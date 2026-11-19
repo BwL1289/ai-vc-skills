@@ -1,36 +1,23 @@
 #!/usr/bin/env python3
+"""Run the equity calculator, which replaced the equity_equation script.
+
+The calculator lives in equity-calculator/. Install it from the repository root with
+``pip install ./equity-calculator``, then run ``equity-calculator --help`` (or this file) to list the scenarios.
+"""
+
+import sys
 
 
-from src.equity_equation.equity_equation_investors import EquityEquation
+def run() -> None:
+    """Start the equity calculator's command line, or say how to install it."""
+    try:
+        from equity_calculator.__main__ import main
+    except ImportError:
+        sys.exit(
+            "The equity calculator is not installed: run pip install ./equity-calculator from the repository root."
+        )
+    main()
+
 
 if __name__ == "__main__":
-    eeq = EquityEquation(
-        total_equity_pool=float(
-            input("""Enter the total equity pool as a percentage (total_equity_pool, between 0 and 100%): """)
-        ),
-        proposed_equity_alloc=float(
-            input(
-                """Enter the proposed equity percentage as a
-                   percentage to be given to the investor as a result
-                   of their investment in the company
-                   (proposed_equity_alloc, between 0 and 100%): """
-            )
-        ),
-        estimated_valuation_increase=float(
-            input(
-                """Enter the estimated increase in valuation of the company
-                   as a result of the investor investing,
-                   as a percentage. Said differently,
-                   how much you expect the valuation of the
-                   company to inrease after their investment
-                   (estimated_valuation_increase): """
-            )
-        ),
-        pre_money_valuation=float(
-            input(
-                """Enter the valuation of the company before the investment (the pre-money valuation)
-                   (pre_money_valuation): """
-            )
-        ),
-    )
-    eeq()
+    run()
