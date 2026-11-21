@@ -13,7 +13,8 @@ Should we trade stock for this, and what does a round do to the cap table? Seven
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
-[`skills/equity-calculator/`](skills/equity-calculator/SKILL.md) tells an assistant when and how to use it.
+[`skills/equity-calculator/`](../skills/equity-calculator/SKILL.md), at the repository root, tells an assistant when and
+how to use it.
 
 Built from the original `equity_equation` script this repository started with (it is in the git history, at
 [`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/ai-vc-skills/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation))
@@ -36,11 +37,11 @@ and the option-pool shuffle.
 In Claude Code, as a plugin (the agent skill and the MCP server, started with [`uvx`](https://docs.astral.sh/uv/)):
 
 ```
-/plugin install equity-calculator --marketplace BwL1289/ai-vc-skills
+/plugin install ai-vc-skills --marketplace BwL1289/ai-vc-skills
 ```
 
 On Claude Code before 2.1.275, add the marketplace first: `/plugin marketplace add BwL1289/ai-vc-skills`, then
-`/plugin install equity-calculator@ai-vc-skills`.
+`/plugin install ai-vc-skills@ai-vc-skills`.
 
 As a Python package, Python 3.12 or later. From GitHub, with the MCP server:
 
@@ -138,7 +139,7 @@ path to it: it is in the `bin` folder of the environment it was installed into (
 
 ## Agent skill
 
-[`skills/equity-calculator/SKILL.md`](skills/equity-calculator/SKILL.md) is an agent skill: it tells an assistant
+[`skills/equity-calculator/SKILL.md`](../skills/equity-calculator/SKILL.md), at the repository root, is an agent skill: it tells an assistant
 which scenario answers which question, how to run it with the command or the MCP tools, the formulas and their
 sources, and to quote the labelled assumptions with every answer. In Claude Code, copy the folder to
 `~/.claude/skills/` (every project) or to a project's `.claude/skills/`. The skill alone keeps a hyphen,

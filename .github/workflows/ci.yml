@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          pip install -e "./equity_calculator[mcp,dev]"
+          pip install --group dev
+      - name: Validate skills
+        run: python scripts/validate_skills.py
+      - name: Pre-commit hooks
+        # detect-aws-credentials stops with "No AWS keys were found" on a runner that has no AWS credentials file,
+        # so CI skips that one hook; it still runs on every contributor's machine.
+        env:
+          SKIP: detect-aws-credentials
+        run: pre-commit run --all-files --show-diff-on-failure
+      - name: Tests
+        run: pytest

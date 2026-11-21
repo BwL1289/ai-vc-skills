@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "equity_calculator": {
-      "command": "uvx",
-      "args": ["--from", "${CLAUDE_PLUGIN_ROOT}[mcp]", "equity_calculator_mcp"]
-    }
-  }
-}

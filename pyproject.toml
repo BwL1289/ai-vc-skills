@@ -23,7 +23,7 @@ line_length = 120
 known_third_party = ["equity_calculator", "tests"]
 
 [tool.pytest.ini_options]
-testpaths = ["equity_calculator/tests"]
+testpaths = ["equity_calculator/tests", "scripts"]
 python_files = ["test_*.py", "*_test.py"]
 norecursedirs = ["tests/fixtures", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__"]
 asyncio_mode = "auto"

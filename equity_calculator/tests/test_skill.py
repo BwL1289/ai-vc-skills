@@ -16,7 +16,8 @@ from typing import Any
 import pytest
 from equity_calculator.__main__ import _INPUT_MODELS, run
 
-_SKILL = Path(__file__).resolve().parents[1] / "skills" / "equity-calculator" / "SKILL.md"
+# The skill sits in the repository root's skills/ folder, where the Claude Code plugin finds it.
+_SKILL = Path(__file__).resolve().parents[2] / "skills" / "equity-calculator" / "SKILL.md"
 _TEXT = _SKILL.read_text(encoding="utf-8")
 _FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 _FENCE = re.compile(r"^```([a-z]*)\n(.*?)^```$", re.MULTILINE | re.DOTALL)
