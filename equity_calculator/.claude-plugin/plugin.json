@@ -1,0 +1,21 @@
+{
+  "name": "equity-calculator",
+  "version": "0.1.0",
+  "description": "Exact startup equity arithmetic: Paul Graham's equity equation, option pools, SAFEs and notes in a priced round, dilution, vesting and exit waterfalls, as an agent skill and an MCP server.",
+  "author": {
+    "name": "Benjamin Leff"
+  },
+  "homepage": "https://github.com/BwL1289/ai-vc-skills",
+  "repository": "https://github.com/BwL1289/ai-vc-skills",
+  "license": "MIT",
+  "keywords": [
+    "equity",
+    "startup",
+    "fundraising",
+    "safe",
+    "cap-table",
+    "dilution",
+    "vesting",
+    "venture-capital"
+  ]
+}

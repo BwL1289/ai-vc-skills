@@ -1,24 +1,116 @@
-# opensource-content
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
+    <img alt="AI VC skills: exact startup equity math for Claude and any MCP client" src="assets/banner-light.svg" width="100%">
+  </picture>
+</p>
 
-Open-source code, one project per folder. Today there is one project: the **equity calculator**, which works the
-questions founders ask about stock with exact arithmetic. Should we sell 7% for this deal? What does a bigger option
-pool do to the price per share? How do our SAFEs convert in the next round? Who gets what when the company is sold?
-It answers as a command, an Excel workbook with live formulas, an MCP server that an AI assistant can call, and a
-Python library.
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-3fb950"></a>
+  <img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-3776ab">
+  <a href="#claude-code"><img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-d97757"></a>
+  <a href="#any-mcp-client"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-6e7681"></a>
+</p>
 
-## What is in the repository
+<p align="center">
+  <b>Ask your AI assistant the equity questions founders get wrong, and get exact answers you can check by hand.</b>
+</p>
 
-| Path                                                                   | What it is                                                                                                                                  |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`equity_calculator/`](equity_calculator/)                             | The equity calculator, a Python package of its own: code, tests, MCP server, agent skill and the [full guide](equity_calculator/README.md). |
-| `pyproject.toml`                                                       | Settings for the whole repository: the dev tools (`dev` group), ruff, isort, pytest and coverage.                                           |
-| `.pre-commit-config.yaml`                                              | The hooks every commit runs (see [Working on the repository](#working-on-the-repository)).                                                  |
-| [`.github/pull_request_template.md`](.github/pull_request_template.md) | The checklist every pull request starts with.                                                                                               |
-| [`LICENSE`](LICENSE)                                                   | MIT.                                                                                                                                        |
+<p align="center">
+  <img src="assets/demo.gif" alt="The investor test in a terminal: selling 7% for a 10% gain says accept, for a 5% gain says reject" width="820">
+</p>
+
+Agent skills for the money side of building a startup. The first is the **equity calculator**: Paul Graham's equity
+equation, the option-pool shuffle, SAFEs and notes converting in a priced round, dilution, vesting and exit
+waterfalls, worked as exact fractions. Claude calls it instead of doing the arithmetic in its head, and every answer
+shows how each line is computed and which assumptions it rests on.
+
+## Install
+
+### Claude Code
+
+```
+/plugin marketplace add BwL1289/ai-vc-skills
+/plugin install equity-calculator@ai-vc-skills
+```
+
+That adds the agent skill and the MCP server. The server starts with [`uvx`](https://docs.astral.sh/uv/), so install
+uv first if you do not have it.
+
+### Any MCP client
+
+<details>
+<summary>Claude Desktop, Cursor and other MCP clients</summary>
+
+Install the package with its MCP server (Python 3.12 or later):
+
+```
+pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skills#subdirectory=equity_calculator"
+```
+
+Then add the server to the client's MCP settings:
+
+```json
+{
+  "mcpServers": {
+    "equity_calculator": { "command": "equity_calculator_mcp" }
+  }
+}
+```
+
+In Claude Code without the plugin: `claude mcp add equity_calculator -- equity_calculator_mcp`.
+
+</details>
+
+### Command line and Python
+
+<details>
+<summary>pip, or a clone to work on it</summary>
+
+```
+pip install "equity_calculator @ git+https://github.com/BwL1289/ai-vc-skills#subdirectory=equity_calculator"
+```
+
+The command and the library need only Pydantic and openpyxl; add `[mcp]` for the server. From a clone:
+
+```
+git clone https://github.com/BwL1289/ai-vc-skills
+cd ai-vc-skills
+python3.12 -m venv .venv
+. .venv/bin/activate
+pip install -e "./equity_calculator[mcp,dev]"
+```
+
+</details>
+
+## What you can ask
+
+Once the plugin is installed, ask in plain words:
+
+- "An investor wants 7% and says the deal makes the company 10% more valuable. Should we take it?"
+- "We have 10M shares, a $1M post-money SAFE capped at $8M, and we're raising $3M at $12M pre with the pool topped
+  up to 10%. What does the SAFE convert at, and who owns what?"
+- "How much equity is a hire worth if they make the company 25% more valuable?"
+- "The Series A sells 20% and adds a 10% pool. What's left of my 30%?"
+- "We sell for $50M and the investors have a 1x non-participating preference on $10M. Who gets what?"
+- "How much of a 4-year grant with a 1-year cliff has vested at month 30?"
+
+```mermaid
+flowchart LR
+  Q["Your question"] --> C["Claude, or any MCP client"]
+  C -->|"the skill picks the scenario"| T["equity_calculator tool"]
+  T --> X["Exact fractions"]
+  X --> R["Report, JSON or .xlsx workbook"]
+```
+
+## Skills
+
+| Skill                                                                      | Status    | What it does                                                                     |
+| -------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
+| [`equity-calculator`](equity_calculator/skills/equity-calculator/SKILL.md) | Available | Seven equity scenarios, worked exactly, with the formulas and sources shown.     |
+| More AI VC skills                                                          | Planned   | Reviews in the style of a venture firm: pitch decks, term sheets, due diligence. |
 
 ## The equity calculator
-
-Seven scenarios, each with its own subcommand and MCP tool:
 
 | Scenario    | The question it answers                                                                                      |
 | ----------- | ------------------------------------------------------------------------------------------------------------ |
@@ -30,29 +122,18 @@ Seven scenarios, each with its own subcommand and MCP tool:
 | `vesting`   | How much of a grant has vested at a given month, and what is it worth above the strike?                      |
 | `waterfall` | The company is sold. Who gets what, with preferences paid by rank and each preferred class free to convert?  |
 
+It runs four ways, all from the same model:
+
+| Way        | How                                                                                                 |
+| ---------- | --------------------------------------------------------------------------------------------------- |
+| Command    | `equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10`                           |
+| Workbook   | Add `--xlsx deal.xlsx`: a formatted `.xlsx` whose investor verdict re-works when you change a cell. |
+| MCP server | `equity_calculator_mcp`: one tool per scenario, for Claude or any MCP client.                       |
+| Python     | `from equity_calculator.scenarios import compute`                                                   |
+
 Every number is worked as an exact fraction and shown rounded once (one case aside: a note's interest over a part
 period, which is marked approximate). Every result says how each line is computed and lists the assumptions it rests
-on, with their sources, so you can check it by hand.
-
-### Install
-
-Python 3.12 or later. From GitHub, with the MCP server:
-
-```
-pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/opensource-content#subdirectory=equity_calculator"
-```
-
-Leave out `[mcp]` for the command and the library alone; they need only Pydantic and openpyxl.
-
-Or from a clone, which is also how to work on it:
-
-```
-git clone https://github.com/BwL1289/opensource-content
-cd opensource-content
-python3.12 -m venv .venv
-. .venv/bin/activate
-pip install -e "./equity_calculator[mcp,dev]"
-```
+on, with their sources.
 
 ### Quick start
 
@@ -72,12 +153,6 @@ Among the lines it prints:
 
 Add `--json` for the whole result as JSON, or `--xlsx investor.xlsx` to write the workbook too.
 `equity_calculator --help` lists the scenarios and `equity_calculator investor --help` the flags of one.
-
-To let Claude Code call it, register the MCP server:
-
-```
-claude mcp add equity_calculator -- equity_calculator_mcp
-```
 
 From Python:
 
@@ -114,13 +189,28 @@ skill, the workbook, the limits and a worked example for each scenario.
 Each formula, its sources and the points no source settles (marked `unverified` in every result) are in
 [The formulas](equity_calculator/README.md#the-formulas).
 
+## What is in the repository
+
+| Path                                                                   | What it is                                                                                        |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| [`equity_calculator/`](equity_calculator/)                             | The equity calculator: code, tests, MCP server, agent skill, plugin manifest and its full guide.  |
+| [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json)   | The Claude Code marketplace that lists this repository's plugins.                                 |
+| `assets/`                                                              | The banner and the demo GIF on this page.                                                         |
+| `pyproject.toml`                                                       | Settings for the whole repository: the dev tools (`dev` group), ruff, isort, pytest and coverage. |
+| `.pre-commit-config.yaml`                                              | The hooks every commit runs (see [Working on the repository](#working-on-the-repository)).        |
+| [`.github/pull_request_template.md`](.github/pull_request_template.md) | The checklist every pull request starts with.                                                     |
+| [`LICENSE`](LICENSE)                                                   | MIT.                                                                                              |
+
 ## Names
 
-Every name uses underscores, the repository's style: the folder
-`equity_calculator/`, the pip package `equity_calculator`, the commands `equity_calculator` and
-`equity_calculator_mcp`, and the MCP server name `equity_calculator`. Two things keep hyphens:
+<details>
+<summary>Why most names use underscores and two keep hyphens</summary>
 
-- The agent skill is `equity-calculator`, in
+Every name uses underscores, the repository's style: the folder `equity_calculator/`, the pip package
+`equity_calculator`, the commands `equity_calculator` and `equity_calculator_mcp`, and the MCP server name
+`equity_calculator`. Two things keep hyphens:
+
+- The agent skill and the Claude Code plugin are `equity-calculator`. The skill is in
   [`equity_calculator/skills/equity-calculator/`](equity_calculator/skills/equity-calculator/SKILL.md). The Agent
   Skills format allows only lowercase letters, digits and hyphens in a skill's name, and the folder must carry the
   same name.
@@ -136,9 +226,16 @@ pip uninstall equity-calculator
 claude mcp remove equity-calculator
 ```
 
+The repository was called `opensource-content` until November 2026; GitHub redirects the old address.
+
+</details>
+
 ## Working on the repository
 
-Set up a clone as in [Install](#install), then add the tools and the commit hooks:
+<details>
+<summary>Set-up, commit hooks and tests</summary>
+
+Set up a clone as in [Command line and Python](#command-line-and-python), then add the tools and the commit hooks:
 
 ```
 python -m pip install -U pip   # dependency groups need pip 25.1 or later
@@ -163,6 +260,9 @@ above. The tests need no network. Inside the repository they write only the cove
 Python bytecode, all git-ignored; everything else goes under pytest's temporary folder.
 `cd equity_calculator && pytest` runs the same tests with the package's own settings and no coverage.
 
+To try the plugin from a clone, add the clone as a marketplace in Claude Code:
+`/plugin marketplace add ./ai-vc-skills`, then `/plugin install equity-calculator@ai-vc-skills`.
+
 The calculator's folder:
 
 ```
@@ -170,6 +270,8 @@ equity_calculator/
   pyproject.toml           the package: name, dependencies, the two commands
   README.md                the full guide
   LICENSE                  MIT, the same as the repository's
+  .claude-plugin/          the Claude Code plugin manifest and icon
+  .mcp.json                the MCP server the plugin starts
   src/equity_calculator/   the code: scenarios, command, workbook, MCP server
   tests/                   the tests
   skills/equity-calculator/SKILL.md   the agent skill
@@ -178,12 +280,14 @@ equity_calculator/
 Every pull request starts from [the template](.github/pull_request_template.md): say what kind of change it is, and
 run `pre-commit run --all-files` before asking for review.
 
+</details>
+
 ## History
 
-The repository started in 2024 with `src/equity_equation`, a script that worked Paul Graham's investor test. In
-November 2026 it grew into the equity calculator, which works the same test exactly and adds the six other
-scenarios. The original script is at
-[`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/opensource-content/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation).
+The repository started in October 2024 with `src/equity_equation`, a script that worked Paul Graham's investor test.
+In November 2026 it grew into the equity calculator, which works the same test exactly and adds the six other
+scenarios, and became the home of the AI VC skills. The original script is at
+[`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/ai-vc-skills/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation).
 
 ## License and credits
 

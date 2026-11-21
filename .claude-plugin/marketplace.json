@@ -1,0 +1,27 @@
+{
+  "name": "ai-vc-skills",
+  "owner": {
+    "name": "Benjamin Leff"
+  },
+  "metadata": {
+    "description": "AI VC skills: exact startup equity math and venture-style reviews for Claude Code."
+  },
+  "plugins": [
+    {
+      "name": "equity-calculator",
+      "source": "./equity_calculator",
+      "description": "Exact startup equity arithmetic: Paul Graham's equity equation, option pools, SAFEs and notes in a priced round, dilution, vesting and exit waterfalls, as an agent skill and an MCP server.",
+      "category": "finance",
+      "keywords": [
+        "equity",
+        "startup",
+        "fundraising",
+        "safe",
+        "cap-table",
+        "dilution",
+        "vesting",
+        "venture-capital"
+      ]
+    }
+  ]
+}
