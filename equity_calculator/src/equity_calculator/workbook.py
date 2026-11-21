@@ -1,7 +1,9 @@
 """The formatted Excel workbook: one sheet per scenario, real number formats, live ``=SUM`` totals, verdict colours.
 
 Each value cell holds the model's display rounding (a ``Decimal``) under its unit's number format; a total line
-holds a live ``=SUM`` of the cells it adds, so an edited part re-totals; a verdict cell is coloured by conditional
+holds a live ``=SUM`` of the cells it adds, so an edited part re-totals; a line with a ``formula`` (the investor test's
+derived lines and verdict) is written as that live formula over its inputs' cells, which then hold the inputs at full
+precision, so an edited input recomputes it and its verdict; a verdict cell is coloured by conditional
 formatting (green accept / grant / in the money, amber break even / at the money, red reject / no grant /
 underwater; a waterfall class's choice is blue for converts and grey for stays, neither good nor bad), so an edited
 verdict recolours. Row 1 is the bold header, frozen; the labelled assumptions follow under their own bold header.
@@ -83,6 +85,12 @@ def _sum_formula(column: int, rows: Sequence[int]) -> str:
     return "=SUM(" + ",".join(f"{letter}{row}" for row in ordered) + ")"
 
 
+def _line_formula(template: str, column: int, rows_by_key: dict[str, int]) -> str:
+    """``template`` as a live formula: each ``{key}`` becomes that line's cell in ``column``."""
+    letter = get_column_letter(column)
+    return "=" + template.format_map({key: f"{letter}{row}" for key, row in rows_by_key.items()})
+
+
 def _colour_verdict(sheet: Worksheet, coordinate: str) -> None:
     """Conditional fills on a verdict cell, one rule per verdict text."""
     for verdict, colour in VERDICT_FILLS.items():
@@ -95,13 +103,15 @@ def _write_line(sheet: Worksheet, row: int, line: Line, rows_by_key: dict[str, i
     sheet.cell(row=row, column=_LABEL_COLUMN, value=line.label)
     for offset, value in enumerate(line.values):
         column = _FIRST_VALUE_COLUMN + offset
-        written: Decimal | str
+        written: Decimal | float | str
+        if isinstance(value, EquityQuantity) and not line.total_of and beyond_limit(value.rounded):
+            raise ResultOutOfRange(OUT_OF_RANGE_REASON)
         if line.total_of:
             written = _sum_formula(column, [rows_by_key[key] for key in line.total_of])
+        elif line.formula:
+            written = _line_formula(line.formula, column, rows_by_key)
         elif isinstance(value, EquityQuantity):
-            if beyond_limit(value.rounded):
-                raise ResultOutOfRange(OUT_OF_RANGE_REASON)
-            written = value.rounded
+            written = float(value.exact) if line.full_precision else value.rounded
         else:
             written = value
 
@@ -140,10 +150,10 @@ def write_sheet(sheet: Worksheet, report: Sheet) -> None:
         cell.font = Font(bold=True)
     sheet.freeze_panes = FROZEN_PANE
 
-    rows_by_key: dict[str, int] = {}
-    for row, line in enumerate(report.lines, start=_HEADER_ROW + 1):
-        rows_by_key[line.key] = row
-        _write_line(sheet, row, line, rows_by_key)
+    # Every row is known before any is written: a formula may name a line below it (the stake from the amounts).
+    rows_by_key = {line.key: row for row, line in enumerate(report.lines, start=_HEADER_ROW + 1)}
+    for line in report.lines:
+        _write_line(sheet, rows_by_key[line.key], line, rows_by_key)
 
     how_column = _FIRST_VALUE_COLUMN + len(report.columns)
     _write_assumptions(sheet, report, how_column)

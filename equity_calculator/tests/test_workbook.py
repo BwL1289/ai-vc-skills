@@ -84,10 +84,12 @@ def test_one_sheet_per_scenario_with_a_bold_frozen_header(tmp_path: Path) -> Non
 
 
 def test_each_value_carries_its_units_format_and_the_models_rounding(tmp_path: Path) -> None:
-    """Every number is the model's display rounding under its unit's format; text cells hold the text."""
+    """Every number is the model's display rounding under its unit's format; text cells hold the text. A line with a
+    live formula holds that formula instead (``test_workbook_formulas`` checks each one) under the same format."""
     sheets = _sheets()
     written = _written(tmp_path, sheets)
 
+    formulas = 0
     for sheet in sheets:
         page, rows = written[sheet.title], _rows(sheet)
         for line in sheet.lines:
@@ -95,10 +97,16 @@ def test_each_value_carries_its_units_format_and_the_models_rounding(tmp_path: P
                 cell = page[f"{_column(offset)}{rows[line.key]}"]
                 if isinstance(value, EquityQuantity):
                     assert cell.number_format == NUMBER_FORMATS[value.unit], (sheet.title, line.key)
+                if line.formula:
+                    assert str(cell.value).startswith("="), (sheet.title, line.key)
+                    formulas += 1
+                elif isinstance(value, EquityQuantity):
                     if not line.total_of:
                         assert Decimal(str(cell.value)) == value.rounded, (sheet.title, line.key)
                 else:
                     assert cell.value == value
+
+    assert formulas == len(["stake", "R", "m*", "g*", "verdict", "holder after", "holder value before", "after"])
 
 
 def test_each_kind_of_number_gets_its_format(tmp_path: Path) -> None:

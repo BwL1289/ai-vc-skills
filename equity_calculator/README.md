@@ -522,8 +522,23 @@ or `Waterfall`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
-- Every value cell holds the model's display rounding as a number, under its unit's format. Fractions use `0.00%`,
+- Every value cell holds the model's display rounding as a number, under its unit's format (a live investor
+  sheet's inputs excepted, below). Fractions use `0.00%`,
   money `"$"#,##0`, a price per share `"$"#,##0.000000`, shares `#,##0` and multipliers `0.0000"x"`.
+- The investor sheet is live: its inputs (the stake, or the pre-money and the investment; the outcome multiplier; a
+  holder's stake) are numbers held at full precision, with the display format doing the rounding, and every line
+  worked from them is a formula over those cells: the stake from the amounts `I/(V + I)`, R `(1 - n)·m`, m\*
+  `1/(1 - n)`, g\* `n/(1 - n)`, the holder's stake after and dollar values, and the verdict,
+  `=IF(ROUND(R-1,12)>0,"accept",IF(ROUND(R-1,12)=0,"break_even","reject"))`. Change the multiplier from 1.10 to 1.05
+  on a 7% stake and the verdict turns from a green accept to a red reject.
+- A spreadsheet works those formulas in binary floating point. Rounding R - 1 to 12 places keeps an exact break even
+  reading break even. Before writing the sheet, the calculator works the same formulas the same way and keeps them only
+  when every number lands within the display rounding of the exact answer and the verdict is the model's. When it
+  does not (an R within 10^-11 of 1 without being 1, or a stake so close to 100% that 1 - n loses its digits), the
+  sheet holds the model's values instead, as the other sheets do. The tests check both kinds of sheet, on break-even
+  cases and on seeded random inputs.
+- Formula cells are worked out by the spreadsheet when it opens the file (Excel and LibreOffice do); a viewer that
+  does not calculate, such as a file preview or openpyxl's `data_only` read, shows them empty.
 - Totals are live `=SUM` formulas, so editing a part re-totals: the investor's post-money, total shares, total
   ownership and post-money (pool and round), the stake lost in all (dilution), vested in all and the grant (vesting), and the total paid out
   (waterfall). A live total adds the rounded cells, so it can differ from the model's exact total in the last place
@@ -533,7 +548,8 @@ or `Waterfall`):
   so they add up to their rounded total exactly.
 - Verdict cells are coloured by conditional formatting: green for accept, grant and in the money, amber for break
   even and at the money, red for reject, no grant and underwater. A waterfall choice is blue when the class converts
-  and grey when it stays: neither is good or bad. Typing a different verdict recolours the cell.
+  and grey when it stays: neither is good or bad. The investor verdict recolours itself when an input changes;
+  elsewhere, typing a different verdict recolours the cell.
 - The assumptions follow two rows below, under their own bold header: `Assumption`, `Setting`, `Statement` and
   `Source`.
 - Column widths are set so labels and formulas are readable without resizing.
