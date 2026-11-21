@@ -1,4 +1,4 @@
-"""``equity-calculator-mcp``: one tool per scenario, refusals as tool errors, the workbook tool's folder rule, stdio.
+"""``equity_calculator_mcp``: one tool per scenario, refusals as tool errors, the workbook tool's folder rule, stdio.
 
 No network: most tests drive the server in process through the MCP SDK's memory transport, and one starts the real
 server as a child process and talks to it over stdio. The only files written are under pytest's temporary directory.
@@ -638,4 +638,4 @@ def test_without_the_mcp_sdk_the_server_names_the_pinned_install_command() -> No
 
     assert pin == ["mcp==1.28.1"]
     assert finished.returncode == 1
-    assert finished.stderr.strip() == "equity-calculator-mcp needs the MCP SDK: pip install 'mcp==1.28.1'"
+    assert finished.stderr.strip() == "equity_calculator_mcp needs the MCP SDK: pip install 'mcp==1.28.1'"

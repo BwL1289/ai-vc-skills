@@ -37,9 +37,9 @@ inside, ``Decimal`` in and out); the input and result models live in ``equity_ca
   - ``cli_numbers`` — the CLI's number readers (amounts, percents, whole counts, the workbook path);
   - ``cli_arguments`` — each scenario's CLI flags;
   - ``cli_instruments`` — the repeated-flag readers: ``--safe``, ``--note``, ``--round`` and ``--class``;
-  - ``__main__``    — the CLI, ``equity-calculator investor|employee|pool|round|dilution|vesting|waterfall
+  - ``__main__``    — the CLI, ``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall
     [--json] [--xlsx PATH]``;
-  - ``mcp_server``  — the MCP server, ``equity-calculator-mcp [--output-dir DIR]``: one tool per scenario over stdio.
+  - ``mcp_server``  — the MCP server, ``equity_calculator_mcp [--output-dir DIR]``: one tool per scenario over stdio.
 
 Nothing here reads the network or a database; it is pure arithmetic plus the workbook writes: the CLI's ``--xlsx``
 file and the MCP server's ``equity_workbook`` tool, which makes files only inside its ``--output-dir`` folder.

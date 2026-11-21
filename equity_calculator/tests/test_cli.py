@@ -1,4 +1,4 @@
-"""``equity-calculator``: the printed report, ``--json``, ``--xlsx``, and every refusal naming the flag at fault.
+"""``equity_calculator``: the printed report, ``--json``, ``--xlsx``, and every refusal naming the flag at fault.
 
 No DB, no network: ``run`` is awaited in process and one test runs the real module in a child process. The only
 file written is the workbook, under pytest's temporary directory.
@@ -248,7 +248,7 @@ def test_main_writes_the_report_to_stdout(capsys: pytest.CaptureFixture[str]) ->
 
 
 def _child(argv: list[str]) -> subprocess.CompletedProcess[str]:
-    """``equity-calculator`` in a child process that sees the same packages as this test run."""
+    """``equity_calculator`` in a child process that sees the same packages as this test run."""
     environment = {**os.environ, "PYTHONPATH": os.pathsep.join(path for path in sys.path if path)}
     return subprocess.run(
         [sys.executable, "-m", "equity_calculator", *argv],

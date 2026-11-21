@@ -1,4 +1,4 @@
-"""Each scenario's CLI flags (``equity-calculator investor|employee|pool|round|dilution|vesting|waterfall``).
+"""Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall``).
 
 The number readers are ``cli_numbers``; a repeated flag's one-argument terms are ``cli_instruments``.
 """

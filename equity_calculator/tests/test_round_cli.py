@@ -1,4 +1,4 @@
-"""``equity-calculator round``: the report, ``--json``, the Convertibles sheet read back, and every refusal.
+"""``equity_calculator round``: the report, ``--json``, the Convertibles sheet read back, and every refusal.
 
 No DB, no network: ``run`` is awaited in process. The only file written is the workbook, under pytest's temporary
 directory. The ``--safe`` and ``--note`` readers on their own, term by term, are ``test_cli_instruments.py``.

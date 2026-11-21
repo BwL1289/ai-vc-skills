@@ -1,6 +1,6 @@
-"""The README's examples run as written: each ``equity-calculator`` command, every line it shows, and the Python one.
+"""The README's examples run as written: each ``equity_calculator`` command, every line it shows, and the Python one.
 
-A fenced block whose first line is an ``equity-calculator`` command is run in process (lines ending `` \\`` join the
+A fenced block whose first line is an ``equity_calculator`` command is run in process (lines ending `` \\`` join the
 next), and every line the block shows after the command must appear in the printed report. The usage synopsis, which
 has ``(``, ``[`` and ``|`` in it, is not a command and is skipped. The ``python`` block is run as written and its one
 printed line must equal the comment on its ``print`` line.
@@ -19,7 +19,7 @@ from equity_calculator.__main__ import run
 
 _README = Path(__file__).resolve().parents[1] / "README.md"
 _FENCE = re.compile(r"^```([a-z]*)\n(.*?)^```$", re.MULTILINE | re.DOTALL)
-_PROGRAM = "equity-calculator "
+_PROGRAM = "equity_calculator "
 _SYNOPSIS = ("(", "[", "|")
 # The quick start, the investor and employee worked examples, and the round example.
 _MIN_COMMANDS = 4

@@ -1,4 +1,4 @@
-"""``equity-calculator waterfall``: the report, ``--json``, ``--xlsx``, every refusal, and the Waterfall sheet read
+"""``equity_calculator waterfall``: the report, ``--json``, ``--xlsx``, every refusal, and the Waterfall sheet read
 back.
 
 No DB, no network: ``run`` is awaited in process and the sheet is built from ``compute``. The only files written are

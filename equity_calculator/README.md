@@ -2,7 +2,7 @@
 
 Should we trade stock for this, and what does a round do to the cap table? Seven scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
-command, `equity-calculator`; an MCP server, `equity-calculator-mcp`, that gives an AI assistant one tool per
+command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
 [`skills/equity-calculator/`](skills/equity-calculator/SKILL.md) tells an assistant when and how to use it.
 
@@ -27,14 +27,14 @@ and the option-pool shuffle.
 Python 3.12 or later. From GitHub, with the MCP server:
 
 ```
-pip install "equity-calculator[mcp] @ git+https://github.com/BwL1289/opensource-content#subdirectory=equity-calculator"
+pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/opensource-content#subdirectory=equity_calculator"
 ```
 
 Or from a clone:
 
 ```
 git clone https://github.com/BwL1289/opensource-content
-cd opensource-content/equity-calculator
+cd opensource-content/equity_calculator
 python3.12 -m venv .venv
 . .venv/bin/activate
 pip install -e '.[mcp,dev]'
@@ -46,7 +46,7 @@ alone, which need only Pydantic and openpyxl.
 ## Quick start
 
 ```
-equity-calculator investor --equity-percent 7 --outcome-multiplier 1.10
+equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10
 Investor test (Paul Graham, "The Equity Equation"): is the stake worth what the deal adds?
   Line                          Value  How it is computed
   Equity sold (n)             7.0000%  given
@@ -61,8 +61,8 @@ Assumptions:
 ```
 
 Add `--json` for the whole result as JSON (every number as its exact fraction and its rounded value) or
-`--xlsx investor.xlsx` to write the workbook as well. `equity-calculator --help` lists the scenarios and
-`equity-calculator <scenario> --help` their flags; [Using it](#using-it) below has them all. From Python:
+`--xlsx investor.xlsx` to write the workbook as well. `equity_calculator --help` lists the scenarios and
+`equity_calculator <scenario> --help` their flags; [Using it](#using-it) below has them all. From Python:
 
 ```python
 from decimal import Decimal
@@ -76,12 +76,12 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 
 ## MCP server
 
-`equity-calculator-mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
+`equity_calculator_mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
 instead of doing the arithmetic itself.
 
 | Tool                                                                                                                         | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity-calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
+| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
 | `equity_workbook`                                                                                                            | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
@@ -98,8 +98,8 @@ JSON, an empty one included; and a non-empty value that is not valid JSON (a bar
 In Claude Code:
 
 ```
-claude mcp add equity-calculator -- equity-calculator-mcp
-claude mcp add equity-calculator -- equity-calculator-mcp --output-dir ~/equity-workbooks
+claude mcp add equity_calculator -- equity_calculator_mcp
+claude mcp add equity_calculator -- equity_calculator_mcp --output-dir ~/equity-workbooks
 ```
 
 The second form adds the workbook tool. In a client that reads an `mcpServers` file, such as Claude Desktop:
@@ -107,23 +107,25 @@ The second form adds the workbook tool. In a client that reads an `mcpServers` f
 ```json
 {
   "mcpServers": {
-    "equity-calculator": {
-      "command": "equity-calculator-mcp",
+    "equity_calculator": {
+      "command": "equity_calculator_mcp",
       "args": ["--output-dir", "/path/to/equity-workbooks"]
     }
   }
 }
 ```
 
-Leave out `args` for a server that writes nothing. If the client cannot find `equity-calculator-mcp`, give the full
-path to it: it is in the `bin` folder of the environment it was installed into (`which equity-calculator-mcp`).
+Leave out `args` for a server that writes nothing. If the client cannot find `equity_calculator_mcp`, give the full
+path to it: it is in the `bin` folder of the environment it was installed into (`which equity_calculator_mcp`).
 
 ## Agent skill
 
 [`skills/equity-calculator/SKILL.md`](skills/equity-calculator/SKILL.md) is an agent skill: it tells an assistant
 which scenario answers which question, how to run it with the command or the MCP tools, the formulas and their
 sources, and to quote the labelled assumptions with every answer. In Claude Code, copy the folder to
-`~/.claude/skills/` (every project) or to a project's `.claude/skills/`.
+`~/.claude/skills/` (every project) or to a project's `.claude/skills/`. The skill alone keeps a hyphen,
+`equity-calculator`, in its name and folder: the Agent Skills format allows only lowercase letters, digits and
+hyphens in a skill's name, and the folder must carry the same name.
 
 ## Sources
 
@@ -326,7 +328,7 @@ The money is rounded to the cent by largest remainder, so the payouts add up to 
 **PG's YC example.** Selling 7% for a 10% better outcome:
 
 ```
-equity-calculator investor --equity-percent 7 --outcome-multiplier 1.10
+equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10
   Value ratio R             1.023000x  (1 - n)·m: what the holders keep vs. before
   Break-even multiplier m*  1.075269x  1/(1 - n)
   Break-even growth g*        7.5269%  n/(1 - n) = m* - 1
@@ -339,7 +341,7 @@ m = 1.43 and rejects at m = 1.428.
 **PG's hire.** A hire who adds 20%, costs $60k a year and joins at a $2M valuation, with a 50% margin:
 
 ```
-equity-calculator employee --gain-percent 20 --annual-cost 60000 --valuation 2000000 --margin-percent 50
+equity_calculator employee --gain-percent 20 --annual-cost 60000 --valuation 2000000 --margin-percent 50
   Break-even stake n                             16.6667%  (i - 1)/i, floored at 0
   Stake the salary costs                          4.5000%  stock cost / valuation
   Retail stake                                   11.1111%  n/(1 + margin)
@@ -366,7 +368,7 @@ T = 12.5M, so the holders own 64%, the pool 16% and the investor 20%.
 pool target in the pre-money, and two SAFEs: $500k on a $5M cap and $1M on a $10M cap:
 
 ```
-equity-calculator round --fully-diluted-shares 10000000 --unissued-pool-shares 500000 --pre-money 16000000 \
+equity_calculator round --fully-diluted-shares 10000000 --unissued-pool-shares 500000 --pre-money 16000000 \
     --investment 4000000 --target-pool-percent 10 \
     --safe "500000 valuation-cap=5000000" --safe "1000000 valuation-cap=10000000"
 ```
@@ -426,20 +428,20 @@ both 1x non-participating:
 ## Using it
 
 ```
-equity-calculator investor (--equity-percent N | --pre-money V --investment I)
+equity_calculator investor (--equity-percent N | --pre-money V --investment I)
     (--outcome-multiplier M | --growth-percent G) [--holder-percent H]
-equity-calculator employee (--outcome-multiplier I | --gain-percent G) [--offered-percent O]
+equity_calculator employee (--outcome-multiplier I | --gain-percent G) [--offered-percent O]
     [--annual-cost C --valuation V] [--margin-percent M] [--cost-years Y]
-equity-calculator pool --fully-diluted-shares FD [--unissued-pool-shares U] --pre-money V --investment I
+equity_calculator pool --fully-diluted-shares FD [--unissued-pool-shares U] --pre-money V --investment I
     --target-pool-percent T [--pool-timing pre_money|post_money] [--share-rounding exact|whole_shares]
-equity-calculator round --fully-diluted-shares FD [--unissued-pool-shares U] --pre-money V --investment I
+equity_calculator round --fully-diluted-shares FD [--unissued-pool-shares U] --pre-money V --investment I
     [--target-pool-percent T] [--pool-timing pre_money|post_money] [--safe "TERMS"]... [--note "TERMS"]...
-equity-calculator dilution --holder-percent H --round "TERMS"...
-equity-calculator vesting --grant-shares G [--total-months T] [--cliff-months C] --month M
+equity_calculator dilution --holder-percent H --round "TERMS"...
+equity_calculator vesting --grant-shares G [--total-months T] [--cliff-months C] --month M
     [--strike-price S] [--common-price P] [--termination-month E]
     [--acceleration none|single_trigger|double_trigger] [--acceleration-percent A]
     [--acceleration-base unvested|grant] [--change-of-control-month M] [--share-rounding exact|whole_shares]
-equity-calculator waterfall --exit-amount E --common-shares S --class "TERMS"...
+equity_calculator waterfall --exit-amount E --common-shares S --class "TERMS"...
 ```
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
@@ -640,8 +642,8 @@ pytest
 The tests need no network. They work PG's examples and the worked examples in this file (each command above that
 shows its output is run, and every line shown must appear in what it prints), check the formulas' properties on seeded
 random inputs, compare the waterfall with every possible set of conversion choices, read the workbooks back with
-openpyxl, run the command as a child process, and drive the MCP server both in process and over stdio. The only files
-they write are under pytest's temporary folder.
+openpyxl, run the command as a child process, and drive the MCP server both in process and over stdio. Apart from
+pytest's cache and Python bytecode, they write only under pytest's temporary folder.
 
 ## License
 

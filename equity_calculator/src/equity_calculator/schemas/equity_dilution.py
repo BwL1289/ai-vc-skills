@@ -1,4 +1,4 @@
-"""Pydantic models of one holder's stake through a series of rounds (``equity-calculator dilution``).
+"""Pydantic models of one holder's stake through a series of rounds (``equity_calculator dilution``).
 
 Each round sells new shares to its investors and may create a new option pool. A holder who buys nothing in the
 round keeps ``1 - n - p`` of their stake: ``n`` is the new investors' share of the company after the round and

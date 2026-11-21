@@ -1,4 +1,4 @@
-"""Pydantic models of converting instruments in a priced round (``equity-calculator round``).
+"""Pydantic models of converting instruments in a priced round (``equity_calculator round``).
 
 A round converts every SAFE and note at once, together with the new investor and the option pool target. SAFEs are
 Y Combinator's post-money SAFE: a valuation cap (``valuation_cap``, post-money), a discount, both, or neither when the

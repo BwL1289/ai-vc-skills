@@ -2,7 +2,7 @@
 
 The field table must name every input field of every scenario (nested instruments, rounds and classes included) and
 nothing that is not a field or an allowed value; the JSON example must be a valid ``equity_investor`` call; and each
-``equity-calculator`` command in it must run and print a report.
+``equity_calculator`` command in it must run and print a report.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ _FENCE = re.compile(r"^```([a-z]*)\n(.*?)^```$", re.MULTILINE | re.DOTALL)
 # The field table's header row, however its cells are padded (a Markdown formatter may align the columns).
 _TABLE_HEAD = re.compile(r"^\|\s*Scenario\s*\|\s*Fields \(required in bold\)\s*\|$", re.MULTILINE)
 _NAME = re.compile(r'[`"]([a-z_]+)[`"]')
-_PROGRAM = "equity-calculator "
+_PROGRAM = "equity_calculator "
 _DESCRIPTION_LIMIT = 1024
 
 

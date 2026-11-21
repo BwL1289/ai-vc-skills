@@ -1,6 +1,6 @@
 """The ``--safe``, ``--note`` and ``--round`` readers on their own: each term read, each malformed term refused by name.
 
-Pure parsing: no DB, no network, nothing written. ``equity-calculator round`` end to end is ``test_round_cli.py``;
+Pure parsing: no DB, no network, nothing written. ``equity_calculator round`` end to end is ``test_round_cli.py``;
 ``dilution`` is ``test_holder_cli.py``.
 """
 

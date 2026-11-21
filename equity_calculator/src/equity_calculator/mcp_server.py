@@ -1,11 +1,11 @@
-"""``equity-calculator-mcp`` — the calculator as an MCP server over stdio, one tool per scenario.
+"""``equity_calculator_mcp`` — the calculator as an MCP server over stdio, one tool per scenario.
 
-    equity-calculator-mcp [--output-dir DIR]
+    equity_calculator_mcp [--output-dir DIR]
 
 Each scenario is one tool, ``equity_<scenario>`` (``equity_investor``, ``equity_employee``, ``equity_pool``,
 ``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``). A tool takes one argument,
 ``inputs``: that scenario's input model (``equity_calculator.schemas``). It returns exactly the text
-``equity-calculator <scenario> --json`` prints: the result model as JSON, exact fractions and labelled assumptions
+``equity_calculator <scenario> --json`` prints: the result model as JSON, exact fractions and labelled assumptions
 included. An input the model refuses, or one it accepts that has no answer (``equity_calculator.errors``), comes back
 as a tool error that says why. The arithmetic runs on a worker thread, so a large round never stalls the server.
 
@@ -45,7 +45,7 @@ try:
 except ModuleNotFoundError as error:  # the optional extra is missing
     if (error.name or "").partition(".")[0] != "mcp":
         raise
-    raise SystemExit("equity-calculator-mcp needs the MCP SDK: pip install 'mcp==1.28.1'") from None
+    raise SystemExit("equity_calculator_mcp needs the MCP SDK: pip install 'mcp==1.28.1'") from None
 
 from equity_calculator.errors import EquityComputeError
 from equity_calculator.layout import sheet_for
@@ -63,8 +63,8 @@ from equity_calculator.schemas.equity import (
 )
 from equity_calculator.workbook import build_workbook
 
-_PROG = "equity-calculator-mcp"
-_SERVER_NAME = "equity-calculator"
+_PROG = "equity_calculator_mcp"
+_SERVER_NAME = "equity_calculator"
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
 _JSON_INDENT = 2
@@ -87,7 +87,7 @@ _DIGITS_ADVICE = (
     "decimal point reaches the calculator as a binary float, which keeps about 15 digits."
 )
 _RESULT_NOTE = (
-    "Returns the exact result as JSON text, the same text `equity-calculator {scenario} --json` prints: every value, "
+    "Returns the exact result as JSON text, the same text `equity_calculator {scenario} --json` prints: every value, "
     "the exact fractions, and the labelled assumptions with their sources. An input with no answer comes back as a "
     "tool error that says why."
 )
@@ -327,7 +327,7 @@ def build_server(output_dir: Path | None = None) -> FastMCP:
 
 
 def main(argv: Sequence[str] | None = None) -> None:
-    """Entry point for ``equity-calculator-mcp``: serve over stdio until the client closes it."""
+    """Entry point for ``equity_calculator_mcp``: serve over stdio until the client closes it."""
     parser = argparse.ArgumentParser(prog=_PROG, description="The equity calculator as an MCP server over stdio.")
     parser.add_argument(
         "--output-dir",
