@@ -3,7 +3,8 @@
 A ``Sheet`` is one scenario's report: its value columns (one, or several for a table such as the pool's pre-money
 and post-money columns or one column per holder), its ``Line`` rows and its labelled assumptions. A line holds the
 model's quantities, never a recomputed number; a total line names the lines it adds, so the workbook writes it as a
-live ``=SUM`` formula under each number while the text shows the model's own total.
+live ``=SUM`` formula under each number while the text shows the model's own total. A line may also carry a workbook
+formula over other lines (``formula``), so an edited input recomputes it; the printed report and JSON never use it.
 """
 
 from __future__ import annotations
@@ -21,7 +22,11 @@ _NO = "no"
 
 @dataclass(frozen=True)
 class Line:
-    """One report row: a label, one value per value column, and how the value is computed."""
+    """One report row: a label, one value per value column, and how the value is computed.
+
+    ``formula`` is a workbook formula without its ``=``, naming other lines as ``{key}``; the workbook writes it in
+    place of the value, each ``{key}`` read as that line's cell in the same column. Empty: the value is written.
+    """
 
     key: str
     label: str
@@ -29,6 +34,7 @@ class Line:
     how: str
     total_of: tuple[str, ...] = ()
     verdict: bool = False
+    formula: str = ""
 
 
 @dataclass(frozen=True)
