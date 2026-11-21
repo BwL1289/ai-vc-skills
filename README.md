@@ -92,7 +92,8 @@ Once the plugin is installed, ask in plain words:
   up to 10%. What does the SAFE convert at, and who owns what?"
 - "How much equity is a hire worth if they make the company 25% more valuable?"
 - "The Series A sells 20% and adds a 10% pool. What's left of my 30%?"
-- "We sell for $50M and the investors have a 1x non-participating preference on $10M. Who gets what?"
+- "We sell for $50M. The investors put in $10M for 25% of the shares, with a 1x non-participating preference. Who
+  gets what?"
 - "How much of a 4-year grant with a 1-year cliff has vested at month 30?"
 
 ```mermaid
@@ -100,7 +101,7 @@ flowchart LR
   Q["Your question"] --> C["Claude, or any MCP client"]
   C -->|"the skill picks the scenario"| T["equity_calculator tool"]
   T --> X["Exact fractions"]
-  X --> R["Report, JSON or .xlsx workbook"]
+  X --> R["Report with every formula and source"]
 ```
 
 ## Skills
@@ -124,12 +125,12 @@ flowchart LR
 
 It runs four ways, all from the same model:
 
-| Way        | How                                                                                                 |
-| ---------- | --------------------------------------------------------------------------------------------------- |
-| Command    | `equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10`                           |
-| Workbook   | Add `--xlsx deal.xlsx`: a formatted `.xlsx` whose investor verdict re-works when you change a cell. |
-| MCP server | `equity_calculator_mcp`: one tool per scenario, for Claude or any MCP client.                       |
-| Python     | `from equity_calculator.scenarios import compute`                                                   |
+| Way        | How                                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------------------- |
+| Command    | `equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10`                            |
+| Workbook   | Add `--xlsx deal.xlsx` to a command: an `.xlsx` whose investor verdict re-works when a cell changes. |
+| MCP server | `equity_calculator_mcp`: one tool per scenario, for Claude or any MCP client.                        |
+| Python     | `from equity_calculator.scenarios import compute`                                                    |
 
 Every number is worked as an exact fraction and shown rounded once (one case aside: a note's interest over a part
 period, which is marked approximate). Every result says how each line is computed and lists the assumptions it rests
@@ -261,7 +262,7 @@ Python bytecode, all git-ignored; everything else goes under pytest's temporary 
 `cd equity_calculator && pytest` runs the same tests with the package's own settings and no coverage.
 
 To try the plugin from a clone, add the clone as a marketplace in Claude Code:
-`/plugin marketplace add ./ai-vc-skills`, then `/plugin install equity-calculator@ai-vc-skills`.
+from inside the clone, `/plugin marketplace add ./`, then `/plugin install equity-calculator@ai-vc-skills`.
 
 The calculator's folder:
 
