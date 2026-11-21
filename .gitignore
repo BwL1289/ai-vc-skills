@@ -21,7 +21,6 @@ target
 .bloop/
 .ammonite/
 metals.sbt
-cdk_src/services/epstein_drive/core/eugo_app/core_app/docker_src/eugo_app/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -40,7 +39,6 @@ archive/*
 # Scala
 .metals
 
-# Rocinante
 downloaded.csv
 
 # Thumbnails

@@ -1,4 +1,4 @@
-"""``equity-calculator``: how the command line reads its inputs — grouped numbers, negative percents, cost years.
+"""``equity_calculator``: how the command line reads its inputs — grouped numbers, negative percents, cost years.
 
 No DB, no network, no file written: ``run`` is awaited in process and returns the printed report.
 """

@@ -1,4 +1,4 @@
-"""``equity-calculator dilution`` and ``vesting``: the reports, ``--json``, ``--xlsx`` and every refusal.
+"""``equity_calculator dilution`` and ``vesting``: the reports, ``--json``, ``--xlsx`` and every refusal.
 
 No DB, no network: ``run`` is awaited in process. The only files written are workbooks, under pytest's temporary
 directory. ``parse_round``'s own cases are in ``test_cli_instruments.py``; both sheets read back in

@@ -1,4 +1,4 @@
-"""Pydantic models of the option-pool shuffle (``equity-calculator pool``): a priced round that tops the pool up.
+"""Pydantic models of the option-pool shuffle (``equity_calculator pool``): a priced round that tops the pool up.
 
 Split out of ``equity_calculator.schemas.equity``, which re-exports every name here and keeps the tagged unions.
 """

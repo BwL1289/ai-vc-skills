@@ -3,7 +3,7 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "equity-calculator"
+name = "equity_calculator"
 version = "0.1.0"
 description = "Exact startup equity arithmetic: Paul Graham's equity equation, the option-pool shuffle, priced rounds with SAFEs and notes, dilution, vesting and exit waterfalls. CLI, Excel workbook and MCP server."
 readme = "README.md"
@@ -23,13 +23,13 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-# The MCP server (equity-calculator-mcp). Exact pin, released 2026-06-26.
+# The MCP server (equity_calculator_mcp). Exact pin, released 2026-06-26.
 mcp = ["mcp==1.28.1"]
 dev = ["pytest>=8", "pytest-asyncio>=0.24"]
 
 [project.scripts]
-equity-calculator = "equity_calculator.__main__:main"
-equity-calculator-mcp = "equity_calculator.mcp_server:main"
+equity_calculator = "equity_calculator.__main__:main"
+equity_calculator_mcp = "equity_calculator.mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/equity_calculator"]

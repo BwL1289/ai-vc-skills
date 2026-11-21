@@ -1,20 +1,20 @@
 # Command-line interface: stdout is the report.
-"""``equity-calculator`` — an equity question: PG's two tests, the option pool, a round, dilution, vesting, an exit.
+"""``equity_calculator`` — an equity question: PG's two tests, the option pool, a round, dilution, vesting, an exit.
 
-    equity-calculator investor (--equity-percent N | --pre-money V --investment I)
+    equity_calculator investor (--equity-percent N | --pre-money V --investment I)
         (--outcome-multiplier M | --growth-percent G) [--holder-percent H]
-    equity-calculator employee (--outcome-multiplier I | --gain-percent G) [--offered-percent O]
+    equity_calculator employee (--outcome-multiplier I | --gain-percent G) [--offered-percent O]
         [--annual-cost C --valuation V] [--margin-percent M] [--cost-years Y]
-    equity-calculator pool --fully-diluted-shares FD [--unissued-pool-shares U] --pre-money V --investment I
+    equity_calculator pool --fully-diluted-shares FD [--unissued-pool-shares U] --pre-money V --investment I
         --target-pool-percent T [--pool-timing pre_money|post_money] [--share-rounding exact|whole_shares]
-    equity-calculator round --fully-diluted-shares FD [--unissued-pool-shares U] --pre-money V --investment I
+    equity_calculator round --fully-diluted-shares FD [--unissued-pool-shares U] --pre-money V --investment I
         [--target-pool-percent T] [--pool-timing pre_money|post_money] (--safe "TERMS" | --note "TERMS")...
-    equity-calculator dilution --holder-percent H (--round "TERMS")...
-    equity-calculator vesting --grant-shares G --month M [--total-months T] [--cliff-months C]
+    equity_calculator dilution --holder-percent H (--round "TERMS")...
+    equity_calculator vesting --grant-shares G --month M [--total-months T] [--cliff-months C]
         [--strike-price S [--common-price P]] [--termination-month E]
         [--acceleration single_trigger|double_trigger --acceleration-percent A --change-of-control-month C
         [--acceleration-base unvested|grant]] [--share-rounding exact|whole_shares]
-    equity-calculator waterfall --exit-amount E --common-shares C (--class "TERMS")...
+    equity_calculator waterfall --exit-amount E --common-shares C (--class "TERMS")...
 
 Every scenario also takes ``--json`` (print the whole result model, exact fractions included, instead of the
 report) and ``--xlsx PATH`` (also write the formatted workbook to PATH; the report then names it). The report is
@@ -68,7 +68,7 @@ from equity_calculator.text import render_sheet
 from equity_calculator.workbook import save_workbook
 from pydantic import BaseModel, ValidationError
 
-_PROG = "equity-calculator"
+_PROG = "equity_calculator"
 _VALUE_ERROR_PREFIX = "Value error, "
 _JSON_INDENT = 2
 _INPUT_MODELS: dict[str, type[ScenarioInput]] = {
@@ -232,7 +232,7 @@ async def run(argv: Sequence[str] | None = None) -> str:
 
 
 def main(argv: Sequence[str] | None = None) -> None:
-    """Entry point for ``equity-calculator`` (``argv`` is for tests)."""
+    """Entry point for ``equity_calculator`` (``argv`` is for tests)."""
     sys.stdout.write(asyncio.run(run(argv)) + "\n")
 
 

@@ -1,4 +1,4 @@
-"""Pydantic models of an option or stock grant vesting month by month (``equity-calculator vesting``).
+"""Pydantic models of an option or stock grant vesting month by month (``equity_calculator vesting``).
 
 A grant of G shares vests over T months: nothing before the cliff, then G·m/T at month m (the cliff months vest at
 once), all of it at month T. A termination stops vesting. Acceleration vests part of what is still unvested at once:

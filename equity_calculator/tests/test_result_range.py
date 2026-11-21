@@ -191,7 +191,7 @@ def test_save_workbook_past_the_limit_writes_no_file_and_no_folder(tmp_path: Pat
 
 
 def _cli_round(safe_count: int, workbook: Path) -> list[str]:
-    """``equity-calculator round`` arguments for ``sliver_round(safe_count)``, writing the workbook to ``workbook``."""
+    """``equity_calculator round`` arguments for ``sliver_round(safe_count)``, writing the workbook to ``workbook``."""
     fields = sliver_round(safe_count)
     safes = cast(list[dict[str, str]], fields["instruments"])
     argv = [

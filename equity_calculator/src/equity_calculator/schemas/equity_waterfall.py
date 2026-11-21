@@ -1,4 +1,4 @@
-"""Pydantic models of an exit waterfall: who gets what of a sale price (``equity-calculator waterfall``).
+"""Pydantic models of an exit waterfall: who gets what of a sale price (``equity_calculator waterfall``).
 
 Each preferred class is owed its liquidation preference, ``preference_multiple`` × ``invested``. Preferences are
 paid by seniority ``rank`` (1 is the most senior), and classes of equal rank share what is left pro rata to what they

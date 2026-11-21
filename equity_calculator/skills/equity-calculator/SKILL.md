@@ -1,6 +1,6 @@
 ---
 name: equity-calculator
-description: Exact startup equity arithmetic with the equity-calculator command or its MCP tools. Use whenever someone asks whether a fundraise or a stake is worth it (Paul Graham's equity equation), how much equity a hire is worth or what to offer them, how big an option pool to add and what it does to the price per share (the option-pool shuffle), how SAFEs or convertible notes convert in a priced round (caps, discounts, MFN, note interest), how a stake dilutes over several rounds, how many shares have vested at a given month (cliff, termination, acceleration, exercise cost), or who gets what at an exit (liquidation preferences, participation, caps). Run the calculator instead of doing the arithmetic by hand.
+description: Exact startup equity arithmetic with the equity_calculator command or its MCP tools. Use whenever someone asks whether a fundraise or a stake is worth it (Paul Graham's equity equation), how much equity a hire is worth or what to offer them, how big an option pool to add and what it does to the price per share (the option-pool shuffle), how SAFEs or convertible notes convert in a priced round (caps, discounts, MFN, note interest), how a stake dilutes over several rounds, how many shares have vested at a given month (cliff, termination, acceleration, exercise cost), or who gets what at an exit (liquidation preferences, participation, caps). Run the calculator instead of doing the arithmetic by hand.
 ---
 
 # Equity calculator
@@ -23,8 +23,8 @@ work them out by hand, and do not round or re-derive what it returns.
 
 ## Running it
 
-**MCP tools** (`equity-calculator-mcp`). Each scenario tool takes one argument, `inputs`, an object with that
-scenario's fields, and returns the same JSON text as `equity-calculator <scenario> --json`:
+**MCP tools** (`equity_calculator_mcp`). Each scenario tool takes one argument, `inputs`, an object with that
+scenario's fields, and returns the same JSON text as `equity_calculator <scenario> --json`:
 
 ```json
 { "inputs": { "equity_percent": "7", "outcome_multiplier": "1.10" } }
@@ -48,16 +48,16 @@ format or surrogate character, and writes a new file in DIR; it never overwrites
 workbook cell (a value of 1e300 or more) is refused and no file is made. While saving, the Excel library also writes
 and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable.
 
-**Command line** (`equity-calculator`). The same scenarios as subcommands with flags, for example:
+**Command line** (`equity_calculator`). The same scenarios as subcommands with flags, for example:
 
 ```
-equity-calculator investor --equity-percent 7 --outcome-multiplier 1.10
-equity-calculator round --fully-diluted-shares 10000000 --pre-money 8000000 --investment 2000000 \
+equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10
+equity_calculator round --fully-diluted-shares 10000000 --pre-money 8000000 --investment 2000000 \
     --target-pool-percent 10 --safe "500000 valuation-cap=5000000" --note "250000 interest-rate-percent=6 months-outstanding=18 discount-percent=20"
-equity-calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --common-price 2
+equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --common-price 2
 ```
 
-`equity-calculator <scenario> --help` lists every flag. `--json` prints the whole result instead of the report, and
+`equity_calculator <scenario> --help` lists every flag. `--json` prints the whole result instead of the report, and
 `--xlsx PATH` also writes a formatted Excel workbook. Exit code 1 means the inputs were refused or have no answer
 (the message says why); exit code 2 means an argument could not be read.
 

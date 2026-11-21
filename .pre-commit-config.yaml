@@ -12,7 +12,7 @@ repos:
       - id: check-toml
       - id: check-json
       - id: name-tests-test
-        exclude: ^(equity-calculator/)
+        exclude: ^(equity_calculator/)
       - id: check-xml
       - id: check-symlinks
       - id: requirements-txt-fixer
