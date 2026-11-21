@@ -6,9 +6,9 @@ command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives
 scenario; and a Python package, `equity_calculator`. An agent skill in
 [`skills/equity-calculator/`](skills/equity-calculator/SKILL.md) tells an assistant when and how to use it.
 
-Built from the original `equity_equation` script that was in this repository (its folder,
-[`src/equity_equation/`](https://github.com/BwL1289/opensource-content/tree/main/src/equity_equation), now points
-here, and the script itself is in the repository's git history) and the essay it implements. That script's own TODO
+Built from the original `equity_equation` script this repository started with (it is in the git history, at
+[`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/opensource-content/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation))
+and the essay it implements. That script's own TODO
 list asked for Pydantic models and cell formatting (percent, numbers); both are here, along with the employee formula
 and the option-pool shuffle.
 
