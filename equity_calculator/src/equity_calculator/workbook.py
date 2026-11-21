@@ -2,8 +2,8 @@
 
 Each value cell holds the model's display rounding (a ``Decimal``) under its unit's number format; a total line
 holds a live ``=SUM`` of the cells it adds, so an edited part re-totals; a line with a ``formula`` (the investor test's
-derived lines and verdict) is written as that live formula over its inputs' cells, so an edited input recomputes it
-and its verdict; a verdict cell is coloured by conditional
+derived lines and verdict) is written as that live formula over its inputs' cells, which then hold the inputs at full
+precision, so an edited input recomputes it and its verdict; a verdict cell is coloured by conditional
 formatting (green accept / grant / in the money, amber break even / at the money, red reject / no grant /
 underwater; a waterfall class's choice is blue for converts and grey for stays, neither good nor bad), so an edited
 verdict recolours. Row 1 is the bold header, frozen; the labelled assumptions follow under their own bold header.
@@ -103,15 +103,15 @@ def _write_line(sheet: Worksheet, row: int, line: Line, rows_by_key: dict[str, i
     sheet.cell(row=row, column=_LABEL_COLUMN, value=line.label)
     for offset, value in enumerate(line.values):
         column = _FIRST_VALUE_COLUMN + offset
-        written: Decimal | str
+        written: Decimal | float | str
+        if isinstance(value, EquityQuantity) and not line.total_of and beyond_limit(value.rounded):
+            raise ResultOutOfRange(OUT_OF_RANGE_REASON)
         if line.total_of:
             written = _sum_formula(column, [rows_by_key[key] for key in line.total_of])
         elif line.formula:
             written = _line_formula(line.formula, column, rows_by_key)
         elif isinstance(value, EquityQuantity):
-            if beyond_limit(value.rounded):
-                raise ResultOutOfRange(OUT_OF_RANGE_REASON)
-            written = value.rounded
+            written = float(value.exact) if line.full_precision else value.rounded
         else:
             written = value
 

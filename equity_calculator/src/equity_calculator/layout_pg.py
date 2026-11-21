@@ -3,34 +3,27 @@
 
 from __future__ import annotations
 
+from equity_calculator import investor_live as live
 from equity_calculator.schemas.equity import EmployeeResult, InvestorResult
 from equity_calculator.sheet_parts import GIVEN, Line, Sheet, given, given_percent, yes_no
 
 _INVESTOR_HEADING = 'Investor test (Paul Graham, "The Equity Equation"): is the stake worth what the deal adds?'
 _EMPLOYEE_HEADING = "Employee test: the most of the company a hire is worth, n = (i - 1)/i"
 
-# The investor sheet's live formulas (``Line.formula``): every derived line recomputes from the input cells, so an
-# edited stake, amount, multiplier or holder stake re-works the whole test, verdict included. The verdict rounds
-# R - 1 to 12 places before its sign is read: a spreadsheet computes in binary floating point, so an exact R = 1 can
-# come out an ulp away from 1, and 12 places still separates every R whose stake and multiplier have the six places
-# the sheet shows (R - 1 is then a multiple of 10^-12).
-_STAKE_FROM_AMOUNTS = "{investment}/({pre_money}+{investment})"
-_VALUE_RATIO = "(1-{equity_sold})*{outcome_multiplier}"
-_BREAK_EVEN_MULTIPLIER = "1/(1-{equity_sold})"
-_BREAK_EVEN_GROWTH = "{equity_sold}/(1-{equity_sold})"
-_VERDICT_PLACES = 12
-_INVESTOR_VERDICT = (
-    f'IF(ROUND({{value_ratio}}-1,{_VERDICT_PLACES})>0,"accept",'
-    f'IF(ROUND({{value_ratio}}-1,{_VERDICT_PLACES})=0,"break_even","reject"))'
-)
-_HOLDER_AFTER = "{holder_before}*(1-{equity_sold})"
-_HOLDER_VALUE_BEFORE = "{holder_before}*{pre_money}"
-_HOLDER_VALUE_AFTER = "{holder_value_before}*{value_ratio}"
-
 
 def investor_sheet(result: InvestorResult) -> Sheet:
-    """The investor test's lines: the stake, the amounts when given, R against the break-even, the verdict."""
+    """The investor test's lines: the stake, the amounts when given, R against the break-even, the verdict.
+
+    When a spreadsheet would work them to the model's answers (``investor_live.spreadsheet_agrees``), every derived
+    line is a live formula over the input cells and the inputs are held at full precision; otherwise the sheet holds
+    the model's values.
+    """
     inputs = result.inputs
+    is_live = live.spreadsheet_agrees(result)
+
+    def formula(template: str) -> str:
+        return template if is_live else ""
+
     from_amounts = inputs.pre_money is not None and inputs.investment is not None
     lines = [
         Line(
@@ -38,39 +31,58 @@ def investor_sheet(result: InvestorResult) -> Sheet:
             "Equity sold (n)",
             (result.equity_sold,),
             GIVEN if inputs.equity_percent is not None else "I/(V + I)",
-            formula=_STAKE_FROM_AMOUNTS if from_amounts else "",
+            formula=formula(live.STAKE_FROM_AMOUNTS) if from_amounts else "",
+            full_precision=is_live and not from_amounts,
         )
     ]
     if inputs.pre_money is not None and inputs.investment is not None and result.post_money is not None:
         lines += [
-            Line("pre_money", "Pre-money valuation (V)", (given("money", inputs.pre_money),), GIVEN),
-            Line("investment", "Investment (I)", (given("money", inputs.investment),), GIVEN),
+            Line(
+                "pre_money",
+                "Pre-money valuation (V)",
+                (given("money", inputs.pre_money),),
+                GIVEN,
+                full_precision=is_live,
+            ),
+            Line(
+                "investment",
+                "Investment (I)",
+                (given("money", inputs.investment),),
+                GIVEN,
+                full_precision=is_live,
+            ),
             Line("post_money", "Post-money valuation", (result.post_money,), "V + I", ("pre_money", "investment")),
         ]
 
     effect_how = GIVEN if inputs.outcome_multiplier is not None else f"1 + g (g = {inputs.growth_percent}%)"
     lines += [
-        Line("outcome_multiplier", "Outcome multiplier (m)", (result.outcome_multiplier,), effect_how),
+        Line(
+            "outcome_multiplier",
+            "Outcome multiplier (m)",
+            (result.outcome_multiplier,),
+            effect_how,
+            full_precision=is_live,
+        ),
         Line(
             "value_ratio",
             "Value ratio R",
             (result.value_ratio,),
             "(1 - n)·m: what the holders keep vs. before",
-            formula=_VALUE_RATIO,
+            formula=formula(live.VALUE_RATIO),
         ),
         Line(
             "break_even_multiplier",
             "Break-even multiplier m*",
             (result.break_even_multiplier,),
             "1/(1 - n)",
-            formula=_BREAK_EVEN_MULTIPLIER,
+            formula=formula(live.BREAK_EVEN_MULTIPLIER),
         ),
         Line(
             "break_even_growth",
             "Break-even growth g*",
             (result.break_even_growth,),
             "n/(1 - n) = m* - 1",
-            formula=_BREAK_EVEN_GROWTH,
+            formula=formula(live.BREAK_EVEN_GROWTH),
         ),
         Line(
             "verdict",
@@ -78,14 +90,26 @@ def investor_sheet(result: InvestorResult) -> Sheet:
             (result.verdict,),
             "accept: R > 1; break_even: R = 1; reject: R < 1",
             verdict=True,
-            formula=_INVESTOR_VERDICT,
+            formula=formula(live.VERDICT),
         ),
     ]
     holder = result.holder
     if holder is not None:
         lines += [
-            Line("holder_before", "Holder's stake before (h)", (holder.stake_before,), GIVEN),
-            Line("holder_after", "Holder's stake after", (holder.stake_after,), "h(1 - n)", formula=_HOLDER_AFTER),
+            Line(
+                "holder_before",
+                "Holder's stake before (h)",
+                (holder.stake_before,),
+                GIVEN,
+                full_precision=is_live,
+            ),
+            Line(
+                "holder_after",
+                "Holder's stake after",
+                (holder.stake_after,),
+                "h(1 - n)",
+                formula=formula(live.HOLDER_AFTER),
+            ),
         ]
         if holder.value_before is not None and holder.value_after is not None:
             lines += [
@@ -94,14 +118,14 @@ def investor_sheet(result: InvestorResult) -> Sheet:
                     "Holder's value before",
                     (holder.value_before,),
                     "h·V",
-                    formula=_HOLDER_VALUE_BEFORE,
+                    formula=formula(live.HOLDER_VALUE_BEFORE),
                 ),
                 Line(
                     "holder_value_after",
                     "Holder's value after",
                     (holder.value_after,),
                     "h(1 - n)·m·V = h·V·R",
-                    formula=_HOLDER_VALUE_AFTER,
+                    formula=formula(live.HOLDER_VALUE_AFTER),
                 ),
             ]
 

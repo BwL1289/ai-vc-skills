@@ -522,17 +522,21 @@ or `Waterfall`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
-- Every value cell holds the model's display rounding as a number, under its unit's format. Fractions use `0.00%`,
+- Every value cell holds the model's display rounding as a number, under its unit's format (a live investor
+  sheet's inputs excepted, below). Fractions use `0.00%`,
   money `"$"#,##0`, a price per share `"$"#,##0.000000`, shares `#,##0` and multipliers `0.0000"x"`.
 - The investor sheet is live: its inputs (the stake, or the pre-money and the investment; the outcome multiplier; a
-  holder's stake) are numbers, and every line worked from them is a formula over those cells: the stake from the
-  amounts `I/(V + I)`, R `(1 - n)·m`, m\* `1/(1 - n)`, g\* `n/(1 - n)`, the holder's stake after and dollar values,
-  and the verdict, `=IF(ROUND(R-1,12)>0,"accept",IF(ROUND(R-1,12)=0,"break_even","reject"))`. Change the multiplier
-  from 1.10 to 1.05 on a 7% stake and the verdict turns from a green accept to a red reject. A spreadsheet works in
-  binary floating point, so the verdict rounds R - 1 to 12 places before reading its sign: an exact break even stays
-  break even, and a stake given as a percent to 0.0001% with a multiplier to six places always gets the model's own
-  verdict. The tests check this, and the stake from the amounts too, on seeded random inputs and on break-even cases.
-  The other sheets keep the model's values, with live totals as below.
+  holder's stake) are numbers held at full precision, with the display format doing the rounding, and every line
+  worked from them is a formula over those cells: the stake from the amounts `I/(V + I)`, R `(1 - n)·m`, m\*
+  `1/(1 - n)`, g\* `n/(1 - n)`, the holder's stake after and dollar values, and the verdict,
+  `=IF(ROUND(R-1,12)>0,"accept",IF(ROUND(R-1,12)=0,"break_even","reject"))`. Change the multiplier from 1.10 to 1.05
+  on a 7% stake and the verdict turns from a green accept to a red reject.
+- A spreadsheet works those formulas in binary floating point. Rounding R - 1 to 12 places keeps an exact break even
+  reading break even. Before writing the sheet, the calculator works the same formulas the same way and keeps them only
+  when every number lands within the display rounding of the exact answer and the verdict is the model's. When it
+  does not (an R within 10^-11 of 1 without being 1, or a stake so close to 100% that 1 - n loses its digits), the
+  sheet holds the model's values instead, as the other sheets do. The tests check both kinds of sheet, on break-even
+  cases and on seeded random inputs.
 - Formula cells are worked out by the spreadsheet when it opens the file (Excel and LibreOffice do); a viewer that
   does not calculate, such as a file preview or openpyxl's `data_only` read, shows them empty.
 - Totals are live `=SUM` formulas, so editing a part re-totals: the investor's post-money, total shares, total

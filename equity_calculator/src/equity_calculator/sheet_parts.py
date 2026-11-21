@@ -26,6 +26,8 @@ class Line:
 
     ``formula`` is a workbook formula without its ``=``, naming other lines as ``{key}``; the workbook writes it in
     place of the value, each ``{key}`` read as that line's cell in the same column. Empty: the value is written.
+    ``full_precision`` writes a quantity's exact value (as the nearest binary float, which is what a spreadsheet holds)
+    rather than its display rounding: an input that formulas read, so they work from what was given.
     """
 
     key: str
@@ -35,6 +37,7 @@ class Line:
     total_of: tuple[str, ...] = ()
     verdict: bool = False
     formula: str = ""
+    full_precision: bool = False
 
 
 @dataclass(frozen=True)
