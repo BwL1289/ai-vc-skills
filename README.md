@@ -11,9 +11,6 @@ Python library.
 | Path                                                                   | What it is                                                                                                                                                      |
 | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`equity_calculator/`](equity_calculator/)                             | The equity calculator, a Python package of its own: code, tests, MCP server, agent skill and the [full guide](equity_calculator/README.md).                     |
-| [`src/main.py`](src/main.py)                                           | Runs the calculator's command (`python3 src/main.py --help`) once it is installed, or says how to install it.                                                   |
-| [`src/equity_equation/`](src/equity_equation/)                         | Where the original `equity_equation` script lived. It now points to the calculator; the script is in the git history (see [History](#history)).                 |
-| [`src/utils/`](src/utils/)                                             | The small `Constants` enum the original script used. Nothing imports it now.                                                                                    |
 | `pyproject.toml`, `setup.cfg`                                          | Settings for the whole repository: ruff, isort, pytest and coverage.                                                                                            |
 | `.pre-commit-config.yaml`                                              | The hooks every commit runs (see [Working on the repository](#working-on-the-repository)).                                                                      |
 | `.pre-commit-hooks.yaml`                                               | Hook definitions in pre-commit's hook-repository format (pre-commit's standard checks plus ruff). The hooks that run are the ones in `.pre-commit-config.yaml`. |
@@ -121,7 +118,7 @@ Each formula, its sources and the points no source settles (marked `unverified` 
 
 ## Names
 
-Every name uses underscores, like the rest of the repository (`src/equity_equation`): the folder
+Every name uses underscores, the repository's style: the folder
 `equity_calculator/`, the pip package `equity_calculator`, the commands `equity_calculator` and
 `equity_calculator_mcp`, and the MCP server name `equity_calculator`. Two things keep hyphens:
 
