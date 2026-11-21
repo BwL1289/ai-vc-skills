@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "equity-calculator"
+version = "0.1.0"
+description = "Exact startup equity arithmetic: Paul Graham's equity equation, the option-pool shuffle, priced rounds with SAFEs and notes, dilution, vesting and exit waterfalls. CLI, Excel workbook and MCP server."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+dependencies = [
+  "pydantic>=2.11,<3",
+  # Exact pin: the workbook's formats and formulas were checked cell by cell against this release.
+  "openpyxl==3.1.5",
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
+  "Topic :: Office/Business :: Financial",
+]
+
+[project.optional-dependencies]
+# The MCP server (equity-calculator-mcp). Exact pin, released 2026-06-26.
+mcp = ["mcp==1.28.1"]
+dev = ["pytest>=8", "pytest-asyncio>=0.24"]
+
+[project.scripts]
+equity-calculator = "equity_calculator.__main__:main"
+equity-calculator-mcp = "equity_calculator.mcp_server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/equity_calculator"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+# The repository root's isort hook (setup.cfg [isort]) places these two as third-party; ruff does the same so the
+# two hooks agree on the import order.
+known-third-party = ["equity_calculator", "tests"]
+
+[tool.pyright]
+include = ["src"]
+exclude = ["**/__pycache__", "**/.venv"]
+typeCheckingMode = "basic"
+pythonVersion = "3.12"
+reportMissingImports = "warning"
+reportUnusedVariable = "warning"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

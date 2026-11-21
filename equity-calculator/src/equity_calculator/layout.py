@@ -1,0 +1,50 @@
+"""The report of any scenario's result, shared by the printed report (``text``) and the workbook (``workbook``).
+
+``sheet_for`` picks the scenario's sheet builder (``layout_pg``, ``layout_pool``, …); the parts a sheet is built
+from (``Line``, ``Sheet``) live in ``sheet_parts`` and are re-exported here for callers that read a report.
+"""
+
+from __future__ import annotations
+
+from typing import assert_never
+
+from equity_calculator.layout_dilution import dilution_sheet
+from equity_calculator.layout_pg import employee_sheet, investor_sheet
+from equity_calculator.layout_pool import pool_sheet
+from equity_calculator.layout_round import round_sheet
+from equity_calculator.layout_vesting import vesting_sheet
+from equity_calculator.layout_waterfall import waterfall_sheet
+from equity_calculator.schemas.equity import (
+    DilutionResult,
+    EmployeeResult,
+    InvestorResult,
+    PoolResult,
+    RoundResult,
+    ScenarioResult,
+    VestingResult,
+    WaterfallResult,
+)
+from equity_calculator.sheet_parts import GIVEN, Line, Sheet
+
+__all__ = ["GIVEN", "Line", "Sheet", "sheet_for"]
+
+
+def sheet_for(result: ScenarioResult) -> Sheet:
+    """The report of any scenario's result (a new scenario adds one ``case``)."""
+    match result:
+        case InvestorResult():
+            return investor_sheet(result)
+        case EmployeeResult():
+            return employee_sheet(result)
+        case PoolResult():
+            return pool_sheet(result)
+        case RoundResult():
+            return round_sheet(result)
+        case DilutionResult():
+            return dilution_sheet(result)
+        case VestingResult():
+            return vesting_sheet(result)
+        case WaterfallResult():
+            return waterfall_sheet(result)
+        case _:
+            assert_never(result)
