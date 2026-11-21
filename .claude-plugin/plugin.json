@@ -1,6 +1,6 @@
 {
   "name": "ai-vc-skills",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "AI VC skills for Claude Code: exact startup equity math (Paul Graham's equity equation, option pools, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls) as agent skills with an MCP server.",
   "author": {
     "name": "Benjamin Leff",

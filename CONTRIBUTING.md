@@ -33,7 +33,7 @@ point into a result.
 
 ## Checks
 
-Set up a clone as in the README's [Command line and Python](README.md#command-line-and-python), then:
+Set up a clone as in [docs/install.md](docs/install.md#from-a-clone), then:
 
 ```
 pip install --group dev
@@ -44,7 +44,7 @@ pytest
 claude plugin validate .
 ```
 
-CI runs the first four on every pull request.
+CI runs the validator, the pre-commit hooks and pytest on every pull request.
 
 ## Quality checklist for a skill
 

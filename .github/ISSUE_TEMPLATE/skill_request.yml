@@ -1,6 +1,6 @@
 name: Skill request
 description: A question founders or investors ask that a skill should answer
-labels: ["skill request"]
+labels: ["enhancement"]
 body:
   - type: textarea
     id: question
