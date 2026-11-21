@@ -42,8 +42,8 @@ target-version = "py312"
 select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.isort]
-# The repository root's isort hook (setup.cfg [isort]) places these two as third-party; ruff does the same so the
-# two hooks agree on the import order.
+# The repository root's isort hook (pyproject.toml [tool.isort]) places these two as third-party; ruff does the
+# same so the two hooks agree on the import order.
 known-third-party = ["equity_calculator", "tests"]
 
 [tool.pyright]

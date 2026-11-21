@@ -8,15 +8,13 @@ Python library.
 
 ## What is in the repository
 
-| Path                                                                   | What it is                                                                                                                                                      |
-| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`equity_calculator/`](equity_calculator/)                             | The equity calculator, a Python package of its own: code, tests, MCP server, agent skill and the [full guide](equity_calculator/README.md).                     |
-| `pyproject.toml`, `setup.cfg`                                          | Settings for the whole repository: ruff, isort, pytest and coverage.                                                                                            |
-| `.pre-commit-config.yaml`                                              | The hooks every commit runs (see [Working on the repository](#working-on-the-repository)).                                                                      |
-| `.pre-commit-hooks.yaml`                                               | Hook definitions in pre-commit's hook-repository format (pre-commit's standard checks plus ruff). The hooks that run are the ones in `.pre-commit-config.yaml`. |
-| `dev_requirements.txt`                                                 | The tools for working on the repository: pre-commit, pytest-cov and ruff.                                                                                       |
-| [`.github/pull_request_template.md`](.github/pull_request_template.md) | The checklist every pull request starts with.                                                                                                                   |
-| [`LICENSE`](LICENSE)                                                   | MIT.                                                                                                                                                            |
+| Path                                                                   | What it is                                                                                                                                  |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`equity_calculator/`](equity_calculator/)                             | The equity calculator, a Python package of its own: code, tests, MCP server, agent skill and the [full guide](equity_calculator/README.md). |
+| `pyproject.toml`                                                       | Settings for the whole repository: the dev tools (`dev` group), ruff, isort, pytest and coverage.                                           |
+| `.pre-commit-config.yaml`                                              | The hooks every commit runs (see [Working on the repository](#working-on-the-repository)).                                                  |
+| [`.github/pull_request_template.md`](.github/pull_request_template.md) | The checklist every pull request starts with.                                                                                               |
+| [`LICENSE`](LICENSE)                                                   | MIT.                                                                                                                                        |
 
 ## The equity calculator
 
@@ -143,7 +141,8 @@ claude mcp remove equity-calculator
 Set up a clone as in [Install](#install), then add the tools and the commit hooks:
 
 ```
-pip install -r dev_requirements.txt
+python -m pip install -U pip   # dependency groups need pip 25.1 or later
+pip install --group dev
 pre-commit install
 pre-commit run --all-files
 ```
