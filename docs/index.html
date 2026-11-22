@@ -125,7 +125,8 @@
         text-decoration-thickness: 2px;
       }
       a:focus-visible,
-      summary:focus-visible {
+      summary:focus-visible,
+      pre:focus-visible {
         outline: 2px solid var(--accent);
         outline-offset: 3px;
         border-radius: 4px;
@@ -300,6 +301,9 @@
         font-size: 13.5px;
         line-height: 1.55;
         tab-size: 2;
+      }
+      pre + pre {
+        margin-top: 12px;
       }
       pre.output {
         font-size: 12.5px;
@@ -741,7 +745,11 @@
           <div class="install-grid">
             <div class="panel">
               <h3>Claude Code <span class="recommended">recommended</span></h3>
-              <pre><code>/plugin marketplace add BwL1289/ai-vc-skills
+              <pre
+                tabindex="0"
+                role="region"
+                aria-label="Claude Code install commands"
+              ><code>/plugin marketplace add BwL1289/ai-vc-skills
 /plugin install ai-vc-skills@ai-vc-skills</code></pre>
               <p>
                 This adds all four skills and the calculator's MCP server, which
@@ -753,11 +761,15 @@
             </div>
             <div class="panel">
               <h3>Claude Desktop, Cursor and other MCP clients</h3>
-              <pre><code>pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skills#subdirectory=equity_calculator"</code></pre>
+              <pre
+                tabindex="0"
+                role="region"
+                aria-label="MCP server install command"
+              ><code>pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skills#subdirectory=equity_calculator"</code></pre>
               <span class="code-label"
                 >Then add the server to the client's MCP settings:</span
               >
-              <pre><code>{
+              <pre tabindex="0" role="region" aria-label="MCP settings"><code>{
   "mcpServers": {
     "equity_calculator": { "command": "equity_calculator_mcp" }
   }
@@ -774,8 +786,23 @@
           </div>
           <details class="panel">
             <summary>Command line and Python</summary>
-            <pre><code>pip install "equity_calculator @ git+https://github.com/BwL1289/ai-vc-skills#subdirectory=equity_calculator"
+            <pre
+              tabindex="0"
+              role="region"
+              aria-label="Command line install and example"
+            ><code>pip install "equity_calculator @ git+https://github.com/BwL1289/ai-vc-skills#subdirectory=equity_calculator"
 equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10</code></pre>
+            <pre
+              tabindex="0"
+              role="region"
+              aria-label="Python example"
+            ><code>from decimal import Decimal
+
+from equity_calculator.scenarios import compute
+from equity_calculator.schemas.equity import InvestorInput
+
+result = compute(InvestorInput(equity_percent=Decimal("7"), outcome_multiplier=Decimal("1.10")))
+print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
           </details>
         </div>
       </section>
@@ -936,14 +963,25 @@ equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10</code></
                 more valuable. Should we take it?
               </p>
             </blockquote>
-            <span class="code-label">The skill runs the investor test:</span>
-            <pre><code>equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10</code></pre>
+            <span class="code-label"
+              >The skill runs the investor test (the MCP tool
+              <code>equity_investor</code>; the same test from the command
+              line):</span
+            >
+            <pre
+              tabindex="0"
+              role="region"
+              aria-label="Investor test command"
+            ><code>equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10</code></pre>
             <span class="code-label"
               >The calculator prints (the assumptions that follow are left out
               here):</span
             >
             <pre
               class="output"
+              tabindex="0"
+              role="region"
+              aria-label="Investor test output"
             ><code>Investor test (Paul Graham, "The Equity Equation"): is the stake worth what the deal adds?
   Line                          Value  How it is computed
   Equity sold (n)             7.0000%  given
@@ -954,8 +992,8 @@ equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10</code></
   Verdict                      accept  accept: R &gt; 1; break_even: R = 1; reject: R &lt; 1</code></pre>
             <p class="note">
               Keeping 93% of a company worth 1.1 times as much leaves the
-              holders 1.023 times better off, so the deal is worth taking. Any
-              gain below 7.5269% would make it a loss.
+              holders 1.023 times as well off, so the deal is worth taking. Any
+              gain under 7/93 (about 7.53%) would make it a loss.
             </p>
           </div>
 
@@ -980,17 +1018,24 @@ equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10</code></
               tool <code>equity_deal_check</code>; the same check from the
               command line):</span
             >
-            <pre><code>equity_calculator deal_check --investment 3000000 --pre-money 12000000 \
+            <pre
+              tabindex="0"
+              role="region"
+              aria-label="Deal check command"
+            ><code>equity_calculator deal_check --investment 3000000 --pre-money 12000000 \
     --stated-investor-percent 20 --fully-diluted-shares 8000000 \
     --target-pool-percent 10 --pool-timing pre_money --holder-percent 100 \
     --cash-on-hand 400000 --planned-monthly-gross-burn 180000 \
     --stated-runway-months 24</code></pre>
             <span class="code-label"
               >Selected lines of what the calculator prints, unedited (scroll
-              sideways for the values on a narrow screen):</span
+              sideways for the full lines; on a phone, for the values):</span
             >
             <pre
               class="output"
+              tabindex="0"
+              role="region"
+              aria-label="Deal check output"
             ><code>A fundraising ask checked against itself: valuation, ownership after the round, runway, the deck's figures
   Line                                                                    This ask  How it is computed
   Raise (I)                                                          $3,000,000.00  given
