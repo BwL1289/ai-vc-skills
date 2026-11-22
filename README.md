@@ -19,6 +19,7 @@
 </p>
 
 <p align="center">
+  <a href="https://bwl1289.github.io/ai-vc-skills/">Website</a> ·
   <a href="#install">Install</a> ·
   <a href="#skills">Skills</a> ·
   <a href="#what-you-can-ask">What you can ask</a> ·

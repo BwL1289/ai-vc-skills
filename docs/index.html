@@ -1,0 +1,1287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI VC skills</title>
+    <meta
+      name="description"
+      content="Agent skills for founders raising from VCs: exact equity math, a check of your deck's numbers, and adversarial reviews of your messaging and your claims, before the meeting."
+    />
+    <link rel="canonical" href="https://bwl1289.github.io/ai-vc-skills/" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <meta
+      name="theme-color"
+      content="#faf8f5"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#0d1117"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AI VC skills" />
+    <meta
+      property="og:title"
+      content="AI VC skills: see your raise the way a VC will"
+    />
+    <meta
+      property="og:description"
+      content="Agent skills for founders raising from VCs: exact equity math, a check of your deck's numbers, and adversarial reviews of your messaging and your claims."
+    />
+    <meta property="og:url" content="https://bwl1289.github.io/ai-vc-skills/" />
+    <meta
+      property="og:image"
+      content="https://bwl1289.github.io/ai-vc-skills/og.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="The AI VC skills knight logo beside the title and the line: see your raise the way a VC will"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="AI VC skills: see your raise the way a VC will"
+    />
+    <meta
+      name="twitter:description"
+      content="Agent skills for founders raising from VCs: exact equity math, a check of your deck's numbers, and adversarial reviews of your messaging and your claims."
+    />
+    <meta
+      name="twitter:image"
+      content="https://bwl1289.github.io/ai-vc-skills/og.png"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="The AI VC skills knight logo beside the title and the line: see your raise the way a VC will"
+    />
+    <style>
+      :root {
+        --bg: #faf8f5;
+        --surface: #ffffff;
+        --surface-2: #f1eee9;
+        --text: #1c1f23;
+        --muted: #565e67;
+        --border: #e4dfd8;
+        --accent: #ab3d0c;
+        --accent-soft: #fdeee4;
+        --button-bg: #b5420d;
+        --button-text: #ffffff;
+        --code-bg: #171412;
+        --code-text: #e9e4de;
+        --code-muted: #a8a099;
+        --code-border: #2b2521;
+        --shadow: 0 1px 2px rgb(28 31 35 / 6%), 0 8px 24px rgb(28 31 35 / 5%);
+        --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+          sans-serif;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0d1117;
+          --surface: #151a21;
+          --surface-2: #1b222b;
+          --text: #e6edf3;
+          --muted: #9aa5b1;
+          --border: #2a313b;
+          --accent: #fd7e14;
+          --accent-soft: #2a1a10;
+          --button-bg: #fd7e14;
+          --button-text: #0d1117;
+          --code-bg: #0a0d12;
+          --code-text: #e6edf3;
+          --code-muted: #8b96a3;
+          --code-border: #2a313b;
+          --shadow: none;
+        }
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 17px;
+        line-height: 1.6;
+      }
+      a {
+        color: var(--accent);
+        text-underline-offset: 2px;
+      }
+      a:hover {
+        text-decoration-thickness: 2px;
+      }
+      a:focus-visible,
+      summary:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+        border-radius: 4px;
+      }
+      code {
+        font-family: var(--mono);
+        font-size: 0.88em;
+      }
+      :not(pre) > code {
+        background: var(--surface-2);
+        padding: 0.1em 0.35em;
+        border-radius: 5px;
+      }
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      .skip {
+        position: absolute;
+        left: -999px;
+        top: 8px;
+      }
+      .skip:focus {
+        left: 8px;
+        background: var(--surface);
+        padding: 6px 10px;
+        border-radius: 6px;
+        z-index: 10;
+      }
+
+      /* Header */
+      .site-header {
+        border-bottom: 1px solid var(--border);
+      }
+      .site-header .wrap {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 60px;
+        flex-wrap: wrap;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 750;
+        letter-spacing: -0.01em;
+      }
+      .brand img {
+        width: 30px;
+        height: 30px;
+      }
+      .site-nav {
+        margin-left: auto;
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 15px;
+      }
+      .site-nav a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .site-nav a:hover {
+        color: var(--text);
+      }
+
+      /* Hero */
+      .hero {
+        padding: 64px 0 56px;
+      }
+      .hero .wrap {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 260px;
+        gap: 48px;
+        align-items: center;
+      }
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--accent);
+        font-weight: 650;
+        font-size: 14px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(2.4rem, 6vw, 3.6rem);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+      }
+      .pitch {
+        margin: 18px 0 0;
+        font-size: clamp(1.25rem, 2.6vw, 1.6rem);
+        line-height: 1.3;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .lede {
+        margin: 16px 0 0;
+        color: var(--muted);
+        max-width: 60ch;
+      }
+      .cta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 28px;
+      }
+      .button {
+        display: inline-block;
+        padding: 11px 18px;
+        border-radius: 8px;
+        font-weight: 650;
+        text-decoration: none;
+        font-size: 16px;
+      }
+      .button.primary {
+        background: var(--button-bg);
+        color: var(--button-text);
+      }
+      .button.secondary {
+        border: 1px solid var(--border);
+        color: var(--text);
+        background: var(--surface);
+      }
+      .button:hover {
+        filter: brightness(1.06);
+      }
+      .hero-mark {
+        width: 100%;
+        max-width: 260px;
+        height: auto;
+        justify-self: center;
+      }
+
+      /* Sections */
+      section {
+        padding: 56px 0;
+        border-top: 1px solid var(--border);
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: clamp(1.6rem, 3.4vw, 2rem);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+      h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        letter-spacing: -0.01em;
+      }
+      .section-intro {
+        margin: 0 0 28px;
+        color: var(--muted);
+        max-width: 70ch;
+      }
+
+      /* Code */
+      pre {
+        margin: 0;
+        background: var(--code-bg);
+        color: var(--code-text);
+        border: 1px solid var(--code-border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        overflow-x: auto;
+        font-family: var(--mono);
+        font-size: 13.5px;
+        line-height: 1.55;
+        tab-size: 2;
+      }
+      pre.output {
+        font-size: 12.5px;
+        line-height: 1.5;
+      }
+      .code-label {
+        display: block;
+        margin: 18px 0 6px;
+        font-size: 14px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .code-label:first-child {
+        margin-top: 0;
+      }
+
+      /* Install */
+      .install-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: var(--shadow);
+        min-width: 0;
+      }
+      .panel > p {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+      .panel h3 + p {
+        margin-top: 4px;
+      }
+      .panel h3 {
+        margin-bottom: 14px;
+      }
+      .panel .recommended {
+        color: var(--accent);
+        font-weight: 650;
+        font-size: 14px;
+        margin-left: 6px;
+      }
+      details.panel {
+        margin-top: 20px;
+      }
+      details.panel summary {
+        cursor: pointer;
+        font-weight: 650;
+      }
+      details.panel[open] summary {
+        margin-bottom: 14px;
+      }
+
+      /* Skill cards */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+      .card {
+        display: flex;
+        flex-direction: column;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: var(--shadow);
+        min-width: 0;
+      }
+      .card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .card-head code {
+        font-size: 1rem;
+        font-weight: 700;
+        background: none;
+        padding: 0;
+        color: var(--text);
+      }
+      .badge {
+        display: inline-block;
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        padding: 3px 9px;
+        border-radius: 999px;
+      }
+      .badge.available {
+        background: var(--surface-2);
+        color: var(--muted);
+        border: 1px solid var(--border);
+      }
+      .badge.preview {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border: 1px solid transparent;
+      }
+      .card p {
+        margin: 12px 0 0;
+      }
+      .card .asks-label {
+        margin-top: 16px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .card ul {
+        margin: 8px 0 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 8px;
+      }
+      .card li {
+        background: var(--surface-2);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 15px;
+        line-height: 1.45;
+      }
+      .card .more {
+        margin-top: auto;
+        padding-top: 16px;
+        font-size: 15px;
+      }
+      .preview-note {
+        margin: 20px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+        max-width: 80ch;
+      }
+
+      /* Examples */
+      .example {
+        margin-top: 40px;
+        padding-top: 36px;
+        border-top: 1px dashed var(--border);
+        display: grid;
+        gap: 12px;
+        min-width: 0;
+      }
+      .section-intro + .example {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+      }
+      .example .code-label {
+        margin: 6px 0 -4px;
+      }
+      .example-head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .example-head h3 code {
+        background: none;
+        padding: 0;
+        font-size: 1em;
+      }
+      .provenance {
+        font-size: 13.5px;
+        font-weight: 650;
+        padding: 3px 10px;
+        border-radius: 999px;
+      }
+      .provenance.real {
+        background: var(--surface-2);
+        color: var(--muted);
+        border: 1px solid var(--border);
+      }
+      .provenance.expected {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      blockquote {
+        margin: 0;
+        padding: 12px 16px;
+        border-left: 3px solid var(--accent);
+        background: var(--surface);
+        border-radius: 0 10px 10px 0;
+        color: var(--text);
+      }
+      blockquote p {
+        margin: 0;
+      }
+      .example ul.expect {
+        margin: 0;
+        padding-left: 20px;
+        display: grid;
+        gap: 6px;
+      }
+      .example .note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      /* How it works */
+      .steps {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+        counter-reset: step;
+      }
+      .steps li {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: var(--shadow);
+        counter-increment: step;
+        min-width: 0;
+      }
+      .steps li::before {
+        content: counter(step);
+        display: inline-grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-weight: 750;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+      .steps p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+      .principles {
+        margin: 28px 0 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 28px;
+      }
+      .principles li {
+        padding-left: 16px;
+        border-left: 3px solid var(--border);
+        min-width: 0;
+      }
+      .principles b {
+        display: block;
+      }
+      .principles span {
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      /* Links */
+      .link-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .link-list a {
+        display: block;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .link-list a span {
+        display: block;
+        color: var(--muted);
+        font-weight: 400;
+        font-size: 14px;
+      }
+      .link-list a:hover {
+        border-color: var(--accent);
+      }
+
+      /* Footer */
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 28px 0 40px;
+        color: var(--muted);
+        font-size: 14.5px;
+      }
+      footer .wrap {
+        display: flex;
+        gap: 12px 24px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+      footer p {
+        margin: 0;
+      }
+
+      @media (max-width: 820px) {
+        .hero {
+          padding: 40px 0 44px;
+        }
+        .hero .wrap {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 24px;
+        }
+        .hero-mark {
+          order: -1;
+          max-width: 88px;
+          justify-self: start;
+        }
+        .install-grid,
+        .cards,
+        .steps,
+        .principles {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .link-list {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 480px) {
+        body {
+          font-size: 16px;
+        }
+        .wrap {
+          padding: 0 16px;
+        }
+        .site-nav {
+          margin-left: 0;
+          gap: 4px 13px;
+          font-size: 14px;
+        }
+        .site-header .wrap {
+          padding-top: 10px;
+          padding-bottom: 10px;
+        }
+        section {
+          padding: 44px 0;
+        }
+        .panel,
+        .card,
+        .steps li {
+          padding: 18px;
+        }
+        pre {
+          font-size: 12.5px;
+          padding: 12px;
+        }
+        pre.output {
+          font-size: 11.5px;
+        }
+        .link-list {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="./"
+          ><img src="logo.svg" alt="" width="30" height="30" />AI VC skills</a
+        >
+        <nav class="site-nav" aria-label="Sections">
+          <a href="#install">Install</a>
+          <a href="#skills">Skills</a>
+          <a href="#examples">Examples</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="https://github.com/BwL1289/ai-vc-skills">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="hero">
+        <div class="wrap">
+          <div>
+            <p class="eyebrow">Agent skills for founders</p>
+            <h1>AI VC skills</h1>
+            <p class="pitch">
+              See your raise the way a VC will, before you walk into the
+              meeting.
+            </p>
+            <p class="lede">
+              Four skills for Claude and any MCP client that work through the
+              money and the story of a fundraise from the founder's side of the
+              table: equity math done exactly, your deck's ask checked against
+              itself, and skeptical reviews of your messaging and your claims
+              that keep only the objections your own material cannot answer.
+            </p>
+            <div class="cta">
+              <a class="button primary" href="#install">Install the plugin</a>
+              <a
+                class="button secondary"
+                href="https://github.com/BwL1289/ai-vc-skills"
+                >View on GitHub</a
+              >
+            </div>
+          </div>
+          <img
+            class="hero-mark"
+            src="logo.svg"
+            alt="The AI VC skills logo: a chess knight whose head is cut into cap-table slices"
+            width="260"
+            height="260"
+          />
+        </div>
+      </div>
+
+      <section id="install" aria-labelledby="install-title">
+        <div class="wrap">
+          <h2 id="install-title">Install</h2>
+          <p class="section-intro">
+            The skills are plain instructions; every number comes from the
+            <code>equity_calculator</code> MCP server, which runs on your own
+            machine and makes no network calls.
+          </p>
+          <div class="install-grid">
+            <div class="panel">
+              <h3>Claude Code <span class="recommended">recommended</span></h3>
+              <pre><code>/plugin marketplace add BwL1289/ai-vc-skills
+/plugin install ai-vc-skills@ai-vc-skills</code></pre>
+              <p>
+                This adds all four skills and the calculator's MCP server, which
+                starts with
+                <a href="https://docs.astral.sh/uv/"><code>uv</code></a
+                >'s <code>uvx</code>, so install uv first. Then ask your first
+                question in a new session.
+              </p>
+            </div>
+            <div class="panel">
+              <h3>Claude Desktop, Cursor and other MCP clients</h3>
+              <pre><code>pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skills#subdirectory=equity_calculator"</code></pre>
+              <span class="code-label"
+                >Then add the server to the client's MCP settings:</span
+              >
+              <pre><code>{
+  "mcpServers": {
+    "equity_calculator": { "command": "equity_calculator_mcp" }
+  }
+}</code></pre>
+              <p>
+                Load the four folders under <code>skills/</code> wherever your
+                client reads skills. Step by step for each client:
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/docs/install.md"
+                  >the install guide</a
+                >.
+              </p>
+            </div>
+          </div>
+          <details class="panel">
+            <summary>Command line and Python</summary>
+            <pre><code>pip install "equity_calculator @ git+https://github.com/BwL1289/ai-vc-skills#subdirectory=equity_calculator"
+equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10</code></pre>
+          </details>
+        </div>
+      </section>
+
+      <section id="skills" aria-labelledby="skills-title">
+        <div class="wrap">
+          <h2 id="skills-title">The skills</h2>
+          <p class="section-intro">
+            Ask in plain words. The agent picks the skill, asks once for
+            anything missing, and never fills a gap with a figure you did not
+            give it.
+          </p>
+          <div class="cards">
+            <article class="card">
+              <div class="card-head">
+                <h3><code>equity-calculator</code></h3>
+                <span class="badge available">Available</span>
+              </div>
+              <p>
+                Works eight equity questions exactly: whether a stake is worth
+                selling, what a hire's grant is worth, the option-pool shuffle,
+                SAFEs and notes converting in a priced round, dilution over
+                several rounds, vesting, exit waterfalls and a check of a
+                raise's numbers. You get the formula and the source behind every
+                line.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>
+                  An investor wants 7% and says the deal makes the company 10%
+                  more valuable. Should we take it?
+                </li>
+                <li>
+                  The Series A sells 20% and adds a 10% pool. What's left of my
+                  30%?
+                </li>
+                <li>
+                  How much of a 4-year grant with a 1-year cliff has vested at
+                  month 30?
+                </li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/equity-calculator/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-deal-math</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Checks the ask in your own deck before a partner does: whether
+                the pre-money, post-money and percent sold agree, what the round
+                leaves the founders once SAFEs, notes and a pool top-up are
+                counted, the effective pre-money, the runway the raise buys and
+                whether the use of funds adds up.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>Check my deck's numbers before I send it out.</li>
+                <li>
+                  What does this round do to my ownership once the SAFEs
+                  convert?
+                </li>
+                <li>How many months of runway does this raise really buy?</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-deal-math/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-positioning</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Tightens the one-liner, narrative and ask before you go out.
+                Skeptical lenses list the strongest reasons a partner might
+                pass, each quoting your own line; a second pass drops every
+                objection your material already answers. You get the survivors
+                with rewrites, a say-and-avoid list and a script for a prep
+                session with an existing investor.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>Stress-test my pitch before we go out to raise.</li>
+                <li>What should I stop saying to VCs?</li>
+                <li>
+                  Prep me for a practice session with our lead seed investor.
+                </li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-positioning/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-claims-check</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Goes through every checkable claim in your deck, one-pager and
+                narrative: can you show a source, do the documents agree, and
+                does the claim use a pattern investors discount. A skeptic picks
+                what a partner would check first; a refute pass keeps only the
+                attacks your material grounds. Each claim gets one verdict and a
+                fix.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>Fact-check my deck before Monday.</li>
+                <li>Do the figures in my deck and my one-pager agree?</li>
+                <li>What will a partner check first?</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-claims-check/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+          </div>
+          <p class="preview-note">
+            Preview means the skill has not yet been tried on real decks: the
+            calculator's arithmetic is tested, but the reviews' wording may
+            change. The positioning and claims-check evals describe the
+            behaviour expected of a run; they are not recordings of one.
+          </p>
+        </div>
+      </section>
+
+      <section id="examples" aria-labelledby="examples-title">
+        <div class="wrap">
+          <h2 id="examples-title">One example per skill</h2>
+          <p class="section-intro">
+            The two calculator examples are real output, pasted from the command
+            line. The two review examples are excerpts from the skills' evals
+            and say what a run should do. All the companies are made up.
+          </p>
+
+          <div class="example">
+            <div class="example-head">
+              <h3><code>equity-calculator</code>: is selling 7% worth it?</h3>
+              <span class="provenance real">Real calculator output</span>
+            </div>
+            <blockquote>
+              <p>
+                An investor wants 7% and says the deal makes the company 10%
+                more valuable. Should we take it?
+              </p>
+            </blockquote>
+            <span class="code-label">The skill runs the investor test:</span>
+            <pre><code>equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10</code></pre>
+            <span class="code-label"
+              >The calculator prints (the assumptions that follow are left out
+              here):</span
+            >
+            <pre
+              class="output"
+            ><code>Investor test (Paul Graham, "The Equity Equation"): is the stake worth what the deal adds?
+  Line                          Value  How it is computed
+  Equity sold (n)             7.0000%  given
+  Outcome multiplier (m)    1.100000x  given
+  Value ratio R             1.023000x  (1 - n)·m: what the holders keep vs. before
+  Break-even multiplier m*  1.075269x  1/(1 - n)
+  Break-even growth g*        7.5269%  n/(1 - n) = m* - 1
+  Verdict                      accept  accept: R &gt; 1; break_even: R = 1; reject: R &lt; 1</code></pre>
+            <p class="note">
+              Keeping 93% of a company worth 1.1 times as much leaves the
+              holders 1.023 times better off, so the deal is worth taking. Any
+              gain below 7.5269% would make it a loss.
+            </p>
+          </div>
+
+          <div class="example">
+            <div class="example-head">
+              <h3><code>vc-deal-math</code>: check my deck's numbers</h3>
+              <span class="provenance real"
+                >Real calculator output, excerpt</span
+              >
+            </div>
+            <blockquote>
+              <p>
+                We're raising $3M at a $12M pre-money and the deck says
+                investors get 20%. We'll create a 10% option pool in the
+                pre-money. The deck says the raise gives us 24 months of runway.
+                We have 8,000,000 shares, all the founders', $400k in the bank,
+                and we plan to burn $180k a month after the raise.
+              </p>
+            </blockquote>
+            <span class="code-label"
+              >The skill passes every stated figure to the deal check (the MCP
+              tool <code>equity_deal_check</code>; the same check from the
+              command line):</span
+            >
+            <pre><code>equity_calculator deal_check --investment 3000000 --pre-money 12000000 \
+    --stated-investor-percent 20 --fully-diluted-shares 8000000 \
+    --target-pool-percent 10 --pool-timing pre_money --holder-percent 100 \
+    --cash-on-hand 400000 --planned-monthly-gross-burn 180000 \
+    --stated-runway-months 24</code></pre>
+            <span class="code-label"
+              >Selected lines of what the calculator prints, unedited:</span
+            >
+            <pre
+              class="output"
+            ><code>A fundraising ask checked against itself: valuation, ownership after the round, runway, the deck's figures
+  Line                                                                    This ask  How it is computed
+  Raise (I)                                                          $3,000,000.00  given
+  Pre-money as stated                                               $12,000,000.00  given
+  Post-money valuation                                              $15,000,000.00  V + I
+  Price per share (p)                                                    $1.312500  the round's price
+  Effective pre-money                                               $10,500,000.00  (FD - U)·p: the pre-round holders' shares at the round price
+  After: holder group                                                     70.0000%  h·kept
+  After: option pool                                                      10.0000%  (U + P)/T
+  After: investors                                                        20.0000%  N/T
+  Pre-money pays for: new pool                                       $1,500,000.00  P·p (pool in the pre-money)
+  Net runway, planned burn                                            18.89 months  (cash + I)/net burn
+  Investors' percent: the deck says                                       20.0000%  given
+  Investors' percent: the calculator gives                                20.0000%  the investor's cap-table share
+  Investors' percent: verdict                                           consistent  within the tolerance is consistent
+  Runway: the deck says                                               24.00 months  given
+  Runway: the calculator gives                                        18.89 months  (cash + I)/net burn, planned (else current)
+  Runway: difference                                                  -5.11 months  computed - stated
+  Runway: verdict                                                         mismatch  within the tolerance is consistent
+  A VC is likely to ask                             pool_in_pre_money_lowers_price  The new pool is paid for out of the pre-money, so the effective pre-money and the price per share are below the headline; a VC prices it this way
+  Overall verdict                                                         mismatch  mismatch if any check is; consistent if all are; not_checked with none</code></pre>
+            <p class="note">
+              The 20% holds, but the runway slide does not: the plan buys 18.89
+              months, not 24. And because the new pool comes out of the
+              pre-money, the founders' shares are priced at an effective $10.5M,
+              not the headline $12M. A partner will price it that way, so it is
+              better to know before the meeting.
+            </p>
+          </div>
+
+          <div class="example">
+            <div class="example-head">
+              <h3>
+                <code>vc-positioning</code>: phrases that cost the meeting
+              </h3>
+              <span class="provenance expected"
+                >Expected behaviour, not a recorded run</span
+              >
+            </div>
+            <blockquote>
+              <p>
+                Tighten my pitch before I go out to raise next month. This is
+                how I open: "Company E is an AI-powered platform transforming
+                accounting for small businesses. We have no competitors. The
+                small-business accounting market is $50B, and we only need 1% of
+                the market to be a $500M company. Our projections are
+                conservative, and we have strong traction." We're raising a seed
+                round from angels and seed funds.
+              </p>
+            </blockquote>
+            <span class="code-label"
+              >From the eval, what a passing run does:</span
+            >
+            <ul class="expect">
+              <li>
+                Makes no calculator call: the founder gave no amount, valuation,
+                cash or burn.
+              </li>
+              <li>
+                Runs the adversarial review, and four objections survive it,
+                each quoting the founder's line: "We have no competitors."
+                (ranked as ends the meeting), "we only need 1% of the market to
+                be a $500M company", the "AI-powered platform transforming
+                accounting" opener, and "we have strong traction" with no
+                number.
+              </li>
+              <li>
+                Puts "Our projections are conservative" on the say-and-avoid
+                list, marked unverified.
+              </li>
+              <li>
+                Never works out 1% of $50B; it asks who exactly buys, how many
+                of them there are and what each pays.
+              </li>
+              <li>
+                Writes rewrites with bracketed asks such as
+                <code>[paying customers today]</code> and
+                <code>[what customers use today instead]</code>, never an
+                invented figure.
+              </li>
+            </ul>
+            <p class="note">
+              Source:
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/evals/vc-positioning/company-e-phrases-that-cost-the-meeting.md"
+                >evals/vc-positioning, Company E</a
+              >.
+            </p>
+          </div>
+
+          <div class="example">
+            <div class="example-head">
+              <h3>
+                <code>vc-claims-check</code>: only grounded attacks survive
+              </h3>
+              <span class="provenance expected"
+                >Expected behaviour, not a recorded run</span
+              >
+            </div>
+            <blockquote>
+              <p>
+                What will a partner check first? Company L sells inventory
+                software to independent bike shops. Deck, slide 2: "Strategic
+                partnership with the largest US bike distributor." Appendix A:
+                "Distributor pilot: unpaid, 3 stores, no commitment after the
+                pilot." Slide 4: "62 paying shops, $310 a month each, invoices
+                available." Slide 6: "Our CTO led the inventory platform at a
+                national sporting-goods retailer for 6 years." Slide 6 footnote:
+                "Her former manager has agreed to take reference calls."
+              </p>
+            </blockquote>
+            <span class="code-label"
+              >From the eval, what a passing run does:</span
+            >
+            <ul class="expect">
+              <li>
+                The skeptic goes first at the "strategic partnership". The
+                refute pass keeps that attack, because Appendix A grounds it:
+                the claim is Contradicted, and the fix calls it an unpaid pilot.
+              </li>
+              <li>
+                An attack on the CTO's credential is dropped, answered by the
+                founder's own line about reference calls; the credential is
+                Supported.
+              </li>
+              <li>
+                Any attack that leans on an outside fact about the bike market
+                or the distributor is dropped as not grounded.
+              </li>
+              <li>
+                "62 paying shops" is Supported by the invoices, and the answer
+                does not total the shops' payments.
+              </li>
+            </ul>
+            <p class="note">
+              Source:
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/evals/vc-claims-check/company-l-an-attack-the-material-does-not-ground.md"
+                >evals/vc-claims-check, Company L</a
+              >.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="how-it-works" aria-labelledby="how-title">
+        <div class="wrap">
+          <h2 id="how-title">How it works</h2>
+          <p class="section-intro">
+            The model reads, asks and writes. It never does the arithmetic, and
+            it never argues against you with facts you did not give it.
+          </p>
+          <ol class="steps">
+            <li>
+              <h3>You ask in plain words</h3>
+              <p>
+                Paste the ask slide, the SAFE list, the one-liner or the whole
+                deck. The skill lists what you stated, word for word, and asks
+                once for what is missing.
+              </p>
+            </li>
+            <li>
+              <h3>The calculator does the math</h3>
+              <p>
+                Every number comes from the exact calculator, worked in
+                fractions and rounded once for display. Each line shows its
+                formula; each result lists its assumptions and their sources.
+              </p>
+            </li>
+            <li>
+              <h3>A review attacks, then refutes</h3>
+              <p>
+                For messaging and claims, skeptical passes raise the strongest
+                objections, and a refute pass drops any that your own material
+                answers or that rest on an outside fact.
+              </p>
+            </li>
+          </ol>
+          <ul class="principles">
+            <li>
+              <b>Exact</b
+              ><span
+                >No floating point inside a result. The investor test above is
+                the fraction 1023/1000, not an approximation.</span
+              >
+            </li>
+            <li>
+              <b>Checkable</b
+              ><span
+                >Sources are named (Paul Graham, Sam Altman, Y Combinator's SAFE
+                documents); anything without one is marked unverified.</span
+              >
+            </li>
+            <li>
+              <b>On your side</b
+              ><span
+                >You are always the founder. The skills never play an investor
+                or speak in a named person's or firm's voice.</span
+              >
+            </li>
+            <li>
+              <b>Local</b
+              ><span
+                >The MCP server runs on your machine and makes no network calls.
+                It also runs as a command, an .xlsx workbook and a Python
+                package.</span
+              >
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="links" aria-labelledby="links-title">
+        <div class="wrap">
+          <h2 id="links-title">On GitHub</h2>
+          <p class="section-intro">
+            The source, the skills and the docs live in the repository.
+          </p>
+          <ul class="link-list">
+            <li>
+              <a href="https://github.com/BwL1289/ai-vc-skills#readme"
+                >README<span>Overview, scenarios, roadmap</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/docs/install.md"
+                >Install guide<span>Step by step per client</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/equity-calculator/SKILL.md"
+                >equity-calculator<span>SKILL.md</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-deal-math/SKILL.md"
+                >vc-deal-math<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-positioning/SKILL.md"
+                >vc-positioning<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-claims-check/SKILL.md"
+                >vc-claims-check<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/equity_calculator/README.md"
+                >Calculator guide<span
+                  >Formulas, flags, worked examples</span
+                ></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/CONTRIBUTING.md"
+                >Contributing<span>Add a skill, report a wrong number</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/LICENSE"
+                >License<span>MIT</span></a
+              >
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <p>
+          AI VC skills is open source under the
+          <a href="https://github.com/BwL1289/ai-vc-skills/blob/main/LICENSE"
+            >MIT license</a
+          >.
+        </p>
+        <p>
+          A calculator and a set of reviews, not investment, legal or tax
+          advice.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
