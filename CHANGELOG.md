@@ -19,6 +19,13 @@ All notable changes to this repository. Dates are UTC.
   A holder group can be given as a share count and the unissued pool as a percent of the fully diluted shares, so
   no one divides by hand. It works the new money as a priced round; a raise on a SAFE goes to `round`. Results gain
   a `months` unit.
+- The `vc-positioning` skill, in preview: a founder tightens the messaging and positioning of a raise before going
+  out to VCs. It checks the one-liner, narrative, ask and metrics against public frameworks, flags phrases that cost
+  credibility, and runs an adversarial review: independent skeptical lenses list the strongest reasons a VC would pass,
+  each quoting the founder's own line, and a refute pass drops every objection the founder's material already answers.
+  It returns the surviving objections with rewrites, a tightened narrative, a say-and-avoid list and a script for a
+  prep session with an existing investor. The ask's figures go to `equity_deal_check`; it invents no traction. Four
+  evals are in `evals/vc-positioning/`.
 
 ### Changed
 
