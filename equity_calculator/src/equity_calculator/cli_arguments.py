@@ -1,4 +1,4 @@
-"""Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall``).
+"""Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check``).
 
 The number readers are ``cli_numbers``; a repeated flag's one-argument terms are ``cli_instruments``.
 """
@@ -8,7 +8,7 @@ from __future__ import annotations
 import argparse
 from typing import get_args
 
-from equity_calculator.cli_instruments import parse_class, parse_note, parse_round, parse_safe
+from equity_calculator.cli_instruments import parse_class, parse_funds_line, parse_note, parse_round, parse_safe
 from equity_calculator.cli_numbers import parse_decimal, parse_months, parse_percent, parse_whole
 from equity_calculator.schemas.equity import PoolTiming, ShareRounding
 from equity_calculator.schemas.equity_vesting import Acceleration, AccelerationBase
@@ -17,6 +17,14 @@ _INSTRUMENTS = "instruments"
 _TERMS = '"TERMS"'
 _ROUNDS = "rounds"
 _CLASSES = "classes"
+_FUNDS = "use_of_funds"
+_SAFE_HELP = "A post-money SAFE: 'AMOUNT [valuation-cap=X] [discount-percent=D] [mfn]'. Repeat for each SAFE."
+_NOTE_HELP = (
+    "A convertible note: 'PRINCIPAL interest-rate-percent=R (months-outstanding=M | issue-date=YYYY-MM-DD "
+    "conversion-date=YYYY-MM-DD) [compounding=simple|annual|monthly] [stub-rule=simple|fractional_power] "
+    "[day-count=actual_365|actual_360] [valuation-cap=X] [discount-percent=D] [interest-paid-in-cash]'. "
+    "Compounding defaults to annual and stub-rule to fractional_power."
+)
 
 
 def investor_arguments(parser: argparse.ArgumentParser) -> None:
@@ -111,7 +119,7 @@ def round_arguments(parser: argparse.ArgumentParser) -> None:
         action="append",
         dest=_INSTRUMENTS,
         metavar=_TERMS,
-        help="A post-money SAFE: 'AMOUNT [valuation-cap=X] [discount-percent=D] [mfn]'. Repeat for each SAFE.",
+        help=_SAFE_HELP,
     )
     parser.add_argument(
         "--note",
@@ -119,10 +127,7 @@ def round_arguments(parser: argparse.ArgumentParser) -> None:
         action="append",
         dest=_INSTRUMENTS,
         metavar=_TERMS,
-        help="A convertible note: 'PRINCIPAL interest-rate-percent=R (months-outstanding=M | issue-date=YYYY-MM-DD "
-        "conversion-date=YYYY-MM-DD) [compounding=simple|annual|monthly] [stub-rule=simple|fractional_power] "
-        "[day-count=actual_365|actual_360] [valuation-cap=X] [discount-percent=D] [interest-paid-in-cash]'. "
-        "Compounding defaults to annual and stub-rule to fractional_power.",
+        help=_NOTE_HELP,
     )
 
 
@@ -195,4 +200,90 @@ def waterfall_arguments(parser: argparse.ArgumentParser) -> None:
         help="One preferred class: 'shares=S invested=I [preference-multiple=M] [rank=K] "
         "[participation=none|full|capped] [cap-multiple=C]'; rank 1 is paid first, a cap includes the preference. "
         "Repeat for each class.",
+    )
+
+
+def _deal_round_arguments(parser: argparse.ArgumentParser) -> None:
+    """A deal check's raise, valuation, share counts, pool and SAFEs or notes (none required but the raise)."""
+    parser.add_argument("--investment", type=parse_decimal, required=True, help="The raise in dollars (I).")
+    parser.add_argument("--pre-money", type=parse_decimal, help="The pre-money valuation as stated (V).")
+    parser.add_argument("--post-money", type=parse_decimal, help="The post-money valuation as stated.")
+    parser.add_argument(
+        "--stated-investor-percent", type=parse_percent, help="The percent the deck says the investors get."
+    )
+    parser.add_argument(
+        "--fully-diluted-shares",
+        type=parse_whole,
+        help="Every pre-round share, unissued pool included, SAFEs and notes not (FD); needed for SAFEs, notes or a "
+        "pool top-up.",
+    )
+    parser.add_argument(
+        "--unissued-pool-shares", type=parse_whole, help="The unissued pool before the round (U, default 0)."
+    )
+    parser.add_argument(
+        "--unissued-pool-percent",
+        type=parse_percent,
+        help="The unissued pool before the round as a percent of FD, instead of --unissued-pool-shares.",
+    )
+    parser.add_argument(
+        "--target-pool-percent",
+        type=parse_percent,
+        help="The unissued pool after the round, in percent (t, default 0: no top-up).",
+    )
+    parser.add_argument(
+        "--pool-timing", choices=get_args(PoolTiming), help="Where a pool top-up is counted (default pre_money)."
+    )
+    parser.add_argument("--safe", type=parse_safe, action="append", dest=_INSTRUMENTS, metavar=_TERMS, help=_SAFE_HELP)
+    parser.add_argument("--note", type=parse_note, action="append", dest=_INSTRUMENTS, metavar=_TERMS, help=_NOTE_HELP)
+    parser.add_argument(
+        "--holder-percent", type=parse_percent, help="One group's share of FD before the round (the founders, say)."
+    )
+    parser.add_argument(
+        "--holder-shares", type=parse_whole, help="That group's shares before the round, instead of --holder-percent."
+    )
+    parser.add_argument(
+        "--stated-holder-percent", type=parse_percent, help="The percent the deck says that group keeps after."
+    )
+
+
+def deal_check_arguments(parser: argparse.ArgumentParser) -> None:
+    """A deal check's flags: the round as the deck states it, then runway, use of funds, tolerances and bands."""
+    _deal_round_arguments(parser)
+    parser.add_argument("--cash-on-hand", type=parse_decimal, help="Cash before the raise lands (default 0).")
+    parser.add_argument(
+        "--planned-monthly-gross-burn", type=parse_decimal, help="Planned monthly cash spend after the raise."
+    )
+    parser.add_argument(
+        "--planned-monthly-revenue", type=parse_decimal, help="Planned monthly cash revenue after the raise."
+    )
+    parser.add_argument("--current-monthly-gross-burn", type=parse_decimal, help="Today's monthly cash spend.")
+    parser.add_argument("--current-monthly-revenue", type=parse_decimal, help="Today's monthly cash revenue.")
+    parser.add_argument("--stated-runway-months", type=parse_decimal, help="The runway the deck claims, in months.")
+    parser.add_argument(
+        "--use-of-funds",
+        type=parse_funds_line,
+        action="append",
+        dest=_FUNDS,
+        metavar=_TERMS,
+        help="One use-of-funds line: dollars ('1250000') or a percent of the raise ('50%%'). Repeat for each line.",
+    )
+    parser.add_argument(
+        "--tolerance-points",
+        type=parse_percent,
+        help="How far a stated percent may sit from the computed one, in percentage points (default 0.5).",
+    )
+    parser.add_argument(
+        "--tolerance-percent",
+        type=parse_percent,
+        help="How far a stated money or months figure may sit, in percent of the computed one (default 2).",
+    )
+    parser.add_argument(
+        "--dilution-band-percent",
+        type=parse_percent,
+        help="Flag an investor share above this percent (default 25; a common benchmark, not a rule).",
+    )
+    parser.add_argument(
+        "--runway-band-months",
+        type=parse_decimal,
+        help="Flag planned net runway below this many months (default 18; a common benchmark, not a rule).",
     )

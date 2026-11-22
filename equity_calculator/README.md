@@ -9,12 +9,13 @@
 
 The first of the [AI VC skills](../README.md).
 
-Should we trade stock for this, and what does a round do to the cap table? Seven scenarios, worked with exact
+Should we trade stock for this, and what does a round do to the cap table? Eight scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
 [`skills/equity-calculator/`](../skills/equity-calculator/SKILL.md), at the repository root, tells an assistant when and
-how to use it.
+how to use it. A second skill, [`skills/vc-deal-math/`](../skills/vc-deal-math/SKILL.md) (in preview), walks a founder
+through checking their own raise with the `deal_check` scenario before a VC does.
 
 Built from the original `equity_equation` script this repository started with (it is in the git history, at
 [`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/ai-vc-skills/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation))
@@ -22,15 +23,16 @@ and the essay it implements. That script's own TODO
 list asked for Pydantic models and cell formatting (percent, numbers); both are here, along with the employee formula
 and the option-pool shuffle.
 
-| Scenario    | The question it answers                                                                                                                                 |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `investor`  | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                          |
-| `employee`  | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                      |
-| `pool`      | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?             |
-| `round`     | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards? |
-| `dilution`  | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                          |
-| `vesting`   | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                   |
-| `waterfall` | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                    |
+| Scenario     | The question it answers                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `investor`   | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                          |
+| `employee`   | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                      |
+| `pool`       | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?             |
+| `round`      | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards? |
+| `dilution`   | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                          |
+| `vesting`    | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                   |
+| `waterfall`  | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                    |
+| `deal_check` | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic? |
 
 ## Install
 
@@ -98,10 +100,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 `equity_calculator_mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
 instead of doing the arithmetic itself.
 
-| Tool                                                                                                                         | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
-| `equity_workbook`                                                                                                            | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
+| Tool                                                                                                                                              | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
+| `equity_workbook`                                                                                                                                 | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
 error that says why. Money and percents are best sent as JSON strings (`"7"`, `"1.10"`, `"8000000"`): a JSON number
@@ -145,6 +147,11 @@ sources, and to quote the labelled assumptions with every answer. In Claude Code
 `~/.claude/skills/` (every project) or to a project's `.claude/skills/`. The skill alone keeps a hyphen,
 `equity-calculator`, in its name and folder: the Agent Skills format allows only lowercase letters, digits and
 hyphens in a skill's name, and the folder must carry the same name.
+
+[`skills/vc-deal-math/SKILL.md`](../skills/vc-deal-math/SKILL.md) is the second skill, in preview until it has been
+checked on real decks. It is written for a founder checking their own fundraising ask: what to collect from the deck,
+what to ask for when it is missing, one `equity_deal_check` call, and how to answer with the checks first and the
+questions a VC is likely to ask after them.
 
 ## Sources
 
@@ -345,6 +352,54 @@ an amount invested, a preference multiple (1 by default), a rank (1 is paid firs
 
 The money is rounded to the cent by largest remainder, so the payouts add up to E exactly.
 
+### Deal check (YC for post = pre + raise; the rest unverified)
+
+A founder's ask is the raise I and at least one valuation figure: a pre-money, a post-money, or the percent sold. The
+new money is worked as a priced equity round; a raise on a SAFE or note is not modelled here (a SAFE's share is set at
+the next priced round, so `round` with that round's terms works it).
+
+1. **Which valuation sets V.** The first given of pre-money, post-money (V = post - I) and stated percent
+   (V = I/percent - I, true only with the pool in the pre-money) sets the pre-money; any other figure given is checked
+   against it. Post-money = V + I, from YC's Post-Money Safe User Guide: "$2 million at a $10 million pre-money
+   valuation ... the same as saying ... $2 million at a $12 million post-money valuation".
+2. **The round.** With SAFEs or notes, the `round` scenario works the cap table; with only a pool top-up, the `pool`
+   scenario at the deal's pool timing; with neither, the investor holds I/(V + I). The result carries the nested
+   round or pool result whole.
+3. **Ownership.** Every pre-round share keeps FD/T of its stake (T the shares after the round), or V/(V + I) with no
+   share counts; a holder group's stake after is h × that, with h given as a percent of FD or as a share count
+   (h = shares/FD, so no one divides by hand). The unissued pool U is given as shares or as a percent of FD that
+   comes to whole shares. The effective pre-money is (FD - U) × price, the pre-round holders' shares at the round
+   price, the same definition as the pool scenario; with SAFEs or notes it also leaves out the converted shares, so
+   it sits below the pre-money less the new pool. The pre-money is split into what it pays for: those holders'
+   shares, the unissued pool already there, the new pool (pool in the pre-money) and the SAFE and note shares; the
+   four add up to V, rounded to the cent by largest remainder, so the existing holders' part can differ by a cent from
+   the effective pre-money rounded on its own.
+4. **Runway.** For the planned and today's burn, each given: net burn = gross burn - revenue, gross runway =
+   (cash + I)/gross burn and net runway = (cash + I)/net burn, none when the net burn is not positive. A runway
+   claim is checked against the planned net runway, else today's (no plan given, or revenue covering the planned
+   burn); when revenue covers every burn given, it is not checked. No fees, the whole raise lands at once.
+5. **Use of funds.** Amount lines are added up and checked against I; percent lines are turned into dollars of I,
+   split to the cent, and their total checked against 100%.
+6. **Checks.** A stated percent within 0.5 percentage points of the computed one is consistent, and a stated money or
+   months figure within 2% of it (both inputs; the edge counts as consistent). The verdict is `mismatch` if any check
+   is, `consistent` if all are, and `not_checked` when no stated figure could be checked: none was stated, or the
+   only one was a runway claim with revenue covering every burn.
+7. **Flags** are questions a VC is likely to ask, never errors, and never change the verdict:
+   `valuation_back_solved`, `pool_in_pre_money_lowers_price`, `pool_in_post_money_dilutes_investor`,
+   `pool_already_large_enough`, `conversions_bought_by_pre_money`, `discount_beat_cap`, `note_interest_converts`,
+   `net_burn_not_positive`, `current_burn_runway_longer`, and two benchmark flags, `runway_below_band` (planned
+   runway under 18 months) and `dilution_above_band` (more than 25% sold in one round). The two benchmarks are
+   inputs, and each is a common benchmark, not a rule: no source was read that fixes either.
+
+A refusal names the fields: no valuation, a post-money not above the raise, SAFEs, notes or a pool target without the
+fully diluted shares, a stated holder percent without the holder's stake before, the holder's stake or the unissued
+pool given both ways, a holder share count or pool percent without the fully diluted shares, a pool percent that is
+not a whole number of shares, a holder group larger than the shares held outside the unissued pool, a runway claim or
+a revenue without its burn, use-of-funds lines that mix amounts and percents, a percent with no valuation and the pool
+in the post-money, and a pre-money worked from the post-money or the percent that no decimal holds exactly (1/7 of a
+dollar, say) or that falls outside the calculator's bounds, when SAFEs, notes or a pool top-up need it as an input to
+the nested round.
+
 </details>
 
 ## Worked examples
@@ -449,6 +504,38 @@ both 1x non-participating:
 | $70M, A capped at 3x           | stays at its cap: $15,000,000.00            | stays: $10,000,000.00            | $45,000,000.00 | 1      |
 | $100M, A capped at 3x          | converts: $20,000,000.00                    | ties at $10,000,000.00 and stays | $70,000,000.00 | 2      |
 
+**Checking a raise (Company B, made up).** An $8M Series A at $32M pre ($40M post) for 20%, two post-money SAFEs ($1M
+at a $10M cap, $1.5M at a $15M cap), a pool topped up to 10% in the pre-money, and founders at 90% of 10M fully
+diluted shares, 400,000 of them the unissued pool. The deck says the founders keep 72%:
+
+```
+equity_calculator deal_check --investment 8000000 --pre-money 32000000 --post-money 40000000 \
+    --stated-investor-percent 20 --fully-diluted-shares 10000000 --unissued-pool-shares 400000 \
+    --target-pool-percent 10 --safe "1000000 valuation-cap=10000000" --safe "1500000 valuation-cap=15000000" \
+    --holder-percent 90 --stated-holder-percent 72
+  Price per share (p)                                                       $2.314050  the round's price
+  Effective pre-money                                                  $22,214,876.03  (FD - U)·p: the pre-round holders' shares at the round price
+  After: holder group                                                        52.0661%  h·kept
+  After: SAFE 1                                                               7.2314%  shares/T
+  After: SAFE 2                                                               7.2314%  shares/T
+  After: option pool                                                         10.0000%  (U + P)/T
+  After: investors                                                           20.0000%  N/T
+  Share of their stake every pre-round share keeps                           57.8512%  FD/T, or V/(V + I) with no share counts
+  Pre-money pays for: SAFE and note shares                              $5,785,123.97  converted shares·p
+  Post-money: verdict                                                      consistent  within the tolerance is consistent
+  Investors' percent: verdict                                              consistent  within the tolerance is consistent
+  Holder group's percent after: the deck says                                72.0000%  given
+  Holder group's percent after: the calculator gives                         52.0661%  h·(share every pre-round share keeps)
+  Holder group's percent after: difference                                  -19.9339%  computed - stated
+  Holder group's percent after: verdict                                      mismatch  within the tolerance is consistent
+  Overall verdict                                                            mismatch  mismatch if any check is; consistent if all are; not_checked with none
+```
+
+The post-money and the 20% hold; the 72% does not. It counts only the new investors' 20% against the founders, and
+leaves out the SAFEs and the pool top-up, both paid for out of the pre-money: every pre-round share keeps 57.8512% of
+its stake. The report also flags
+`pool_in_pre_money_lowers_price` and `conversions_bought_by_pre_money` as what a VC is likely to ask about.
+
 ## Using it
 
 ```
@@ -466,7 +553,21 @@ equity_calculator vesting --grant-shares G [--total-months T] [--cliff-months C]
     [--acceleration none|single_trigger|double_trigger] [--acceleration-percent A]
     [--acceleration-base unvested|grant] [--change-of-control-month M] [--share-rounding exact|whole_shares]
 equity_calculator waterfall --exit-amount E --common-shares S --class "TERMS"...
+equity_calculator deal_check --investment I [--pre-money V] [--post-money P] [--stated-investor-percent X]
+    [--fully-diluted-shares FD [--unissued-pool-shares U | --unissued-pool-percent UP] [--target-pool-percent T]
+    [--pool-timing pre_money|post_money] [--safe "TERMS" | --note "TERMS"]...]
+    [(--holder-percent H | --holder-shares HS) [--stated-holder-percent S]] [--cash-on-hand C]
+    [--planned-monthly-gross-burn B [--planned-monthly-revenue R]]
+    [--current-monthly-gross-burn B [--current-monthly-revenue R]] [--stated-runway-months M]
+    [--use-of-funds AMOUNT|PCT%]... [--tolerance-points P] [--tolerance-percent Q]
+    [--dilution-band-percent D] [--runway-band-months M]
 ```
+
+`deal_check` needs `--investment` and at least one of `--pre-money`, `--post-money` and `--stated-investor-percent`.
+Its `--safe` and `--note` take the same terms as `round`'s. `--holder-shares` gives the holder group as a share count
+of FD instead of `--holder-percent`, and `--unissued-pool-percent` gives the unissued pool as a percent of FD instead of
+`--unissued-pool-shares`. Each `--use-of-funds` is one line of the deck's use of
+funds, an amount (`1250000`) or a percent of the raise (`50%`), all lines the same kind.
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
 `--class`. Each repeated flag is one instrument, round or class, given as one quoted string of `key=value` terms and
@@ -525,7 +626,8 @@ as `"a"`) and `rounded` is the display value as a decimal string.
 
 Every decimal input has at most 28 significant digits, trailing zeros included, and a nonzero value at least 1e-15
 and under 1e16 in size. A share count is a whole number below 1e16. Number text is at most 100 characters. A round takes at
-most 50 SAFEs and notes, a dilution at most 20 rounds, and a waterfall at most 12 preferred classes, ranked 1 to 12.
+most 50 SAFEs and notes, a dilution at most 20 rounds, a waterfall at most 12 preferred classes, ranked 1 to 12, and a
+deal check at most 50 SAFEs and notes and 20 use-of-funds lines.
 A note runs at most 600 months, or at most 18,262 days (about 50 years) between its dates; a vesting schedule, its
 cliff and every month asked about are at most 600 months. These limits keep every exact step small: the largest
 inputs compute in well under a second, and a value like `1e999999999` is refused at once instead of tying up the
@@ -541,14 +643,15 @@ tools do not check it.
 
 ## The Excel workbook
 
-There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` for the round, `Dilution`, `Vesting`
-or `Waterfall`):
+There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` for the round, `Dilution`, `Vesting`,
+`Waterfall` or `Deal check`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
 - Every value cell holds the model's display rounding as a number, under its unit's format (a live investor
   sheet's inputs excepted, below). Fractions use `0.00%`,
-  money `"$"#,##0`, a price per share `"$"#,##0.000000`, shares `#,##0` and multipliers `0.0000"x"`.
+  money `"$"#,##0`, a price per share `"$"#,##0.000000`, shares `#,##0`, multipliers `0.0000"x"` and months
+  `0.00" months"`.
 - The investor sheet is live: its inputs (the stake, or the pre-money and the investment; the outcome multiplier; a
   holder's stake) are numbers held at full precision, with the display format doing the rounding, and every line
   worked from them is a formula over those cells: the stake from the amounts `I/(V + I)`, R `(1 - n)·m`, m\*
@@ -564,14 +667,15 @@ or `Waterfall`):
 - Formula cells are worked out by the spreadsheet when it opens the file (Excel and LibreOffice do); a viewer that
   does not calculate, such as a file preview or openpyxl's `data_only` read, shows them empty.
 - Totals are live `=SUM` formulas, so editing a part re-totals: the investor's post-money, total shares, total
-  ownership and post-money (pool and round), the stake lost in all (dilution), vested in all and the grant (vesting), and the total paid out
-  (waterfall). A live total adds the rounded cells, so it can differ from the model's exact total in the last place
+  ownership and post-money (pool and round), the stake lost in all (dilution), vested in all and the grant (vesting), the total paid out
+  (waterfall), and the pre-money split and use-of-funds totals (deal check). A live total adds the rounded cells, so it can differ from the model's exact total in the last place
   kept: a cent on the investor's post-money, a thousandth of a share on the pool's total shares, 0.000001 on its total
   ownership. The number formats hide that difference.
-- The pool's and the round's value rows, and the waterfall's payouts, are rounded to the cent by largest remainder,
-  so they add up to their rounded total exactly.
+- The pool's and the round's value rows, the waterfall's payouts, and a deal check's pre-money split and percent
+  use-of-funds lines are rounded to the cent by largest remainder, so they add up to their rounded total exactly.
 - Verdict cells are coloured by conditional formatting: green for accept, grant and in the money, amber for break
-  even and at the money, red for reject, no grant and underwater. A waterfall choice is blue when the class converts
+  even and at the money, red for reject, no grant and underwater. A deal check's verdicts are green for consistent,
+  red for mismatch and amber for not checked. A waterfall choice is blue when the class converts
   and grey when it stays: neither is good or bad. The investor verdict recolours itself when an input changes;
   elsewhere, typing a different verdict recolours the cell.
 - The assumptions follow two rows below, under their own bold header: `Assumption`, `Setting`, `Statement` and
@@ -583,7 +687,7 @@ or `Waterfall`):
 Inside, every number is a `Fraction`. Inputs arrive as `Decimal` (the models refuse NaN and infinity, and hold every
 number to the limits above) and share counts as plain integers (a bool, a float or a numeric string is refused, never
 read as a count). The output carries both the exact fraction and a `Decimal` rounded half-even at a fixed number of
-places: 6 places for ratios and prices, 2 for money, 3 for shares. Rounding is integer arithmetic. No step reads or
+places: 6 places for ratios and prices, 2 for money and months, 3 for shares. Rounding is integer arithmetic. No step reads or
 sets the global decimal context, so a caller's `decimal.localcontext()` cannot change a result, and the note stub's
 private context sets every field, so a changed `decimal.DefaultContext` cannot either.
 
@@ -595,7 +699,8 @@ compounds exactly under either stub rule.
 
 Each number shown is its own exact value rounded once. So rounded parts can miss a rounded total by one in the last
 place shown: in the report, a thousandth of a share or 0.0001% beside a total line. The pool's and the round's value
-rows and the waterfall's payouts are the exception, split to the cent by largest remainder.
+rows, the waterfall's payouts and a deal check's pre-money split and percent use-of-funds lines are the exception,
+split to the cent by largest remainder.
 
 ## Assumptions
 
@@ -674,6 +779,22 @@ was read for preferred-stock terms:
 | `best_response_search`         | from none converting, at most one pass more than the classes | fixed                             |
 | `participation`                | the preference, then a per-share part of the rest            | `participation=full` or `capped`  |
 | `cap_includes_preference`      | cap-multiple × invested, the preference included             | `cap-multiple=`                   |
+
+The `deal_check` scenario adds these, each only when the input uses it, then the nested round's or pool's own rows
+(above) that it does not already list:
+
+| Key                   | Default                                                | How to change it                            | Source                                      |
+| --------------------- | ------------------------------------------------------ | ------------------------------------------- | ------------------------------------------- |
+| `post_money_rule`     | post-money = V + I                                     | fixed                                       | YC (the Post-Money Safe User Guide)         |
+| `valuation_order`     | pre-money, then post-money, then the stated percent    | give one valuation figure                   | unverified                                  |
+| `back_solve`          | post-money = I / percent                               | give a pre- or post-money                   | unverified (standard arithmetic)            |
+| `holder_scaling`      | h × the share of the stake every pre-round share keeps | fixed                                       | unverified                                  |
+| `effective_pre_money` | (FD - U) × price                                       | fixed                                       | unverified                                  |
+| `runway_rule`         | (cash + I) / monthly burn, net and gross               | fixed                                       | unverified (standard arithmetic)            |
+| `runway_band`         | 18 months                                              | `--runway-band-months`                      | unverified (a common benchmark, not a rule) |
+| `tolerance`           | 0.5 points; 2% relative                                | `--tolerance-points`, `--tolerance-percent` | unverified                                  |
+| `dilution_band`       | 25%                                                    | `--dilution-band-percent`                   | unverified (a common benchmark, not a rule) |
+| `use_of_funds_rule`   | the lines add up to the raise                          | fixed                                       | unverified                                  |
 
 </details>
 

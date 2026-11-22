@@ -24,6 +24,7 @@ from equity_calculator.schemas.equity import (
     PoolInput,
     ScenarioInput,
 )
+from equity_calculator.schemas.equity_deal_check import DealCheckInput
 from equity_calculator.schemas.equity_dilution import DilutionInput
 from equity_calculator.schemas.equity_round import RoundInput
 from equity_calculator.schemas.equity_vesting import VestingInput
@@ -131,6 +132,35 @@ _EXAMPLES: tuple[ScenarioInput, ...] = (
         }
     ),
     _CAPPED_WATERFALL,
+    # A deal check worked from its post-money, so the validator's V = post - I runs in the hostile context too: a
+    # SAFE with a cap and a discount, a pool topped up to 10.5%, a holder group, both burns and amount lines.
+    DealCheckInput.model_validate(
+        {
+            "investment": "4125000",
+            "post_money": "20375000",
+            "stated_investor_percent": "20.25",
+            "fully_diluted_shares": 10_250_000,
+            "unissued_pool_shares": 512_500,
+            "target_pool_percent": "10.5",
+            "instruments": [
+                {
+                    "kind": "safe",
+                    "purchase_amount": "512500",
+                    "valuation_cap": "5125000",
+                    "discount_percent": "17.5",
+                }
+            ],
+            "holder_percent": "87.5",
+            "stated_holder_percent": "62.5",
+            "cash_on_hand": "312500",
+            "planned_monthly_gross_burn": "187500",
+            "planned_monthly_revenue": "12500",
+            "current_monthly_gross_burn": "112500",
+            "current_monthly_revenue": "7500",
+            "stated_runway_months": "22.5",
+            "use_of_funds": [{"amount": "2062500"}, {"amount": "1237500"}, {"amount": "825000"}],
+        }
+    ),
 )
 _EXAMPLE_IDS = [
     "investor",
@@ -141,6 +171,7 @@ _EXAMPLE_IDS = [
     "dilution",
     "vesting-double-trigger",
     "waterfall-capped",
+    "deal-check-from-post-money",
 ]
 
 
@@ -164,8 +195,8 @@ def test_round_to_places_is_half_even_with_fixed_places(value: Fraction, places:
 
 
 def test_each_unit_rounds_to_its_display_places() -> None:
-    """Fractions, multipliers and prices keep 6 places, money 2, shares 3."""
-    assert DISPLAY_PLACES == {"fraction": 6, "multiplier": 6, "money": 2, "price": 6, "shares": 3}
+    """Fractions, multipliers and prices keep 6 places, money 2, shares 3, months 2."""
+    assert DISPLAY_PLACES == {"fraction": 6, "multiplier": 6, "money": 2, "price": 6, "shares": 3, "months": 2}
     for unit, places in DISPLAY_PLACES.items():
         assert quantity(unit, Fraction(1, 3)).rounded.as_tuple().exponent == -places
 

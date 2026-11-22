@@ -1,4 +1,4 @@
-"""The repeated-flag readers: a round's ``--safe`` or ``--note``, a dilution ``--round``, a waterfall ``--class``.
+"""The repeated-flag readers: ``--safe``, ``--note``, ``--round``, ``--class`` and a deal check's ``--use-of-funds``.
 
 A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a note's principal) and goes on with
 ``name=value`` terms named like the model fields, hyphens for underscores, plus bare flags; a ``--round`` or a
@@ -11,6 +11,8 @@ A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a n
     --round "investor-percent=20 pool-percent=10"
     --round "pre-money=8000000 investment=2000000"
     --class "shares=2000000 invested=5000000 preference-multiple=1 rank=1 participation=capped cap-multiple=3"
+    --use-of-funds 1250000       (a deal check's use-of-funds line in dollars)
+    --use-of-funds 50%           (or as a percent of the raise)
 
 Numbers read as every other flag's do (``equity_calculator.cli_numbers``); a date is ``YYYY-MM-DD``. An unknown,
 repeated or malformed term is refused naming the term; which terms go together is the model's check
@@ -30,9 +32,10 @@ from equity_calculator.schemas.equity_common import MAX_NUMBER_TEXT
 from equity_calculator.schemas.equity_round import DayCount, NoteCompounding, StubRule
 from equity_calculator.schemas.equity_waterfall import Participation
 
-__all__ = ["parse_class", "parse_note", "parse_round", "parse_safe"]
+__all__ = ["parse_class", "parse_funds_line", "parse_note", "parse_round", "parse_safe"]
 
 _TERM_SEPARATOR = "="
+_PERCENT_SIGN = "%"
 _ISO_DATE_LENGTH = len("2026-11-18")
 # A whole argument is at most this long: every term at its longest number, which no real item comes near.
 _MAX_TERMS_TEXT = 20 * MAX_NUMBER_TEXT
@@ -146,6 +149,15 @@ def parse_safe(raw: str) -> dict[str, object]:
 def parse_note(raw: str) -> dict[str, object]:
     """argparse type for ``--note``: ``PRINCIPAL interest-rate-percent=R (months-outstanding=M | the two dates) …``."""
     return _instrument(raw, "note", _NOTE_AMOUNT, _NOTE_TERMS, _NOTE_FLAGS)
+
+
+def parse_funds_line(raw: str) -> dict[str, object]:
+    """argparse type for ``--use-of-funds``: an amount in dollars (``1250000``) or a percent of the raise (``50%``)."""
+    text = _checked_length(raw).strip()
+    if text.endswith(_PERCENT_SIGN):
+        return {"percent": parse_percent(text)}
+
+    return {"amount": parse_decimal(text)}
 
 
 def parse_round(raw: str) -> dict[str, object]:

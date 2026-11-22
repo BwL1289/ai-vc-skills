@@ -18,9 +18,33 @@ import pytest
 from equity_calculator.__main__ import main, run
 from equity_calculator.schemas.equity import EquityAssumption
 from openpyxl import load_workbook
-from tests.support import POOL_EXAMPLE, employee, investor, pool
+from tests.support import DEAL_A, POOL_EXAMPLE, deal_check, employee, investor, pool
 
 _INVESTOR = ["investor", "--equity-percent", "7", "--outcome-multiplier", "1.10"]
+# Company A's deck (tests.support.DEAL_A) as flags: a pool in the pre-money and a runway claim.
+_DEAL_A = [
+    "deal_check",
+    "--investment",
+    "3000000",
+    "--pre-money",
+    "12000000",
+    "--stated-investor-percent",
+    "20",
+    "--fully-diluted-shares",
+    "8000000",
+    "--target-pool-percent",
+    "10",
+    "--pool-timing",
+    "pre_money",
+    "--holder-percent",
+    "100",
+    "--cash-on-hand",
+    "400000",
+    "--planned-monthly-gross-burn",
+    "180000",
+    "--stated-runway-months",
+    "24",
+]
 _EMPLOYEE = [
     "employee",
     "--gain-percent",
@@ -92,8 +116,9 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
             employee(gain_percent="20", annual_cost="60000", valuation="2000000", margin_percent="50").assumptions,
         ),
         (_POOL, pool(**POOL_EXAMPLE).assumptions),
+        (_DEAL_A, deal_check(**DEAL_A).assumptions),
     ],
-    ids=["investor", "employee", "pool"],
+    ids=["investor", "employee", "pool", "deal_check"],
 )
 async def test_every_assumption_prints_with_its_setting_statement_and_source(
     argv: list[str], assumptions: tuple[EquityAssumption, ...]

@@ -1,4 +1,4 @@
-"""Pydantic models for the equity calculator (``equity_calculator``): investor test, employee test, option-pool shuffle.
+"""Pydantic models for the equity calculator (``equity_calculator``): the investor and employee tests, and the unions.
 
 ``equity_calculator`` turns each input decimal into a ``fractions.Fraction`` and does every step exactly (how the
 decimals are read: ``equity_calculator.schemas.equity_common``). Each computed number is an ``EquityQuantity``: the
@@ -27,6 +27,7 @@ from equity_calculator.schemas.equity_common import (
     ShareRounding,
     exactly_one,
 )
+from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealCheckResult
 from equity_calculator.schemas.equity_dilution import DilutionInput, DilutionResult
 from equity_calculator.schemas.equity_pool import (
     CapTableGroup,
@@ -44,6 +45,8 @@ from pydantic import BaseModel, Field, model_validator
 __all__ = [
     "CapTableGroup",
     "CapTableRow",
+    "DealCheckInput",
+    "DealCheckResult",
     "DilutionInput",
     "DilutionResult",
     "EmployeeInput",
@@ -217,9 +220,25 @@ class EmployeeResult(BaseModel):
 
 # Every scenario's input and result, as plain unions for signatures (``compute``, ``sheet_for``); a new scenario
 # adds one member to each. ``EquityInput`` and ``EquityResult`` are the same unions tagged for validation.
-ScenarioInput = InvestorInput | EmployeeInput | PoolInput | RoundInput | DilutionInput | VestingInput | WaterfallInput
+ScenarioInput = (
+    InvestorInput
+    | EmployeeInput
+    | PoolInput
+    | RoundInput
+    | DilutionInput
+    | VestingInput
+    | WaterfallInput
+    | DealCheckInput
+)
 ScenarioResult = (
-    InvestorResult | EmployeeResult | PoolResult | RoundResult | DilutionResult | VestingResult | WaterfallResult
+    InvestorResult
+    | EmployeeResult
+    | PoolResult
+    | RoundResult
+    | DilutionResult
+    | VestingResult
+    | WaterfallResult
+    | DealCheckResult
 )
 
 EquityInput = Annotated[ScenarioInput, Field(discriminator="scenario")]

@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/BwL1289/ai-vc-skills/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/BwL1289/ai-vc-skills/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-3fb950"></a>
-  <a href="#skills"><img alt="Skills: 1" src="https://img.shields.io/badge/skills-1-8957e5"></a>
+  <a href="#skills"><img alt="Skills: 2" src="https://img.shields.io/badge/skills-2-8957e5"></a>
   <a href="#install"><img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-d97757"></a>
   <a href="docs/install.md"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-6e7681"></a>
   <img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-3776ab">
@@ -66,7 +66,8 @@ pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skill
 }
 ```
 
-Add the server to the client's MCP settings, then load `skills/equity-calculator/` where the client reads skills.
+Add the server to the client's MCP settings, then load `skills/equity-calculator/` and `skills/vc-deal-math/` where the
+client reads skills.
 Step by step for each client: [docs/install.md](docs/install.md).
 
 </details>
@@ -93,23 +94,26 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 
 ## Skills
 
-| Skill                                                    | What it does                                                                                                                                                              | Status       |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| [`equity-calculator`](skills/equity-calculator/SKILL.md) | Seven equity scenarios worked exactly: the investor test, a hire's grant, the option-pool shuffle, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls. | ✅ Available |
-| `vc-deal-math`                                           | Checks a pitch deck's ask: valuation, implied ownership, dilution, pool top-up, SAFE stack and runway, every number from the calculator.                                  | 🛠️ Next      |
-| More venture-style reviews                               | Pitch decks, term sheets and due-diligence questions, in the style of a venture firm.                                                                                     | 🗺️ Planned   |
+| Skill                                                    | What it does                                                                                                                                                                                                | Status       |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| [`equity-calculator`](skills/equity-calculator/SKILL.md) | Eight equity scenarios worked exactly: the investor test, a hire's grant, the option-pool shuffle, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls, and a check of a raise's numbers. | ✅ Available |
+| [`vc-deal-math`](skills/vc-deal-math/SKILL.md)           | For founders: checks your own deck's ask before a VC does (valuation, ownership after the round, the pool top-up, the SAFE stack, runway, use of funds), every number from the calculator.                  | 🧪 Preview   |
+| More venture-style reviews                               | Pitch decks, term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                     | 🗺️ Planned   |
 
-The `equity-calculator` skill covers seven scenarios:
+`vc-deal-math` is in preview until it has been checked on real decks; its arithmetic is tested, its wording may change.
 
-| Scenario    | The question it answers                                                                                      |
-| ----------- | ------------------------------------------------------------------------------------------------------------ |
-| `investor`  | An investor wants n of the company. Is the deal worth it? (Paul Graham's equity equation)                    |
-| `employee`  | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?           |
-| `pool`      | A round asks for a bigger option pool. What is the real price per share, and who owns what afterwards?       |
-| `round`     | A priced round converts post-money SAFEs and convertible notes. At what price, and who owns what afterwards? |
-| `dilution`  | A holder owns h of the company. What is left after a series of rounds?                                       |
-| `vesting`   | How much of a grant has vested at a given month, and what is it worth above the strike?                      |
-| `waterfall` | The company is sold. Who gets what, with preferences paid by rank and each preferred class free to convert?  |
+The `equity-calculator` skill covers eight scenarios:
+
+| Scenario     | The question it answers                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------ |
+| `investor`   | An investor wants n of the company. Is the deal worth it? (Paul Graham's equity equation)                    |
+| `employee`   | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?           |
+| `pool`       | A round asks for a bigger option pool. What is the real price per share, and who owns what afterwards?       |
+| `round`      | A priced round converts post-money SAFEs and convertible notes. At what price, and who owns what afterwards? |
+| `dilution`   | A holder owns h of the company. What is left after a series of rounds?                                       |
+| `vesting`    | How much of a grant has vested at a given month, and what is it worth above the strike?                      |
+| `waterfall`  | The company is sold. Who gets what, with preferences paid by rank and each preferred class free to convert?  |
+| `deal_check` | Do a raise's valuation, percent sold, ownership after the round and runway agree, as a VC will check them?   |
 
 ## What you can ask
 
@@ -128,6 +132,9 @@ Once the plugin is installed, ask in plain words:
 > what?
 
 > How much of a 4-year grant with a 1-year cliff has vested at month 30?
+
+> Check my deck's numbers: we're raising $3M at $12M pre for 20%, with a 10% pool in the pre-money, and the deck says
+> 24 months of runway. We have 8M shares, $400k in the bank, and plan to burn $180k a month.
 
 ## How it works
 
@@ -162,12 +169,13 @@ The formulas, their sources, every flag and a worked example per scenario are in
 
 ## Roadmap
 
-- [x] `equity-calculator`: seven scenarios, command, workbook, MCP server, Python package
+- [x] `equity-calculator`: eight scenarios, command, workbook, MCP server, Python package
 - [x] Claude Code plugin and marketplace
-- [ ] `vc-deal-math`: check a pitch deck's numbers with the calculator
-- [ ] A pitch-deck review with a forced verdict: pass, too early (with what would change it), or take the meeting
+- [ ] `vc-deal-math`: founders check their own deck's numbers with the calculator (preview)
+- [ ] A pitch-deck review: how a VC is likely to read your deck (pass, too early, take the meeting) and what to change
 - [ ] A term-sheet review, clause by clause, with the exit waterfall computed
-- [ ] Due-diligence questions ranked by how much each answer would move the decision
+- [ ] The due-diligence questions a VC is likely to ask, ranked by how much each answer moves their decision, so you
+      can prepare
 
 Want a skill that is not here? [Request it](https://github.com/BwL1289/ai-vc-skills/issues/new?template=skill_request.yml).
 
@@ -178,6 +186,7 @@ Want a skill that is not here? [Request it](https://github.com/BwL1289/ai-vc-ski
 | [`skills/`](skills/)                       | One folder per agent skill, each with its `SKILL.md`.                                            |
 | [`equity_calculator/`](equity_calculator/) | The calculator: a Python package with the command, the workbook, the MCP server and tests.       |
 | [`.claude-plugin/`](.claude-plugin/)       | `marketplace.json` and `plugin.json`: the Claude Code marketplace and its one plugin.            |
+| [`evals/`](evals/)                         | Test prompts per skill, each with the expected tool call and an answer pasted from real output.  |
 | [`template/`](template/)                   | The starting point for a new skill.                                                              |
 | [`scripts/`](scripts/)                     | `validate_skills.py`, which checks every skill in CI.                                            |
 | [`docs/`](docs/)                           | [Install guide per client](docs/install.md) and [how to write a skill](docs/writing-a-skill.md). |

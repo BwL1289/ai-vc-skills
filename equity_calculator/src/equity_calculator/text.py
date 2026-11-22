@@ -2,7 +2,8 @@
 
 Numbers print as the model's display rounding: a fraction as a percent with four places (7.5269%), a multiplier
 with an ``x``, money and prices with a dollar sign and thousands separators, share counts with thousands separators
-(a whole count without decimals). Nothing is recomputed here, and no step reads the decimal context.
+(a whole count without decimals), months with two places and the word (18.89 months). Nothing is recomputed here,
+and no step reads the decimal context.
 """
 
 from __future__ import annotations
@@ -34,6 +35,8 @@ def display(value: EquityQuantity | str) -> str:
             # A whole count prints as one (10,000,000); a fractional count keeps its display places.
             whole = value.exact.denominator == 1
             return f"{value.exact.numerator:,}" if whole else f"{value.rounded:,f}"
+        case "months":
+            return f"{value.rounded:,f} months"
 
 
 def render_sheet(sheet: Sheet) -> str:

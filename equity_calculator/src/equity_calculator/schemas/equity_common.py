@@ -1,8 +1,10 @@
 """The parts every equity calculator model shares: config, units, the quantity and assumption models, helpers.
 
-``equity_calculator.schemas.equity`` (the investor, employee and pool scenarios and the ``EquityInput`` /
-``EquityResult`` unions) and each later scenario's module (``equity_round``, ``equity_dilution``, ``equity_vesting``,
+``equity_calculator.schemas.equity`` (the investor and employee scenarios and the ``EquityInput`` / ``EquityResult``
+unions) and each later scenario's module (``equity_pool``, ``equity_round``, ``equity_dilution``, ``equity_vesting``,
 ``equity_waterfall``) import from here, never from each other, so the unions can import every scenario without a cycle.
+The one exception is ``equity_deal_check``, which reuses the round's instruments and the pool and round models; those
+two import only this module, so there is still no cycle.
 
 How the models read a decimal: text and ``Decimal`` values are kept digit for digit, never through a binary float.
 A Python ``float``, and a JSON number given to ``model_validate_json``, reach the model as the float's shortest
@@ -26,8 +28,8 @@ from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Fie
 
 # The kind of number an ``EquityQuantity`` holds, which sets its display rounding and its workbook format.
 # ``fraction`` a share of the company or a growth rate (shown as a percent); ``multiplier`` a ratio of outcomes;
-# ``money`` dollars; ``price`` dollars per share; ``shares`` a share count.
-EquityUnit = Literal["fraction", "multiplier", "money", "price", "shares"]
+# ``money`` dollars; ``price`` dollars per share; ``shares`` a share count; ``months`` a span of months (runway).
+EquityUnit = Literal["fraction", "multiplier", "money", "price", "shares", "months"]
 
 # Where the round's option pool is counted. ``pre_money``: created before the round, inside the pre-money
 # valuation, so only the existing holders are diluted by it (the usual term sheet, the "option-pool shuffle").

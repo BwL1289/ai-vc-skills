@@ -10,14 +10,15 @@ its command or its MCP server.
 
 ## Layout
 
-| Path                         | What it is                                                               |
-| ---------------------------- | ------------------------------------------------------------------------ |
-| `skills/<name>/SKILL.md`     | One agent skill per folder; the folder name is the skill's `name`.       |
-| `template/SKILL.md`          | The starting point for a new skill.                                      |
-| `equity_calculator/`         | The Python package: scenarios, command, workbook, MCP server, tests.     |
-| `.claude-plugin/`            | `marketplace.json` (the marketplace) and `plugin.json` (the one plugin). |
-| `scripts/validate_skills.py` | Checks every skill's frontmatter and that the README lists it.           |
-| `docs/`                      | Install guide per client, and how to write a skill.                      |
+| Path                         | What it is                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| `skills/<name>/SKILL.md`     | One agent skill per folder; the folder name is the skill's `name`.             |
+| `evals/<skill>/*.md`         | Test prompts for a skill: the expected tool call and answer, from real output. |
+| `template/SKILL.md`          | The starting point for a new skill.                                            |
+| `equity_calculator/`         | The Python package: scenarios, command, workbook, MCP server, tests.           |
+| `.claude-plugin/`            | `marketplace.json` (the marketplace) and `plugin.json` (the one plugin).       |
+| `scripts/validate_skills.py` | Checks every skill's frontmatter and that the README lists it.                 |
+| `docs/`                      | Install guide per client, and how to write a skill.                            |
 
 ## Rules
 
