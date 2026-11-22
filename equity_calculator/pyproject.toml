@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "equity_calculator"
 version = "0.1.0"
-description = "Exact startup equity arithmetic: Paul Graham's equity equation, the option-pool shuffle, priced rounds with SAFEs and notes, dilution, vesting and exit waterfalls. CLI, Excel workbook and MCP server."
+description = "Exact startup equity arithmetic: Paul Graham's equity equation, the option-pool shuffle, priced rounds with SAFEs and notes, dilution, vesting, exit waterfalls, and a founder's check of their own raise. CLI, Excel workbook and MCP server."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

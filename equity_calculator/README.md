@@ -354,7 +354,9 @@ The money is rounded to the cent by largest remainder, so the payouts add up to 
 
 ### Deal check (YC for post = pre + raise; the rest unverified)
 
-A founder's ask is the raise I and at least one valuation figure: a pre-money, a post-money, or the percent sold.
+A founder's ask is the raise I and at least one valuation figure: a pre-money, a post-money, or the percent sold. The
+new money is worked as a priced equity round; a raise on a SAFE or note is not modelled here (a SAFE's share is set at
+the next priced round, so `round` with that round's terms works it).
 
 1. **Which valuation sets V.** The first given of pre-money, post-money (V = post - I) and stated percent
    (V = I/percent - I, true only with the pool in the pre-money) sets the pre-money; any other figure given is checked
@@ -364,18 +366,24 @@ A founder's ask is the raise I and at least one valuation figure: a pre-money, a
    scenario at the deal's pool timing; with neither, the investor holds I/(V + I). The result carries the nested
    round or pool result whole.
 3. **Ownership.** Every pre-round share keeps FD/T of its stake (T the shares after the round), or V/(V + I) with no
-   share counts; a holder group's stake after is h × that. The effective pre-money is (FD - U) × price, the
-   pre-round holders' shares at the round price, the same definition as the pool scenario. The pre-money is split
-   into what it pays for: those holders' shares, the unissued pool already there, the new pool (pool in the
-   pre-money) and the SAFE and note shares; the four add up to V, rounded to the cent by largest remainder.
+   share counts; a holder group's stake after is h × that, with h given as a percent of FD or as a share count
+   (h = shares/FD, so no one divides by hand). The unissued pool U is given as shares or as a percent of FD that
+   comes to whole shares. The effective pre-money is (FD - U) × price, the pre-round holders' shares at the round
+   price, the same definition as the pool scenario; with SAFEs or notes it also leaves out the converted shares, so
+   it sits below the pre-money less the new pool. The pre-money is split into what it pays for: those holders'
+   shares, the unissued pool already there, the new pool (pool in the pre-money) and the SAFE and note shares; the
+   four add up to V, rounded to the cent by largest remainder, so the existing holders' part can differ by a cent from
+   the effective pre-money rounded on its own.
 4. **Runway.** For the planned and today's burn, each given: net burn = gross burn - revenue, gross runway =
    (cash + I)/gross burn and net runway = (cash + I)/net burn, none when the net burn is not positive. A runway
-   claim is checked against the planned net runway, else today's. No fees, the whole raise lands at once.
+   claim is checked against the planned net runway, else today's (no plan given, or revenue covering the planned
+   burn); when revenue covers every burn given, it is not checked. No fees, the whole raise lands at once.
 5. **Use of funds.** Amount lines are added up and checked against I; percent lines are turned into dollars of I,
    split to the cent, and their total checked against 100%.
 6. **Checks.** A stated percent within 0.5 percentage points of the computed one is consistent, and a stated money or
    months figure within 2% of it (both inputs; the edge counts as consistent). The verdict is `mismatch` if any check
-   is, `consistent` if all are, and `not_checked` when the deck states nothing to check.
+   is, `consistent` if all are, and `not_checked` when no stated figure could be checked: none was stated, or the
+   only one was a runway claim with revenue covering every burn.
 7. **Flags** are questions a VC is likely to ask, never errors, and never change the verdict:
    `valuation_back_solved`, `pool_in_pre_money_lowers_price`, `pool_in_post_money_dilutes_investor`,
    `pool_already_large_enough`, `conversions_bought_by_pre_money`, `discount_beat_cap`, `note_interest_converts`,
@@ -384,10 +392,13 @@ A founder's ask is the raise I and at least one valuation figure: a pre-money, a
    inputs, and each is a common benchmark, not a rule: no source was read that fixes either.
 
 A refusal names the fields: no valuation, a post-money not above the raise, SAFEs, notes or a pool target without the
-fully diluted shares, a stated holder percent without the holder's percent before, a runway claim or a revenue
-without its burn, use-of-funds lines that mix amounts and percents, a percent with no valuation and the pool in the
-post-money, and a pre-money worked from the post-money or the percent that no decimal holds exactly (1/7 of a dollar,
-say) when SAFEs, notes or a pool top-up need it as an input to the nested round.
+fully diluted shares, a stated holder percent without the holder's stake before, the holder's stake or the unissued
+pool given both ways, a holder share count or pool percent without the fully diluted shares, a pool percent that is
+not a whole number of shares, a holder group larger than the shares held outside the unissued pool, a runway claim or
+a revenue without its burn, use-of-funds lines that mix amounts and percents, a percent with no valuation and the pool
+in the post-money, and a pre-money worked from the post-money or the percent that no decimal holds exactly (1/7 of a
+dollar, say) or that falls outside the calculator's bounds, when SAFEs, notes or a pool top-up need it as an input to
+the nested round.
 
 </details>
 
@@ -543,9 +554,9 @@ equity_calculator vesting --grant-shares G [--total-months T] [--cliff-months C]
     [--acceleration-base unvested|grant] [--change-of-control-month M] [--share-rounding exact|whole_shares]
 equity_calculator waterfall --exit-amount E --common-shares S --class "TERMS"...
 equity_calculator deal_check --investment I [--pre-money V] [--post-money P] [--stated-investor-percent X]
-    [--fully-diluted-shares FD [--unissued-pool-shares U] [--target-pool-percent T]
+    [--fully-diluted-shares FD [--unissued-pool-shares U | --unissued-pool-percent UP] [--target-pool-percent T]
     [--pool-timing pre_money|post_money] [--safe "TERMS" | --note "TERMS"]...]
-    [--holder-percent H [--stated-holder-percent S]] [--cash-on-hand C]
+    [(--holder-percent H | --holder-shares HS) [--stated-holder-percent S]] [--cash-on-hand C]
     [--planned-monthly-gross-burn B [--planned-monthly-revenue R]]
     [--current-monthly-gross-burn B [--current-monthly-revenue R]] [--stated-runway-months M]
     [--use-of-funds AMOUNT|PCT%]... [--tolerance-points P] [--tolerance-percent Q]
@@ -553,7 +564,9 @@ equity_calculator deal_check --investment I [--pre-money V] [--post-money P] [--
 ```
 
 `deal_check` needs `--investment` and at least one of `--pre-money`, `--post-money` and `--stated-investor-percent`.
-Its `--safe` and `--note` take the same terms as `round`'s. Each `--use-of-funds` is one line of the deck's use of
+Its `--safe` and `--note` take the same terms as `round`'s. `--holder-shares` gives the holder group as a share count
+of FD instead of `--holder-percent`, and `--unissued-pool-percent` gives the unissued pool as a percent of FD instead of
+`--unissued-pool-shares`. Each `--use-of-funds` is one line of the deck's use of
 funds, an amount (`1250000`) or a percent of the raise (`50%`), all lines the same kind.
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one

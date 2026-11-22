@@ -57,7 +57,7 @@ in its own text.
   After: option pool                                                         10.0000%  (U + P)/T
   After: investors                                                           20.0000%  N/T
   Share of their stake every pre-round share keeps                           57.8512%  FD/T, or V/(V + I) with no share counts
-  Pre-money pays for: existing holders' shares                         $22,214,876.03  (FD - U)·p: the effective pre-money
+  Pre-money pays for: existing holders' shares                         $22,214,876.03  (FD - U)·p, to the cent so the parts add up to V
   Pre-money pays for: unissued pool already there                         $925,619.83  U·p
   Pre-money pays for: new pool                                          $3,074,380.17  P·p (pool in the pre-money)
   Pre-money pays for: SAFE and note shares                              $5,785,123.97  converted shares·p

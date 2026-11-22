@@ -27,14 +27,25 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
    pre-money, outstanding SAFEs and notes, cash on hand, burn, revenue, the runway claim and the use-of-funds lines.
    Quote each figure as stated; never correct it before the check.
 2. **Ask the founder for what is missing, by name, in one message.** Never guess:
+   - **Is the new money a priced round, or a SAFE or note?** `deal_check` works the new money as a priced equity
+     round. If the founder is raising on a SAFE or a note, do not pass it as `investment`: a SAFE's share is set only
+     at the next priced round, and "the safes are not diluted by each other" (Y Combinator's post-money SAFE user
+     guide), so `deal_check` would report a correct founders' figure as a mismatch. Say so, and offer `equity_round` instead
+     (the equity-calculator skill), with the new SAFE or note as one more instrument and the next priced round the
+     founder expects (its size, pre-money and pool target) as the round; say the figures depend on that round.
    - SAFEs, notes or a pool top-up need the fully diluted share count before the round (every share, granted options
-     and the unissued pool included) and the unissued pool. If the founder does not have them to hand, offer a
-     stand-in of 10,000,000 shares with the pool as its percent of that. Use it only on their yes, say so in the
+     and the unissued pool included) and the unissued pool, as shares (`unissued_pool_shares`) or as a percent of
+     the fully diluted shares (`unissued_pool_percent`). If the founder does not have them to hand, offer a stand-in
+     of 10,000,000 shares with the pool passed as `unissued_pool_percent`. Use it only on their yes, say so in the
      answer, and quote only percentages and money from that run, never prices or share counts.
    - Each SAFE: amount, post-money cap and/or discount, MFN. Each note: principal, interest rate, months outstanding
-     (or issue and conversion dates), simple or compounding interest, cap and/or discount.
-   - A claim about the founders' percent after the round needs their share of the company today, on the same fully
-     diluted basis (9,000,000 of 10,000,000 shares is 90). If they give it on another basis, ask for the share counts.
+     (or issue and conversion dates), simple or compounding interest, cap and/or discount, and what the cap is
+     measured against. The calculator reads a note's cap as a pre-money cap over today's fully diluted shares (its
+     `note_cap_basis` assumption); if the note says otherwise, say the result does not model that note.
+   - A claim about the founders' percent after the round needs their stake today, on the same fully diluted basis:
+     pass a share count as `holder_shares` (9,000,000 of 10,000,000 fully diluted shares) or a percent of every fully
+     diluted share as `holder_percent`. Never divide the shares yourself. If they give a percent on another basis (of
+     issued shares only, say), ask for the share counts.
    - A runway claim needs cash on hand and the planned monthly spend and revenue after the raise. Ask for today's
      spend and revenue too: decks often quote runway on today's burn, and a VC will check it against the plan.
    - Pool timing: if the term sheet or deck does not say, use the pre-money (the usual term sheet), say so, and offer
@@ -95,15 +106,20 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
 Lead with the verdict, then the table, then the questions, then the assumptions. Use the tool's printed values
 (`rounded` with its unit, or the exact fraction when precision matters); never round again or recompute.
 
-1. **Verdict.** "All N figures the deck states are consistent", "M of N figures the deck states do not match", or
-   "The deck states nothing the calculator can check; here is what the round does."
+1. **Verdict.** "All N figures the deck states are consistent", "M of N figures the deck states do not match", or,
+   for `not_checked`, "The calculator could check none of the deck's figures; here is what the round does." A runway
+   claim is not checked when revenue covers every burn given (the `net_burn_not_positive` flag): say that claim could
+   not be checked, and why.
 2. **Checks table:** "The deck says", "The calculator gives", "Difference", "Consistent?", one row per check.
 3. **What the round does to you.** Ownership after the round: the founders, existing holders, each SAFE or note, the
    pool, the new investor. Also the share of their stake every pre-round share keeps, the effective pre-money against
-   the headline, and what the pre-money pays for.
-4. **Runway:** each burn case's net and gross runway, and which one the claim was checked against.
-5. **What a VC is likely to ask**, one line per flag, in plain words, with how to fix the deck or prepare the answer.
-   A flag is a question to be ready for, never an error. The two benchmark flags (dilution above 25%, runway under
+   the headline, and what the pre-money pays for. When SAFEs or notes convert, present the pre-money split line by
+   line rather than one effective pre-money: the tool's effective pre-money also leaves out the converted shares and
+   the unissued pool already there, so it is lower than the pre-money less the new pool that a VC may quote.
+4. **Runway:** each burn case's net and gross runway, and which one the claim was checked against: the planned net
+   runway, else today's when revenue covers the planned burn.
+5. **What a VC is likely to ask**, one line per flag, in plain words, with how to fix the deck or prepare the answer
+   (the flag table below). A flag is a question to be ready for, never an error. The two benchmark flags (dilution above 25%, runway under
    18 months) are common benchmarks, not rules: say so, say they vary by sector, stage and year, and quote the source
    the tool's assumption row gives, which today is `unverified`.
 6. **Assumptions:** quote the ones the answer leans on, with their sources. Say plainly which are `unverified` and how
@@ -111,11 +127,32 @@ Lead with the verdict, then the table, then the questions, then the assumptions.
 7. **Close** with what a lawyer or accountant should confirm before the deck goes out: the actual cap table, the SAFE
    and note documents, the term sheet's pool wording.
 
+## Flags
+
+The result's `flags` holds codes only; this table is what each one means for the founder. The text report prints the
+same meaning beside each flag.
+
+| Flag                                  | What it means for the founder                                                                                   | What to change or prepare                                                                      |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise and the percent.                            | Label the valuation pre- or post-money in the deck; a VC will ask which it is.                 |
+| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, so the effective pre-money and the price are below the headline. | Expect a VC to price it this way; show the effective pre-money beside the headline.            |
+| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less than raise / post-money.                         | Expect a VC to ask to move the pool into the pre-money; show what that does to the founders.   |
+| `pool_already_large_enough`           | The unissued pool already meets the target, so no new pool shares are needed.                                   | Say so in the deck; a VC may still ask for a bigger target.                                    |
+| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold.     | Show ownership with the SAFEs and notes converted, as a VC reads the cap table.                |
+| `discount_beat_cap`                   | A discount gave a lower price than the cap.                                                                     | Model that instrument at its discount price; a cap-only conversion in the deck would be wrong. |
+| `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares.                           | Count the interest in the cap table.                                                           |
+| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it.                                      | A runway claim is checked on the other burn's net runway; with none, it is not checked.        |
+| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn.                                                      | Say which burn the deck's runway uses; a VC will check it against the planned spend.           |
+| `runway_below_band`                   | Planned net runway is under the runway benchmark (18 months by default).                                        | Be ready to say whether the raise reaches the next milestone (a common benchmark, not a rule). |
+| `dilution_above_band`                 | The investors get more than the dilution benchmark (25% by default) in one round.                               | Be ready to say why so much is sold (a common benchmark, not a rule).                          |
+
 ## Limits
 
 - It checks the arithmetic of the figures the founder gives. It does not read a deck file, a cap table file or a term
   sheet; the founder's text is the input, and nothing is sent anywhere.
 - It is not investment, legal or tax advice, and it does not say whether to take a round or what a company is worth.
+- It works the new money as a priced equity round. A raise on a SAFE or note is not modelled by `deal_check`; step 2
+  routes it to `equity_round` with the next priced round the founder expects.
 - Benchmarks are common benchmarks, not rules. Quote one only as the tool's assumption rows give it, with the source
   they name, or as `unverified` when they name none.
 - It uses named public frameworks (Y Combinator's post-money SAFE user guide, the option-pool shuffle, runway on net

@@ -34,7 +34,7 @@ from equity_calculator.schemas.equity_common import (
 )
 from equity_calculator.schemas.equity_pool import PoolInput, PoolResult
 from equity_calculator.schemas.equity_round import MAX_INSTRUMENTS, Instrument, RoundInput, RoundResult
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, ValidationError, model_validator
 
 __all__ = [
     "MAX_USE_OF_FUNDS_LINES",
@@ -55,6 +55,7 @@ __all__ = [
     "deal_path",
     "deal_valuation",
     "nested_input",
+    "unissued_shares",
 ]
 
 DealCheckScenario = Literal["deal_check"]
@@ -70,8 +71,8 @@ CheckVerdict = Literal["consistent", "mismatch"]
 # round, the runway claim, or the use-of-funds lines' total.
 CheckKey = Literal["post_money", "investor_percent", "holder_percent", "runway_months", "use_of_funds_total"]
 
-# The whole check: a ``mismatch`` if any check is one, ``consistent`` if every check is, ``not_checked`` when the deck
-# stated nothing to check.
+# The whole check: a ``mismatch`` if any check is one, ``consistent`` if every check is, ``not_checked`` when no stated
+# figure could be checked (none was stated, or a runway claim met revenue covering every burn given).
 DealVerdict = Literal["consistent", "mismatch", "not_checked"]
 
 # Facts and questions a VC is likely to raise. They never change a verdict; their plain words are in
@@ -107,6 +108,7 @@ _DEFAULT_RUNWAY_BAND_MONTHS = Decimal("18")
 _TWO = 2
 _FIVE = 5
 _ZERO = Fraction(0)
+_VALUE_ERROR_PREFIX = "Value error, "
 
 
 class FundsLine(BaseModel):
@@ -165,11 +167,29 @@ def deal_path(inputs: DealCheckInput) -> DealPath:
     return "plain"
 
 
+def unissued_shares(inputs: DealCheckInput) -> int:
+    """U: ``unissued_pool_shares``, or ``unissued_pool_percent`` of FD (a whole number, as the validator checks)."""
+    if inputs.unissued_pool_percent is None or inputs.fully_diluted_shares is None:
+        return inputs.unissued_pool_shares
+
+    return int(Fraction(inputs.unissued_pool_percent) * inputs.fully_diluted_shares / ONE_HUNDRED)
+
+
+def _refused_pre_money(error: ValidationError) -> str | None:
+    """The nested model's reason for refusing ``pre_money``, or ``None`` when it refused something else."""
+    for failure in error.errors(include_url=False):
+        if failure["loc"][:1] == ("pre_money",):
+            return str(failure["msg"]).removeprefix(_VALUE_ERROR_PREFIX)
+
+    return None
+
+
 def nested_input(inputs: DealCheckInput) -> RoundInput | PoolInput | None:
     """The ``RoundInput`` or ``PoolInput`` the deal's path works, or ``None`` on the plain path.
 
-    Raises ``ValueError`` (naming fields) when the pre-money came out as a fraction no decimal holds exactly, or when
-    the nested model refuses the inputs; built in the validator, so compute only rebuilds a known-valid input.
+    Raises ``ValueError`` (naming fields) when the pre-money came out as a fraction no decimal holds exactly or one the
+    nested model refuses as a pre-money (named by the figure it was worked from, not ``pre_money``), or when the nested
+    model refuses the inputs; built in the validator, so compute only rebuilds a known-valid input.
     """
     path = deal_path(inputs)
     if path == "plain":
@@ -177,33 +197,42 @@ def nested_input(inputs: DealCheckInput) -> RoundInput | PoolInput | None:
 
     valuation, source = deal_valuation(inputs)
     pre_money = _terminating_decimal(valuation)
+    given = "post_money" if source == "post_money" else "stated_investor_percent"
     if pre_money is None:
-        given = "post_money" if source == "post_money" else "stated_investor_percent"
         raise ValueError(
             f"the pre-money worked from {given} is {valuation}, which no decimal holds exactly: give pre_money to "
             "convert SAFEs and notes or to top up the pool"
         )
     fields: dict[str, object] = {
         "fully_diluted_shares": inputs.fully_diluted_shares,
-        "unissued_pool_shares": inputs.unissued_pool_shares,
+        "unissued_pool_shares": unissued_shares(inputs),
         "pre_money": pre_money,
         "investment": inputs.investment,
         "target_pool_percent": inputs.target_pool_percent,
         "pool_timing": inputs.pool_timing,
     }
-    if path == "round":
-        return RoundInput.model_validate({**fields, "instruments": inputs.instruments})
-
-    return PoolInput.model_validate(fields)
+    try:
+        if path == "round":
+            return RoundInput.model_validate({**fields, "instruments": inputs.instruments})
+        return PoolInput.model_validate(fields)
+    except ValidationError as error:
+        reason = None if source == "pre_money" else _refused_pre_money(error)
+        if reason is None:
+            raise
+        raise ValueError(
+            f"the pre-money worked from {given} is {pre_money}, which the calculator does not take as a pre-money "
+            f"({reason}): give pre_money"
+        ) from None
 
 
 class DealCheckInput(BaseModel):
     """A fundraising ask as a deck states it, plus the cap-table facts the check needs; see the module docstring.
 
     Percent fields take percent points (``20`` is 20%). ``fully_diluted_shares`` (FD) counts every share before the
-    round, the unissued pool (``unissued_pool_shares``, U) included and the SAFEs and notes excluded; it is needed
-    only to convert SAFEs and notes or to top up the pool. ``holder_percent`` is one group's share of FD before the
-    round; ``stated_holder_percent`` the deck's figure for it after. Runway takes the planned and/or current monthly
+    round, the unissued pool (U: ``unissued_pool_shares``, or ``unissued_pool_percent`` of FD) included and the SAFEs
+    and notes excluded; it is needed only to convert SAFEs and notes or to top up the pool. One group's stake before
+    the round is ``holder_percent`` of FD or ``holder_shares`` of it; ``stated_holder_percent`` is the deck's figure
+    for it after. Runway takes the planned and/or current monthly
     gross burn, each with its revenue. The tolerances say how far a stated figure may sit from the computed one; the
     two bands raise a benchmark question, never an error.
     """
@@ -217,10 +246,12 @@ class DealCheckInput(BaseModel):
     stated_investor_percent: BoundedDecimal | None = Field(default=None, gt=0, lt=WHOLE_PERCENT)
     fully_diluted_shares: ShareCount | None = Field(default=None, gt=0)
     unissued_pool_shares: ShareCount = Field(default=0, ge=0)
+    unissued_pool_percent: BoundedDecimal | None = Field(default=None, ge=0, lt=WHOLE_PERCENT)
     target_pool_percent: BoundedDecimal = Field(default=Decimal(0), ge=0, lt=WHOLE_PERCENT)
     pool_timing: PoolTiming = "pre_money"
     instruments: tuple[Instrument, ...] = Field(default=(), max_length=MAX_INSTRUMENTS)
     holder_percent: BoundedDecimal | None = Field(default=None, gt=0, le=WHOLE_PERCENT)
+    holder_shares: ShareCount | None = Field(default=None, gt=0)
     stated_holder_percent: BoundedDecimal | None = Field(default=None, gt=0, lt=WHOLE_PERCENT)
     cash_on_hand: BoundedDecimal = Field(default=Decimal(0), ge=0)
     planned_monthly_gross_burn: BoundedDecimal | None = Field(default=None, gt=0)
@@ -241,22 +272,61 @@ class DealCheckInput(BaseModel):
         if valuation <= _ZERO:
             raise ValueError("post_money must be above investment (the pre-money would be zero or less)")
         if source == "percent" and self.pool_timing == "post_money":
-            raise ValueError("a stated_investor_percent with no valuation needs pool_timing pre_money")
+            # The value is written in words: the command line turns every field name in a message into its flag.
+            raise ValueError(
+                "a stated_investor_percent with no valuation needs the pool counted in the pre-money: leave "
+                "pool_timing at its default"
+            )
         needs_shares = bool(self.instruments) or self.target_pool_percent > 0
         if self.fully_diluted_shares is None and needs_shares:
             raise ValueError("fully_diluted_shares is needed to convert SAFEs and notes or to top up the pool")
-        if self.unissued_pool_shares > 0 and self.fully_diluted_shares is None:
-            raise ValueError("unissued_pool_shares needs fully_diluted_shares")
-        if self.fully_diluted_shares is not None and self.unissued_pool_shares >= self.fully_diluted_shares:
-            raise ValueError("unissued_pool_shares must be below fully_diluted_shares (someone must hold a share)")
-        if self.stated_holder_percent is not None and self.holder_percent is None:
-            raise ValueError("stated_holder_percent needs holder_percent (the group's share before the round)")
+        self._share_rules()
         self._burn_rules()
         if len({line.amount is None for line in self.use_of_funds}) > 1:
             raise ValueError("give every use_of_funds line as an amount or every one as a percent, not a mix")
 
         nested_input(self)
         return self
+
+    def _share_rules(self) -> None:
+        """Refuse a pool or holder group given twice, without FD, not whole, or larger than the shares there are."""
+        if self.unissued_pool_percent is not None and self.unissued_pool_shares > 0:
+            raise ValueError("give unissued_pool_shares or unissued_pool_percent, not both")
+        if self.holder_percent is not None and self.holder_shares is not None:
+            raise ValueError("give holder_percent or holder_shares, not both")
+        if self.stated_holder_percent is not None and self.holder_percent is None and self.holder_shares is None:
+            raise ValueError(
+                "stated_holder_percent needs holder_percent or holder_shares (the group's share before the round)"
+            )
+        fully_diluted = self.fully_diluted_shares
+        if fully_diluted is None:
+            needing = (
+                ("unissued_pool_shares", self.unissued_pool_shares or None),
+                ("unissued_pool_percent", self.unissued_pool_percent),
+                ("holder_shares", self.holder_shares),
+            )
+            for name, value in needing:
+                if value is not None:
+                    raise ValueError(f"{name} needs fully_diluted_shares")
+            return
+
+        if self.unissued_pool_percent is not None:
+            pool = Fraction(self.unissued_pool_percent) * fully_diluted / ONE_HUNDRED
+            if pool.denominator != 1:
+                raise ValueError(
+                    "unissued_pool_percent of fully_diluted_shares is not a whole number of shares: give "
+                    "unissued_pool_shares"
+                )
+        elif self.unissued_pool_shares >= fully_diluted:
+            raise ValueError("unissued_pool_shares must be below fully_diluted_shares (someone must hold a share)")
+        held = fully_diluted - unissued_shares(self)
+        if self.holder_shares is not None and self.holder_shares > held:
+            raise ValueError("holder_shares is more than the fully_diluted_shares held outside the unissued pool")
+        if self.holder_percent is not None and Fraction(self.holder_percent) * fully_diluted / ONE_HUNDRED > held:
+            raise ValueError(
+                "holder_percent is more than the share of fully_diluted_shares held outside the unissued pool: give "
+                "the group's share of every fully diluted share, the unissued pool counted"
+            )
 
     def _burn_rules(self) -> None:
         """Refuse a revenue without its burn, or a runway claim with no burn to check it against."""

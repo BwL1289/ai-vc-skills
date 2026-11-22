@@ -204,6 +204,61 @@ async def test_refusals_name_flags_never_model_fields(argv: list[str], message: 
     assert _MODEL_FIELD.findall(caught.value.code.replace("valuation-cap", "")) == []
 
 
+@pytest.mark.parametrize(
+    ("argv", "line"),
+    [
+        (
+            ["deal_check", "--investment", "3000000", "--stated-investor-percent", "20"]
+            + ["--fully-diluted-shares", "8000000", "--target-pool-percent", "10", "--pool-timing", "post_money"],
+            "a --stated-investor-percent with no valuation needs the pool counted in the pre-money: leave "
+            "--pool-timing at its default",
+        ),
+        (
+            ["deal_check", "--investment", "8000000", "--pre-money", "32000000", "--fully-diluted-shares", "10000000"]
+            + ["--unissued-pool-shares", "400000", "--holder-percent", "100", "--stated-holder-percent", "57.85"],
+            "--holder-percent is more than the share of --fully-diluted-shares held outside the unissued pool: give "
+            "the group's share of every fully diluted share, the unissued pool counted",
+        ),
+        (
+            ["deal_check", "--investment", "9000000000000000", "--stated-investor-percent", "10"]
+            + ["--fully-diluted-shares", "8000000", "--target-pool-percent", "10"],
+            "the pre-money worked from --stated-investor-percent is 81000000000000000, which the calculator does not "
+            "take as a pre-money (a nonzero number here is at least 1e-15 and under 1e16 in size (got "
+            "81000000000000000)): give --pre-money",
+        ),
+        (
+            ["deal_check", "--investment", "0.000000000000001", "--post-money", "9999999999999999"]
+            + ["--fully-diluted-shares", "100", "--target-pool-percent", "10"],
+            "the pre-money worked from --post-money is 9999999999999998.999999999999999, which the calculator does "
+            "not take as a pre-money (a number here has at most 28 significant digits, trailing zeros included (got "
+            "31)): give --pre-money",
+        ),
+    ],
+    ids=[
+        "percent-with-post-pool",
+        "holder-above-the-held-share",
+        "worked-pre-money-too-big",
+        "worked-pre-money-digits",
+    ],
+)
+async def test_whole_model_refusals_print_exactly_one_line_naming_flags(argv: list[str], line: str) -> None:
+    with pytest.raises(SystemExit) as caught:
+        await run(argv)
+
+    assert caught.value.code == line
+
+
+async def test_holder_shares_and_a_pool_percent_are_flags() -> None:
+    argv = ["deal_check", "--investment", "2000000", "--pre-money", "8000000", "--fully-diluted-shares", "10600000"]
+    argv += ["--unissued-pool-percent", "5", "--holder-shares", "9000000", "--json"]
+
+    printed = json.loads(await run(argv))
+
+    assert printed["inputs"]["holder_shares"] == 9_000_000
+    assert printed["inputs"]["unissued_pool_percent"] == "5"
+    assert Fraction(printed["holder_ownership_after"]["exact"]) == Fraction(45, 53) * Fraction(4, 5)
+
+
 async def test_a_nested_round_with_no_price_exits_with_the_reason() -> None:
     argv = ["deal_check", "--investment", "4000000", "--pre-money", "1000000", "--fully-diluted-shares", "10000000"]
 

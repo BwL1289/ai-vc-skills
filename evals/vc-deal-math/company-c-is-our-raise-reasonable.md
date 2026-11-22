@@ -9,8 +9,8 @@ in its own text.
 
 > Is our raise reasonable, or will a VC pick holes in it? $2.5M seed at a $10M pre-money. The deck says we founders keep
 > 80% and the raise gives us about 24 months of runway. Use of funds: 50% engineering, 30% go-to-market, 20% G&A. We
-> have 8,000,000 shares, all ours. One convertible note: $500k, 6% simple interest, 18 months outstanding, $8M cap
-> over the 8,000,000 pre-round shares, 20% discount. $300k in the bank. Today we spend $120k a month with $20k of
+> have 8,000,000 shares, all ours. One convertible note: $500k, 6% simple interest, 18 months outstanding, an $8M cap,
+> 20% discount. $300k in the bank. Today we spend $120k a month with $20k of
 > revenue; after the raise we plan $210k a month with $35k of revenue.
 
 ## Expected tool call
@@ -107,4 +107,5 @@ in its own text.
   rule (18 months, source `unverified`), and the answer says benchmarks vary by sector, stage and year.
 - "Reasonable" is answered as whether the numbers hold up and which questions to prepare for, never as advice to raise
   or not. The answer notes the note's interest was taken as simple because the founder said so (the calculator's
-  default is yearly compounding).
+  default is yearly compounding), and that the $8M cap was read as a pre-money cap over today's 8,000,000 fully
+  diluted shares (the `note_cap_basis` assumption), which the founder should confirm against the note.

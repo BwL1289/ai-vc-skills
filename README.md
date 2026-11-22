@@ -172,9 +172,10 @@ The formulas, their sources, every flag and a worked example per scenario are in
 - [x] `equity-calculator`: eight scenarios, command, workbook, MCP server, Python package
 - [x] Claude Code plugin and marketplace
 - [ ] `vc-deal-math`: founders check their own deck's numbers with the calculator (preview)
-- [ ] A pitch-deck review with a forced verdict: pass, too early (with what would change it), or take the meeting
+- [ ] A pitch-deck review: how a VC is likely to read your deck (pass, too early, take the meeting) and what to change
 - [ ] A term-sheet review, clause by clause, with the exit waterfall computed
-- [ ] Due-diligence questions ranked by how much each answer would move the decision
+- [ ] The due-diligence questions a VC is likely to ask, ranked by how much each answer moves their decision, so you
+      can prepare
 
 Want a skill that is not here? [Request it](https://github.com/BwL1289/ai-vc-skills/issues/new?template=skill_request.yml).
 

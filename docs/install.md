@@ -51,7 +51,7 @@ Install the package as above, then add the same `mcpServers` entry to the client
 pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skills#subdirectory=equity_calculator"
 claude mcp add equity_calculator -- equity_calculator_mcp
 git clone https://github.com/BwL1289/ai-vc-skills
-cp -r ai-vc-skills/skills/equity-calculator ~/.claude/skills/
+cp -r ai-vc-skills/skills/equity-calculator ai-vc-skills/skills/vc-deal-math ~/.claude/skills/
 ```
 
 ## The command line only

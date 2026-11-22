@@ -6,11 +6,12 @@ V + I and the headline share sold I/(V + I). The round is then worked on one of 
 - ``round`` (any SAFE or note): ``compute_round``. ``pool`` (a pool top-up, no instruments): ``compute_pool``, the
   deal's pool timing. ``plain`` (neither): the investor gets I/(V + I); with share counts the price is V/FD.
 - Every pre-round share keeps FD/T of its stake (V/(V + I) on the plain path); a holder group with h of FD before
-  holds h·FD/T after. The effective pre-money is (FD - U) at the round price, as in the pool scenario. The pre-money
-  is split, to the cent, into what it buys: the existing holders' shares, the unissued pool, the new pool (when it is
-  counted in the pre-money) and the SAFE and note shares; the parts add up to V.
+  (``holder_percent``, or ``holder_shares``/FD) holds h·FD/T after. The effective pre-money is (FD - U) at the
+  round price, as in the pool scenario. The pre-money is split, to the cent, into what it buys: the existing
+  holders' shares, the unissued pool, the new pool (when it is counted in the pre-money) and the SAFE and note
+  shares; the parts add up to V.
 - Runway on each burn given: (cash on hand + I) / burn, net (gross - revenue) and gross; no net runway when revenue
-  covers the burn.
+  covers the burn. A runway claim is checked against the planned net runway, else today's.
 
 Each figure the deck states becomes one check (consistent within the tolerance, inclusive, else a mismatch); flags
 name what a VC is likely to ask and never change a verdict.
@@ -41,6 +42,7 @@ from equity_calculator.schemas.equity_deal_check import (
     RunwayRow,
     deal_valuation,
     nested_input,
+    unissued_shares,
 )
 from equity_calculator.schemas.equity_pool import PoolInput, PoolResult
 from equity_calculator.schemas.equity_round import RoundInput, RoundResult
@@ -123,7 +125,7 @@ def _plain_path(inputs: DealCheckInput, valuation: Fraction) -> _Worked:
         return _Worked("plain", None, None, ONE - kept, kept, None, None, None, ZERO, ZERO)
 
     fully_diluted = fraction(inputs.fully_diluted_shares)
-    unissued = fraction(inputs.unissued_pool_shares)
+    unissued = fraction(unissued_shares(inputs))
     price = valuation / fully_diluted
     total = fully_diluted + investment / price
 
@@ -158,7 +160,7 @@ def _pre_money_split(inputs: DealCheckInput, worked: _Worked) -> tuple[DealMoney
         return ()
 
     fully_diluted = fraction(inputs.fully_diluted_shares)
-    unissued = fraction(inputs.unissued_pool_shares)
+    unissued = fraction(unissued_shares(inputs))
     new_pool = worked.new_pool_shares if inputs.pool_timing == "pre_money" else ZERO
     parts: tuple[tuple[PreMoneyPart, Fraction], ...] = (
         ("existing_holders", fully_diluted - unissued),
@@ -266,9 +268,10 @@ def _checks(
     if inputs.stated_holder_percent is not None and holder_after is not None:
         stated = from_percent(inputs.stated_holder_percent)
         checks.append(_check("holder_percent", "fraction", stated, holder_after, points))
-    basis = runway[0] if runway else None
-    if inputs.stated_runway_months is not None and basis is not None and basis.net_runway is not None:
-        computed = basis.net_runway.exact
+    # The planned burn's net runway, else today's: the first row that has one (none when revenue covers every burn).
+    basis = next((row.net_runway for row in runway if row.net_runway is not None), None)
+    if inputs.stated_runway_months is not None and basis is not None:
+        computed = basis.exact
         stated = fraction(inputs.stated_runway_months)
         checks.append(_check("runway_months", "months", stated, computed, relative * computed))
 
@@ -327,6 +330,16 @@ def _verdict(checks: tuple[DealCheck, ...]) -> DealVerdict:
     return "mismatch" if any(check.verdict == "mismatch" for check in checks) else "consistent"
 
 
+def _holder_before(inputs: DealCheckInput) -> Fraction | None:
+    """The named group's share of FD before the round: ``holder_shares``/FD, else ``holder_percent``, else none."""
+    if inputs.holder_shares is not None and inputs.fully_diluted_shares is not None:
+        return fraction(inputs.holder_shares) / fraction(inputs.fully_diluted_shares)
+    if inputs.holder_percent is not None:
+        return from_percent(inputs.holder_percent)
+
+    return None
+
+
 def _optional(unit: EquityUnit, value: Fraction | None) -> EquityQuantity | None:
     return None if value is None else quantity(unit, value)
 
@@ -342,7 +355,8 @@ def compute_deal_check(inputs: DealCheckInput) -> DealCheckResult:
     post_money = valuation + investment
     headline = investment / post_money
     worked = _work(inputs, valuation)
-    holder_after = None if inputs.holder_percent is None else from_percent(inputs.holder_percent) * worked.kept
+    holder_before = _holder_before(inputs)
+    holder_after = None if holder_before is None else holder_before * worked.kept
     runway = _runway(inputs)
     funds = _use_of_funds(inputs)
     checks = tuple(_checks(inputs, post_money, worked, holder_after, runway)) + (
@@ -351,7 +365,7 @@ def compute_deal_check(inputs: DealCheckInput) -> DealCheckResult:
     if inputs.fully_diluted_shares is None or worked.price is None:
         effective = valuation
     else:
-        effective = (fraction(inputs.fully_diluted_shares) - fraction(inputs.unissued_pool_shares)) * worked.price
+        effective = (fraction(inputs.fully_diluted_shares) - fraction(unissued_shares(inputs))) * worked.price
     at_round_price = None if worked.price is None or worked.total_shares is None else worked.total_shares * worked.price
 
     return DealCheckResult(

@@ -280,6 +280,72 @@ def test_runway_is_checked_on_todays_burn_when_no_plan_is_given() -> None:
     assert result.flags == ()
 
 
+def test_a_runway_claim_falls_back_to_todays_burn_when_revenue_covers_the_plan() -> None:
+    """Planned revenue covers the planned burn, so the claim is checked on today's net runway: (200k + 1M)/60k = 20."""
+    result = deal_check(
+        investment="1000000",
+        pre_money="4000000",
+        cash_on_hand="200000",
+        planned_monthly_gross_burn="100000",
+        planned_monthly_revenue="100000",
+        current_monthly_gross_burn="80000",
+        current_monthly_revenue="20000",
+        stated_runway_months="18",
+    )
+
+    assert [row.net_runway is None for row in result.runway] == [True, False]
+    assert _checks(result) == {"runway_months": (Fraction(18), Fraction(20), "mismatch")}
+    assert result.flags == ("net_burn_not_positive",)
+    assert result.verdict == "mismatch"
+
+
+def test_a_runway_claim_with_revenue_covering_every_burn_is_not_checked() -> None:
+    result = deal_check(
+        investment="1000000",
+        pre_money="4000000",
+        planned_monthly_gross_burn="100000",
+        planned_monthly_revenue="100000",
+        current_monthly_gross_burn="100000",
+        current_monthly_revenue="120000",
+        stated_runway_months="10",
+    )
+
+    assert result.checks == ()
+    assert result.flags == ("net_burn_not_positive",)
+    assert result.verdict == "not_checked"
+
+
+def test_holder_shares_and_a_pool_percent_give_the_same_check_as_their_percent_and_shares() -> None:
+    """Company B with the founders as 9,000,000 shares and the pool as 4% of FD: the same 63/121 as 90% and 400,000."""
+    fields = {key: value for key, value in DEAL_B.items() if key not in {"holder_percent", "unissued_pool_shares"}}
+    by_shares = deal_check(**fields, holder_shares=9_000_000, unissued_pool_percent="4")
+    by_percent = deal_check(**DEAL_B)
+
+    assert by_shares.holder_ownership_after is not None
+    assert by_shares.holder_ownership_after.exact == Fraction(63, 121)
+    assert by_shares.checks == by_percent.checks
+    assert by_shares.pre_money_split == by_percent.pre_money_split
+    assert by_shares.effective_pre_money == by_percent.effective_pre_money
+
+
+def test_a_holder_share_count_that_does_not_divide_evenly_stays_exact() -> None:
+    """9,000,000 of 10,600,000 shares is 45/53 of FD, a percent no decimal holds; the stake after stays exact."""
+    result = deal_check(
+        investment="2000000", pre_money="8000000", fully_diluted_shares=10_600_000, holder_shares=9_000_000
+    )
+
+    assert result.holder_ownership_after is not None
+    assert result.holder_ownership_after.exact == Fraction(45, 53) * Fraction(4, 5)
+
+
+def test_a_holder_group_may_hold_every_share_outside_the_pool() -> None:
+    """The bound is inclusive: 96% of FD with a 4% unissued pool is every issued share."""
+    fields = {key: value for key, value in DEAL_B.items() if key != "holder_percent"}
+    result = deal_check(**fields, holder_percent="96")
+
+    assert result.holder_ownership_after == result.existing_holders_ownership
+
+
 def test_a_pool_already_large_enough_is_flagged_only_with_a_target() -> None:
     with_target = deal_check(
         investment="2000000",
@@ -333,6 +399,43 @@ def test_dilution_above_the_band_is_a_question_not_a_mismatch() -> None:
             "unissued_pool_shares must be below fully_diluted_shares",
         ),
         ({"pre_money": "8000000", "stated_holder_percent": "50"}, "stated_holder_percent needs holder_percent"),
+        (
+            {"pre_money": "8000000", "holder_percent": "50", "holder_shares": 5, "fully_diluted_shares": 10},
+            "give holder_percent or holder_shares, not both",
+        ),
+        ({"pre_money": "8000000", "holder_shares": 5}, "holder_shares needs fully_diluted_shares"),
+        ({"pre_money": "8000000", "unissued_pool_percent": "5"}, "unissued_pool_percent needs fully_diluted_shares"),
+        (
+            {
+                "pre_money": "8000000",
+                "fully_diluted_shares": 10,
+                "unissued_pool_shares": 1,
+                "unissued_pool_percent": "5",
+            },
+            "give unissued_pool_shares or unissued_pool_percent, not both",
+        ),
+        (
+            {"pre_money": "8000000", "fully_diluted_shares": 10, "unissued_pool_percent": "5"},
+            "unissued_pool_percent of fully_diluted_shares is not a whole number of shares",
+        ),
+        (
+            {"pre_money": "8000000", "fully_diluted_shares": 10, "unissued_pool_shares": 2, "holder_shares": 9},
+            "holder_shares is more than the fully_diluted_shares held outside the unissued pool",
+        ),
+        (
+            {**DEAL_B, "investment": "8000000", "holder_percent": "100", "stated_holder_percent": "57.85"},
+            "holder_percent is more than the share of fully_diluted_shares held outside the unissued pool",
+        ),
+        (
+            {
+                "investment": "9000000000000000",
+                "stated_investor_percent": "10",
+                "fully_diluted_shares": 8_000_000,
+                "target_pool_percent": "10",
+            },
+            "the pre-money worked from stated_investor_percent is 81000000000000000, which the calculator does not "
+            "take as a pre-money (a nonzero number here is at least 1e-15 and under 1e16 in size",
+        ),
         ({"pre_money": "8000000", "stated_runway_months": "20"}, "stated_runway_months needs"),
         ({"pre_money": "8000000", "planned_monthly_revenue": "5"}, "planned_monthly_revenue needs"),
         ({"pre_money": "8000000", "current_monthly_revenue": "5"}, "current_monthly_revenue needs"),
@@ -343,7 +446,8 @@ def test_dilution_above_the_band_is_a_question_not_a_mismatch() -> None:
         ({"pre_money": "8000000", "use_of_funds": [{"amount": "5", "percent": "5"}]}, "give exactly one of amount"),
         (
             {"stated_investor_percent": "20", "pool_timing": "post_money"},
-            "a stated_investor_percent with no valuation needs pool_timing pre_money",
+            "a stated_investor_percent with no valuation needs the pool counted in the pre-money: leave pool_timing at "
+            "its default",
         ),
         (
             {"stated_investor_percent": "7", "fully_diluted_shares": 100, "target_pool_percent": "10"},
@@ -369,6 +473,14 @@ def test_dilution_above_the_band_is_a_question_not_a_mismatch() -> None:
         "unissued-without-shares",
         "unissued-is-everything",
         "stated-holder-alone",
+        "holder-given-twice",
+        "holder-shares-without-fd",
+        "pool-percent-without-fd",
+        "pool-given-twice",
+        "pool-percent-not-whole",
+        "holder-shares-above-the-held-shares",
+        "holder-percent-above-the-held-share",
+        "worked-pre-money-out-of-bounds",
         "runway-without-burn",
         "planned-revenue-alone",
         "current-revenue-alone",

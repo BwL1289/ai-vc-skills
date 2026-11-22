@@ -3,7 +3,9 @@
 The JSON example must be a valid ``equity_deal_check`` call, the ``equity_calculator`` command must run, and every
 line of the output excerpt that follows it must be a line the command really prints, so no figure in the skill is
 typed by hand. The same holds for each eval prompt in evals/vc-deal-math/: its tool call is valid and its excerpt is
-lines of the report that call prints.
+lines of the report that call prints. An eval whose right answer is no ``equity_deal_check`` call (a raise on a SAFE)
+says so under its tool-call heading and carries no call or excerpt to check. Every flag code has a row in the skill's
+flag table, since the tool's JSON gives the codes only.
 """
 
 from __future__ import annotations
@@ -12,18 +14,22 @@ import json
 import re
 import shlex
 from pathlib import Path
+from typing import get_args
 
 import pytest
 from equity_calculator.__main__ import run
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
-from equity_calculator.schemas.equity_deal_check import DealCheckInput
+from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealFlag
 from equity_calculator.text import render_sheet
 
 _ROOT = Path(__file__).resolve().parents[2]
 _SKILL = _ROOT / "skills" / "vc-deal-math" / "SKILL.md"
 _EVALS = sorted((_ROOT / "evals" / "vc-deal-math").glob("*.md"))
-_EVAL_COUNT = 3
+_EVAL_COUNT = 4
+_NO_CALL = "## Expected tool call\n\nNone: no `equity_deal_check` call."
+_CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
+_NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
 _TEXT = _SKILL.read_text(encoding="utf-8")
 _FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 # A fence inside a list item is indented; the indent is captured so it can be taken off each line.
@@ -103,7 +109,22 @@ def test_there_is_one_eval_per_worked_company() -> None:
     assert len(_EVALS) == _EVAL_COUNT
 
 
-@pytest.mark.parametrize("path", _EVALS, ids=[path.stem for path in _EVALS])
+def test_one_eval_expects_no_deal_check_call() -> None:
+    (path,) = _NO_CALL_EVALS
+    text = path.read_text(encoding="utf-8")
+
+    assert _fences("json", text) == [] and _fences("text", text) == []
+    assert "equity_round" in text
+
+
+def test_every_flag_code_has_a_row_in_the_skills_flag_table() -> None:
+    table = _TEXT.split("## Flags", 1)[1].split("\n## ", 1)[0]
+    rows = re.findall(r"^\| `([a-z_]+)` +\|", table, re.MULTILINE)
+
+    assert rows == list(get_args(DealFlag))
+
+
+@pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])
 def test_each_eval_call_is_valid_and_its_excerpt_is_what_the_calculator_prints(path: Path) -> None:
     """An eval's figures are pasted from the calculator: its excerpt must be lines of the report for its call."""
     text = path.read_text(encoding="utf-8")

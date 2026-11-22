@@ -16,7 +16,9 @@ All notable changes to this repository. Dates are UTC.
   ownership after the round with SAFEs, notes and the pool counted, effective pre-money, runway, use of funds). It
   runs on the calculator's new `deal_check` scenario, also an MCP tool (`equity_deal_check`), a command and a
   workbook sheet, which returns each stated figure as consistent or a mismatch and flags what a VC is likely to ask.
-  Results gain a `months` unit.
+  A holder group can be given as a share count and the unissued pool as a percent of the fully diluted shares, so
+  no one divides by hand. It works the new money as a priced round; a raise on a SAFE goes to `round`. Results gain
+  a `months` unit.
 
 ### Changed
 

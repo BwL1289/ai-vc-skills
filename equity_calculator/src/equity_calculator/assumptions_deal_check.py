@@ -64,7 +64,7 @@ def _valuation_rows(inputs: DealCheckInput) -> list[EquityAssumption]:
 def _ownership_rows(inputs: DealCheckInput) -> list[EquityAssumption]:
     """How a holder group's stake is scaled, and what the effective pre-money counts."""
     rows = []
-    if inputs.holder_percent is not None:
+    if inputs.holder_percent is not None or inputs.holder_shares is not None:
         rows.append(
             _assumption(
                 "holder_scaling",

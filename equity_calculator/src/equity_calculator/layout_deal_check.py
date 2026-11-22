@@ -26,7 +26,7 @@ _PART_NAMES = {
     "conversions": "SAFE and note shares",
 }
 _PART_HOW = {
-    "existing_holders": "(FD - U)·p: the effective pre-money",
+    "existing_holders": "(FD - U)·p, to the cent so the parts add up to V",
     "existing_pool": "U·p",
     "new_pool": "P·p (pool in the pre-money)",
     "conversions": "converted shares·p",
@@ -65,7 +65,8 @@ def _flag_words(flag: DealFlag, result: DealCheckResult) -> str:
         "would be wrong",
         "note_interest_converts": "Note interest converts too, so a note gets more than its principal's worth of "
         "shares; count it in the cap table",
-        "net_burn_not_positive": "Revenue covers the burn on these figures, so there is no net runway figure",
+        "net_burn_not_positive": "Revenue covers the burn on these figures, so there is no net runway figure; a "
+        "runway claim is checked on another burn's net runway, and with none it is not checked",
         "current_burn_runway_longer": "Runway on today's burn is longer than on the planned burn; say which one "
         "the deck uses, as a VC will check it against the planned spend",
         "runway_below_band": f"Planned runway is under {inputs.runway_band_months} months; a VC is likely to ask "
@@ -87,10 +88,12 @@ def _given_lines(result: DealCheckResult) -> list[Line]:
         ("given_investor_percent", "Investors' percent as stated", _maybe_percent(inputs.stated_investor_percent)),
         ("fully_diluted_shares", "Fully diluted shares before (FD)", _maybe_shares(inputs.fully_diluted_shares)),
         ("unissued_pool_shares", "Unissued pool before (U)", _maybe_shares(inputs.unissued_pool_shares or None)),
+        ("unissued_pool_percent", "Unissued pool before, percent of FD", _maybe_percent(inputs.unissued_pool_percent)),
         ("target_pool", "Target pool after the round (t)", _maybe_percent(inputs.target_pool_percent or None)),
         ("pool_timing", "Pool counted in the", inputs.pool_timing.replace("_", "-")),
         ("instruments", "SAFEs and notes", str(len(inputs.instruments))),
         ("holder_percent", "Holder group before (h)", _maybe_percent(inputs.holder_percent)),
+        ("holder_shares", "Holder group's shares before", _maybe_shares(inputs.holder_shares)),
         ("given_holder_percent", "Holder group after as stated", _maybe_percent(inputs.stated_holder_percent)),
         ("cash_on_hand", "Cash on hand", given("money", inputs.cash_on_hand) if result.runway else None),
         ("planned_gross_burn", "Planned monthly gross burn", _maybe("money", inputs.planned_monthly_gross_burn)),

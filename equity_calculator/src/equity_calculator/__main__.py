@@ -17,9 +17,9 @@ or a fundraising ask checked before a VC reads it.
         [--acceleration-base unvested|grant]] [--share-rounding exact|whole_shares]
     equity_calculator waterfall --exit-amount E --common-shares C (--class "TERMS")...
     equity_calculator deal_check --investment I [--pre-money V] [--post-money P] [--stated-investor-percent X]
-        [--fully-diluted-shares FD [--unissued-pool-shares U] [--target-pool-percent T]
+        [--fully-diluted-shares FD [--unissued-pool-shares U | --unissued-pool-percent UP] [--target-pool-percent T]
         [--pool-timing pre_money|post_money] [--safe "TERMS" | --note "TERMS"]...]
-        [--holder-percent H [--stated-holder-percent S]] [--cash-on-hand C]
+        [(--holder-percent H | --holder-shares HS) [--stated-holder-percent S]] [--cash-on-hand C]
         [--planned-monthly-gross-burn B [--planned-monthly-revenue R]]
         [--current-monthly-gross-burn B [--current-monthly-revenue R]] [--stated-runway-months M]
         [--use-of-funds AMOUNT|PCT%]... [--tolerance-points P] [--tolerance-percent Q]

@@ -221,6 +221,11 @@ def _deal_round_arguments(parser: argparse.ArgumentParser) -> None:
         "--unissued-pool-shares", type=parse_whole, help="The unissued pool before the round (U, default 0)."
     )
     parser.add_argument(
+        "--unissued-pool-percent",
+        type=parse_percent,
+        help="The unissued pool before the round as a percent of FD, instead of --unissued-pool-shares.",
+    )
+    parser.add_argument(
         "--target-pool-percent",
         type=parse_percent,
         help="The unissued pool after the round, in percent (t, default 0: no top-up).",
@@ -232,6 +237,9 @@ def _deal_round_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--note", type=parse_note, action="append", dest=_INSTRUMENTS, metavar=_TERMS, help=_NOTE_HELP)
     parser.add_argument(
         "--holder-percent", type=parse_percent, help="One group's share of FD before the round (the founders, say)."
+    )
+    parser.add_argument(
+        "--holder-shares", type=parse_whole, help="That group's shares before the round, instead of --holder-percent."
     )
     parser.add_argument(
         "--stated-holder-percent", type=parse_percent, help="The percent the deck says that group keeps after."
