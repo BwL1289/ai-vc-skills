@@ -106,9 +106,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 `vc-deal-math`, `vc-positioning` and `vc-claims-check` are in preview until they have been checked on real decks. The
 calculator's arithmetic is tested; the reviews' wording may change. The `vc-positioning` and `vc-claims-check` evals
 were run in live Claude Code sessions on 2026-11-22, and each file holds an excerpt of its recorded answer with a
-verdict against its pass sentence: three passed, three passed in part and one failed. Two were run again after a skill
-fix, as their files say. One run each is a small sample. The `vc-deal-math` evals state
-the expected behaviour and have not yet been run in a live session.
+verdict against its pass sentence: two passed, four passed in part and one failed. Pass means every clause of that
+sentence was met, Partial that exactly one was missed or met only in part, and Fail that two or more were missed. Two
+were run again after a skill fix, as their files say. One run each is a small sample. The `vc-deal-math` evals state the
+expected behaviour and have not yet been run in a live session.
 
 The `equity-calculator` skill covers eight scenarios:
 

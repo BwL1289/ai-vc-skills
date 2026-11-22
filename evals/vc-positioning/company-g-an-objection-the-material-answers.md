@@ -3,7 +3,9 @@
 A test prompt for the `vc-positioning` skill. The company is made up. "Expected answer" states the expected behaviour,
 and "Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-22). A run passes when the refute
 pass drops an objection by quoting the founder's own line that answers it, keeps the one the material cannot answer, and
-invents nothing on the founder's behalf.
+invents nothing on the founder's behalf. The verdict is Pass when every clause of that sentence is met, Partial when
+exactly one clause is missed or met only in part, and Fail when two or more are missed; a shortfall against the other
+points of the expected answer is noted but does not change the verdict.
 
 ## Prompt
 
@@ -46,7 +48,8 @@ answer is trimmed; [...] marks each cut.
 **Pass.** Six lens subagents and eight refute subagents ran; the refute pass dropped the traction objection by quoting
 slide 3, the SAFE's runway is not checked, and no pilot revenue is totalled. Short of the expected answer: the why-now
 objection was dropped although its judge called it a close call (the skill says to keep it), the market became a
-survivor rather than an open ask, and the prep script hedges on who the lead is.
+survivor rather than an open ask, and the prep script hedges on who the lead is. Since this run the skill's description,
+its subagent wording, step 4 and its limits have changed; the eval has not been run again.
 
 > I ran the stress test: six independent skeptical lenses attacked the pitch, then a separate pass tested each objection against your own slides. Six objections survived and two were dropped; none is rated as ending the meeting.
 >

@@ -47,15 +47,15 @@ All notable changes to this repository. Dates are UTC.
   theme), the plugin icon and the social image all use it; shapes and base colours are unchanged.
 - The seven `vc-positioning` and `vc-claims-check` evals were run in live Claude Code sessions (2.1.330, 2026-11-22).
   Each file keeps its expected answer and adds a trimmed excerpt of the recorded answer with a verdict against its pass
-  sentence: three passed, three passed in part and one failed. The `vc-deal-math` evals now say they have not been run
-  live.
+  sentence: two passed, four passed in part and one failed (Pass: every clause met; Partial: exactly one missed or met
+  only in part; Fail: two or more missed). The `vc-deal-math` evals now say they have not been run live.
 - Skill fixes from those runs. `vc-positioning` now owns "check our story and our ask" (a run had routed it to
   `vc-deal-math`), runs its lenses and refute passes as subagents however short the material, makes one calculator call
-  per version of the ask and keeps the tool's values as printed, and, asked to play a named investor, offers the public
-  frameworks and the lenses together with the prep-session credit. `vc-deal-math` says to use `vc-positioning` for the
-  story and the ask together, computes nothing outside the calculator's tools and runs no what-if the founder did not
-  ask for. In `vc-claims-check`, the skeptic no longer judges whether the material answers an attack (the refute pass
-  does), and the "AI-powered" pattern applies when nothing says what the model does.
+  per version of the ask (two for a valuation with no label) and keeps the tool's values as printed, and, asked to play
+  a named investor, offers the public frameworks and the lenses together with the prep-session credit. `vc-deal-math`
+  says to use `vc-positioning` for the story and the ask together, computes nothing outside the calculator's tools and
+  runs no what-if the founder did not ask for. In `vc-claims-check`, the skeptic no longer judges whether the material
+  answers an attack (the refute pass does), and the "AI-powered" pattern applies when nothing says what the model does.
 
 ## 2026-11-21
 

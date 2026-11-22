@@ -3,7 +3,9 @@
 A test prompt for the `vc-positioning` skill. The company is made up. "Expected answer" states the expected behaviour,
 and "Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-22). A run passes when it makes no
 calculator call, runs the adversarial review, keeps the objections below with the founder's own line quoted, and adds no
-fact the founder did not give.
+fact the founder did not give. The verdict is Pass when every clause of that sentence is met, Partial when exactly one
+clause is missed or met only in part, and Fail when two or more are missed; a shortfall against the other points of the
+expected answer is noted but does not change the verdict.
 
 ## Prompt
 
@@ -42,10 +44,10 @@ to check.
 Recorded with Claude Code 2.1.330 on 2026-11-22, with the plugin loaded from this repository and no user settings. The
 answer is trimmed; [...] marks each cut.
 
-**Partial.** It made no calculator call, kept all four objections with the founder's lines quoted, flagged "Our
-projections are conservative" as unverified and added no fact. It ran the six lenses inline in one agent although it had
-a subagent tool, and gave no refute pass per objection. Since this run the skill says to use subagents however short the
-material; the eval has not been run again.
+**Partial: one clause met only in part.** It made no calculator call, kept all four objections with the founder's lines
+quoted, flagged "Our projections are conservative" as unverified and added no fact. It ran the adversarial review only
+in part: it ran the six lenses inline in one agent although it had a subagent tool, and gave no refute pass per
+objection. Since this run the skill says to use subagents however short the material; the eval has not been run again.
 
 > Almost every sentence in this opening is a phrase investors discount, and the opening contains no checkable fact about the company. I can restructure it, but the facts have to come from you, so the rewrite below has bracketed gaps for you to fill.
 >

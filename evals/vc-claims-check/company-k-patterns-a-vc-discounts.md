@@ -3,7 +3,9 @@
 A test prompt for the `vc-claims-check` skill. The company is made up. "Expected answer" states the expected behaviour,
 and "Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-22). A run passes when each
 pattern is flagged Will be discounted with its source (or marked unverified), every fix uses only the founder's facts or
-a bracketed ask, and no figure is computed.
+a bracketed ask, and no figure is computed. The verdict is Pass when every clause of that sentence is met, Partial when
+exactly one clause is missed or met only in part, and Fail when two or more are missed; a shortfall against the other
+points of the expected answer is noted but does not change the verdict.
 
 ## Prompt
 
@@ -41,11 +43,11 @@ None: no `equity_deal_check` call. The prompt states no deal terms; the size of 
 Recorded with Claude Code 2.1.330 on 2026-11-22, with the plugin loaded from this repository and no user settings. The
 answer is trimmed; [...] marks each cut.
 
-**Partial.** The letters of intent lead under Checked first; the market size, no competitors, the advisors and the
-world-class operator are Will be discounted; no 1% is worked out. The AI-powered line came back Needs a source, because
-the pattern then applied only where the product would work the same without a model, which the founder's text cannot
-settle. Since this run the pattern is an AI-powered label with nothing that says what the model does; the eval has not
-been run again.
+**Partial: one clause met only in part.** The letters of intent lead under Checked first; the market size, no
+competitors, the advisors and the world-class operator are Will be discounted; no 1% is worked out. The first clause is
+missed for one pattern: the AI-powered line came back Needs a source, not Will be discounted, because the pattern then
+applied only where the product would work the same without a model, which the founder's text cannot settle. Since this
+run the pattern is an AI-powered label with nothing that says what the model does; the eval has not been run again.
 
 > Nothing in the deck contradicts itself, but five of the six claims use wording a partner is likely to discount, and the sixth needs evidence. I checked only your wording and the evidence you named: I haven't seen the letters of intent and looked nothing up, so this doesn't say whether any claim is true.
 >

@@ -4,7 +4,9 @@ A test prompt for the `vc-claims-check` skill. The company is made up. The two t
 real `equity_calculator deal_check` runs with these inputs. "Expected answer" states the expected behaviour, and
 "Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-22). A run passes when it makes one
 `equity_deal_check` call per document's version of the ask (field order free, money and percents as strings), compares
-the other figures as stated, and computes nothing in its own text.
+the other figures as stated, and computes nothing in its own text. The verdict is Pass when every clause of that
+sentence is met, Partial when exactly one clause is missed or met only in part, and Fail when two or more are missed; a
+shortfall against the other points of the expected answer is noted but does not change the verdict.
 
 ## Prompt
 
@@ -96,7 +98,9 @@ answer is trimmed; [...] marks each cut.
 
 **Pass.** Two `equity_deal_check` calls with the inputs above, the one-pager's 20% leading as a mismatch, the customer
 counts side by side as Contradicted, and MRR and ARR not converted. Short of the expected answer: the MRR line is
-Supported on the billing dashboard rather than Needs a source, and the runway attack skipped its refute pass.
+Supported on the billing dashboard rather than Needs a source, and the runway attack skipped its refute pass. Since this
+run the skeptic's brief (it no longer judges whether the material answers an attack) and the "AI-powered" pattern have
+changed; the eval has not been run again.
 
 > **No: two pairs of figures contradict each other, and one pair can't be compared as written.** The raise, the post-money and the 24 months of runway hold up.
 >

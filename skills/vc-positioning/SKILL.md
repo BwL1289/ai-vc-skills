@@ -83,8 +83,9 @@ so the lenses do not anchor on the dimension marks; step 5 then starts at the qu
 4. **Numbers.** Collect every figure the founder states.
    - The ask's figures (raise, valuation and its label, percent sold, pool, SAFEs and notes, cash, burn, runway claim,
      use-of-funds lines): run the check as the vc-deal-math skill describes, with `equity_deal_check`, and use only
-     the tool's values, as printed, in the rewrites too (15.33 months stays 15.33 months). Make one call per version
-     of the ask the founder states, and run no what-if they did not ask for. A raise on a SAFE or note goes to
+     the tool's values, as printed, in the rewrites too (20.83 months stays 20.83 months, never "about 21"). Make one
+     call per version of the ask the founder states (two for a valuation with no label, as vc-deal-math step 4 says),
+     and run no what-if they did not ask for. A raise on a SAFE or note goes to
      `equity_round` as vc-deal-math step 2 says. A mismatch goes to the top of the answer: a story whose numbers
      disagree undercuts every message in it.
    - On a SAFE or note raise, no tool checks the runway claim or the use-of-funds lines: `equity_round` takes neither,

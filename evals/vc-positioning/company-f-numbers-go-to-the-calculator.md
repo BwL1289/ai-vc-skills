@@ -4,7 +4,9 @@ A test prompt for the `vc-positioning` skill. The company is made up. The tool c
 `equity_calculator deal_check` run with these inputs. "Expected answer" states the expected behaviour, and "Recorded
 answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-22). A run passes when it makes the one tool
 call below (field order free, money and percents as strings), puts the calculator's mismatches at the top of the
-surviving objections, and computes nothing in its own text.
+surviving objections, and computes nothing in its own text. The verdict is Pass when every clause of that sentence is
+met, Partial when exactly one clause is missed or met only in part, and Fail when two or more are missed; a shortfall
+against the other points of the expected answer is noted but does not change the verdict.
 
 ## Prompt
 
@@ -70,12 +72,14 @@ surviving objections, and computes nothing in its own text.
 Recorded with Claude Code 2.1.330 on 2026-11-22, with the plugin loaded from this repository and no user settings. The
 answer is trimmed; [...] marks each cut.
 
-**Fail.** It loaded vc-positioning, put the two calculator mismatches at the top of the survivors and quoted the growth
-rate unchecked, but it missed two clauses: it made a second `equity_deal_check` call that no one asked for, working the
-20% back to a pre-money, and its own text rounds the tool's 15.33 months to 15 in the rewrites and the prep script.
-Since this run, step 4 of the skill asks for one call per version of the ask and the tool's values as printed; the eval
-has not been run again. A first run the same day, before this commit's skill changes, loaded vc-deal-math instead: no
-adversarial review, three calculator calls and the growth rate worked out by hand, also a fail.
+**Fail: two clauses missed.** It loaded vc-positioning, put the two calculator mismatches at the top of the survivors
+and quoted the growth rate unchecked, but it missed two clauses: it made a second `equity_deal_check` call that no one
+asked for, working the 20% back to a pre-money, and its own text rounds the tool's 15.33 months to 15 in the rewrites
+and the prep script. Since this run, step 4 of the skill asks for one call per version of the ask and the tool's values
+as printed; the eval has not been run again. A first run the same day, before this commit's skill changes, loaded
+vc-deal-math instead: no adversarial review, three calculator calls and the growth rate worked out by hand, also a fail.
+This run came after the skill's description and its "When to use it" list gained this prompt's opening words, "check our
+story and our ask", so its routing shows that this wording now reaches vc-positioning, not that other wordings do.
 
 > Two of your ask's numbers don't agree with each other, and a partner will find both in the first minute: the round sells 16.6667%, not 20%, and it buys 15.33 months of runway, not 18.
 >

@@ -3,7 +3,9 @@
 A test prompt for the `vc-claims-check` skill. The company is made up. "Expected answer" states the expected behaviour,
 and "Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-22). A run passes when the refute
 pass keeps the attack the material grounds, drops one by quoting the founder's line that answers it, drops one that
-rests on an outside fact, and invents nothing on the founder's behalf.
+rests on an outside fact, and invents nothing on the founder's behalf. The verdict is Pass when every clause of that
+sentence is met, Partial when exactly one clause is missed or met only in part, and Fail when two or more are missed; a
+shortfall against the other points of the expected answer is noted but does not change the verdict.
 
 ## Prompt
 
@@ -36,11 +38,12 @@ None: no `equity_deal_check` call. The prompt states no deal terms.
 Recorded with Claude Code 2.1.330 on 2026-11-22, with the plugin loaded from this repository and no user settings. The
 answer is trimmed; [...] marks each cut.
 
-**Pass.** The distributor attack is kept, grounded on Appendix A; the CTO attack is dropped as answered by the footnote;
-parts of attacks that rest on guesses outside the material (a hand-picked reference, lapsed shops, pilot stores counted
-among the 62) are dropped as not grounded; nothing is totalled or invented. Those not-grounded drops are parts of
-attacks, not a whole attack. A first run the same day, before this commit's change to the skeptic's brief, failed: the
-skeptic judged the CTO line answered itself and never raised it, so nothing was dropped.
+**Partial: one clause met only in part.** The distributor attack is kept, grounded on Appendix A; the CTO attack is
+dropped as answered by the footnote; nothing is totalled or invented. The third clause is met only in part: parts of
+attacks that rest on guesses outside the material (a hand-picked reference, lapsed shops, the 3 pilot stores counted in
+the 62 shops) are dropped as not grounded, but no whole attack is. A first run the same day, before this commit's change
+to the skeptic's brief, failed: the skeptic judged the CTO line answered itself and never raised it, so nothing was
+dropped.
 
 > I ran the skeptic and refute passes on your five lines; here is the result.
 >
