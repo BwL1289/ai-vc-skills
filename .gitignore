@@ -264,6 +264,7 @@ Icon*
 /site/
 /*.html
 /docs/*.png
+!/docs/og.png
 
 # Google Drive
 *.gdoc

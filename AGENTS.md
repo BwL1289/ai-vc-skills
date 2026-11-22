@@ -18,7 +18,7 @@ its command or its MCP server.
 | `equity_calculator/`         | The Python package: scenarios, command, workbook, MCP server, tests.                                                                                                                              |
 | `.claude-plugin/`            | `marketplace.json` (the marketplace) and `plugin.json` (the one plugin).                                                                                                                          |
 | `scripts/validate_skills.py` | Checks every skill's frontmatter and that the README lists it.                                                                                                                                    |
-| `docs/`                      | Install guide per client, and how to write a skill.                                                                                                                                               |
+| `docs/`                      | Install guide per client, how to write a skill, and the one-page website GitHub Pages serves (`index.html` and its assets; every file the page uses lives here).                                  |
 
 ## Rules
 

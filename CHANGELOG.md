@@ -35,6 +35,9 @@ All notable changes to this repository. Dates are UTC.
   claims a partner is likely to check first, and a refute pass keeps an attack only when the founder's material
   grounds it. `vc-positioning` now points to it. Three evals are in `evals/vc-claims-check/`.
 - New logo: a chess knight whose head is cut into cap-table slices.
+- A one-page website for the skills, served by GitHub Pages from `docs/` at
+  [bwl1289.github.io/ai-vc-skills](https://bwl1289.github.io/ai-vc-skills/): install lines, the four skills, real
+  calculator output for the two calculator skills and eval excerpts for the two reviews, light and dark themes.
 
 ### Changed
 
