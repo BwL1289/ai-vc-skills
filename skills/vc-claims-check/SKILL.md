@@ -144,7 +144,9 @@ grounded. Questions to the founder go to the open asks.
 ### The refute pass
 
 Each attack gets its own refute pass. With a subagent tool, run one subagent per attack, given the founder's material,
-that one attack and the brief below, and nothing else; without one, decide the attacks one at a time. The brief:
+that one attack, the Pattern column of the discount table below and the brief below with its three verdicts, and
+nothing else; without one, decide the attacks one at a time. A pass needs the Pattern column because a discount
+pattern grounds an attack even when the founder can show evidence. The brief:
 
 - You decide whether one attack is grounded in the founder's material. Write in the third person; you are not an
   investor and do not speak as one, named or not.

@@ -209,6 +209,9 @@ def test_the_refute_pass_keeps_an_attack_only_when_the_material_grounds_it() -> 
     for verdict in _REFUTE_VERDICTS:
         assert verdict in refute, verdict
     assert "one subagent per attack" in refute
+    # A discount pattern is one of the grounds, so the pass that judges grounds is handed the patterns.
+    assert "a pattern from the discount table" in refute
+    assert "the Pattern column of the discount table below and the brief below with its three verdicts" in refute
     assert "An attack is kept only if it is grounded" in refute
     assert "A line that is not in the material word for word does not drop the attack" in refute
     assert "invents nothing on the founder's behalf" in refute
