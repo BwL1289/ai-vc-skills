@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "ai-vc-skills",
-      "description": "Startup equity math done exactly: Paul Graham's equity equation, option pools, SAFEs and notes converting in a priced round, dilution, vesting and exit waterfalls, with every formula and source shown. More venture-style skills to come.",
+      "description": "Startup equity math done exactly: Paul Graham's equity equation, option pools, SAFEs and notes converting in a priced round, dilution, vesting and exit waterfalls, and a founder's check of their own raise before a VC sees it, with every formula and source shown. More venture-style skills to come.",
       "source": "./",
       "category": "finance"
     }
