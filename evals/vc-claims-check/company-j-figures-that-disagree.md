@@ -80,5 +80,10 @@ What the calculator prints for the one-pager (excerpt):
   places and marked Contradicted. No difference is computed. The fix asks the founder to confirm one figure against
   the billing dashboard and use it in both documents.
 - "$38k MRR in October" and "$450k ARR" are not compared: one is monthly and one yearly, and the skill converts
-  neither. Both are Needs a source, with an ask to state one figure, in one form, with its period.
+  neither. Both are Needs a source, with an ask to state one figure, in one form, with its period. If the skeptic
+  attacks this pair, the refute pass keeps the attack as a missing source, not a conflict, so the verdict stays Needs
+  a source and is never Contradicted.
+- Through the MCP tool, the one-pager's computed share comes back as the fraction 0.250000 and the difference as
+  0.050000; the answer shows them as 25.0000% and 5.0000% by moving the decimal point two places, the form the report
+  prints, and rounds neither.
 - Every percent, valuation and month figure in the answer comes from the tool or is quoted from the prompt.

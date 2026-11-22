@@ -67,7 +67,9 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
 
 1. Pick the scenario, ask for any required input that is missing, and run it. State any value you had to assume.
 2. Give the headline numbers as the tool prints them (the `rounded` value with its unit, or the exact fraction when
-   precision matters). Do not round them again or recompute them.
+   precision matters). Do not round them again or recompute them. A value whose unit is `fraction` is a share of the
+   whole: show it as a percent by moving the decimal point of its `rounded` value two places to the right, keeping
+   every digit (0.166667 is 16.6667%), as the command line's report does; that is notation, not a calculation.
 3. Quote the assumptions the result lists. Each has a source; say plainly when it is `unverified` (standard
    arithmetic no cited source fixes, such as every option-pool, note and waterfall convention), and say how to change
    a default when the user's terms differ.

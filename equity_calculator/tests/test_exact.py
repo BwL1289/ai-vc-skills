@@ -29,7 +29,7 @@ from equity_calculator.schemas.equity_dilution import DilutionInput
 from equity_calculator.schemas.equity_round import RoundInput
 from equity_calculator.schemas.equity_vesting import VestingInput
 from equity_calculator.schemas.equity_waterfall import WaterfallInput
-from equity_calculator.text import render_sheet
+from equity_calculator.text import display, render_sheet
 from pydantic import RootModel, ValidationError
 from tests.support import POOL_EXAMPLE
 
@@ -199,6 +199,17 @@ def test_each_unit_rounds_to_its_display_places() -> None:
     assert DISPLAY_PLACES == {"fraction": 6, "multiplier": 6, "money": 2, "price": 6, "shares": 3, "months": 2}
     for unit, places in DISPLAY_PLACES.items():
         assert quantity(unit, Fraction(1, 3)).rounded.as_tuple().exponent == -places
+
+
+def test_a_fraction_prints_as_its_rounded_value_with_the_point_moved_two_places() -> None:
+    """The skills tell an agent on the MCP path, which returns a share as a fraction, to show it as a percent by moving
+    the decimal point of ``rounded`` two places: that must be exactly what the command line's report prints."""
+    rng = random.Random(20261122)
+    values = [Fraction(0), Fraction(1), Fraction(1, 6), Fraction(-1, 30), Fraction(1, 20), Fraction(2, 3)]
+    values += [Fraction(rng.randint(-(10**9), 10**9), rng.randint(1, 10**7)) for _ in range(500)]
+    for value in values:
+        shown = quantity("fraction", value)
+        assert display(shown) == f"{shown.rounded.scaleb(2):,f}%", value
 
 
 @pytest.mark.parametrize(

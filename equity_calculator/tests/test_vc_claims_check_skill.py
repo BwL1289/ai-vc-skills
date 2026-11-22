@@ -291,3 +291,85 @@ def test_a_two_document_eval_runs_one_call_per_document() -> None:
     ]
 
     assert len(set(stated)) == len(stated)
+
+
+_SAFE_UNCHECKED = "not checked: no tool computes this for a SAFE or note raise"
+_SAME_FORM = "same metric, in the same form, for the same period"
+# A figure an eval's answer takes from the calculator: a percent or months with decimals, or money with cents.
+_PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|\d[\d,]*\.\d+ months|\$\d[\d,]*\.\d{2}")
+
+
+def test_the_refute_brief_itself_carries_the_pattern_precedence_and_the_same_form_rule() -> None:
+    """The rules that settle a tie sit inside what each refute subagent is handed, never only in the text before it."""
+    handoff, brief = (_unwrapped(part) for part in _section("### The refute pass").split("The brief:\n", 1))
+
+    assert "the brief below with its three verdicts and the rules after them" in handoff
+    assert "is Kept, grounded even when the material shows evidence" in brief
+    assert "even when" not in handoff
+    assert f"For a figure, a second line counts as a conflict only when it states the {_SAME_FORM}" in brief
+    assert "never as a conflict" in brief
+    assert "the material already shows the evidence the attack asks for, and the attack matches no pattern" in brief
+    assert "An attack is kept only if it is grounded" in brief
+
+
+def test_figures_in_different_forms_are_needs_a_source_in_every_rule_that_sets_a_verdict() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    verdicts = {row[0]: row[1] for row in _table("## The four verdicts")}
+
+    assert steps.index("**Set each verdict**") < steps.index(f"states the {_SAME_FORM}")
+    assert "make the attack Needs a source, never Contradicted" in steps
+    assert "the same metric in the same form for the same period" in verdicts["Contradicted"]
+    assert "MRR against ARR" in verdicts["Needs a source"]
+
+
+def test_the_skeptic_can_attack_with_a_discount_pattern_and_runs_before_step_1_without_subagents() -> None:
+    skeptic = _unwrapped(_section("### The skeptic"))
+    steps = _unwrapped(_section("## Steps"))
+    note = "Without a subagent tool, run the skeptic first, before step 1"
+
+    assert "the discount pattern it matches" in skeptic
+    assert "plus the Pattern column of the discount table below" in skeptic
+    assert note in steps and steps.index(note) < steps.index("1. **List the claims, word for word.**")
+    assert "Say whether the skeptic ran as a subagent or in the same agent" in _unwrapped(_section("## Answering"))
+
+
+def test_checked_first_lists_every_mismatch_outside_the_cap_of_three() -> None:
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "the calculator's mismatches first, each one, outside any cap; then the skeptic's kept attacks" in answering
+
+
+def test_a_safe_raise_has_no_tool_verdict_and_its_runway_is_quoted_unchecked() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "it gives no consistent or mismatch verdict" in steps
+    assert "Only a consistent `equity_deal_check` row makes a deal term Supported" in steps
+    assert "On a SAFE or note raise, no tool checks the runway claim or the use-of-funds lines" in steps
+    assert _SAFE_UNCHECKED in steps and "never work them out by hand" in steps
+    assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
+
+
+def test_the_letters_of_intent_row_cites_only_the_a16z_items_that_say_so() -> None:
+    rows = _table("## Discount patterns")
+    (letters,) = (row for row in rows if row[0].startswith("Letters of intent"))
+    (pipeline,) = (row for row in rows if "Pipeline" in row[0])
+
+    assert letters[-1] == 'a16z "16 Startup Metrics" (1, 6)' and "pipeline" not in letters[0].lower()
+    assert pipeline[-1] == _UNVERIFIED and "pipeline called revenue" in _unwrapped(_section("## Sources"))
+    for path in _EVALS:
+        assert "items 1 and 2" not in path.read_text(encoding="utf-8"), path.name
+
+
+@pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])
+def test_each_figure_an_eval_answer_takes_from_the_calculator_is_what_it_prints(path: Path) -> None:
+    """A percent, a months figure or a money figure with cents in the expected answer is a line a report prints."""
+    text = path.read_text(encoding="utf-8")
+    reports = "\n".join(
+        render_sheet(sheet_for(compute(DealCheckInput.model_validate(json.loads(call)["inputs"]))))
+        for call in _fences("json", text)
+    )
+    figures = _PRINTED_FIGURE.findall(_unwrapped(_section("## Expected answer", text)))
+
+    assert figures
+    for figure in figures:
+        assert figure in reports, figure

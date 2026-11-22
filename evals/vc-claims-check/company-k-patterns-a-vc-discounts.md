@@ -18,7 +18,7 @@ None: no `equity_deal_check` call. The prompt states no deal terms; the size of 
 
 ## Expected answer
 
-- "$1.2M in revenue from signed letters of intent." is Will be discounted (a16z "16 Startup Metrics", items 1 and 2):
+- "$1.2M in revenue from signed letters of intent." is Will be discounted (a16z "16 Startup Metrics", item 1):
   letters of intent are not revenue. The evidence the founder can show, the letters, supports that they exist, not
   that they are revenue. The fix names the letters of intent for what they are, with their own figure as stated.
 - "The global dental market is $40B (industry report); we only need 1% of it." is Will be discounted (YC seven
@@ -31,6 +31,6 @@ None: no `equity_deal_check` call. The prompt states no deal terms; the size of 
   the product could not do without it.
 - The advisors line and "world-class operator" are Will be discounted (YC seed deck guide; YC "How to Apply"), with
   asks for one specific achievement for the CEO and what each advisor does for the company.
-- The skeptic's top attack is the letters-of-intent line; it is kept as grounded (a discount pattern) and leads the
-  answer.
+- The skeptic's top attack is the letters-of-intent line; it is kept as grounded (a discount pattern) even though
+  the founder can show the letters, and it leads the answer under Checked first, never under Dropped.
 - The close says the answer is not investment advice and that named customers should agree to be named.

@@ -104,7 +104,10 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
 ## Answering
 
 Lead with the verdict, then the table, then the questions, then the assumptions. Use the tool's printed values
-(`rounded` with its unit, or the exact fraction when precision matters); never round again or recompute.
+(`rounded` with its unit, or the exact fraction when precision matters); never round again or recompute. A value whose
+unit is `fraction` is a share of the whole: show it as a percent by moving the decimal point of its `rounded` value two
+places to the right, keeping every digit (0.166667 is 16.6667%), which is what the command line's report prints. That
+is a change of notation, not a calculation.
 
 1. **Verdict.** "All N figures the deck states are consistent", "M of N figures the deck states do not match", or,
    for `not_checked`, "The calculator could check none of the deck's figures; here is what the round does." A runway

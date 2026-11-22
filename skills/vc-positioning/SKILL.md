@@ -10,8 +10,9 @@ a story a partner can repeat to their colleagues, and the phrases to keep or dro
 checks it against public frameworks for how investors read a pitch, attacks it the way a skeptical partner would, then
 defends it with the founder's own words, and returns what survives: the objections still standing, a tightened
 narrative, a say-and-avoid list and a script for a prep session with an existing investor. The prep session follows an
-idea from a public LinkedIn post by Harry Stebbings of 20VC (November 2026): test the packaging with someone already on
-your cap table before you take it to dozens of new investors.
+idea from a LinkedIn post by Harry Stebbings of 20VC (around November 2026; unverified, since this skill's authors saw
+only a pasted copy and did not fetch the post): test the packaging with someone already on your cap table before going
+wide.
 
 The founder is always the user. The skill never plays an investor, never speaks as a named investor or firm, and never
 adds a fact about the company that the founder did not give.
@@ -68,6 +69,9 @@ column names the adversarial lens that attacks the row.
 
 ## Steps
 
+Without a subagent tool, run Stage A of the adversarial review first, before step 1, as "How to run the lenses" says,
+so the lenses do not anchor on the dimension marks; step 5 then starts at the quote check.
+
 1. **Quote first.** List what the founder said under each dimension, word for word. Do not tidy it yet.
 2. **Mark each dimension** Clear, Needs work or Missing, quoting the line that decides it. Give no overall score: a
    number from one conversation is not calibrated and invites false comfort.
@@ -79,6 +83,12 @@ column names the adversarial lens that attacks the row.
      use-of-funds lines): run the check as the vc-deal-math skill describes, with `equity_deal_check`, and use only
      the tool's values. A raise on a SAFE or note goes to `equity_round` as vc-deal-math step 2 says. A mismatch goes
      to the top of the answer: a story whose numbers disagree undercuts every message in it.
+   - On a SAFE or note raise, no tool checks the runway claim or the use-of-funds lines: `equity_round` takes neither,
+     and `equity_deal_check` needs a priced round's valuation. Quote them as stated, mark them "not checked: no tool
+     computes this for a SAFE or note raise", and never work them out by hand.
+   - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
+     its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%, -0.033333 is -3.3333%),
+     which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
    - Growth rates, market sizes, retention and unit economics: no tool in this repository computes them. Quote them as
      stated, check only that each has a definition and a period, and never compute, convert or round one (no monthly
      growth turned into yearly, no "1% of the market is").
@@ -124,9 +134,11 @@ Every lens gets the same brief, with its own name and test filled in:
 
 **How to run the lenses.** When the agent has a subagent tool (in Claude Code, the Agent or Task tool), run the lenses
 as parallel subagents. Give each one only the founder's material and its lens brief: not this skill's other sections,
-not the dimension table, not another lens's output, so no lens anchors on another. Without a subagent tool, run them
-one after another, and write each lens's objections down in full before reading the next lens's brief; never revise
-an earlier lens's list after a later one.
+not the dimension table, not another lens's output, so no lens anchors on another. Without a subagent tool, run Stage A
+first, before step 1, without consulting the dimension table, the phrase table or any dimension mark: run the lenses
+one after another, write each lens's objections down in full before reading the next lens's brief, and never revise
+an earlier lens's list after a later one. Lenses run this way are less independent than subagents, and the same agent
+then judges them in Stage B, so the answer says so.
 
 **The calculator's mismatches** from step 4 do not go through the lenses. Each mismatch row is added to the
 survivors as ends the meeting, quoting the figure as the deck states it, with the tool's value as the reason. It is
@@ -140,31 +152,41 @@ the same line, merge them and keep both lens names. Gaps from every lens go to t
 
 ### Stage B: refute
 
-Each objection gets its own refute pass, which argues the founder's side using only the founder's material. With a
-subagent tool, run one subagent per objection, given the founder's material, that one objection and the refute brief
-below, and nothing else; without one, take the objections one at a time and decide each before reading the next.
+Each objection gets its own refute pass, which decides, using only the founder's material, whether that material
+answers the objection. The pass is a judge, not the founder's advocate. With a subagent tool, run one subagent per
+objection, given the founder's material, that one objection, the Phrase or pattern column of the phrase table below,
+and everything from "The refute brief:" to the end of this stage, and nothing else; without one, take the objections
+one at a time and decide each against the same brief before reading the next.
 
 The refute brief:
 
-- You argue the founder's side of one objection. Write in the third person; you are not an investor and do not speak
-  as one, named or not.
-- Use only the founder's material given here. Bring in no outside fact, and do no arithmetic: no totals, conversions
-  or growth rates worked out from the founder's figures.
+- You decide whether the founder's material answers one objection; you argue neither side. Write in the third
+  person; you are not an investor and do not speak as one, named or not.
+- Use only the founder's material given here. Bring in no outside fact about the company, its market or its
+  competitors, and do no arithmetic: no totals, conversions or growth rates worked out from the founder's figures.
+- How a partner is likely to read a line is not an outside fact. An objection that letters of intent are not revenue,
+  or that a market's ceiling is small, rests on that reading: judge whether the material answers it, and never drop
+  it as not grounded for that reason.
+- A line that itself matches a phrase or pattern in the list you were given never answers an objection.
 - Return one verdict from the three below, with the founder's line quoted word for word where the verdict needs one.
+  When you cannot decide, return Kept.
 
-The pass returns one verdict:
+The verdicts:
 
-- **Dropped, answered:** the material already answers the objection. Quote the founder's line that answers it. The
-  rewrite may still move that line earlier, where a partner will see it.
-- **Dropped, not grounded:** the quoted line does not say what the objection claims, or the objection rests on a fact
-  that is not in the material.
+- **Dropped, answered:** a line of the material other than the objected line supplies the specific thing the
+  objection says is missing (a figure with its period, a named alternative, a milestone, a specific achievement).
+  Quote the founder's line that answers it. When that line should move earlier, where a partner will see it, say so.
+- **Dropped, not grounded:** the quoted line does not say what the objection claims, or the objection rests on an
+  outside fact about the company, its market or its competitors.
 - **Kept:** neither holds. When the founder's best answer would need something the material does not contain, the
   objection stays and that something becomes the evidence to add, as a bracketed ask.
 
 The refute pass invents nothing on the founder's behalf: no figure, customer, plan, partnership or argument the
-founder did not give. When it cannot decide, the objection is kept. Check every answering line the same way as the
-objections' quotes: an answering line that is not in the material word for word does not drop the objection, which
-stays kept.
+founder did not give. When it cannot decide, the objection is kept.
+
+After the passes, check every answering line the same way as the objections' quotes: an answering line that is not in
+the material word for word does not drop the objection, which stays kept, and neither does one that is the objected
+line itself or that matches a phrase in the phrase table.
 
 ### Rank what survives
 
@@ -177,28 +199,29 @@ no percentages and no score. For each survivor write:
 - a concrete rewrite that uses only the founder's facts, or the evidence to add, as a bracketed ask.
 
 **Where the survivors go.** The top three become the biggest issues at the head of the answer. A survivor that turns
-on a phrase joins the say-and-avoid list. Each rewrite is carried into the tightened narrative. The top survivors go
-into the prep script, so the existing investor can say whether new investors will raise them too.
+on a phrase joins the say-and-avoid list. Each rewrite is carried into the tightened narrative, and so is the
+advice to move a dropped objection's answering line earlier. The top survivors go into the prep script, so the
+existing investor can say whether new investors will raise them too.
 
 ## Phrases that cost credibility
 
 Signals, not rules: a founder may have a reason. Flag, explain, and let them decide. A row marked unverified has no
 public source behind it that this skill's authors read; say so when you use it.
 
-| Phrase or pattern                                                                | What a partner is likely to hear                      | Say instead                                                                                    | Source                                                                                                             |
-| -------------------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| "We have no competitors", "nobody else does this"                                | The market is not real, or the founder has not looked | Name the alternatives, including doing it by hand or doing nothing, and why customers pick you | Sequoia "Competition / alternatives"; YC "How to Apply" (obstacles you have not considered); Dixon "The idea maze" |
-| "We only need 1% of the market", "if we get just 1% of a $X billion market"      | Top-down sizing that never narrowed the customer      | Who exactly buys, how many of them, what each pays: the founder's own numbers                  | YC seven questions (2); YC seed fundraising guide (what not to do: inflated market sizes)                          |
-| "Our projections are conservative"                                               | Unverified: common in founder advice, no source read  | Label projections as a plan and show the two or three assumptions that drive them              | Unverified; YC seed fundraising guide advises against detailed financials at seed                                  |
-| "Transforming", "revolutionizing", "AI-powered platform for"                     | Nothing a reader could describe back                  | What it is, for whom, in plain words; an "X for Y" analogy is fine                             | YC "How to Apply" (marketing language); YC seven questions (jargon)                                                |
-| "Our edge is a better UX", "we execute better", "easy to use"                    | A claim to execute well, not an insight               | The specific thing you know or do that others do not                                           | YC "How to Apply"; YC seven questions (4)                                                                          |
-| "Strong traction", "great momentum" with no number; cumulative charts; downloads | Vanity, or a number being hidden                      | A period-by-period figure with its definition                                                  | a16z "16 Startup Metrics" (13, 14); YC seed deck guide                                                             |
-| Letters of intent or bookings called revenue; GMV called revenue                 | An inflated top line that diligence will undo         | Name each metric for what it is                                                                | a16z "16 Startup Metrics" (1, 6)                                                                                   |
-| "We're raising $X" with nothing after it                                         | Cannot tell what the money buys                       | The amount and the milestones it reaches                                                       | YC seed deck guide; YC seven questions (7)                                                                         |
-| Team as adjectives ("passionate", "world-class"); advisors up front              | Generic claims that carry no weight                   | One specific achievement per founder; founders before advisors                                 | YC "How to Apply"; YC seed deck guide                                                                              |
-| The obvious risk left out                                                        | The founder has not thought of it                     | Name it and the plan for it                                                                    | YC "How to Apply"                                                                                                  |
-| "What do you think?" as the close                                                | No ask                                                | State the ask                                                                                  | YC seven questions (7)                                                                                             |
-| Asking for an NDA; negotiating valuation in the first meeting                    | Inexperience                                          | Drop the NDA; take terms away to discuss later                                                 | YC seed fundraising guide (what not to do)                                                                         |
+| Phrase or pattern                                                                | What a partner is likely to hear                         | Say instead                                                                                    | Source                                                                                                             |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| "We have no competitors", "nobody else does this"                                | The market is not real, or the founder has not looked    | Name the alternatives, including doing it by hand or doing nothing, and why customers pick you | Sequoia "Competition / alternatives"; YC "How to Apply" (obstacles you have not considered); Dixon "The idea maze" |
+| "We only need 1% of the market", "if we get just 1% of a $X billion market"      | Top-down sizing that never narrowed the customer         | Who exactly buys, how many of them, what each pays: the founder's own numbers                  | YC seven questions (2); YC seed fundraising guide (what not to do: inflated market sizes)                          |
+| "Our projections are conservative"                                               | A claim no one can check; the assumptions are what count | Label projections as a plan and show the two or three assumptions that drive them              | Unverified; YC seed fundraising guide advises against detailed financials at seed                                  |
+| "Transforming", "revolutionizing", "AI-powered platform for"                     | Nothing a reader could describe back                     | What it is, for whom, in plain words; an "X for Y" analogy is fine                             | YC "How to Apply" (marketing language); YC seven questions (jargon)                                                |
+| "Our edge is a better UX", "we execute better", "easy to use"                    | A claim to execute well, not an insight                  | The specific thing you know or do that others do not                                           | YC "How to Apply"; YC seven questions (4)                                                                          |
+| "Strong traction", "great momentum" with no number; cumulative charts; downloads | Vanity, or a number being hidden                         | A period-by-period figure with its definition                                                  | a16z "16 Startup Metrics" (13, 14); YC seed deck guide                                                             |
+| Letters of intent or bookings called revenue; GMV called revenue                 | An inflated top line that diligence will undo            | Name each metric for what it is                                                                | a16z "16 Startup Metrics" (1, 6)                                                                                   |
+| "We're raising $X" with nothing after it                                         | Cannot tell what the money buys                          | The amount and the milestones it reaches                                                       | YC seed deck guide; YC seven questions (7)                                                                         |
+| Team as adjectives ("passionate", "world-class"); advisors up front              | Generic claims that carry no weight                      | One specific achievement per founder; founders before advisors                                 | YC "How to Apply"; YC seed deck guide                                                                              |
+| The obvious risk left out                                                        | The founder has not thought of it                        | Name it and the plan for it                                                                    | YC "How to Apply"                                                                                                  |
+| "What do you think?" as the close                                                | No ask                                                   | State the ask                                                                                  | YC seven questions (7)                                                                                             |
+| Asking for an NDA; negotiating valuation in the first meeting                    | Inexperience                                             | Drop the NDA; take terms away to discuss later                                                 | YC seed fundraising guide (what not to do)                                                                         |
 
 ## The tightened narrative
 
@@ -210,6 +233,7 @@ public source behind it that this skill's authors read; say so when you use it.
   the founder's material or a tool result. Every gap is a bracketed ask.
 - **Shorter, in the founder's voice.** Cut words that carry nothing; keep the founder's own terms where they are clear.
 - **Answer the survivors.** Each surviving objection's rewrite appears in the narrative, or its bracketed ask does.
+  A dropped objection's answering line moves earlier where its Dropped line says so.
 - **The repeatable line:** mark the one sentence a partner should be able to repeat to their partners on Monday.
 
 ## The prep script
@@ -244,11 +268,15 @@ Lead with what to fix, then the material to take into the prep session.
    - **Survivors,** ranked, as a table: Rank, Tier, Lens, The founder's line (quoted), Why a partner reads it that way,
      Rewrite or evidence to add.
    - **Dropped,** one line each: the objection, its lens, and why it fell (answered, quoting the founder's line that
-     answers it, or not grounded), so the founder sees it was tested.
+     answers it and saying whether to move that line earlier, or not grounded), so the founder sees it was tested.
+   - When the lenses ran one after another in one agent, with no subagent tool, say so: they are less independent
+     than separate subagents.
 3. **Dimension table:** Dimension, What you say (quoted), Clear / Needs work / Missing, Fix.
 4. **Say and avoid:** each flagged phrase quoted, what a partner is likely to hear, the rewrite, the source.
-5. **Numbers:** the `equity_deal_check` verdict with each mismatch row in the tool's values; then each other figure
-   quoted as stated with "not checked: no tool computes this", and any that lacks a definition or a period.
+5. **Numbers:** the `equity_deal_check` verdict with each mismatch row in the tool's values; on a SAFE or note raise,
+   the runway claim and use-of-funds lines quoted with "not checked: no tool computes this for a SAFE or note raise";
+   then each other figure quoted as stated with "not checked: no tool computes this", and any that lacks a definition
+   or a period.
 6. **Tightened narrative:** one-liner options, a 30-second version, the section order with bracketed asks.
 7. **Prep script,** filled in with the founder's material and the top survivors.
 8. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
@@ -267,8 +295,9 @@ Lead with what to fix, then the material to take into the prep session.
 - Sequoia Capital, "Writing a Business Plan": https://www.sequoiacap.com/article/writing-a-business-plan/
 - Andreessen Horowitz, "16 Startup Metrics" (2015): https://a16z.com/16-startup-metrics/
 - Chris Dixon, "The idea maze" (2013): https://cdixon.org/2013/08/04/the-idea-maze
-- Harry Stebbings (20VC), LinkedIn post on prepping fundraising messaging with existing investors, November 2026; the
-  idea only, paraphrased above.
+- Harry Stebbings (20VC), a LinkedIn post on prepping fundraising messaging with existing investors (around November
+  2026). Unverified: this skill's authors saw only a pasted copy and did not fetch the post. The idea only,
+  paraphrased above.
 
 Several of these guides are years old. They describe how investors read a pitch, which changes slowly, but say their
 dates when a founder leans on one. The adversarial review's two-stage method (attack, then refute with the founder's

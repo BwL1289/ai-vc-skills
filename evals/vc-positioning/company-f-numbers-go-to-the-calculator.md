@@ -54,6 +54,9 @@ calculator's mismatches at the top of the surviving objections, and computes not
 - The two calculator mismatches lead the surviving objections, ranked as ends the meeting and not put through the
   refute pass: the deck's 20% against the calculator's 16.6667% (a $12,000,000.00 post-money), and the deck's 18.00
   months against 15.33 months. Each quotes the deck's figure as stated and gives the tool's value.
+- Through the MCP tool, the investors' share comes back as the fraction 0.166667 and the difference as -0.033333; the
+  answer shows them as 16.6667% and -3.3333% by moving the decimal point two places, the form the report prints, and
+  rounds neither.
 - The `runway_below_band` flag is relayed as a question a partner is likely to ask, a common benchmark and not a rule.
 - "15% a month" is quoted as stated and marked "not checked: no tool computes this". The answer neither confirms,
   corrects nor annualizes it.

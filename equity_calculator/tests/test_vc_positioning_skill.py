@@ -236,3 +236,89 @@ def test_each_eval_call_is_valid_and_its_excerpt_is_what_the_calculator_prints(p
 
     for line in excerpt.splitlines():
         assert line in printed, line
+
+
+_SAFE_UNCHECKED = "not checked: no tool computes this for a SAFE or note raise"
+# A figure an eval's answer takes from the calculator: a percent or months with decimals, or money with cents.
+_PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|\d[\d,]*\.\d+ months|\$\d[\d,]*\.\d{2}")
+
+
+def test_the_refute_brief_is_handed_over_whole_and_judges_rather_than_argues() -> None:
+    """The pass that drops objections gets its verdicts and rules, the phrase list, and the lens ban's own limits."""
+    stage = _section("### Stage B: refute")
+    handoff, brief = (_unwrapped(part) for part in stage.split("\n\nThe refute brief:\n\n", 1))
+
+    assert "| Phrase or pattern" in _section("## Phrases that cost credibility")
+    assert "the Phrase or pattern column of the phrase table below" in handoff
+    assert 'everything from "The refute brief:" to the end of this stage' in handoff
+    for rule in (
+        "you argue neither side",
+        "Bring in no outside fact about the company, its market or its competitors",
+        "How a partner is likely to read a line is not an outside fact",
+        "never answers an objection",
+        "When you cannot decide, return Kept",
+        "a line of the material other than the objected line supplies the specific thing the objection says is missing",
+        "rests on an outside fact about the company, its market or its competitors",
+        "invents nothing on the founder's behalf",
+        "neither does one that is the objected line itself or that matches a phrase in the phrase table",
+    ):
+        assert rule in brief, rule
+    assert "argue the founder's side" not in _unwrapped(stage)
+
+
+def test_without_a_subagent_tool_the_lenses_run_before_step_1_and_the_answer_says_so() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    attack = _unwrapped(_section("### Stage A: attack"))
+    note = "Without a subagent tool, run Stage A of the adversarial review first, before step 1"
+
+    assert note in steps and steps.index(note) < steps.index("1. **Quote first.**")
+    assert "run Stage A first, before step 1" in attack and "less independent than subagents" in attack
+    assert "less independent than separate subagents" in _unwrapped(_section("## Answering"))
+
+
+def test_a_safe_raise_quotes_its_runway_and_use_of_funds_unchecked() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    prompts = {path: _unwrapped(_section("## Prompt", path.read_text(encoding="utf-8"))) for path in _EVALS}
+    (path,) = (path for path, prompt in prompts.items() if "on a SAFE" in prompt and "months of runway" in prompt)
+
+    assert "On a SAFE or note raise, no tool checks the runway claim or the use-of-funds lines" in steps
+    assert _SAFE_UNCHECKED in steps and _SAFE_UNCHECKED in _unwrapped(_section("## Answering"))
+    assert "never work them out by hand" in steps
+    assert _SAFE_UNCHECKED in _unwrapped(_section("## Expected answer", path.read_text(encoding="utf-8")))
+
+
+def test_a_fraction_from_the_tool_is_shown_as_a_percent_by_notation_only() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
+
+
+def test_the_letters_of_intent_row_cites_only_the_a16z_items_that_say_so() -> None:
+    table = _section("## Phrases that cost credibility")
+    (row,) = (row for row in table.splitlines() if row.startswith("| Letters of intent"))
+
+    assert row.rstrip(" |").rsplit("|", 1)[1].strip() == 'a16z "16 Startup Metrics" (1, 6)'
+    assert "pipeline" not in row.lower()
+
+
+def test_the_prep_session_credit_says_its_source_was_not_fetched() -> None:
+    intro = _TEXT.split("\n## ", 1)[0]
+    (credit,) = (line for line in _section("## Sources").split("\n- ") if "Stebbings" in line)
+
+    assert "unverified" in _unwrapped(intro) and "did not fetch the post" in _unwrapped(intro)
+    assert "Unverified" in credit and "did not fetch the post" in _unwrapped(credit)
+
+
+@pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])
+def test_each_figure_an_eval_answer_takes_from_the_calculator_is_what_it_prints(path: Path) -> None:
+    """A percent, a months figure or a money figure with cents in the expected answer is a line the report prints."""
+    text = path.read_text(encoding="utf-8")
+    reports = "\n".join(
+        render_sheet(sheet_for(compute(DealCheckInput.model_validate(json.loads(call)["inputs"]))))
+        for call in _fences("json", text)
+    )
+    figures = _PRINTED_FIGURE.findall(_unwrapped(_section("## Expected answer", text)))
+
+    assert figures
+    for figure in figures:
+        assert figure in reports, figure

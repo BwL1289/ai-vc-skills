@@ -12,13 +12,14 @@ answers it, keeps the one the material cannot answer, and invents nothing on the
 > last year the main shortage list is published as a daily data feed, so shortages can be tracked automatically."
 > Slide 5, Competition: "Today pharmacists use spreadsheets and phone calls; two inventory vendors show shortages in a
 > monthly report." Slide 6, Team: "Our CEO ran pharmacy purchasing at a 600-bed hospital for 8 years; our CTO built
-> the data pipeline at a health-data startup." Slide 7, Ask: "We're raising $1.5M on a SAFE."
+> the data pipeline at a health-data startup." Slide 7, Ask: "We're raising $1.5M on a SAFE.
+> That gives us 18 months of runway."
 
 ## Expected tool call
 
 None: no `equity_deal_check` call. The raise is on a SAFE, which `deal_check` does not model, and no cap is given. As
 the vc-deal-math skill says, it asks for the cap and the next priced round the founder expects before any
-`equity_round` call.
+`equity_round` call. No tool checks the runway claim on a SAFE raise either.
 
 ## Expected answer
 
@@ -31,5 +32,7 @@ the vc-deal-math skill says, it asks for the cap and the next priced round the f
   line.
 - "We're raising $1.5M on a SAFE." survives (the ask and milestones), because nothing in the material says what the
   $1.5M reaches; the evidence to add is a bracketed ask, such as `[the milestones the $1.5M reaches]`.
+- "That gives us 18 months of runway." is quoted as stated and marked "not checked: no tool computes this for a SAFE
+  or note raise". The answer works out no runway and asks for nothing it would need to.
 - The market has no line to quote, so it is a gap in the open asks, not an objection.
 - The prep script is filled in for the lead seed investor and brings the top survivors to the session.
