@@ -35,14 +35,15 @@ The plugin adds every skill in `skills/` and the MCP server, which it starts wit
 
    If Claude Desktop cannot find the command, give its full path (`which equity_calculator_mcp`).
 
-3. For the skill itself, download the repository (`git clone https://github.com/BwL1289/ai-vc-skills`), zip its
-   `skills/equity-calculator/` folder and upload it in Claude's skills settings.
+3. For the skills themselves, download the repository (`git clone https://github.com/BwL1289/ai-vc-skills`), zip its
+   `skills/equity-calculator/` folder (and `skills/vc-deal-math/`, the founder's deal check, in preview) and upload
+   each in Claude's skills settings.
 
 ## Cursor, Windsurf and other MCP clients
 
 Install the package as above, then add the same `mcpServers` entry to the client's MCP settings (Cursor:
-`~/.cursor/mcp.json`). Clients that read Agent Skills can load `skills/equity-calculator/SKILL.md` from a copy of the
-folder in their skills directory.
+`~/.cursor/mcp.json`). Clients that read Agent Skills can load `skills/equity-calculator/SKILL.md` and
+`skills/vc-deal-math/SKILL.md` from a copy of each folder in their skills directory.
 
 ## Claude Code without the plugin
 
