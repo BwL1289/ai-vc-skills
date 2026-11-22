@@ -654,12 +654,12 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
 - Formula cells are worked out by the spreadsheet when it opens the file (Excel and LibreOffice do); a viewer that
   does not calculate, such as a file preview or openpyxl's `data_only` read, shows them empty.
 - Totals are live `=SUM` formulas, so editing a part re-totals: the investor's post-money, total shares, total
-  ownership and post-money (pool and round), the stake lost in all (dilution), vested in all and the grant (vesting), and the total paid out
-  (waterfall). A live total adds the rounded cells, so it can differ from the model's exact total in the last place
+  ownership and post-money (pool and round), the stake lost in all (dilution), vested in all and the grant (vesting), the total paid out
+  (waterfall), and the pre-money split and use-of-funds totals (deal check). A live total adds the rounded cells, so it can differ from the model's exact total in the last place
   kept: a cent on the investor's post-money, a thousandth of a share on the pool's total shares, 0.000001 on its total
   ownership. The number formats hide that difference.
-- The pool's and the round's value rows, and the waterfall's payouts, are rounded to the cent by largest remainder,
-  so they add up to their rounded total exactly.
+- The pool's and the round's value rows, the waterfall's payouts, and a deal check's pre-money split and percent
+  use-of-funds lines are rounded to the cent by largest remainder, so they add up to their rounded total exactly.
 - Verdict cells are coloured by conditional formatting: green for accept, grant and in the money, amber for break
   even and at the money, red for reject, no grant and underwater. A deal check's verdicts are green for consistent,
   red for mismatch and amber for not checked. A waterfall choice is blue when the class converts
@@ -686,7 +686,8 @@ compounds exactly under either stub rule.
 
 Each number shown is its own exact value rounded once. So rounded parts can miss a rounded total by one in the last
 place shown: in the report, a thousandth of a share or 0.0001% beside a total line. The pool's and the round's value
-rows and the waterfall's payouts are the exception, split to the cent by largest remainder.
+rows, the waterfall's payouts and a deal check's pre-money split and percent use-of-funds lines are the exception,
+split to the cent by largest remainder.
 
 ## Assumptions
 

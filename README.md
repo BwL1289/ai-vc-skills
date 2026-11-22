@@ -185,6 +185,7 @@ Want a skill that is not here? [Request it](https://github.com/BwL1289/ai-vc-ski
 | [`skills/`](skills/)                       | One folder per agent skill, each with its `SKILL.md`.                                            |
 | [`equity_calculator/`](equity_calculator/) | The calculator: a Python package with the command, the workbook, the MCP server and tests.       |
 | [`.claude-plugin/`](.claude-plugin/)       | `marketplace.json` and `plugin.json`: the Claude Code marketplace and its one plugin.            |
+| [`evals/`](evals/)                         | Test prompts per skill, each with the expected tool call and an answer pasted from real output.  |
 | [`template/`](template/)                   | The starting point for a new skill.                                                              |
 | [`scripts/`](scripts/)                     | `validate_skills.py`, which checks every skill in CI.                                            |
 | [`docs/`](docs/)                           | [Install guide per client](docs/install.md) and [how to write a skill](docs/writing-a-skill.md). |
