@@ -160,6 +160,8 @@ def test_the_refute_stage_uses_only_the_founders_material_and_says_why_each_obje
         assert verdict in refute, verdict
     assert "Quote the founder's line that answers it" in refute
     assert "invents nothing on the founder's behalf" in refute
+    assert "an answering line that is not in the material word for word does not drop the objection" in refute
+    assert "The refute brief:" in refute and "do no arithmetic" in refute and "Bring in no outside fact" in refute
     assert "word for word" in quotes and "dropped as not grounded" in quotes
 
 

@@ -139,8 +139,18 @@ the same line, merge them and keep both lens names. Gaps from every lens go to t
 ### Stage B: refute
 
 Each objection gets its own refute pass, which argues the founder's side using only the founder's material. With a
-subagent tool, run one subagent per objection, given the founder's material and that one objection only; without
-one, take the objections one at a time and decide each before reading the next. The pass returns one verdict:
+subagent tool, run one subagent per objection, given the founder's material, that one objection and the refute brief
+below, and nothing else; without one, take the objections one at a time and decide each before reading the next.
+
+The refute brief:
+
+- You argue the founder's side of one objection. Write in the third person; you are not an investor and do not speak
+  as one, named or not.
+- Use only the founder's material given here. Bring in no outside fact, and do no arithmetic: no totals, conversions
+  or growth rates worked out from the founder's figures.
+- Return one verdict from the three below, with the founder's line quoted word for word where the verdict needs one.
+
+The pass returns one verdict:
 
 - **Dropped, answered:** the material already answers the objection. Quote the founder's line that answers it. The
   rewrite may still move that line earlier, where a partner will see it.
@@ -150,7 +160,9 @@ one, take the objections one at a time and decide each before reading the next. 
   objection stays and that something becomes the evidence to add, as a bracketed ask.
 
 The refute pass invents nothing on the founder's behalf: no figure, customer, plan, partnership or argument the
-founder did not give. When it cannot decide, the objection is kept.
+founder did not give. When it cannot decide, the objection is kept. Check every answering line the same way as the
+objections' quotes: an answering line that is not in the material word for word does not drop the objection, which
+stays kept.
 
 ### Rank what survives
 

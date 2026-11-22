@@ -8,9 +8,10 @@ calculator's mismatches at the top of the surviving objections, and computes not
 ## Prompt
 
 > Check our story and our ask. Company F helps truck fleets pay their drivers the same day. We're raising a $2M priced
-> seed at a $10M pre-money for 20% of the company. We have $300k in the bank, no revenue yet, and we spend $150k a
-> month today and plan to keep spending $150k a month after the raise. The deck says 18 months of runway. Weekly
-> active users went from 2,000 to 4,500 over the last six months, which is 15% a month.
+> seed at a $10M pre-money for 20% of the company. We have $300k in the bank and no revenue yet, and we don't plan
+> any revenue in the next 18 months. We spend $150k a month today and plan to keep spending $150k a month after the
+> raise. The deck says 18 months of runway. Weekly active users went from 2,000 to 4,500 over the last six months,
+> which is 15% a month.
 
 ## Expected tool call
 
