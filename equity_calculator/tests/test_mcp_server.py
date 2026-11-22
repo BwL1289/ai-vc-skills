@@ -23,6 +23,7 @@ from equity_calculator.result_range import OUT_OF_RANGE_REASON
 from equity_calculator.scenarios import compute
 from openpyxl import load_workbook
 from tests.support import (
+    DEAL_B,
     DILUTION_ROUNDS,
     POOL_EXAMPLE,
     ROUND_EXAMPLE,
@@ -122,6 +123,7 @@ _SAMPLES: dict[str, dict[str, object]] = {
     "dilution": {"holder_percent": "50", "rounds": DILUTION_ROUNDS},
     "vesting": {"grant_shares": 48_000, "month": 30, "strike_price": "0.50", "common_price": "2"},
     "waterfall": {"exit_amount": "50000000", "common_shares": WATERFALL_COMMON, "classes": [WATERFALL_A, WATERFALL_B]},
+    "deal_check": DEAL_B,
 }
 # $1M in at a $1M pre-money with a 25% pre-money pool target and a $250k SAFE at a 50% discount: the pooled price is
 # exactly zero, so the round has no price (the same case as test_round_pool.py).
@@ -168,7 +170,7 @@ async def test_one_read_only_tool_per_scenario_and_no_workbook_tool_without_a_fo
     tools = await _tools(mcp_server.build_server())
 
     assert sorted(tool.name for tool in tools) == sorted(f"equity_{scenario}" for scenario in _INPUT_MODELS)
-    assert len(tools) == len(_SAMPLES) == 7
+    assert len(tools) == len(_SAMPLES) == 8
     for tool in tools:
         assert tool.annotations.readOnlyHint is True
         assert tool.annotations.openWorldHint is False

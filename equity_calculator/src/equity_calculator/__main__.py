@@ -1,5 +1,6 @@
 # Command-line interface: stdout is the report.
-"""``equity_calculator`` — an equity question: PG's two tests, the option pool, a round, dilution, vesting, an exit.
+"""``equity_calculator`` — an equity question: PG's two tests, the option pool, a round, dilution, vesting, an exit,
+or a fundraising ask checked before a VC reads it.
 
     equity_calculator investor (--equity-percent N | --pre-money V --investment I)
         (--outcome-multiplier M | --growth-percent G) [--holder-percent H]
@@ -15,6 +16,14 @@
         [--acceleration single_trigger|double_trigger --acceleration-percent A --change-of-control-month C
         [--acceleration-base unvested|grant]] [--share-rounding exact|whole_shares]
     equity_calculator waterfall --exit-amount E --common-shares C (--class "TERMS")...
+    equity_calculator deal_check --investment I [--pre-money V] [--post-money P] [--stated-investor-percent X]
+        [--fully-diluted-shares FD [--unissued-pool-shares U] [--target-pool-percent T]
+        [--pool-timing pre_money|post_money] [--safe "TERMS" | --note "TERMS"]...]
+        [--holder-percent H [--stated-holder-percent S]] [--cash-on-hand C]
+        [--planned-monthly-gross-burn B [--planned-monthly-revenue R]]
+        [--current-monthly-gross-burn B [--current-monthly-revenue R]] [--stated-runway-months M]
+        [--use-of-funds AMOUNT|PCT%]... [--tolerance-points P] [--tolerance-percent Q]
+        [--dilution-band-percent D] [--runway-band-months M]
 
 Every scenario also takes ``--json`` (print the whole result model, exact fractions included, instead of the
 report) and ``--xlsx PATH`` (also write the formatted workbook to PATH; the report then names it). The report is
@@ -27,8 +36,9 @@ as ``COLUMNS`` to wrap the help, none of which changes a number); its one output
 any folders on its path that do not exist yet; while saving, the Excel library also writes and deletes a short-lived
 file in the system's temporary folder (``TMPDIR`` if set), so that folder must be writable. The number readers are
 ``equity_calculator.cli_numbers``; each scenario's flags are ``equity_calculator.cli_arguments``; a ``--safe``,
-``--note``, ``--round`` or ``--class`` is one argument of terms (``equity_calculator.cli_instruments``). A refusal names
-the flag, or a repeated flag's item as ``--note #2`` (the second instrument in the order given) and its term.
+``--note``, ``--round``, ``--class`` or ``--use-of-funds`` is one argument of terms
+(``equity_calculator.cli_instruments``). A refusal names the flag, or a repeated flag's item as ``--note #2`` (the
+second instrument in the order given) and its term.
 """
 
 from __future__ import annotations
@@ -42,6 +52,7 @@ from pathlib import Path
 from typing import get_args
 
 from equity_calculator.cli_arguments import (
+    deal_check_arguments,
     dilution_arguments,
     employee_arguments,
     investor_arguments,
@@ -55,6 +66,7 @@ from equity_calculator.errors import EquityComputeError
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity import (
+    DealCheckInput,
     DilutionInput,
     EmployeeInput,
     InvestorInput,
@@ -79,6 +91,7 @@ _INPUT_MODELS: dict[str, type[ScenarioInput]] = {
     "dilution": DilutionInput,
     "vesting": VestingInput,
     "waterfall": WaterfallInput,
+    "deal_check": DealCheckInput,
 }
 _OUTPUT_FLAGS = ("json", "xlsx")
 _FIRST = 0
@@ -109,6 +122,11 @@ def _build_parser() -> argparse.ArgumentParser:
         ("dilution", "One holder's stake through rounds: h_k = h_(k-1)·(1 - n_k - p_k)", dilution_arguments),
         ("vesting", "A grant at a month: cliff, termination, acceleration, value above the strike", vesting_arguments),
         ("waterfall", "Who gets what of an exit: preferences by rank, each class converts or not", waterfall_arguments),
+        (
+            "deal_check",
+            "Check your raise before a VC does: valuation, ownership after the round, runway, the deck's figures",
+            deal_check_arguments,
+        ),
     )
     for name, summary, add_arguments in scenarios_help:
         add_arguments(scenarios.add_parser(name, parents=[outputs], help=summary, description=summary))

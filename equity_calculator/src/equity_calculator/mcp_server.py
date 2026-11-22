@@ -3,8 +3,8 @@
     equity_calculator_mcp [--output-dir DIR]
 
 Each scenario is one tool, ``equity_<scenario>`` (``equity_investor``, ``equity_employee``, ``equity_pool``,
-``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``). A tool takes one argument,
-``inputs``: that scenario's input model (``equity_calculator.schemas``). It returns exactly the text
+``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``). A tool takes
+one argument, ``inputs``: that scenario's input model (``equity_calculator.schemas``). It returns exactly the text
 ``equity_calculator <scenario> --json`` prints: the result model as JSON, exact fractions and labelled assumptions
 included. An input the model refuses, or one it accepts that has no answer (``equity_calculator.errors``), comes back
 as a tool error that says why. The arithmetic runs on a worker thread, so a large round never stalls the server.
@@ -51,6 +51,7 @@ from equity_calculator.errors import EquityComputeError
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity import (
+    DealCheckInput,
     DilutionInput,
     EmployeeInput,
     EquityInput,
@@ -140,15 +141,26 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "Who gets what of an exit: liquidation preferences paid by rank (multiples, caps, participation), then each "
         "preferred class's best response, convert to common or keep its preference.",
     ),
+    "deal_check": (
+        DealCheckInput,
+        "Deal check (your raise as a VC will read it)",
+        "A founder's fundraising ask checked before a VC does: post-money = pre_money + investment (or the pre-money "
+        "worked from post_money or stated_investor_percent), the share the investor really gets (pool timing, SAFEs "
+        "and notes counted), one holder group's stake after the round (holder_percent), the effective pre-money and "
+        "what the pre-money pays for, runway = (cash_on_hand + investment) / monthly net burn on the planned and "
+        "current figures, and the use_of_funds total. Each figure the deck states comes back consistent or a "
+        "mismatch with its difference; flags name what a VC is likely to ask and never change a verdict.",
+    ),
 }
 
 _INSTRUCTIONS = (
     "Exact startup-equity arithmetic. Pick the tool for the question: equity_investor (should we sell stock for this "
     "deal?), equity_employee (the most a hire is worth), equity_pool (option-pool shuffle), equity_round (priced round "
     "with SAFEs and notes), equity_dilution (one holder through rounds), equity_vesting (a grant at a month), "
-    "equity_waterfall (who gets what of an exit). Pass the scenario's fields in `inputs`; give money and percents as "
-    "JSON strings to keep every digit. Quote the result's numbers and its labelled assumptions; never round them "
-    "further without saying so."
+    "equity_waterfall (who gets what of an exit), equity_deal_check (a founder's raise checked: valuation, ownership "
+    "after the round, runway, the deck's own figures). Pass the scenario's fields in `inputs`; give money and "
+    "percents as JSON strings to keep every digit. Quote the result's numbers and its labelled assumptions; never "
+    "round them further without saying so."
 )
 
 
@@ -315,7 +327,7 @@ def build_server(output_dir: Path | None = None) -> FastMCP:
                 f"dot, no control, format or surrogate character), and a name that would land outside the folder, an "
                 f"existing file, a link or an answer too large for a workbook is refused. `inputs` is any "
                 f'scenario\'s input with its `scenario` tag set ("investor", "employee", "pool", "round", "dilution", '
-                f'"vesting" or "waterfall"). Returns the path written. {_DIGITS_ADVICE}'
+                f'"vesting", "waterfall" or "deal_check"). Returns the path written. {_DIGITS_ADVICE}'
             ),
             annotations=ToolAnnotations(
                 readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False

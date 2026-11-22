@@ -1,13 +1,15 @@
 """The report of any scenario's result, shared by the printed report (``text``) and the workbook (``workbook``).
 
-``sheet_for`` picks the scenario's sheet builder (``layout_pg``, ``layout_pool``, …); the parts a sheet is built
-from (``Line``, ``Sheet``) live in ``sheet_parts`` and are re-exported here for callers that read a report.
+``sheet_for`` picks the scenario's sheet builder (``layout_pg``, ``layout_pool``, …, ``layout_deal_check``); the parts
+a sheet is built from (``Line``, ``Sheet``) live in ``sheet_parts`` and are re-exported here for callers that read a
+report.
 """
 
 from __future__ import annotations
 
 from typing import assert_never
 
+from equity_calculator.layout_deal_check import deal_check_sheet
 from equity_calculator.layout_dilution import dilution_sheet
 from equity_calculator.layout_pg import employee_sheet, investor_sheet
 from equity_calculator.layout_pool import pool_sheet
@@ -15,6 +17,7 @@ from equity_calculator.layout_round import round_sheet
 from equity_calculator.layout_vesting import vesting_sheet
 from equity_calculator.layout_waterfall import waterfall_sheet
 from equity_calculator.schemas.equity import (
+    DealCheckResult,
     DilutionResult,
     EmployeeResult,
     InvestorResult,
@@ -46,5 +49,7 @@ def sheet_for(result: ScenarioResult) -> Sheet:
             return vesting_sheet(result)
         case WaterfallResult():
             return waterfall_sheet(result)
+        case DealCheckResult():
+            return deal_check_sheet(result)
         case _:
             assert_never(result)

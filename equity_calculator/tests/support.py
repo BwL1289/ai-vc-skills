@@ -23,6 +23,7 @@ from equity_calculator.schemas.equity_common import (
     MIN_ADJUSTED_EXPONENT,
     SIZE_LIMIT,
 )
+from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealCheckResult
 from equity_calculator.schemas.equity_dilution import DilutionInput, DilutionResult
 from equity_calculator.schemas.equity_round import RoundInput, RoundResult
 from equity_calculator.schemas.equity_vesting import VestingInput, VestingResult
@@ -189,3 +190,71 @@ def waterfall(exit_amount: str, *classes: dict[str, object], common_shares: int 
     fields = {"exit_amount": exit_amount, "common_shares": common_shares, "classes": list(classes)}
 
     return compute(WaterfallInput.model_validate(fields))
+
+
+# Three made-up decks, worked by hand in the design notes and by exact fractions in test_deal_check.py.
+# Company A: $3M at a $12M pre-money for 20%, a 10% pool in the pre-money, 8M founder shares, $400k in the bank and a
+# planned $180k a month: runway 170/9 months, not the 24 the deck claims.
+DEAL_A: dict[str, object] = {
+    "investment": "3000000",
+    "pre_money": "12000000",
+    "stated_investor_percent": "20",
+    "fully_diluted_shares": 8_000_000,
+    "target_pool_percent": "10",
+    "pool_timing": "pre_money",
+    "holder_percent": "100",
+    "cash_on_hand": "400000",
+    "planned_monthly_gross_burn": "180000",
+    "stated_runway_months": "24",
+}
+# Company B: an $8M Series A at $32M pre ($40M post) for 20%, two post-money SAFEs ($1M at a $10M cap, $1.5M at a
+# $15M cap) and a pool topped up to 10% in the pre-money; founders hold 90% of 10M shares and the deck says 72% after.
+DEAL_B: dict[str, object] = {
+    "investment": "8000000",
+    "pre_money": "32000000",
+    "post_money": "40000000",
+    "stated_investor_percent": "20",
+    "fully_diluted_shares": 10_000_000,
+    "unissued_pool_shares": 400_000,
+    "target_pool_percent": "10",
+    "pool_timing": "pre_money",
+    "instruments": [
+        {"kind": "safe", "purchase_amount": "1000000", "valuation_cap": "10000000"},
+        {"kind": "safe", "purchase_amount": "1500000", "valuation_cap": "15000000"},
+    ],
+    "holder_percent": "90",
+    "stated_holder_percent": "72",
+}
+# Company C: a $2.5M seed at $10M pre with a $500k note (6% simple for 18 months, $8M cap, 20% discount), founders at
+# 100% of 8M shares (the deck says 80% after), $300k in the bank, today $120k burn and $20k revenue a month, planned
+# $210k and $35k, a 24-month runway claim and a 50/30/20 use of funds.
+DEAL_C: dict[str, object] = {
+    "investment": "2500000",
+    "pre_money": "10000000",
+    "fully_diluted_shares": 8_000_000,
+    "instruments": [
+        {
+            "kind": "note",
+            "principal": "500000",
+            "interest_rate_percent": "6",
+            "months_outstanding": 18,
+            "compounding": "simple",
+            "valuation_cap": "8000000",
+            "discount_percent": "20",
+        }
+    ],
+    "holder_percent": "100",
+    "stated_holder_percent": "80",
+    "cash_on_hand": "300000",
+    "planned_monthly_gross_burn": "210000",
+    "planned_monthly_revenue": "35000",
+    "current_monthly_gross_burn": "120000",
+    "current_monthly_revenue": "20000",
+    "stated_runway_months": "24",
+    "use_of_funds": [{"percent": "50"}, {"percent": "30"}, {"percent": "20"}],
+}
+
+
+def deal_check(**fields: object) -> DealCheckResult:
+    """The deal check for ``fields`` (a ``DealCheckInput``'s fields)."""
+    return compute(DealCheckInput.model_validate(fields))
