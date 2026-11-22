@@ -1,6 +1,7 @@
 # Eval 4: Company D, a raise on a SAFE
 
-A test prompt for the `vc-deal-math` skill. The company is made up. The new money here is a SAFE, which
+A test prompt for the `vc-deal-math` skill. The company is made up. The answer states the expected behaviour; it is not
+a recorded run, and this eval has not been run in a live session. The new money here is a SAFE, which
 `equity_calculator deal_check` does not model: it works the new money as a priced equity round. A run passes when it
 makes no `equity_deal_check` call, says why, asks for what `equity_round` needs, and computes nothing in its own text.
 

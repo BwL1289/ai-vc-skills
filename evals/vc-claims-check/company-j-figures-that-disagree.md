@@ -1,9 +1,10 @@
 # Eval 1: Company J, figures that disagree across the deck and the one-pager
 
 A test prompt for the `vc-claims-check` skill. The company is made up. The two tool calls and their excerpts are from
-real `equity_calculator deal_check` runs with these inputs; the rest states the expected behaviour and is not a
-recorded run. A run passes when it makes one `equity_deal_check` call per document's version of the ask (field order
-free, money and percents as strings), compares the other figures as stated, and computes nothing in its own text.
+real `equity_calculator deal_check` runs with these inputs. "Expected answer" states the expected behaviour, and
+"Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-22). A run passes when it makes one
+`equity_deal_check` call per document's version of the ask (field order free, money and percents as strings), compares
+the other figures as stated, and computes nothing in its own text.
 
 ## Prompt
 
@@ -87,3 +88,47 @@ What the calculator prints for the one-pager (excerpt):
   0.050000; the answer shows them as 25.0000% and 5.0000% by moving the decimal point two places, the form the report
   prints, and rounds neither.
 - Every percent, valuation and month figure in the answer comes from the tool or is quoted from the prompt.
+
+## Recorded answer
+
+Recorded with Claude Code 2.1.330 on 2026-11-22, with the plugin loaded from this repository and no user settings. The
+answer is trimmed; [...] marks each cut.
+
+**Pass.** Two `equity_deal_check` calls with the inputs above, the one-pager's 20% leading as a mismatch, the customer
+counts side by side as Contradicted, and MRR and ARR not converted. Short of the expected answer: the MRR line is
+Supported on the billing dashboard rather than Needs a source, and the runway attack skipped its refute pass.
+
+> **No: two pairs of figures contradict each other, and one pair can't be compared as written.** The raise, the post-money and the 24 months of runway hold up.
+>
+> ## What a partner is likely to check first
+>
+> 1. **Percent sold: the one-pager is wrong.** The calculator puts $2.5M at a $10M post-money at 25.0000% for investors, on a $7.5M pre-money. The deck's "investors get 25%" is consistent. The one-pager's "for 20% of the company" is a mismatch by 5.0000 points. Change the one-pager to 25%. If 20% is the deal you actually want, the raise or the post-money has to change in both documents.
+>
+> 2. **Customer count: the deck and the one-pager disagree.** The deck says "120 paying customers as of October." and the one-pager says "150 paying customers as of October." That is the same metric for the same month with two counts. Use the number your billing dashboard shows for October in both, and note the date it was read.
+>
+> 3. **MRR against ARR: not comparable as stated.** "$38k MRR in October" is a monthly figure with a period; "$450k ARR" has no period or definition. I did not convert one into the other, but a partner will annualise the MRR and compare it with $450k. State one figure, in one form, with its month, in both documents, and say how ARR is defined if you keep it.
+>
+> The skeptic pass ran as a separate subagent and raised the percent sold, the customer count and the runway. No attack was dropped as ungrounded; the runway attack was settled by the calculator.
+>
+> ## Claims table
+>
+> | #   | Claim                                                                 | Where                       | Evidence you named | Verdict                                                     | Fix                                                   |
+> | --- | --------------------------------------------------------------------- | --------------------------- | ------------------ | ----------------------------------------------------------- | ----------------------------------------------------- |
+> | 1   | "for 20% of the company" / "investors get 25%"                        | One-pager ¶4 / Deck slide 9 | None               | **Contradicted**                                            | One-pager to 25%                                      |
+> | 2   | "120 paying customers" / "150 paying customers", both "as of October" | Deck slide 5 / One-pager ¶2 | Billing dashboard  | **Contradicted**                                            | Use the dashboard's October count in both             |
+> | 3   | "$450k ARR"                                                           | One-pager                   | None               | **Needs a source**                                          | Add its period and definition, or replace it with MRR |
+> | 4   | "24 months of runway"                                                 | Deck slide 9                | None               | **Needs a source** (arithmetic consistent)                  | Have the bank balance and spending plan ready         |
+> | 5   | "$2.5M at a $10M post-money"                                          | Deck slide 9, One-pager ¶4  | None               | **Needs a source** (arithmetic consistent, documents agree) | Nothing to change in the text                         |
+> | 6   | "$38k MRR in October"                                                 | Deck slide 5                | Billing dashboard  | **Supported**                                               | A partner will ask for the dashboard export           |
+>
+> "Supported" means supported by what you say you can show; I have not seen the dashboard.
+>
+> ## Deal terms from the calculator
+>
+> - **Deck figures:** consistent. Investors get 25.0000%, and existing holders keep 75.0000%.
+> - **Runway:** consistent. $400k in the bank plus the $2.5M raise, at $120k a month with no revenue, comes to 24.17 months against your stated 24.
+> - **One-pager figures:** mismatch. It states 20.0000% where the calculator computes 25.0000%.
+>
+> [...]
+>
+> This is not investment, legal or tax advice; have a lawyer review the materials before they go out widely.

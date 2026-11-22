@@ -105,7 +105,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 
 `vc-deal-math`, `vc-positioning` and `vc-claims-check` are in preview until they have been checked on real decks. The
 calculator's arithmetic is tested; the reviews' wording may change. The `vc-positioning` and `vc-claims-check` evals
-state the expected behaviour and have not yet been run in a live session.
+were run in live Claude Code sessions on 2026-11-22, and each file holds an excerpt of its recorded answer with a
+verdict against its pass sentence: three passed, three passed in part and one failed. Two were run again after a skill
+fix, as their files say. One run each is a small sample. The `vc-deal-math` evals state
+the expected behaviour and have not yet been run in a live session.
 
 The `equity-calculator` skill covers eight scenarios:
 
@@ -194,16 +197,16 @@ Want a skill that is not here? [Request it](https://github.com/BwL1289/ai-vc-ski
 
 ## Project structure
 
-| Path                                       | What it is                                                                                                                                                                                                                                                                         |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`skills/`](skills/)                       | One folder per agent skill, each with its `SKILL.md`.                                                                                                                                                                                                                              |
-| [`equity_calculator/`](equity_calculator/) | The calculator: a Python package with the command, the workbook, the MCP server and tests.                                                                                                                                                                                         |
-| [`.claude-plugin/`](.claude-plugin/)       | `marketplace.json` and `plugin.json`: the Claude Code marketplace and its one plugin.                                                                                                                                                                                              |
-| [`evals/`](evals/)                         | Test prompts per skill: the prompt, the expected tool call and the expected answer. Calculator calls and excerpts are pasted from real output and re-checked by the tests; each file's first paragraph says whether its answer is a recorded run or states the expected behaviour. |
-| [`template/`](template/)                   | The starting point for a new skill.                                                                                                                                                                                                                                                |
-| [`scripts/`](scripts/)                     | `validate_skills.py`, which checks every skill in CI.                                                                                                                                                                                                                              |
-| [`docs/`](docs/)                           | [Install guide per client](docs/install.md), [how to write a skill](docs/writing-a-skill.md) and the [website](https://bwl1289.github.io/ai-vc-skills/)'s one page, `index.html`.                                                                                                  |
-| [`AGENTS.md`](AGENTS.md)                   | Instructions for AI coding agents working on this repository.                                                                                                                                                                                                                      |
+| Path                                       | What it is                                                                                                                                                                                                                                                                             |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`skills/`](skills/)                       | One folder per agent skill, each with its `SKILL.md`.                                                                                                                                                                                                                                  |
+| [`equity_calculator/`](equity_calculator/) | The calculator: a Python package with the command, the workbook, the MCP server and tests.                                                                                                                                                                                             |
+| [`.claude-plugin/`](.claude-plugin/)       | `marketplace.json` and `plugin.json`: the Claude Code marketplace and its one plugin.                                                                                                                                                                                                  |
+| [`evals/`](evals/)                         | Test prompts per skill: the prompt, the expected tool call and the expected answer. Calculator calls and excerpts are pasted from real output and re-checked by the tests; each file's first paragraph says whether it also holds a recorded answer from a live run, with its verdict. |
+| [`template/`](template/)                   | The starting point for a new skill.                                                                                                                                                                                                                                                    |
+| [`scripts/`](scripts/)                     | `validate_skills.py`, which checks every skill in CI.                                                                                                                                                                                                                                  |
+| [`docs/`](docs/)                           | [Install guide per client](docs/install.md), [how to write a skill](docs/writing-a-skill.md) and the [website](https://bwl1289.github.io/ai-vc-skills/)'s one page, `index.html`.                                                                                                      |
+| [`AGENTS.md`](AGENTS.md)                   | Instructions for AI coding agents working on this repository.                                                                                                                                                                                                                          |
 
 ## Contributing
 

@@ -1,9 +1,10 @@
 # Eval 2: Company B, "what does this round do to my ownership"
 
-A test prompt for the `vc-deal-math` skill. The company is made up. Every figure under "Expected answer" is pasted
-from what `equity_calculator deal_check` printed for these inputs; none is typed by hand. A run passes when it makes
-the one tool call below (field order free, money and percents as strings), gives these figures, and computes nothing
-in its own text.
+A test prompt for the `vc-deal-math` skill. The company is made up. The answer states the expected behaviour; it is not
+a recorded run, and this eval has not been run in a live session. Every figure under "Expected answer" is pasted from
+what `equity_calculator deal_check` printed for these inputs; none is typed by hand. A run passes when it makes the one
+tool call below (field order free, money and percents as strings), gives these figures, and computes nothing in its own
+text.
 
 ## Prompt
 

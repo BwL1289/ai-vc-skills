@@ -1,6 +1,6 @@
 ---
 name: vc-positioning
-description: Helps a founder tune a raise's messaging and positioning before VCs see it. It reads the founder's one-liner, narrative, ask and metrics, checks them against public frameworks (YC's seven pitch questions and seed guides, Sequoia's business-plan outline), and runs an adversarial review in which independent skeptical lenses list the strongest reasons a VC would pass, each quoting the founder's own line, and a refute pass drops every objection the founder's own material answers. It flags phrases that cost credibility, such as no competitors, our projections are conservative, or we only need 1% of the market, and returns surviving objections with rewrites, a tightened narrative, a say-and-avoid list and a script for a prep session with an existing investor. Use when a founder says tighten my pitch, stress-test my pitch, how should we position this round, what should I not say to VCs, or prep me before we go out to raise. Never invents traction; the ask's figures go to the calculator. Not investment advice.
+description: Helps a founder tune a raise's messaging and positioning before VCs see it. It reads the founder's one-liner, narrative, ask and metrics, checks them against public frameworks (YC's seven pitch questions and seed guides, Sequoia's outline), and runs an adversarial review in which independent skeptical lenses list the strongest reasons a VC would pass, each quoting the founder's own line, and a refute pass drops every objection the founder's material answers. It flags phrases that cost credibility, such as no competitors, our projections are conservative, or we only need 1% of the market, and returns surviving objections with rewrites, a tightened narrative, a say-and-avoid list and a prep-session script for an existing investor. Use when a founder says tighten my pitch, stress-test my pitch, check our story and our ask, how should we position this round, what should I not say to VCs, or prep me before we go out to raise. Never invents traction; the ask's figures go to the calculator. Not investment advice.
 ---
 
 # VC positioning
@@ -21,6 +21,8 @@ adds a fact about the company that the founder did not give.
 
 - "Tighten my pitch." "Stress-test my pitch." "Why would a VC pass on us?" "How should we position this round?"
   "What should I not say to VCs?" "Is my one-liner clear?" "Prep me before we go out to raise."
+- A request about the story and the ask's numbers together ("check our story and our ask"): this skill runs it, and
+  step 4 sends the ask's figures to `equity_deal_check`.
 - A pasted one-liner, elevator pitch, deck outline or slide text, executive summary or intro blurb.
 - Hand off:
   - The arithmetic in the ask (valuation, percent sold, option pool, SAFEs and notes, runway, use of funds): follow the
@@ -81,8 +83,10 @@ so the lenses do not anchor on the dimension marks; step 5 then starts at the qu
 4. **Numbers.** Collect every figure the founder states.
    - The ask's figures (raise, valuation and its label, percent sold, pool, SAFEs and notes, cash, burn, runway claim,
      use-of-funds lines): run the check as the vc-deal-math skill describes, with `equity_deal_check`, and use only
-     the tool's values. A raise on a SAFE or note goes to `equity_round` as vc-deal-math step 2 says. A mismatch goes
-     to the top of the answer: a story whose numbers disagree undercuts every message in it.
+     the tool's values, as printed, in the rewrites too (15.33 months stays 15.33 months). Make one call per version
+     of the ask the founder states, and run no what-if they did not ask for. A raise on a SAFE or note goes to
+     `equity_round` as vc-deal-math step 2 says. A mismatch goes to the top of the answer: a story whose numbers
+     disagree undercuts every message in it.
    - On a SAFE or note raise, no tool checks the runway claim or the use-of-funds lines: `equity_round` takes neither,
      and `equity_deal_check` needs a priced round's valuation. Quote them as stated, mark them "not checked: no tool
      computes this for a SAFE or note raise", and never work them out by hand.
@@ -133,12 +137,12 @@ Every lens gets the same brief, with its own name and test filled in:
 - Return "nothing found" rather than a weak objection.
 
 **How to run the lenses.** When the agent has a subagent tool (in Claude Code, the Agent or Task tool), run the lenses
-as parallel subagents. Give each one only the founder's material and its lens brief: not this skill's other sections,
-not the dimension table, not another lens's output, so no lens anchors on another. Without a subagent tool, run Stage A
-first, before step 1, without consulting the dimension table, the phrase table or any dimension mark: run the lenses
-one after another, write each lens's objections down in full before reading the next lens's brief, and never revise
-an earlier lens's list after a later one. Lenses run this way are less independent than subagents, and the same agent
-then judges them in Stage B, so the answer says so.
+as parallel subagents, however short the material. Give each one only the founder's material and its lens brief: not
+this skill's other sections, not the dimension table, not another lens's output, so no lens anchors on another. Without
+a subagent tool, run Stage A first, before step 1, without consulting the dimension table, the phrase table or any
+dimension mark: run the lenses one after another, write each lens's objections down in full before reading the next
+lens's brief, and never revise an earlier lens's list after a later one. Lenses run this way are less independent than
+subagents, and the same agent then judges them in Stage B, so the answer says so.
 
 **The calculator's mismatches** from step 4 do not go through the lenses. Each mismatch row is added to the
 survivors as ends the meeting, quoting the figure as the deck states it, with the tool's value as the reason. It is
@@ -152,11 +156,11 @@ the same line, merge them and keep both lens names. Gaps from every lens go to t
 
 ### Stage B: refute
 
-Each objection gets its own refute pass, which decides, using only the founder's material, whether that material
-answers the objection. The pass is a judge, not the founder's advocate. With a subagent tool, run one subagent per
-objection, given the founder's material, that one objection, the Phrase or pattern column of the phrase table below,
-and everything from "The refute brief:" to the end of this stage, and nothing else; without one, take the objections
-one at a time and decide each against the same brief before reading the next.
+Each objection gets its own refute pass, which decides, using only the founder's material, whether that material answers
+the objection. The pass is a judge, not the founder's advocate. With a subagent tool, run one subagent per objection,
+however few there are, given the founder's material, that one objection, the Phrase or pattern column of the phrase
+table below, and everything from "The refute brief:" to the end of this stage, and nothing else; without one, take the
+objections one at a time and decide each against the same brief before reading the next.
 
 The refute brief:
 
@@ -309,8 +313,8 @@ own material) is this skill's own, not taken from any source.
 - It never invents or strengthens traction, customers, partners, credentials or figures, in a rewrite or in a refute
   pass.
 - It never role-plays or speaks as a named investor, firm or author. Asked to "be" one, it offers that firm's public
-  framework instead (Sequoia's outline, YC's questions) or the adversarial review's lenses, and keeps the founder as
-  the user.
+  framework instead (Sequoia's outline and YC's seven questions, with their links) and the adversarial review's
+  lenses, plus the prep session credited in one line to the post that inspired it, and keeps the founder as the user.
 - The adversarial review predicts likely objections from the founder's text; it is not a verdict on the company, and
   a real partner may raise others.
 - No investor research: no target lists, fund look-ups, contact details or outreach. The founder names who they meet.
