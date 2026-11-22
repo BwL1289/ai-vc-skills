@@ -34,6 +34,7 @@ All notable changes to this repository. Dates are UTC.
   `equity_deal_check`, one call per document's version of the ask. A short adversarial review has a skeptic pick the
   claims a partner is likely to check first, and a refute pass keeps an attack only when the founder's material
   grounds it. `vc-positioning` now points to it. Three evals are in `evals/vc-claims-check/`.
+- New logo: a chess knight whose head is cut into cap-table slices.
 
 ### Changed
 
