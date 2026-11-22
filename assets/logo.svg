@@ -10,12 +10,25 @@
       </g>
       <circle cx="280" cy="240" r="25" fill="#000"/>
     </mask>
+    <linearGradient id="knight-shade-1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fd8f32"/><stop offset="1" stop-color="#fd780a"/></linearGradient>
+    <linearGradient id="knight-shade-2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3691f"/><stop offset="1" stop-color="#de550b"/></linearGradient>
+    <linearGradient id="knight-shade-3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6510f"/><stop offset="1" stop-color="#bf440c"/></linearGradient>
+    <linearGradient id="knight-shade-4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c5420e"/><stop offset="1" stop-color="#9e350b"/></linearGradient>
+    <linearGradient id="knight-shade-base" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#aa3c14"/><stop offset="1" stop-color="#862f10"/></linearGradient>
+    <linearGradient id="knight-edge-head" gradientUnits="userSpaceOnUse" x1="0" y1="24" x2="0" y2="474"><stop offset="0" stop-color="#fff" stop-opacity="0.35"/><stop offset="0.45" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <clipPath id="knight-clip-head"><path d="M106 230 Q70 228 66 200 L64 184 Q62 160 86 152 L196 108 L234 98 L258 24 L306 104 A138 138 0 0 1 418 240 A138 138 0 0 1 410 286 Q400 328 398 374 L174 374 Q160 340 214 300 L280 240 Z"/></clipPath>
+    <filter id="knight-shadow" filterUnits="userSpaceOnUse" x="0" y="0" width="512" height="512" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="9.6" stdDeviation="8.8" flood-color="#371307" flood-opacity="0.22"/>
+    </filter>
   </defs>
-  <g mask="url(#knight-cuts)">
-    <path fill="#FD7E14" d="M280 240 L106 230 Q70 228 66 200 L64 184 Q62 160 86 152 L196 108 Z"/>
-    <path fill="#E8590C" d="M280 240 L196 108 L234 98 L258 24 L306 104 Z"/>
-    <path fill="#C9470D" d="M280 240 L306 104 A138 138 0 0 1 418 240 Z"/>
-    <path fill="#A8380C" d="M280 240 L418 240 A138 138 0 0 1 410 286 Q400 328 398 374 L174 374 Q160 340 214 300 Z"/>
+  <g filter="url(#knight-shadow)">
+    <g mask="url(#knight-cuts)">
+      <path fill="url(#knight-shade-1)" d="M280 240 L106 230 Q70 228 66 200 L64 184 Q62 160 86 152 L196 108 Z"/>
+      <path fill="url(#knight-shade-2)" d="M280 240 L196 108 L234 98 L258 24 L306 104 Z"/>
+      <path fill="url(#knight-shade-3)" d="M280 240 L306 104 A138 138 0 0 1 418 240 Z"/>
+      <path fill="url(#knight-shade-4)" d="M280 240 L418 240 A138 138 0 0 1 410 286 Q400 328 398 374 L174 374 Q160 340 214 300 Z"/>
+      <path fill="none" stroke="url(#knight-edge-head)" stroke-width="16" clip-path="url(#knight-clip-head)" d="M106 230 Q70 228 66 200 L64 184 Q62 160 86 152 L196 108 L234 98 L258 24 L306 104 A138 138 0 0 1 418 240 A138 138 0 0 1 410 286 Q400 328 398 374 L174 374 Q160 340 214 300 L280 240 Z"/>
+    </g>
+    <path fill="url(#knight-shade-base)" d="M170 394 H404 A10 10 0 0 1 414 404 V420 H438 A12 12 0 0 1 450 432 V462 A12 12 0 0 1 438 474 H130 A12 12 0 0 1 118 462 V432 A12 12 0 0 1 130 420 H160 V404 A10 10 0 0 1 170 394 Z"/>
   </g>
-  <path fill="#8F3211" d="M170 394 H404 A10 10 0 0 1 414 404 V420 H438 A12 12 0 0 1 450 432 V462 A12 12 0 0 1 438 474 H130 A12 12 0 0 1 118 462 V432 A12 12 0 0 1 130 420 H160 V404 A10 10 0 0 1 170 394 Z"/>
 </svg>
