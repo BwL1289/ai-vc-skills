@@ -241,6 +241,8 @@ def test_each_eval_call_is_valid_and_its_excerpt_is_what_the_calculator_prints(p
 _SAFE_UNCHECKED = "not checked: no tool computes this for a SAFE or note raise"
 # A figure an eval's answer takes from the calculator: a percent or months with decimals, or money with cents.
 _PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|\d[\d,]*\.\d+ months|\$\d[\d,]*\.\d{2}")
+# A share as the MCP tool returns it: a fraction with six places and no percent sign.
+_JSON_FRACTION = re.compile(r"(?<![\d.])-?\d+\.\d{6}(?![\d%])")
 
 
 def test_the_refute_brief_is_handed_over_whole_and_judges_rather_than_argues() -> None:
@@ -313,12 +315,14 @@ def test_the_prep_session_credit_says_its_source_was_not_fetched() -> None:
 def test_each_figure_an_eval_answer_takes_from_the_calculator_is_what_it_prints(path: Path) -> None:
     """A percent, a months figure or a money figure with cents in the expected answer is a line the report prints."""
     text = path.read_text(encoding="utf-8")
-    reports = "\n".join(
-        render_sheet(sheet_for(compute(DealCheckInput.model_validate(json.loads(call)["inputs"]))))
-        for call in _fences("json", text)
-    )
-    figures = _PRINTED_FIGURE.findall(_unwrapped(_section("## Expected answer", text)))
+    results = [compute(DealCheckInput.model_validate(json.loads(call)["inputs"])) for call in _fences("json", text)]
+    reports = "\n".join(render_sheet(sheet_for(result)) for result in results)
+    dumps = "\n".join(result.model_dump_json() for result in results)
+    answer = _unwrapped(_section("## Expected answer", text))
+    figures = _PRINTED_FIGURE.findall(answer)
 
     assert figures
     for figure in figures:
         assert figure in reports, figure
+    for fraction in _JSON_FRACTION.findall(answer):
+        assert f'"rounded":"{fraction}"' in dumps, fraction

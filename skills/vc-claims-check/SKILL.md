@@ -59,12 +59,12 @@ Every claim gets exactly one class. A claim that fits two takes the one a partne
 Each claim gets one verdict. When a claim earns more than one, it takes the first in this order and the others go in
 its fix: **Contradicted**, then **Will be discounted**, then **Needs a source**, then **Supported**.
 
-| Verdict            | When                                                                                                                                                                                                                      |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Contradicted       | Two lines of the founder's material state the claim differently (both quoted, with their places; for a figure, the same metric in the same form for the same period), or the calculator reports a mismatch on a deal term |
-| Will be discounted | The claim matches a pattern in the discount table below, whatever its evidence                                                                                                                                            |
-| Needs a source     | The founder names no evidence they can show, or the claim can only be compared with another line after a conversion this skill does not do (MRR against ARR, a month against a year)                                      |
-| Supported          | The founder names evidence they can show, every place the claim appears agrees, and no discount pattern applies; a deal term also needs a consistent verdict from `equity_deal_check`                                     |
+| Verdict            | When                                                                                                                                                                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Contradicted       | Two lines of the founder's material state the claim differently (both quoted, with their places; for a figure, the same metric in the same form for the same period), or the calculator reports a mismatch on a deal term                              |
+| Will be discounted | The claim matches a pattern in the discount table below, whatever its evidence                                                                                                                                                                         |
+| Needs a source     | The founder names no evidence they can show, or the claim can only be compared with another line after a conversion this skill does not do (MRR against ARR, a month against a year), or a deal term no tool gives a verdict on (a SAFE or note raise) |
+| Supported          | The founder names evidence they can show, every place the claim appears agrees, and no discount pattern applies; a deal term also needs a consistent verdict from `equity_deal_check`                                                                  |
 
 "Supported" means supported by what the founder says they can show. The skill does not see or verify that evidence;
 the answer says a partner will ask for it.

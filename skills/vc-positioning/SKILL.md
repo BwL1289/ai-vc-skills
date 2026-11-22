@@ -8,7 +8,7 @@ description: Helps a founder tune a raise's messaging and positioning before VCs
 Helps a founder package a raise before the first outside meeting: one plain sentence that says what the company does,
 a story a partner can repeat to their colleagues, and the phrases to keep or drop. It reads the founder's own material,
 checks it against public frameworks for how investors read a pitch, attacks it the way a skeptical partner would, then
-defends it with the founder's own words, and returns what survives: the objections still standing, a tightened
+tests each objection against the founder's own words, and returns what survives: the objections still standing, a tightened
 narrative, a say-and-avoid list and a script for a prep session with an existing investor. The prep session follows an
 idea from a LinkedIn post by Harry Stebbings of 20VC (around November 2026; unverified, since this skill's authors saw
 only a pasted copy and did not fetch the post): test the packaging with someone already on your cap table before going
@@ -102,8 +102,8 @@ so the lenses do not anchor on the dimension marks; step 5 then starts at the qu
 ## Adversarial review
 
 The dimension table says what is missing; this review says what will lose the meeting. One set of independent lenses
-attacks the founder's material, a second pass defends it using only that material, and only the objections the
-defence cannot answer reach the founder. The founder then sees both: what survived, and what was tested and fell.
+attacks the founder's material, a second pass judges each objection using only that material, and only the
+objections that material does not answer reach the founder. The founder then sees both: what survived, and what was tested and fell.
 
 ### Stage A: attack
 

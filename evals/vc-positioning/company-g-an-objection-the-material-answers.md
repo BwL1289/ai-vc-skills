@@ -33,6 +33,6 @@ the vc-deal-math skill says, it asks for the cap and the next priced round the f
 - "We're raising $1.5M on a SAFE." survives (the ask and milestones), because nothing in the material says what the
   $1.5M reaches; the evidence to add is a bracketed ask, such as `[the milestones the $1.5M reaches]`.
 - "That gives us 18 months of runway." is quoted as stated and marked "not checked: no tool computes this for a SAFE
-  or note raise". The answer works out no runway and asks for nothing it would need to.
+  or note raise". The answer works out no runway from any figure.
 - The market has no line to quote, so it is a gap in the open asks, not an objection.
 - The prep script is filled in for the lead seed investor and brings the top survivors to the session.
