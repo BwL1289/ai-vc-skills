@@ -1,0 +1,21 @@
+name: Skill request
+description: A question founders or investors ask that a skill should answer
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: The question
+      description: What a founder or investor asks, in their own words.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: A worked example
+      description: Inputs and the answer you would expect, if you have one.
+  - type: textarea
+    id: source
+    attributes:
+      label: The source you would trust
+      description: An essay, a standard form, a textbook, a firm's public guide.

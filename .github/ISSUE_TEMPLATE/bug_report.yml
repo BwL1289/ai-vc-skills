@@ -1,0 +1,30 @@
+name: Bug report
+description: A wrong number, a crash, or a skill that misbehaves
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What you ran
+      description: The exact command, prompt or MCP tool call, with its inputs.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: got
+    attributes:
+      label: What it printed
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and the source
+      description: For a wrong number, the number you expected and where it comes from (a formula, a term sheet clause, a YC document).
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versions
+      description: Python, the client (Claude Code, Claude Desktop, Cursor...) and its version.

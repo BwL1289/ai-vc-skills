@@ -1,13 +1,23 @@
 # Equity calculator
 
+<p>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-3fb950"></a>
+  <img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-3776ab">
+  <img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-d97757">
+  <img alt="MCP server" src="https://img.shields.io/badge/MCP-server-6e7681">
+</p>
+
+The first of the [AI VC skills](../README.md).
+
 Should we trade stock for this, and what does a round do to the cap table? Seven scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
-[`skills/equity-calculator/`](skills/equity-calculator/SKILL.md) tells an assistant when and how to use it.
+[`skills/equity-calculator/`](../skills/equity-calculator/SKILL.md), at the repository root, tells an assistant when and
+how to use it.
 
 Built from the original `equity_equation` script this repository started with (it is in the git history, at
-[`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/opensource-content/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation))
+[`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/ai-vc-skills/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation))
 and the essay it implements. That script's own TODO
 list asked for Pydantic models and cell formatting (percent, numbers); both are here, along with the employee formula
 and the option-pool shuffle.
@@ -24,17 +34,26 @@ and the option-pool shuffle.
 
 ## Install
 
-Python 3.12 or later. From GitHub, with the MCP server:
+In Claude Code, as a plugin (the agent skill and the MCP server, started with [`uvx`](https://docs.astral.sh/uv/)):
 
 ```
-pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/opensource-content#subdirectory=equity_calculator"
+/plugin install ai-vc-skills --marketplace BwL1289/ai-vc-skills
+```
+
+On Claude Code before 2.1.275, add the marketplace first: `/plugin marketplace add BwL1289/ai-vc-skills`, then
+`/plugin install ai-vc-skills@ai-vc-skills`.
+
+As a Python package, Python 3.12 or later. From GitHub, with the MCP server:
+
+```
+pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skills#subdirectory=equity_calculator"
 ```
 
 Or from a clone:
 
 ```
-git clone https://github.com/BwL1289/opensource-content
-cd opensource-content/equity_calculator
+git clone https://github.com/BwL1289/ai-vc-skills
+cd ai-vc-skills/equity_calculator
 python3.12 -m venv .venv
 . .venv/bin/activate
 pip install -e '.[mcp,dev]'
@@ -120,7 +139,7 @@ path to it: it is in the `bin` folder of the environment it was installed into (
 
 ## Agent skill
 
-[`skills/equity-calculator/SKILL.md`](skills/equity-calculator/SKILL.md) is an agent skill: it tells an assistant
+[`skills/equity-calculator/SKILL.md`](../skills/equity-calculator/SKILL.md), at the repository root, is an agent skill: it tells an assistant
 which scenario answers which question, how to run it with the command or the MCP tools, the formulas and their
 sources, and to quote the labelled assumptions with every answer. In Claude Code, copy the folder to
 `~/.claude/skills/` (every project) or to a project's `.claude/skills/`. The skill alone keeps a hyphen,
@@ -151,6 +170,9 @@ hyphens in a skill's name, and the folder must carry the same name.
   standard arithmetic, and each result marks them `unverified` in its assumptions.
 
 ## The formulas
+
+<details>
+<summary>Every formula, with its sources and what no source settles</summary>
 
 ### Investor test (PG)
 
@@ -322,6 +344,8 @@ an amount invested, a preference multiple (1 by default), a rank (1 is paid firs
    set of choices, this is the one the search reaches first; the tests compare it with every one of the 2^k sets.
 
 The money is rounded to the cent by largest remainder, so the payouts add up to E exactly.
+
+</details>
 
 ## Worked examples
 
@@ -575,6 +599,9 @@ rows and the waterfall's payouts are the exception, split to the cent by largest
 
 ## Assumptions
 
+<details>
+<summary>Every assumption a result can list, with its sources</summary>
+
 Every result lists the assumptions it rests on, with the setting it used and its source. They appear in the report,
 in the JSON and in the workbook.
 
@@ -647,6 +674,8 @@ was read for preferred-stock terms:
 | `best_response_search`         | from none converting, at most one pass more than the classes | fixed                             |
 | `participation`                | the preference, then a per-share part of the rest            | `participation=full` or `capped`  |
 | `cap_includes_preference`      | cap-multiple × invested, the preference included             | `cap-multiple=`                   |
+
+</details>
 
 ## Tests
 

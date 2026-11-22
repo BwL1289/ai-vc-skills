@@ -1,0 +1,33 @@
+{
+  "name": "ai-vc-skills",
+  "version": "0.1.0",
+  "description": "AI VC skills for Claude Code: exact startup equity math (Paul Graham's equity equation, option pools, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls) as agent skills with an MCP server.",
+  "author": {
+    "name": "Benjamin Leff",
+    "url": "https://github.com/BwL1289"
+  },
+  "homepage": "https://github.com/BwL1289/ai-vc-skills",
+  "repository": "https://github.com/BwL1289/ai-vc-skills",
+  "license": "MIT",
+  "keywords": [
+    "venture-capital",
+    "startup",
+    "equity",
+    "fundraising",
+    "safe",
+    "cap-table",
+    "dilution",
+    "vesting"
+  ],
+  "skills": "./skills",
+  "mcpServers": {
+    "equity_calculator": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "${CLAUDE_PLUGIN_ROOT}/equity_calculator[mcp]",
+        "equity_calculator_mcp"
+      ]
+    }
+  }
+}
