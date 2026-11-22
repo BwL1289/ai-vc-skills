@@ -3,12 +3,27 @@
   <g stroke="#21262d" stroke-width="1">
     <path d="M0 60H1200M0 120H1200M0 180H1200M0 240H1200"/>
   </g>
-  <g transform="translate(150 150)">
-    <circle r="86" fill="none" stroke="#21262d" stroke-width="28"/>
-    <circle r="86" fill="none" stroke="#3fb950" stroke-width="28" stroke-dasharray="328.8 540.4" transform="rotate(-90)"/>
-    <circle r="86" fill="none" stroke="#9fb0c8" stroke-width="28" stroke-dasharray="108 540.4" stroke-dashoffset="-328.8" transform="rotate(-90)" opacity="0.7"/>
-  </g>
-  <text x="290" y="138" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="68" font-weight="700" fill="#f0f6fc">AI VC skills</text>
+  <svg x="25" y="25" width="250" height="250" viewBox="0 0 512 512">
+    <defs>
+      <mask id="knight-cuts" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+        <rect width="512" height="512" fill="#fff"/>
+        <g stroke="#000" stroke-width="16" stroke-linecap="round">
+          <path d="M280 240 L171 69"/>
+          <path d="M280 240 L314 63"/>
+          <path d="M280 240 L470 240"/>
+        </g>
+        <circle cx="280" cy="240" r="25" fill="#000"/>
+      </mask>
+    </defs>
+    <g mask="url(#knight-cuts)">
+      <path fill="#FD7E14" d="M280 240 L106 230 Q70 228 66 200 L64 184 Q62 160 86 152 L196 108 Z"/>
+      <path fill="#E8590C" d="M280 240 L196 108 L234 98 L258 24 L306 104 Z"/>
+      <path fill="#C9470D" d="M280 240 L306 104 A138 138 0 0 1 418 240 Z"/>
+      <path fill="#A8380C" d="M280 240 L418 240 A138 138 0 0 1 410 286 Q400 328 398 374 L174 374 Q160 340 214 300 Z"/>
+    </g>
+    <path fill="#8F3211" d="M170 394 H404 A10 10 0 0 1 414 404 V420 H438 A12 12 0 0 1 450 432 V462 A12 12 0 0 1 438 474 H130 A12 12 0 0 1 118 462 V432 A12 12 0 0 1 130 420 H160 V404 A10 10 0 0 1 170 394 Z"/>
+  </svg>
+  <text x="290" y="138" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="68"><tspan font-weight="800" fill="#FD7E14">AI VC</tspan><tspan font-weight="500" fill="#E8590C" dx="4"> skills</tspan></text>
   <text x="292" y="190" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="28" fill="#9fb0c8">Exact startup equity math for Claude and any MCP client</text>
-  <text x="292" y="232" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="22" fill="#3fb950">7% for a 10% gain → R = 1.023 → accept</text>
+  <text x="292" y="232" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="22" fill="#E8590C">7% for a 10% gain → R = 1.023 → accept</text>
 </svg>

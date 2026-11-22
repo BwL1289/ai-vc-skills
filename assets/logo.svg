@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="ai-vc-logo-title">
+  <title id="ai-vc-logo-title">AI VC skills</title>
+  <defs>
+    <mask id="knight-cuts" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="#fff"/>
+      <g stroke="#000" stroke-width="16" stroke-linecap="round">
+        <path d="M280 240 L171 69"/>
+        <path d="M280 240 L314 63"/>
+        <path d="M280 240 L470 240"/>
+      </g>
+      <circle cx="280" cy="240" r="25" fill="#000"/>
+    </mask>
+  </defs>
+  <g mask="url(#knight-cuts)">
+    <path fill="#FD7E14" d="M280 240 L106 230 Q70 228 66 200 L64 184 Q62 160 86 152 L196 108 Z"/>
+    <path fill="#E8590C" d="M280 240 L196 108 L234 98 L258 24 L306 104 Z"/>
+    <path fill="#C9470D" d="M280 240 L306 104 A138 138 0 0 1 418 240 Z"/>
+    <path fill="#A8380C" d="M280 240 L418 240 A138 138 0 0 1 410 286 Q400 328 398 374 L174 374 Q160 340 214 300 Z"/>
+  </g>
+  <path fill="#8F3211" d="M170 394 H404 A10 10 0 0 1 414 404 V420 H438 A12 12 0 0 1 450 432 V462 A12 12 0 0 1 438 474 H130 A12 12 0 0 1 118 462 V432 A12 12 0 0 1 130 420 H160 V404 A10 10 0 0 1 170 394 Z"/>
+</svg>
