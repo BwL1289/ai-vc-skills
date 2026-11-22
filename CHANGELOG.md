@@ -19,6 +19,21 @@ All notable changes to this repository. Dates are UTC.
   A holder group can be given as a share count and the unissued pool as a percent of the fully diluted shares, so
   no one divides by hand. It works the new money as a priced round; a raise on a SAFE goes to `round`. Results gain
   a `months` unit.
+- The `vc-positioning` skill, in preview: a founder tightens the messaging and positioning of a raise before going
+  out to VCs. It checks the one-liner, narrative, ask and metrics against public frameworks, flags phrases that cost
+  credibility, and runs an adversarial review: independent skeptical lenses list the strongest reasons a VC would pass,
+  each quoting the founder's own line, and a refute pass drops every objection the founder's material already answers.
+  It returns the surviving objections with rewrites, a tightened narrative, a say-and-avoid list and a script for a
+  prep session with an existing investor. The ask's figures go to `equity_deal_check`; it invents no traction. Four
+  evals are in `evals/vc-positioning/`.
+- The `vc-claims-check` skill, in preview: a founder checks every quantitative or verifiable claim in their deck,
+  one-pager and narrative before a VC does. Each claim is listed with where it appears and its class (figure, market
+  size, customer or partner, team credential, competition, technology claim), checked for evidence the founder can
+  show, for agreement across the materials (compared as stated, never converted) and for patterns a VC discounts, and
+  returned as supported, needs a source, contradicted or will be discounted, with the fix. Deal terms go to
+  `equity_deal_check`, one call per document's version of the ask. A short adversarial review has a skeptic pick the
+  claims a partner is likely to check first, and a refute pass keeps an attack only when the founder's material
+  grounds it. `vc-positioning` now points to it. Three evals are in `evals/vc-claims-check/`.
 
 ### Changed
 

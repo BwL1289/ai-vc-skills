@@ -160,7 +160,9 @@ _INSTRUCTIONS = (
     "equity_waterfall (who gets what of an exit), equity_deal_check (a founder's raise checked: valuation, ownership "
     "after the round, runway, the deck's own figures). Pass the scenario's fields in `inputs`; give money and "
     "percents as JSON strings to keep every digit. Quote the result's numbers and its labelled assumptions; never "
-    "round them further without saying so."
+    "round them further without saying so. A value whose unit is fraction is a share of the whole: show it as a "
+    "percent by moving the decimal point of its rounded value two places to the right (0.166667 is 16.6667%), as the "
+    "command line's report prints it."
 )
 
 
