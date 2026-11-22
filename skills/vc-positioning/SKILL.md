@@ -25,8 +25,10 @@ adds a fact about the company that the founder did not give.
   - The arithmetic in the ask (valuation, percent sold, option pool, SAFEs and notes, runway, use of funds): follow the
     vc-deal-math skill, which calls `equity_deal_check`. New money on a SAFE or note: `equity_round` (equity-calculator
     skill). A stake through later rounds: `equity_dilution`.
-  - Planned, not yet shipped: slide-by-slide deck review, rehearsing the partner meeting, checking each claim's
-    evidence. Until they ship, say so and do the messaging part here.
+  - Each claim's evidence, and figures that disagree across the deck, one-pager and narrative: the vc-claims-check
+    skill (preview). Point the founder to it when they give more than one document or a claim has no evidence named.
+  - Planned, not yet shipped: slide-by-slide deck review, rehearsing the partner meeting. Until they ship, say so and
+    do the messaging part here.
 
 ## Inputs
 

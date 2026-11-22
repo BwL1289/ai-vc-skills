@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/BwL1289/ai-vc-skills/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/BwL1289/ai-vc-skills/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-3fb950"></a>
-  <a href="#skills"><img alt="Skills: 3" src="https://img.shields.io/badge/skills-3-8957e5"></a>
+  <a href="#skills"><img alt="Skills: 4" src="https://img.shields.io/badge/skills-4-8957e5"></a>
   <a href="#install"><img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-d97757"></a>
   <a href="docs/install.md"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-6e7681"></a>
   <img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-3776ab">
@@ -66,8 +66,8 @@ pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skill
 }
 ```
 
-Add the server to the client's MCP settings, then load `skills/equity-calculator/`, `skills/vc-deal-math/` and
-`skills/vc-positioning/` where the client reads skills.
+Add the server to the client's MCP settings, then load `skills/equity-calculator/`, `skills/vc-deal-math/`,
+`skills/vc-positioning/` and `skills/vc-claims-check/` where the client reads skills.
 Step by step for each client: [docs/install.md](docs/install.md).
 
 </details>
@@ -94,14 +94,15 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 
 ## Skills
 
-| Skill                                                    | What it does                                                                                                                                                                                                                            | Status       |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| [`equity-calculator`](skills/equity-calculator/SKILL.md) | Eight equity scenarios worked exactly: the investor test, a hire's grant, the option-pool shuffle, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls, and a check of a raise's numbers.                             | ✅ Available |
-| [`vc-deal-math`](skills/vc-deal-math/SKILL.md)           | For founders: checks your own deck's ask before a VC does (valuation, ownership after the round, the pool top-up, the SAFE stack, runway, use of funds), every number from the calculator.                                              | 🧪 Preview   |
-| [`vc-positioning`](skills/vc-positioning/SKILL.md)       | For founders: tightens your raise's messaging before you go out, with an adversarial review (skeptical lenses attack it, your own material defends it), a say-and-avoid list and a prep script for a session with an existing investor. | 🧪 Preview   |
-| More venture-style reviews                               | Pitch decks, term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                 | 🗺️ Planned   |
+| Skill                                                    | What it does                                                                                                                                                                                                                                                            | Status       |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| [`equity-calculator`](skills/equity-calculator/SKILL.md) | Eight equity scenarios worked exactly: the investor test, a hire's grant, the option-pool shuffle, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls, and a check of a raise's numbers.                                                             | ✅ Available |
+| [`vc-deal-math`](skills/vc-deal-math/SKILL.md)           | For founders: checks your own deck's ask before a VC does (valuation, ownership after the round, the pool top-up, the SAFE stack, runway, use of funds), every number from the calculator.                                                                              | 🧪 Preview   |
+| [`vc-positioning`](skills/vc-positioning/SKILL.md)       | For founders: tightens your raise's messaging before you go out, with an adversarial review (skeptical lenses attack it, your own material defends it), a say-and-avoid list and a prep script for a session with an existing investor.                                 | 🧪 Preview   |
+| [`vc-claims-check`](skills/vc-claims-check/SKILL.md)     | For founders: checks every claim in your deck, one-pager and narrative before a VC does (a source you can show, figures that agree, patterns a VC discounts), with a skeptic that picks what a partner checks first and a refute pass that keeps only grounded attacks. | 🧪 Preview   |
+| More venture-style reviews                               | Pitch decks, term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                                                 | 🗺️ Planned   |
 
-`vc-deal-math` and `vc-positioning` are in preview until they have been checked on real decks; the arithmetic is
+`vc-deal-math`, `vc-positioning` and `vc-claims-check` are in preview until they have been checked on real decks; the arithmetic is
 tested, the wording may change.
 
 The `equity-calculator` skill covers eight scenarios:
@@ -176,6 +177,8 @@ The formulas, their sources, every flag and a worked example per scenario are in
 - [ ] `vc-deal-math`: founders check their own deck's numbers with the calculator (preview)
 - [ ] `vc-positioning`: founders tighten their raise's messaging, stress-tested by an adversarial review, and prep it
       with an existing investor (preview)
+- [ ] `vc-claims-check`: founders check every claim's evidence and that their figures agree, with a skeptic and a
+      refute pass (preview)
 - [ ] A pitch-deck review: how a VC is likely to read your deck (pass, too early, take the meeting) and what to change
 - [ ] A term-sheet review, clause by clause, with the exit waterfall computed
 - [ ] The due-diligence questions a VC is likely to ask, ranked by how much each answer moves their decision, so you
