@@ -42,6 +42,9 @@ All notable changes to this repository. Dates are UTC.
 ### Changed
 
 - The repository was renamed from `opensource-content` to `ai-vc-skills`; GitHub redirects the old address.
+- The knight logo has a little depth: a soft drop shadow, each slice shaded lighter at the top, and a faint
+  highlight along the head's top edges. The banners, the site's logo and favicon (which follow the light or dark
+  theme), the plugin icon and the social image all use it; shapes and base colours are unchanged.
 
 ## 2026-11-21
 
