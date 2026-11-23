@@ -26,6 +26,7 @@ from equity_calculator.schemas.equity import (
 )
 from equity_calculator.schemas.equity_deal_check import DealCheckInput
 from equity_calculator.schemas.equity_dilution import DilutionInput
+from equity_calculator.schemas.equity_metrics_check import MetricsCheckInput
 from equity_calculator.schemas.equity_round import RoundInput
 from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput
 from equity_calculator.schemas.equity_vesting import VestingInput
@@ -194,6 +195,43 @@ _EXAMPLES: tuple[ScenarioInput, ...] = (
             "stated_runway_months": "5.5",
         }
     ),
+    # A metrics check with every part: an annual unit, the starting customers' own movements, a month with one-time
+    # and usage revenue, customers, spend and margin, burn, concentration, every stated figure and a segment band.
+    MetricsCheckInput.model_validate(
+        {
+            "period_months": 7,
+            "recurring_unit": "annual",
+            "starting_recurring": "1312500",
+            "new_recurring": "437500",
+            "expansion_recurring": "112500",
+            "contraction_recurring": "37500",
+            "churned_recurring": "87500",
+            "cohort_expansion_recurring": "62500",
+            "cohort_contraction_recurring": "12500",
+            "cohort_churned_recurring": "62500",
+            "month_total_revenue": "162500",
+            "month_one_time_revenue": "12500",
+            "month_usage_revenue": "7500",
+            "customers_start": 333,
+            "customers_lost": 17,
+            "customers_new": 61,
+            "customers_new_paid": 23,
+            "sales_marketing_spend": "487500",
+            "gross_margin_percent": "72.5",
+            "net_burn": "912500",
+            "largest_customer_revenue": "137500",
+            "period_revenue": "862500",
+            "stated_arr": "1750000",
+            "stated_nrr_percent": "103",
+            "stated_grr_percent": "94",
+            "stated_churn_percent": "5.1",
+            "stated_cac": "8000",
+            "stated_cac_payback_months": "18.5",
+            "stated_burn_multiple": "2.3",
+            "stated_concentration_percent": "16",
+            "customer_segment": "mid_market",
+        }
+    ),
 )
 _EXAMPLE_IDS = [
     "investor",
@@ -206,6 +244,7 @@ _EXAMPLE_IDS = [
     "waterfall-capped",
     "deal-check-from-post-money",
     "runway-plan-with-a-late-raise",
+    "metrics-check-with-every-part",
 ]
 
 

@@ -4,8 +4,9 @@
 unions) and each later scenario's module (``equity_pool``, ``equity_round``, ``equity_dilution``, ``equity_vesting``,
 ``equity_waterfall``) import from here, never from each other, so the unions can import every scenario without a cycle.
 The exceptions are ``equity_deal_check``, which reuses the round's instruments and the pool and round models (those
-two import only this module), and ``equity_runway_plan``, which reuses the deal check's use-of-funds line, verdict
-words and defaults; there is still no cycle.
+two import only this module), ``equity_runway_plan``, which reuses the deal check's use-of-funds line, verdict words
+and defaults, and ``equity_metrics_check``, which reuses the deal check's verdict words and default tolerances; there
+is still no cycle.
 
 How the models read a decimal: text and ``Decimal`` values are kept digit for digit, never through a binary float.
 A Python ``float``, and a JSON number given to ``model_validate_json``, reach the model as the float's shortest

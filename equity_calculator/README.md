@@ -9,7 +9,7 @@
 
 The first of the [AI VC skills](../README.md).
 
-Should we trade stock for this, and what does a round do to the cap table? Nine scenarios, worked with exact
+Should we trade stock for this, and what does a round do to the cap table? Ten scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
@@ -23,17 +23,18 @@ and the essay it implements. That script's own TODO
 list asked for Pydantic models and cell formatting (percent, numbers); both are here, along with the employee formula
 and the option-pool shuffle.
 
-| Scenario      | The question it answers                                                                                                                                                         |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `investor`    | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                                                  |
-| `employee`    | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                                              |
-| `pool`        | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?                                     |
-| `round`       | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards?                         |
-| `dilution`    | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                                                  |
-| `vesting`     | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                                           |
-| `waterfall`   | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                            |
-| `deal_check`  | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                         |
-| `runway_plan` | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there? |
+| Scenario        | The question it answers                                                                                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `investor`      | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                                                  |
+| `employee`      | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                                              |
+| `pool`          | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?                                     |
+| `round`         | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards?                         |
+| `dilution`      | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                                                  |
+| `vesting`       | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                                           |
+| `waterfall`     | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                            |
+| `deal_check`    | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                         |
+| `runway_plan`   | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there? |
+| `metrics_check` | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback and burn multiple the deck states agree with their parts?                   |
 
 ## Install
 
@@ -101,10 +102,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 `equity_calculator_mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
 instead of doing the arithmetic itself.
 
-| Tool                                                                                                                                                                    | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
-| `equity_workbook`                                                                                                                                                       | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
+| Tool                                                                                                                                                                                            | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
+| `equity_workbook`                                                                                                                                                                               | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
 error that says why. Money and percents are best sent as JSON strings (`"7"`, `"1.10"`, `"8000000"`): a JSON number
@@ -175,6 +176,19 @@ questions a VC is likely to ask after them.
   raise enough to reach the next "fundable" milestone, "which will usually be 12 to 18 months later", and founders
   raise "for N months (usually 12-18)". The runway band's default of 18 months is the top of that range (a
   benchmark, not a rule); the time left to raise the next round is ours, unverified.
+- **Metrics**: the metrics check quotes five public pages word for word in its assumptions, each read in full on
+  23 November 2026, text only (charts, images and embedded slides not seen): a16z's
+  ["16 Startup Metrics"](https://a16z.com/16-startup-metrics/) (21 August 2015) for churn and CAC, and
+  ["16 More Startup Metrics"](https://a16z.com/16-more-startup-metrics/) (23 September 2015) for ARR and customer
+  concentration; Bessemer Venture Partners'
+  ["Scaling to $100 Million"](https://www.bvp.com/atlas/scaling-to-100-million) (21 September 2021) for gross and
+  net retention, CAC payback on gross margin and its payback targets by customer segment (under 12, 18 and 24
+  months; its data is Bessemer's own cloud portfolio, not a random sample); David Sacks's
+  ["The Burn Multiple"](https://sacks.substack.com/p/the-burn-multiple-51a7e43cb200) (23 April 2020) for the
+  multiple and its 3x line; and David Skok's ["SaaS Metrics 2.0"](https://www.forentrepreneurs.com/saas-metrics-2/)
+  (no date on the page) for net revenue churn above 2% a month. The three lines are benchmarks, not rules: each
+  raises a question, never an error, and each is an input. The period rule, the cohort rule, leaving new customers
+  out of retention, the exact payback formula and the tolerances are unverified.
 - **Pre-money SAFEs are not supported.** YC's page has no current pre-money SAFE form; the user guide works one
   pre-money Safe Price only as an example, not as a form's definitions, so they are left out.
 - **Unverified**: neither essay covers option pools, convertible notes, preferred stock or the finer vesting terms,
@@ -451,6 +465,50 @@ A refusal names the field: a first case that is not the plan, a plan given as pe
 with both phases and a percent or neither, phases that do not start at month 1 or do not move later, a floor above the
 cash, a milestone given twice, use-of-funds lines that mix amounts and percents, and every list over its cap.
 
+### Metrics check (a16z, Bessemer, Sacks and Skok for the definitions and benchmarks; the rest unverified)
+
+A founder's own figures for one period of P months (1 to 36): every flow (the recurring revenue movement, customers,
+spend, burn, revenue) covers that one period. Recurring revenue is monthly (k = 12) or annual (k = 1), as the founder
+gives it; the calculator never converts a quarter to a year or compounds a rate.
+
+1. **ARR.** With S at the start, N new, E expansion, C contraction and X churned: ARR at the start k·S, at the end
+   k·(S + N + E - C - X), net new ARR k·(N + E - C - X), new ARR k·N. From the latest month's revenue T, of which O
+   is one-time and U usage: ARR 12·(T - O - U), and the run-rate 12·T, which is not ARR (a16z: ARR "should exclude
+   one-time fees, professional service fees, and any variable usage fees"). A stated ARR is checked against the
+   movement's ending ARR, or the latest month's ARR when no movement is given.
+2. **Retention and churn.** Gross revenue retention (S - C' - X')/S and net (S + E' - C' - X')/S, where E', C' and
+   X' are the starting customers' own movements when given and the period's totals otherwise (Bessemer for the
+   definitions; leaving new customers out is ours, unverified). Gross revenue churn = 1 - GRR, net revenue churn =
+   1 - NRR (below zero when expansion outruns losses), logo churn = customers lost / customers at the start (a16z,
+   stated per month; over a longer period it is ours). None is annualised.
+3. **Acquisition.** Blended CAC = spend / new customers; paid CAC = spend / customers from paid channels (a16z). CAC
+   payback = spend / (new monthly recurring revenue × gross margin) in months, and the revenue-only payback leaves
+   the margin out (Bessemer measures payback on gross margin; the formula is unverified).
+4. **Efficiency.** Burn multiple = net burn / net new ARR (Sacks), none when either is zero or less; on new ARR alone
+   it is worked only to name the cause of a stated multiple that matches it. Concentration = the largest customer's
+   revenue / the period's revenue (a16z), with no benchmark.
+5. **Checks.** Each stated figure is checked with `deal_check`'s tolerances (0.5 points for a percent, 2% of the
+   computed value for the rest, each an input, the edge included). A stated churn with a basis is checked on that
+   basis; with none, on every basis the inputs allow, and it holds when any does. A stated payback is checked on
+   gross margin when one is given. The verdict is `deal_check`'s rule: mismatch if any figure is, not_checked with
+   none.
+6. **Flags**, never errors. Beside a mismatch, the likely cause: `stated_arr_matches_run_rate`,
+   `stated_nrr_includes_new` (ending over starting recurring revenue), `stated_payback_not_margin_adjusted` and
+   `stated_burn_multiple_uses_new_not_net_arr`, each only when the stated figure lands within tolerance of that
+   other definition. With or without a mismatch: `run_rate_includes_non_recurring` (the latest month has one-time
+   or usage revenue), `expansion_hides_churn` (revenue was lost, but net revenue churn is at or below zero),
+   `churn_basis_unlabelled` (a stated churn with no basis), `blended_cac_only` (no paid-channel count),
+   `payback_not_margin_adjusted` (no gross margin), `burn_multiple_not_defined` (net new ARR at or below zero) and
+   `no_net_burn` (a net burn at or below zero). The benchmarks, each an input: `payback_above_band` (at or above
+   Bessemer's target for the customer segment, under 12 months for SMB, 18 for mid-market and 24 for enterprise, or
+   the founder's own band), `burn_multiple_above_band` (3x or more, Sacks) and `net_revenue_churn_above_band` (above
+   2% in a one-month period, Skok; not asked over a longer period, since nothing is compounded).
+
+A refusal names the field: a movement or cohort figure without `starting_recurring`, contraction and churn above the
+start, a cohort figure above its total, the latest month's parts without its total or above it, customers lost or
+paid-channel customers without or above their total, the largest customer without or above the period's revenue, a
+stated figure without what it needs to be checked, and a churn basis without a stated churn or its inputs.
+
 </details>
 
 ## Worked examples
@@ -615,6 +673,34 @@ With no raise the cash lasts 3.87 months, so the next raise is already late. $3M
 month 21 now is $3,745,000.00 on the plan and $4,142,500.00 on the downside. The report also flags
 `milestone_short_on_plan`, `downside_short_where_plan_covers`, `start_raising_date_passed` and `runway_below_band`.
 
+**Traction a VC will recompute (Company AM, made up).** Over 12 months, monthly recurring revenue went from $80k
+to $100k: $24k new, $6k expansion, $2k downgrades and $8k cancelled. Last month's revenue was $125k, $25k of it
+implementation fees, and the net burn was $1.8M. The deck says $1.5M ARR, 125% net revenue retention and a 6.25x
+burn multiple:
+
+```
+equity_calculator metrics_check --period-months 12 --starting-recurring 80000 --new-recurring 24000 \
+    --expansion-recurring 6000 --contraction-recurring 2000 --churned-recurring 8000 \
+    --month-total-revenue 125000 --month-one-time-revenue 25000 --net-burn 1800000 \
+    --stated-arr 1500000 --stated-nrr-percent 125 --stated-burn-multiple 6.25
+  ARR at the end of the period                                             $1,200,000.00  k·(S + N + E - C - X)
+  Run-rate (12 x the month's revenue)                                      $1,500,000.00  12·T
+  Gross revenue retention (12 months)                                           87.5000%  (S - C - X)/S
+  Net revenue retention (12 months)                                             95.0000%  (S + E - C - X)/S
+  Burn multiple                                                                7.500000x  net burn / net new ARR
+  Burn multiple on new ARR only                                                6.250000x  net burn / new ARR
+  ARR: verdict                                                                  mismatch  within the tolerance is consistent
+  Net revenue retention: verdict                                                mismatch  within the tolerance is consistent
+  Burn multiple: verdict                                                        mismatch  within the tolerance is consistent
+  Overall verdict                                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); not_checked with none
+```
+
+ARR is 12 × $100k = $1,200,000; the $1.5M is the run-rate, with the fees in it. Net revenue retention is 95%, not
+125%: the 125% is ending over starting recurring revenue, which counts the new customers. The burn multiple is
+7.5x on net new ARR; the deck's 6.25x divides by new ARR alone, before churn and downgrades. The report also flags
+`stated_arr_matches_run_rate`, `run_rate_includes_non_recurring`, `stated_nrr_includes_new`,
+`stated_burn_multiple_uses_new_not_net_arr` and `burn_multiple_above_band` as what a VC is likely to ask about.
+
 ## Using it
 
 ```
@@ -645,6 +731,17 @@ equity_calculator runway_plan --cash-on-hand C [--cash-floor F] --phase "TERMS".
     [--lean-phase "TERMS"... | --lean-revenue-percent R [--lean-gross-burn-percent G]]
     [--raise "TERMS"]... [--raise-use-of-funds "N AMOUNT|PCT%"]... [--milestone M]... [--months-to-raise T]
     [--stated-runway-months S] [--tolerance-points P] [--tolerance-percent Q] [--runway-band-months B]
+equity_calculator metrics_check --period-months P [--recurring-unit monthly|annual]
+    [--starting-recurring S [--new-recurring N] [--expansion-recurring E] [--contraction-recurring C]
+    [--churned-recurring X] [--cohort-expansion-recurring E] [--cohort-contraction-recurring C]
+    [--cohort-churned-recurring X]] [--month-total-revenue T [--month-one-time-revenue O]
+    [--month-usage-revenue U]] [--customers-start S [--customers-lost L]] [--customers-new N
+    [--customers-new-paid P]] [--sales-marketing-spend M [--gross-margin-percent G]] [--net-burn B]
+    [--largest-customer-revenue L --period-revenue R] [--stated-arr A] [--stated-nrr-percent N]
+    [--stated-grr-percent G] [--stated-churn-percent C [--stated-churn-basis BASIS]] [--stated-cac C]
+    [--stated-cac-payback-months M] [--stated-burn-multiple X] [--stated-concentration-percent C]
+    [--tolerance-points P] [--tolerance-percent Q] [--customer-segment smb|mid_market|enterprise]
+    [--payback-band-months B] [--burn-multiple-band X] [--net-revenue-churn-band-percent C]
 ```
 
 `deal_check` needs `--investment` and at least one of `--pre-money`, `--post-money` and `--stated-investor-percent`.
@@ -658,6 +755,13 @@ or a lean case is its own `--downside-phase` / `--lean-phase` items or the perce
 burn, not both. Each `--raise` is one option to compare, and each `--raise-use-of-funds` is one line of the raise it
 names by number (`1` is the first `--raise`), an amount or a percent of that raise. `--milestone` is a month from
 today; `--stated-runway-months` is the runway stated with no raise.
+
+`metrics_check` needs `--period-months`, the one period every flow figure covers. Each part is the founder's own
+figure: recurring revenue in the unit `--recurring-unit` names (monthly by default), customers as whole numbers,
+and `--net-burn` positive when cash goes out (`--net-burn=-50000` for a cash-generative period, with `=` because
+argparse reads a lone negative number as a flag). Give only what the document shows; each stated figure is
+checked when its parts are there, and `--stated-churn-basis` (`logo`, `gross_revenue`, `net_revenue` or
+`unlabelled`) says which churn the document means.
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
 `--class`. Each repeated flag is one instrument, round or class, given as one quoted string of `key=value` terms and
@@ -721,7 +825,8 @@ and under 1e16 in size. A share count is a whole number below 1e16. Number text 
 most 50 SAFEs and notes, a dilution at most 20 rounds, a waterfall at most 12 preferred classes, ranked 1 to 12, and a
 deal check at most 50 SAFEs and notes and 20 use-of-funds lines. A runway plan takes at most 3 cases (the plan, a
 downside and a lean case) of at most 12 phases, 6 raises of at most 20 use-of-funds lines each, and 10 milestones;
-its months are at most 600 and its months to raise at most 60.
+its months are at most 600 and its months to raise at most 60. A metrics check covers one period of 1 to 36
+months, and its customer counts are whole numbers below 1e16.
 A note runs at most 600 months, or at most 18,262 days (about 50 years) between its dates; a vesting schedule, its
 cliff and every month asked about are at most 600 months. These limits keep every exact step small: the largest
 inputs compute in well under a second, and a value like `1e999999999` is refused at once instead of tying up the
@@ -738,7 +843,7 @@ tools do not check it.
 ## The Excel workbook
 
 There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` for the round, `Dilution`, `Vesting`,
-`Waterfall`, `Deal check` or `Runway plan`):
+`Waterfall`, `Deal check`, `Runway plan` or `Metrics check`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
@@ -768,8 +873,8 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
 - The pool's and the round's value rows, the waterfall's payouts, and a deal check's pre-money split and percent
   use-of-funds lines are rounded to the cent by largest remainder, so they add up to their rounded total exactly.
 - Verdict cells are coloured by conditional formatting: green for accept, grant and in the money, amber for break
-  even and at the money, red for reject, no grant and underwater. A deal check's and a runway plan's verdicts are green for
-  consistent, red for mismatch and amber for not checked; a runway plan's milestones are green when covered and red
+  even and at the money, red for reject, no grant and underwater. A deal check's, a runway plan's and a metrics check's verdicts are
+  green for consistent, red for mismatch and amber for not checked; a runway plan's milestones are green when covered and red
   when short. A waterfall choice is blue when the class converts
   and grey when it stays: neither is good or bad. The investor verdict recolours itself when an input changes;
   elsewhere, typing a different verdict recolours the cell.
@@ -904,6 +1009,24 @@ The `runway_plan` scenario adds these, each only when the input uses it:
 | `tolerance`           | 0.5 points; 2% relative                                                      | `--tolerance-points`, `--tolerance-percent` | unverified                                                                  |
 | `runway_band`         | 18 months                                                                    | `--runway-band-months`                      | YC seed guide ("usually 12-18"; 18 is its top; a benchmark, not a rule)     |
 | `use_of_funds_rule`   | the lines add up to the raise                                                | fixed                                       | unverified                                                                  |
+
+The `metrics_check` scenario adds these, each only when the input uses it:
+
+| Key                      | Default                                                                 | How to change it                              | Source                                                             |
+| ------------------------ | ----------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------ |
+| `period_rule`            | every flow is for the one period; nothing annualised or compounded      | `--period-months`                             | unverified (a modelling choice)                                    |
+| `arr_rule`               | ARR = k × recurring revenue; run-rate = 12 × the latest month's revenue | `--recurring-unit`                            | a16z ("16 More Startup Metrics", item 2)                           |
+| `retention_rule`         | GRR = (S - C - X)/S; NRR = (S + E - C - X)/S; new customers left out    | fixed                                         | Bessemer for the definitions; leaving new customers out unverified |
+| `cohort_rule`            | the period's totals                                                     | the `--cohort-*` figures                      | unverified (a modelling choice)                                    |
+| `churn_rule`             | logo, gross and net revenue churn over the period                       | fixed                                         | a16z ("16 Startup Metrics", item 11; per month)                    |
+| `cac_rule`               | blended = spend / new customers; paid = spend / paid-channel customers  | fixed                                         | a16z ("16 Startup Metrics", item 8)                                |
+| `payback_rule`           | spend / (new monthly recurring revenue × gross margin)                  | `--gross-margin-percent`                      | Bessemer (on gross margin); the formula unverified                 |
+| `burn_multiple_rule`     | net burn / net new ARR                                                  | fixed                                         | Sacks                                                              |
+| `concentration_rule`     | largest customer / the period's revenue; no benchmark                   | fixed                                         | a16z ("16 More Startup Metrics", item 14)                          |
+| `tolerance`              | 0.5 points; 2% relative                                                 | `--tolerance-points`, `--tolerance-percent`   | unverified                                                         |
+| `payback_band`           | the segment's target: 12, 18 or 24 months                               | `--customer-segment`, `--payback-band-months` | Bessemer (a benchmark, not a rule)                                 |
+| `burn_multiple_band`     | 3x                                                                      | `--burn-multiple-band`                        | Sacks (a benchmark, not a rule)                                    |
+| `net_revenue_churn_band` | 2% a month, one-month periods only                                      | `--net-revenue-churn-band-percent`            | Skok (a benchmark, not a rule)                                     |
 
 </details>
 

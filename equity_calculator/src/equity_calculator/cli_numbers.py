@@ -88,6 +88,11 @@ def parse_months(raw: str) -> int:
     return _whole(raw, "a whole number of months")
 
 
+def parse_customers(raw: str) -> int:
+    """argparse type for a count of customers: a whole number, ``_`` ignored, ``,`` only between thousands."""
+    return _whole(raw, "a whole number of customers")
+
+
 def parse_rank(raw: str) -> int:
     """argparse type for a seniority rank: a whole number, 1 the most senior (the model bounds it)."""
     return _whole(raw, "a whole-number rank (1 is paid first)")

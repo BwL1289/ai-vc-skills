@@ -109,7 +109,7 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 | [`vc-term-sheet-review`](skills/vc-term-sheet-review/SKILL.md)             | For founders: reads a term sheet you were offered in plain words, marks each term against YC's standard and clean Series A term sheet, runs the round and an exit waterfall at low and high exits on the calculator, and ends with questions for your lawyer. Never says whether to sign.                                                            | 🧪 Preview   |
 | [`vc-diligence-questions`](skills/vc-diligence-questions/SKILL.md)         | For founders: prepares you for a fund's due diligence after the first meeting: the questions your own material leaves open, by area, ranked by how much each answer moves the decision, with draft answers from your own material and a data-room checklist scaled to your stage.                                                                    | 🧪 Preview   |
 | [`vc-current-investor-update`](skills/vc-current-investor-update/SKILL.md) | For founders: writes or reviews your monthly or quarterly update to your current investors so it builds trust before the next raise: the same metrics and definitions every time, lowlights told straight, every figure and promise tied out to the last update, runway from the calculator, and a reader pass that flags spin and missing bad news. | 🧪 Preview   |
-| More venture-style reviews                                                 | Term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                                                                                                                                           | 🗺️ Planned   |
+| More venture-style reviews                                 | Term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                                                                                                                            | 🗺️ Planned   |
 
 `vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions` and `vc-current-investor-update` are in preview until they have been checked on
 real decks and meetings. The calculator's arithmetic is tested; the reviews' wording may change. The `vc-positioning` and
@@ -119,19 +119,20 @@ every clause of that sentence was met, Partial that exactly one was missed or me
 more were missed. Two were run again after a skill fix, as their files say. One run each is a small sample. The
 `vc-deal-math`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions` and `vc-current-investor-update` evals state the expected behaviour and have not yet been run in a live session.
 
-The `equity-calculator` skill covers nine scenarios:
+The `equity-calculator` skill covers ten scenarios:
 
-| Scenario      | The question it answers                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `investor`    | An investor wants n of the company. Is the deal worth it? (Paul Graham's equity equation)                              |
-| `employee`    | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                     |
-| `pool`        | A round asks for a bigger option pool. What is the real price per share, and who owns what afterwards?                 |
-| `round`       | A priced round converts post-money SAFEs and convertible notes. At what price, and who owns what afterwards?           |
-| `dilution`    | A holder owns h of the company. What is left after a series of rounds?                                                 |
-| `vesting`     | How much of a grant has vested at a given month, and what is it worth above the strike?                                |
-| `waterfall`   | The company is sold. Who gets what, with preferences paid by rank and each preferred class free to convert?            |
-| `deal_check`  | Do a raise's valuation, percent sold, ownership after the round and runway agree, as a VC will check them?             |
-| `runway_plan` | How long does each raise last on a phased plan and a downside, which milestones does it reach, and how much is needed? |
+| Scenario        | The question it answers                                                                                                |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `investor`      | An investor wants n of the company. Is the deal worth it? (Paul Graham's equity equation)                              |
+| `employee`      | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                     |
+| `pool`          | A round asks for a bigger option pool. What is the real price per share, and who owns what afterwards?                 |
+| `round`         | A priced round converts post-money SAFEs and convertible notes. At what price, and who owns what afterwards?           |
+| `dilution`      | A holder owns h of the company. What is left after a series of rounds?                                                 |
+| `vesting`       | How much of a grant has vested at a given month, and what is it worth above the strike?                                |
+| `waterfall`     | The company is sold. Who gets what, with preferences paid by rank and each preferred class free to convert?            |
+| `deal_check`    | Do a raise's valuation, percent sold, ownership after the round and runway agree, as a VC will check them?             |
+| `runway_plan`   | How long does each raise last on a phased plan and a downside, which milestones does it reach, and how much is needed? |
+| `metrics_check` | Do the ARR, retention, churn, CAC payback and burn multiple a deck states match their parts?                           |
 
 ## What you can ask
 
@@ -200,7 +201,7 @@ The formulas, their sources, every flag and a worked example per scenario are in
 
 ## Roadmap
 
-- [x] `equity-calculator`: nine scenarios, command, workbook, MCP server, Python package
+- [x] `equity-calculator`: ten scenarios, command, workbook, MCP server, Python package
 - [x] Claude Code plugin and marketplace
 - [ ] `vc-deal-math`: founders check their own deck's numbers with the calculator (preview)
 - [ ] `vc-positioning`: founders tighten their raise's messaging, stress-tested by an adversarial review, and prep it

@@ -1,5 +1,5 @@
 """Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check|``
-``runway_plan``).
+``runway_plan|metrics_check``).
 
 The number readers are ``cli_numbers``; a repeated flag's one-argument terms are ``cli_instruments``.
 """
@@ -19,8 +19,9 @@ from equity_calculator.cli_instruments import (
     parse_round,
     parse_safe,
 )
-from equity_calculator.cli_numbers import parse_decimal, parse_months, parse_percent, parse_whole
+from equity_calculator.cli_numbers import parse_customers, parse_decimal, parse_months, parse_percent, parse_whole
 from equity_calculator.schemas.equity import PoolTiming, ShareRounding
+from equity_calculator.schemas.equity_metrics_check import CustomerSegment, RecurringUnit, StatedChurnBasis
 from equity_calculator.schemas.equity_vesting import Acceleration, AccelerationBase
 
 _INSTRUMENTS = "instruments"
@@ -391,4 +392,109 @@ def runway_plan_arguments(parser: argparse.ArgumentParser) -> None:
         "--runway-band-months",
         type=parse_decimal,
         help="Flag a raise lasting under this many months on the plan (default 18; a common benchmark, not a rule).",
+    )
+
+
+def _metrics_parts_arguments(parser: argparse.ArgumentParser) -> None:
+    """A metrics check's parts: the period, the recurring revenue movement, the latest month, customers, spend."""
+    parser.add_argument(
+        "--period-months",
+        type=parse_months,
+        required=True,
+        help="The period every flow figure covers, in whole months (1 to 36): movement, customers, spend, burn.",
+    )
+    parser.add_argument(
+        "--recurring-unit",
+        choices=get_args(RecurringUnit),
+        help="The unit the recurring revenue figures are in: monthly (MRR) or annual (ARR) (default monthly).",
+    )
+    movements = (
+        ("--starting-recurring", "Recurring revenue at the start of the period (S; give 0 when there was none)."),
+        ("--new-recurring", "Recurring revenue from customers won in the period (N, default 0)."),
+        ("--expansion-recurring", "Recurring revenue added by upsells and expansion in the period (E, default 0)."),
+        ("--contraction-recurring", "Recurring revenue lost to downgrades in the period (C, default 0)."),
+        ("--churned-recurring", "Recurring revenue lost to cancellations in the period (X, default 0)."),
+        ("--cohort-expansion-recurring", "Expansion from the customers there at the start only (retention uses it)."),
+        ("--cohort-contraction-recurring", "Contraction of the customers there at the start only."),
+        ("--cohort-churned-recurring", "Recurring revenue the customers there at the start cancelled."),
+        ("--month-total-revenue", "The latest month's total revenue (T)."),
+        ("--month-one-time-revenue", "Of it, one-time revenue: setup, implementation, services (O, default 0)."),
+        ("--month-usage-revenue", "Of it, variable usage revenue (U, default 0)."),
+    )
+    for flag, words in movements:
+        parser.add_argument(flag, type=parse_decimal, help=words)
+    customers = (
+        ("--customers-start", "Customers at the start of the period."),
+        ("--customers-lost", "Of them, customers lost in the period."),
+        ("--customers-new", "Customers won in the period, every channel."),
+        ("--customers-new-paid", "Of them, customers won through paid channels."),
+    )
+    for flag, words in customers:
+        parser.add_argument(flag, type=parse_customers, help=words)
+    parser.add_argument(
+        "--sales-marketing-spend", type=parse_decimal, help="Sales and marketing spend in the period, every cost."
+    )
+    parser.add_argument("--gross-margin-percent", type=parse_percent, help="Gross margin, in percent.")
+    parser.add_argument(
+        "--net-burn",
+        type=parse_decimal,
+        help="Net burn in the period (spend less cash in); give a negative value as --net-burn=-50000.",
+    )
+    parser.add_argument("--largest-customer-revenue", type=parse_decimal, help="The largest customer's revenue.")
+    parser.add_argument("--period-revenue", type=parse_decimal, help="Total revenue in the period.")
+
+
+def metrics_check_arguments(parser: argparse.ArgumentParser) -> None:
+    """A metrics check's flags: the parts, then what the document states, the tolerances and the benchmarks."""
+    _metrics_parts_arguments(parser)
+    stated = (
+        ("--stated-arr", parse_decimal, "The ARR the document states, in dollars."),
+        ("--stated-nrr-percent", parse_percent, "The net revenue retention it states, in percent."),
+        ("--stated-grr-percent", parse_percent, "The gross revenue retention it states, in percent."),
+        ("--stated-churn-percent", parse_percent, "The churn it states, in percent."),
+    )
+    for flag, reader, words in stated:
+        parser.add_argument(flag, type=reader, help=words)
+    parser.add_argument(
+        "--stated-churn-basis",
+        choices=get_args(StatedChurnBasis),
+        help="What the stated churn counts (default unlabelled: it is checked on every basis the figures give).",
+    )
+    stated = (
+        ("--stated-cac", parse_decimal, "The CAC it states, in dollars."),
+        ("--stated-cac-payback-months", parse_decimal, "The CAC payback it states, in months."),
+        ("--stated-burn-multiple", parse_decimal, "The burn multiple it states (2.5 for 2.5x)."),
+        ("--stated-concentration-percent", parse_percent, "The largest customer's share of revenue it states."),
+        (
+            "--tolerance-points",
+            parse_percent,
+            "How far a stated percent may sit from the computed one, in percentage points (default 0.5).",
+        ),
+        (
+            "--tolerance-percent",
+            parse_percent,
+            "How far a stated money, months or multiple figure may sit, in percent of the computed one (default 2).",
+        ),
+    )
+    for flag, reader, words in stated:
+        parser.add_argument(flag, type=reader, help=words)
+    parser.add_argument(
+        "--customer-segment",
+        choices=get_args(CustomerSegment),
+        help="Who you sell to; it sets the CAC payback benchmark (a benchmark, not a rule).",
+    )
+    parser.add_argument(
+        "--payback-band-months",
+        type=parse_decimal,
+        help="Flag a CAC payback on gross margin at or above this many months; used over the segment's.",
+    )
+    parser.add_argument(
+        "--burn-multiple-band",
+        type=parse_decimal,
+        help="Flag a burn multiple at or above this (default 3; a benchmark, not a rule).",
+    )
+    parser.add_argument(
+        "--net-revenue-churn-band-percent",
+        type=parse_percent,
+        help="Flag one month's net revenue churn above this percent (default 2; a benchmark, not a rule).",
     )

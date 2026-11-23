@@ -25,6 +25,7 @@ from equity_calculator.schemas.equity_common import (
 )
 from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealCheckResult
 from equity_calculator.schemas.equity_dilution import DilutionInput, DilutionResult
+from equity_calculator.schemas.equity_metrics_check import MetricsCheckInput, MetricsCheckResult
 from equity_calculator.schemas.equity_round import RoundInput, RoundResult
 from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput, RunwayPlanResult
 from equity_calculator.schemas.equity_vesting import VestingInput, VestingResult
@@ -316,3 +317,53 @@ RUNWAY_Y: dict[str, object] = {
 def runway_plan(**fields: object) -> RunwayPlanResult:
     """The runway plan for ``fields`` (a ``RunwayPlanInput``'s fields)."""
     return compute(RunwayPlanInput.model_validate(fields))
+
+
+# Made-up metrics, worked by exact fractions in test_metrics_check.py.
+# Company AM, over 12 months: $80k MRR at the start, $24k new, $6k expansion, $2k downgrades, $8k cancelled; last
+# month's revenue $125k with $25k of implementation fees; $1.8M net burn. Its deck says $1.5M ARR, 125% net revenue
+# retention and a 6.25x burn multiple.
+METRICS_AM: dict[str, object] = {
+    "period_months": 12,
+    "recurring_unit": "monthly",
+    "starting_recurring": "80000",
+    "new_recurring": "24000",
+    "expansion_recurring": "6000",
+    "contraction_recurring": "2000",
+    "churned_recurring": "8000",
+    "month_total_revenue": "125000",
+    "month_one_time_revenue": "25000",
+    "net_burn": "1800000",
+    "stated_arr": "1500000",
+    "stated_nrr_percent": "125",
+    "stated_burn_multiple": "6.25",
+}
+# Company AN, one month: 400 customers at the start, 12 lost, 45 new (20 from paid ads); $50k MRR at the start, $5k new,
+# $500 expansion, $500 downgrades, $1k cancelled; $36k sales and marketing spend; 75% gross margin; it sells to small
+# businesses. Its deck says "monthly churn 2%" and a 7.2-month CAC payback; its model says 9.6 months.
+METRICS_AN_PARTS: dict[str, object] = {
+    "period_months": 1,
+    "starting_recurring": "50000",
+    "new_recurring": "5000",
+    "expansion_recurring": "500",
+    "contraction_recurring": "500",
+    "churned_recurring": "1000",
+    "customers_start": 400,
+    "customers_lost": 12,
+    "customers_new": 45,
+    "customers_new_paid": 20,
+    "sales_marketing_spend": "36000",
+    "gross_margin_percent": "75",
+    "customer_segment": "smb",
+}
+METRICS_AN_DECK: dict[str, object] = {
+    **METRICS_AN_PARTS,
+    "stated_churn_percent": "2",
+    "stated_cac_payback_months": "7.2",
+}
+METRICS_AN_MODEL: dict[str, object] = {**METRICS_AN_PARTS, "stated_cac_payback_months": "9.6"}
+
+
+def metrics_check(**fields: object) -> MetricsCheckResult:
+    """The metrics check for ``fields`` (a ``MetricsCheckInput``'s fields)."""
+    return compute(MetricsCheckInput.model_validate(fields))
