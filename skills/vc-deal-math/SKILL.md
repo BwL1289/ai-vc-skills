@@ -20,7 +20,10 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
   (`equity_pool`), SAFE conversion detail (`equity_round`), a stake through later rounds (`equity_dilution`), vesting
   or an exit waterfall.
 - Hand off to the vc-round-sizing skill for how much to raise on a phased plan, raise now or wait, or which milestone
-  month a raise's cash reaches.
+  month a raise's cash reaches. A runway claim with no raise, or on a SAFE or note raise, goes to its tool,
+  `equity_runway_plan`, as step 2 says; `deal_check` checks only the runway a priced round buys.
+- Hand off ARR, retention, churn, CAC payback and burn multiple to the vc-metrics-readiness skill (preview), a market
+  size to the vc-market-sizing skill (preview), and a term sheet to the vc-term-sheet-review skill (preview).
 
 ## Steps
 
@@ -34,12 +37,18 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      at the next priced round, and "the safes are not diluted by each other" (Y Combinator's post-money SAFE user
      guide), so `deal_check` would report a correct founders' figure as a mismatch. Say so, and offer `equity_round` instead
      (the equity-calculator skill), with the new SAFE or note as one more instrument and the next priced round the
-     founder expects (its size, pre-money and pool target) as the round; say the figures depend on that round.
+     founder expects (its size, pre-money and pool target) as the round; say the figures depend on that round. The
+     raise's runway claim and use-of-funds lines go to `equity_runway_plan` (the runway bullet below).
    - SAFEs, notes or a pool top-up need the fully diluted share count before the round (every share, granted options
-     and the unissued pool included) and the unissued pool, as shares (`unissued_pool_shares`) or as a percent of
-     the fully diluted shares (`unissued_pool_percent`). If the founder does not have them to hand, offer a stand-in
-     of 10,000,000 shares with the pool passed as `unissued_pool_percent`. Use it only on their yes, say so in the
-     answer, and quote only percentages and money from that run, never prices or share counts.
+     and the unissued pool included, SAFEs and notes left out, since the tool converts them itself) and the unissued
+     pool, as shares (`unissued_pool_shares`) or as a percent of the fully diluted shares (`unissued_pool_percent`).
+     Some cap tables count SAFEs and notes in their fully diluted total; ask which way the founder's does, and pass
+     the tool its own basis. If the founder's total counts them, ask for the total without them, as a bracketed ask,
+     `[fully diluted shares before the round, SAFEs and notes left out]`, and make no call that needs it until they
+     give it; never subtract the SAFE or note shares yourself. If the founder does not have the count to hand, offer
+     a stand-in of 10,000,000 shares with the pool passed as `unissued_pool_percent`. Use it only on their yes, call
+     it this skill's placeholder in the answer, never a company figure, and quote only percentages and money from
+     that run, never prices or share counts.
    - Each SAFE: amount, post-money cap and/or discount, MFN. Each note: principal, interest rate, months outstanding
      (or issue and conversion dates), simple or compounding interest, cap and/or discount, and what the cap is
      measured against. The calculator reads a note's cap as a pre-money cap over today's fully diluted shares (its
@@ -50,6 +59,22 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      issued shares only, say), ask for the share counts.
    - A runway claim needs cash on hand and the planned monthly spend and revenue after the raise. Ask for today's
      spend and revenue too: decks often quote runway on today's burn, and a VC will check it against the plan.
+   - **Runway with no raise, or on a SAFE or note raise,** goes to `equity_runway_plan` (from the command line,
+     `equity_calculator runway_plan`), never to `deal_check`, which needs a priced round. It takes the raise as cash
+     and needs no valuation: `cash_on_hand`; one `plan` case whose first phase is today's monthly spend and revenue,
+     `{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}`; the new SAFE or note
+     in `raises`, its use-of-funds lines included,
+     `{"amount": "...", "stated_runway_months": "...", "use_of_funds": [{"percent": "..."}]}`; and a runway stated
+     with no raise as the top-level `stated_runway_months`. On a SAFE or note raise, the `plan` case's phases are the
+     founder's own figures: today's monthly spend and revenue as the first phase, from month 1, and each change the
+     founder plans (more spend after the raise, say) as a later phase from the month the founder names, each asked for
+     by name when missing (`[planned monthly spend and revenue, from which month]`), never assumed. With no cash or
+     burn given, ask for them by name
+     (`[cash on hand, monthly spend and revenue]`) and make no call until they are given. A mismatch row is quoted
+     with the tool's value, as `deal_check`'s are. With no milestone, months to raise or landing month passed, two
+     flags can come back: `runway_below_band` (on the plan the raise lasts under the runway benchmark, 18 months by
+     default; a common benchmark, not a rule) and `cash_never_runs_out` (revenue covers the spend before the cash
+     runs out, so there is no runway end and a stated runway is not checked).
    - Pool timing: if the term sheet or deck does not say, use the pre-money (the usual term sheet), say so, and offer
      to re-run with the pool in the post-money.
 3. **Call `equity_deal_check`** with every stated figure. Send money and percents as strings:
@@ -123,11 +148,12 @@ is a change of notation, not a calculation.
    line rather than one effective pre-money: the tool's effective pre-money also leaves out the converted shares and
    the unissued pool already there, so it is lower than the pre-money less the new pool that a VC may quote.
 4. **Runway:** each burn case's net and gross runway, and which one the claim was checked against: the planned net
-   runway, else today's when revenue covers the planned burn.
+   runway, else today's when revenue covers the planned burn. From `equity_runway_plan`, the plan's runway with the
+   raise and with none, each as printed.
 5. **What a VC is likely to ask**, one line per flag, in plain words, with how to fix the deck or prepare the answer
    (the flag table below). A flag is a question to be ready for, never an error. The two benchmark flags (dilution above 25%, runway under
    18 months) are common benchmarks, not rules: say so, say they vary by sector, stage and year, and quote the source
-   the tool's assumption row gives, which today is `unverified`.
+   that the tool's assumption row gives (each tool's row names its own).
 6. **Assumptions:** quote the ones the answer leans on, with their sources. Say plainly which are `unverified` and how
    to change a default (pool timing, note compounding, the tolerances, the two benchmarks).
 7. **Close** with what a lawyer or accountant should confirm before the deck goes out: the actual cap table, the SAFE
@@ -135,8 +161,8 @@ is a change of notation, not a calculation.
 
 ## Flags
 
-The result's `flags` holds codes only; this table is what each one means for the founder. The text report prints the
-same meaning beside each flag.
+The result's `flags` holds codes only; this table is what each `deal_check` flag means for the founder (step 2 gives
+the two `runway_plan` flags). The text report prints the same meaning beside each flag; the MCP result does not.
 
 | Flag                                  | What it means for the founder                                                                                   | What to change or prepare                                                                      |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
@@ -154,15 +180,17 @@ same meaning beside each flag.
 
 ## Limits
 
-- No arithmetic outside the calculator's tools. A figure outside the deal terms (a growth rate, a market size, unit
-  economics) is quoted as stated with "not checked: no tool computes this", and no what-if the founder did not ask for
-  is run.
+- No arithmetic outside the calculator's tools, and no what-if the founder did not ask for. A figure outside the
+  deal terms goes to the skill built for it: ARR, retention, churn, CAC payback and burn multiple to the
+  vc-metrics-readiness skill (`equity_metrics_check`), a market size to the vc-market-sizing skill
+  (`equity_market_sizing`). Growth rates and LTV are quoted as stated with "not checked: no tool computes this".
 - It checks the arithmetic of the figures the founder gives. It does not read a deck file, a cap table file or a term
   sheet; the founder's text is the input, and nothing is sent anywhere. A term sheet goes to the vc-term-sheet-review
   skill.
 - It is not investment, legal or tax advice, and it does not say whether to take a round or what a company is worth.
 - It works the new money as a priced equity round. A raise on a SAFE or note is not modelled by `deal_check`; step 2
-  routes it to `equity_round` with the next priced round the founder expects.
+  routes its ownership to `equity_round` with the next priced round the founder expects, and its runway and
+  use-of-funds lines to `equity_runway_plan`.
 - Benchmarks are common benchmarks, not rules. Quote one only as the tool's assumption rows give it, with the source
   they name, or as `unverified` when they name none.
 - It uses named public frameworks (Y Combinator's post-money SAFE user guide, the option-pool shuffle, runway on net

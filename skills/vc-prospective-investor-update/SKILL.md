@@ -147,8 +147,9 @@ The founder keeps the list of investors. This skill takes the names only, as the
 
 ## Steps
 
-In review mode without a subagent tool, run Stage A of the reader pass first, before step 1, as "How to run the
-lenses" says; step 9 then starts at the quote check.
+With a subagent tool (the Agent or Task tool), the reader pass runs as subagents, however short the material: one per
+lens, then one per objection. In review mode without a subagent tool, run Stage A of the reader pass first, before step
+1, as "How to run the lenses" says; step 9 then starts at the quote check.
 
 The reader pass judges the draft before this skill changes it. In review mode, both its stages read the founder's draft
 as given, never the revised one: a line this skill adds at step 8 answers no objection. In draft mode, they read the
@@ -166,19 +167,26 @@ draft written at step 8.
    compared as written: **Matches** or **Differs from the current-investor update**. This check is this skill's own,
    not a metric status.
 6. **Runway,** only when the update shows one: call `equity_runway_plan` (next section).
-7. **Other figures:** quote each as stated, with "not checked: no tool computes this".
+7. **Other figures:** quote each as stated, with its line from the shared rules file's "Not checked here": ARR,
+   retention, churn, CAC payback and burn multiple go to the vc-metrics-readiness skill; the rest are "not checked: no
+   tool computes this".
 8. **Draft or revise.** Draft mode: write the update in the shape above from the founder's material only, every gap a
    bracketed ask. Review mode: keep the founder's draft and words; change only what a status, the calculator, a figure
    or definition that Differs from the current-investor update or a kept finding requires. With more than one ask in the
-   material, keep one and put the choice in the open asks (`[the one ask for this update: A or B]`).
+   material, keep one and put the choice in the open asks (`[the one ask for this update: A or B]`). Either way, a
+   definition or lowlight the founder did not give is a bracketed ask (`[runway definition]`), never this skill's words;
+   a moved target is named under "Last time we said", with the old and new targets as quoted.
 9. **Run the reader pass** (below) on the draft it judges (the founder's draft as given in review mode): attack, check
    the quotes, refute, rank. Revise the draft for every kept finding, using only the founder's facts or a bracketed
    ask.
 10. **Check before answering.** Every figure is quoted as stated or comes from a tool; every lowlight the founder gave
     is in the draft; every figure and definition this period's current-investor update also gives is word for word the
     same as there; every metric an earlier update reported is in the line or said to be dropped; every last-time item
-    has a line; one ask; no investor named in the update, except in a thanks the founder says that person agreed to;
-    no sentence speaks as an investor or names a firm as a voice; nothing is sent anywhere.
+    has a line; one ask; no investor named in the update, except in a thanks the founder says that person agreed to; no
+    sentence speaks as an investor or names a firm as a voice; nothing is sent anywhere. Never work out how two of the
+    founder's figures relate (a difference, a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a
+    line or a table cell unless the founder's material states it or a tool returned it; quote both figures as stated
+    instead ("from 2,000 to 4,500", never "more than doubled").
 
 ## Runway
 
@@ -290,26 +298,31 @@ Every lens gets the same brief, with its own name and test filled in:
 - Read only the founder's material given here: the earlier updates, this period's notes, this period's update to current
   investors when given, and the draft. Bring in no outside fact about the company, its market or its customers, and do
   no arithmetic. Saying that one stated figure is larger than another, or one date later, is allowed; working out by how
-  much is not.
+  much is not. Figures under different labels or definitions are never set side by side, not even as larger or smaller:
+  say only that the label or definition changed.
 - Return at most three objections, strongest first. For each: the draft's line it is about (or, for something left
   out, the earlier update's or the notes' line the draft omits), quoted word for word with its place; why an investor
   is likely to read it as a reason to trust the line less; and how much it costs (fix before sending, worth fixing, or
   minor).
 - A reason you cannot tie to a line of the material is not an objection. List it apart as a question to the founder.
+  Never turn an objection into a question because another line may answer it.
 - Do not judge whether another line of the draft answers an objection: raise it anyway, and the refute pass decides.
   Return "nothing found" only when no line of the material gives this lens an objection worth an investor's time.
 
 **How to run the lenses.** With a subagent tool (in Claude Code, the Agent or Task tool), run the four lenses as
-parallel subagents, each given only the founder's material, the draft it judges (Steps) and its lens brief: not this
-skill's other sections, not the line or the tie-out table, not another lens's output. Without one, in review mode run
-the lenses before step 1, one after another, writing each lens's objections down in full before reading the next brief.
-In draft mode the same agent wrote the draft, so the lenses run after step 8, still one after another. Either way the
-answer says the lenses ran in one agent and are less independent than subagents.
+parallel subagents, however short the material, each given only the founder's material, the draft it judges (Steps) and
+its lens brief: not this skill's other sections, not the line or the tie-out table, not another lens's output. Without
+one, in review mode run the lenses before step 1, one after another, writing each lens's objections down in full before
+reading the next brief. In draft mode the same agent wrote the draft, so the lenses run after step 8, still one after
+another. Either way the answer says the lenses ran in one agent and are less independent than subagents.
 
 **The calculator's mismatches** do not go through the lenses or the refute pass, and neither does a printed runway
 below a claim stated as a floor, nor a figure or definition that Differs from the current-investor update (step 5).
-Each leads the first tier, quoting the update's figure with the tool's value, or the current-investor update's line,
-as the reason. A mismatch with the claim below the printed runway goes in the minor tier at most, the same way.
+A mismatch is added to the ranked fix list ahead of the tiers, quoting the update's figure with the tool's value as the
+reason. It carries no tier: how much a gap hurts depends on its size, which the founder weighs. A mismatch with the
+claim below the printed runway goes in the minor tier at most. A printed runway below a claim stated as a floor, and a
+figure or definition that Differs from the current-investor update, lead the first tier, quoting the update's figure
+with the tool's value, or the current-investor update's line, as the reason.
 
 ### Check the quotes
 
@@ -319,16 +332,18 @@ objection about the same line merge, keeping both lens names. Questions go to th
 
 ### Stage B: refute
 
-Each objection gets its own refute pass. With a subagent tool, run one subagent per objection, given the founder's
-material, the draft, that one objection, the Pattern column of the table below, and everything from "The refute
-brief:" to the end of this stage, and nothing else; without one, decide the objections one at a time against the same
-brief.
+Each objection gets its own refute pass. With a subagent tool, launch one subagent per objection in a single message,
+so they run in parallel; never put two objections in one subagent, and never judge them in the main agent instead. Give
+each the founder's material, the draft, that one objection, the Pattern column of the table below, and everything from
+"The refute brief:" to the end of this stage, and nothing else. Without a subagent tool, decide the objections one at a
+time against the same brief.
 
 The refute brief:
 
 - You decide whether the founder's material answers one objection; you argue neither side. Write in the third person;
   you are not an investor and do not speak as one, named or not.
-- Use only the founder's material and the draft given here. Bring in no outside fact, and do no arithmetic.
+- Use only the founder's material and the draft given here. Bring in no outside fact, and do no arithmetic. Figures
+  under different labels or definitions are never compared, not even as larger or smaller.
 - How an investor is likely to read a line is not an outside fact: judge whether the material answers that reading.
 - A line that matches a pattern in the list you were given never answers an objection.
 - Return one verdict from the three below, quoting the founder's line word for word where it needs one. When you
@@ -355,14 +370,15 @@ is the founder's, as given: a line this skill added at step 8 is not in it.
 ### The ranked fix list
 
 Order the kept objections in three tiers: **fix before sending**, **worth fixing**, **minor**. The calculator's
-mismatches lead the first tier, with every figure or definition that Differs from the current-investor update (step 5),
-though a mismatch with the claim below the printed runway is minor at most (Runway); a Dropped or Restated metric
-status, or a last-time item with no line in the founder's draft (No word, whatever the notes say), goes in it too, even
+mismatches lead the list ahead of the tiers, with no tier, though a mismatch with the claim below the printed runway is
+minor at most (Runway). The first tier opens with a printed runway below a claim stated as a floor and with every
+figure or definition that Differs from the current-investor update (step 5); a Dropped or Restated metric status, or a
+last-time item with no line in the founder's draft (No word, whatever the notes say), goes in it too, even
 though the revised draft adds its line. An entry the tie-out put in the list takes the lens names of any kept objection
 about the same line, and is not listed twice. Within a tier, an objection raised by more than one lens comes first. The
 tier is a judgment: give no percentages and no score. Each entry: the section, the line quoted, why an investor is
-likely to read it that way in one or two plain sentences, and the change, using only the founder's facts or a bracketed
-ask. The draft is revised for every kept entry.
+likely to read it that way in one or two plain sentences (figures under different definitions never set side by side),
+and the change, using only the founder's facts or a bracketed ask. The draft is revised for every kept entry.
 
 ## Patterns that cost a prospect's trust
 
@@ -392,7 +408,7 @@ update is cut from it, never written apart from it:
 
 - The same figures, word for word, and the same metric definitions. Step 5 sets each figure and definition the founder
   gives for this update beside that update's. One that differs, in a draft or in the founder's request, gives way to
-  that update's in the draft and leads the first tier of the fix list with the calculator's mismatches (the last
+  that update's in the draft and leads the first tier of the fix list, right after the calculator's mismatches (the last
   pattern row). One `equity_runway_plan` call for this update when it shows a runway, using that update's cash, spend
   and revenue.
 - It may leave out whole sections the founder keeps for current investors (named customers who have not agreed to be
@@ -408,10 +424,13 @@ Review mode leads with what to fix; draft mode leads with the draft.
 1. **The draft or the revised draft,** in the shape above, ready to copy, every gap a bracketed ask. In review mode,
    first **the biggest fixes,** at most three, one line each.
 2. **Reader pass:** the ranked fix list as a table (Rank, Tier, Section, Lens, The line (quoted), Why an investor reads
-   it that way, Fix), then **Dropped,** one line each with why it fell. Say whether the lenses ran as subagents.
-3. **Tie-out table:** Metric or item, Period, The last update said (quoted), This update says (quoted), Status.
+   it that way, Fix), then **Dropped,** one line each with why it fell. Say whether the lenses ran as subagents, and how
+   many refute subagents ran.
+3. **Tie-out table:** Metric or item, Period, The last update said (quoted), This update says (quoted), Status. Rows
+   only for each metric and each item of the last update, each with one status; an older update's item or target
+   appears only in the reader pass, with no status.
 4. **Numbers:** each `equity_runway_plan` call's verdict and runway rows in the tool's values, with its flags and the
-   assumptions it leans on; then each other figure quoted with "not checked: no tool computes this".
+   assumptions it leans on; then each other figure quoted with its "Not checked here" line from the shared rules file.
 5. **Goes to:** the founder's names, unchanged, any duplicate marked.
 6. **Open asks:** every bracketed gap and every lens question in one list, to answer in one sitting.
 7. **Sources:** the guides used, with links, and which points are this skill's own, unverified.

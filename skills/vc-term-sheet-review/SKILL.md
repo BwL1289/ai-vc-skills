@@ -24,6 +24,8 @@ the founder did not give. It always tells the founder to have a lawyer review th
   exit?" "What is the liquidation preference doing?" "What should I ask my lawyer about this term sheet?"
 - "Should we take this term sheet?": run the review and say, in one line, that whether to sign is the founder's call
   with their lawyer.
+- "Is this term sheet standard?": never answer yes or no. Say which terms match the YC baseline, which differ and which
+  it does not cover, each from the marks table, and that "standard" here means only that baseline.
 - A pasted term sheet, a summary of its key terms, or a term sheet file the agent can read in this session, with or
   without the pro forma cap table that came with it.
 - Hand off:
@@ -35,6 +37,7 @@ the founder did not give. It always tells the founder to have a lawyer review th
   - The story and the say-and-avoid list for the next round: the vc-positioning skill. Claims in a deck: the
     vc-claims-check skill. The deck as a whole: the vc-deck-review skill (preview).
   - How much to raise and what it buys: the vc-round-sizing skill (preview).
+  - Diligence after the term sheet, with a data-room checklist: the vc-diligence-questions skill (preview).
 
 ## Inputs
 
@@ -110,9 +113,11 @@ words, with the report and its date, when a founder asks whether a 1x non-partic
 
 ## Steps
 
-Without a subagent tool, take the steps in this order: 1, 3, 4, 5, then Stage A of the adversarial review (as "How
-to run the lenses" says), then 2, then the rest of 6. The lenses need the calculator's output but must not see the
-marks.
+With a subagent tool (in Claude Code, the Agent or Task tool), step 6 spawns the four lens subagents in one message,
+however short the sheet, then one refute subagent per objection that survives the quote check, as "How to run the
+lenses" says; the one-agent order below is only for a client with no subagent tool. Without a subagent tool, take the
+steps in this order: 1, 3, 4, 5, then Stage A of the adversarial review (as "How to run the lenses" says), then 2,
+then the rest of 6. The lenses need the calculator's output but must not see the marks.
 
 The tools return JSON. The field names below are the JSON's; the command line's report prints the same values under
 the labels given in parentheses.
@@ -129,9 +134,15 @@ the labels given in parentheses.
      founder believes as `stated_investor_percent` or `stated_holder_percent`. Its `effective_pre_money`
      ("Effective pre-money"), `holder_ownership_after` ("After: holder group"), `investor_ownership`, `checks`,
      `flags` and `verdict` are the figures for the price, the founders' ownership and any belief that does not hold.
+     With two readings, show both side by side. Only a check that is a mismatch under every reading is the
+     calculator's mismatch; a mismatch under one reading only is not: it becomes one lawyer question, to have the
+     sheet say pre- or post-money, quoting both readings in the tool's values.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
-     which way the founder's does, and pass the tool its own basis.
+     which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask the
+     founder for the total without them, as a bracketed ask,
+     `[fully diluted shares before the round, SAFEs and notes left out]`, and leave every cap-table field out of the
+     call until they give it; never subtract the SAFE or note shares yourself.
    - `equity_pool`, only when no SAFE or note converts and the sheet sets a pool target: the same round with
      `share_rounding` set to `whole_shares` and the same `pool_timing` as `equity_deal_check`. It returns two tables,
      `pool_in_pre_money` and `pool_in_post_money`, each with its own `rows`. The one that matches the sheet's pool
@@ -190,6 +201,9 @@ the labels given in parentheses.
      `common_payout` ("Common stock's payout"). When the founders hold every common share that takes part, the
      common payout is the founders' payout; otherwise give the common payout and its per-share part and say "not
      checked: no tool splits the common payout by holder".
+   - Explain participation only with the row's own fields (`preference_paid`, `residual_share`, `payout`). Never set
+     the round's ownership percent beside the waterfall's `residual`: the unissued pool takes nothing in a sale, so a
+     class's share of the rest is not its cap-table percent.
 5. **Terms the calculator does not model.** Cumulative dividends, anti-dilution, redemption, pay-to-play, warrants,
    conversion thresholds, management carve-outs, credit for time served on founder vesting, and debt, fees or
    escrow taken out of a sale are quoted with
@@ -203,8 +217,10 @@ the labels given in parentheses.
    participating preference pay common at our low exit?" is a question; "push back on the 2x" and "ask for a lower
    valuation in return" are not).
 8. **Check before answering.** Every quote is in the sheet or the founder's material word for word; every figure is
-   quoted as stated or comes from a tool; no sentence says to sign or not to sign, says what a term "should" be, or
-   speaks as an investor; every source named is in the Sources list; the answer says to get a lawyer.
+   quoted as stated or comes from a tool; a count of terms is a figure too, taken from the marks table or left out;
+   lawyer questions use only the periods and amounts the sheet or the founder gave; no sentence says to sign or not to
+   sign, says what a term "should" be, or speaks as an investor; every source named is in the Sources list; the
+   answer gives a refute verdict for every objection that reached the refute pass; the answer says to get a lawyer.
 
 ## Adversarial review
 
@@ -235,21 +251,24 @@ Every lens gets the same brief, with its own name and test filled in:
   a later deal is likely to ask about it, or minor).
 - An objection you cannot tie to a line of the sheet is not an objection. List it apart as a gap, worded as a
   question.
-- Do not judge whether another line of the sheet answers an objection: raise it anyway, and the refute pass
-  decides. Return "nothing found" only when no line of the sheet gives this lens an objection worth the founder's
-  time. Say nothing about whether to sign.
+- Do not judge whether another line of the sheet answers an objection: raise it anyway, however short the material;
+  the refute pass decides. Return "nothing found" only when no line of the sheet gives this lens an objection worth
+  the founder's time. Say nothing about whether to sign.
 
 **How to run the lenses.** With a subagent tool (in Claude Code, the Agent or Task tool), run the lenses as
-parallel subagents, each given only the sheet, the founder's answers, the calculator's output and its lens brief: not
+parallel subagents, however short the material, all launched in one message, each given only the sheet, the
+founder's answers, the calculator's output and its lens brief: not
 the marks, not this skill's other sections, not another lens's output. Without one, run them one after another after
 step 5 and before step 2 (no mark exists yet), write each lens's objections down in full before reading the next
 brief, and never revise an earlier list. Lenses run this way are less independent than subagents, and the same agent
 then judges them, so the answer says so.
 
-**The calculator's mismatches** from step 3 do not go through the lenses: each is added to the survivors as a later
-deal is likely to stall on it, quoting the founder's belief with the tool's value. It is computed, not argued. It
-leads because the founder's own figure for the round is wrong, which matters before anything else; it is not a
-prediction about a later deal.
+**The calculator's mismatches** from step 3 do not go through the lenses: each heads the survivors, ahead of the
+tiers, quoting the founder's belief with the tool's value and difference. It is computed, not argued, and not refuted.
+It carries no tier: how much a gap hurts depends on its size and on the term, which the founder weighs. It leads
+because the founder's own figure for the round is wrong, which matters before anything else; it is not a prediction
+about a later deal. A question to label the valuation (a mismatch under one reading only) is not a calculator
+mismatch.
 
 ### Check the quotes
 
@@ -259,9 +278,10 @@ Gaps go to the open asks.
 
 ### Stage B: refute
 
-Each objection gets its own refute pass. With a subagent tool, run one subagent per objection, given the sheet, the
-founder's answers, the calculator's output, that one objection, the baseline column of the terms table, and
-everything from "The refute brief:" to the end of this stage, and nothing else; without one, decide the objections
+Each objection gets its own refute pass. With a subagent tool, launch one subagent per objection in a single message;
+never put two objections in one subagent. Give each one the sheet, the founder's answers, the calculator's output,
+that one objection, the baseline column of the terms table, and everything from "The refute brief:" to the end of
+this stage, and nothing else. Without one, decide the objections
 one at a time against the same brief.
 
 The refute brief:
@@ -290,8 +310,8 @@ line that is not in the sheet word for word, or that is the objected line itself
 ### Rank what survives
 
 Three tiers, most costly first: **a later deal is likely to stall on it**, **a later deal is likely to ask about
-it**, **minor**. The calculator's mismatches lead the first tier; within a tier, an objection raised by more than one
-lens comes first. The tier is a judgment, not a probability, and never a recommendation: no percentages, no score,
+it**, **minor**. The calculator's mismatches head the list, ahead of the tiers, under **figures that do not match
+(computed)**, with no tier. Within a tier, an objection raised by more than one lens comes first. The tier is a judgment, not a probability, and never a recommendation: no percentages, no score,
 no "do not sign". Each survivor becomes a lawyer question in step 7.
 
 ## Answering
@@ -304,8 +324,8 @@ Lead with the reminder, then the terms, then the money, then what a later reader
    summary), Mark, Source.
 3. **The money:**
    - `equity_deal_check`: the headline valuation beside the effective pre-money, the founders' percent after, the
-     pool, each SAFE or note, and every mismatch with the founder's belief in the tool's values; its flags in plain
-     words, as vc-deal-math's flag table says.
+     pool, each SAFE or note, and every mismatch with the founder's belief in the tool's values; each flag as its code
+     with its meaning from the flag table below (over MCP the tool returns the code alone).
    - The pool counted in the pre-money beside the post-money, from `equity_pool`, when it ran: the what-if column's
      investor ownership with its own price and post-money, saying it holds the pre-money fixed.
    - **Exit table:** Exit value, Where it comes from, the new series' choice, its payout, the common payout under the
@@ -314,14 +334,36 @@ Lead with the reminder, then the terms, then the money, then what a later reader
      shares vested at the month they named, from `equity_vesting`, each in the tool's values.
    - Every not-modelled term with its string, and the waterfall's assumptions the table leans on.
 4. **What a later investor, acquirer or board is likely to object to:** survivors as a table: Rank, Tier, Lens, The
-   sheet's line (quoted), Why that reader objects. Then **Dropped,** one line each with why it fell. When the lenses
-   ran in one agent, say they are less independent than separate subagents.
+   sheet's line (quoted), Why that reader objects; the figures that do not match (computed) first, with no tier.
+   Then **Refute verdicts:** one line for every objection that reached the refute pass, Kept ones included, each with
+   its verdict, and for a Dropped one why it fell. Say how the lenses and the refute pass ran (as subagents, one
+   refute subagent per objection); when the lenses ran in one agent, say they are less independent than separate
+   subagents.
 5. **Questions for your lawyer,** numbered, under Economics, Control and Process.
 6. **Open asks:** every gap, in one list, with the baseline terms not in what was pasted.
 7. **Sources:** the ones used, with links and dates, and which explanations are this skill's own, unverified.
 8. **Close:** have a lawyer who works on startup and venture financings review the sheet before signing; ask them
    which parts bind on signing (the sheet itself says, often the no-shop and fees); this is not legal, tax or
    investment advice.
+
+## Flags
+
+`equity_deal_check`'s `flags` holds codes only; over MCP no sentence comes with them (the command line prints one
+beside each). This is what each means for the founder: a question a later reader is likely to ask, never an error.
+
+| Flag                                  | What it means for the founder                                                                                   |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise and the percent: the sheet should say which |
+| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, so the effective pre-money and the price are below the headline  |
+| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less than raise / post-money                          |
+| `pool_already_large_enough`           | The unissued pool already meets the target, so no new pool shares are needed                                    |
+| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold      |
+| `discount_beat_cap`                   | A discount gave a lower price than the cap, so a cap-only conversion would be wrong                             |
+| `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares                            |
+| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on them                                     |
+| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn                                                       |
+| `runway_below_band`                   | Planned runway is under the tool's runway benchmark (a common benchmark, not a rule)                            |
+| `dilution_above_band`                 | The investors get more than the tool's dilution benchmark in one round (a common benchmark, not a rule)         |
 
 ## Sources
 

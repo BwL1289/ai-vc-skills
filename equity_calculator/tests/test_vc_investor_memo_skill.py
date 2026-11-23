@@ -9,6 +9,8 @@ round's stake apart with a fixed label. The dissent pass keeps both stages: five
 objection quoting a line word for word, and a refute pass with the fixed verdicts; the survivors become a ranked fix
 list in three tiers. Each eval in evals/vc-investor-memo/ has a prompt, an expected tool call and an expected answer;
 each call is labelled with its tool, is valid, and carries an excerpt that is lines of the report that call prints.
+The tools' flags come back as bare codes over MCP, so the skill carries a meaning for every code. An eval run in a live
+session records an excerpt of that run under "Recorded answer"; the others say they have not been run.
 """
 
 from __future__ import annotations
@@ -17,12 +19,14 @@ import json
 import re
 import shlex
 from pathlib import Path
+from typing import get_args
 
 import pytest
 from equity_calculator.__main__ import _INPUT_MODELS, run
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
-from equity_calculator.schemas.equity_deal_check import DealCheckInput
+from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealFlag
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag
 from equity_calculator.schemas.equity_waterfall import WaterfallInput
 from equity_calculator.text import render_sheet
 from tests.test_vc_claims_check_skill import _READ_SOURCES
@@ -64,6 +68,19 @@ _HANDOFF_SKILLS = (
     "equity-calculator",
     "vc-positioning",
     "vc-diligence-questions",
+    "vc-metrics-readiness",
+    "vc-market-sizing",
+    "vc-round-sizing",
+    "vc-term-sheet-review",
+)
+# Evals run in a live session: each records an excerpt of the run, blockquoted, under "## Recorded answer".
+_RECORDED = ("bm",)
+_NOT_RUN_LIVE = "has not been run in a live session"
+_RECORDED_HEADING = "\n## Recorded answer\n"
+_ONE_PER_SUBAGENT = "launch one subagent per objection in a single message; never put two objections in one subagent"
+_RAISE_ANYWAY = (
+    "Do not judge whether another line answers an objection: raise it anyway, however short the material; the refute "
+    "pass decides."
 )
 _PROGRAM = "equity_calculator "
 _DESCRIPTION_LIMIT = 1024
@@ -311,6 +328,22 @@ def test_the_round_goes_to_the_round_tools_and_asks_the_fully_diluted_basis() ->
     # The calculator leaves SAFEs and notes out of the fully diluted count, so both the intake and the round ask.
     assert "SAFEs and notes excluded" in round_ and "ask which way the founder's does" in round_
     assert "the calculator's count leaves them out" in inputs
+    assert "`[fully diluted shares before the round, SAFEs and notes left out]`" in round_
+    assert "never subtract the SAFE or note shares yourself" in round_
+    # Use of funds on a SAFE raise, and runway with no raise, go to the runway plan; missing cash or burn is asked.
+    assert "The runway claim and the use-of-funds lines on a SAFE or note raise go to `equity_runway_plan`" in round_
+    assert '"use_of_funds": [{"percent"}]' in round_
+    assert "**Runway with no raise** (what happens if the round does not close), on any instrument" in round_
+    assert "With no cash on hand or no burn given, ask for them; make no runway call until they are in" in round_
+    # Today's figures go to the tool only when they differ from the plan.
+    assert "`current_monthly_revenue`) only when the founder gives a different figure for today" in round_
+    # A flag is a bare code over MCP: it goes to the fix list and to Numbers with the skill's own meaning.
+    assert "in the words the tool prints" not in _TEXT
+    assert (
+        "goes into the fix list, after the computed mismatches and with no tier" in round_ and "into Numbers" in round_
+    )
+    assert "Over MCP a flag comes back as a bare code" in round_
+    assert "with the source that row gives" in round_
     assert "0.200000 is 20.0000%" in round_ and "That is notation, not a calculation; never round it" in round_
     assert "common benchmarks, not rules" in round_
 
@@ -354,7 +387,8 @@ def test_the_outcome_rules_name_no_fund_math() -> None:
     for phrase in (
         "takes no fund size",
         'never writes "this returns the fund"',
-        "Never divide one by the other",
+        # A payout beside the amount invested reads as a return multiple at a glance, so the two never sit together.
+        "The amount invested never sits beside a payout, in the table or in a sentence",
         "Never multiply a stake by an exit value",
         f'"{_LABEL}"',
         f'"{_NOT_RUN}"',
@@ -388,6 +422,17 @@ def test_the_outcome_rules_name_no_fund_math() -> None:
                 assert _NEGATION.search(sentence), (term, sentence)
 
 
+def test_the_outcome_table_and_the_evals_never_set_a_payout_beside_the_amount_invested() -> None:
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "beside the amount invested" not in _unwrapped(_TEXT)
+    assert "each class's payout, Converts?, Common's payout; never the amount invested" in answering
+    assert "Invested," not in answering
+    for path in _EVALS:
+        expected = _unwrapped(_section("## Expected answer", path.read_text(encoding="utf-8")))
+        assert not re.search(r"beside \$[\d,]+ invested|\.\d{2} beside \$", expected), path.name
+
+
 def test_the_prose_figure_from_the_pool_tool_is_what_it_prints() -> None:
     printed = _report("pool", _COMPANY_BM_POOL)
 
@@ -407,7 +452,8 @@ def test_the_lenses_are_the_five_and_name_no_person_or_firm() -> None:
         "do no arithmetic",
         '"nothing found"',
         "quoted word for word",
-        "Do not judge whether another line answers an objection: raise it anyway",
+        _RAISE_ANYWAY,
+        "run the lenses as parallel subagents, however short the material, all launched in one message",
         "not the tool results",
         "less independent than subagents",
         # Without subagents a draft has no memo when the lenses run, so two checks run on the draft after step 6.
@@ -419,6 +465,9 @@ def test_the_lenses_are_the_five_and_name_no_person_or_firm() -> None:
     steps = _unwrapped(_section("## Steps"))
     note = "Without a subagent tool, run Stage A of the dissent pass first, before step 1"
     assert note in steps and steps.index(note) < steps.index("1. **Quote first.**")
+    subagents_first = "With a subagent tool (in Claude Code, the Agent or Task tool), step 7 runs the five lenses"
+    assert subagents_first in steps and steps.index(subagents_first) < steps.index(note)
+    assert "it goes in the minor tier at most" in brief and "the claim below the computed runway" in brief
 
 
 def test_the_refute_pass_uses_the_fixed_verdicts_and_names_no_person_or_firm() -> None:
@@ -428,7 +477,7 @@ def test_the_refute_pass_uses_the_fixed_verdicts_and_names_no_person_or_firm() -
 
     for verdict in _REFUTE_VERDICTS:
         assert verdict in words, verdict
-    assert "one subagent per objection" in _unwrapped(handoff)
+    assert _ONE_PER_SUBAGENT in _unwrapped(handoff)
     assert 'everything from "The refute brief:" to the end of this stage' in _unwrapped(handoff)
     for rule in (
         "you argue neither side",
@@ -464,6 +513,15 @@ def test_the_ranked_fix_list_has_the_three_tiers_and_no_score() -> None:
     assert "**figures that do not match (computed)**" in ranked and "with no tier" in ranked
     assert "no percentages and no score" in ranked
     assert "goes into the memo's Top risks, in the founder's words" in ranked
+    assert "the flags follow them, also with no tier" in ranked
+    assert "A Kept objection answered in part says so in its Fix cell" in ranked
+    assert "its Open questions section lists its own bracketed asks in full" in answering
+    assert "never points to the answer's Open asks" in answering
+    assert "Say how the lenses and the refute pass ran (as subagents, one refute subagent per objection)" in answering
+    assert "each flag as its code with its meaning from the flag table" in answering
+    shape = _unwrapped(_section("## The memo's shape"))
+    assert 'never restated in words ("nearly half", "most")' in shape
+    assert "no figure is restated in words" in _unwrapped(_section("## Steps"))
     assert answering.index("**The biggest fixes,**") < answering.index("**Ranked fix list,**")
     assert "Lead with the biggest fixes, then the memo, then the full fix list." in answering
     assert _FIX_COLUMNS.search(answering) and "**Dropped,**" in answering
@@ -488,8 +546,58 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
         positions = [text.find(f"\n{heading}\n") for heading in _EVAL_HEADINGS]
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
-        assert "made up" in text and "has not been run in a live session" in text, path.name
+        assert "made up" in text, path.name
         assert "A run passes when" in _unwrapped(text), path.name
+        recorded = path.name.split("-")[1] in _RECORDED
+        assert (_RECORDED_HEADING in text) == recorded, path.name
+        assert (_NOT_RUN_LIVE in text) != recorded, path.name
+
+
+@pytest.mark.parametrize("letter", _RECORDED)
+def test_a_recorded_run_is_a_blockquoted_excerpt_after_the_expected_answer(letter: str) -> None:
+    """The recorded answer is the run's own text, quoted, so no heading or fence in it is read as the eval's own."""
+    (path,) = (path for path in _EVALS if path.name.startswith(f"company-{letter}-"))
+    text = path.read_text(encoding="utf-8")
+    header = _unwrapped(text.split("\n## Prompt\n", 1)[0])
+    recorded = text.split(_RECORDED_HEADING, 1)[1]
+    lines = [line for line in recorded.splitlines() if line.strip()]
+    quoted = [line for line in lines if line.startswith(">")]
+
+    assert text.index("\n## Expected answer\n") < text.index(_RECORDED_HEADING)
+    assert "is an excerpt of a recorded run (Claude Code" in header
+    assert "Recorded with Claude Code" in recorded and quoted
+    assert all(line.startswith(">") for line in lines[lines.index(quoted[0]) :])
+    assert not any(line.startswith(("#", "```")) for line in lines)
+
+
+def test_every_flag_code_each_round_tool_returns_has_a_meaning_in_the_skill() -> None:
+    """Over MCP the tools return bare codes, so the skill must say what each one means."""
+    rows = {row[0].strip("`"): row[1] for row in _table("## Flags")}
+
+    for code in get_args(DealFlag):
+        assert "deal check" in rows[code], code
+    for code in get_args(RunwayPlanFlag):
+        assert "runway plan" in rows[code], code
+    assert set(rows) == set(get_args(DealFlag)) | set(get_args(RunwayPlanFlag))
+
+
+def test_the_exit_statement_the_skill_quotes_is_the_waterfalls_own() -> None:
+    """The memo quotes the waterfall's exit_is_shared_amount statement word for word, so the skill's copy must match."""
+    result = compute(WaterfallInput.model_validate(json.loads(_fences("json")[0])["inputs"]))
+    (statement,) = (row.statement for row in result.assumptions if row.key == "exit_is_shared_amount")
+
+    assert f'`exit_is_shared_amount`: "{statement}"' in _unwrapped(_section("## The outcome case"))
+
+
+def test_metrics_and_market_sizes_go_to_their_skills_and_only_growth_and_ltv_stay_unchecked() -> None:
+    shape = _unwrapped(_section("## The memo's shape"))
+    limits = _unwrapped(_section("## Limits"))
+
+    assert "ARR, retention, churn, CAC payback and burn multiple are checked against their parts by the" in shape
+    assert "a market size is built bottom-up by the vc-market-sizing skill" in shape
+    assert f'Growth rates and LTV are quoted as stated, with "{_NOT_CHECKED}"' in shape
+    assert "Growth rates, market sizes, retention and unit economics" not in _TEXT
+    assert "checked by the vc-metrics-readiness and vc-market-sizing skills" in limits
 
 
 def test_the_no_call_eval_carries_no_call_or_excerpt() -> None:
@@ -621,6 +729,12 @@ def test_one_eval_keeps_an_objection_a_line_answers_only_in_part() -> None:
     assert objected in prompt and answering in prompt and objected != answering
     assert "`[one specific achievement for each other founder, and their role]`" in kept
     assert "Dropped, answered by slide 6" not in answer
+    assert "Its Fix cell says it is answered in part and quotes the slide 6 line with its place" in kept
+    # The recorded run batched the refute pass; the eval now says which form passes.
+    assert "one subagent deciding several objections, even one at a time, does not pass" in answer
+    assert "a pointer to the answer's Open asks does not pass" in answer
+    assert "statement quoted word for word with its key" in answer
+    assert "the Sources citations the skill prescribes are excepted" in answer
 
 
 @pytest.mark.parametrize("letter", ["bp"])

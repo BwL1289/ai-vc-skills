@@ -26,7 +26,8 @@ firm would, never scores taste, and never adds a decision, a reason, a customer 
   - The one-liner, the narrative and the say-and-avoid list for the pitch as a whole: the vc-positioning skill. This
     skill covers the decisions behind the product; that one covers how the raise is told.
   - A claim inside a decision that a partner could check (usage after a cut, a customer quote, a benchmark): the
-    vc-claims-check skill.
+    vc-claims-check skill. Retention, churn or recurring revenue a partner will test against its parts: the
+    vc-metrics-readiness skill (preview).
   - The ask's figures (amount, valuation, ownership, runway): the vc-deal-math skill, which uses the equity-calculator
     skill's tools. This skill does no arithmetic and calls no calculator tool.
   - A slide-by-slide deck review: the vc-deck-review skill (preview). Rehearsing the partner meeting, where these
@@ -95,12 +96,16 @@ so the lenses do not anchor on the checks or the flags; step 5 then starts at th
    partner is likely to hear, and give a fix that uses only the founder's facts, or a bracketed ask:
    `[what customers did after the cut]`.
 4. **Figures** in a decision (usage, retention, conversion) are quoted as stated, with their definition and period, and
-   never computed, converted or rounded. A figure a partner would check first goes to the vc-claims-check skill.
+   never computed, converted or rounded. A figure line goes into a why-we-built-it line word for word, and the answer
+   never states what a figure leaves over ("11 of 12" never becomes "the twelfth that left"): an ask about the rest
+   uses the founder's own terms, `[what the pilot agency that did not keep using the app said]`. A figure a partner
+   would check first goes to the vc-claims-check skill; retention or churn to the vc-metrics-readiness skill.
 5. **Run the adversarial review** (next section): attack, check the quotes, refute, rank.
 6. **Write the "why we built it this way" lines** and their placement (rules below), from the surviving decisions.
 7. **Check before answering.** Every decision, NO and reason in the answer appears in the founder's material; every
-   surviving objection quotes a line that is in the material word for word; no line says a model wrote anything; no
-   sentence speaks as an investor or judges taste as a named person or firm would.
+   surviving objection quotes a line that is in the material word for word; every "not yet" placement names every
+   kept objection on that decision, and the lead gives no count ("one fact away") the table does not match; no line
+   says a model wrote anything; no sentence speaks as an investor or judges taste as a named person or firm would.
 
 ## Adversarial review
 
@@ -135,26 +140,31 @@ Every lens gets the same brief, with its own name and test filled in:
   question to the founder.
 - A call the founder labels a judgment before data, saying how they will know it was right, is not untrustworthy for
   lacking data yet.
-- Return "nothing found" rather than a weak objection.
+- Do not judge whether another line of the material answers an objection: raise it anyway, however short the
+  material, and the refute pass decides. Return "nothing found" only when no line of the material gives this lens an
+  objection worth a partner's time.
 
 **How to run the lenses.** When the agent has a subagent tool (in Claude Code, the Agent or Task tool), run the lenses
-as parallel subagents. Give each one only the founder's material and its lens brief: not this skill's other sections,
-not the checks, not the flags, not another lens's output. Without a subagent tool, run Stage A first, before step 1:
-run the lenses one after another, write each lens's objections down in full before reading the next lens's brief, and
-never revise an earlier list. Lenses run this way are less independent than subagents, and the same agent then judges
-them in Stage B, so the answer says so.
+as parallel subagents, however short the material. Give each one only the founder's material and its lens brief, the
+material verbatim: not this skill's other sections, not the checks, not the flags, not another lens's output, and no
+list of what the founder did not provide (a missing input goes to the open asks directly). Without a subagent tool,
+run Stage A first, before step 1: run the lenses one after another, write each lens's objections down in full before
+reading the next lens's brief, and never revise an earlier list. Lenses run this way are less independent than
+subagents, and the same agent then judges them in Stage B, so the answer says so.
 
 ### Check the quotes
 
 Before Stage B, check every objection's quote against the founder's material. A quote that does not appear there word
-for word (spacing and line breaks aside) is dropped as not grounded. When two lenses raise the same objection about
-the same line, merge them and keep both lens names. Gaps from every lens go to the open asks.
+for word (spacing and line breaks aside) is dropped as not grounded. An objection whose claim is that an input from
+the Inputs list is missing (what changed, the alternatives, the material), rather than something the quoted line
+says, moves to the open asks as a gap and is never kept against that decision. When two lenses raise the same
+objection about the same line, merge them and keep both lens names. Gaps from every lens go to the open asks.
 
 ### Stage B: refute
 
 Each objection gets its own refute pass, which decides, using only the founder's material, whether that material
-answers the objection. The pass is a judge, not the founder's advocate. With a subagent tool, run one subagent per
-objection, given the founder's material, that one objection, the Pattern column of the flags table above, and
+answers the objection. The pass is a judge, not the founder's advocate. With a subagent tool, launch one subagent per
+objection in a single message; never put two objections in one subagent. Each is given the founder's material, that one objection, the Pattern column of the flags table above, and
 everything from "The refute brief:" to the end of this stage, and nothing else; without one, take the objections one at
 a time and decide each against the same brief before reading the next.
 
@@ -182,7 +192,9 @@ The verdicts:
   before data, the founder's label of it as a judgment, as above). Quote the founder's line
   that answers it, and say whether it should move next to the decision, where a partner will see it.
 - **Dropped, not grounded:** the quoted line does not say what the objection claims, or the objection rests on an
-  outside fact about the company, its market or its competitors.
+  outside fact about the company, its market or its competitors. An objection that an input from the founder's list
+  is missing (what changed, the alternatives, the material) rather than about what the line says falls here; it goes
+  to the open asks as a gap.
 - **Kept:** neither holds. When the founder's best answer would need something the material does not contain, the
   objection stays and that something becomes the evidence to add, as a bracketed ask.
 
@@ -204,12 +216,15 @@ score. For each survivor write:
 - a concrete fix that uses only the founder's facts, or the evidence to add, as a bracketed ask.
 
 **Where the survivors go.** The top three become the biggest issues at the head of the answer. A decision with a kept
-objection is placed "not yet" until it is fixed. A survivor that turns on a phrase joins the flags list.
+objection that ends the meeting or weakens it is placed "not yet" until it is fixed. A minor survivor does not move a
+decision: its bracketed ask goes beside the line, and in the meeting it is the prep for the follow-up question. A
+survivor that turns on a phrase joins the flags list.
 
 ## Why we built it this way
 
 - **One sentence per decision,** in the founder's voice: what was chosen, what was turned down, and the reason, then
   what shows it or how they will know. Shape: "We [decision] instead of [the NO], because [the founder's reason]."
+  A second sentence is allowed only for the founder's evidence line, quoted word for word.
 - **Only the founder's facts.** No reason, customer, figure or result that is not in the material. A NO with no stated
   reason, or a decision with nothing to show for it, gets a bracketed ask: `[why you turned down the reseller deal]`.
 - **Plain words.** No stacked adjectives, and never the word taste: the line shows judgment by naming the trade-off.
@@ -217,16 +232,18 @@ objection is placed "not yet" until it is fixed. A survivor that turns on a phra
 
 **Where each one goes** (a judgment, not a score). Every row of the decisions table gets exactly one placement:
 
-- **In the deck:** at most three, each a decision with no kept objection and no flag, Clear on all three checks, and
-  tied to the core workflow. Name the slide: the product or solution slide for a scope cut, the competition or insight
-  slide for a departure from the alternatives. Never a slide about the founder's taste. A decision that needs a story
-  to land goes in the meeting even when it also qualifies here, and so does a fourth decision that qualifies.
-- **In the meeting:** decisions with no kept objection and no flag that need a story to land (a feature removed after
-  launch, a paying customer's request turned down, a channel dropped), ready for when a partner asks "why not build
-  X?" or "what have you learned?".
-- **Not yet:** every other decision, with the fix that would move it: any decision with a kept objection or a flag,
-  which outranks the meeting and the deck, and any decision that fits neither of the two above, such as one marked
-  Needs work or Missing on a check with no story behind it.
+- **In the deck:** at most three, each a decision with no kept objection above minor and no flag, Clear on all three
+  checks, and tied to the core workflow. Name the slide: the product or solution slide for a scope cut, the competition
+  or insight slide for a departure from the alternatives. Never a slide about the founder's taste. A decision that
+  needs a story to land goes in the meeting even when it also qualifies here, and so does a fourth decision that
+  qualifies.
+- **In the meeting:** decisions with no kept objection above minor and no flag that need a story to land (a feature
+  removed after launch, a paying customer's request turned down, a channel dropped), ready for when a partner asks
+  "why not build X?" or "what have you learned?".
+- **Not yet:** every other decision, with the fix that would move it, naming every kept objection on it: any decision
+  with a kept objection that ends the meeting or weakens it, or a flag, which outranks the meeting and the deck, and
+  any decision that fits neither of the two above, such as one marked Needs work or Missing on a check with no story
+  behind it.
 
 ## Answering
 

@@ -29,4 +29,6 @@ None: no `equity_deal_check` call. The prompt gives no figures of the ask.
   `[net revenue retention, last 12 months, as you define it, with the cohort table]`.
 - Data room: retention by monthly cohort (MET-D4) and the metric definitions sheet (MET-D1) are Missing; monthly
   metrics since launch (MET-D2) and invoices and contracts (MET-D5) are Ready as named.
-- No conversion between ARR and MRR, no growth figure, no score and no readiness percentage.
+- No conversion between ARR and MRR, no growth figure, no score and no readiness percentage. The ARR and retention
+  lines are quoted as stated, with the vc-metrics-readiness skill named as the one that checks them against their
+  parts.

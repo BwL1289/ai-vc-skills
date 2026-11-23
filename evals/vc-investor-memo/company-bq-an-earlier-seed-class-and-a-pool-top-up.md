@@ -138,9 +138,9 @@ exit value, with `common_shares` 7500000 (the founder's issued common) and the S
   counts the Seed's 2,000,000 shares too, so it is not used: passing it would count the Seed twice, once as common and
   once as its own class. The Series A class takes the `investor` row (2,714,285); the Seed is its own class with
   $2,000,000 invested at rank 2, since the term sheet makes the Series A senior.
-- The outcome table: at $6,000,000, the founder's assumption with "an acqui-hire" quoted, the Series A stays and is
-  paid $5,000,000.00 beside $5,000,000 invested; the Seed is paid $1,000,000.00 and common $0.00. At $60,000,000, the
-  founder's assumption with "a sale to a larger scheduling vendor" quoted, the Series A converts and is paid
-  $13,333,330.60 beside $5,000,000 invested. The `exit_is_shared_amount` row is quoted; no multiple, no fund size.
+- The outcome table: at $6,000,000, the founder's assumption with "an acqui-hire" quoted, the Series A stays and is paid
+  $5,000,000.00; the Seed is paid $1,000,000.00 and common $0.00. At $60,000,000, the founder's assumption with "a sale
+  to a larger scheduling vendor" quoted, the Series A converts and is paid $13,333,330.60. No payout is set beside an
+  amount invested. The `exit_is_shared_amount` row is quoted; no multiple, no fund size.
 - The exit if the company wins is a bracketed ask, `[the exit value if the company wins, and why]`.
 - No sentence recommends investing; no firm is named; no score.

@@ -22,7 +22,8 @@ points of the expected answer is noted but does not change the verdict.
 
 None: no `equity_deal_check` call. The raise is on a SAFE, which `deal_check` does not model, and no cap is given. As
 the vc-deal-math skill says, it asks for the cap and the next priced round the founder expects before any
-`equity_round` call. No tool checks the runway claim on a SAFE raise either.
+`equity_round` call. No `equity_runway_plan` call either: a runway claim on a SAFE raise goes to that tool, but the
+founder gives no cash on hand, monthly spend or revenue, so the answer asks for them first.
 
 ## Expected answer
 
@@ -35,8 +36,9 @@ the vc-deal-math skill says, it asks for the cap and the next priced round the f
   line.
 - "We're raising $1.5M on a SAFE." survives (the ask and milestones), because nothing in the material says what the
   $1.5M reaches; the evidence to add is a bracketed ask, such as `[the milestones the $1.5M reaches]`.
-- "That gives us 18 months of runway." is quoted as stated and marked "not checked: no tool computes this for a SAFE
-  or note raise". The answer works out no runway from any figure.
+- "That gives us 18 months of runway." is quoted as stated and not checked yet: a runway claim on a SAFE raise goes to
+  `equity_runway_plan`, and the answer asks for the cash on hand, monthly spend and revenue that call needs. The
+  answer works out no runway from any figure.
 - The market has no line to quote, so it is a gap in the open asks, not an objection.
 - The prep script is filled in for the lead seed investor and brings the top survivors to the session.
 
@@ -49,7 +51,9 @@ answer is trimmed; [...] marks each cut.
 slide 3, the SAFE's runway is not checked, and no pilot revenue is totalled. Short of the expected answer: the why-now
 objection was dropped although its judge called it a close call (the skill says to keep it), the market became a
 survivor rather than an open ask, and the prep script hedges on who the lead is. Since this run the skill's description,
-its subagent wording, step 4 and its limits have changed; the eval has not been run again.
+its subagent wording, step 4 and its limits have changed: a SAFE raise's runway now goes to `equity_runway_plan`, so
+the expected answer asks for the cash and burn this prompt leaves out rather than calling the claim uncheckable. The
+eval has not been run again.
 
 > I ran the stress test: six independent skeptical lenses attacked the pitch, then a separate pass tested each objection against your own slides. Six objections survived and two were dropped; none is rated as ending the meeting.
 >

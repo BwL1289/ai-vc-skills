@@ -14,8 +14,10 @@ arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with 
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
 [`skills/equity-calculator/`](../skills/equity-calculator/SKILL.md), at the repository root, tells an assistant when and
-how to use it. A second skill, [`skills/vc-deal-math/`](../skills/vc-deal-math/SKILL.md) (in preview), walks a founder
-through checking their own raise with the `deal_check` scenario before a VC does.
+how to use it. The fourteen founder reviews in the root README's [skills table](../README.md#skills), all in preview,
+take every figure they work out from these scenarios; four were built around one: `deal_check` for `vc-deal-math`,
+`runway_plan` for `vc-round-sizing`, `metrics_check` for `vc-metrics-readiness` and `market_sizing` for
+`vc-market-sizing`.
 
 Built from the original `equity_equation` script this repository started with (it is in the git history, at
 [`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/ai-vc-skills/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation))
@@ -39,7 +41,7 @@ and the option-pool shuffle.
 
 ## Install
 
-In Claude Code, as a plugin (the agent skill and the MCP server, started with [`uvx`](https://docs.astral.sh/uv/)):
+In Claude Code, as a plugin (every skill and the MCP server, started with [`uvx`](https://docs.astral.sh/uv/)):
 
 ```
 /plugin install ai-vc-skills --marketplace BwL1289/ai-vc-skills
@@ -154,10 +156,8 @@ sources, and to quote the labelled assumptions with every answer. In Claude Code
 `equity-calculator`, in its name and folder: the Agent Skills format allows only lowercase letters, digits and
 hyphens in a skill's name, and the folder must carry the same name.
 
-[`skills/vc-deal-math/SKILL.md`](../skills/vc-deal-math/SKILL.md) is the second skill, in preview until it has been
-checked on real decks. It is written for a founder checking their own fundraising ask: what to collect from the deck,
-what to ask for when it is missing, one `equity_deal_check` call, and how to answer with the checks first and the
-questions a VC is likely to ask after them.
+The other skills, the founder reviews, are listed in the root README's [skills table](../README.md#skills), each in
+preview until it has been checked on real decks and meetings.
 
 ## Sources
 

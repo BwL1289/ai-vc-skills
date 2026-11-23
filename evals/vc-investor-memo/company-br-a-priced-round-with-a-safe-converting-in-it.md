@@ -94,12 +94,11 @@ forma's counts.
 - The founders' percent leads the fix list under figures that do not match (computed), with no tier: "founders keep
   62%" against the tool's 53.6986% (difference -8.3014%); the memo states 53.6986%. Left out of `instruments`, the
   SAFE would not be counted and the founders' percent would come out too high.
-- The `conversions_bought_by_pre_money` flag goes into the fix list as a question a partner is likely to ask, in the
-  tool's words.
+- The `conversions_bought_by_pre_money` flag goes into the fix list, after the computed mismatch and with no tier, as
+  a question a partner is likely to ask, and into Numbers, with its meaning from the skill's flag table.
 - The waterfall runs on the pro forma's counts: `common_shares` 9,000,000, the SAFE's 1,428,571 shares as their own
   class with $1,000,000 invested, never part of `common_shares`, and the Series A's 2,979,591 shares with $4,000,000
   invested, both at rank 1 as the founder states them.
 - The outcome table: $100,000,000, the founder's assumption with `[why $100 million]`; the Series A's payout
-  $22,222,218.08 beside $4,000,000 invested, and the SAFE class's $10,654,487.92 beside $1,000,000; no multiple, no
-  fund size.
+  $22,222,218.08 and the SAFE class's $10,654,487.92, neither beside its amount invested; no multiple, no fund size.
 - No sentence recommends investing; no firm is named; no score.

@@ -86,6 +86,19 @@ def test_the_frontmatter_names_the_skill_and_describes_it() -> None:
     assert 0 < len(entries["description"]) <= _DESCRIPTION_LIMIT
 
 
+def test_it_hands_a_founders_review_to_the_skill_built_for_it_and_asks_for_the_tools_share_basis() -> None:
+    """A review goes to the skill that reads the results; a fully diluted total that counts SAFEs is asked about."""
+    text = " ".join(line.strip() for line in _TEXT.splitlines())
+
+    for name in ("vc-deal-math", "vc-round-sizing", "vc-metrics-readiness", "vc-market-sizing", "vc-term-sheet-review"):
+        assert f"the {name} skill" in text, name
+        assert (_SKILL.parents[1] / name / "SKILL.md").is_file(), name
+    assert "leaves SAFEs and notes out" in text and "ask which way the user's does" in text
+    assert "never subtract the SAFE or note shares yourself" in text
+    assert "never strings" in text and "For `deal_check`, never assume one" in text
+    assert "never as an assumed figure" in text and "State any value you had to assume" not in text
+
+
 def test_the_field_table_names_every_input_field_and_nothing_else() -> None:
     rows = _table_rows()
 
@@ -114,3 +127,31 @@ async def test_each_skill_command_runs(command: str) -> None:
 
 def test_the_skill_has_its_commands() -> None:
     assert len(_commands()) >= 3
+
+
+def test_the_skill_asks_the_founders_basis_assumes_no_figure_and_points_to_the_review_skills() -> None:
+    text = " ".join(line.strip() for line in _TEXT.splitlines())
+    rows = _table_rows()
+
+    # Fully diluted shares leave SAFEs and notes out; a cap table that counts them is asked for its total without them.
+    for scenario in ("round", "deal_check"):
+        assert "`fully_diluted_shares` (SAFEs and notes left out: see below)" in rows[scenario].replace(
+            "**", ""
+        ), scenario
+    assert "ask which way the user's does, and pass the tool its own basis" in text
+    assert "never subtract the SAFE or note shares yourself" in text
+    # Counts of customers and months are whole numbers, like share counts.
+    assert "customer counts" in text and "month counts" in text and "JSON integers, never strings" in text
+    # No figure is assumed: a default left in place is named as one.
+    assert "Never fill a gap with a figure the user did not give" in text and "never as an assumed figure" in text
+    assert "For `deal_check`, never assume one" in text
+    for name in (
+        "vc-deal-math",
+        "vc-round-sizing",
+        "vc-metrics-readiness",
+        "vc-market-sizing",
+        "vc-term-sheet-review",
+        "vc-current-investor-update",
+    ):
+        assert f"the {name} skill" in text, name
+        assert (_SKILL.parents[1] / name / "SKILL.md").is_file(), name

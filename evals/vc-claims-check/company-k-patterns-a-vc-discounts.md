@@ -27,7 +27,8 @@ None: no `equity_deal_check` call. The prompt states no deal terms; the size of 
 - "The global dental market is $40B (industry report); we only need 1% of it." is Will be discounted (YC seven
   questions, 2; YC seed fundraising guide): top-down only. The answer does not work out 1% of $40B. The fix is a
   bottom-up size from the founder's own figures, as bracketed asks: `[number of clinics you can sell to]`,
-  `[what each pays a year]`. It also asks for the report's publisher and year.
+  `[what each pays a year]`. It also asks for the report's publisher and year, and the fix names the vc-market-sizing
+  skill, which checks that bottom-up size once the founder gives those figures.
 - "We have no competitors." is Will be discounted, with the fix to name the alternatives in the four groups (marked
   unverified as a grouping), including clinics doing it by phone or by hand. It names no competitor itself.
 - "AI-powered scheduling assistant" is Will be discounted, marked unverified, with an ask: what the model does that
@@ -47,7 +48,8 @@ answer is trimmed; [...] marks each cut.
 competitors, the advisors and the world-class operator are Will be discounted; no 1% is worked out. The first clause is
 missed for one pattern: the AI-powered line came back Needs a source, not Will be discounted, because the pattern then
 applied only where the product would work the same without a model, which the founder's text cannot settle. Since this
-run the pattern is an AI-powered label with nothing that says what the model does; the eval has not been run again.
+run the pattern is an AI-powered label with nothing that says what the model does, and a market size's fix names the
+vc-market-sizing skill; the eval has not been run again.
 
 > Nothing in the deck contradicts itself, but five of the six claims use wording a partner is likely to discount, and the sixth needs evidence. I checked only your wording and the evidence you named: I haven't seen the letters of intent and looked nothing up, so this doesn't say whether any claim is true.
 >

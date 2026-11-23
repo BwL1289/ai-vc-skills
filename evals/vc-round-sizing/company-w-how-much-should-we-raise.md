@@ -1,12 +1,14 @@
 # Eval 1: Company W, how much to raise, $3M or $4M
 
 A test prompt for the `vc-round-sizing` skill. The company is made up. Every tool call and excerpt is from a real
-`equity_calculator` run with these inputs. The answer states the expected behaviour; it is not a recorded run, and this
-eval has not been run in a live session. A run passes when it makes the five tool calls below (field order free, money
-and percents as strings), says whose cash lasts to the milestone month on plan, in the downside and on the lean plan
-with the tool's figures, reads the lean plan for $3M only, leaves "$1M ARR" itself not checked, drops the attacks the
-founder's material answers, quotes the dilution benchmark only as the tool prints it, gives no recommendation, and
-computes nothing in its own text.
+`equity_calculator` run with these inputs. "Expected answer" states the expected behaviour, and "Recorded answer" is an
+excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-23). A run passes when it makes the five tool calls below and
+no other (field order free, money and percents as strings), says whose cash lasts to the milestone month on plan, in
+the downside and on the lean plan with the tool's figures, reads the lean plan for $3M only, leaves "$1M ARR" itself not
+checked, runs the refute pass on every attack, quotes the dilution benchmark only as the tool prints it, gives no
+recommendation, and computes nothing in its own text. The verdict is Pass when every clause of that sentence is met,
+Partial when exactly one clause is missed or met only in part, and Fail when two or more are missed; a shortfall against
+the other points of the expected answer is noted but does not change the verdict.
 
 ## Prompt
 
@@ -205,24 +207,100 @@ The two dilution runs, $3M then $4M:
 - `milestone_short_on_plan` counts the plan case only: the answer quotes it beside $3M's covered lean verdict and does
   not drop either.
 - A covered verdict says only that the cash lasts to month 15 plus 6 months to raise (the tool's `milestone_rule`
-  row). "$1M ARR" itself is quoted as stated, "not checked: no tool computes this", and the open asks ask for the
-  revenue a month the plan needs by month 15 for it. The answer does not convert ARR to a month by hand.
+  row). "$1M ARR" itself is quoted as stated and not checked: an ARR target is the vc-metrics-readiness skill's to check
+  (`equity_metrics_check`, from monthly recurring revenue), never "no tool computes this", and the open asks ask for the
+  monthly recurring revenue it stands for. The answer does not convert ARR to a month by hand.
 - The tool's required raise to reach month 15 with 6 months to raise is $3,745,000.00 on plan, $4,142,500.00 in the
   downside and $2,989,000.00 on the lean plan. The answer quotes them and does not round them to a nicer number.
-- The no-raise row comes first: 3.87 months, start raising by -2.13 months, with the `start_raising_date_passed` flag
-  in the tool's words.
+- The no-raise row comes first: 3.87 months, start raising by -2.13 months as printed (never "already passed"), with
+  the `start_raising_date_passed` flag and its meaning from the skill's flag table.
 - Ownership: $3M sells 20.0000% and leaves the founders 68.0000%; $4M sells 25.0000% and leaves 63.7500%. After the A
   as the founder expects it, 47.6000% and 44.6250%.
 - The dilution benchmark is quoted only as the tool prints it (Dilution benchmark 25.0000%, its `dilution_band` row,
   source unverified); 25.0000% is not above it, so no flag. No benchmark figure of the skill's own appears.
-- Flags, one line each: `milestone_short_on_plan`, `downside_short_where_plan_covers`, `start_raising_date_passed`,
-  `runway_below_band` (a common benchmark, not a rule, quoting the tool's `runway_band` row).
-- The calculator's short milestones head the review and are not refuted. The skeptic's strongest kept attack quotes
-  "$1M ARR" beside the plan's "from month 13 $300k with $60k", with the pattern "A revenue milestone with no monthly
-  figure" (unverified); an attack on the revenue path under "Revenue in the plan rising with no evidence named" may
-  also be kept.
-- Dropped, answered: an attack under "No downside case", quoting "Downside: revenue comes in at half of plan", and one
-  under "One amount only, no plan for a smaller raise", quoting "If we only get $3M, we cut spend to 85% of plan". The
-  material supplies what those patterns say is missing. The answer says whether the skeptic ran as a subagent.
+- Flags, one line each with its meaning from the skill's flag table: `milestone_short_on_plan`,
+  `downside_short_where_plan_covers`, `start_raising_date_passed`, `runway_below_band` (a common benchmark, not a rule,
+  quoting the tool's `runway_band` row, and asking which milestone $3M reaches rather than calling it short).
+- It runs only the founder's three cases, in the one `equity_runway_plan` call: no case merges the downside's revenue
+  cut into the lean plan, and the open asks ask whether spend would also be cut in the downside.
+- No figure in the text is a gap or a difference worked by hand: no amount said to fall short of or clear the required
+  raise by some sum, and no difference in points between the two options' stakes; each pair of tool values sits side
+  by side.
+- The calculator's short milestones head the review as computed facts, with no tier, and are not refuted. The skeptic's
+  strongest kept attack quotes "$1M ARR" beside the plan's "from month 13 $300k with $60k", with the pattern "A revenue
+  milestone with no monthly figure" (unverified); an attack on the revenue path under "Revenue in the plan rising with
+  no evidence named" may also be kept. An attack that asserts the downside misses the revenue milestone, which no tool
+  computes, is Dropped, not grounded.
+- The refute pass runs on every attack, one subagent per attack launched in one message, and each attack carries its
+  verdict. If the skeptic raises an attack under "No downside case" or "One amount only, no plan for a smaller raise",
+  it is Dropped, answered, quoting "Downside: revenue comes in at half of plan" or "If we only get $3M, we cut spend to
+  85% of plan": the material supplies what those patterns say is missing, so no kept attack rests on either. The
+  answer says whether the skeptic ran as a subagent.
 - No recommendation: it says what $4M buys on plan and not in the downside, and lists what would have to be true for
   either amount to work, in the founder's terms. It closes as not investment, legal or tax advice.
+
+## Recorded answer
+
+Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository and no user settings. This
+is the second run, made after the fixes the first run led to (below). The answer is trimmed; [...] marks each cut.
+
+**Partial: one clause met only in part.** It made the five calls below with the expected arguments and no other, ran
+only the founder's three cases, quoted the tool's runways, slacks and required raises with their cents, read the lean
+plan for $3M only and said why, and left "$1M ARR" not checked. Its review led with the computed short milestones and
+no tier, ran the skeptic and then one refute subagent per attack in a single message, and struck the skeptic's claim
+that the downside misses the milestone as a result no tool computed. It quoted the dilution band as the tool prints it,
+gave each flag its meaning from the skill's table, printed -2.13 as the start-raising value, used the eleven headings
+and gave no recommendation. It computed one figure in its own text: its second attack, relayed from the skeptic, asks
+what "the other 15%" of spend is for, a remainder of the founder's 85% that neither the founder nor the tool gave. Of
+the other points, it did not name its first attack's pattern and did not list in one place what would have to be true
+for each amount. Since this run the skill names a remainder of a founder's percent among the figures an answer never
+states, and its check before answering covers the skeptic's text it relays; an ARR milestone, which this run called
+something no tool computes, is now named as the vc-metrics-readiness skill's to check. The skill has not been run
+again.
+
+The first run, on the same version and day, failed with four clauses missed. It made a sixth call that merged the
+downside's revenue cut into the lean plan and put that case in the founder's tables; it never ran the refute pass; it
+never quoted the dilution benchmark; and it computed six figures in its own text: the gaps between each amount and the
+required raise, and the difference in points between the two options' stakes ("The extra $1M costs the founders 4.25
+points now"). It also left out the flags and the -2.13 start-raising value, and opened with a verdict of its own
+("Neither amount is safe as planned"). After it the skill banned any gap or difference stated by hand, forbade merging
+two cases or a second runway plan call, made the answer's eleven items required headings, launched one refute subagent
+per attack in a single message, and carried the deal check's flag meanings; this eval gained the open ask about cutting
+spend in the downside, and drops an answered attack only when the skeptic raises it.
+
+> The numbers are all in; here is what each amount buys on your plan. Every figure below is from the equity calculator or your own message.
+>
+> ## 1. What each amount buys
+>
+> - **$3M, full plan:** runway 17.90 months on plan and 16.77 in the downside. The month-15 milestone is short in both cases (slack 2.90 and 1.77 months, against your 6 months to raise).
+> - **$3M, your lean plan (spend at 85%):** runway 21.06 months, milestone covered, slack 6.06 months. The required raise on the lean plan is $2,989,000.00, beside your $3,000,000.00.
+> - [...]
+>
+> The lean rows for $4M and for no raise are left out because you tie the lean plan to $3M.
+>
+> ## 2. Table
+>
+> | Option   | Case | Runway (months) | Milestone (month) | Covered? | Slack (months) | Start raising by (month) |
+> | -------- | ---- | --------------- | ----------------- | -------- | -------------- | ------------------------ |
+> | No raise | plan | 3.87            | 15                | short    | -11.13         | -2.13                    |
+> | [...]    |      |                 |                   |          |                |                          |
+> | $3M      | lean | 21.06           | 15                | covered  | 6.06           | 15.06                    |
+>
+> [...]
+>
+> 2. **"If we only get $3M, we cut spend to 85% of plan."**
+>    - Doubt: the line does not say what is cut, or whether revenue and the milestone month survive the cut. The lean case above keeps revenue at 100% of plan because you stated no change. A partner is likely to ask what the other 15% of spend is for if revenue arrives without it.
+>
+> [...]
+>
+> - The skeptic's remark that the milestone is "presumably missed" in the downside was struck as a result no tool computed. It moves to the open asks.
+>
+> **Dropped:** none.
+>
+> The skeptic ran as a subagent, and the refute pass ran as one subagent per attack.
+>
+> ## 7. Flags
+>
+> - `milestone_short_on_plan`: $3M does not reach the milestone with time to raise, even on plan. This flag counts the plan case only; the $3M lean row covers it.
+> - [...]
+> - `start_raising_date_passed`: on cash alone, raising should already have started, given your 6 months to raise.

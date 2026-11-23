@@ -193,8 +193,8 @@ for digit, for the later round the founder names, and gives no sign or do-not-si
   marked Missing: conversion, protective provisions, founder vesting, the investor rights and the no-shop's fees and
   conditions go to the open asks as not in what was pasted, with a request for the whole sheet.
 - Price: the $40M post-money includes the pool, so the founders' shares are priced at the effective pre-money,
-  $28,000,000.00, against the $32,000,000.00 pre-money (the `pool_in_pre_money_lowers_price` flag in plain words).
-  With the pool counted after the money instead and the $32,000,000.00 pre-money held fixed (`equity_pool`'s other
+  $28,000,000.00, against the $32,000,000.00 pre-money (the `pool_in_pre_money_lowers_price` flag, with its meaning
+  from the skill's flag table). With the pool counted after the money instead and the $32,000,000.00 pre-money held fixed (`equity_pool`'s other
   table), the price would be $3.200000 and the post-money $42,666,665.60, not the sheet's $40M, and the investor would
   hold 18.7500%. That is a lawyer question, not advice. The founders' 70% is consistent (70.0000%).
 - Exit table, each exit named with where it comes from: at $8M (the amount raised) the Series A stays, takes

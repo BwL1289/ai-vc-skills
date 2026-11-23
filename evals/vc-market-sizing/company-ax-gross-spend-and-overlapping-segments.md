@@ -193,8 +193,8 @@ The whole-company run at 20%:
 
 ## Expected answer
 
-- **Doubted first, computed:** the TAM mismatch leads the first tier. Slide 4's "$11.7B TAM: every pool in the Sun
-  Belt plus Texas and Florida." is $11,700,000,000.00 stated against $1,755,000,000.00, a difference of
+- **Doubted first, computed:** the TAM mismatch heads the list, ahead of the tiers, with no tier. Slide 4's "$11.7B
+  TAM: every pool in the Sun Belt plus Texas and Florida." is $11,700,000,000.00 stated against $1,755,000,000.00, a difference of
   $-9,945,000,000.00. Beside it, the tool's gross spend is $11,700,000,000.00, the slide's figure: the slide counted
   the whole spend owners pay their cleaners, not the 15% the company keeps. The answer quotes the tool's revenue rule
   and its source, the YC seed fundraising guide's glossary ("the estimated total revenue available for the product(s)

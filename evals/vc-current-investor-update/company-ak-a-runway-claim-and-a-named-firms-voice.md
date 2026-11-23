@@ -53,8 +53,9 @@ the one call below, puts the runway mismatch first, and keeps the lowlight the f
   it; no runway is worked out by hand.
 - "Lowlights: our VP Sales left in August." stays in the revised draft as a lowlight, with `[what you are doing about
 it]`.
-- ARR and net revenue retention are quoted as stated with "not checked: no tool computes this"; the retention definition
-  is asked for (gross or net, period), and the last update's figures are asked for so they can be tied out.
+- ARR and net revenue retention are quoted as stated with "not checked here: the vc-metrics-readiness skill checks it
+  from its parts", and the founder is pointed to that skill; the retention definition is asked for (gross or net,
+  period), and the last update's figures are asked for so they can be tied out.
 - "Q3 ARR: $1.9M." and "Monthly revenue: $95,000." state the top line in two forms in one draft: Different form. No
   figure is converted or compared; the open asks include `[how the ARR figure is built, and whether the monthly revenue
 used for the runway is the same revenue]`.

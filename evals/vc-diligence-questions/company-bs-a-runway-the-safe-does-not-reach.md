@@ -1,4 +1,4 @@
-# Eval 5: Company AL, a runway the SAFE does not reach and a total that counts a SAFE
+# Eval 5: Company BS, a runway the SAFE does not reach and a total that counts a SAFE
 
 A test prompt for the `vc-diligence-questions` skill. The company is made up. The tool call and the excerpt are from a
 real `equity_calculator runway_plan` run with these inputs. The answer states the expected behaviour; it is not a
@@ -9,7 +9,7 @@ keeps the data room to the seed stage's core set, and computes nothing in its ow
 
 ## Prompt
 
-> A seed fund starts diligence next week; prep me. Company AL sells scheduling software to physiotherapy clinics.
+> A seed fund starts diligence next week; prep me. Company BS sells scheduling software to physiotherapy clinics.
 > We're raising $1.5M on a SAFE at a $10M post-money cap. The deck says "The raise gives us 36 months of runway." We
 > have $200k in the bank, spend $70k a month and bring in $10k a month. Cap table: 9,000,000 shares fully diluted, our
 > earlier $300k SAFE counted in. Documents we have: the deck, the cap table spreadsheet, the signed SAFE, our
@@ -59,11 +59,12 @@ the next priced round the founder expects before any `equity_round` call.
 
 ## Expected answer
 
-- The runway mismatch leads the ranked list as stops the process, in Financials and cap table, and is not put through
-  the refute pass: "The raise gives us 36 months of runway." (the tool prints 36.00 months, given) against the tool's
-  28.33 months, a difference of -7.67 months. The tool returns no flag, so none is relayed. The draft answer uses only
-  the tool's figure, asks the founder to correct the deck line, and names the monthly cash plan (FIN-D5) as what to
-  put in the data room, with `[the monthly cash plan, with and without the raise]`.
+- The runway mismatch heads the ranked list, ahead of the tiers and with no tier, in Financials and cap table, and is
+  not put through the refute pass: "The raise gives us 36 months of runway." (the tool prints 36.00 months, given)
+  against the tool's 28.33 months, a difference of -7.67 months. The claim is above the computed runway, so the
+  understated-runway exception does not apply. The tool returns no flag, so none is relayed. The draft answer uses
+  only the tool's figure, asks for `[the corrected deck line]`, and names the monthly cash plan (FIN-D5) as what to put
+  in the data room, with `[the monthly cash plan, with and without the raise]`; it never says the deck was corrected.
 - The founder's fully diluted total counts the SAFE, so step 2 asks for
   `[fully diluted shares before the round, SAFEs and notes left out]` and passes no share count to any tool; no
   share figure is subtracted or divided.

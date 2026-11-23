@@ -8,8 +8,7 @@ that may use only the founder's material), the standing prep questions are never
 stronger answer only from the founder's material. The question bank in references/ is one table per category with
 fixed columns, no figures and no names, competition rows at four fixed levels, and the standing prep questions word
 for word. Each eval in evals/vc-partner-meeting/ has a prompt, an expected tool call and an expected answer; the one
-eval with an ``equity_deal_check`` call carries a valid call and an excerpt that is lines of the report that call
-prints.
+eval with calculator calls carries valid calls and excerpts that are lines of the reports those calls print.
 """
 
 from __future__ import annotations
@@ -17,12 +16,15 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import get_args
 
 import pytest
 from equity_calculator.__main__ import _INPUT_MODELS
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
-from equity_calculator.schemas.equity_deal_check import DealCheckInput
+from equity_calculator.schemas.equity import ScenarioInput, ScenarioResult
+from equity_calculator.schemas.equity_deal_check import DealFlag
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput
 from equity_calculator.text import render_sheet
 from tests.test_vc_claims_check_skill import _READ_SOURCES
 
@@ -45,7 +47,16 @@ _FENCE = re.compile(r"^( *)```([a-z]*)\n(.*?)^\1```$", re.MULTILINE | re.DOTALL)
 _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
-_HANDOFF_SKILLS = ("vc-deal-math", "equity-calculator", "vc-positioning", "vc-claims-check", "vc-metrics-readiness")
+_HANDOFF_SKILLS = (
+    "vc-deal-math",
+    "equity-calculator",
+    "vc-positioning",
+    "vc-claims-check",
+    "vc-metrics-readiness",
+    "vc-round-sizing",
+    "vc-investor-memo",
+    "vc-market-sizing",
+)
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 350
 _TRIGGERS = (
@@ -84,9 +95,13 @@ _BADGE = re.compile(r'alt="Skills: (\d+)" src="https://img\.shields\.io/badge/sk
 _NOT_REHEARSED = "not rehearsed"
 _YOUR_QUESTION = "your question"
 _DOUBLE_QUOTED = re.compile(r'"([^"]+)"')
-_SAFE_UNCHECKED = "not checked: no tool computes this for a SAFE or note raise"
-_NO_RAISE_UNCHECKED = "not checked: no tool computes runway without a raise"
-_SKILL_MARKS = {_NOT_REHEARSED, _YOUR_QUESTION, _SAFE_UNCHECKED, _NO_RAISE_UNCHECKED}
+_NOT_COMPUTED = "not checked: no tool computes this"
+_THIRD_PERSON = "A partner is likely to ask ..."
+_SKILL_MARKS = {_NOT_REHEARSED, _YOUR_QUESTION, _NOT_COMPUTED, _THIRD_PERSON}
+# The one sentence every attack brief in the pack carries since a live run's attacker judged the material for itself.
+_RAISE_IT_ANYWAY = "raise it anyway, however short the material, and the refute pass decides"
+# An eval's call: a line that starts with the tool's name and ends with a colon, then its JSON fence.
+_LABELLED_CALL = re.compile(r"^`equity_([a-z_]+)`[^\n]*:\n\n```json\n(.*?)^```$", re.MULTILINE | re.DOTALL)
 _REFUTE_VERDICTS = ("Dropped, answered:", "Dropped, not grounded:", "Kept:")
 # A figure an eval's answer takes from the calculator: a percent or months with decimals, or money with cents.
 _PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|\d[\d,]*\.\d+ months|\$\d[\d,]*\.\d{2}")
@@ -152,6 +167,18 @@ def _bank_rows() -> list[list[str]]:
 def _eval(letter: str) -> Path:
     (path,) = (path for path in _EVALS if path.name.startswith(f"company-{letter}-"))
     return path
+
+
+def _calls(text: str) -> list[tuple[str, ScenarioInput]]:
+    """Each labelled call of an eval: the scenario its label names, and its inputs, validated by that model."""
+    calls: list[tuple[str, ScenarioInput]] = []
+    for scenario, body in _LABELLED_CALL.findall(_section("## Expected tool call", text)):
+        calls.append((scenario, _INPUT_MODELS[scenario].model_validate(json.loads(body)["inputs"])))
+    return calls
+
+
+def _results(text: str) -> list[ScenarioResult]:
+    return [compute(inputs) for _, inputs in _calls(text)]
 
 
 def test_the_frontmatter_names_the_skill_and_the_founders_questions() -> None:
@@ -230,7 +257,8 @@ def test_the_refute_stage_judges_with_only_the_material_and_moves_answered_quest
 
     for verdict in _REFUTE_VERDICTS:
         assert verdict in refute, verdict
-    assert "one subagent per question" in refute
+    assert "launch one subagent per question in a single message" in refute
+    assert "never put two questions in one subagent" in refute
     assert "you argue neither side" in refute
     assert "When you cannot decide, return Kept" in refute
     assert "Bring in no outside fact" in refute and "do no arithmetic" in refute
@@ -241,14 +269,22 @@ def test_the_refute_stage_judges_with_only_the_material_and_moves_answered_quest
     assert "no percentages and no score" in _unwrapped(_section("### Rank what survives"))
 
 
-def test_the_calculators_rows_open_their_tiers_ahead_of_questions_from_more_than_one_lens() -> None:
+def test_the_calculators_mismatches_head_the_drill_with_no_tier_and_its_flags_open_their_tier() -> None:
     rank = _unwrapped(_section("### Rank what survives"))
-    mismatches = _unwrapped(_section("### Stage A: attack"))
+    attack = _unwrapped(_section("### Stage A: attack"))
 
-    assert "the calculator's rows come first, in the order the tool reports them, ahead of everything else" in rank
-    assert "mismatches open ends the meeting, flags open weakens it" in rank
-    assert rank.index("the calculator's rows come first") < rank.index("raised by more than one lens")
-    assert "Neither goes through the quote check or the refute pass" in mismatches
+    assert rank.strip().startswith("The calculator's mismatches head the drill, ahead of the tiers")
+    assert "the calculator's flags come first, in the order the tool reports them, ahead of everything else" in rank
+    assert "flags open weakens it" in rank and "ends the meeting, quoting" not in attack
+    assert rank.index("the calculator's flags come first") < rank.index("raised by more than one lens")
+    assert "It carries no tier: how much a gap hurts depends on its size" in attack
+    # Only a runway below the computed one understates; a percent sold or use of funds below the tool's is a mismatch.
+    assert "a runway claim below the computed runway understates it, so it does not head the drill" in attack
+    assert "minor tier at most" in attack and "below the tool's figure understates it" not in _TEXT
+    assert "A percent sold or use-of-funds total below the tool's figure is still a mismatch" in attack
+    assert "(an understated runway goes in minor)" in rank and "an understated one" not in rank
+    assert "Neither goes through the quote check or the refute pass" in attack
+    assert _RAISE_IT_ANYWAY in attack and "rather than a weak question" not in attack
 
 
 def test_one_message_mode_debriefs_every_pasted_answer_even_one_no_lens_kept() -> None:
@@ -273,6 +309,11 @@ def test_the_standing_prep_questions_are_not_refuted_and_invent_nothing() -> Non
 
 def test_the_debrief_builds_only_from_the_material_and_never_predicts_a_decision() -> None:
     debrief = _unwrapped(_section("## The debrief"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "never an argument about which assumptions would make the stated figure true" in debrief
+    assert f'in the third person ("{_THIRD_PERSON}")' in answering
+    assert '"from the calculator; not refuted"' in answering and "counts only the lens questions" in answering
 
     assert "built only from the founder's material" in debrief
     assert "bracketed ask" in debrief
@@ -280,28 +321,68 @@ def test_the_debrief_builds_only_from_the_material_and_never_predicts_a_decision
     assert "never say a partner or a firm would invest, pass or score" in debrief
 
 
-def test_figures_go_to_the_calculator_and_runway_with_no_raise_is_quoted_unchecked() -> None:
+def test_figures_go_to_the_calculator_and_runway_with_no_raise_or_on_a_safe_goes_to_the_runway_plan() -> None:
     steps = _unwrapped(_section("## Steps"))
     answering = _unwrapped(_section("## Answering"))
+    limits = _unwrapped(_section("## Limits"))
+    (example,) = re.findall(r"`(\{\"inputs\": .*?\})`", steps)
 
-    for unchecked in (_SAFE_UNCHECKED, _NO_RAISE_UNCHECKED):
-        assert unchecked in steps and unchecked in answering, unchecked
-    assert "never divide cash by burn yourself" in steps
+    assert "no tool computes runway without a raise" not in _TEXT and 'for a SAFE or note raise"' not in _TEXT
+    # The example's "..." stand for the founder's figures; with figures in, it is a valid call with no raise.
+    assert RunwayPlanInput.model_validate(json.loads(example.replace('"..."', '"1"'))["inputs"]).raises == ()
+    assert "the founder's figure as the top-level `stated_runway_months`" in steps
+    assert "With no cash or burn given, ask for them; never divide cash by burn yourself" in steps
+    assert "the runway claim and the use-of-funds lines go to `equity_runway_plan` too, the raise as cash only" in steps
+    assert "from `equity_runway_plan`" in answering and "runway with no raise comes from `equity_runway_plan`" in limits
     assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
     assert "Make one call per version of the ask" in steps and "as printed" in steps
+    assert "in bracketed asks, table cells and debrief notes too" in steps
+    assert '("from $80k to $120k a month", never "$40k more")' in steps
+
+
+def test_metrics_and_market_sizes_go_to_their_skills_and_only_growth_and_ltv_have_no_tool() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "ARR, retention, churn, CAC payback and burn multiple belong to the vc-metrics-readiness skill" in steps
+    assert "a market size to the vc-market-sizing skill (`equity_market_sizing`)" in steps
+    assert f'Growth rates and LTV are quoted with "{_NOT_COMPUTED}"' in steps
+
+
+def test_a_fully_diluted_total_and_an_unlabelled_valuation_are_handled_as_the_pack_does() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "Fully diluted shares, for the tool, leave SAFEs and notes out" in steps
+    assert "ask which way the founder's does, and pass the tool its own basis" in steps
+    assert "never subtract the SAFE or note shares yourself" in steps
+    assert "A check that is a mismatch under one reading only is not a calculator mismatch" in steps
+    assert "Only a mismatch under every reading is the calculator's mismatch" in steps
 
 
 def test_every_flag_the_calculator_raises_is_relayed_and_a_benchmark_band_is_never_a_bar() -> None:
     steps = _unwrapped(_section("## Steps"))
     answering = _unwrapped(_section("## Answering"))
 
-    assert "Read every code in the tool's `flags` too" in steps
-    assert "joins the kept questions as weakens it, in the tool's words, and is not refuted" in steps
+    flags = _section("## Calculator flags")
+    rows = re.findall(r"^\| `([a-z_]+)` +\|", flags, re.MULTILINE)
+
+    assert "Read every code in each tool's `flags` too" in steps
+    assert "joins the kept questions as weakens it, with its meaning from the calculator flags table below" in steps
+    assert "in the tool's words" not in _TEXT
+    # Over MCP a tool returns bare codes, so the skill carries each code's meaning itself, with no band of its own.
+    assert rows == list(get_args(DealFlag))
+    assert "`cash_never_runs_out`" in flags and "18 months" not in flags and "25%" not in flags
     for code in ("`runway_below_band`", "`dilution_above_band`", "`runway_band`", "`dilution_band`"):
         assert code in steps, code
-    assert "with its `unverified` source" in steps and "never as a bar" in steps
-    assert "each flag, one line, in the tool's words" in answering and "`unverified` source" in answering
-    assert "which one is meant, as ends the meeting, quoting both tool values" in steps
+    # The runway plan's band row cites a guide and the deal check's does not, so the skill quotes whichever source the
+    # row gives rather than calling every band unverified.
+    assert "with the source that row gives, as a common benchmark" in steps and "never as a bar" in steps
+    assert "its meaning from the calculator flags table" in answering and "with the source that row gives" in answering
+    assert "`unverified` source" not in _TEXT
+    # Each question keeps to what the tool's own sentence says, never a motive or a doubt the tool does not raise.
+    meanings = dict(re.findall(r"^\| `([a-z_]+)` +\| (.+?) +\|$", flags, re.MULTILINE))
+    assert "as a VC prices it" in meanings["pool_in_pre_money_lowers_price"]
+    assert meanings["net_burn_not_positive"].endswith("which burn does the runway claim use?")
+    assert "why?" not in flags and "which burn is real?" not in flags
 
 
 def test_the_question_bank_has_fixed_columns_unique_ids_and_known_lenses_and_stages() -> None:
@@ -387,11 +468,15 @@ def test_the_refusal_evals_decline_and_name_no_one() -> None:
         assert quoted in _unwrapped(_section("## Prompt", _eval("ab").read_text(encoding="utf-8"))), quoted
 
 
-def test_the_runway_eval_quotes_the_no_raise_runway_unchecked() -> None:
+def test_the_runway_eval_checks_the_no_raise_runway_with_the_runway_plan_and_records_its_live_run() -> None:
     text = _eval("r").read_text(encoding="utf-8")
+    answer = _unwrapped(_section("## Expected answer", text))
 
     assert _eval("r") in _CALL_EVALS
-    assert _NO_RAISE_UNCHECKED in _unwrapped(_section("## Expected answer", text))
+    assert [scenario for scenario, _ in _calls(text)] == ["deal_check", "runway_plan"]
+    assert "checked with `equity_runway_plan` on today's spend" in answer and "minor tier at most" in answer
+    assert "ahead of the tiers and with no tier" in answer
+    assert "## Recorded answer" in text and text.index("## Expected answer") < text.index("## Recorded answer")
 
 
 def test_the_no_call_evals_carry_no_call_or_excerpt() -> None:
@@ -403,23 +488,22 @@ def test_the_no_call_evals_carry_no_call_or_excerpt() -> None:
 
 @pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])
 def test_each_eval_call_is_valid_and_its_excerpt_is_what_the_calculator_prints(path: Path) -> None:
-    """An eval's figures are pasted from the calculator: its excerpt must be lines of the report for its call."""
+    """An eval's figures are pasted from the calculator: each excerpt must be lines of the report for its call."""
     text = path.read_text(encoding="utf-8")
-    (example,) = _fences("json", text)
-    (excerpt,) = _fences("text", text)
+    excerpts = _fences("text", _section("## What the calculator prints (excerpt)", text))
 
-    report = render_sheet(sheet_for(compute(DealCheckInput.model_validate(json.loads(example)["inputs"]))))
-    printed = [line.rstrip() for line in report.splitlines()]
-
-    for line in excerpt.splitlines():
-        assert line in printed, line
+    assert len(_calls(text)) == len(_fences("json", text)) == len(excerpts)
+    for result, excerpt in zip(_results(text), excerpts, strict=True):
+        printed = [line.rstrip() for line in render_sheet(sheet_for(result)).splitlines()]
+        for line in excerpt.splitlines():
+            assert line in printed, line
 
 
 @pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])
 def test_each_figure_an_eval_answer_takes_from_the_calculator_is_what_it_prints(path: Path) -> None:
     """A percent, a months figure or a money figure with cents in the expected answer is a line the report prints."""
     text = path.read_text(encoding="utf-8")
-    results = [compute(DealCheckInput.model_validate(json.loads(call)["inputs"])) for call in _fences("json", text)]
+    results = _results(text)
     reports = "\n".join(render_sheet(sheet_for(result)) for result in results)
     dumps = "\n".join(result.model_dump_json() for result in results)
     answer = _unwrapped(_section("## Expected answer", text))

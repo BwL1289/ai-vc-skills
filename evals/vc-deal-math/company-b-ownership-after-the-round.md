@@ -74,6 +74,9 @@ text.
 
 ## Expected answer
 
+- It asks whether the founder's 10,000,000 fully diluted shares leave the two SAFEs out, as the tool's count does
+  (every share before the round, granted options and the unissued pool included, SAFEs and notes left out), and says
+  the figures stand only on that basis. It subtracts no SAFE shares itself.
 - Verdict `mismatch`: the post-money and the investors' 20% are consistent; the founders' 72% is not.
 - Founders: the deck says 72.0000%, the calculator gives 52.0661%, a difference of -19.9339%. The answer explains that
   the 72% leaves out the two SAFEs converting and the pool top-up, both paid for out of the pre-money, and that a VC

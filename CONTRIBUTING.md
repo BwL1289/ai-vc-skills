@@ -5,7 +5,7 @@ Thanks for helping. Ideas for new skills, fixes to the math, clearer docs: all w
 ## Requesting a skill
 
 Open an issue with the [skill request](https://github.com/BwL1289/ai-vc-skills/issues/new?template=skill_request.yml)
-form: the question a founder or investor asks, an example, and the source you would trust for the answer.
+form: the question a founder asks, an example, and the source you would trust for the answer.
 
 ## Reporting a wrong number
 
@@ -48,6 +48,8 @@ CI runs the validator, the pre-commit hooks and pytest on every pull request.
 
 ## Quality checklist for a skill
 
+- [ ] The founder is the user: the skill answers a founder's question, and an investor's view appears only as a lens
+      in a review, never as the role the skill plays.
 - [ ] The description says what the skill does and when to use it, in the words users actually type.
 - [ ] Every number comes from a tool or the user's document; the skill says so.
 - [ ] Missing inputs are asked for, never guessed.
