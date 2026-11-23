@@ -276,6 +276,9 @@ def test_a_milestone_verdict_says_only_that_the_cash_lasts() -> None:
     assert "only that the cash lasts to the milestone month plus the months to raise" in steps
     assert "a milestone is covered only when the slack is at least the months to raise" in steps
     assert _NOT_CHECKED in steps and _NOT_CHECKED in answering
+    # An ARR milestone has a tool since the metrics check shipped; only a customer count or a launch has none.
+    assert "an ARR target is checked by the vc-metrics-readiness skill" in steps
+    assert "an ARR target with the vc-metrics-readiness skill named as where it is checked" in answering
     assert "never converted by hand" in steps and "`milestone_rule`" in answering
 
 
@@ -504,7 +507,7 @@ def test_the_two_amounts_eval_leaves_the_arr_figure_unchecked_and_drops_what_the
     _, prompt, answer = _eval("w")
     answered = ("Downside: revenue comes in at half of plan", "If we only get $3M, we cut spend to 85% of plan")
 
-    assert f'"$1M ARR" itself is quoted as stated, "{_NOT_CHECKED}"' in answer
+    assert '"$1M ARR" itself is quoted as stated and not checked' in answer and "vc-metrics-readiness" in answer
     assert '"A revenue milestone with no monthly figure"' in answer
     # A drop can be scored only when the skeptic raises the attack, so it is conditional; no merged case is run.
     assert "If the skeptic raises an attack" in answer and "Dropped, answered" in answer

@@ -128,8 +128,10 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
    What a milestone verdict says: only that the cash lasts to the milestone month plus the months to raise (the tool's
    `milestone_rule` row). Slack is the runway less the milestone month, so a milestone is covered only when the slack
    is at least the months to raise; "short" beside a positive slack is no contradiction. Whether the plan reaches the
-   milestone's own figure (ARR, a customer count, a launch) is quoted as stated, with "not checked: no tool computes
-   this". A revenue milestone the founder gives as revenue a month is set beside the tool's phase revenue row for
+   milestone's own figure is quoted as stated and not checked by these calls: an ARR target is checked by the
+   vc-metrics-readiness skill (`equity_metrics_check` works ARR out from monthly recurring revenue), and the open asks
+   ask for the monthly recurring revenue it stands for; a customer count or a launch is quoted with "not checked: no
+   tool computes this". A revenue milestone the founder gives as revenue a month is set beside the tool's phase revenue row for
    that month, both as printed; one in other terms is never converted by hand, and its monthly figure goes to the
    open asks.
 
@@ -312,8 +314,9 @@ verdict of the skill's own opens the answer.
    "fails", "only works", "needs to"). A lean plan's runway, verdict and required raise go on the line of the option
    the founder ties it to, and nowhere else; one line says the lean rows for the other amounts are left out because
    the founder ties the lean plan to that amount. `milestone_short_on_plan` counts the plan case only, so a smaller
-   raise can carry it while its lean rows cover the milestone: quote both. Each milestone's own figure is quoted with
-   "not checked: no tool computes this".
+   raise can carry it while its lean rows cover the milestone: quote both. Each milestone's own figure is quoted as
+   stated and not checked: an ARR target with the vc-metrics-readiness skill named as where it is checked, a customer
+   count or a launch with "not checked: no tool computes this".
 2. **Table:** Option, Case, Runway, Milestone (month), Covered?, Slack, Start raising by. The no-raise row first, its
    start raising by as printed (a negative value stays negative, never "already passed").
 3. **Ownership per option:** percent sold and the founders' stake after, from `equity_deal_check`; after the next

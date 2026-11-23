@@ -207,8 +207,9 @@ The two dilution runs, $3M then $4M:
 - `milestone_short_on_plan` counts the plan case only: the answer quotes it beside $3M's covered lean verdict and does
   not drop either.
 - A covered verdict says only that the cash lasts to month 15 plus 6 months to raise (the tool's `milestone_rule`
-  row). "$1M ARR" itself is quoted as stated, "not checked: no tool computes this", and the open asks ask for the
-  revenue a month the plan needs by month 15 for it. The answer does not convert ARR to a month by hand.
+  row). "$1M ARR" itself is quoted as stated and not checked: an ARR target is the vc-metrics-readiness skill's to check
+  (`equity_metrics_check`, from monthly recurring revenue), never "no tool computes this", and the open asks ask for the
+  monthly recurring revenue it stands for. The answer does not convert ARR to a month by hand.
 - The tool's required raise to reach month 15 with 6 months to raise is $3,745,000.00 on plan, $4,142,500.00 in the
   downside and $2,989,000.00 on the lean plan. The answer quotes them and does not round them to a nicer number.
 - The no-raise row comes first: 3.87 months, start raising by -2.13 months as printed (never "already passed"), with
@@ -253,7 +254,9 @@ and gave no recommendation. It computed one figure in its own text: its second a
 what "the other 15%" of spend is for, a remainder of the founder's 85% that neither the founder nor the tool gave. Of
 the other points, it did not name its first attack's pattern and did not list in one place what would have to be true
 for each amount. Since this run the skill names a remainder of a founder's percent among the figures an answer never
-states, and its check before answering covers the skeptic's text it relays. The skill has not been run again.
+states, and its check before answering covers the skeptic's text it relays; an ARR milestone, which this run called
+something no tool computes, is now named as the vc-metrics-readiness skill's to check. The skill has not been run
+again.
 
 The first run, on the same version and day, failed with four clauses missed. It made a sixth call that merged the
 downside's revenue cut into the lean plan and put that case in the founder's tables; it never ran the refute pass; it

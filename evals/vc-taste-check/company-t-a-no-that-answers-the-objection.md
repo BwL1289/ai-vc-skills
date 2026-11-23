@@ -58,15 +58,18 @@ Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from thi
 this eval expected an objection dropped by quoting D1's reason, D1 in the meeting and D2 in the deck. The answer is
 trimmed; [...] marks each cut.
 
-**Partial, as the run's reviewer graded it.** It ran the five lenses and five refute passes as subagents, invented no
-decision, figure or product, quoted "11 of 12" as stated, and asked what voice D3 turned down. It met none of the three
-placement and drop clauses then expected: no lens objected to D1's missing reason, since the reason was in the material
-every lens read, so nothing was dropped; one minor objection held D1 at Not yet; and three kept objections held D2 at
-Not yet, one of them only that the founder had not said what changed. The reviewer traced those misses to this eval
-and to two loose rules in the skill rather than to the model. Since this run a minor survivor no longer moves a
-decision, an objection that only says an input is missing goes to the open asks, the lenses get no list of what was
-not provided, a figure line is never turned into what it leaves over, and every Not yet names each kept objection on
-it; this eval's drop and placement points are now conditional. The eval has not been run again.
+**Partial: one clause of the pass sentence above missed.** It ran the five lenses and five refute passes as subagents,
+put the founder's reason beside D1 in its why-we-built-it line, said that D2's own label answers a "no data"
+objection, invented no decision, figure or product, quoted "11 of 12" as stated, and asked what voice D3 turned down.
+It missed the placement clause: one minor objection held D1 at Not yet, and D2's Not yet named two of the three
+objections kept on it, the third only saying that the founder had not said what changed. Against the pass sentence
+this eval had when it ran (an objection dropped by quoting D1's reason, D1 in the meeting, D2 in the deck) it missed
+two clauses, though the run's reviewer graded it Partial: no lens objected to D1's missing reason, since the reason
+was in the material every lens read, and the reviewer traced the misses to this eval and to two loose rules in the
+skill rather than to the model. Since this run a minor survivor no longer moves a decision, an objection that only
+says an input is missing goes to the open asks, the lenses get no list of what was not provided, a figure line is
+never turned into what it leaves over, and every Not yet names each kept objection on it; this eval's drop and
+placement points are now conditional. The eval has not been run again.
 
 > **Short answer:** as written, none of the three is ready to show yet. D2 (the chat assistant no) is one fact away from the deck, D1 (the dashboard cut) is two facts away from being your meeting story, and D3 (brand voice) should be left out until it names something you turned down.
 >
