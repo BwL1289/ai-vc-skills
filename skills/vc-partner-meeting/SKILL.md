@@ -19,7 +19,7 @@ company, its round or its investors that the founder did not give.
 
 - "Rehearse my partner meeting." "Run a mock partner meeting." "Drill me on the hard questions." "Prep me for my
   partner meeting on Monday." "What will the partners ask?" "Debrief my answers."
-- A pasted pitch, deck outline or slide text, with the stage, the round and a note on who the founder is meeting.
+- A pasted pitch, deck outline or slide text, with the stage, the round and a note on who the founder is meeting. Any of these may come as a file the agent can read in this session.
 - Hand off:
   - Metric definitions a partner will test: the vc-metrics-readiness skill (preview).
   - The story, the one-liner and the phrases to drop: the vc-positioning skill. Suggest it first when the pitch has
@@ -37,7 +37,7 @@ company, its round or its investors that the founder did not give.
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess. At most five questions:
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the figures behind a chart), and never ask the founder to paste what the file already holds. At most five questions:
 
 1. The pitch as the founder gives it: the one-liner, then the slides or the spoken pitch in order.
 2. The stage and the round: pre-seed, seed, Series A or later; the amount, the instrument (priced round, SAFE or
@@ -51,8 +51,8 @@ Ask once, in one message, for whatever is missing, by name. Never guess. At most
    founder pastes the questions they expect, each with their answer, and the skill debriefs every one of them).
 
 A missing input does not stop the rehearsal. It becomes a named gap and a bracketed ask in the debrief, never a
-plausible fact. **The founder's material** means the pasted text plus every answer the founder gives in this session.
-Label each part as it arrives (P1, P2 ... for the pitch; A1, A2 ... for answers), so every quote can be located.
+plausible fact. **The founder's material** means the pasted text and any file read, plus every answer the founder gives
+in this session. Label each part as it arrives (P1, P2 ... for the pitch; A1, A2 ... for answers), so every quote can be located.
 
 ## The lenses
 
@@ -214,9 +214,9 @@ the same line, merge them and keep both lens names. Gaps from every lens go to t
 ### Stage B: refute
 
 Each question gets its own refute pass. With a subagent tool, launch one subagent per question in a single message,
-however few there are, each given the founder's material, that one question, and everything from "The refute brief:"
-to the end of this stage, and nothing else; never put two questions in one subagent. Without one, take the questions one at a time and decide each against the same brief before reading
-the next.
+however few there are, each given the founder's material, that one question, and everything from "The refute brief:" to
+the end of this stage, and nothing else; never put two questions in one subagent. Without one, take the questions one at
+a time and decide each against the same brief before reading the next. **Lean mode,** the one exception: with more than eight questions after the quote check, the refute pass may instead run one subagent per lens, all in a single message. Each gets what a one-question subagent gets, but with every question from its lens (one that two lenses raised goes to one of them only), and judges each question separately against the brief, with its own verdict and its own quote where the verdict needs one, never weighing one question against another. The answer then says the refute pass ran per lens, which is less independent than one subagent per question. The founder may ask for the full pass, one subagent per question.
 
 The refute brief:
 

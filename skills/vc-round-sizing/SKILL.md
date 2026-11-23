@@ -20,7 +20,7 @@ adds a figure the founder did not give: no burn, growth rate, haircut, valuation
   "How long will this last?" "How long until we raise again?" "What if we miss plan?" "How long do we survive with no
   new money?"
 - A pasted burn or hiring plan, a use-of-funds slide, or a line like "we're raising for 18 months" or "we have six
-  months without raising".
+  months without raising". Any of these may come as a file the agent can read in this session.
 - Hand off:
   - The ask's arithmetic (valuation labels, the pool shuffle, the SAFE stack, a deck's percent sold): the vc-deal-math
     skill.
@@ -33,6 +33,10 @@ adds a figure the founder did not give: no burn, growth rate, haircut, valuation
 ## Inputs
 
 Ask once, in one message, for whatever is missing, by name. Never guess, and never fill a gap with a typical figure.
+When the founder gives a file the agent can read (a PDF, HTML, a slides export, Markdown), read it yourself and list
+what it holds place by place (slide by slide for a deck), so the founder sees what was read from each; ask only for what
+the file cannot show (speaker notes, the figures behind a chart), and never ask the founder to paste what the file
+already holds.
 
 1. **Cash and the plan:** cash in the bank today, and the monthly plan as a few phases (from which month, gross
    spend, revenue). Three to five phases is plenty; a detailed model is not needed.

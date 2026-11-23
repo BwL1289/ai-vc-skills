@@ -215,7 +215,10 @@ def test_the_refute_pass_keeps_an_attack_only_when_the_material_grounds_it() -> 
     assert "a pattern from the discount table" in refute
     assert "the Pattern column of the discount table below and the brief below with its three verdicts" in refute
     assert "An attack is kept only if it is grounded" in refute
-    assert "A line that is not in the material word for word does not drop the attack" in refute
+    assert (
+        "Spacing and line breaks aside, a line that is not in the material word for word does not drop the attack"
+        in refute
+    )
     assert "invents nothing on the founder's behalf" in refute
     assert "Bring in no outside fact" in refute and "do no arithmetic" in refute
     assert "word for word" in quotes and "dropped as not grounded" in quotes

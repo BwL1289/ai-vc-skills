@@ -19,7 +19,8 @@ looks up a market figure, and never adds a count, price, share, adoption rate or
 
 - "How big is our market?" "Help me size our market." "Build our TAM, SAM and SOM." "Is our TAM credible?" "Will a
   VC believe our market size?" "Bottom-up or top-down?" "What if our price is lower?" "Which assumption matters most?"
-- A pasted market slide, an analyst figure ("$40B by 2030"), or a "we only need 1% of the market" line.
+- A pasted market slide, an analyst figure ("$40B by 2030"), or a "we only need 1% of the market" line. Any of these may
+  come as a file the agent can read in this session.
 - Hand off:
   - Every claim in the materials checked, market size among them, with no sizing asked for: the vc-claims-check skill.
   - The deck as a whole, slide by slide: the vc-deck-review skill (preview).
@@ -32,8 +33,11 @@ looks up a market figure, and never adds a count, price, share, adoption rate or
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess, never look anything up, and never fill a
-gap with a typical figure.
+Ask once, in one message, for whatever is missing, by name. Never guess, never look anything up, and never fill a gap
+with a typical figure. When the founder gives a file the agent can read (a PDF, HTML, a slides export, Markdown), read
+it yourself and list what it holds place by place (slide by slide for a deck), so the founder sees what was read from
+each; ask only for what the file cannot show (speaker notes, the figures behind a chart), and never ask the founder to
+paste what the file already holds.
 
 1. **Who buys, as segments** (one to eight): the buying customer (a clinic, a household, a store), how many there
    are, and where that count comes from. Segments must not overlap: one buyer in one segment only.
@@ -276,6 +280,13 @@ founder's material, that objection, the Pattern and Fix columns of the Patterns 
 brief:" to the end of this stage (the verdicts and the rule on what is missing included), and add no rule of your own.
 Without one, decide them one at a time against the same brief.
 
+**Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run
+one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection
+from its lens (one that two lenses raised goes to one of them only), and judges each objection separately against the
+brief, with its own verdict and its own quote where the verdict needs one, never weighing one objection against another.
+The answer then says the refute pass ran per lens, which is less independent than one subagent per objection. The
+founder may ask for the full pass, one subagent per objection.
+
 The refute brief:
 
 - You decide whether the founder's material answers one objection; you argue neither side. Write in the third
@@ -300,9 +311,9 @@ asks as a question and does not keep it. A line that supplies only part of it (a
 it: the objection is Kept for the part left, the answering line is quoted with the advice to put it on the market
 slide, and the part left becomes the bracketed ask.
 
-The pass invents nothing on the founder's behalf: no figure, source, customer or channel. After the passes, an
-answering line that is not in the material word for word does not drop the objection, and neither does one that is the
-objected line itself.
+The pass invents nothing on the founder's behalf: no figure, source, customer or channel. After the passes, spacing and
+line breaks aside, an answering line that is not in the material word for word does not drop the objection, and neither
+does one that is the objected line itself.
 
 ### Rank what survives
 

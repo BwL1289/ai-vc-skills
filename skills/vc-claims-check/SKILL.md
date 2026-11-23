@@ -33,7 +33,10 @@ looks anything up, and never adds evidence, figures or facts the founder did not
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess.
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
+read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
+for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the
+figures behind a chart), and never ask the founder to paste what the file already holds.
 
 1. Every document the founder will send or show, each with a name ("deck", "one-pager", "narrative") and its places
    marked (slide numbers, page numbers or paragraph order), so every claim can be located.
@@ -218,9 +221,9 @@ The verdicts:
 
 - **Kept, grounded:** the attack rests on the material: a source the material does not supply, a second line of the
   material that states the claim differently (quoted), or a pattern from the discount table.
-- **Dropped, answered:** the material already shows the evidence the attack asks for, and the attack matches no
-  pattern. Quote the founder's line that shows it. A line that is not in the material word for word does not drop
-  the attack.
+- **Dropped, answered:** the material already shows the evidence the attack asks for, and the attack matches no pattern.
+  Quote the founder's line that shows it. Spacing and line breaks aside, a line that is not in the material word for
+  word does not drop the attack.
 - **Dropped, not grounded:** the attack rests on something outside the material (a market fact, a guess about a
   competitor or a customer, an assumption about the founder), or the quoted line does not say what the attack claims.
 

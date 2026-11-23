@@ -1,6 +1,6 @@
 """Rules the review skills share word for word, so one founder input gets the same treatment whichever skill runs.
 
-Two sentences are copied into several skills and must stay identical there:
+Four sentences are copied into several skills and must stay identical there:
 
 - Which monthly spend goes into ``equity_runway_plan`` for a runway claim on a SAFE or note raise, and what happens
   while a planned change's start month is missing. When the skills disagreed, the same founder input ($400,000 in the
@@ -13,6 +13,18 @@ Two sentences are copied into several skills and must stay identical there:
   users "more than doubled", which neither the founder nor the calculator said. Every skill that writes rewrites,
   lines, draft answers, update text or deck fixes for the founder carries the sentence, except the partner-meeting
   skill, whose own ban says the same in other words and is checked here too.
+- A lean refute pass. One refute subagent per objection is the default, and the deck review's seven lenses may raise up
+  to three objections each, so one review could start more than twenty refute subagents, as a real deck run showed.
+  Every skill whose lenses feed a refute pass of one subagent per objection (or per question) now names one exception,
+  word for word: with more than eight, one subagent per lens may judge each of its lens's objections on its own, and
+  the answer says that is less independent.
+  The claims and round-sizing skills are not on the list: one skeptic raises at most three attacks there.
+- A file the founder gives is read, never pasted. Every skill with an Inputs section reads a file the agent can open
+  (a PDF, HTML, a slides export, Markdown), lists what it read place by place, and asks only for what the file cannot
+  show; and every "When to use it" bullet that names pasted material says it may come as a file.
+
+A refute pass checks its answering line as the quote check does, spacing and line breaks aside: a line that wraps in
+the founder's file is still the founder's line.
 
 Every eval that records a live run states the README's verdict rule in its first paragraph and opens its recording
 with a verdict under it: Pass when every clause of the pass sentence is met, Partial when exactly one is missed or met
@@ -130,12 +142,68 @@ _FOUNDER_TEXT_SKILLS = (
     "vc-diligence-questions",
 )
 _PARTNER_MEETING_BAN = 'never a difference, sum or ratio of two figures the founder gave ("from $80k to $120k a month"'
+# The lean refute pass, with {noun} filled by what the skill's lenses raise: an objection, or a question.
+_LEAN_REFUTE = (
+    "**Lean mode,** the one exception: with more than eight {noun}s after the quote check, the refute pass may instead"
+    " run one subagent per lens, all in a single message. Each gets what a one-{noun} subagent gets, but with every"
+    " {noun} from its lens (one that two lenses raised goes to one of them only), and judges each {noun} separately"
+    " against the brief, with its own verdict and its own quote where the verdict needs one, never weighing one {noun}"
+    " against another. The answer then says the refute pass ran per lens, which is less independent than one subagent"
+    " per {noun}. The founder may ask for the full pass, one subagent per {noun}."
+)
+_LEAN_REFUTE_SKILLS = {
+    "vc-current-investor-update": "objection",
+    "vc-deck-review": "objection",
+    "vc-diligence-questions": "question",
+    "vc-investor-memo": "objection",
+    "vc-market-sizing": "objection",
+    "vc-metrics-readiness": "objection",
+    "vc-partner-meeting": "question",
+    "vc-positioning": "objection",
+    "vc-prospective-investor-update": "objection",
+    "vc-taste-check": "objection",
+    "vc-term-sheet-review": "objection",
+}
+_READ_THE_FILE = (
+    "When the founder gives a file the agent can read (a PDF, HTML, a slides export, Markdown), read it yourself and"
+    " list what it holds place by place (slide by slide for a deck), so the founder sees what was read from each; ask"
+    " only for what the file cannot show (speaker notes, the figures behind a chart), and never ask the founder to"
+    " paste what the file already holds."
+)
+_READ_THE_FILE_SKILLS = (
+    "vc-claims-check",
+    "vc-current-investor-update",
+    "vc-deck-review",
+    "vc-diligence-questions",
+    "vc-investor-memo",
+    "vc-market-sizing",
+    "vc-metrics-readiness",
+    "vc-partner-meeting",
+    "vc-positioning",
+    "vc-prospective-investor-update",
+    "vc-round-sizing",
+    "vc-taste-check",
+    "vc-term-sheet-review",
+)
+_FILE_TOO = "Any of these may come as a file the agent can read in this session."
+# How a refute pass checks the line it says answers an item: as the quote check does, spacing and line breaks aside.
+_ANSWER_SPACING = re.compile(
+    r"[Ss]pacing and line breaks aside, an? (?:answering )?line that is not"
+    r"|check every answering line the same way as the (?:objections' )?quotes"
+)
 
 
 def _unwrapped(name: str) -> str:
     """The skill's text with its Markdown line breaks taken out, so a wrapped sentence reads as one."""
     text = (_SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
     return " ".join(line.lstrip("> ").strip() for line in text.splitlines())
+
+
+def _inputs(name: str) -> str:
+    """The skill's Inputs section, its line breaks taken out."""
+    text = (_SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+    section = text.split("\n## Inputs\n", 1)[1].split("\n## ", 1)[0]
+    return " ".join(line.strip() for line in section.splitlines())
 
 
 def test_the_skills_that_send_a_safe_raises_runway_to_the_runway_plan_are_the_ones_listed() -> None:
@@ -166,6 +234,58 @@ def test_founder_facing_text_never_works_out_how_two_founder_figures_compare(nam
 
 def test_the_partner_meeting_skill_keeps_its_own_ban_on_combining_two_founder_figures() -> None:
     assert _PARTNER_MEETING_BAN in _unwrapped("vc-partner-meeting")
+
+
+def test_the_skills_whose_refute_pass_runs_one_subagent_per_objection_or_question_are_the_ones_listed() -> None:
+    """A new skill whose lenses feed a refute pass of one subagent per item joins the list, and so gets lean mode."""
+    found = {}
+    for path in _SKILLS.glob("*/SKILL.md"):
+        text = _unwrapped(path.parent.name)
+        for noun in ("objection", "question"):
+            if f"one subagent per {noun}" in text:
+                found[path.parent.name] = noun
+
+    assert found == _LEAN_REFUTE_SKILLS
+
+
+@pytest.mark.parametrize("name", sorted(_LEAN_REFUTE_SKILLS))
+def test_a_refute_pass_of_more_than_eight_may_run_one_subagent_per_lens_and_says_so(name: str) -> None:
+    noun = _LEAN_REFUTE_SKILLS[name]
+    text = _unwrapped(name)
+    lean = _LEAN_REFUTE.format(noun=noun)
+
+    assert lean in text
+    # One subagent per item stays the rule; lean mode is its one named exception, for the agent that runs the pass,
+    # so it comes before the brief the refute subagents are given.
+    assert f"launch one subagent per {noun} in a single message" in text
+    assert f"never put two {noun}s in one subagent" in text
+    raw = (_SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+    before_brief = raw.split("\nThe refute brief:\n", 1)[0]
+    assert lean in " ".join(line.strip() for line in before_brief.splitlines())
+
+
+@pytest.mark.parametrize("name", [*sorted(_LEAN_REFUTE_SKILLS), "vc-claims-check"])
+def test_a_refute_pass_checks_its_answering_line_as_the_quote_check_does(name: str) -> None:
+    """A line that wraps in the founder's file, quoted on one line, is still word for word."""
+    assert _ANSWER_SPACING.search(_unwrapped(name)), name
+
+
+def test_the_skills_that_read_a_file_the_founder_gives_are_every_skill_with_inputs() -> None:
+    with_inputs = {path.parent.name for path in _SKILLS.glob("*/SKILL.md") if "\n## Inputs\n" in path.read_text()}
+
+    assert with_inputs == set(_READ_THE_FILE_SKILLS)
+
+
+@pytest.mark.parametrize("name", _READ_THE_FILE_SKILLS)
+def test_a_file_the_founder_gives_is_read_never_asked_for_as_a_paste(name: str) -> None:
+    inputs = _inputs(name)
+
+    assert _READ_THE_FILE in inputs
+    # It comes with the first instruction, before the list of what to ask for.
+    assert inputs.index(_READ_THE_FILE) < inputs.index("1. ")
+    text = _unwrapped(name)
+    assert "from text the founder pastes" not in text
+    assert "the pasted text plus every answer" not in text
 
 
 def _paragraphs(text: str) -> list[str]:
@@ -252,3 +372,21 @@ def test_every_hand_off_to_the_memo_skill_says_a_champion_is_likely_to_write_it(
     assert set(handoffs) == {f"- {_MEMO_HANDOFF}"}
     for path in _SKILLS.glob("*/SKILL.md"):
         assert "champion writes for the partnership" not in path.read_text(encoding="utf-8"), path.parent.name
+
+
+def test_every_when_to_use_bullet_that_names_pasted_material_says_it_may_come_as_a_file() -> None:
+    """A trigger written as paste-only teaches the agent to ask for a paste of a file it could read."""
+    pasted = []
+    for path in sorted(_SKILLS.glob("*/SKILL.md")):
+        text = path.read_text(encoding="utf-8")
+        if "\n## When to use it\n" not in text:
+            continue
+        when = text.split("\n## When to use it\n", 1)[1].split("\n## ", 1)[0]
+        for bullet in re.split(r"\n(?=- )", when):
+            line = " ".join(part.strip() for part in bullet.splitlines())
+            if line.startswith(("- A pasted", "- Pasted material")):
+                pasted.append((path.parent.name, line))
+
+    assert len(pasted) >= 9
+    for name, line in pasted:
+        assert _FILE_TOO in line or "file the agent can read in this session" in line, name

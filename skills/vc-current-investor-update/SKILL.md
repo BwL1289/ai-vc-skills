@@ -20,7 +20,8 @@ adds a figure, customer or event the founder did not give, and never leaves out 
 
 - "Write my investor update." "Review my investor update before I send it." "Draft our monthly update." "How do I
   tell investors about a bad month?" "Should I skip this month's update?" "Write our Q3 investor update."
-- Pasted material: the last update, this period's notes, a metrics table, a cash and burn figure, a draft update.
+- Pasted material: the last update, this period's notes, a metrics table, a cash and burn figure, a draft update. Any of
+  these may come as a file the agent can read in this session.
 - A founder who wants to skip a bad month: the sources below say to send it anyway (stopping is itself read as a
   warning). Say so once, then write the update.
 - Built for the founder's current investors: people who already hold shares, SAFEs or notes in the company.
@@ -39,7 +40,10 @@ adds a figure, customer or event the founder did not give, and never leaves out 
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess.
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
+read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
+for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the
+figures behind a chart), and never ask the founder to paste what the file already holds.
 
 1. The last update, word for word, with its date and period; or "this is the first one".
 2. What happened this period, in the founder's notes: what went right, what went wrong, what slipped, who left,
@@ -289,6 +293,13 @@ each the founder's material, the draft, that one objection, the Pattern column o
 "The refute brief:" to the end of this stage, and nothing else. Without a subagent tool, decide the objections one at a
 time against the same brief.
 
+**Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run
+one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection
+from its lens (one that two lenses raised goes to one of them only), and judges each objection separately against the
+brief, with its own verdict and its own quote where the verdict needs one, never weighing one objection against another.
+The answer then says the refute pass ran per lens, which is less independent than one subagent per objection. The
+founder may ask for the full pass, one subagent per objection.
+
 The refute brief:
 
 - You decide whether the founder's material answers one objection; you argue neither side. Write in the third
@@ -308,9 +319,9 @@ The verdicts:
   outside fact.
 - **Kept:** neither holds. When the fix needs something the material does not contain, it becomes a bracketed ask.
 
-The refute pass invents nothing on the founder's behalf. An answering line that is not in the draft word for word, or is
-the objected line itself, does not drop the objection. In review mode the draft given here is the founder's, as given: a
-line this skill added at step 7 is not in it.
+The refute pass invents nothing on the founder's behalf. Spacing and line breaks aside, an answering line that is not in
+the draft word for word, or is the objected line itself, does not drop the objection. In review mode the draft given
+here is the founder's, as given: a line this skill added at step 7 is not in it.
 
 ### The ranked fix list
 

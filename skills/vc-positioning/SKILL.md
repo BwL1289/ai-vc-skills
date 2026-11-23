@@ -22,7 +22,8 @@ adds a fact about the company that the founder did not give.
   "What should I not say to VCs?" "Is my one-liner clear?" "Prep me before we go out to raise."
 - A request about the story and the ask's numbers together ("check our story and our ask"): this skill runs it, and
   step 4 sends the ask's figures to `equity_deal_check`.
-- A pasted one-liner, elevator pitch, deck outline or slide text, executive summary or intro blurb.
+- A pasted one-liner, elevator pitch, deck outline or slide text, executive summary or intro blurb. Any of these may
+  come as a file the agent can read in this session.
 - Hand off:
   - The arithmetic in the ask (valuation, percent sold, option pool, SAFEs and notes, runway, use of funds): follow the
     vc-deal-math skill, which calls `equity_deal_check`. New money on a SAFE or note: `equity_round` (equity-calculator
@@ -44,7 +45,10 @@ adds a fact about the company that the founder did not give.
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess.
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
+read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
+for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the
+figures behind a chart), and never ask the founder to paste what the file already holds.
 
 1. The one-liner as the founder says it today, word for word.
 2. The narrative in order: slide titles and text, or the spoken pitch.
@@ -203,6 +207,13 @@ in a single message, however few there are; never put two objections in one suba
 material, that one objection, the Phrase or pattern column of the phrase table below, and everything from "The
 refute brief:" to the end of this stage, and nothing else; without one, take the objections one at a time and decide
 each against the same brief before reading the next.
+
+**Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run
+one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection
+from its lens (one that two lenses raised goes to one of them only), and judges each objection separately against the
+brief, with its own verdict and its own quote where the verdict needs one, never weighing one objection against another.
+The answer then says the refute pass ran per lens, which is less independent than one subagent per objection. The
+founder may ask for the full pass, one subagent per objection.
 
 The refute brief:
 

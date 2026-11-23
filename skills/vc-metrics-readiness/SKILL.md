@@ -36,7 +36,10 @@ score and never says "ready" or "not ready", and never adds a figure the founder
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess.
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
+read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
+for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the
+figures behind a chart), and never ask the founder to paste what the file already holds.
 
 1. Every document with metrics in it (deck, model or KPI tab, investor update, one-pager), each named and with its
    places marked (slide, tab, paragraph), so every metric can be quoted with where it appears.
@@ -287,6 +290,13 @@ each the founder's material, that one objection, the Pattern column of this skil
 vc-claims-check's discount table, and everything from "The refute brief:" to the end of this stage, and nothing else.
 Without a subagent tool, decide the objections one at a time against the same brief.
 
+**Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run
+one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection
+from its lens (one that two lenses raised goes to one of them only), and judges each objection separately against the
+brief, with its own verdict and its own quote where the verdict needs one, never weighing one objection against another.
+The answer then says the refute pass ran per lens, which is less independent than one subagent per objection. The
+founder may ask for the full pass, one subagent per objection.
+
 The refute brief:
 
 - You decide whether the founder's material answers one objection; you argue neither side. Write in the third person;
@@ -308,8 +318,9 @@ The verdicts:
 - **Kept:** neither holds. When the best answer needs something the material does not contain, the objection stays
   and that something becomes the evidence to add, as a bracketed ask.
 
-The refute pass invents nothing on the founder's behalf. After the passes, an answering line that is not in the
-material word for word does not drop the objection, and neither does one that is the objected line itself.
+The refute pass invents nothing on the founder's behalf. After the passes, spacing and line breaks aside, an answering
+line that is not in the material word for word does not drop the objection, and neither does one that is the objected
+line itself.
 
 ### The ranked fix list
 

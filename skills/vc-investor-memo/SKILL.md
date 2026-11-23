@@ -24,8 +24,8 @@ and never adds a figure, customer or fact the founder did not give. It takes no 
 
 - "Write the investment memo for my champion." "Draft our IC memo." "What will the partner write about us?" "Make the
   case for us internally." "What would a partner arguing against us say?" "Review the memo I drafted for our lead."
-- Pasted material: a deck or its text, a one-pager, the round's terms, a cap table, metrics, the founder's notes on
-  the team and the risks, and the exits the founder believes in. Or a memo draft the founder wrote (review mode).
+- Pasted material: a deck or its text, a one-pager, the round's terms, a cap table, metrics, the founder's notes on the
+  team and the risks, and the exits the founder believes in. Or a memo draft the founder wrote (review mode). Any of these may come as a file the agent can read in this session.
 - A founder who asks "show that we return their fund": the skill shows what the round's stake pays at the founder's
   own exit values, takes no fund size and says why once (see "The outcome case").
 - Hand off:
@@ -46,7 +46,7 @@ and never adds a figure, customer or fact the founder did not give. It takes no 
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess.
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the figures behind a chart), and never ask the founder to paste what the file already holds.
 
 1. The founder's material, each document named and its places marked (slide, page or paragraph), so every line the
    memo uses can be quoted with where it comes from. In review mode, the memo draft too.
@@ -370,8 +370,8 @@ objection about the same line, merge them and keep both lens names. Gaps go to t
 
 Each objection gets its own refute pass. With a subagent tool, launch one subagent per objection in a single message;
 never put two objections in one subagent. Give each the founder's material, the memo, that one objection, the Pattern
-column of the table below and everything from "The refute brief:" to the end of this stage, and nothing else.
-Without one, decide the objections one at a time against the same brief.
+column of the table below and everything from "The refute brief:" to the end of this stage, and nothing else. Without
+one, decide the objections one at a time against the same brief. **Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection from its lens (one that two lenses raised goes to one of them only), and judges each objection separately against the brief, with its own verdict and its own quote where the verdict needs one, never weighing one objection against another. The answer then says the refute pass ran per lens, which is less independent than one subagent per objection. The founder may ask for the full pass, one subagent per objection.
 
 The refute brief:
 
@@ -395,8 +395,8 @@ The verdicts:
   (one founder's achievement when the memo speaks for several founders) does not drop it: the objection is Kept for
   the part left, the answering line is quoted for the memo to carry, and the part left becomes the bracketed ask.
 
-The refute pass invents nothing on the founder's behalf. An answering line that is not in the material word for word
-does not drop the objection, and neither does one that is the objected line itself.
+The refute pass invents nothing on the founder's behalf. Spacing and line breaks aside, an answering line that is not in
+the material word for word does not drop the objection, and neither does one that is the objected line itself.
 
 | Pattern                                                                             | Why a partner arguing against the deal uses it         | Source                                                                         |
 | ----------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------ |

@@ -15,7 +15,8 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
 
 - "Check my deck's numbers." "Is our raise reasonable?" "What does this round do to my ownership?"
 - "How much runway does this buy?" "Will a VC question our valuation?"
-- A pasted ask slide, a SAFE or note list, a cap table summary or a use-of-funds slide.
+- A pasted ask slide, a SAFE or note list, a cap table summary or a use-of-funds slide. Any of these may come as a file
+  the agent can read in this session.
 - Hand off to the equity-calculator skill for a single question with no deck to check: an option pool alone
   (`equity_pool`), SAFE conversion detail (`equity_round`), a stake through later rounds (`equity_dilution`), vesting
   or an exit waterfall.

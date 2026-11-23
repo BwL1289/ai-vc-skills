@@ -249,6 +249,16 @@ All notable changes to this repository. Dates are UTC.
   ask" adds prompts for the metrics, market size, round size and product-decision skills, and the long caption under
   the demo recording is one line. The site's "See it work" introduction fits on one line, its first "How it works"
   step says the same as the README's, and AGENTS.md describes the pack the same way.
+- After a real deck run, plugin version 0.2.4. Every review skill whose lenses feed one refute subagent per objection
+  or question names one exception, in the same words: with more than eight after the quote check, one subagent per lens
+  may judge each of its lens's items on its own, with its own verdict and quote, never weighing one against another;
+  the answer says that is less independent, and the founder may ask for the full pass (the deck review's seven lenses
+  can raise up to three objections each). Every skill with an Inputs section reads a file the founder gives (a PDF,
+  HTML, a slides export, Markdown), lists what it read place by place and asks only for what the file cannot show,
+  never for a paste of what it holds; every "When to use it" bullet that names pasted material says it may come as a
+  file. A refute pass now checks its answering line as the quote check does, spacing and line breaks aside, so a line
+  that wraps in a file's text still answers. `test_pack_shared_rules.py` pins both sentences, the file note and the
+  carve-out.
 
 ## 2026-11-21
 

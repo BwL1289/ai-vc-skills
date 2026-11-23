@@ -41,7 +41,10 @@ the founder did not give. It always tells the founder to have a lawyer review th
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess.
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
+read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
+for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the
+figures behind a chart), and never ask the founder to paste what the file already holds.
 
 1. The term sheet, every term word for word, in its own order and with its own headings (or the key terms, each
    quoted), and whether the text is the whole sheet. Figures are quoted as the sheet states them.
@@ -285,6 +288,13 @@ that one objection, the baseline column of the terms table, and everything from 
 this stage, and nothing else. Without one, decide the objections
 one at a time against the same brief.
 
+**Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run
+one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection
+from its lens (one that two lenses raised goes to one of them only), and judges each objection separately against the
+brief, with its own verdict and its own quote where the verdict needs one, never weighing one objection against another.
+The answer then says the refute pass ran per lens, which is less independent than one subagent per objection. The
+founder may ask for the full pass, one subagent per objection.
+
 The refute brief:
 
 - You decide whether the sheet itself answers one objection; you argue neither side. Write in the third person; you
@@ -305,8 +315,9 @@ The verdicts:
   outside fact.
 - **Kept:** neither holds. What the founder would need to know becomes a lawyer question.
 
-The refute pass invents nothing: no term, side letter, promise or argument the founder did not give. An answering
-line that is not in the sheet word for word, or that is the objected line itself, does not drop the objection.
+The refute pass invents nothing: no term, side letter, promise or argument the founder did not give. Spacing and line
+breaks aside, an answering line that is not in the sheet word for word, or that is the objected line itself, does not
+drop the objection.
 
 ### Rank what survives
 

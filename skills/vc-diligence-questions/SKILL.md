@@ -36,7 +36,10 @@ score and no readiness percentage, and never adds a fact, a figure or a document
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess. At most five questions:
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
+read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
+for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the
+figures behind a chart), and never ask the founder to paste what the file already holds. At most five questions:
 
 1. The material the fund has seen or will see: the deck, a one-pager, the answers given in the meeting as the founder
    remembers them, and anything the fund has already asked for, in its words.
@@ -45,14 +48,15 @@ Ask once, in one message, for whatever is missing, by name. Never guess. At most
 3. The cap table as the founder has it: each holder group's shares (founders, other common, granted options, the
    unissued pool, preferred), the fully diluted total, and each SAFE or note with its terms, as vc-deal-math step 2
    lists them; plus every place the deck or a document states an ownership percent.
-4. The documents the founder has today, by name, one line each on what each shows ("bookings by month since
-   January"). The skill works from this list and from text the founder pastes; it does not open a folder of files.
+4. The documents the founder has today, by name, one line each on what each shows ("bookings by month since January").
+   The skill works from this list and from the material the founder pastes or gives as a file; it does not open a folder
+   of files.
 5. The company's legal home in the founder's words (country, kind of company), so legal items are worded as questions
    for the founder's lawyer, not as rules of one country.
 
 A missing input does not stop the work. It becomes a named gap and a bracketed ask, never a plausible fact. **The
-founder's material** means the pasted text plus every answer the founder gives in this session; label each part as it
-arrives (M1, M2 ... for the material; D1, D2 ... for the document list), so every quote can be located.
+founder's material** means the pasted text and any file read, plus every answer the founder gives in this session; label
+each part as it arrives (M1, M2 ... for the material; D1, D2 ... for the document list), so every quote can be located.
 
 ## The six areas and the shared question bank
 
@@ -230,6 +234,13 @@ never put two questions in one subagent. Give each the founder's material, the d
 everything from "The refute brief:" to the end of this stage, and nothing else. Without one, take the questions one at
 a time and decide each against the same brief before reading the next.
 
+**Lean mode,** the one exception: with more than eight questions after the quote check, the refute pass may instead run
+one subagent per lens, all in a single message. Each gets what a one-question subagent gets, but with every question
+from its lens (one that two lenses raised goes to one of them only), and judges each question separately against the
+brief, with its own verdict and its own quote where the verdict needs one, never weighing one question against another.
+The answer then says the refute pass ran per lens, which is less independent than one subagent per question. The founder
+may ask for the full pass, one subagent per question.
+
 The refute brief:
 
 - You decide whether the founder's material already answers one diligence question; you argue neither side. Write in
@@ -251,9 +262,9 @@ The verdicts:
 - **Kept:** neither holds. When the best answer would need something the material does not contain, that something
   becomes a bracketed ask, such as `[a signed assignment of the contractor's work to the company]`.
 
-The refute pass invents nothing on the founder's behalf: no figure, document, customer, investor or argument. After
-the passes, an answering line that is not in the material word for word does not drop the question, which stays
-kept, and neither does one that is the questioned line itself.
+The refute pass invents nothing on the founder's behalf: no figure, document, customer, investor or argument. After the
+passes, spacing and line breaks aside, an answering line that is not in the material word for word does not drop the
+question, which stays kept, and neither does one that is the questioned line itself.
 
 ### Rank what survives
 
