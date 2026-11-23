@@ -389,7 +389,6 @@ def test_the_outcome_rules_name_no_fund_math() -> None:
         'never writes "this returns the fund"',
         # A payout beside the amount invested reads as a return multiple at a glance, so the two never sit together.
         "The amount invested never sits beside a payout, in the table or in a sentence",
-        'The amount invested appears only in "The round"',
         "Never multiply a stake by an exit value",
         f'"{_LABEL}"',
         f'"{_NOT_RUN}"',

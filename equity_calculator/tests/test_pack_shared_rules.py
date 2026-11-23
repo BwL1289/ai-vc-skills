@@ -27,12 +27,17 @@ import pytest
 _ROOT = Path(__file__).resolve().parents[2]
 _SKILLS = _ROOT / "skills"
 _RECORDED = "\n## Recorded answer\n"
-_RECORDED_EVALS = sorted(path for path in (_ROOT / "evals").glob("*/*.md") if _RECORDED in path.read_text(encoding="utf-8"))
+_RECORDED_EVALS = sorted(
+    path for path in (_ROOT / "evals").glob("*/*.md") if _RECORDED in path.read_text(encoding="utf-8")
+)
 _VERDICT_RULE = (
     "The verdict is Pass when every clause of that sentence is met, Partial when exactly one clause is missed or met"
     " only in part, and Fail when two or more are missed"
 )
 _THEN = "graded against the pass sentence this eval had then"
+_MEMO_HANDOFF = (
+    "The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview)."
+)
 # The four recordings re-graded under the rule, each from its own recorded answer.
 _REGRADED = {
     "company-ar-a-2x-participating-seed": "**Pass, with shortfalls against the expected answer",
@@ -85,11 +90,8 @@ def _unwrapped(name: str) -> str:
 
 def test_the_skills_that_send_a_safe_raises_runway_to_the_runway_plan_are_the_ones_listed() -> None:
     """A new skill that routes a SAFE or note raise's runway to the tool joins the list, and so gets the sentence."""
-    routing = {
-        path.parent.name
-        for path in _SKILLS.glob("*/SKILL.md")
-        if "SAFE or note raise" in _unwrapped(path.parent.name) and "`equity_runway_plan`" in _unwrapped(path.parent.name)
-    }
+    texts = {path.parent.name: _unwrapped(path.parent.name) for path in _SKILLS.glob("*/SKILL.md")}
+    routing = {name for name, text in texts.items() if "SAFE or note raise" in text and "`equity_runway_plan`" in text}
 
     assert routing == set(_SAFE_RUNWAY_SKILLS)
 
@@ -143,3 +145,18 @@ def test_the_four_regraded_evals_carry_the_verdict_their_recorded_answers_give()
     for stem, opening in _REGRADED.items():
         verdict = _paragraphs(graded[stem].split(_RECORDED, 1)[1].strip("\n"))[1]
         assert verdict.startswith(opening), stem
+
+
+def test_every_hand_off_to_the_memo_skill_says_a_champion_is_likely_to_write_it() -> None:
+    """No skill claims to know how a firm works, so the memo is the one a champion is likely to write."""
+    handoffs = [
+        line.strip()
+        for path in sorted(_SKILLS.glob("*/SKILL.md"))
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if "the vc-investor-memo skill (preview)" in line
+    ]
+
+    assert len(handoffs) >= 4
+    assert set(handoffs) == {f"- {_MEMO_HANDOFF}"}
+    for path in _SKILLS.glob("*/SKILL.md"):
+        assert "champion writes for the partnership" not in path.read_text(encoding="utf-8"), path.parent.name

@@ -175,12 +175,21 @@ All notable changes to this repository. Dates are UTC.
 - Skill fixes from those runs. `vc-positioning` now owns "check our story and our ask" (a run had routed it to
   `vc-deal-math`), runs its lenses and refute passes as subagents however short the material, makes one calculator call
   per version of the ask (two for a valuation with no label) and keeps the tool's values as printed, and, asked to play
-  a named investor, offers the public frameworks and the lenses together with the prep-session credit. `vc-deal-math`
+  a named investor, offers the public frameworks and the lenses together with the prep session. `vc-deal-math`
   says to use `vc-positioning` for the story and the ask together, computes nothing outside the calculator's tools and
   runs no what-if the founder did not ask for. In `vc-claims-check`, the skeptic no longer judges whether the material
   answers an attack (the refute pass does), and the "AI-powered" pattern applies when nothing says what the model does.
-- An independent review of the whole pack (a second model) and one live run per new skill; fixes to hand-offs, runway
-  and metrics checks now that the tools exist, the refute pass, and the site and install guide.
+- An independent review of the whole pack (a second model) and one live run per new skill on 2026-11-23, eleven in all,
+  each recorded in its eval with a verdict under the README's rule. Fixes from them: every skill that passes a fully
+  diluted share count now asks whether that count includes SAFEs and notes, since one that does gives the founders a
+  wrong ownership figure; a calculator mismatch heads the list with no tier rather than being ranked "ends the meeting",
+  and only a runway claim below the computed runway counts as understated; each skill carries the meaning of every
+  calculator flag, since a tool call returns bare codes; one shared sentence says which monthly spend goes into the
+  runway of a SAFE or note raise, and another forbids working out how two of the founder's figures relate ("more than
+  doubled"); the memo's outcome table no longer sets a payout beside the amount invested; `vc-positioning` no longer
+  credits a post its authors never read; and hand-offs, runway and metrics checks now that the tools exist, the refute
+  pass, and the site and install guide. Two evals were renamed to companies BS and BT, so no company letter is used
+  twice.
 
 ## 2026-11-21
 

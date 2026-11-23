@@ -33,7 +33,7 @@ names a firm the deck fits, gives no score, and never adds a fact about the comp
   - The market slide, built bottom-up from who buys, how many and what each pays: the vc-market-sizing skill (preview).
   - How much to raise and what it reaches: the vc-round-sizing skill (preview).
   - Rehearsing the partner meeting once the deck is ready: the vc-partner-meeting skill (preview).
-  - The memo your champion writes for the partnership: the vc-investor-memo skill (preview).
+  - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview).
   - A term sheet the founder was offered: the vc-term-sheet-review skill (preview).
 
 ## Inputs

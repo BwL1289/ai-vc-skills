@@ -9,8 +9,9 @@ flags such a call can raise, and a runway claim stated as a floor ("30+ months")
 The metric rules and the six metric status words live in one file the vc-current-investor-update skill keeps,
 ``skills/vc-current-investor-update/references/metric-consistency.md``, which this skill reads in place. Three guards
 hold that read: the skill's fallback when the file is missing (never the rules from memory), a sentence in
-docs/install.md (not yet added) and the coupling test below, which checks the link resolves, the status words this
-skill names are the file's, no line of the file is copied here, and the promise statuses live here only.
+docs/install.md ("Skills that load in pairs", checked by test_site_and_install.py) and the coupling test below, which
+checks the link resolves, the status words this skill names are the file's, no line of the file is copied here, and the
+promise statuses live here only.
 
 The update's sections, the line table, the promise statuses, the names rule and the reader pass's four lenses are
 fixed; the refute verdicts are word for word the repository's; the ranked fix list puts the calculator's mismatches

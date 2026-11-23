@@ -38,7 +38,7 @@ adds a fact about the company that the founder did not give.
   - Diligence after the first meeting, with a data-room checklist: the vc-diligence-questions skill (preview).
   - Writing the investor updates themselves: the vc-current-investor-update skill (preview).
   - Metrics and their definitions: the vc-metrics-readiness skill (preview).
-  - The memo your champion writes for the partnership: the vc-investor-memo skill (preview).
+  - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview).
   - Market size, bottom-up: the vc-market-sizing skill (preview).
   - Keeping prospective investors updated before the raise: the vc-prospective-investor-update skill (preview).
 

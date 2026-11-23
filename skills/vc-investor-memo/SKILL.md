@@ -159,14 +159,14 @@ The round's figures are checked once, as the vc-deal-math skill describes:
   once as `pre_money`, once as `post_money`, and show both readings side by side, as vc-deal-math step 4 does. A
   mismatch that appears under only one reading is not listed as a computed mismatch: its fix is "say whether the
   valuation is pre- or post-money", with both readings quoted.
-- **A SAFE or note:** not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round`, with the next
-  priced round the founder expects, labelled the founder's assumption in the memo. `equity_round` compares no stated
-  figure, so quote its values beside the memo's, without a verdict. The runway claim and the use-of-funds lines on a
-  SAFE or note raise go to `equity_runway_plan` with the raise as cash only (`raises: [{"amount",
-  "stated_runway_months", "use_of_funds": [{"percent"}]}]`). On a SAFE or note raise, the `plan` case's phases are the
-  founder's own figures: today's monthly spend and revenue as the first phase, from month 1, and each change the founder
-  plans (more spend after the raise, say) as a later phase from the month the founder names, each asked for by name when
-  missing (`[planned monthly spend and revenue, from which month]`), never assumed.
+- **A SAFE or note:** not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round`, with the
+  next priced round the founder expects, labelled the founder's assumption in the memo. `equity_round` compares no
+  stated figure, so quote its values beside the memo's, without a verdict. The runway claim and the use-of-funds lines
+  on a SAFE or note raise go to `equity_runway_plan` with the raise as cash only
+  (`raises: [{"amount", "stated_runway_months", "use_of_funds": [{"percent"}]}]`). On a SAFE or note raise, the `plan`
+  case's phases are the founder's own figures: today's monthly spend and revenue as the first phase, from month 1, and
+  each change the founder plans (more spend after the raise, say) as a later phase from the month the founder names,
+  each asked for by name when missing (`[planned monthly spend and revenue, from which month]`), never assumed.
 - **Runway with no raise** (what happens if the round does not close), on any instrument: `equity_runway_plan`, whose
   no-raise row is the figure, with the memo's stated no-raise runway as the top-level `stated_runway_months`. With no
   cash on hand or no burn given, ask for them; make no runway call until they are in.
@@ -247,9 +247,9 @@ same question from the founder's side: "If all goes well, what will you have bui
    series. Seniority: every class at rank 1 when the terms say pari passu or are silent (say so); the new
    series at rank 1 and earlier ones at 2 when the terms stack them.
 5. **One `equity_waterfall` call per exit value.** Read `rows[]` (`payout`, `converts`, `preference_owed`) and
-   `common_payout`. The memo gives, for each exit value, each class's payout as printed with whether it converted,
-   and common's payout. The amount invested never sits beside a payout, in the table or in a sentence: side by side
-   they read as a return multiple, which is fund math. The amount invested appears only in "The round".
+   `common_payout`. The memo gives, for each exit value, each class's payout as printed with whether it converted, and
+   common's payout. The amount invested never sits beside a payout, in the table or in a sentence: side by side they
+   read as a return multiple, which is fund math.
 6. **Later rounds**, only when the founder gives them: `equity_dilution` with `holder_percent` = this round's
    percent as the round's tool printed it, and `rounds` = the founder's assumed later rounds (`investor_percent`,
    `pool_percent`), labelled assumptions. For a priced round, that percent is `equity_deal_check`'s "Investors' share

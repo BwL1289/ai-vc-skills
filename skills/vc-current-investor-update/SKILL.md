@@ -98,8 +98,8 @@ What the draft does for each status:
 The last update's own promises are tied out too: each "next month" item, target or open lowlight in it gets a line in
 this update saying what happened, in the founder's words, or a bracketed ask. Its status in the tie-out table follows
 the founder's notes, never this skill's judgment: Done, Partly done, Not done, Moved (back with a later date, a lower
-figure or a narrower scope) or No word (the founder's draft does not mention it). The runway row's status is the
-calculator's verdict word, or the floor rule's result (Runway).
+figure or a narrower scope), No word (the founder's draft does not mention it) or Not yet due (its date has not come;
+it carries over). The runway row's status is the calculator's verdict word, or the floor rule's result (Runway).
 
 A first update has nothing to tie out: every metric is New, there are no promises to check, and its Definitions
 block is the one the next update ties out to.

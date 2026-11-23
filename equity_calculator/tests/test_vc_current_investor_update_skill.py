@@ -448,6 +448,8 @@ def test_the_tie_out_statuses_are_the_fixed_words_and_compare_as_stated() -> Non
     assert "The last update's own promises are tied out too" in tie_out
     # A promise's status follows the founder's notes; the runway row's is the calculator's verdict word.
     assert "Done, Partly done, Not done, Moved" in tie_out and "never this skill's judgment" in tie_out
+    # The same six promise statuses as the prospective-investor update, so a target whose date is later has one too.
+    assert "or Not yet due (its date has not come; it carries over)" in tie_out
     assert "The runway row's status is the calculator's verdict word" in tie_out
     assert _NOT_CHECKED in rules
     # ARR, retention, churn, CAC payback and burn multiple have a tool now; growth rates and LTV do not.

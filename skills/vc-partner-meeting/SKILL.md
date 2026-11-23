@@ -144,19 +144,19 @@ lenses" says, so the lenses do not anchor on the numbers or the bank; step 4 the
 
 A tool call returns each flag as a bare code; this is what each code means, as a question a partner is likely to ask.
 
-| Flag (`equity_deal_check`)            | What a partner is likely to ask                                                                  |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise: pre- or post-money?         |
-| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, as a VC prices it: does the deck show the effective pre-money? |
-| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less: will you move it into the pre?   |
-| `pool_already_large_enough`           | The unissued pool already meets the target: is the target big enough for the hiring plan?        |
-| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the existing holders: what do you own once they convert?        |
-| `discount_beat_cap`                   | A discount gave a lower price than the cap: is the cap table modelled at that price?             |
-| `note_interest_converts`              | Note interest converts too: is the interest counted in the cap table?                            |
+| Flag (`equity_deal_check`)            | What a partner is likely to ask                                                                                  |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise: pre- or post-money?                         |
+| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, as a VC prices it: does the deck show the effective pre-money?    |
+| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less: will you move it into the pre?                   |
+| `pool_already_large_enough`           | The unissued pool already meets the target: is the target big enough for the hiring plan?                        |
+| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the existing holders: what do you own once they convert?                        |
+| `discount_beat_cap`                   | A discount gave a lower price than the cap: is the cap table modelled at that price?                             |
+| `note_interest_converts`              | Note interest converts too: is the interest counted in the cap table?                                            |
 | `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it: which burn does the runway claim use? |
-| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn: which burn does the runway claim use? |
-| `runway_below_band`                   | Planned net runway is under the tool's runway band: which milestone does the raise reach?        |
-| `dilution_above_band`                 | The investors get more than the tool's dilution band in one round: why sell that much?           |
+| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn: which burn does the runway claim use?                 |
+| `runway_below_band`                   | Planned net runway is under the tool's runway band: which milestone does the raise reach?                        |
+| `dilution_above_band`                 | The investors get more than the tool's dilution band in one round: why sell that much?                           |
 
 From `equity_runway_plan`, whose calls here carry no milestone, months to raise or landing month, two codes can come
 back: `cash_never_runs_out` (revenue covers spend before the cash goes: what revenue makes that true?) and
