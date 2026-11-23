@@ -227,6 +227,7 @@ has not been run again.
 > - [The basis for each exit value: the revenue or clinic count each case assumes.]
 >
 > **Open questions**
+>
 > - See the open asks below.
 >
 > [...]
@@ -243,4 +244,4 @@ has not been run again.
 >
 > [...]
 >
->   - The exit amount is what shareholders share, with no debt, fees or escrow taken out first.
+> - The exit amount is what shareholders share, with no debt, fees or escrow taken out first.

@@ -326,12 +326,12 @@ been run again.
 >
 > [...]
 >
-> | Exit | Where it comes from | Series Seed's choice | Series Seed gets | Founders get (this sheet) | Founders get (1x non-participating) |
-> |---|---|---|---|---|---|
-> | $3,000,000 | Amount raised | Keeps preference | $3,000,000.00 | $0.00 | $0.00 |
-> | $6,000,000 | The 2x preference owed | Keeps preference | $6,000,000.00 | $0.00 | $3,000,000.00 |
-> | $12,000,000 | Post-money | Keeps preference and participates | $7,666,666.51 | $4,333,333.49 | $8,666,666.99 |
-> | **$30,000,000** | The offer you named | Keeps preference and participates | $12,666,666.02 | **$17,333,333.98** | $21,666,667.47 |
+> | Exit            | Where it comes from    | Series Seed's choice              | Series Seed gets | Founders get (this sheet) | Founders get (1x non-participating) |
+> | --------------- | ---------------------- | --------------------------------- | ---------------- | ------------------------- | ----------------------------------- |
+> | $3,000,000      | Amount raised          | Keeps preference                  | $3,000,000.00    | $0.00                     | $0.00                               |
+> | $6,000,000      | The 2x preference owed | Keeps preference                  | $6,000,000.00    | $0.00                     | $3,000,000.00                       |
+> | $12,000,000     | Post-money             | Keeps preference and participates | $7,666,666.51    | $4,333,333.49             | $8,666,666.99                       |
+> | **$30,000,000** | The offer you named    | Keeps preference and participates | $12,666,666.02   | **$17,333,333.98**        | $21,666,667.47                      |
 >
 > At $30M the investors' 25% takes $6M first, then a pro rata share of the remaining $24M. Under the baseline they would convert to common instead.
 >

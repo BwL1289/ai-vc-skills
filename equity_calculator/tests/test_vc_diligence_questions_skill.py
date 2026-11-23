@@ -392,7 +392,9 @@ def test_the_attack_stage_runs_six_area_lenses_before_the_numbers_and_the_bank()
     assert "never by a person or firm" in attack
     assert _RAISE_ANYWAY in attack and "rather than a weak question" not in attack
     assert "run the six lenses as parallel subagents, however short the material" in attack
-    subagents_first = "With a subagent tool (in Claude Code, the Agent or Task tool), the lenses and the refute pass run"
+    subagents_first = (
+        "With a subagent tool (in Claude Code, the Agent or Task tool), the lenses and the refute pass run"
+    )
     assert subagents_first in steps and steps.index(subagents_first) < steps.index(note)
 
 
@@ -536,7 +538,10 @@ def test_draft_answers_build_only_from_the_material_and_never_judge_the_law() ->
     assert "built only from the founder's material and tool results" in drafts
     assert "bracketed ask" in drafts
     assert "never says whether something is legally sufficient" in drafts
-    assert "**A calculator mismatch's draft** gives the tool's figure as printed, then `[the corrected deck line]`" in drafts
+    assert (
+        "**A calculator mismatch's draft** gives the tool's figure as printed, then `[the corrected deck line]`"
+        in drafts
+    )
     assert "It never says a line was corrected or that a document exists unless the founder said so" in drafts
     assert "a bracketed ask that names the document or fact and nothing more" in drafts
 

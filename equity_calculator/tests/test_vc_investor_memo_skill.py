@@ -339,7 +339,9 @@ def test_the_round_goes_to_the_round_tools_and_asks_the_fully_diluted_basis() ->
     assert "`current_monthly_revenue`) only when the founder gives a different figure for today" in round_
     # A flag is a bare code over MCP: it goes to the fix list and to Numbers with the skill's own meaning.
     assert "in the words the tool prints" not in _TEXT
-    assert "goes into the fix list, after the computed mismatches and with no tier" in round_ and "into Numbers" in round_
+    assert (
+        "goes into the fix list, after the computed mismatches and with no tier" in round_ and "into Numbers" in round_
+    )
     assert "Over MCP a flag comes back as a bare code" in round_
     assert "with the source that row gives" in round_
     assert "0.200000 is 20.0000%" in round_ and "That is notation, not a calculation; never round it" in round_

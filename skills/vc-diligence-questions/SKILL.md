@@ -339,30 +339,30 @@ A tool's `flags` holds codes only; over MCP no sentence comes with them (the com
 These tables are what each code means for the founder. A flag is a question to prepare for, never an error, and
 never changes a verdict. `equity_round` returns no flags.
 
-| `equity_deal_check` flag              | What it means for the founder                                                                               |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise and the percent: label it              |
+| `equity_deal_check` flag              | What it means for the founder                                                                                  |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise and the percent: label it                  |
 | `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, so the effective pre-money and the price are below the headline |
-| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less than raise / post-money                      |
-| `pool_already_large_enough`           | The unissued pool already meets the target, so no new pool shares are needed                                |
-| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold  |
-| `discount_beat_cap`                   | A discount gave a lower price than the cap, so a cap-only conversion would be wrong                         |
-| `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares                        |
-| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on them                                 |
-| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn: say which one a runway claim uses               |
-| `runway_below_band`                   | Planned runway is under the tool's runway benchmark (a common benchmark, not a rule)                        |
-| `dilution_above_band`                 | The investors get more than the tool's dilution benchmark in one round (a common benchmark, not a rule)    |
+| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less than raise / post-money                         |
+| `pool_already_large_enough`           | The unissued pool already meets the target, so no new pool shares are needed                                   |
+| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold     |
+| `discount_beat_cap`                   | A discount gave a lower price than the cap, so a cap-only conversion would be wrong                            |
+| `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares                           |
+| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on them                                    |
+| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn: say which one a runway claim uses                   |
+| `runway_below_band`                   | Planned runway is under the tool's runway benchmark (a common benchmark, not a rule)                           |
+| `dilution_above_band`                 | The investors get more than the tool's dilution benchmark in one round (a common benchmark, not a rule)        |
 
-| `equity_runway_plan` flag          | What it means for the founder                                                                      |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `cash_never_runs_out`              | Revenue covers the spend before the cash runs out, so that runway has no end and is not checked    |
-| `cash_out_before_raise_lands`      | The cash goes below the floor before a later raise lands                                           |
-| `milestone_short_on_plan`          | A raise does not reach a milestone, even on the plan                                               |
-| `downside_short_where_plan_covers` | A raise reaches a milestone on the plan but not on the downside                                    |
-| `covered_without_raise`            | The cash already reaches a milestone with no raise                                                 |
-| `start_raising_date_passed`        | With the months to raise given, the date to start raising is already at or past today              |
-| `no_time_to_raise_given`           | Milestones were checked at their own month, with no time left to raise the next round              |
-| `runway_below_band`                | A raise lasts under the tool's runway benchmark on the plan (a common benchmark, not a rule)       |
+| `equity_runway_plan` flag          | What it means for the founder                                                                   |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `cash_never_runs_out`              | Revenue covers the spend before the cash runs out, so that runway has no end and is not checked |
+| `cash_out_before_raise_lands`      | The cash goes below the floor before a later raise lands                                        |
+| `milestone_short_on_plan`          | A raise does not reach a milestone, even on the plan                                            |
+| `downside_short_where_plan_covers` | A raise reaches a milestone on the plan but not on the downside                                 |
+| `covered_without_raise`            | The cash already reaches a milestone with no raise                                              |
+| `start_raising_date_passed`        | With the months to raise given, the date to start raising is already at or past today           |
+| `no_time_to_raise_given`           | Milestones were checked at their own month, with no time left to raise the next round           |
+| `runway_below_band`                | A raise lasts under the tool's runway benchmark on the plan (a common benchmark, not a rule)    |
 
 With no milestone, no landing month and no months to raise in the call, as in step 2, only `cash_never_runs_out` and
 `runway_below_band` can come back.

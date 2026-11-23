@@ -76,8 +76,8 @@ its default value (here `pool_timing`) may be left out.
   it never says the deck was corrected or that a pro forma is in the data room.
 - "Founders own 75% today." is quoted and marked "not checked: no tool adds up a cap table"; so is whether the four
   holder rows add up to the fully diluted total. No sentence says what the deck's 75% or 60% is made of or how the
-  deck reached it; where a question needs that, the draft asks `[how the deck's figure was worked out, and on what
-  basis]`. No division or sum of shares appears.
+  deck reached it; where a question needs that, the draft asks
+  `[how the deck's figure was worked out, and on what basis]`. No division or sum of shares appears.
 - The investors' percent is consistent (20.0000%). A lens question on it that survives the refute pass is minor at
   most, and its draft quotes the tool's value and the assumption row it rests on, never stating the assumption as what
   the term sheet says.
@@ -114,10 +114,10 @@ draft names it as the row that settles the question, which this eval now accepts
 >
 > ## Ranked questions
 >
-> | # | Tier | Area | Your line | The question | What settles it |
-> |---|---|---|---|---|---|
-> | 1 | Stops the process | Financials and cap table; Legal | "Founders keep 60% after the round." | What does the cap table look like after this round? (ASK-7) | A pro forma cap table with the SAFE converted and the pool topped up, and the deck line corrected |
-> | 2 | Slows it | Financials and cap table; Legal | "Founders own 75% today." | On what basis is "today" stated, and why does it leave out the SAFE? (CAP-1) | The cap table with its basis stated and a SAFE row; the deck line relabelled |
+> | #   | Tier              | Area                            | Your line                            | The question                                                                 | What settles it                                                                                   |
+> | --- | ----------------- | ------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+> | 1   | Stops the process | Financials and cap table; Legal | "Founders keep 60% after the round." | What does the cap table look like after this round? (ASK-7)                  | A pro forma cap table with the SAFE converted and the pool topped up, and the deck line corrected |
+> | 2   | Slows it          | Financials and cap table; Legal | "Founders own 75% today."            | On what basis is "today" stated, and why does it leave out the SAFE? (CAP-1) | The cap table with its basis stated and a SAFE row; the deck line relabelled                      |
 >
 > [...]
 >

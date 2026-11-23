@@ -351,19 +351,19 @@ Lead with the reminder, then the terms, then the money, then what a later reader
 `equity_deal_check`'s `flags` holds codes only; over MCP no sentence comes with them (the command line prints one
 beside each). This is what each means for the founder: a question a later reader is likely to ask, never an error.
 
-| Flag                                  | What it means for the founder                                                                               |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Flag                                  | What it means for the founder                                                                                   |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise and the percent: the sheet should say which |
-| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, so the effective pre-money and the price are below the headline |
-| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less than raise / post-money                      |
-| `pool_already_large_enough`           | The unissued pool already meets the target, so no new pool shares are needed                                |
-| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold  |
-| `discount_beat_cap`                   | A discount gave a lower price than the cap, so a cap-only conversion would be wrong                         |
-| `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares                        |
-| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on them                                 |
-| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn                                                   |
-| `runway_below_band`                   | Planned runway is under the tool's runway benchmark (a common benchmark, not a rule)                        |
-| `dilution_above_band`                 | The investors get more than the tool's dilution benchmark in one round (a common benchmark, not a rule)    |
+| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, so the effective pre-money and the price are below the headline  |
+| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less than raise / post-money                          |
+| `pool_already_large_enough`           | The unissued pool already meets the target, so no new pool shares are needed                                    |
+| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold      |
+| `discount_beat_cap`                   | A discount gave a lower price than the cap, so a cap-only conversion would be wrong                             |
+| `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares                            |
+| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on them                                     |
+| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn                                                       |
+| `runway_below_band`                   | Planned runway is under the tool's runway benchmark (a common benchmark, not a rule)                            |
+| `dilution_above_band`                 | The investors get more than the tool's dilution benchmark in one round (a common benchmark, not a rule)         |
 
 ## Sources
 
