@@ -104,16 +104,17 @@ so the lenses do not anchor on the tool's output; step 7 then starts at the quot
    definition or no period is Needs a source with a bracketed ask (`[the period this NRR covers]`).
 3. **Agreement across the documents:** follow vc-claims-check step 4 as written. Compare as stated; compute no
    difference; never convert. Lines in different forms (MRR against ARR, a month against a year) are compared only by
-   the calculator, when the founder gives the parts; otherwise mark the metric Needs a source and ask for one figure,
-   in one form, with its period.
+   the calculator, each in a call for its own period (step 4), when the founder gives the parts; otherwise mark the
+   metric Needs a source and ask for one figure, in one form, with its period.
 4. **The calculator.** Pass the founder's parts and every stated figure the tool can check from them to
    `equity_metrics_check` (from the command line, `equity_calculator metrics_check`), money and percents as strings:
    - **One call per document's version of the figures,** each with only that document's stated figures. Never match a
      figure against a tool value by eye across documents.
    - The report labels every stated figure "the deck says", whatever the call's document. When relaying a check row,
      name that call's document instead ("the model says", "the update says"); that is relabelling, not arithmetic.
-   - With no recurring revenue at all there are no parts to pass: make no call. A stated burn multiple then falls
-     under the pattern table's row for a burn multiple before there is revenue.
+   - With no recurring revenue at all, a stated burn multiple and its net burn are not passed: the multiple falls
+     under the pattern table's row for a burn multiple before there is revenue. Parts that need no recurring revenue
+     (a month's revenue, customers, spend) still go in a call; make no call only when nothing is left to pass.
    - Every flow figure in one call is for the same period, `period_months`. When the founder's burn and revenue
      movements cover different periods, ask for one period; never prorate.
    - A stated retention or churn figure goes in a call whose `period_months` is the period the document states for

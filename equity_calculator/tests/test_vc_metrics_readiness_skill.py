@@ -327,7 +327,8 @@ def test_the_model_converts_nothing_and_the_calculator_does_every_ratio() -> Non
         "A stated figure whose parts the founder did not give is left out of the call",
         "A refusal that comes anyway is relayed with the parts it names",
         "gets no check row: it is not checked, and the flag (`burn_multiple_not_defined` or `no_net_burn`) says why",
-        "With no recurring revenue at all there are no parts to pass: make no call",
+        "With no recurring revenue at all, a stated burn multiple and its net burn are not passed",
+        "make no call only when nothing is left to pass",
         "Net burn goes into a call only when that call's document states a burn multiple",
         # The report's fixed label is renamed to the call's document when a row is relayed.
         'name that call\'s document instead ("the model says", "the update says")',
@@ -396,7 +397,7 @@ def test_the_refute_stage_uses_only_the_founders_material_and_says_why_each_obje
     assert "word for word" in quotes and "dropped as not grounded" in quotes
 
 
-def test_calculator_mismatches_lead_the_first_tier_and_there_is_no_score() -> None:
+def test_calculator_mismatches_lead_the_list_and_there_is_no_score() -> None:
     ranked = _unwrapped(_section("### The ranked fix list"))
     answering = _unwrapped(_section("## Answering"))
 
