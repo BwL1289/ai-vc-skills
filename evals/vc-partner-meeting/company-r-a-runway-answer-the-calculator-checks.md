@@ -105,8 +105,9 @@ The runway plan:
 - The Finance lens runs with the Seed lens.
 - "Without the raise we have about 6 months." is checked with `equity_runway_plan` on today's spend: 6.25 months
   against 6.00 months stated, consistent. The founder's "6" is the tool's 6.25 months rounded to the whole months it is
-  written with (the row `rounds to the deck's "6"` prints yes), though 0.25 months is past the 2% tolerance, so it is
-  no kept question: the founder may keep it or say 6.25 months. No division of cash by burn appears.
+  written with (the row `rounds to the deck's "6"` prints yes), though 0.25 months is past the 2% tolerance, so, like
+  the percent sold, it is not drilled: Numbers gives the tool's verdict, and the founder may keep it or say 6.25
+  months. No division of cash by burn appears.
 - Debrief: "Two years, comfortably." is weak (it disagrees with a tool result, both quoted); the reason for the gap is
   a bracketed ask, such as `[what the deck's 24 months assumes]`, never an argument about which assumptions would make
   24 months true. The stronger answer uses only the tool's figures and the founder's burn plan, and brackets what the

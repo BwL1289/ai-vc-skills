@@ -121,8 +121,9 @@ def _written(value: Decimal) -> Decimal:
 
 
 # A document's stated figure that is checked for rounding (a metrics check's stated percent, months or multiple, a deal
-# check's stated percent or runway): a ``BoundedDecimal`` whose zero keeps the places it is written with, since "0.0%"
-# is a claim to one place, not to none. Echoed back, it reads the same (``0.0`` dumps as "0.0").
+# check's stated percent or runway, a runway plan's stated runways): a ``BoundedDecimal`` whose zero keeps the places it
+# is written with, since "0.0%" is a claim to one place, not to none. Echoed back, it reads the same (``0.0`` dumps as
+# "0.0").
 WrittenDecimal = Annotated[Decimal, BeforeValidator(_refuse_unbounded_raw), AfterValidator(_written)]
 
 # The description a ``WrittenDecimal`` field carries in the JSON schema (an MCP tool's input), formatted with examples:
