@@ -276,6 +276,8 @@ Lead with the reminder, then the terms, then the money, then what a later reader
    - The pool counted in the pre-money beside the post-money, from `equity_pool`, when it ran.
    - **Exit table:** Exit value, Where it comes from, the new series' choice, its payout, the common payout under the
      sheet, the common payout under the baseline (when run). Compute no difference between columns.
+   - When the founder asked: the founders' stake after the later round they named, from `equity_dilution`, and the
+     shares vested at the month they named, from `equity_vesting`, each in the tool's values.
    - Every not-modelled term with its string, and the waterfall's assumptions the table leans on.
 4. **What a later investor, acquirer or board is likely to object to:** survivors as a table: Rank, Tier, Lens, The
    sheet's line (quoted), Why that reader objects. Then **Dropped,** one line each with why it fell. When the lenses
