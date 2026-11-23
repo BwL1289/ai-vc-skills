@@ -2,7 +2,8 @@
 
 Numbers print as the model's display rounding: a fraction as a percent with four places (7.5269%), a multiplier
 with an ``x``, money and prices with a dollar sign and thousands separators, share counts with thousands separators
-(a whole count without decimals), months with two places and the word (18.89 months). Nothing is recomputed here,
+(a whole count without decimals), counts of customers the same way (a fractional one with two places), months with
+two places and the word (18.89 months). Nothing is recomputed here,
 and no step reads the decimal context.
 """
 
@@ -17,6 +18,7 @@ _PERCENT_PLACES = 4
 _FIRST = 0
 _COLUMN_GAP = "  "
 _INDENT = "  "
+_QUOTED_STOP = '."'
 
 
 def display(value: EquityQuantity | str) -> str:
@@ -31,12 +33,17 @@ def display(value: EquityQuantity | str) -> str:
             return f"{value.rounded:,f}x"
         case "money" | "price":
             return f"${value.rounded:,f}"
-        case "shares":
+        case "shares" | "count":
             # A whole count prints as one (10,000,000); a fractional count keeps its display places.
             whole = value.exact.denominator == 1
             return f"{value.exact.numerator:,}" if whole else f"{value.rounded:,f}"
         case "months":
             return f"{value.rounded:,f} months"
+
+
+def _sentence(source: str) -> str:
+    """``source`` closed with a period, unless it already ends with a quoted sentence's own (``... enough."``)."""
+    return source if source.endswith(_QUOTED_STOP) else f"{source}."
 
 
 def render_sheet(sheet: Sheet) -> str:
@@ -54,7 +61,8 @@ def render_sheet(sheet: Sheet) -> str:
         return (_INDENT + _COLUMN_GAP.join(cells)).rstrip()
 
     assumptions = [
-        f"{_INDENT}- {item.key} = {item.setting}: {item.statement} Source: {item.source}." for item in sheet.assumptions
+        f"{_INDENT}- {item.key} = {item.setting}: {item.statement} Source: {_sentence(item.source)}"
+        for item in sheet.assumptions
     ]
 
     return "\n".join([sheet.heading, aligned(header), *(aligned(row) for row in rows), "Assumptions:", *assumptions])

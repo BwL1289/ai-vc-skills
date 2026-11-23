@@ -14,6 +14,7 @@ from equity_calculator.deal_check import compute_deal_check
 from equity_calculator.dilution import compute_dilution
 from equity_calculator.employee import compute_employee
 from equity_calculator.investor import compute_investor
+from equity_calculator.market_sizing import compute_market_sizing
 from equity_calculator.metrics_check import compute_metrics_check
 from equity_calculator.pool import compute_pool
 from equity_calculator.round import compute_round
@@ -27,6 +28,8 @@ from equity_calculator.schemas.equity import (
     EmployeeResult,
     InvestorInput,
     InvestorResult,
+    MarketSizingInput,
+    MarketSizingResult,
     MetricsCheckInput,
     MetricsCheckResult,
     PoolInput,
@@ -96,6 +99,11 @@ def compute(inputs: MetricsCheckInput) -> MetricsCheckResult:
     ...
 
 
+@overload
+def compute(inputs: MarketSizingInput) -> MarketSizingResult:
+    ...
+
+
 def compute(inputs: ScenarioInput) -> ScenarioResult:
     """The worked result of ``inputs``' scenario.
 
@@ -125,5 +133,7 @@ def compute(inputs: ScenarioInput) -> ScenarioResult:
             return compute_runway_plan(inputs)
         case MetricsCheckInput():
             return compute_metrics_check(inputs)
+        case MarketSizingInput():
+            return compute_market_sizing(inputs)
         case _:
             assert_never(inputs)

@@ -88,6 +88,11 @@ def parse_months(raw: str) -> int:
     return _whole(raw, "a whole number of months")
 
 
+def parse_years(raw: str) -> int:
+    """argparse type for a count of years: a whole number, ``_`` ignored, ``,`` only between thousands."""
+    return _whole(raw, "a whole number of years")
+
+
 def parse_customers(raw: str) -> int:
     """argparse type for a count of customers: a whole number, ``_`` ignored, ``,`` only between thousands."""
     return _whole(raw, "a whole number of customers")

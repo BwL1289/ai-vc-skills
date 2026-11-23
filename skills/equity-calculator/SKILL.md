@@ -1,11 +1,11 @@
 ---
 name: equity-calculator
-description: Exact startup equity arithmetic with the equity_calculator command or MCP tools. Use when someone asks whether a fundraise or a stake is worth it (Paul Graham's equity equation), how much equity a hire is worth or what to offer them, how big an option pool to add and its effect on the price per share (the option-pool shuffle), how SAFEs or convertible notes convert in a priced round (caps, discounts, MFN, note interest), how a stake dilutes over several rounds, how many shares have vested by a given month (cliff, termination, acceleration, exercise cost), or who gets what at an exit (liquidation preferences, participation, caps). Its deal_check scenario checks a raise before a VC does, testing whether the valuation, percent sold, ownership after the round and runway agree; runway_plan shows how long each raise lasts on a phased plan and a downside and which milestones it reaches; metrics_check checks ARR, retention, churn, CAC payback and burn multiple. Run it instead of doing the arithmetic by hand.
+description: Exact startup equity arithmetic with the equity_calculator command or MCP tools. Use when someone asks whether a fundraise or a stake is worth it (Paul Graham's equity equation), how much equity a hire is worth or what to offer them, how big an option pool to add and its effect on the price per share (the option-pool shuffle), how SAFEs or convertible notes convert in a priced round (caps, discounts, MFN, note interest), how a stake dilutes over several rounds, how many shares have vested by a given month (cliff, termination, acceleration, exercise cost), or who gets what at an exit (liquidation preferences, participation, caps). deal_check checks a raise before a VC does, testing whether valuation, percent sold, ownership and runway agree; runway_plan shows how long each raise lasts on a plan and a downside and which milestones it reaches; metrics_check checks ARR, retention, churn, CAC payback and burn multiple; market_sizing builds TAM, SAM and SOM bottom-up. Run it instead of doing the arithmetic by hand.
 ---
 
 # Equity calculator
 
-The calculator works ten scenarios exactly (rational arithmetic, no floating point) and returns every value, the
+The calculator works eleven scenarios exactly (rational arithmetic, no floating point) and returns every value, the
 exact fractions, and the assumptions each result rests on, each with its source. Use it for the numbers; do not
 work them out by hand, and do not round or re-derive what it returns.
 
@@ -23,6 +23,7 @@ work them out by hand, and do not round or re-derive what it returns.
 | Does a deck's raise, valuation, ownership and runway add up before a VC checks it?                     | `deal_check`    | `equity_deal_check`    |
 | How long does each raise last on our plan and a downside, and which milestones does it reach?          | `runway_plan`   | `equity_runway_plan`   |
 | Do our ARR, retention, churn, CAC payback and burn multiple match their parts before a VC checks them? | `metrics_check` | `equity_metrics_check` |
+| What are our TAM, SAM and SOM bottom-up, do they match the deck, and which assumption moves them most? | `market_sizing` | `equity_market_sizing` |
 
 ## Running it
 
@@ -45,6 +46,7 @@ scenario's fields, and returns the same JSON text as `equity_calculator <scenari
 | deal_check    | **`investment`**; `pre_money`, `post_money` or `stated_investor_percent` (at least one); `fully_diluted_shares`, `unissued_pool_shares` or `unissued_pool_percent`, `target_pool_percent`, `pool_timing`, `instruments` (the same `{"kind": "safe", "purchase_amount", "valuation_cap", "discount_percent", "mfn"}` and `{"kind": "note", "principal", "interest_rate_percent", "months_outstanding"` or `"issue_date"` and `"conversion_date", "compounding", "stub_rule", "day_count", "valuation_cap", "discount_percent", "interest_paid_in_cash"}` objects as round); `holder_percent` or `holder_shares`, `stated_holder_percent`; `cash_on_hand`, `planned_monthly_gross_burn`, `planned_monthly_revenue`, `current_monthly_gross_burn`, `current_monthly_revenue`, `stated_runway_months`; `use_of_funds`: a list of `{"amount"}` or `{"percent"}`; `tolerance_points`, `tolerance_percent`, `dilution_band_percent`, `runway_band_months`                                                                                                                                                                               |
 | runway_plan   | **`cash_on_hand`**, `cash_floor`, **`cases`**: the plan first, `{"name": "plan", "phases"}` with `phases` a list of `{"from_month", "gross_burn", "revenue"}`, then optionally `{"name": "downside"}` or `{"name": "lean"}` with its own `phases` or `"revenue_percent_of_plan"` and `"gross_burn_percent_of_plan"`; `raises`: a list of `{"amount", "lands_month", "stated_runway_months", "stated_runway_from"` (`today` or `landing`), `"use_of_funds"` (a list of `{"amount"}` or `{"percent"}`)`}`; `milestones` (months from today), `months_to_raise`, `stated_runway_months` (with no raise), `tolerance_points`, `tolerance_percent`, `runway_band_months`                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | metrics_check | **`period_months`** (1 to 36, the one period every flow figure covers), `recurring_unit` (`monthly` or `annual`); `starting_recurring` with the period's `new_recurring`, `expansion_recurring`, `contraction_recurring`, `churned_recurring`, and the starting customers' own `cohort_expansion_recurring`, `cohort_contraction_recurring`, `cohort_churned_recurring`; `month_total_revenue` with `month_one_time_revenue`, `month_usage_revenue`; `customers_start`, `customers_lost`, `customers_new`, `customers_new_paid`; `sales_marketing_spend`, `gross_margin_percent`, `net_burn`; `largest_customer_revenue` with `period_revenue`; what the document states: `stated_arr`, `stated_nrr_percent`, `stated_grr_percent`, `stated_churn_percent` with `stated_churn_basis` (`logo`, `gross_revenue`, `net_revenue` or `unlabelled`), `stated_cac`, `stated_cac_payback_months`, `stated_burn_multiple`, `stated_concentration_percent`; `tolerance_points`, `tolerance_percent`, `customer_segment` (`smb`, `mid_market`, `enterprise`), `payback_band_months`, `burn_multiple_band`, `net_revenue_churn_band_percent` |
+| market_sizing | **`segments`**: a list of up to 8 `{"customers", "price", "price_period_months" (1 to 120, the months the price covers; 12 by default), "units_per_customer", "take_rate_percent", "serviceable_percent", "obtainable_percent"` or `"obtainable_customers"` (the SOM, at most one), `"customers_today"}`; `top_down`: a list of up to 3 `{"amount", "comparable_percent", "compare_to"` (`tam` or `sam`)`}`; `sensitivity`: a list of up to 6 `{"field"` (`customers`, `price`, `units_per_customer`, `take_rate_percent`, `serviceable_percent`, `obtainable_percent`, `obtainable_customers`), `"segment"` (1 is the first), `"values"` (1 to 4)`}`; `population`, `annual_revenue_today`, `som_years` (1 to 20), `som_target`; what the deck states: `stated_tam`, `stated_sam`, `stated_som`; `tolerance_percent`                                                                                                                                                                                                                                                                                                            |
 
 Send money, percents and multipliers as JSON strings (`"7"`, `"1.10"`, `"8000000"`): a JSON number with a decimal
 point arrives as a binary float and keeps only about 15 digits. Percents are percents (`"7"` is 7%). Share counts
@@ -80,7 +82,11 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
    is longer than a month, ask for the starting customers' own expansion, contraction and churn
    (`cohort_expansion_recurring`, `cohort_contraction_recurring`, `cohort_churned_recurring`), or quote the
    `cohort_rule` row. For the payback benchmark, ask who the company sells to (`customer_segment`: `smb`,
-   `mid_market` or `enterprise`); never assume it. A stated CAC is checked as blended CAC.
+   `mid_market` or `enterprise`); never assume it. A stated CAC is checked as blended CAC. For `market_sizing`,
+   never assume a customer count, a price, a take rate or a share: each is the founder's own figure with the founder's
+   source, so ask for it; a price is sent with the months it covers, never turned into a year by hand. A SOM is best a
+   count of customers the founder plans to win; a SOM given only as a percent runs, with the `som_as_percent_only`
+   flag. A top-down figure is a cross-check: it never sets the market size.
 2. Give the headline numbers as the tool prints them (the `rounded` value with its unit, or the exact fraction when
    precision matters). Do not round them again or recompute them. A value whose unit is `fraction` is a share of the
    whole: show it as a percent by moving the decimal point of its `rounded` value two places to the right, keeping
@@ -104,7 +110,9 @@ Metrics", <https://a16z.com/16-startup-metrics/> (21 Aug 2015), and "16 More Sta
 <https://a16z.com/16-more-startup-metrics/> (23 Sep 2015). **Bessemer** is "Scaling to $100 Million",
 <https://www.bvp.com/atlas/scaling-to-100-million> (21 Sep 2021). **Sacks** is David Sacks, "The Burn Multiple",
 <https://sacks.substack.com/p/the-burn-multiple-51a7e43cb200> (23 Apr 2020). **Skok** is David Skok, "SaaS Metrics
-2.0", <https://www.forentrepreneurs.com/saas-metrics-2/> (no date on the page). Everything else is standard arithmetic, labelled `unverified` in the results.
+2.0", <https://www.forentrepreneurs.com/saas-metrics-2/> (no date on the page). The **YC pitch guide** is Y Combinator,
+"How to Pitch Your Company", <https://www.ycombinator.com/library/4b-how-to-pitch-your-company> (no date on the
+page). Everything else is standard arithmetic, labelled `unverified` in the results.
 
 - **Investor (PG).** With n the stake sold and m the outcome multiplier, the holders keep R = (1 - n)·m of the whole
   company before. Accept when R > 1, break even at R = 1, reject below. Break-even multiplier m\* = 1/(1 - n), growth
@@ -164,6 +172,18 @@ Metrics", <https://a16z.com/16-startup-metrics/> (21 Aug 2015), and "16 More Sta
   tolerances; a churn with no basis is checked on every basis and holds when any does. Flags name the likely cause of
   a mismatch; the payback target by customer segment (Bessemer), a burn multiple of 3x or more (Sacks) and one
   month's net revenue churn above 2% (Skok) raise a question, never an error.
+- **Market sizing (the YC pitch guide for building the market bottom-up from customers and price and for preferring
+  it to top-down; the YC seed guide for TAM as revenue; the rest unverified).** Per segment, annual revenue from one
+  customer = price × units × 12 / the months the price covers × take rate; TAM = customers × that, summed; SAM =
+  TAM × serviceable percent; SOM = the customers to win (or the serviceable customers × the share to win) × the
+  annual revenue from one. The gross spend (before the take rate) is shown apart. A top-down figure's comparable part
+  is set beside the bottom-up TAM or SAM, never in its place. With a horizon, the new customers a year are a straight
+  line from today's. Stated TAM, SAM and SOM use deal_check's 2% tolerance. A sensitivity row works one field of one
+  segment at each value, the rest at base; every total is linear in one field, so the value at which SOM reaches
+  the target, and TAM or SAM the first top-down figure, is exact (or met without it, does not move, or out of range).
+  Flags (a price period left out, read as yearly; double counting past the population, a bottom-up above the top-down, SAM equal to TAM, no SOM or one given only as
+  a percent, a SOM grown from no customers today or below today's customers, no horizon, a SOM below or out of
+  reach of the target) raise a question, never an error.
 
 ## Limits
 
@@ -171,5 +191,6 @@ A decimal input has at most 28 significant digits and, when nonzero, a size from
 takes at most 50 SAFEs and notes, a dilution at most 20 rounds, a waterfall at most 12 classes, a deal check at
 most 50 SAFEs and notes and 20 use-of-funds lines, and a runway plan at most 3 cases of 12 phases, 6 raises (20
 use-of-funds lines each), 10 milestones, months up to 600 and 60 months to raise; a metrics check covers one
-period of 1 to 36 months. Anything past a
+period of 1 to 36 months; a market size takes at most 8 segments, 3 top-down figures and 6 sensitivity rows of
+up to 4 values each. Anything past a
 limit is refused with a message naming the field.

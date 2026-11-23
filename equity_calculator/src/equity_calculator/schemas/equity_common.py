@@ -5,8 +5,8 @@ unions) and each later scenario's module (``equity_pool``, ``equity_round``, ``e
 ``equity_waterfall``) import from here, never from each other, so the unions can import every scenario without a cycle.
 The exceptions are ``equity_deal_check``, which reuses the round's instruments and the pool and round models (those
 two import only this module), ``equity_runway_plan``, which reuses the deal check's use-of-funds line, verdict words
-and defaults, and ``equity_metrics_check``, which reuses the deal check's verdict words and default tolerances; there
-is still no cycle.
+and defaults, ``equity_metrics_check``, which reuses the deal check's verdict words and default tolerances, and
+``equity_market_sizing``, which reuses its verdict words and default relative tolerance; there is still no cycle.
 
 How the models read a decimal: text and ``Decimal`` values are kept digit for digit, never through a binary float.
 A Python ``float``, and a JSON number given to ``model_validate_json``, reach the model as the float's shortest
@@ -30,8 +30,9 @@ from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Fie
 
 # The kind of number an ``EquityQuantity`` holds, which sets its display rounding and its workbook format.
 # ``fraction`` a share of the company or a growth rate (shown as a percent); ``multiplier`` a ratio of outcomes;
-# ``money`` dollars; ``price`` dollars per share; ``shares`` a share count; ``months`` a span of months (runway).
-EquityUnit = Literal["fraction", "multiplier", "money", "price", "shares", "months"]
+# ``money`` dollars; ``price`` dollars per share; ``shares`` a share count; ``months`` a span of months (runway);
+# ``count`` a count of customers or other buyers (a market size's).
+EquityUnit = Literal["fraction", "multiplier", "money", "price", "shares", "months", "count"]
 
 # Where the round's option pool is counted. ``pre_money``: created before the round, inside the pre-money
 # valuation, so only the existing holders are diluted by it (the usual term sheet, the "option-pool shuffle").

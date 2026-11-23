@@ -4,7 +4,7 @@
 
 Each scenario is one tool, ``equity_<scenario>`` (``equity_investor``, ``equity_employee``, ``equity_pool``,
 ``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``,
-``equity_runway_plan``, ``equity_metrics_check``). A tool takes
+``equity_runway_plan``, ``equity_metrics_check``, ``equity_market_sizing``). A tool takes
 one argument, ``inputs``: that scenario's input model (``equity_calculator.schemas``). It returns exactly the text
 ``equity_calculator <scenario> --json`` prints: the result model as JSON, exact fractions and labelled assumptions
 included. An input the model refuses, or one it accepts that has no answer (``equity_calculator.errors``), comes back
@@ -57,6 +57,7 @@ from equity_calculator.schemas.equity import (
     EmployeeInput,
     EquityInput,
     InvestorInput,
+    MarketSizingInput,
     MetricsCheckInput,
     PoolInput,
     RoundInput,
@@ -190,6 +191,25 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "and three benchmark questions (payback by customer_segment, burn multiple 3x, monthly net revenue churn "
         "2%), never errors. Every part is the founder's figure: never assume one.",
     ),
+    "market_sizing": (
+        MarketSizingInput,
+        "Market sizing (TAM, SAM and SOM bottom-up, with a cross-check and sensitivity)",
+        "A founder's market size worked exactly from their own segments (one to eight, numbered in order, no names). "
+        "Per segment: value = price x 12 / price_period_months x units_per_customer x take_rate_percent/100 (the "
+        "annual revenue from one buying customer; price_period_months left out is 12, a yearly price, and is flagged: "
+        "send 1 for a monthly price); gross spend = customers x price x 12 / price_period_months x units_per_customer "
+        "(before the take rate); TAM = customers x value; SAM = customers x serviceable_percent/100 x value; SOM = "
+        "obtainable_customers (preferred) or SAM customers x obtainable_percent/100, x value. Totals are sums (SOM "
+        "only when every segment gives one). The path: SOM customers / customers_today and (SOM customers - "
+        "customers_today) / som_years a year, a straight line, no compound rate. Each top_down figure (amount x "
+        "comparable_percent/100) is set beside the bottom-up TAM or SAM as a cross-check, never a verdict. stated_tam, "
+        "stated_sam and stated_som come back consistent or a mismatch within tolerance_percent. Each sensitivity row "
+        "works one field of one segment at the founder's own values, the rest at base, with the SOM range and swing "
+        "and the exact value at which SOM reaches som_target (met_without_it when the base SOM already reaches it) and "
+        "the total reaches the first top-down figure. Flags name a price period left out, double counting, a SOM given "
+        "only as a share, no horizon, a SOM below the target and a target no row reaches, never errors. Every count, "
+        "price, share and figure is the founder's: never assume or look one up.",
+    ),
 }
 
 _INSTRUCTIONS = (
@@ -200,11 +220,12 @@ _INSTRUCTIONS = (
     "after the round, runway, the deck's own figures), equity_runway_plan (how long each raise lasts on a phased "
     "plan and a downside, which milestones it reaches, the smallest raise that gets there), equity_metrics_check "
     "(a founder's ARR, retention, churn, CAC payback, burn multiple and concentration worked from their parts and "
-    "checked against the document's figures). Pass the scenario's fields in `inputs`; give money and percents as "
-    "JSON strings to keep every digit. Quote the result's numbers and "
-    "its labelled assumptions; never round them further without saying so. A value whose unit is fraction is a share "
-    "of the whole: show it as a percent by moving the decimal point of its rounded value two places to the right "
-    "(0.166667 is 16.6667%), as the command line's report prints it."
+    "checked against the document's figures), equity_market_sizing (a founder's TAM, SAM and SOM built bottom-up "
+    "from their own segments, checked against the deck, set beside any top-down figure, with ranges). Pass the "
+    "scenario's fields in `inputs`; give money and percents as JSON strings to keep every digit. Quote the result's "
+    "numbers and its labelled assumptions; never round them further without saying so. A value whose unit is "
+    "fraction is a share of the whole: show it as a percent by moving the decimal point of its rounded value two "
+    "places to the right (0.166667 is 16.6667%), as the command line's report prints it."
 )
 
 
@@ -371,8 +392,8 @@ def build_server(output_dir: Path | None = None) -> FastMCP:
                 f"dot, no control, format or surrogate character), and a name that would land outside the folder, an "
                 f"existing file, a link or an answer too large for a workbook is refused. `inputs` is any "
                 f'scenario\'s input with its `scenario` tag set ("investor", "employee", "pool", "round", "dilution", '
-                f'"vesting", "waterfall", "deal_check", "runway_plan" or "metrics_check"). Returns the path written. '
-                f"{_DIGITS_ADVICE}"
+                f'"vesting", "waterfall", "deal_check", "runway_plan", "metrics_check" or "market_sizing"). Returns '
+                f"the path written. {_DIGITS_ADVICE}"
             ),
             annotations=ToolAnnotations(
                 readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False

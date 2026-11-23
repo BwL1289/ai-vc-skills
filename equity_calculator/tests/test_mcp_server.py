@@ -25,6 +25,7 @@ from openpyxl import load_workbook
 from tests.support import (
     DEAL_B,
     DILUTION_ROUNDS,
+    MARKET_AW,
     METRICS_AM,
     POOL_EXAMPLE,
     ROUND_EXAMPLE,
@@ -128,6 +129,7 @@ _SAMPLES: dict[str, dict[str, object]] = {
     "deal_check": DEAL_B,
     "runway_plan": RUNWAY_W,
     "metrics_check": METRICS_AM,
+    "market_sizing": MARKET_AW,
 }
 # $1M in at a $1M pre-money with a 25% pre-money pool target and a $250k SAFE at a 50% discount: the pooled price is
 # exactly zero, so the round has no price (the same case as test_round_pool.py).
@@ -174,7 +176,7 @@ async def test_one_read_only_tool_per_scenario_and_no_workbook_tool_without_a_fo
     tools = await _tools(mcp_server.build_server())
 
     assert sorted(tool.name for tool in tools) == sorted(f"equity_{scenario}" for scenario in _INPUT_MODELS)
-    assert len(tools) == len(_SAMPLES) == 10
+    assert len(tools) == len(_SAMPLES) == 11
     for tool in tools:
         assert tool.annotations.readOnlyHint is True
         assert tool.annotations.openWorldHint is False
@@ -188,6 +190,17 @@ async def test_each_tool_returns_the_scenario_result_as_json(scenario: str) -> N
     assert result.isError is False
     assert _text(result) == _expected(scenario, _SAMPLES[scenario])
     assert json.loads(_text(result))["scenario"] == scenario
+
+
+@pytest.mark.parametrize(("segment", "flagged"), [({}, True), ({"price_period_months": 12}, False)])
+async def test_the_market_tool_flags_a_price_period_left_out(segment: dict[str, object], flagged: bool) -> None:
+    """The tool reads a left-out price period as the yearly default and says so; an explicit 12 is the founder's."""
+    inputs = {"segments": [{"customers": "1000", "price": "400", **segment}]}
+    result = await _call(mcp_server.build_server(), "equity_market_sizing", {"inputs": inputs})
+
+    answer = json.loads(_text(result))
+    assert ("price_period_defaulted" in answer["flags"]) is flagged
+    assert answer["segments"][0]["price_period_given"] is not flagged
 
 
 async def test_the_investor_tool_answers_what_the_cli_prints_with_json() -> None:

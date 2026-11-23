@@ -9,7 +9,7 @@
 
 The first of the [AI VC skills](../README.md).
 
-Should we trade stock for this, and what does a round do to the cap table? Ten scenarios, worked with exact
+Should we trade stock for this, and what does a round do to the cap table? Eleven scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
@@ -35,6 +35,7 @@ and the option-pool shuffle.
 | `deal_check`    | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                         |
 | `runway_plan`   | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there? |
 | `metrics_check` | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback and burn multiple the deck states agree with their parts?                   |
+| `market_sizing` | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?          |
 
 ## Install
 
@@ -102,10 +103,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 `equity_calculator_mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
 instead of doing the arithmetic itself.
 
-| Tool                                                                                                                                                                                            | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
-| `equity_workbook`                                                                                                                                                                               | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
+| Tool                                                                                                                                                                                                                    | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
+| `equity_workbook`                                                                                                                                                                                                       | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
 error that says why. Money and percents are best sent as JSON strings (`"7"`, `"1.10"`, `"8000000"`): a JSON number
@@ -189,6 +190,16 @@ questions a VC is likely to ask after them.
   (no date on the page) for net revenue churn above 2% a month. The three lines are benchmarks, not rules: each
   raises a question, never an error, and each is an input. The period rule, the cohort rule, leaving new customers
   out of retention, the exact payback formula and the tolerances are unverified.
+- **Market size**: the market sizing quotes two Y Combinator pages word for word in its assumptions:
+  ["How to Pitch Your Company"](https://www.ycombinator.com/library/4b-how-to-pitch-your-company)
+  (the YC pitch guide; no date on the page; read in full on 23 November 2026), for building the market bottom-up ("you can estimate the number of customers that would
+  want your product and approximate how much you could charge them"), for a price that covers more than a year (its
+  example device's "lifecycle ... is two years") and for preferring bottom-up to top-down; and the seed guide's
+  glossary (the YC seed guide above), for TAM as "the estimated total revenue available for the product(s) you are selling", which is why a
+  take rate below 100% counts only the share of the spend the company keeps. Neither page defines SAM or SOM, so
+  those rules, the population check, the sensitivity and break-even rule, the straight-line year (price × 12 / the
+  months covered: the pitch guide gives the two-year lifecycle, not the division), the straight-line path to SOM and
+  the tolerance are unverified. No figure comes from the calculator: every count, price and share is the founder's.
 - **Pre-money SAFEs are not supported.** YC's page has no current pre-money SAFE form; the user guide works one
   pre-money Safe Price only as an example, not as a form's definitions, so they are left out.
 - **Unverified**: neither essay covers option pools, convertible notes, preferred stock or the finer vesting terms,
@@ -512,6 +523,51 @@ figure is not given, so retention is never below 0), the latest month's parts wi
 paid-channel customers without or above their total, the largest customer without or above the period's revenue, a
 stated figure without what it needs to be checked, and a churn basis without a stated churn or its inputs.
 
+### Market sizing (YC's pitch guide for bottom-up and the seed guide for TAM as revenue; the rest unverified)
+
+A founder's own segments, up to 8: for each, the buying customers, the price of one unit and the months it covers
+(12 by default, a yearly price, which the report marks as not given and flags; 1 for a monthly price, 24 for a
+two-year device), the units one customer buys, the take rate (100% by
+default; a marketplace's or a payments company's fee), the serviceable percent (100% by default) and the SOM, as the
+customers to win (preferred) or a share of the serviceable customers to win, never both.
+
+1. **Per segment.** Annual revenue from one customer = price × 12 / the months covered × units × take rate. TAM =
+   customers × that; the gross spend (before the take rate) is shown apart. SAM customers = customers × serviceable
+   percent, SAM = SAM customers × annual revenue from one. SOM customers = the customers to win, or SAM customers ×
+   the share to win; SOM = SOM customers × annual revenue from one.
+2. **Totals.** Each is the sum of the segments; SAM as a share of TAM, SOM as a share of SAM and, with today's
+   annual revenue, SOM over it. With today's customers and a horizon in years, the new customers a year to reach SOM
+   are a straight line, (SOM customers - today's) / years; no growth rate is compounded.
+3. **Top-down cross-check.** Each top-down figure's comparable part (the figure × the share that matches the
+   founder's definition) is set beside the bottom-up TAM or SAM: the bottom-up as a share of it and the difference.
+   It never sets the market size or the verdict (YC's pitch guide prefers bottom-up).
+4. **Checks.** A stated TAM, SAM or SOM is checked with `deal_check`'s 2% relative tolerance (an input, the edge
+   included). The verdict is mismatch if any is, not_checked with none.
+5. **Sensitivity.** Each row works one field of one segment (`customers`, `price`, `units_per_customer`, the three
+   percents or `obtainable_customers`) at each of the founder's values, the rest at base, and gives the SOM low,
+   high and swing. Every total is linear in one field, so the value at which SOM reaches the plan's target, and TAM
+   or SAM the first top-down figure's comparable part (only the first: a second or third figure gets the cross-check
+   of step 3, no break-even), is exact: x\* = x0·(T - the other segments' total) / this segment's total. It is
+   `met_without_it` when the target is reached with the field at its base (the other segments alone reach it, or, for
+   the plan's target, the base SOM is already at or above it), with no value; `does_not_move` when the field is not a
+   factor of that total; and `out_of_range` when the segment would be refused at that value (a percent above 100,
+   more customers to win than it can serve, fewer customers than today's, or a number outside the size every input
+   has: at least 1e-15 and under 1e16), the value still given. The top-down break-even is a cross-check, not a
+   target.
+6. **Flags**, never errors: `price_period_defaulted` (a segment left out the months its price covers, so the price
+   was read as a yearly one; a monthly price left out makes that segment 12 times too small),
+   `segments_exceed_population` (the segments' customers add up to more than the population they come from: a buyer
+   counted twice), `bottom_up_above_top_down` (above a top-down figure's comparable part), `sam_equals_tam` (no
+   serviceable percent below 100), `som_not_given` (a segment with no SOM, so no SOM total), `som_as_percent_only`,
+   `som_from_zero_customers`, `som_below_customers_today`, `no_horizon_given`, `som_below_target` (the SOM total is
+   below the plan's target) and `som_target_out_of_reach` (the SOM is below the target, and no sensitivity row
+   reaches it at a value its segment can take: at least one row would need a value out of range and none reaches it
+   exactly).
+
+A refusal names the field: a SOM given both ways, today's customers above the buying customers, customers to win
+above the serviceable customers, a stated SOM or a target with a segment that has no SOM, and a sensitivity row past
+the last segment, on a SOM field the segment does not give, repeated, or with a value the segment would refuse.
+
 </details>
 
 ## Worked examples
@@ -704,6 +760,50 @@ ARR is 12 × $100k = $1,200,000; the $1.5M is the run-rate, with the fees in it.
 `stated_arr_matches_run_rate`, `run_rate_includes_non_recurring`, `stated_nrr_includes_new`,
 `stated_burn_multiple_uses_new_not_net_arr` and `burn_multiple_above_band` as what a VC is likely to ask about.
 
+**A market built bottom-up (Company AW, made up).** Software for vet clinics: 18,000 independent clinics at $400 a
+month, 60% of them reachable today, 900 to win and 45 customers now; and 400 multi-site groups, 15 locations each at
+$300 a location a month, 50% reachable, 10% of those to win and 2 customers now. An analyst's figure of $2.1B a
+year matches the founder's definition for 40% of it. The plan needs $8M a year from this market in 5 years, today's
+revenue is $324k a year (its 47 customers at its own prices), and the deck says the TAM is $120M. The founder's own ranges: price $300 to $500, clinics to
+win 600 to 1,200, the groups' share 5% to 15%:
+
+```
+equity_calculator market_sizing \
+    --segment "customers=18,000 price=400 price-period-months=1 serviceable-percent=60 obtainable-customers=900 customers-today=45" \
+    --segment "customers=400 price=300 price-period-months=1 units-per-customer=15 serviceable-percent=50 obtainable-percent=10 customers-today=2" \
+    --top-down "amount=2,100,000,000 comparable-percent=40" --som-years 5 --annual-revenue-today 324000 \
+    --som-target 8000000 --stated-tam 120000000 \
+    --sensitivity "field=price segment=1 values=300/500" --sensitivity "field=obtainable-customers segment=1 values=600/1,200" \
+    --sensitivity "field=obtainable-percent segment=2 values=5/15"
+  Segment 1: annual revenue per customer                                         $4,800.00  price × 12 / months covered × units × take rate
+  Segment 2: annual revenue per customer                                        $54,000.00  price × 12 / months covered × units × take rate
+  Total TAM                                                                $108,000,000.00  sum of the segments
+  Total SAM                                                                 $62,640,000.00  sum of the segments
+  Total SOM customers                                                                  920  sum of the segments
+  Total SOM                                                                  $5,400,000.00  sum of the segments
+  SOM share of SAM                                                                 8.6207%  total SOM / total SAM
+  SOM / annual revenue today                                                    16.666667x  total SOM / annual revenue today
+  Segment 1: new customers a year to SOM                                               171  (SOM customers - customers today) / years, a straight line
+  Top-down 1: comparable part                                              $840,000,000.00  figure × share matching
+  Top-down 1: bottom-up as a share of it                                          12.8571%  bottom-up TAM / comparable part (a cross-check)
+  TAM: verdict                                                                    mismatch  within the tolerance is consistent
+  Sensitivity 1: SOM swing                                                   $2,160,000.00  SOM high - SOM low
+  Sensitivity 2: SOM swing                                                   $2,880,000.00  SOM high - SOM low
+  Sensitivity 3: SOM swing                                                   $1,080,000.00  SOM high - SOM low
+  Sensitivity 1: segment 1 price at SOM = $8,000,000.00                            $640.74  base × (target - other segments' SOM) / this segment's SOM
+  Sensitivity 2: segment 1 customers to win at SOM = $8,000,000.00                1,441.67  base × (target - other segments' SOM) / this segment's SOM
+  Sensitivity 3: segment 2 share to win at SOM = $8,000,000.00                    34.0741%  base × (target - other segments' SOM) / this segment's SOM
+  Overall verdict                                                                 mismatch  mismatch if any stated figure is; not_checked with none; a top-down figure never counts
+```
+
+The TAM is $108,000,000.00, not the deck's $120M (a mismatch past the 2% tolerance), and the SOM is $5,400,000.00
+from 920 customers, 8.6207% of SAM and 16.666667x today's revenue: short of the $8M the plan needs, so the report
+flags `som_below_target`, and
+`som_as_percent_only` for the groups' 10%. The top-down figure is a cross-check only: the bottom-up TAM is 12.8571% of
+its comparable part. Of the three ranges, the clinics to win move SOM the most ($2,880,000.00 from low to high);
+reaching $8M on one assumption alone would take a $640.74 monthly price, about 1,442 clinics (1,441.67 exactly), or
+34.0741% of the groups.
+
 ## Using it
 
 ```
@@ -745,6 +845,9 @@ equity_calculator metrics_check --period-months P [--recurring-unit monthly|annu
     [--stated-cac-payback-months M] [--stated-burn-multiple X] [--stated-concentration-percent C]
     [--tolerance-points P] [--tolerance-percent Q] [--customer-segment smb|mid_market|enterprise]
     [--payback-band-months B] [--burn-multiple-band X] [--net-revenue-churn-band-percent C]
+equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
+    [--population N] [--annual-revenue-today R] [--som-years Y] [--som-target T] [--stated-tam A]
+    [--stated-sam A] [--stated-som A] [--tolerance-percent Q]
 ```
 
 `deal_check` needs `--investment` and at least one of `--pre-money`, `--post-money` and `--stated-investor-percent`.
@@ -768,18 +871,33 @@ checked when its parts are there, and `--stated-churn-basis` (`logo`, `gross_rev
 `--period-months` and never annualised, so give the period the document's figure covers (1 for a monthly churn, 12
 for an annual NRR) and run once per period when the document mixes them. A stated CAC is checked as blended CAC.
 
+`market_sizing` needs at least one `--segment`, one group of buying customers with no overlap between groups. Each
+count, price and share is the founder's own figure: a price is given with the months it covers
+(`price-period-months=1` for a monthly price, 24 for a two-year device) and never turned into a year by hand, and
+`take-rate-percent` is the share of the customers' spend the company keeps (a marketplace's fee). The SOM is
+`obtainable-customers` (preferred) or `obtainable-percent` of the serviceable customers, not both. `--top-down` is a
+cross-check only, compared with the bottom-up TAM unless `compare-to=sam`. Each `--sensitivity` names one field of
+one segment by number (`1` is the first `--segment`) and its values, split on `/` (a comma there separates
+thousands). `--population` is the population the segments are drawn from, to catch a buyer counted twice;
+`--som-target` is the annual revenue the plan needs from this market; `--stated-som` and `--som-target` need a SOM in
+every segment.
+
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
-`--class`. Each repeated flag is one instrument, round or class, given as one quoted string of `key=value` terms and
+`--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure or sensitivity
+row, given as one quoted string of `key=value` terms and
 bare flags in any order, after the amount for a SAFE or the principal for a note, which comes first:
 
-| Flag      | Terms                                                                                                                                                                                                                                                                                       |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--safe`  | `AMOUNT [valuation-cap=X] [discount-percent=D] [mfn]`                                                                                                                                                                                                                                       |
-| `--note`  | `PRINCIPAL interest-rate-percent=R (months-outstanding=M \| issue-date=YYYY-MM-DD conversion-date=YYYY-MM-DD) [compounding=simple\|annual\|monthly] [stub-rule=simple\|fractional_power] [day-count=actual_365\|actual_360] [valuation-cap=X] [discount-percent=D] [interest-paid-in-cash]` |
-| `--round` | `(investor-percent=N \| pre-money=V investment=I) [pool-percent=P]`                                                                                                                                                                                                                         |
-| `--class` | `shares=S invested=I [preference-multiple=M] [rank=K] [participation=none\|full\|capped] [cap-multiple=C]` (a cap only with `capped`)                                                                                                                                                       |
-| `--phase` | `from-month=M gross-burn=G [revenue=R]` (also `--downside-phase` and `--lean-phase`)                                                                                                                                                                                                        |
-| `--raise` | `amount=I [lands-month=L] [stated-runway-months=M] [stated-runway-from=today\|landing]`                                                                                                                                                                                                     |
+| Flag            | Terms                                                                                                                                                                                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--safe`        | `AMOUNT [valuation-cap=X] [discount-percent=D] [mfn]`                                                                                                                                                                                                                                       |
+| `--note`        | `PRINCIPAL interest-rate-percent=R (months-outstanding=M \| issue-date=YYYY-MM-DD conversion-date=YYYY-MM-DD) [compounding=simple\|annual\|monthly] [stub-rule=simple\|fractional_power] [day-count=actual_365\|actual_360] [valuation-cap=X] [discount-percent=D] [interest-paid-in-cash]` |
+| `--round`       | `(investor-percent=N \| pre-money=V investment=I) [pool-percent=P]`                                                                                                                                                                                                                         |
+| `--class`       | `shares=S invested=I [preference-multiple=M] [rank=K] [participation=none\|full\|capped] [cap-multiple=C]` (a cap only with `capped`)                                                                                                                                                       |
+| `--phase`       | `from-month=M gross-burn=G [revenue=R]` (also `--downside-phase` and `--lean-phase`)                                                                                                                                                                                                        |
+| `--raise`       | `amount=I [lands-month=L] [stated-runway-months=M] [stated-runway-from=today\|landing]`                                                                                                                                                                                                     |
+| `--segment`     | `customers=N price=P [price-period-months=M] [units-per-customer=U] [take-rate-percent=R] [serviceable-percent=S] [obtainable-percent=O \| obtainable-customers=C] [customers-today=T]`                                                                                                     |
+| `--top-down`    | `amount=A [comparable-percent=C] [compare-to=tam\|sam]`                                                                                                                                                                                                                                     |
+| `--sensitivity` | `field=F segment=K values=V1/V2/...` (F one of `customers`, `price`, `units-per-customer`, `take-rate-percent`, `serviceable-percent`, `obtainable-percent`, `obtainable-customers`; 1 to 4 values)                                                                                         |
 
 A note that names no `compounding` compounds `annual`, and one that names no `stub-rule` uses `fractional_power`.
 An unknown term, a term given twice, or a value that is not a number is refused, naming the flag.
@@ -831,7 +949,9 @@ most 50 SAFEs and notes, a dilution at most 20 rounds, a waterfall at most 12 pr
 deal check at most 50 SAFEs and notes and 20 use-of-funds lines. A runway plan takes at most 3 cases (the plan, a
 downside and a lean case) of at most 12 phases, 6 raises of at most 20 use-of-funds lines each, and 10 milestones;
 its months are at most 600 and its months to raise at most 60. A metrics check covers one period of 1 to 36
-months, and its customer counts are whole numbers below 1e16.
+months, and its customer counts are whole numbers below 1e16. A market size takes at most 8 segments, 3 top-down
+figures and 6 sensitivity rows of 1 to 4 values each; a price covers at most 120 months and the SOM horizon is 1 to
+20 years.
 A note runs at most 600 months, or at most 18,262 days (about 50 years) between its dates; a vesting schedule, its
 cliff and every month asked about are at most 600 months. These limits keep every exact step small: the largest
 inputs compute in well under a second, and a value like `1e999999999` is refused at once instead of tying up the
@@ -848,13 +968,13 @@ tools do not check it.
 ## The Excel workbook
 
 There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` for the round, `Dilution`, `Vesting`,
-`Waterfall`, `Deal check`, `Runway plan` or `Metrics check`):
+`Waterfall`, `Deal check`, `Runway plan`, `Metrics check` or `Market sizing`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
 - Every value cell holds the model's display rounding as a number, under its unit's format (a live investor
   sheet's inputs excepted, below). Fractions use `0.00%`,
-  money `"$"#,##0`, a price per share `"$"#,##0.000000`, shares `#,##0`, multipliers `0.0000"x"` and months
+  money `"$"#,##0`, a price per share `"$"#,##0.000000`, shares `#,##0`, customer counts `#,##0.00`, multipliers `0.0000"x"` and months
   `0.00" months"`.
 - The investor sheet is live: its inputs (the stake, or the pre-money and the investment; the outcome multiplier; a
   holder's stake) are numbers held at full precision, with the display format doing the rounding, and every line
@@ -872,13 +992,14 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
   does not calculate, such as a file preview or openpyxl's `data_only` read, shows them empty.
 - Totals are live `=SUM` formulas, so editing a part re-totals: the investor's post-money, total shares, total
   ownership and post-money (pool and round), the stake lost in all (dilution), vested in all and the grant (vesting), the total paid out
-  (waterfall), the pre-money split and use-of-funds totals (deal check), and each raise's use-of-funds total (runway plan). A live total adds the rounded cells, so it can differ from the model's exact total in the last place
+  (waterfall), the pre-money split and use-of-funds totals (deal check), each raise's use-of-funds total (runway plan), and a market size's totals across its segments (customers, gross spend, TAM, SAM and SOM). A live total adds the rounded cells, so it can differ from the model's exact total in the last place
   kept: a cent on the investor's post-money, a thousandth of a share on the pool's total shares, 0.000001 on its total
   ownership. The number formats hide that difference.
-- The pool's and the round's value rows, the waterfall's payouts, and a deal check's pre-money split and percent
-  use-of-funds lines are rounded to the cent by largest remainder, so they add up to their rounded total exactly.
+- The pool's and the round's value rows, the waterfall's payouts, a deal check's pre-money split and percent
+  use-of-funds lines, and a market size's segment figures (to the cent, or a hundredth of a customer) are rounded by
+  largest remainder, so they add up to their rounded total exactly.
 - Verdict cells are coloured by conditional formatting: green for accept, grant and in the money, amber for break
-  even and at the money, red for reject, no grant and underwater. A deal check's, a runway plan's and a metrics check's verdicts are
+  even and at the money, red for reject, no grant and underwater. A deal check's, a runway plan's, a metrics check's and a market size's verdicts are
   green for consistent, red for mismatch and amber for not checked; a runway plan's milestones are green when covered and red
   when short. A waterfall choice is blue when the class converts
   and grey when it stays: neither is good or bad. The investor verdict recolours itself when an input changes;
@@ -1032,6 +1153,21 @@ The `metrics_check` scenario adds these, each only when the input uses it:
 | `payback_band`           | the segment's target: 12, 18 or 24 months                               | `--customer-segment`, `--payback-band-months` | Bessemer (a benchmark, not a rule)                                 |
 | `burn_multiple_band`     | 3x                                                                      | `--burn-multiple-band`                        | Sacks (a benchmark, not a rule)                                    |
 | `net_revenue_churn_band` | 2% a month, one-month periods only                                      | `--net-revenue-churn-band-percent`            | Skok (a benchmark, not a rule)                                     |
+
+The `market_sizing` scenario adds these: `bottom_up_rule`, `annual_rule` and `sam_rule` always, the rest only when
+the input uses them:
+
+| Key                | Default                                                                    | How to change it                       | Source                                                                     |
+| ------------------ | -------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------- |
+| `bottom_up_rule`   | TAM = customers × annual revenue from one customer, per segment, summed    | fixed                                  | YC pitch guide (question 2)                                                |
+| `annual_rule`      | annual price = price × 12 / the months it covers; no growth or churn       | `price-period-months=`                 | YC pitch guide (the two-year lifecycle); the straight-line year unverified |
+| `revenue_rule`     | TAM = the customers' spend × the take rate (only below 100%)               | `take-rate-percent=`                   | YC seed guide (glossary: TAM)                                              |
+| `sam_rule`         | SAM = TAM × the serviceable percent; 100% when none is given               | `serviceable-percent=`                 | unverified (common usage)                                                  |
+| `som_rule`         | SOM = the customers to win × annual revenue from one; a straight-line path | `obtainable-customers=`, `--som-years` | unverified (common usage)                                                  |
+| `top_down_rule`    | a top-down figure is a cross-check only                                    | fixed                                  | YC pitch guide (question 2)                                                |
+| `population_rule`  | the segments' customers at most the population                             | `--population`                         | unverified (standard arithmetic)                                           |
+| `sensitivity_rule` | one field of one segment at a time, the rest at base                       | fixed                                  | unverified (standard arithmetic)                                           |
+| `tolerance`        | 2% relative                                                                | `--tolerance-percent`                  | unverified                                                                 |
 
 </details>
 

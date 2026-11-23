@@ -19,7 +19,7 @@ from equity_calculator.schemas.equity import EquityQuantity, EquityUnit
 # Decimal places each unit is rounded to for display. A fraction is shown as a percent, so 6 places of the
 # fraction are 4 places of the percent (7.5269%); multipliers and share prices keep 6 places (1.075269x,
 # $0.736842); money is whole cents; share counts keep 3 places of a share (exact mode can hold fractional shares);
-# months of runway keep 2 places (18.89 months).
+# months of runway keep 2 places (18.89 months); a count of customers keeps 2 (a share of a count can be fractional).
 DISPLAY_PLACES: dict[EquityUnit, int] = {
     "fraction": 6,
     "multiplier": 6,
@@ -27,6 +27,7 @@ DISPLAY_PLACES: dict[EquityUnit, int] = {
     "price": 6,
     "shares": 3,
     "months": 2,
+    "count": 2,
 }
 
 ONE = Fraction(1)

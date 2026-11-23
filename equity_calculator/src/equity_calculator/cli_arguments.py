@@ -1,5 +1,5 @@
 """Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check|``
-``runway_plan|metrics_check``).
+``runway_plan|metrics_check|market_sizing``).
 
 The number readers are ``cli_numbers``; a repeated flag's one-argument terms are ``cli_instruments``.
 """
@@ -18,8 +18,18 @@ from equity_calculator.cli_instruments import (
     parse_raise_funds_line,
     parse_round,
     parse_safe,
+    parse_segment,
+    parse_sensitivity,
+    parse_top_down,
 )
-from equity_calculator.cli_numbers import parse_customers, parse_decimal, parse_months, parse_percent, parse_whole
+from equity_calculator.cli_numbers import (
+    parse_customers,
+    parse_decimal,
+    parse_months,
+    parse_percent,
+    parse_whole,
+    parse_years,
+)
 from equity_calculator.schemas.equity import PoolTiming, ShareRounding
 from equity_calculator.schemas.equity_metrics_check import CustomerSegment, RecurringUnit, StatedChurnBasis
 from equity_calculator.schemas.equity_vesting import Acceleration, AccelerationBase
@@ -497,4 +507,61 @@ def metrics_check_arguments(parser: argparse.ArgumentParser) -> None:
         "--net-revenue-churn-band-percent",
         type=parse_percent,
         help="Flag one month's net revenue churn above this percent (default 2; a benchmark, not a rule).",
+    )
+
+
+def market_sizing_arguments(parser: argparse.ArgumentParser) -> None:
+    """A market size's flags: the segments, the top-down figures, the sensitivity rows, then the founder's other
+    figures and what the deck states."""
+    parser.add_argument(
+        "--segment",
+        type=parse_segment,
+        action="append",
+        dest="segments",
+        required=True,
+        metavar=_TERMS,
+        help="One group of buying customers: 'customers=N price=P [price-period-months=M] [units-per-customer=U] "
+        "[take-rate-percent=T] [serviceable-percent=S] [obtainable-percent=O | obtainable-customers=C] "
+        "[customers-today=D]'. The price is for M months (default 12). Repeat for each segment (at most 8).",
+    )
+    parser.add_argument(
+        "--top-down",
+        type=parse_top_down,
+        action="append",
+        dest="top_down",
+        metavar=_TERMS,
+        help="A top-down figure to compare with: 'amount=A [comparable-percent=P] [compare-to=tam|sam]' (a "
+        "cross-check, never a verdict). Repeat for each (at most 3).",
+    )
+    parser.add_argument(
+        "--sensitivity",
+        type=parse_sensitivity,
+        action="append",
+        dest="sensitivity",
+        metavar=_TERMS,
+        help="One field of one segment worked again at your own values: 'field=F segment=K values=V1/V2' (F one of "
+        "customers, price, units-per-customer, take-rate-percent, serviceable-percent, obtainable-percent, "
+        "obtainable-customers; K 1 for the first --segment). Repeat for each (at most 6, 4 values each).",
+    )
+    parser.add_argument(
+        "--population", type=parse_decimal, help="The total the segments are drawn from, in the same buying unit."
+    )
+    parser.add_argument("--annual-revenue-today", type=parse_decimal, help="The company's annual revenue today.")
+    parser.add_argument("--som-years", type=parse_years, help="Years to win the SOM customers (1 to 20).")
+    parser.add_argument(
+        "--som-target",
+        type=parse_decimal,
+        help="The annual revenue your plan needs from this market by then; needs a SOM in every segment.",
+    )
+    stated = (
+        ("--stated-tam", "The TAM the deck states, in dollars a year."),
+        ("--stated-sam", "The SAM the deck states, in dollars a year."),
+        ("--stated-som", "The SOM the deck states, in dollars a year; needs a SOM in every segment."),
+    )
+    for flag, words in stated:
+        parser.add_argument(flag, type=parse_decimal, help=words)
+    parser.add_argument(
+        "--tolerance-percent",
+        type=parse_percent,
+        help="How far a stated figure may sit from the computed one, in percent of the computed one (default 2).",
     )
