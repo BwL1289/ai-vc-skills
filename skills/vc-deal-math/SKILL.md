@@ -78,13 +78,14 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      there is no runway end and a stated runway is not checked).
    - Pool timing: if the term sheet or deck does not say, use the pre-money (the usual term sheet), say so, and offer
      to re-run with the pool in the post-money.
-   - A stated percent or runway that is the tool's figure rounded to the places the deck writes is consistent, past
-     the tolerance or not, because people write figures rounded to the places they show (a 12-month runway against
-     the tool's 12.40 months; 17% sold against 16.6667%, but not 20%); its row says so ("rounds to the deck's"). Those
-     places decide it, so pass `stated_investor_percent`, `stated_holder_percent` and `stated_runway_months` as text
-     with exactly the places the deck writes ("12", "12.0"). The post-money and the use-of-funds total keep the
-     tolerance alone. The verdict is the tool's; `consistent_beyond_rounding` names a figure that holds by the
-     tolerance alone, and goes to the answer as the flag table says.
+   - In `equity_deal_check`, a stated percent or runway that is the tool's figure rounded to the places the deck
+     writes is consistent, past the tolerance or not, because people write figures rounded to the places they show (a
+     12-month runway against the tool's 12.40 months; 17% sold against 16.6667%, but not 20%); its row says so
+     ("rounds to the deck's"). Those places decide it, so pass `stated_investor_percent`, `stated_holder_percent` and
+     `stated_runway_months` as text with exactly the places the deck writes ("12", "12.0"). The post-money and the
+     use-of-funds total keep the tolerance alone, and so does `equity_runway_plan`'s stated runway. The verdict is the
+     tool's; `consistent_beyond_rounding` names a figure that holds by the tolerance alone, and goes to the answer as
+     the flag table says.
 3. **Call `equity_deal_check`** with every stated figure. Send money and percents as strings, each stated percent
    and the runway with the deck's own places:
 

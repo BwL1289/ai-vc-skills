@@ -65,7 +65,7 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
    lean plan): never merge two (the downside's revenue percent into the lean plan, say) and never add one. When it is
    unclear whether the founder would also cut spend in the downside, that is an open ask,
    `[would you cut spend in the downside, and to what?]`, not a case. The no-raise row is always worked; do not add it
-   as an option. Send money and percents as strings, a stated percent with the founder's own places:
+   as an option. Send money and percents as strings:
 
    ```json
    {
@@ -138,7 +138,8 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
 4. **Ownership per option,** with the tools that already do it:
    - A priced round: `equity_deal_check` with the option's amount, its valuation and the founders' stake today
      (`holder_percent`), and no burn fields, so the runway comes only from `equity_runway_plan` and the answer never
-     shows two runway figures.
+     shows two runway figures. A stated percent goes in as text with the founder's own places, since one that is the
+     tool's figure rounded to them is consistent.
    - A SAFE or note: `equity_round`, with the next priced round the founder expects. With none, the SAFE's share is
      "not computed: set at the next priced round", as the vc-deal-math skill says; never pass a SAFE as `investment`.
      The tool's `fully_diluted_shares` counts every share before the round, granted options and the unissued pool
