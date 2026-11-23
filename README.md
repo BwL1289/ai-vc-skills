@@ -138,8 +138,6 @@ Once the plugin is installed, ask in plain words:
 
 > The Series A sells 20% and adds a 10% pool. What's left of my 30%?
 
-> Review my deck before I send it to seed funds: here is each slide's text and our ask.
-
 > We sell for $50M. The investors put in $10M for 25% of the shares, with a 1x non-participating preference. Who gets
 > what?
 
@@ -151,6 +149,8 @@ Once the plugin is installed, ask in plain words:
 > Stress-test my pitch before we go out to raise: here is our one-liner, our slide titles and our ask.
 
 > Fact-check my deck: do the figures in the deck and the one-pager agree, and what will a partner check first?
+
+> Review my deck before I send it to seed funds: here is each slide's text and our ask.
 
 ## How it works
 

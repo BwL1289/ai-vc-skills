@@ -366,6 +366,7 @@ def test_the_ask_goes_to_the_calculator_and_a_safe_raise_is_quoted_unchecked() -
     assert "call twice, once as `pre_money`, once as `post_money`. Show both readings side by side" in steps
     assert "A check that is a mismatch under one reading only is not a calculator mismatch" in steps
     assert "Only a check that is a mismatch under every reading is the calculator's mismatch" in steps
+    assert "In the claims table, such a claim is not Contradicted either: mark it Needs a source" in steps
     assert "a mismatch under every reading of the valuation" in _unwrapped(_section("## The evidence marks"))
     # The calculator's flags reach the founder as questions, the benchmark ones marked as benchmarks.
     assert "Each code in the result's `flags` goes to the answer as a question a partner is likely to ask" in steps
@@ -484,3 +485,4 @@ def test_one_eval_turns_a_mismatch_under_one_reading_into_a_fix_to_label_the_val
     assert "A mismatch under one reading only is not a calculator mismatch" in answer
     assert "to label the valuation pre- or post-money" in answer
     assert "it does not mark Ask and use of funds Contradicted" in answer
+    assert 'In the claims table, "investors get 25%" is Needs a source with both readings in its fix' in answer

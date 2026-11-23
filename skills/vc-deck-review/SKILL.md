@@ -135,7 +135,8 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
      as vc-deal-math step 4 does, and say a partner will ask which one is meant. A check that is a mismatch under one
      reading only is not a calculator mismatch: it becomes one fix, to label the valuation pre- or post-money, quoting
      both readings in the tool's values. Only a check that is a mismatch under every reading is the calculator's
-     mismatch.
+     mismatch. In the claims table, such a claim is not Contradicted either: mark it Needs a source, with both
+     readings in its fix, since no single reading gives a verdict.
    - Each code in the result's `flags` goes to the answer as a question a partner is likely to ask, in the words the
      tool prints beside it, with what to change or prepare from the vc-deal-math skill's flag table. The benchmark
      flags (`dilution_above_band`, `runway_below_band`) are common benchmarks, not rules: say so and quote the tool's

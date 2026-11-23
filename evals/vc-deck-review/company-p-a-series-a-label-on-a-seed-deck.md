@@ -71,7 +71,8 @@ Read as post-money:
   investors 20.0000% (a mismatch with the stated 25.0000%); read as post-money, it gives 25.0000% (consistent). A
   mismatch under one reading only is not a calculator mismatch: it becomes one fix, to label the valuation pre- or
   post-money, with a partner likely to ask which one is meant. It does not head the ranked fix list as a figure that
-  does not match, and it does not mark Ask and use of funds Contradicted.
+  does not match, and it does not mark Ask and use of funds Contradicted. In the claims table, "investors get 25%" is
+  Needs a source with both readings in its fix, not Contradicted.
 - Which investors: the stated stage (Series A) and what the deck shows (stores on a free plan and three paid pilots)
   disagree; this is raised as a question a partner at a Series A fund is likely to ask, with no revenue threshold and
   no named firm, marked as the skill's own judgment, unverified. The answer notes that its investor-fit table covers
