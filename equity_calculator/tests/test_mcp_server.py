@@ -203,6 +203,24 @@ async def test_the_market_tool_flags_a_price_period_left_out(segment: dict[str, 
     assert answer["segments"][0]["price_period_given"] is not flagged
 
 
+async def test_the_market_tools_echoed_inputs_fed_back_keep_the_price_period_flag() -> None:
+    """The echo shows a left-out price period as null, so a second call (or the workbook tool) built from it is still
+    flagged, never silently given 12."""
+    server = mcp_server.build_server()
+    first = json.loads(
+        _text(
+            await _call(
+                server, "equity_market_sizing", {"inputs": {"segments": [{"customers": "1000", "price": "400"}]}}
+            )
+        )
+    )
+    again = json.loads(_text(await _call(server, "equity_market_sizing", {"inputs": first["inputs"]})))
+
+    assert first["inputs"]["segments"][0]["price_period_months"] is None
+    assert "price_period_defaulted" in first["flags"] and again["flags"] == first["flags"]
+    assert again["segments"][0]["price_period_given"] is False
+
+
 async def test_the_investor_tool_answers_what_the_cli_prints_with_json() -> None:
     printed = await run(["investor", "--equity-percent", "7", "--outcome-multiplier", "1.10", "--json"])
     result = await _call(mcp_server.build_server(), "equity_investor", {"inputs": _SAMPLES["investor"]})

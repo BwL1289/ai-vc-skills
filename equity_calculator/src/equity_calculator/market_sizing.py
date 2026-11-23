@@ -20,7 +20,10 @@ Notation (``equity_calculator.schemas.equity_market_sizing``), per segment s, ev
   segment's part, the value at which the total reaches T is x_0 · (T - (M - M_s)) / M_s, exactly.
 
 Money parts are rounded to the cent by largest remainder, and counts of customers to the hundredth the same way, so
-the segments add up to the rounded totals.
+the segments add up to the rounded totals. A unit price (given, a sensitivity value or a break-even value) is shown
+to the cent when that is exact, else to as many places as it needs up to 6, and a price under a hundred-thousandth of
+a dollar keeps two significant digits (up to 15 places, the input floor): a $0.0075 usage price never prints as
+$0.01.
 """
 
 from __future__ import annotations
@@ -38,6 +41,7 @@ from equity_calculator.exact import (
     ZERO,
     fraction,
     from_percent,
+    price_quantity,
     quantity,
     round_to_places,
     split_cents,
@@ -63,7 +67,7 @@ from equity_calculator.schemas.equity_market_sizing import (
     TopDownRow,
 )
 
-__all__ = ["compute_market_sizing", "field_unit"]
+__all__ = ["compute_market_sizing", "field_quantity", "field_unit"]
 
 _MONTHS_PER_YEAR = 12
 # The smallest nonzero size a decimal input may have (``BoundedDecimal``'s floor; its ceiling is ``SIZE_LIMIT``).
@@ -118,7 +122,7 @@ class _Totals:
 def _worked(segment: MarketSegment) -> _Segment:
     """One segment's annual value, gross spend, TAM, SAM and SOM."""
     customers = fraction(segment.customers)
-    yearly_price = fraction(segment.price) * _MONTHS_PER_YEAR / segment.price_period_months
+    yearly_price = fraction(segment.price) * _MONTHS_PER_YEAR / segment.period_months()
     spend = yearly_price * fraction(segment.units_per_customer)
     value = spend * from_percent(segment.take_rate_percent)
     sam_customers = segment.serviceable_count()
@@ -169,15 +173,18 @@ def _replaced(inputs: MarketSizingInput, row: SensitivityRow, value: Decimal) ->
 
 
 def field_unit(name: SegmentField) -> EquityUnit:
-    """The unit a sensitivity value of ``name`` is shown in: a percent field as a fraction, the price as money, the
-    rest as a count."""
+    """The unit a value of ``name`` is shown in: a percent field as a fraction, the price as a unit price (never
+    money, whose cents would hide a usage price's fraction of a cent), the rest as a count."""
     if name in PERCENT_FIELDS:
         return "fraction"
-    return "money" if name == "price" else "count"
+    return "price" if name == "price" else "count"
 
 
-def _field_quantity(name: SegmentField, value: Fraction) -> EquityQuantity:
-    """A value of the field ``name`` as its quantity (a percent field's value as the fraction it names)."""
+def field_quantity(name: SegmentField, value: Fraction) -> EquityQuantity:
+    """A value of the field ``name`` as its quantity (a percent field's value as the fraction it names, a price as a
+    unit price)."""
+    if name == "price":
+        return price_quantity(value)
     return quantity(field_unit(name), value / HUNDRED if name in PERCENT_FIELDS else value)
 
 
@@ -221,7 +228,8 @@ def _break_even(
 
     With ``at_least`` (the plan's revenue, a floor to reach) a total already at or above ``target`` is
     ``met_without_it``, with no value: the field need not move. Without it (a top-down figure, a cross-check) the value
-    is given either way.
+    is given either way. ``does_not_move`` is tested first, so a field that is no factor of the total is reported so
+    even when the target is already met.
     """
     segment = inputs.segments[row.segment - 1]
     own = _worked(segment).metric(metric)
@@ -234,7 +242,7 @@ def _break_even(
         return BreakEvenRow(metric=metric, target=target_quantity, reach="met_without_it")
     value = fraction(getattr(segment, row.field)) * needed / own
     reach: BreakEvenReach = "value" if _allowed(segment, row.field, value) else "out_of_range"
-    return BreakEvenRow(metric=metric, target=target_quantity, reach=reach, value=_field_quantity(row.field, value))
+    return BreakEvenRow(metric=metric, target=target_quantity, reach=reach, value=field_quantity(row.field, value))
 
 
 def _sensitivity(inputs: MarketSizingInput, base: _Totals) -> tuple[SensitivityResult, ...]:
@@ -250,7 +258,7 @@ def _sensitivity(inputs: MarketSizingInput, base: _Totals) -> tuple[SensitivityR
             soms.append(worked.som)
             cases.append(
                 SensitivityCase(
-                    value=_field_quantity(row.field, fraction(value)),
+                    value=field_quantity(row.field, fraction(value)),
                     tam=quantity("money", worked.tam),
                     sam=quantity("money", worked.sam),
                     som=_optional("money", worked.som),
@@ -271,7 +279,7 @@ def _sensitivity(inputs: MarketSizingInput, base: _Totals) -> tuple[SensitivityR
                 row=number,
                 field=row.field,
                 segment=row.segment,
-                base_value=_field_quantity(row.field, fraction(getattr(inputs.segments[row.segment - 1], row.field))),
+                base_value=field_quantity(row.field, fraction(getattr(inputs.segments[row.segment - 1], row.field))),
                 cases=tuple(cases),
                 som_low=_optional("money", low),
                 som_high=_optional("money", high),
@@ -316,7 +324,7 @@ def _flags(
     segments = inputs.segments
     worked = [_worked(segment) for segment in segments]
     found: set[MarketSizingFlag] = set()
-    if not all(_period_given(segment) for segment in segments):
+    if not all(segment.period_given() for segment in segments):
         found.add("price_period_defaulted")
     if inputs.population is not None and base.customers > fraction(inputs.population):
         found.add("segments_exceed_population")
@@ -348,11 +356,6 @@ def _flags(
 
 
 _FLAG_ORDER: tuple[MarketSizingFlag, ...] = get_args(MarketSizingFlag)
-
-
-def _period_given(segment: MarketSegment) -> bool:
-    """Whether the founder gave the months the price covers (left out, the price is read as a yearly one)."""
-    return "price_period_months" in segment.model_fields_set
 
 
 def _verdict(checks: tuple[MarketCheck, ...]) -> DealVerdict:
@@ -404,7 +407,7 @@ def _segment_rows(inputs: MarketSizingInput, worked: list[_Segment], base: _Tota
         rows.append(
             SegmentRow(
                 segment=index + 1,
-                price_period_given=_period_given(segment),
+                price_period_given=segment.period_given(),
                 annual_value_per_customer=quantity("money", figures.value),
                 customers=customers[index],
                 gross_spend=gross[index],

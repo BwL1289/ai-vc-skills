@@ -109,7 +109,7 @@ def _check_rows(inputs: RunwayPlanInput, checked: bool) -> list[EquityAssumption
         rows.append(
             _assumption(
                 "tolerance",
-                f"{inputs.tolerance_points} points; {inputs.tolerance_percent}% relative",
+                f"{inputs.tolerance_points:f} points; {inputs.tolerance_percent:f}% relative",
                 "A stated runway within this share of the computed one, a use-of-funds total within this share of "
                 "the raise, or percent lines within this many points of 100%, is consistent (decks round their "
                 "figures).",
@@ -120,7 +120,7 @@ def _check_rows(inputs: RunwayPlanInput, checked: bool) -> list[EquityAssumption
         rows.append(
             _assumption(
                 "runway_band",
-                f"{inputs.runway_band_months} months",
+                f"{inputs.runway_band_months:f} months",
                 "A raise whose runway on the plan, from today, is below this many months is flagged as a question, "
                 "never an error; the band is an input. The default, 18 months, is the top of the guide's usual 12 to "
                 "18, so a raise lasting 12 to 18 months is within the guide's range: the flag asks which milestone it "

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from equity_calculator.exact import fraction, price_quantity
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_market_sizing import (
     BreakEvenRow,
@@ -45,6 +46,7 @@ _FIELD_NAMES: dict[SegmentField, str] = {
     "obtainable_customers": "customers to win",
 }
 _CROSS_CHECK_NOTE = "; a cross-check with the top-down figure, not a target"
+_UNDER_SMALLEST_SHARE = "under 0.0001%"
 _PERIOD_DEFAULT = "not given: read as a yearly price (give 1 for a monthly one)"
 _REACH_WORDS = {
     "value": "reaches it exactly",
@@ -89,13 +91,14 @@ def _flag_words(flag: MarketSizingFlag) -> str:
     return words[flag]
 
 
-def _segment_given_lines(number: int, segment: MarketSegment, period_given: bool) -> list[Line]:
-    """One segment's inputs as given (the price period marked as the default when it was left out)."""
-    name = f"Segment {number}"
-    key = f"segment_{number}"
+def _segment_given_lines(row: SegmentRow, segment: MarketSegment) -> list[Line]:
+    """One segment's inputs as given (the price period marked as the default when it was left out). The buying
+    customers show the model's split rounding, so the segments' lines add up to the total line that sums them."""
+    name = f"Segment {row.segment}"
+    key = f"segment_{row.segment}"
     shown: list[tuple[str, str, EquityQuantity | str | None]] = [
-        (f"{key}_customers", f"{name}: buying customers", given("count", segment.customers)),
-        (f"{key}_price", f"{name}: price per unit", given("money", segment.price)),
+        (f"{key}_customers", f"{name}: buying customers", row.customers),
+        (f"{key}_price", f"{name}: price per unit", price_quantity(fraction(segment.price))),
         (f"{key}_units", f"{name}: units per customer", given("count", segment.units_per_customer)),
         (f"{key}_take_rate", f"{name}: take rate", given_percent(segment.take_rate_percent)),
         (f"{key}_serviceable", f"{name}: serviceable share", given_percent(segment.serviceable_percent)),
@@ -119,8 +122,8 @@ def _segment_given_lines(number: int, segment: MarketSegment, period_given: bool
     period = Line(
         f"{key}_price_period",
         f"{name}: the price covers",
-        (_months(segment.price_period_months),),
-        GIVEN if period_given else _PERIOD_DEFAULT,
+        (_months(segment.period_months()),),
+        GIVEN if row.price_period_given else _PERIOD_DEFAULT,
     )
     return [*lines[:2], period, *lines[2:]]
 
@@ -130,7 +133,7 @@ def _given_lines(result: MarketSizingResult) -> list[Line]:
     inputs = result.inputs
     lines: list[Line] = []
     for row, segment in zip(result.segments, inputs.segments, strict=True):
-        lines += _segment_given_lines(row.segment, segment, row.price_period_given)
+        lines += _segment_given_lines(row, segment)
     for number, top in enumerate(inputs.top_down, start=1):
         name = f"Top-down {number}"
         lines += [
@@ -161,6 +164,13 @@ def _maybe(unit: EquityUnit, value: Decimal | None) -> EquityQuantity | None:
     return None if value is None else given(unit, value)
 
 
+def _share_how(how: str, share: EquityQuantity | None) -> str:
+    """``how``, plus a note when a share above zero rounds to 0.0000%, so it never reads as none."""
+    if share is not None and share.exact != 0 and share.rounded == 0:
+        return f"{how}; {_UNDER_SMALLEST_SHARE}, not zero"
+    return how
+
+
 def _segment_lines(row: SegmentRow) -> list[Line]:
     """One segment worked: its annual revenue per customer, gross spend, TAM, SAM, SOM, share and path."""
     name = f"Segment {row.segment}"
@@ -178,7 +188,12 @@ def _segment_lines(row: SegmentRow) -> list[Line]:
         ("sam", "SAM", row.sam, "SAM customers × annual revenue per customer"),
         ("som_customers", "SOM customers", row.som_customers, "customers to win, or SAM customers × share to win"),
         ("som", "SOM", row.som, "SOM customers × annual revenue per customer"),
-        ("share_of_tam", "share of total TAM", row.share_of_tam, "segment TAM / total TAM"),
+        (
+            "share_of_tam",
+            "share of total TAM",
+            row.share_of_tam,
+            _share_how("segment TAM / total TAM", row.share_of_tam),
+        ),
         ("som_multiple", "SOM customers / today", row.som_multiple_of_today, "SOM customers / customers today"),
         (
             "new_per_year",
@@ -216,8 +231,18 @@ def _total_lines(result: MarketSizingResult) -> list[Line]:
         if value is not None
     ]
     shares: list[tuple[str, str, EquityQuantity | None, str]] = [
-        ("sam_share_of_tam", "SAM share of TAM", totals.sam_share_of_tam, "total SAM / total TAM"),
-        ("som_share_of_sam", "SOM share of SAM", totals.som_share_of_sam, "total SOM / total SAM"),
+        (
+            "sam_share_of_tam",
+            "SAM share of TAM",
+            totals.sam_share_of_tam,
+            _share_how("total SAM / total TAM", totals.sam_share_of_tam),
+        ),
+        (
+            "som_share_of_sam",
+            "SOM share of SAM",
+            totals.som_share_of_sam,
+            _share_how("total SOM / total SAM", totals.som_share_of_sam),
+        ),
         (
             "som_multiple_of_revenue_today",
             "SOM / annual revenue today",
@@ -241,7 +266,7 @@ def _top_down_lines(result: MarketSizingResult) -> list[Line]:
                 f"{key}_bottom_up_share",
                 f"{name}: bottom-up as a share of it",
                 (row.bottom_up_share,),
-                f"bottom-up {metric} / comparable part (a cross-check)",
+                _share_how(f"bottom-up {metric} / comparable part (a cross-check)", row.bottom_up_share),
             ),
             Line(f"{key}_difference", f"{name}: difference", (row.difference,), f"bottom-up {metric} - comparable"),
         ]

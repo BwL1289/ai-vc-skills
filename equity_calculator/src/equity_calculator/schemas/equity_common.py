@@ -30,7 +30,8 @@ from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Fie
 
 # The kind of number an ``EquityQuantity`` holds, which sets its display rounding and its workbook format.
 # ``fraction`` a share of the company or a growth rate (shown as a percent); ``multiplier`` a ratio of outcomes;
-# ``money`` dollars; ``price`` dollars per share; ``shares`` a share count; ``months`` a span of months (runway);
+# ``money`` dollars; ``price`` dollars per share (or a market's unit price, shown with the places it needs);
+# ``shares`` a share count; ``months`` a span of months (runway);
 # ``count`` a count of customers or other buyers (a market size's).
 EquityUnit = Literal["fraction", "multiplier", "money", "price", "shares", "months", "count"]
 

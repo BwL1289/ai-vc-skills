@@ -205,10 +205,12 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "comparable_percent/100) is set beside the bottom-up TAM or SAM as a cross-check, never a verdict. stated_tam, "
         "stated_sam and stated_som come back consistent or a mismatch within tolerance_percent. Each sensitivity row "
         "works one field of one segment at the founder's own values, the rest at base, with the SOM range and swing "
-        "and the exact value at which SOM reaches som_target (met_without_it when the base SOM already reaches it) and "
-        "the total reaches the first top-down figure. Flags name a price period left out, double counting, a SOM given "
-        "only as a share, no horizon, a SOM below the target and a target no row reaches, never errors. Every count, "
-        "price, share and figure is the founder's: never assume or look one up.",
+        "and the exact value at which SOM reaches som_target (does_not_move first, for a field that is no factor of "
+        "SOM; else met_without_it when the base SOM already reaches it) and the total reaches the first top-down "
+        "figure. A unit price prints to the cent when exact, else with the places it needs ($0.0075). Flags name a "
+        "price period left out, double counting, a SOM given only as a share, no horizon, a SOM below the target and "
+        "a target no row reaches, never errors. Every count, price, share and figure is the founder's: never assume "
+        "or look one up.",
     ),
 }
 

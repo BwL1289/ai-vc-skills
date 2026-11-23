@@ -16,6 +16,7 @@ Pure arithmetic: no DB, no network, nothing written. Expected values are exact f
 
 from __future__ import annotations
 
+import json
 import random
 import re
 from decimal import Decimal
@@ -26,11 +27,15 @@ import pytest
 from equity_calculator.assumptions_market_sizing import (
     BOTTOM_UP_QUOTE,
     LIFECYCLE_QUOTE,
+    NEW_SPACE_QUOTE,
     TAM_GLOSSARY_QUOTE,
     TOP_DOWN_QUOTE,
+    YC_BOTTOM_UP_QUOTE,
 )
+from equity_calculator.exact import price_quantity
 from equity_calculator.layout import sheet_for
 from equity_calculator.market_sizing import compute_market_sizing
+from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity_market_sizing import (
     MAX_SEGMENTS,
     MAX_SENSITIVITIES,
@@ -57,6 +62,11 @@ _TOP_DOWN_WORDS = (
     "the customer enough."
 )
 _GLOSSARY_WORDS = "In pitches, this is the estimated total revenue available for the product(s) you are selling."
+_NEW_SPACE_WORDS = "creating a new product or space (like Slack)"
+_YC_BOTTOM_UP_WORDS = (
+    "With bottom up you figure out where comparable products are sold, how many of them are sold, and what % of those "
+    "sales you could take."
+)
 _ONE_SEGMENT: dict[str, object] = {"customers": "1000", "price": "100"}
 
 
@@ -109,7 +119,7 @@ def test_company_aw_ranges_and_break_even_values() -> None:
     assert price.som_swing is not None and price.som_swing.exact == 2_160_000
     assert price.at_som_target is not None and price.at_som_target.value is not None
     assert (price.at_som_target.reach, price.at_som_target.value.exact) == ("value", Fraction(17_300, 27))
-    assert price.at_som_target.value.rounded == Decimal("640.74")
+    assert price.at_som_target.value.rounded == Decimal("640.740741")
     assert price.at_top_down is not None and price.at_top_down.value is not None
     assert price.at_top_down.value.exact == Fraction(34_100, 9)
 
@@ -532,6 +542,12 @@ def test_the_yc_rows_quote_the_pages_word_for_word() -> None:
     assert _BOTTOM_UP_WORDS in rows["bottom_up_rule"] and "4b-how-to-pitch-your-company" in rows["bottom_up_rule"]
     assert _LIFECYCLE_WORDS in rows["annual_rule"]
     assert _TOP_DOWN_WORDS in rows["top_down_rule"]
+    assert (NEW_SPACE_QUOTE, YC_BOTTOM_UP_QUOTE) == (f'"{_NEW_SPACE_WORDS}"', f'"{_YC_BOTTOM_UP_WORDS}"')
+    # The customers × price sentence is YC's method for a new product or space; the page's own bottom-up counts
+    # comparable products' sales, and its preference is quoted beside that sentence, never beside customers × price.
+    assert _NEW_SPACE_WORDS in rows["bottom_up_rule"] and "common usage, unverified" in rows["bottom_up_rule"]
+    assert rows["top_down_rule"].index(_YC_BOTTOM_UP_WORDS) < rows["top_down_rule"].index(_TOP_DOWN_WORDS)
+    assert _YC_BOTTOM_UP_WORDS not in rows["bottom_up_rule"]
     assert _GLOSSARY_WORDS in rows["revenue_rule"] and "4A-a-guide-to-seed-fundraising" in rows["revenue_rule"]
     for key in ("sam_rule", "som_rule", "population_rule", "sensitivity_rule", "tolerance"):
         assert rows[key].startswith("unverified"), key
@@ -568,6 +584,8 @@ _TOO_MANY_VALUES = [str(value) for value in range(1, MAX_SENSITIVITY_VALUES + 2)
         (_with({"serviceable_percent": "50", "obtainable_customers": "501"}), "above the serviceable customers"),
         (_with({"take_rate_percent": "100.01"}), "less than or equal to 100"),
         (_with({"price_period_months": 121}), "less than or equal to 120"),
+        (_with({"price_period_months": 0}), "greater than or equal to 1"),
+        (_with({"price_period_months": "12"}), "valid integer"),
         (_with(som_years=21), "less than or equal to 20"),
         (_with(stated_som="1"), "stated_som needs obtainable_percent or obtainable_customers in every segment"),
         (_with(som_target="1"), "som_target needs obtainable_percent or obtainable_customers in every segment"),
@@ -609,3 +627,147 @@ def test_seven_sensitivity_rows_are_refused() -> None:
 
     with pytest.raises(ValidationError, match="at most 6 items"):
         MarketSizingInput.model_validate({"segments": [_ONE_SEGMENT, _ONE_SEGMENT], "sensitivity": rows[:7]})
+
+
+_USAGE_PRICE = {
+    "customers": "2,000".replace(",", ""),
+    "price": "0.0075",
+    "price_period_months": 1,
+    "units_per_customer": "400000",
+    "obtainable_customers": "150",
+}
+
+
+def test_a_sub_cent_price_is_shown_with_the_places_it_needs_never_as_whole_cents() -> None:
+    """A $0.0075 usage price prints as $0.0075 everywhere it appears (the given line, the sensitivity base, each case
+    and its label, the break-even value), so a 67% price rise never prints as no change."""
+    result = market_sizing(
+        segments=[_USAGE_PRICE],
+        som_target="9000000",
+        sensitivity=[{"field": "price", "segment": 1, "values": ["0.005", "0.0125"]}],
+    )
+    (row,) = result.sensitivity
+    report = render_sheet(sheet_for(result))
+
+    assert row.base_value.rounded == Decimal("0.0075") and row.base_value.unit == "price"
+    assert [case.value.rounded for case in row.cases] == [Decimal("0.005"), Decimal("0.0125")]
+    assert row.at_som_target is not None and row.at_som_target.value is not None
+    assert (row.at_som_target.value.exact, row.at_som_target.value.rounded) == (Fraction(1, 80), Decimal("0.0125"))
+    assert re.search(r"Segment 1: price per unit +\$0\.0075  given", report)
+    assert re.search(r"Sensitivity 1: segment 1 price, base +\$0\.0075  given", report)
+    assert "Sensitivity 1 at $0.005: SOM " in report and "Sensitivity 1 at $0.0125: SOM " in report
+    assert re.search(r"price at SOM = \$9,000,000\.00 +\$0\.0125  base", report)
+    assert "$0.01 " not in report and "$0.00 " not in report
+
+
+@pytest.mark.parametrize(
+    ("value", "rounded"),
+    [
+        (Fraction(400), "400.00"),
+        (Fraction(49, 100), "0.49"),
+        (Fraction(3, 400), "0.0075"),
+        (Fraction(17_300, 27), "640.740741"),
+        (Fraction(15, 10**8), "0.00000015"),
+        (Fraction(1, 3 * 10**7), "0.000000033"),
+        (Fraction(1, 10**15), "0.000000000000001"),
+        (Fraction(1, 10**16), "0.00"),
+    ],
+)
+def test_a_unit_price_keeps_cents_and_the_places_it_needs(value: Fraction, rounded: str) -> None:
+    """Whole cents when exact, up to 6 places when needed, two significant digits under $0.00001 (up to 15 places, the
+    input floor; a break-even value below it shows as zero, and is refused as out of range), the exact value kept."""
+    shown = price_quantity(value)
+
+    assert (shown.unit, shown.exact, f"{shown.rounded:f}") == ("price", value, rounded)
+
+
+def test_a_workbook_price_cell_shows_every_place_it_was_rounded_to() -> None:
+    from equity_calculator.workbook import build_workbook
+
+    result = market_sizing(segments=[{**_USAGE_PRICE, "price": "0.00000015"}])
+    sheet = build_workbook([sheet_for(result)]).active
+    assert sheet is not None
+    formats = {
+        str(row[1].value): row[1].number_format
+        for row in sheet.iter_rows()
+        if isinstance(row[0].value, str) and row[0].value.endswith("price per unit")
+    }
+
+    assert formats == {"1.5E-7": '"$"#,##0.00000000'}
+
+
+def test_the_echoed_inputs_fed_back_keep_the_price_period_flag() -> None:
+    """Left out, the price period is null in the echo, so a call built from a result's own inputs keeps
+    price_period_defaulted; given (12 included), it stays given."""
+    for segment, flagged in (({}, True), ({"price_period_months": 12}, False), ({"price_period_months": None}, True)):
+        first = compute(MarketSizingInput.model_validate(_with(segment)))
+        echoed = json.loads(first.model_dump_json())["inputs"]
+        again = compute(MarketSizingInput.model_validate(echoed))
+
+        assert echoed["segments"][0]["price_period_months"] == (None if flagged else 12)
+        assert again.flags == first.flags
+        assert ("price_period_defaulted" in again.flags) is flagged
+        assert again.segments[0].price_period_given is not flagged
+        assert again.totals.tam.exact == first.totals.tam.exact == 100_000
+
+
+def test_the_input_schema_shows_no_default_period_of_12() -> None:
+    period = MarketSizingInput.model_json_schema()["$defs"]["MarketSegment"]["properties"]["price_period_months"]
+
+    assert period["default"] is None
+
+
+def test_fractional_customer_lines_add_up_to_the_total_line() -> None:
+    """The segments' buying-customer lines show the model's split rounding, so they add up to the total that sums
+    them (10.005 and 20.005 print as 10.01 and 20.00 above 30.01)."""
+    result = market_sizing(segments=[{"customers": "10.005", "price": "100"}, {"customers": "20.005", "price": "100"}])
+    lines = {line.key: line for line in sheet_for(result).lines}
+    parts = [lines[f"segment_{number}_customers"].values[0] for number in (1, 2)]
+
+    assert [part.rounded for part in parts if not isinstance(part, str)] == [Decimal("10.01"), Decimal("20.00")]
+    total = lines["total_customers"].values[0]
+    assert not isinstance(total, str) and total.rounded == Decimal("30.01")
+
+
+def test_a_share_above_zero_that_rounds_to_zero_says_so() -> None:
+    result = market_sizing(
+        segments=[{"customers": "40", "price": "100", "price_period_months": 1}], top_down=[{"amount": "840000000000"}]
+    )
+    report = render_sheet(sheet_for(result))
+
+    assert "bottom-up TAM / comparable part (a cross-check); under 0.0001%, not zero" in report
+    plain = render_sheet(sheet_for(market_sizing(**MARKET_AW)))
+    assert "not zero" not in plain
+
+
+def test_the_som_rule_says_one_year_and_the_tolerance_source_names_the_default() -> None:
+    one = {
+        row.key: row
+        for row in market_sizing(**_with({"obtainable_customers": "10"}, som_years=1, stated_tam="1")).assumptions
+    }
+    five = {row.key: row for row in market_sizing(**_with({"obtainable_customers": "10"}, som_years=5)).assumptions}
+    changed = market_sizing(**_with(stated_tam="1", tolerance_percent="5")).assumptions
+
+    assert one["som_rule"].setting.endswith("in 1 year") and five["som_rule"].setting.endswith("in 5 years")
+    assert one["tolerance"].source == "unverified (deal_check's default is 2%)"
+    assert {row.key: row.setting for row in changed}["tolerance"] == "5% of the computed figure"
+
+
+def test_does_not_move_is_reported_before_met_without_it() -> None:
+    """A field that is no factor of SOM is does_not_move even when the base SOM already meets the target; a field
+    that is a factor is met_without_it."""
+    result = market_sizing(
+        **_with(
+            {"obtainable_customers": "100"},
+            som_target="5000",
+            sensitivity=[
+                {"field": "customers", "segment": 1, "values": ["2000"]},
+                {"field": "price", "segment": 1, "values": ["200"]},
+            ],
+        )
+    )
+
+    assert [row.at_som_target.reach for row in result.sensitivity if row.at_som_target] == [
+        "does_not_move",
+        "met_without_it",
+    ]

@@ -14,6 +14,7 @@ from typing import get_args
 
 import pytest
 from equity_calculator.funds import use_of_funds_assumption
+from equity_calculator.layout import sheet_for
 from equity_calculator.runway_plan import Phase, cumulative_burn, required_raise, runway
 from equity_calculator.schemas.equity_runway_plan import (
     MAX_CASES,
@@ -24,6 +25,7 @@ from equity_calculator.schemas.equity_runway_plan import (
     RunwayPlanInput,
     RunwayPlanResult,
 )
+from equity_calculator.text import render_sheet
 from pydantic import ValidationError
 from tests.support import RUNWAY_W, RUNWAY_W_PLAN, RUNWAY_X, RUNWAY_Y, deal_check, runway_plan
 
@@ -326,6 +328,10 @@ def test_a_derived_case_scales_every_plan_phase_exactly() -> None:
             {"raises": [{"amount": "1", "use_of_funds": [{"amount": "1"}, {"percent": "50"}]}]},
             "every use_of_funds line as an amount or every one as a percent",
         ),
+        (
+            {"raises": [{"amount": "1", "lands_month": 2, "stated_runway_from": "landing"}]},
+            "stated_runway_from needs a stated runway on the same raise",
+        ),
     ],
     ids=[
         "plan-not-first",
@@ -338,6 +344,7 @@ def test_a_derived_case_scales_every_plan_phase_exactly() -> None:
         "floor-above-cash",
         "milestone-twice",
         "mixed-funds",
+        "basis-without-runway",
     ],
 )
 def test_each_refusal_says_what_is_wrong(fields: dict[str, object], message: str) -> None:
@@ -582,3 +589,72 @@ def test_the_defaults_are_the_deal_checks() -> None:
         deal.runway_band_months,
     )
     assert plan.runway_band_months == Decimal(18)
+
+
+def test_a_basis_with_its_stated_runway_or_left_at_today_is_accepted() -> None:
+    landing = {"amount": "1", "lands_month": 2, "stated_runway_from": "landing", "stated_runway_months": "3"}
+    today = {"amount": "1", "stated_runway_from": "today"}
+
+    accepted = RunwayPlanInput.model_validate(
+        {"cash_on_hand": "100000", "cases": [_PLAN_FLAT], "raises": [landing, today]}
+    )
+    assert [option.stated_runway_from for option in accepted.raises] == ["landing", "today"]
+
+
+def test_the_downside_flag_counts_the_no_raise_row_and_says_so() -> None:
+    """Every raise covers the milestone on both cases; only the no-raise row is covered on the plan and short on the
+    downside. The flag fires (with a raise and with none given), and its words cover the no-raise row."""
+    downside = {"name": "downside", "gross_burn_percent_of_plan": "150"}
+    base = {
+        "cash_on_hand": "100",
+        "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "10"}]}, downside],
+    }
+    with_raise = runway_plan(**base, raises=[{"amount": "50"}], milestones=[10])
+    without = runway_plan(**base, milestones=[10])
+
+    assert _verdict(with_raise, "plan", 1) == _verdict(with_raise, "downside", 1) == "covered"
+    assert (_verdict(with_raise, "plan", 0), _verdict(with_raise, "downside", 0)) == ("covered", "short")
+    assert "downside_short_where_plan_covers" in with_raise.flags and "milestone_short_on_plan" not in with_raise.flags
+    assert "downside_short_where_plan_covers" in without.flags
+    words = next(line.how for line in sheet_for(without).lines if line.key == "flag_downside_short_where_plan_covers")
+    assert words.startswith(
+        "The cash reaches a milestone on the plan but not on the downside, with the same raise or " "with none"
+    )
+    covered = runway_plan(**base, milestones=[6])
+    assert "downside_short_where_plan_covers" not in covered.flags
+
+
+def test_the_required_raise_shown_is_rounded_up_so_raising_it_covers() -> None:
+    """The exact requirement is $100.0002; half-even would print $100.00, which is short. The display rounds up to
+    $100.01, and a raise of that amount covers the milestone; an amount already in whole cents is shown as is."""
+    fields = _plan((1, "33.3334", "0"), cash_on_hand="0", milestones=[3], months_to_raise=0)
+    result = runway_plan(**fields)
+    row = next(row for row in result.required if row.case == "plan" and row.lands_month == 0)
+
+    assert row.amount is not None and row.amount.exact == Fraction(1_000_002, 10_000)
+    assert row.amount.rounded == Decimal("100.01")
+    printed = runway_plan(**{**fields, "raises": [{"amount": str(row.amount.rounded)}]})
+    assert _verdict(printed, "plan", 1) == "covered"
+    assert _verdict(runway_plan(**{**fields, "raises": [{"amount": "100.00"}]}), "plan", 1) == "short"
+    whole = runway_plan(**_plan((1, "100000", "0"), cash_on_hand="0", milestones=[3], months_to_raise=0))
+    (whole_row,) = (row for row in whole.required if row.case == "plan")
+    assert whole_row.amount is not None and whole_row.amount.rounded == Decimal("300000.00")
+
+
+def test_a_band_and_tolerances_typed_in_exponent_form_print_as_plain_numbers() -> None:
+    result = runway_plan(
+        **_plan(
+            (1, "10", "0"),
+            cash_on_hand="100",
+            raises=[{"amount": "5"}],
+            runway_band_months="2e1",
+            stated_runway_months="10",
+            tolerance_points="5E-1",
+        )
+    )
+    rows = {row.key: row.setting for row in result.assumptions}
+    words = next(line.how for line in sheet_for(result).lines if line.key == "flag_runway_below_band")
+
+    assert rows["runway_band"] == "20 months" and rows["tolerance"] == "0.5 points; 2% relative"
+    assert words.startswith("A raise lasts under 20 months on the plan")
+    assert "E+" not in render_sheet(sheet_for(result))
