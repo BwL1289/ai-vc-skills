@@ -18,7 +18,18 @@ import pytest
 from equity_calculator.__main__ import main, run
 from equity_calculator.schemas.equity import EquityAssumption
 from openpyxl import load_workbook
-from tests.support import DEAL_A, POOL_EXAMPLE, RUNWAY_Y, deal_check, employee, investor, pool, runway_plan
+from tests.support import (
+    DEAL_A,
+    METRICS_AN_DECK,
+    POOL_EXAMPLE,
+    RUNWAY_Y,
+    deal_check,
+    employee,
+    investor,
+    metrics_check,
+    pool,
+    runway_plan,
+)
 
 _INVESTOR = ["investor", "--equity-percent", "7", "--outcome-multiplier", "1.10"]
 # Company A's deck (tests.support.DEAL_A) as flags: a pool in the pre-money and a runway claim.
@@ -60,6 +71,40 @@ _RUNWAY_Y = [
     "12",
     "--months-to-raise",
     "6",
+]
+# Company AN's deck (tests.support.METRICS_AN_DECK) as flags: one month's parts, an unlabelled churn and a payback.
+_METRICS_AN = [
+    "metrics_check",
+    "--period-months",
+    "1",
+    "--starting-recurring",
+    "50000",
+    "--new-recurring",
+    "5000",
+    "--expansion-recurring",
+    "500",
+    "--contraction-recurring",
+    "500",
+    "--churned-recurring",
+    "1000",
+    "--customers-start",
+    "400",
+    "--customers-lost",
+    "12",
+    "--customers-new",
+    "45",
+    "--customers-new-paid",
+    "20",
+    "--sales-marketing-spend",
+    "36000",
+    "--gross-margin-percent",
+    "75",
+    "--customer-segment",
+    "smb",
+    "--stated-churn-percent",
+    "2",
+    "--stated-cac-payback-months",
+    "7.2",
 ]
 _EMPLOYEE = [
     "employee",
@@ -134,8 +179,9 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
         (_POOL, pool(**POOL_EXAMPLE).assumptions),
         (_DEAL_A, deal_check(**DEAL_A).assumptions),
         (_RUNWAY_Y, runway_plan(**RUNWAY_Y).assumptions),
+        (_METRICS_AN, metrics_check(**METRICS_AN_DECK).assumptions),
     ],
-    ids=["investor", "employee", "pool", "deal_check", "runway_plan"],
+    ids=["investor", "employee", "pool", "deal_check", "runway_plan", "metrics_check"],
 )
 async def test_every_assumption_prints_with_its_setting_statement_and_source(
     argv: list[str], assumptions: tuple[EquityAssumption, ...]

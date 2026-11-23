@@ -29,6 +29,7 @@ from equity_calculator.schemas.equity_common import (
 )
 from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealCheckResult
 from equity_calculator.schemas.equity_dilution import DilutionInput, DilutionResult
+from equity_calculator.schemas.equity_metrics_check import MetricsCheckInput, MetricsCheckResult
 from equity_calculator.schemas.equity_pool import (
     CapTableGroup,
     CapTableRow,
@@ -64,6 +65,8 @@ __all__ = [
     "InvestorInput",
     "InvestorResult",
     "InvestorScenario",
+    "MetricsCheckInput",
+    "MetricsCheckResult",
     "PoolCapTable",
     "PoolInput",
     "PoolResult",
@@ -233,6 +236,7 @@ ScenarioInput = (
     | WaterfallInput
     | DealCheckInput
     | RunwayPlanInput
+    | MetricsCheckInput
 )
 ScenarioResult = (
     InvestorResult
@@ -244,6 +248,7 @@ ScenarioResult = (
     | WaterfallResult
     | DealCheckResult
     | RunwayPlanResult
+    | MetricsCheckResult
 )
 
 EquityInput = Annotated[ScenarioInput, Field(discriminator="scenario")]

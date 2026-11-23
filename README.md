@@ -98,7 +98,7 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 
 | Skill                                                                      | What it does                                                                                                                                                                                                                                                                                                                                         | Status       |
 | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| [`equity-calculator`](skills/equity-calculator/SKILL.md)                   | Nine equity scenarios worked exactly: the investor test, a hire's grant, the option-pool shuffle, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls, a check of a raise's numbers, and how long a raise lasts on a plan.                                                                                                         | ✅ Available |
+| [`equity-calculator`](skills/equity-calculator/SKILL.md)                   | Ten equity scenarios worked exactly: the investor test, a hire's grant, the option-pool shuffle, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls, a check of a raise's numbers, how long a raise lasts on a plan, and a check of traction metrics.                                                                             | ✅ Available |
 | [`vc-deal-math`](skills/vc-deal-math/SKILL.md)                             | For founders: checks your own deck's ask before a VC does (valuation, ownership after the round, the pool top-up, the SAFE stack, runway, use of funds), every number from the calculator.                                                                                                                                                           | 🧪 Preview   |
 | [`vc-positioning`](skills/vc-positioning/SKILL.md)                         | For founders: tightens your raise's messaging before you go out, with an adversarial review (skeptical lenses attack it, then a judge drops what your own material already answers), a say-and-avoid list and a prep script for a session with an existing investor.                                                                                 | 🧪 Preview   |
 | [`vc-claims-check`](skills/vc-claims-check/SKILL.md)                       | For founders: checks every claim in your deck, one-pager and narrative before a VC does (a source you can show, figures that agree, patterns a VC discounts), with a skeptic that picks what a partner checks first and a refute pass that keeps only grounded attacks.                                                                              | 🧪 Preview   |
@@ -119,19 +119,20 @@ every clause of that sentence was met, Partial that exactly one was missed or me
 more were missed. Two were run again after a skill fix, as their files say. One run each is a small sample. The
 `vc-deal-math`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions` and `vc-current-investor-update` evals state the expected behaviour and have not yet been run in a live session.
 
-The `equity-calculator` skill covers nine scenarios:
+The `equity-calculator` skill covers ten scenarios:
 
-| Scenario      | The question it answers                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `investor`    | An investor wants n of the company. Is the deal worth it? (Paul Graham's equity equation)                              |
-| `employee`    | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                     |
-| `pool`        | A round asks for a bigger option pool. What is the real price per share, and who owns what afterwards?                 |
-| `round`       | A priced round converts post-money SAFEs and convertible notes. At what price, and who owns what afterwards?           |
-| `dilution`    | A holder owns h of the company. What is left after a series of rounds?                                                 |
-| `vesting`     | How much of a grant has vested at a given month, and what is it worth above the strike?                                |
-| `waterfall`   | The company is sold. Who gets what, with preferences paid by rank and each preferred class free to convert?            |
-| `deal_check`  | Do a raise's valuation, percent sold, ownership after the round and runway agree, as a VC will check them?             |
-| `runway_plan` | How long does each raise last on a phased plan and a downside, which milestones does it reach, and how much is needed? |
+| Scenario        | The question it answers                                                                                                |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `investor`      | An investor wants n of the company. Is the deal worth it? (Paul Graham's equity equation)                              |
+| `employee`      | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                     |
+| `pool`          | A round asks for a bigger option pool. What is the real price per share, and who owns what afterwards?                 |
+| `round`         | A priced round converts post-money SAFEs and convertible notes. At what price, and who owns what afterwards?           |
+| `dilution`      | A holder owns h of the company. What is left after a series of rounds?                                                 |
+| `vesting`       | How much of a grant has vested at a given month, and what is it worth above the strike?                                |
+| `waterfall`     | The company is sold. Who gets what, with preferences paid by rank and each preferred class free to convert?            |
+| `deal_check`    | Do a raise's valuation, percent sold, ownership after the round and runway agree, as a VC will check them?             |
+| `runway_plan`   | How long does each raise last on a phased plan and a downside, which milestones does it reach, and how much is needed? |
+| `metrics_check` | Do the ARR, retention, churn, CAC payback and burn multiple a deck states match their parts?                           |
 
 ## What you can ask
 
@@ -185,8 +186,9 @@ Once the plugin is installed, ask in plain words:
 - **Exact.** Every number is a fraction, rounded once for display (one marked exception: a note's interest over a part
   period). No floating point inside a result.
 - **Checkable.** Each line of a result says how it was computed; each result lists the assumptions it rests on and
-  their sources (Paul Graham, Sam Altman, Y Combinator's SAFE documents and its seed fundraising guide), and marks the
-  rest `unverified`.
+  their sources (Paul Graham, Sam Altman, Y Combinator's SAFE documents and its seed fundraising guide, and for the
+  traction metrics a16z's two startup-metrics posts, Bessemer's "Scaling to $100 Million", David Sacks's "The Burn
+  Multiple" and David Skok's "SaaS Metrics 2.0"), and marks the rest `unverified`.
 - **Four ways to run it.** The MCP server for agents, a command, an `.xlsx` workbook whose investor verdict re-works
   when you change a cell (`--xlsx deal.xlsx`), and a Python package.
 - **Local.** The server runs on your machine and makes no network calls ([SECURITY.md](SECURITY.md)).
@@ -200,7 +202,7 @@ The formulas, their sources, every flag and a worked example per scenario are in
 
 ## Roadmap
 
-- [x] `equity-calculator`: nine scenarios, command, workbook, MCP server, Python package
+- [x] `equity-calculator`: ten scenarios, command, workbook, MCP server, Python package
 - [x] Claude Code plugin and marketplace
 - [ ] `vc-deal-math`: founders check their own deck's numbers with the calculator (preview)
 - [ ] `vc-positioning`: founders tighten their raise's messaging, stress-tested by an adversarial review, and prep it
@@ -281,6 +283,14 @@ MIT, see [LICENSE](LICENSE). The calculator implements:
   fully diluted shares, and the 4-year schedule with a 1-year cliff.
 - Y Combinator's post-money SAFE forms and its Post-Money Safe User Guide,
   [ycombinator.com/documents](https://www.ycombinator.com/documents): the SAFE conversion rules.
+- Y Combinator, ["A guide to seed fundraising"](https://www.ycombinator.com/library/4A-a-guide-to-seed-fundraising):
+  the milestone rule and the runway band in `runway_plan`.
+- a16z, ["16 Startup Metrics"](https://a16z.com/16-startup-metrics/) and
+  ["16 More Startup Metrics"](https://a16z.com/16-more-startup-metrics/), Bessemer Venture Partners,
+  ["Scaling to $100 Million"](https://www.bvp.com/atlas/scaling-to-100-million), David Sacks,
+  ["The Burn Multiple"](https://sacks.substack.com/p/the-burn-multiple-51a7e43cb200) and David Skok,
+  ["SaaS Metrics 2.0"](https://www.forentrepreneurs.com/saas-metrics-2/): the definitions and benchmarks
+  `metrics_check` quotes.
 
 Everything else (option pools, notes, preferred stock, the finer vesting terms) is standard arithmetic, marked
 `unverified` in each result's assumptions. This is a calculator, not investment, legal or tax advice.

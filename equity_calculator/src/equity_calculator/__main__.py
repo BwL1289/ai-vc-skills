@@ -1,6 +1,7 @@
 # Command-line interface: stdout is the report.
 """``equity_calculator`` — an equity question: PG's two tests, the option pool, a round, dilution, vesting, an exit,
-a fundraising ask checked before a VC reads it, or how long a raise lasts on a founder's plan.
+a fundraising ask checked before a VC reads it, how long a raise lasts on a founder's plan, or a founder's traction
+metrics checked against their parts.
 
     equity_calculator investor (--equity-percent N | --pre-money V --investment I)
         (--outcome-multiplier M | --growth-percent G) [--holder-percent H]
@@ -29,6 +30,17 @@ a fundraising ask checked before a VC reads it, or how long a raise lasts on a f
         [--lean-phase "TERMS"... | --lean-revenue-percent R [--lean-gross-burn-percent G]]
         [--raise "TERMS"]... [--raise-use-of-funds "N AMOUNT|PCT%"]... [--milestone M]... [--months-to-raise T]
         [--stated-runway-months S] [--tolerance-points P] [--tolerance-percent Q] [--runway-band-months B]
+    equity_calculator metrics_check --period-months P [--recurring-unit monthly|annual]
+        [--starting-recurring S [--new-recurring N] [--expansion-recurring E] [--contraction-recurring C]
+        [--churned-recurring X] [--cohort-expansion-recurring E] [--cohort-contraction-recurring C]
+        [--cohort-churned-recurring X]] [--month-total-revenue T [--month-one-time-revenue O]
+        [--month-usage-revenue U]] [--customers-start S [--customers-lost L]] [--customers-new N
+        [--customers-new-paid P]] [--sales-marketing-spend M [--gross-margin-percent G]] [--net-burn B]
+        [--largest-customer-revenue L --period-revenue R] [--stated-arr A] [--stated-nrr-percent N]
+        [--stated-grr-percent G] [--stated-churn-percent C [--stated-churn-basis BASIS]] [--stated-cac C]
+        [--stated-cac-payback-months M] [--stated-burn-multiple X] [--stated-concentration-percent C]
+        [--tolerance-points P] [--tolerance-percent Q] [--customer-segment smb|mid_market|enterprise]
+        [--payback-band-months B] [--burn-multiple-band X] [--net-revenue-churn-band-percent C]
 
 Every scenario also takes ``--json`` (print the whole result model, exact fractions included, instead of the
 report) and ``--xlsx PATH`` (also write the formatted workbook to PATH; the report then names it). The report is
@@ -62,6 +74,7 @@ from equity_calculator.cli_arguments import (
     dilution_arguments,
     employee_arguments,
     investor_arguments,
+    metrics_check_arguments,
     pool_arguments,
     round_arguments,
     runway_plan_arguments,
@@ -78,6 +91,7 @@ from equity_calculator.schemas.equity import (
     DilutionInput,
     EmployeeInput,
     InvestorInput,
+    MetricsCheckInput,
     PoolInput,
     RoundInput,
     RunwayPlanInput,
@@ -102,6 +116,7 @@ _INPUT_MODELS: dict[str, type[ScenarioInput]] = {
     "waterfall": WaterfallInput,
     "deal_check": DealCheckInput,
     "runway_plan": RunwayPlanInput,
+    "metrics_check": MetricsCheckInput,
 }
 # A scenario whose flags do not map one to one onto its model's fields: the fields they make, and where each came from.
 _SHAPES: dict[str, Callable[[dict[str, Any]], tuple[dict[str, object], Places]]] = {"runway_plan": runway_plan_fields}
@@ -143,6 +158,11 @@ def _build_parser() -> argparse.ArgumentParser:
             "runway_plan",
             "How long each raise lasts on your plan and a downside, which milestones it reaches, how much is needed",
             runway_plan_arguments,
+        ),
+        (
+            "metrics_check",
+            "Check your traction metrics before a VC does: ARR, retention, churn, CAC payback, burn multiple",
+            metrics_check_arguments,
         ),
     )
     for name, summary, add_arguments in scenarios_help:

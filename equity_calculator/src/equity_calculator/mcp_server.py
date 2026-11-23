@@ -4,7 +4,7 @@
 
 Each scenario is one tool, ``equity_<scenario>`` (``equity_investor``, ``equity_employee``, ``equity_pool``,
 ``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``,
-``equity_runway_plan``). A tool takes
+``equity_runway_plan``, ``equity_metrics_check``). A tool takes
 one argument, ``inputs``: that scenario's input model (``equity_calculator.schemas``). It returns exactly the text
 ``equity_calculator <scenario> --json`` prints: the result model as JSON, exact fractions and labelled assumptions
 included. An input the model refuses, or one it accepts that has no answer (``equity_calculator.errors``), comes back
@@ -57,6 +57,7 @@ from equity_calculator.schemas.equity import (
     EmployeeInput,
     EquityInput,
     InvestorInput,
+    MetricsCheckInput,
     PoolInput,
     RoundInput,
     RunwayPlanInput,
@@ -169,6 +170,26 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "percents, milestones, months_to_raise and lands_month are the founder's figures: never assume one. Flags "
         "never change a verdict.",
     ),
+    "metrics_check": (
+        MetricsCheckInput,
+        "Metrics check (ARR, retention, churn, CAC payback, burn multiple)",
+        "A founder's traction metrics worked exactly from their parts over one period_months, and each figure the "
+        "document states checked. Recurring revenue in recurring_unit (monthly or annual; k = 12 or 1, the only "
+        "conversion): starting_recurring S and the period's new N, expansion E, contraction C and churned X. ARR at "
+        "the end = k(S + N + E - C - X), net new ARR = k(N + E - C - X); the latest month's ARR = 12(month_total - "
+        "one_time - usage) against its run-rate 12 x month_total. Gross revenue retention (S - C - X)/S and net "
+        "(S + E - C - X)/S, on the cohort_* movements of the starting customers when given, over the period and "
+        "never annualised; gross revenue churn (C + X)/S, net (C + X - E)/S, logo churn customers_lost / "
+        "customers_start. CAC = sales_marketing_spend / customers_new (paid: / customers_new_paid); CAC payback = "
+        "spend / (new monthly recurring x gross margin), and on revenue only; burn multiple = net_burn / net new "
+        "ARR (none at or below zero); concentration = largest_customer_revenue / period_revenue. Each stated_* "
+        "figure comes back consistent or a mismatch (a churn with no basis once per basis; a stated retention or "
+        "churn over period_months, so set it to the period the document's figure covers, 1 for a monthly churn, 12 "
+        "for an annual NRR, one call per period); flags name the likely "
+        "cause of a mismatch (a run-rate called ARR, new customers in NRR, payback on revenue, new not net new ARR) "
+        "and three benchmark questions (payback by customer_segment, burn multiple 3x, monthly net revenue churn "
+        "2%), never errors. Every part is the founder's figure: never assume one.",
+    ),
 }
 
 _INSTRUCTIONS = (
@@ -177,8 +198,10 @@ _INSTRUCTIONS = (
     "round with SAFEs and notes), equity_dilution (one holder through rounds), equity_vesting (a grant at a month), "
     "equity_waterfall (who gets what of an exit), equity_deal_check (a founder's raise checked: valuation, ownership "
     "after the round, runway, the deck's own figures), equity_runway_plan (how long each raise lasts on a phased "
-    "plan and a downside, which milestones it reaches, the smallest raise that gets there). Pass the scenario's "
-    "fields in `inputs`; give money and percents as JSON strings to keep every digit. Quote the result's numbers and "
+    "plan and a downside, which milestones it reaches, the smallest raise that gets there), equity_metrics_check "
+    "(a founder's ARR, retention, churn, CAC payback, burn multiple and concentration worked from their parts and "
+    "checked against the document's figures). Pass the scenario's fields in `inputs`; give money and percents as "
+    "JSON strings to keep every digit. Quote the result's numbers and "
     "its labelled assumptions; never round them further without saying so. A value whose unit is fraction is a share "
     "of the whole: show it as a percent by moving the decimal point of its rounded value two places to the right "
     "(0.166667 is 16.6667%), as the command line's report prints it."
@@ -348,7 +371,8 @@ def build_server(output_dir: Path | None = None) -> FastMCP:
                 f"dot, no control, format or surrogate character), and a name that would land outside the folder, an "
                 f"existing file, a link or an answer too large for a workbook is refused. `inputs` is any "
                 f'scenario\'s input with its `scenario` tag set ("investor", "employee", "pool", "round", "dilution", '
-                f'"vesting", "waterfall", "deal_check" or "runway_plan"). Returns the path written. {_DIGITS_ADVICE}'
+                f'"vesting", "waterfall", "deal_check", "runway_plan" or "metrics_check"). Returns the path written. '
+                f"{_DIGITS_ADVICE}"
             ),
             annotations=ToolAnnotations(
                 readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False
