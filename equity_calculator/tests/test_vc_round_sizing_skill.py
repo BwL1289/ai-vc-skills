@@ -214,6 +214,7 @@ def test_the_steps_send_both_runway_claims_and_a_safe_to_the_right_place() -> No
     assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
     assert "`slack_months`" in steps and "`start_raising_by`" in steps and "never added or subtracted by hand" in steps
     assert "No recommendation." in steps
+    assert "means what the vc-deal-math skill's flag table says" in steps
 
 
 def test_every_pattern_cites_a_read_source_the_calculator_or_says_unverified() -> None:

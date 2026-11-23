@@ -113,6 +113,8 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
    - A SAFE or note: `equity_round`, with the next priced round the founder expects. With none, the SAFE's share is
      "not computed: set at the next priced round", as the vc-deal-math skill says; never pass a SAFE as `investment`.
    - Through the next round: `equity_dilution`, with this round and the next as the founder expects it.
+   - A code in an ownership tool's `flags` means what the vc-deal-math skill's flag table says; a benchmark one is
+     quoted with the tool's own assumption row and its source.
 5. **Deck claims.** "We have N months without raising" goes in the top-level `stated_runway_months`. A raise's runway
    claim goes in that option's `stated_runway_months`, with `stated_runway_from` set to `landing` when the deck counts
    from the close of a later raise. Use-of-funds lines go in that option's `use_of_funds`. Each comes back consistent

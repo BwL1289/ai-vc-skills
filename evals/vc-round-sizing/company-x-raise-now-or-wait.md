@@ -101,7 +101,9 @@ The runway plan:
   Milestone 1 (month 18), plan, raise 2: verdict                                   covered  covered when the runway reaches month 24
   Milestone 1 (month 18), downside, raise 2: verdict                                 short  covered when the runway reaches month 24
   Required raise, milestone 1, plan, landing month 0                         $2,580,000.00  smallest raise keeping cash at or above the floor to month 24
+  Required raise, milestone 1, plan, landing month 6                         $2,580,000.00  smallest raise keeping cash at or above the floor to month 24
   Required raise, milestone 1, downside, landing month 0                     $3,156,000.00  smallest raise keeping cash at or above the floor to month 24
+  Required raise, milestone 1, downside, landing month 6                     $3,156,000.00  smallest raise keeping cash at or above the floor to month 24
   Be ready to answer                                               milestone_short_on_plan  A raise does not reach a milestone, with the months to raise, on the plan itself
   Be ready to answer                                      downside_short_where_plan_covers  A raise reaches a milestone on the plan but not on the downside; be ready to say what happens if the plan is missed
 ```
