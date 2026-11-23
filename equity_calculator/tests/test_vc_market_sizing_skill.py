@@ -10,7 +10,8 @@ refute pass with the fixed verdicts that invents nothing, and computed findings 
 evals/vc-market-sizing/ has a prompt, an expected tool call and an expected answer; an eval with an
 ``equity_market_sizing`` call carries each call valid (the main call, then any whole-company run) and, for each, an
 excerpt that is lines of the report that call prints. The skill states the tool's list limits from the schema, which
-rows to keep when there are more, and which fields cannot move a SOM given as a count, as the tool works them.
+rows to keep when there are more, and which fields cannot move a SOM given as a count, as the tool works them. An eval
+run in a live session records an excerpt of that run under "Recorded answer"; the others say they have not been run.
 """
 
 from __future__ import annotations
@@ -64,7 +65,20 @@ _PROGRAM = "equity_calculator "
 _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
-_HANDOFF_SKILLS = ("vc-claims-check", "vc-deck-review", "vc-positioning", "vc-deal-math", "equity-calculator")
+_HANDOFF_SKILLS = (
+    "vc-claims-check",
+    "vc-deck-review",
+    "vc-positioning",
+    "vc-deal-math",
+    "equity-calculator",
+    "vc-metrics-readiness",
+    "vc-round-sizing",
+)
+# Evals run in a live session: each records an excerpt of the run, blockquoted, under "## Recorded answer".
+_RECORDED = ("aw",)
+_NOT_RUN_LIVE = "has not been run in a live session"
+_RECORDED_HEADING = "\n## Recorded answer\n"
+_ONE_PER_SUBAGENT = "launch one subagent per objection in a single message; never put two objections in one subagent"
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
 _TRIGGERS = (
@@ -301,7 +315,22 @@ def test_the_answer_names_every_break_even_outcome_and_how_the_lenses_ran() -> N
         if reach != "value":
             assert f"`{reach}`" in answering, reach
     assert "Say whether the lenses ran as subagents" in answering
+    assert "give the number of refute subagents run" in answering
     assert "every sensitivity row left out" in answering
+    assert "its lens or lenses in brackets after the quote" in answering
+    # Gross spend always sits beside a stated TAM, in its own section; a top-down gap's reason is only a question.
+    assert "**Against the deck,** its own section" in answering
+    assert "Beside a stated TAM, always give the tool's total gross spend" in answering
+    assert "with no take rate the two figures are the same, so it cannot" in answering
+    assert "Any reason for the gap is a question to the founder under Open asks, never a statement" in answering
+    # The ledger keeps a horizon per segment; the shakiest pick says why the other rows were not picked.
+    ledger = _unwrapped(_section("## The assumption ledger"))
+    assert "Each segment with a SOM has its own Horizon row" in ledger
+    assert "give each other sensitivity row's kind and swing and why it was not picked" in _unwrapped(
+        _section("## Steps")
+    )
+    flags = _unwrapped(_section("## Flags"))
+    assert "`[the number of <buyers> you plan to win]`" in flags and "`[the year you expect to win them]`" in flags
 
 
 def test_the_skill_states_the_tools_list_limits_and_which_rows_to_keep() -> None:
@@ -365,8 +394,14 @@ def test_the_three_lenses_are_named_by_what_they_test() -> None:
     assert "never the tool's result" in attack
     assert "you are not an investor and do not speak as one, named or not" in attack
     # A lens that sees the answering line must still raise the objection, or the refute pass has nothing to drop.
-    assert "Do not judge whether another line of the material answers an objection: raise it anyway" in attack
+    assert (
+        "Do not judge whether another line of the material answers an objection: raise it anyway, however short the "
+        "material; the refute pass decides." in attack
+    )
     assert "rather than a weak objection" not in attack
+    assert "parallel subagents, however short the material, all launched in one message" in attack
+    subagents_first = "With a subagent tool (in Claude Code, the Agent or Task tool), step 8 runs the three lenses"
+    assert subagents_first in lead and lead.index(subagents_first) < lead.index("Without a subagent tool")
 
 
 def test_the_refute_pass_uses_the_fixed_verdicts() -> None:
@@ -379,6 +414,17 @@ def test_the_refute_pass_uses_the_fixed_verdicts() -> None:
     assert "Bring in no outside fact about the market, and do no arithmetic" in refute
     assert "a line of the material other than the objected line supplies" in refute
     assert "neither does one that is the objected line itself" in refute
+    # The refute pass is countable: one objection per subagent, all in one message, with no rule added to the brief.
+    assert "N objections after the quote check means N subagents" in refute and _ONE_PER_SUBAGENT in refute
+    assert "add no rule of your own to the brief" in refute
+    # What is missing is what the pattern names; a line answering part of it keeps the objection for the rest.
+    assert "What is missing is what the objection's pattern names in its Fix column, nothing more" in refute
+    assert "goes to the open asks as a question and does not keep it" in refute
+    assert "the objection is Kept for the part left" in refute
+    (path_row,) = (row for row in _table("### Patterns") if row[0].startswith("A SOM many times today's customers"))
+    assert path_row[2] == "Name the channel behind the tool's new customers a year; its capacity is a question"
+    steps = _unwrapped(_section("## Steps"))
+    assert "the number of refute subagents equals the number of objections that passed the quote check" in steps
 
 
 def test_computed_findings_skip_the_review_and_survivors_have_tiers() -> None:
@@ -386,7 +432,8 @@ def test_computed_findings_skip_the_review_and_survivors_have_tiers() -> None:
     ranked = _unwrapped(_section("### Rank what survives"))
 
     assert "Computed findings do not go through the lenses or the refute pass" in attack
-    assert "A mismatch on a stated TAM, SAM or SOM leads the first tier" in attack
+    assert "A mismatch on a stated TAM, SAM or SOM heads the list, ahead of the tiers, with no tier" in attack
+    assert "leads the first tier" not in _TEXT
     for tier in _TIERS:
         assert f"**{tier}**" in ranked, tier
     assert "no percentages and no score" in ranked
@@ -436,7 +483,27 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
         positions = [text.find(f"\n{heading}\n") for heading in _EVAL_HEADINGS]
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
-        assert "made up" in text and "has not been run in a live session" in text, path.name
+        assert "made up" in text, path.name
+        recorded = path.name.split("-")[1] in _RECORDED
+        assert (_RECORDED_HEADING in text) == recorded, path.name
+        assert (_NOT_RUN_LIVE in text) != recorded, path.name
+
+
+@pytest.mark.parametrize("letter", _RECORDED)
+def test_a_recorded_run_is_a_blockquoted_excerpt_after_the_expected_answer(letter: str) -> None:
+    """The recorded answer is the run's own text, quoted, so no heading or fence in it is read as the eval's own."""
+    (path,) = (path for path in _EVALS if path.name.startswith(f"company-{letter}-"))
+    text = path.read_text(encoding="utf-8")
+    header = _unwrapped(text.split("\n## Prompt\n", 1)[0])
+    recorded = text.split(_RECORDED_HEADING, 1)[1]
+    lines = [line for line in recorded.splitlines() if line.strip()]
+    quoted = [line for line in lines if line.startswith(">")]
+
+    assert text.index("\n## Expected answer\n") < text.index(_RECORDED_HEADING)
+    assert "is an excerpt of a recorded run (Claude Code" in header
+    assert "Recorded with Claude Code" in recorded and quoted
+    assert all(line.startswith(">") for line in lines[lines.index(quoted[0]) :])
+    assert not any(line.startswith(("#", "```")) for line in lines)
 
 
 def test_the_no_call_evals_carry_no_call_or_excerpt() -> None:
@@ -477,7 +544,10 @@ def test_eval_aw_leads_with_the_mismatch_and_quotes_the_break_even_values() -> N
     slide = "A $120M TAM in US veterinary software."
 
     assert slide in prompt and slide in answer
-    assert "the TAM mismatch leads the first tier" in answer
+    assert "the TAM mismatch heads the list, ahead of the tiers, with no tier" in answer
+    assert "the gap is not a gross-spend count" in answer and "Under its own heading, Against the deck" in answer
+    assert "does not keep the objection" in answer and "One subagent deciding several objections" in answer
+    assert "`[the number of groups you plan to win]`" in answer
     assert "It works none of them out itself" in answer
     assert "even at the founder's own best case no single assumption reaches the plan" in answer
     assert "never a recommendation or a figure to aim for" in answer
