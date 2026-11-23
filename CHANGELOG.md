@@ -244,6 +244,11 @@ All notable changes to this repository. Dates are UTC.
   founder's places, and the skills that relay the runway plan say so and explain the flag. One eval's verdict changed:
   Company R's "about 6 months" with no raise is 6.25 months rounded to whole months, so it is now consistent, not a
   minor-tier mismatch; every runway plan excerpt was re-synced.
+- The README's front page describes the whole pack, with plugin version 0.2.3 so an installed copy carries it: the
+  pitch, the opening paragraphs and "How it works" now cover the reviews as well as the calculator, "What you can
+  ask" adds prompts for the metrics, market size, round size and product-decision skills, and the long caption under
+  the demo recording is one line. The site's "See it work" introduction fits on one line, its first "How it works"
+  step says the same as the README's, and AGENTS.md describes the pack the same way.
 
 ## 2026-11-21
 

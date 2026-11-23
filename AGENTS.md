@@ -4,9 +4,10 @@ Instructions for AI coding agents working on this repository. Humans: see [CONTR
 
 ## What this repository is
 
-AI VC skills: agent skills for the money side of building a startup, shipped as one Claude Code plugin. Skills live in
-`skills/<name>/SKILL.md`; the exact math lives in the `equity_calculator` Python package, which the skills call through
-its command or its MCP server.
+AI VC skills: agent skills that help a founder get a raise ready (exact equity math and skeptical reviews of the deck,
+claims, metrics, round and term sheet), shipped as one Claude Code plugin. Skills live in `skills/<name>/SKILL.md`; the
+exact math lives in the `equity_calculator` Python package, which the skills call through its command or its MCP
+server.
 
 ## Layout
 

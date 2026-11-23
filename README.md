@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <b>Ask your AI the equity questions founders get wrong, and get exact answers you can check by hand.</b>
+  <b>Get your raise ready before a VC sees it: skeptical reviews of your deck, claims, metrics, round and term sheet, and exact equity math you can check by hand.</b>
 </p>
 
 <p align="center">
@@ -33,15 +33,21 @@
 </p>
 
 <p align="center">
-  <sub>The prompt asks for five short lines, so the answer shortens the tool's figures: the calculator prints a round
-  price of $0.960784 and existing holders at 60.8497%. Otherwise the equity-calculator skill tells the agent to give the
-  numbers as the tool prints them, never rounded again.</sub>
+  <sub>A real run. The prompt asks for five short lines, so the answer shortens the calculator's figures.</sub>
 </p>
 
-**AI VC skills** are agent skills for the money side of building a startup: the questions you face when an investor
-wants a stake, a hire wants a grant, or a round converts your SAFEs. Each skill tells the agent when to act and how;
-the numbers come from an exact calculator, never from the model's own arithmetic, and every answer shows its formula,
-its source and its assumptions.
+**AI VC skills** are agent skills that help a founder get a raise ready before a VC sees it. They check your deck's
+ask and its claims, review your deck, messaging, metrics, market size, round size, term sheet and investor updates,
+show the judgment behind what you built, rehearse your partner meeting, prepare you for diligence and draft the memo
+your champion partner is likely to write. In every review, skeptical passes raise the strongest objections to your
+material, then a refute pass drops each one that your own material answers or that rests on a fact you did not give.
+What is left is what you still need to fix, answer or take to your lawyer.
+
+Every figure about your company comes from an exact calculator or from your own material, never from the model's own
+arithmetic. The calculator's report says how each line was computed, and each result lists its assumptions and their
+sources. The same calculator answers the equity questions founders get wrong (an investor's stake, a hire's grant,
+SAFEs converting in a round) in figures you can check by hand. An investor's view is only a lens the reviews apply:
+the skills never screen deals and never speak as a named investor or firm.
 
 Works with Claude Code (as a plugin), Claude Desktop, Cursor and any client that speaks
 [MCP](https://modelcontextprotocol.io) or reads [Agent Skills](https://agentskills.io).
@@ -151,7 +157,44 @@ The `equity-calculator` skill covers eleven scenarios:
 
 ## What you can ask
 
-Once the plugin is installed, ask in plain words:
+Once the plugin is installed, ask in plain words.
+
+**Your raise**
+
+> Review my deck before I send it to seed funds: here is each slide's text and our ask.
+
+> Check my deck's numbers: we're raising $3M at $12M pre for 20%, with a 10% pool in the pre-money, and the deck says
+> 24 months of runway. We have 8M shares, $400k in the bank, and plan to burn $180k a month.
+
+> Fact-check my deck: do the figures in the deck and the one-pager agree, and what will a partner check first?
+
+> Stress-test my pitch before we go out to raise: here is our one-liner, our slide titles and our ask.
+
+> Are our metrics ready for our Series A meetings? Here are the ARR, retention, churn and CAC payback figures from our
+> deck, our model and our last update.
+
+> Check our market slide: here is the TAM it states, who buys from us, how many of them there are and what each pays,
+> with our sources.
+
+> How much should we raise, $3M or $4M? Here is our cash, our monthly plan and the milestone we need to reach before
+> the next round.
+
+> Which of our product decisions should I show investors? Here is our core workflow, what we cut and why.
+
+> Rehearse my partner meeting on Tuesday: here is my pitch, our seed round and the partner's background.
+
+> The fund wants to start diligence: here is our deck, our cap table and the documents we have.
+
+> Here is our term sheet: what does each term mean, and what do we get at a $20M sale?
+
+> Write the investment memo for my champion: here is our deck, the round, the cap table and the exits we believe in.
+
+> Write our October investor update: here is last month's update, this month's numbers and our cash and burn.
+
+> Write this month's update for the VCs we're warming up: here is last month's update, this month's notes and our one
+> ask.
+
+**Equity math**
 
 > An investor wants 7% and says the deal makes the company 10% more valuable. Should we take it?
 
@@ -167,29 +210,18 @@ Once the plugin is installed, ask in plain words:
 
 > How much of a 4-year grant with a 1-year cliff has vested at month 30?
 
-> Check my deck's numbers: we're raising $3M at $12M pre for 20%, with a 10% pool in the pre-money, and the deck says
-> 24 months of runway. We have 8M shares, $400k in the bank, and plan to burn $180k a month.
-
-> Stress-test my pitch before we go out to raise: here is our one-liner, our slide titles and our ask.
-
-> Fact-check my deck: do the figures in the deck and the one-pager agree, and what will a partner check first?
-
-> Review my deck before I send it to seed funds: here is each slide's text and our ask.
-
-> Rehearse my partner meeting on Tuesday: here is my pitch, our seed round and the partner's background.
-
-> Here is our term sheet: what does each term mean, and what do we get at a $20M sale?
-
-> The fund wants to start diligence: here is our deck, our cap table and the documents we have.
-
-> Write our October investor update: here is last month's update, this month's numbers and our cash and burn.
-
-> Write the investment memo for my champion: here is our deck, the round, the cap table and the exits we believe in.
-
-> Write this month's update for the VCs we're warming up: here is last month's update, this month's notes and our one
-> ask.
-
 ## How it works
+
+1. **You ask in plain words.** Paste the ask slide, the SAFE list, the one-liner or the whole deck. The skill asks for
+   what is missing, by name, and a review quotes your own lines word for word.
+2. **The calculator does the math.** Every figure a skill works out comes from the exact equity calculator (its MCP
+   tools or its command). Its report says how each line was computed, and each result lists its assumptions and their
+   sources. The model reads, asks and writes; it never does the arithmetic.
+3. **A review attacks, then refutes.** In every skill but `equity-calculator` and `vc-deal-math`, skeptical passes
+   raise the strongest objections, and a refute pass drops any that your own material answers or that rest on a fact
+   you did not give.
+
+The calculator's part, for the investor test:
 
 ```
   You ask                          The skill                         The MCP server
@@ -214,6 +246,8 @@ Once the plugin is installed, ask in plain words:
   marks the rest `unverified`.
 - **Four ways to run it.** The MCP server for agents, a command, an `.xlsx` workbook whose investor verdict re-works
   when you change a cell (`--xlsx deal.xlsx`), and a Python package.
+- **On your side.** You are always the founder. The skills never play an investor or speak as a named person or
+  firm.
 - **Local.** The server runs on your machine and makes no network calls ([SECURITY.md](SECURITY.md)).
 
 <p align="center">
