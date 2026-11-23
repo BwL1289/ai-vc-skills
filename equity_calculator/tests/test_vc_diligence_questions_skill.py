@@ -383,6 +383,9 @@ def test_the_cap_table_goes_to_the_calculator_and_its_sums_are_quoted_unchecked(
     assert "is not passed as `investment`" in steps
     assert "Runway with no raise, or on a SAFE or note raise, goes to `equity_runway_plan`" in steps
     assert "One call per document's version of the ask" in steps
+    assert "Read every code in the tool's `flags` too, and relay each in the tool's words" in steps
+    assert "with its `unverified` source, never as a bar" in steps
+    assert "each flag, one line, in the tool's words" in answering
     for unchecked in ("no tool computes runway without a raise", "no tool computes this for a SAFE or note raise"):
         assert unchecked not in _TEXT, unchecked
 

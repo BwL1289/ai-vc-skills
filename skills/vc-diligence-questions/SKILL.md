@@ -28,7 +28,7 @@ score and no readiness percentage, and never adds a fact, a figure or a document
     around it: the equity-calculator skill.
   - The story and the phrases to drop: the vc-positioning skill.
   - "Review my term sheet": the vc-term-sheet-review skill, clause by clause. This skill lists the term sheet as a
-    data-room document and takes its pool for the calculator, but never reads or judges its terms.
+    data-room document and takes its pool for the calculator, but never reviews or judges its clauses.
 
 ## Inputs
 
@@ -56,7 +56,8 @@ The questions come from one file: the question bank the vc-partner-meeting skill
 [`../vc-partner-meeting/references/question-bank.md`](../vc-partner-meeting/references/question-bank.md) from this
 skill's folder (the plugin installs both folders side by side under `skills/`; a manual install copies both folders).
 This skill reads that file; it keeps no copy of it. If the file is not there (the vc-partner-meeting folder was not
-installed), say so in one line, name the folder to add, and go on with this skill's own file; never write bank questions from memory and cite no bank ID.
+installed), say so in one line, name the folder to add, and go on with this skill's own file; never write bank
+questions from memory and cite no bank ID.
 
 From each bank row this skill reads the ID, Question, Probes, Stages, Grounding and Diligence columns; it does not use
 the Lenses column, which belongs to the partner-meeting rehearsal. Each bank category belongs to one area:
@@ -113,6 +114,9 @@ check.
      (`{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}`), the stated runway as
      `stated_runway_months` (no raise) or as a raise option's own `stated_runway_months` (`raises: [{"amount": "..."}]`).
    - A tool's mismatch is a diligence question a partner will ask first, so it goes to the top of the ranked list.
+   - Read every code in the tool's `flags` too, and relay each in the tool's words: beside the mismatch it explains,
+     or, with no mismatch, as a kept question at slows it, not refuted. A flag that rests on a benchmark band quotes
+     the band only as the tool's assumption row gives it, with its `unverified` source, never as a bar to clear.
    - What no tool checks: whether the cap table's rows add up to its total, and any percent of the company the
      founder states for today. Quote them as stated, mark them "not checked: no tool adds up a cap table", and never
      add, subtract or divide shares yourself.
@@ -122,9 +126,9 @@ check.
    - Growth rates, retention, market sizes and unit economics have no tool here: quote them as stated, check only that
      each has a definition, a period and a record behind it, and never compute, convert or round one.
 3. **Run the adversarial review** (next section): attack, check the quotes, refute, rank.
-4. **Read the bank and the checklist,** only now. Word each kept question with a bank row's Question when one asks
-   the same thing, and cite its ID; otherwise keep the lens's wording. Then build the area prep list and the data-room
-   checklist (the sections after the review).
+4. **Read the bank and the checklist,** only now. Word each kept question with a bank row's Question, or a row of
+   this skill's own question table, when one asks the same thing, and cite its ID; otherwise keep the lens's
+   wording. Then build the area prep list and the data-room checklist (the sections after the review).
 5. **Draft an answer** to each kept question (the section "Draft answers").
 6. **Check before answering.** Every kept question quotes a line that is in the founder's material word for word;
    every draft answer uses only facts from the material or a tool result and marks each gap as a bracketed ask; every
@@ -244,7 +248,7 @@ missing; name them once as "for the next round" when the founder asks for a full
 
 For each kept question, in ranked order:
 
-- **The question,** its area, the bank ID if one was used, and the founder's line it came from, quoted.
+- **The question,** its area, the bank or own-table ID if one was used, and the founder's line it came from, quoted.
 - **A draft answer,** at most four sentences, the point first, built only from the founder's material and tool
   results, each fact traceable to a label. Never stronger than the facts: no number, customer, document, signature,
   date or plan that is not in the material. Each gap is a bracketed ask. Where the founder does not know yet, the
@@ -262,12 +266,12 @@ it never says whether something is legally sufficient.
    point to, which also goes to the have-it-ready list; or not grounded). When the lenses ran one after another in
    one agent, say they are less independent than separate subagents.
 3. **Draft answers,** question by question, as above.
-4. **Area prep list,** area by area, with bank IDs.
+4. **Area prep list,** area by area, with bank IDs and this skill's own LEGAL and CAP IDs.
 5. **Data-room checklist,** by area: Row, What it shows, Status (Contradicted, Missing or Ready), the founder's
    document or the bracketed ask.
 6. **Numbers and cap table:** each `equity_deal_check`, `equity_round` or `equity_runway_plan` verdict with each
-   mismatch row in the tool's values; the cap table's own sums and today's percents with "not checked: no tool adds
-   up a cap table"; every other figure quoted as stated.
+   mismatch row in the tool's values; each flag, one line, in the tool's words; the cap table's own sums and today's
+   percents with "not checked: no tool adds up a cap table"; every other figure quoted as stated.
 7. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
 8. **Sources:** the frameworks used, with links, and which points rest on this skill's own unverified judgment.
 9. **Close:** this is not legal, tax or investment advice; a lawyer should review the legal rows and every document
