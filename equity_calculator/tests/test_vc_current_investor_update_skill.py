@@ -1,17 +1,19 @@
-"""The vc-investor-update skill keeps its shape: its sections, its tie-out, its runway call, its reader pass, its evals.
+"""The vc-current-investor-update skill keeps its shape: its sections, tie-out, runway call, reader pass and evals.
 
 The skill writes the update a founder sends their current investors. Every calculator tool it names must be a tool the
 MCP server serves, and it names one: ``equity_runway_plan``, called with no raise and no milestone. Its JSON example
 must be a valid call, its command must run and print every line of the excerpt after it, and the two must be the same
-check. Its flag table holds exactly the flags such a call can raise. The update's sections, the tie-out statuses and
-the reader pass's four lenses are fixed; the refute verdicts are word for word the repository's; the ranked fix list
-has three tiers and no score. Every source is one the skill's authors read in full, and every pattern row cites one of
-them or says it is unverified. Each eval in evals/vc-investor-update/ has a prompt, an expected tool call and an
-expected answer, and every call is valid and every excerpt is lines of the report that call prints.
+check. Its flag table holds exactly the flags such a call can raise. A runway claim stated as a floor ("30+ months") is
+judged by the printed runway, not by the tool's two-sided verdict. The update's sections, the tie-out statuses and the
+reader pass's four lenses are fixed; in review mode the reader pass judges the founder's draft as given; the refute
+verdicts are word for word the repository's; the ranked fix list has three tiers and no score. Every source is one the
+skill's authors read in full, and every pattern row cites one of them or says it is unverified. Each eval in
+evals/vc-current-investor-update/ has a prompt, an expected tool call and an expected answer, and every call is valid
+and every excerpt is lines of the report that call prints.
 
 Two skills it points to are planned, not yet shipped: sizing the next round (vc-round-sizing) and updates to
-prospective investors (vc-founder-update). A test checks that their folders do not exist yet, so the pull request that
-adds either one has to turn the planned line here into a hand-off.
+prospective investors (vc-prospective-investor-update). A test checks that their folders do not exist yet, so the pull
+request that adds either one has to turn the planned line here into a hand-off.
 """
 
 from __future__ import annotations
@@ -26,18 +28,19 @@ import pytest
 from equity_calculator.__main__ import _INPUT_MODELS, run
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
-from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag, RunwayPlanInput
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag, RunwayPlanInput, RunwayPlanResult
 from equity_calculator.text import render_sheet
+from pydantic import ValidationError
 
 _ROOT = Path(__file__).resolve().parents[2]
-_SKILL = _ROOT / "skills" / "vc-investor-update" / "SKILL.md"
+_SKILL = _ROOT / "skills" / "vc-current-investor-update" / "SKILL.md"
 _TEXT = _SKILL.read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
-_EVALS = sorted((_ROOT / "evals" / "vc-investor-update").glob("*.md"))
-_EVAL_COUNT = 4
-# The repository gives each made-up company its own letter; this skill's evals use AG, AH, AJ and AK (no AI, as the
+_EVALS = sorted((_ROOT / "evals" / "vc-current-investor-update").glob("*.md"))
+_EVAL_COUNT = 5
+# The repository gives each made-up company its own letter; this skill's evals use AG, AH, AJ, AK and AL (no AI, as the
 # repository skips I).
-_EVAL_LETTERS = ("ag", "ah", "aj", "ak")
+_EVAL_LETTERS = ("ag", "ah", "aj", "ak", "al")
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_runway_plan` call."
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
@@ -50,7 +53,7 @@ _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
 _PROGRAM = "equity_calculator "
 _HANDOFF_SKILLS = ("vc-claims-check", "vc-deal-math", "equity-calculator", "vc-positioning")
-_PLANNED_SKILLS = ("vc-round-sizing", "vc-founder-update")
+_PLANNED_SKILLS = ("vc-round-sizing", "vc-prospective-investor-update")
 _PLANNED = "Planned, not yet shipped:"
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
@@ -113,6 +116,11 @@ _CASH_BRIDGE = (
 _PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+ months")
 # How far the flag check reaches: every months-to-raise from 0 to two years on the skill's own example.
 _MONTHS_TO_RAISE = range(25)
+# A "30+ months" claim, passed as 30, against a runway the tool puts above it (a mismatch, yet the claim holds) and one
+# within its tolerance below it (consistent, yet the claim does not hold): money as strings, one phase from month 1.
+_FLOOR = 30
+_FLOOR_ABOVE = ("4000000", "210000", "95000")
+_FLOOR_JUST_BELOW = ("2950000", "100000", "0")
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -184,7 +192,7 @@ def test_the_frontmatter_names_the_skill_and_the_founders_questions() -> None:
     fields = _frontmatter()
     description = fields["description"]
 
-    assert fields["name"] == "vc-investor-update"
+    assert fields["name"] == "vc-current-investor-update"
     assert len(description) <= _DESCRIPTION_LIMIT
     assert not set("<>") & set(description)
     assert ": " not in description
@@ -212,7 +220,7 @@ def test_every_skill_it_hands_off_to_exists_and_vc_positioning_points_to_it() ->
     for name in _HANDOFF_SKILLS:
         assert f"the {name} skill" in handoff, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
-    assert "the vc-investor-update skill" in _unwrapped(_section("## When to use it", _POSITIONING))
+    assert "the vc-current-investor-update skill" in _unwrapped(_section("## When to use it", _POSITIONING))
 
 
 def test_the_planned_skills_are_named_as_planned_until_their_folders_exist() -> None:
@@ -268,8 +276,61 @@ async def test_the_command_and_the_json_example_are_the_same_check() -> None:
     )
 
 
+def _floor_call(cash: str, gross_burn: str, revenue: str) -> RunwayPlanResult:
+    phase = {"from_month": 1, "gross_burn": gross_burn, "revenue": revenue}
+    inputs = {"cash_on_hand": cash, "cases": [{"name": "plan", "phases": [phase]}], "stated_runway_months": str(_FLOOR)}
+    result = compute(RunwayPlanInput.model_validate(inputs))
+    assert isinstance(result, RunwayPlanResult)
+    return result
+
+
+def test_a_claim_stated_as_a_floor_is_judged_by_the_printed_runway_not_the_verdict() -> None:
+    runway = _unwrapped(_section("## Runway"))
+    above, just_below = _floor_call(*_FLOOR_ABOVE), _floor_call(*_FLOOR_JUST_BELOW)
+
+    # The tool's check is two-sided, so its verdict gets both cases wrong for a floor; the skill's rule gets them right.
+    assert above.verdict == "mismatch" and above.checks[0].computed.rounded >= _FLOOR
+    assert just_below.verdict == "consistent" and just_below.checks[0].computed.rounded < _FLOOR
+    for rule in (
+        "**A claim stated as a floor**",
+        "the tool's verdict row does not decide it",
+        "A printed runway at or above the number keeps the claim",
+        "it goes in no tier",
+        "A printed runway below the number is a fix before sending, even when the verdict row says consistent",
+        "A mismatch on an exact claim is a figure to fix before sending",
+        "and the claim does not hold (below)",
+    ):
+        assert rule in runway, rule
+    assert "neither does a printed runway below a claim stated as a floor" in _unwrapped(
+        _section("### Stage A: attack")
+    )
+
+
+def test_the_runway_inputs_say_how_to_pass_what_the_tool_refuses_or_cannot_take_as_given() -> None:
+    runway = _unwrapped(_section("## Runway"))
+    (example,) = _fences("json")
+    late_start = json.loads(example)["inputs"]
+    late_start["cases"][0]["phases"][0]["from_month"] = 2
+
+    with pytest.raises(ValidationError):
+        RunwayPlanInput.model_validate(late_start)
+    with pytest.raises(ValidationError):
+        RunwayPlanInput.model_validate({**json.loads(example)["inputs"], "months_to_raise": "6"})
+    for rule in (
+        "A refusal is the answer for those inputs: relay its reason",
+        "With no claim, call without it and put the tool's runway in the update",
+        "a whole number, as a JSON integer, never a string",
+        'A range ("4 to 6 months") is asked about once',
+        "When the founder gives only net burn, ask for spend and revenue",
+        "When the founder gives cash collected rather than revenue, pass that and say so",
+        'in the "Start raising by" row, how many months from the cash date',
+    ):
+        assert rule in runway, rule
+
+
 def test_the_flag_table_holds_exactly_the_flags_a_no_raise_call_can_raise() -> None:
     rows = tuple(row[0].strip("`") for row in _table("## Runway"))
+    answers = {row[0].strip("`"): row[-1] for row in _table("## Runway")}
     (example,) = _fences("json")
     inputs = json.loads(example)["inputs"]
     raised: set[str] = set()
@@ -281,6 +342,9 @@ def test_the_flag_table_holds_exactly_the_flags_a_no_raise_call_can_raise() -> N
     raised |= set(compute(RunwayPlanInput.model_validate(covered)).flags)
 
     assert rows == _FLAGS
+    assert answers["cash_never_runs_out"].startswith("Says so instead of a runway figure")
+    assert "a stated runway is not checked" in answers["cash_never_runs_out"]
+    assert answers["start_raising_date_passed"].startswith("Says the next raise should already be under way")
     assert set(rows) <= set(get_args(RunwayPlanFlag))
     assert raised == set(_FLAGS)
     assert "With no raise and no milestone in the call, the tool raises no other flag" in _unwrapped(
@@ -343,6 +407,34 @@ def test_the_lenses_are_the_four_and_name_no_person_or_firm() -> None:
     assert "rather than a weak objection" not in attack
 
 
+def test_the_reader_pass_judges_the_founders_draft_as_given_in_review_mode() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    stage = _unwrapped(_section("### Stage B: refute"))
+    ranked = _unwrapped(_section("### The ranked fix list"))
+
+    assert "In review mode, both its stages read the founder's draft as given, never the revised one" in steps
+    assert "a line this skill adds at step 7 answers no objection" in steps
+    assert "In draft mode, they read the draft written at step 7" in steps
+    assert "the founder's draft as given in review mode" in steps
+    assert "the draft it judges (Steps)" in _unwrapped(_section("### Stage A: attack"))
+    assert "a line this skill added at step 7 is not in it" in stage
+    assert "**Dropped, answered:** a line of the draft given here, other than the objected line" in stage
+    assert "with no word in the founder's draft (review mode), even though the revised draft adds its line" in ranked
+
+
+def test_a_first_update_and_a_section_the_founder_wants_left_out_have_their_rules() -> None:
+    assert '"this is the first one"' in _unwrapped(_section("## Inputs"))
+    assert "A first update has nothing to tie out: every metric is New" in _unwrapped(
+        _section("## Tying out to the last update")
+    )
+    shape = _unwrapped(_section("## The update's shape"))
+    assert "A founder who asks to leave a section out, cash and runway included" in shape
+    assert "the section stays, with bracketed asks for what is missing" in shape
+    assert "A customer who has not agreed to be named stays in as an unnamed description" in _unwrapped(
+        _section("## Inputs")
+    )
+
+
 def test_without_a_subagent_tool_the_lenses_run_before_step_1_in_review_mode() -> None:
     steps = _unwrapped(_section("## Steps"))
     note = "In review mode without a subagent tool, run Stage A of the reader pass first, before step 1"
@@ -400,6 +492,14 @@ def test_every_pattern_row_cites_a_read_source_or_says_unverified() -> None:
     # The ask row's source backs asks for introductions, not how specific they are; the row says so.
     (ask,) = (row for row in rows if row[0].startswith("An ask"))
     assert ask[-1] == "Mercury guide (asks); specificity unverified"
+    # The a16z list says net churn understates the loss (item 11) but calls net burn the true measure (item 12), so
+    # churn and burn are separate rows, each citing its own item.
+    by_pattern = {row[0]: row for row in rows}
+    assert by_pattern["Churn with no gross or net said"][-1] == 'a16z "16 Startup Metrics" (11)'
+    assert by_pattern["Burn with no gross or net said"][-1] == 'a16z "16 Startup Metrics" (12)'
+    assert "understate" not in by_pattern["Burn with no gross or net said"][1]
+    (target,) = (row for row in rows if row[0].startswith("A target or forecast"))
+    assert target[-1] == "Mercury guide (next month); target as result unverified"
 
 
 def test_sources_are_the_read_set() -> None:
@@ -456,7 +556,7 @@ def test_each_figure_an_eval_answer_takes_from_the_calculator_is_what_it_prints(
 
 
 def test_one_eval_calls_again_with_todays_spend_held_flat() -> None:
-    text, _, answer = _eval("ag")
+    text, prompt, answer = _eval("ag")
     plan, flat = _calls(text)
 
     assert len(plan.cases[0].phases) > 1
@@ -465,6 +565,8 @@ def test_one_eval_calls_again_with_todays_spend_held_flat() -> None:
     assert compute(plan).verdict == "mismatch"
     assert "15.07 months at today's spend held flat" in answer
     assert "We hired one engineer, not two; the second candidate declined." in answer
+    assert "both quoted, status Same" in answer and "MRR is New" in answer
+    assert "same definition as before" not in prompt and "which we report for the first time" in prompt
 
 
 def test_one_eval_drops_an_objection_by_quoting_the_drafts_own_line() -> None:
@@ -475,6 +577,8 @@ def test_one_eval_drops_an_objection_by_quoting_the_drafts_own_line() -> None:
     assert answering_line in prompt
     assert answering_line not in _DOUBLE_QUOTED.findall(objection)
     assert "Restated" in answer and "Changed definition" in answer
+    assert '"Paying customers: 41." is Dropped, fix before sending' in answer
+    assert "The reader pass judges the founder's draft as given" in answer
     assert _NOT_CHECKED in answer
 
 
@@ -497,4 +601,28 @@ def test_one_eval_declines_a_named_firm_and_a_version_for_prospects() -> None:
     assert "a planned skill that has not shipped" in answer and "It writes no second version" in answer
     assert '"30+ months of runway." leads the fix list in the fix before sending tier' in answer
     assert str(call.stated_runway_months) == "30" and compute(call).verdict == "mismatch"
+    assert "It is a claim stated as a floor, passed as 30" in answer
+    assert "the update states 30.00 months" not in answer
+    assert "Different form" in answer and "No firm is named as a voice or a judge" in answer
     assert "Lowlights: our VP Sales left in August." in answer
+
+
+def test_one_eval_is_a_first_update_with_no_claim_and_a_raise_already_late() -> None:
+    text, prompt, answer = _eval("al")
+    (call,) = _calls(text)
+    result = compute(call)
+
+    assert "This is our first investor update" in prompt
+    assert call.stated_runway_months is None and call.months_to_raise == 9
+    assert isinstance(json.loads(_fences("json", text)[0])["inputs"]["months_to_raise"], int)
+    assert result.flags == ("start_raising_date_passed",) and result.verdict == "not_checked"
+    assert "nothing is tied out" in answer and "both New" in answer
+    assert "the next raise should already be under way" in answer
+    assert "our first sales hire starts in January, a month later than we wanted" in prompt
+
+
+def test_every_tie_out_status_is_exercised_by_an_eval() -> None:
+    answers = " ".join(_eval(letter)[2] for letter in _EVAL_LETTERS)
+
+    for status in _STATUSES:
+        assert status in answers, status

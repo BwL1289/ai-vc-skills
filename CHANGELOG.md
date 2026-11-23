@@ -108,6 +108,16 @@ All notable changes to this repository. Dates are UTC.
   answers; the rest becomes a ranked fix list that revises the draft. It keeps every lowlight the founder gives and
   writes no version for people who are not yet investors. `vc-positioning` now points to it. Four evals are in
   `evals/vc-investor-update/`.
+- The `vc-current-investor-update` skill, in preview: a founder drafts or reviews the monthly or quarterly update to
+  their current investors in one fixed shape (summary, the same metrics with the same definitions, highlights,
+  lowlights, asks, cash and runway, next period, definitions). Every metric and every promise in the last update is tied
+  out as stated with fixed status words (Same, Restated, Different form, Changed definition, Dropped, New), never
+  recomputed; the runway claim goes to `equity_runway_plan` with no raise and no milestone, and a claim stated as a
+  floor ("30+ months") is judged by the printed runway rather than the tool's two-sided verdict. A reader pass has four
+  lenses (spin, missing bad news, definitions, tie-out) attack the draft (in review mode, the founder's draft as given)
+  and a refute pass drop what the founder's own material answers; the rest becomes a ranked fix list that revises the
+  draft. It keeps every lowlight the founder gives and writes no version for people who are not yet investors.
+  `vc-positioning` now points to it. Five evals are in `evals/vc-current-investor-update/`.
 
 ### Changed
 

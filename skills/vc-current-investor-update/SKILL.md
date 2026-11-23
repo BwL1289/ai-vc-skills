@@ -1,9 +1,9 @@
 ---
-name: vc-investor-update
+name: vc-current-investor-update
 description: Helps a founder write the monthly or quarterly update they send their current investors, so it builds the trust the next raise needs. It drafts or reviews the update in one fixed shape (a short summary, the same metrics with the same definitions every time, highlights, lowlights told straight, asks, cash and runway, the next period), ties every figure and promise out to the last update as stated, never recomputed, and checks the runway claim with the calculator's runway_plan tool. An adversarial reader pass has independent lenses flag spin, missing bad news, changed metric definitions and figures that do not tie out, and a refute pass drops what the founder's own material answers. Use when a founder says write my investor update, review my investor update before I send it, draft our monthly update, how do I tell investors about a bad month, or should I skip this month's update. Never invents or hides numbers. Not investment advice.
 ---
 
-# VC investor update
+# VC current investor update
 
 Helps a founder write the regular update they send to the investors who already own part of the company. An update
 sent every month or quarter, good or bad, in the same shape and with the same definitions, is the record those
@@ -31,9 +31,9 @@ adds a figure, customer or event the founder did not give, and never leaves out 
     equity-calculator skill for one scenario on its own.
   - The story for the coming raise and the say-and-avoid list: the vc-positioning skill.
   - Planned, not yet shipped: how much to raise next and which milestone it buys (the vc-round-sizing skill), and
-    the short update a founder sends prospective investors before a raise (the vc-founder-update skill). Until each
-    ships, say so. This skill's runway call carries no raise and no milestone, and it writes no version for people
-    who are not yet investors.
+    the short update a founder sends prospective investors before a raise (the vc-prospective-investor-update
+    skill). Until each ships, say so. This skill's runway call carries no raise and no milestone, and it writes no
+    version for people who are not yet investors.
 
 ## Inputs
 
@@ -52,26 +52,28 @@ Ask once, in one message, for whatever is missing, by name. Never guess.
    customer who has not agreed to be named).
 
 A missing input never stops the work. It becomes a bracketed ask in the draft (`[cash on hand on 31 October]`),
-never a plausible figure.
+never a plausible figure. A customer who has not agreed to be named stays in as an unnamed description ("our biggest
+customer", "a regional grocer"); the event and its figures are kept.
 
 ## The update's shape
 
 Bullet points, short lines, the same sections in the same order every time.
 
-| Section         | What it holds                                                                                    | Source                                                      |
-| --------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
-| Summary         | Two or three sentences: was the period good, bad or in between, and the takeaway                 | Mercury guide (introduction)                                |
-| Metrics         | The same few metrics every time, each with its definition and period, last value beside this one | Mercury guide (performance); 500 Global guide (key updates) |
-| Highlights      | What went right, with the figure or the name the founder gave                                    | Mercury guide; 500 Global guide                             |
-| Lowlights       | What went wrong, slipped or was lost, said plainly, with what the founder is doing about it      | Mercury guide; 500 Global guide                             |
-| Asks            | Specific introductions or help: who, and why                                                     | Mercury guide (asks)                                        |
-| Cash and runway | Cash on hand with its date, monthly spend and revenue, runway from the calculator                | Mercury guide; 500 Global guide (cash in bank)              |
-| Next period     | What is happening next, not a forecast of metrics                                                | Mercury guide (next month)                                  |
-| Thanks          | Optional: investors who helped since the last update, by name only if they agree                 | 500 Global guide                                            |
-| Definitions     | Every metric's definition, word for word the same each time; a change says so                    | Ours; a16z "16 Startup Metrics" (9)                         |
+| Section         | What it holds                                                                                    | Source                                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Summary         | Two or three sentences: was the period good, bad or in between, and the takeaway                 | Mercury guide (introduction)                                                                              |
+| Metrics         | The same few metrics every time, each with its definition and period, last value beside this one | Mercury guide (performance); 500 Global guide (key updates); last value beside this one: ours, unverified |
+| Highlights      | What went right, with the figure or the name the founder gave                                    | Mercury guide; 500 Global guide                                                                           |
+| Lowlights       | What went wrong, slipped or was lost, said plainly, with what the founder is doing about it      | Mercury guide; 500 Global guide                                                                           |
+| Asks            | Specific introductions or help: who, and why                                                     | Mercury guide (asks)                                                                                      |
+| Cash and runway | Cash on hand with its date, monthly spend and revenue, runway from the calculator                | Mercury guide; 500 Global guide (cash in bank)                                                            |
+| Next period     | What is happening next, not a forecast of metrics                                                | Mercury guide (next month)                                                                                |
+| Thanks          | Optional: investors who helped since the last update, by name only if they agree                 | 500 Global guide                                                                                          |
+| Definitions     | Every metric's definition, word for word the same each time; a change says so                    | Ours; a16z "16 Startup Metrics" (9)                                                                       |
 
 Keep the founder's words where they are clear. The Definitions block is this skill's own addition, unverified: it
-makes the next update's tie-out possible.
+makes the next update's tie-out possible. A founder who asks to leave a section out, cash and runway included, hears
+once that the update keeps the same sections every time; the section stays, with bracketed asks for what is missing.
 
 ## Metrics and their definitions
 
@@ -91,17 +93,20 @@ makes the next update's tie-out possible.
 Every metric and every figure is set beside the last update's, as stated. Each gets one status. No arithmetic: two
 figures are compared as written, and whether one is larger may be said, never by how much.
 
-| Status             | When                                                                                           | What the draft does                                             |
-| ------------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Same               | The same metric, label, definition and form; every period both updates give has the same value | Nothing; a new period's value sits beside the last one          |
-| Restated           | The same metric, in the same form, for a period both updates give, with a different value      | Says so beside the figure, with the reason (`[why it changed]`) |
-| Different form     | The two lines state the metric in different forms (MRR and ARR, a month and a quarter)         | States one form, the last update's; asks for the figure         |
-| Changed definition | The label or definition differs from the last update's                                         | Announces the change as the section above says                  |
-| Dropped            | The last update reported it; this draft does not                                               | Puts it back, or says it is dropped and why                     |
-| New                | This draft reports it; the last update did not                                                 | Gives its definition                                            |
+| Status             | When                                                                                                                                         | What the draft does                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Same               | The same metric, label, definition and form; every period both updates give has the same value                                               | Nothing; a new period's value sits beside the last one                               |
+| Restated           | The same metric, in the same form, for a period both updates give, with a different value                                                    | Says so beside the figure, with the reason (`[why it changed]`)                      |
+| Different form     | The two lines state the metric in different forms (MRR and ARR, a month and a quarter), between the two updates or in two lines of the draft | States one form, the last update's; asks for the figure, or how the two lines relate |
+| Changed definition | The label or definition differs from the last update's                                                                                       | Announces the change as the section above says                                       |
+| Dropped            | The last update reported it; this draft does not                                                                                             | Puts it back, or says it is dropped and why                                          |
+| New                | This draft reports it; the last update did not                                                                                               | Gives its definition                                                                 |
 
 The last update's own promises are tied out too: each "next month" item, target or open lowlight in it gets a line in
 this update saying what happened, in the founder's words, or a bracketed ask.
+
+A first update has nothing to tie out: every metric is New, there are no promises to check, and its Definitions
+block is the one the next update ties out to.
 
 Figures no tool here computes stay quoted as stated with "not checked: no tool computes this": growth rates, churn,
 retention, recurring revenue built from a month (ARR), unit economics, and the change in cash between the two
@@ -114,6 +119,10 @@ an investor holding both updates can make that comparison.
 In review mode without a subagent tool, run Stage A of the reader pass first, before step 1, as "How to run the
 lenses" says; step 8 then starts at the quote check.
 
+The reader pass judges the draft before this skill changes it. In review mode, both its stages read the founder's
+draft as given, never the revised one: a line this skill adds at step 7 answers no objection. In draft mode, they read
+the draft written at step 7.
+
 1. **Quote first.** List, word for word with their sections, every figure, promise and target in the last update,
    and every figure and event in this period's material and in any draft.
 2. **Ask for what is missing,** once, in one message (Inputs above).
@@ -125,8 +134,9 @@ lenses" says; step 8 then starts at the quote check.
 7. **Draft or revise.** Draft mode: write the update in the shape above from the founder's material only, every gap a
    bracketed ask. Review mode: keep the founder's draft and words; change only what a status, the calculator or a kept
    finding requires.
-8. **Run the reader pass** (below) on the draft: attack, check the quotes, refute, rank. Revise the draft for every
-   kept finding, using only the founder's facts or a bracketed ask.
+8. **Run the reader pass** (below) on the draft it judges (the founder's draft as given in review mode): attack,
+   check the quotes, refute, rank. Revise the draft for every kept finding, using only the founder's facts or a
+   bracketed ask.
 9. **Check before answering.** Every figure is quoted as stated or comes from a tool; every lowlight the founder gave
    is in the draft; no metric the last update reported is silently gone; no sentence speaks as an investor or names a
    firm as a voice; nothing is sent anywhere.
@@ -138,15 +148,24 @@ founder's plan with no raise:
 
 - `cash_on_hand`: cash at the update's date. Money as strings.
 - One `plan` case: the first phase is today's monthly spend (`gross_burn`) and `revenue`, from month 1 (the month
-  after the cash date); each planned change is another phase, from its month.
+  after the cash date); each planned change is another phase, from its month. When the founder gives cash collected
+  rather than revenue, pass that and say so. When the founder gives only net burn, ask for spend and revenue; until
+  then, pass the net burn as `gross_burn` with `revenue` `"0"`, and label the line as net burn in the update.
 - `stated_runway_months`: the runway the update states, when it states one; a "30+ months" claim is passed as
   `"30"`. With no claim, call without it and put the tool's runway in the update.
-- `months_to_raise`, only when the founder gives how long the next raise will take: the tool then prints the month to
-  start raising by.
+- `months_to_raise`, only when the founder gives how long the next raise will take: a whole number, as a JSON integer,
+  never a string. A range ("4 to 6 months") is asked about once; until answered, pass the upper figure and say so. The
+  tool then prints, in the "Start raising by" row, how many months from the cash date the raise has to start by.
 - No `raises` and no `milestones`: sizing the next round is not this skill's job.
-- One call for the update. When the plan changes the burn and the claim is a mismatch, call once more with today's
-  spend and revenue as the only phase, so the answer can say which burn the claim used. The tool names that case
-  `plan` too; the answer calls it "today's spend held flat". Make no other call the founder did not ask for.
+- One call for the update. When the plan changes the burn and the claim does not hold (below), call once more with
+  today's spend and revenue as the only phase, so the answer can say which burn the claim used. The tool names that
+  case `plan` too; the answer calls it "today's spend held flat". Make no other call the founder did not ask for.
+
+**A claim stated as a floor** ("30+ months", "over 30 months", "at least 30 months") is passed as its number, but the
+tool's verdict row does not decide it: the tool calls a figure within its tolerance either way consistent. Compare the
+tool's printed runway with that number as written, saying only which is larger. A printed runway at or above the number
+keeps the claim: the update may keep it or state the printed runway, and it goes in no tier. A printed runway below the
+number is a fix before sending, even when the verdict row says consistent.
 
 ```json
 {
@@ -188,7 +207,8 @@ the plan's runway, and today's, each as the tool prints it.
 
 Read every row, the `flags` and the `assumptions` before answering. Use the printed values (12.79 months stays 12.79
 months, never "about 13"); never round again or recompute. A refusal is the answer for those inputs: relay its reason.
-A mismatch is a figure to fix before sending, not one to soften.
+A mismatch on an exact claim is a figure to fix before sending, not one to soften; a claim stated as a floor follows
+the rule above instead.
 
 | Flag                        | What it means for the founder                                                         | What the update does                                                    |
 | --------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
@@ -229,14 +249,15 @@ Every lens gets the same brief, with its own name and test filled in:
   Return "nothing found" only when no line of the material gives this lens an objection worth an investor's time.
 
 **How to run the lenses.** With a subagent tool (in Claude Code, the Agent or Task tool), run the four lenses as
-parallel subagents, each given only the founder's material, the draft and its lens brief: not this skill's other
-sections, not the tie-out table, not another lens's output. Without one, in review mode run the lenses before step 1,
-one after another, writing each lens's objections down in full before reading the next brief. In draft mode the same
-agent wrote the draft, so the lenses run after step 7, still one after another. Either way the answer says the lenses
-ran in one agent and are less independent than subagents.
+parallel subagents, each given only the founder's material, the draft it judges (Steps) and its lens brief: not this
+skill's other sections, not the tie-out table, not another lens's output. Without one, in review mode run the lenses
+before step 1, one after another, writing each lens's objections down in full before reading the next brief. In draft
+mode the same agent wrote the draft, so the lenses run after step 7, still one after another. Either way the answer says
+the lenses ran in one agent and are less independent than subagents.
 
-**The calculator's mismatches** do not go through the lenses or the refute pass. Each leads the first tier, quoting
-the update's figure with the tool's value as the reason.
+**The calculator's mismatches** do not go through the lenses or the refute pass, and neither does a printed runway
+below a claim stated as a floor. Each leads the first tier, quoting the update's figure with the tool's value as the
+reason.
 
 ### Check the quotes
 
@@ -263,44 +284,48 @@ The refute brief:
 
 The verdicts:
 
-- **Dropped, answered:** a line of the draft other than the objected line already says what the objection says is
-  missing or hidden. Quote it. When it sits where an investor will not look first, say to move it up.
+- **Dropped, answered:** a line of the draft given here, other than the objected line, already says what the objection
+  says is missing or hidden. Quote it. When it sits where an investor will not look first, say to move it up.
 - **Dropped, not grounded:** the quoted line does not say what the objection claims, or the objection rests on an
   outside fact.
 - **Kept:** neither holds. When the fix needs something the material does not contain, it becomes a bracketed ask.
 
-The refute pass invents nothing on the founder's behalf. An answering line that is not in the draft word for word, or
-is the objected line itself, does not drop the objection.
+The refute pass invents nothing on the founder's behalf. An answering line that is not in the draft word for word, or is
+the objected line itself, does not drop the objection. In review mode the draft given here is the founder's, as given: a
+line this skill added at step 7 is not in it.
 
 ### The ranked fix list
 
 Order the kept objections in three tiers: **fix before sending**, **worth fixing**, **minor**. The calculator's
-mismatches lead the first tier; a Restated or Dropped status with no word in the draft goes in it too. Within a tier,
-an objection raised by more than one lens comes first. The tier is a judgment: give no percentages and no score. Each
-entry: the section, the line quoted, why an investor is likely to read it that way in one or two plain sentences, and
-the change, using only the founder's facts or a bracketed ask. The draft is revised for every kept entry.
+mismatches lead the first tier; a Restated or Dropped status with no word in the draft goes in it too. So does a "next
+month" item, target or open lowlight from the last update with no word in the founder's draft (review mode), even though
+the revised draft adds its line. Within a tier, an objection raised by more than one lens comes first. The tier is a
+judgment: give no percentages and no score. Each entry: the section, the line quoted, why an investor is likely to read
+it that way in one or two plain sentences, and the change, using only the founder's facts or a bracketed ask. The draft
+is revised for every kept entry.
 
 ## Patterns that cost trust
 
 Signals, not rules: a founder may have a reason. A row marked unverified has no public source behind it that this
 skill's authors read; say so when it is used.
 
-| Pattern                                                                                              | Why an investor is likely to discount it                 | Fix                                                                      | Source                                       |
-| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------- |
-| A summary of adjectives ("another great month", "strong momentum") with no figure                    | Nothing to check, and it reads as hiding the facts       | Say whether the period was good, bad or in between, and the one takeaway | Mercury guide (introduction)                 |
-| Highlights and no lowlights                                                                          | Investors assume something is being hidden               | The lowlights the founder gave, said plainly                             | Mercury guide (mistakes to avoid)            |
-| Updates that stop, or a bad month skipped                                                            | Silence is read as a warning that things are going badly | Send it, on the usual schedule, with the lowlights                       | Mercury guide (mistakes to avoid)            |
-| A metric from the last update missing now                                                            | A metric that disappears is read as one that went badly  | Put it back, or say it is dropped and why                                | Mercury guide (keep including it every time) |
-| "Active" or another metric with no definition, or a definition changed without notice                | Figures cannot be compared from one update to the next   | Define it; announce any change with both values for the overlap period   | a16z "16 Startup Metrics" (9)                |
-| A percent change with no absolute figures                                                            | A percent off a small base sounds bigger than it is      | Give both figures beside the percent                                     | a16z "16 Startup Metrics" (15)               |
-| A cumulative total in place of the period's figure                                                   | Cumulative figures rise even when the business shrinks   | The period's figure                                                      | a16z "16 Startup Metrics" (14)               |
-| Bookings or letters of intent called revenue; one-time fees in recurring revenue; GMV called revenue | An inflated top line                                     | Name each metric for what it is, with its own figure                     | a16z "16 Startup Metrics" (1, 2, 6)          |
-| Churn or burn with no gross or net said                                                              | Net figures can understate the loss                      | Say which, and keep it the same each time                                | a16z "16 Startup Metrics" (11, 12)           |
-| A growth rate with no method or period                                                               | A simple average and a compounded rate differ            | Name the method and the period; the rate stays the founder's             | a16z "16 Startup Metrics" (10)               |
-| A target or forecast written as a result, or forecasts in the next-period section                    | A promise that the next update will have to walk back    | Results as results; the next period says what is happening, not metrics  | Mercury guide (next month)                   |
-| A "next month" item, target or open lowlight from the last update with no word now                   | Investors remember what they were told to expect         | One line on what happened, in the founder's words                        | Unverified                                   |
-| The same runway figure two updates running                                                           | A month passed; the reader asks what changed             | The calculator's runway on the current plan                              | Unverified                                   |
-| An ask with no who and no why ("any intros welcome")                                                 | Nothing an investor can act on                           | Name the kind of person, the company type and why                        | Mercury guide (asks); specificity unverified |
+| Pattern                                                                                              | Why an investor is likely to discount it                                       | Fix                                                                      | Source                                                  |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------ | ------------------------------------------------------- |
+| A summary of adjectives ("another great month", "strong momentum") with no figure                    | Nothing to check, and it reads as hiding the facts                             | Say whether the period was good, bad or in between, and the one takeaway | Mercury guide (introduction)                            |
+| Highlights and no lowlights                                                                          | Investors assume something is being hidden                                     | The lowlights the founder gave, said plainly                             | Mercury guide (mistakes to avoid)                       |
+| Updates that stop, or a bad month skipped                                                            | Silence is read as a warning that things are going badly                       | Send it, on the usual schedule, with the lowlights                       | Mercury guide (mistakes to avoid)                       |
+| A metric from the last update missing now                                                            | The picture over time stops being consistent and predictable                   | Put it back, or say it is dropped and why                                | Mercury guide (performance)                             |
+| "Active" or another metric with no definition, or a definition changed without notice                | Figures cannot be compared from one update to the next                         | Define it; announce any change with both values for the overlap period   | a16z "16 Startup Metrics" (9)                           |
+| A percent change with no absolute figures                                                            | A percent off a small base sounds bigger than it is                            | Give both figures beside the percent                                     | a16z "16 Startup Metrics" (15)                          |
+| A cumulative total in place of the period's figure                                                   | Cumulative figures rise even when the business shrinks                         | The period's figure                                                      | a16z "16 Startup Metrics" (14)                          |
+| Bookings or letters of intent called revenue; one-time fees in recurring revenue; GMV called revenue | An inflated top line                                                           | Name each metric for what it is, with its own figure                     | a16z "16 Startup Metrics" (1, 2, 6)                     |
+| Churn with no gross or net said                                                                      | Net churn blends upsells with losses and understates them                      | Say which, and keep it the same each time                                | a16z "16 Startup Metrics" (11)                          |
+| Burn with no gross or net said                                                                       | Gross and net burn differ; investors read how long the cash lasts off net burn | Say which, and keep it the same each time                                | a16z "16 Startup Metrics" (12)                          |
+| A growth rate with no method or period                                                               | A simple average and a compounded rate differ                                  | Name the method and the period; the rate stays the founder's             | a16z "16 Startup Metrics" (10)                          |
+| A target or forecast written as a result, or forecasts in the next-period section                    | A promise that the next update will have to walk back                          | Results as results; the next period says what is happening, not metrics  | Mercury guide (next month); target as result unverified |
+| A "next month" item, target or open lowlight from the last update with no word now                   | Investors remember what they were told to expect                               | One line on what happened, in the founder's words                        | Unverified                                              |
+| The same runway figure two updates running                                                           | A month passed; the reader asks what changed                                   | The calculator's runway on the current plan                              | Unverified                                              |
+| An ask with no who and no why ("any intros welcome")                                                 | Nothing an investor can act on                                                 | Name the kind of person, the company type and why                        | Mercury guide (asks); specificity unverified            |
 
 ## Answering
 

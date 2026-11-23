@@ -68,7 +68,7 @@ pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skill
 ```
 
 Add the server to the client's MCP settings, then load `skills/equity-calculator/`, `skills/vc-deal-math/`,
-`skills/vc-positioning/`, `skills/vc-claims-check/`, `skills/vc-deck-review/`, `skills/vc-partner-meeting/`, `skills/vc-taste-check/`, `skills/vc-round-sizing/`, `skills/vc-term-sheet-review/`, `skills/vc-diligence-questions/` and `skills/vc-investor-update/` where the client reads skills.
+`skills/vc-positioning/`, `skills/vc-claims-check/`, `skills/vc-deck-review/`, `skills/vc-partner-meeting/`, `skills/vc-taste-check/`, `skills/vc-round-sizing/`, `skills/vc-term-sheet-review/`, `skills/vc-diligence-questions/`, `skills/vc-investor-update/` and `skills/vc-current-investor-update/` where the client reads skills.
 `vc-diligence-questions` reads `vc-partner-meeting`'s question bank, so load both folders.
 Step by step for each client: [docs/install.md](docs/install.md).
 
@@ -109,15 +109,16 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 | [`vc-term-sheet-review`](skills/vc-term-sheet-review/SKILL.md)     | For founders: reads a term sheet you were offered in plain words, marks each term against YC's standard and clean Series A term sheet, runs the round and an exit waterfall at low and high exits on the calculator, and ends with questions for your lawyer. Never says whether to sign.                                             | 🧪 Preview   |
 | [`vc-diligence-questions`](skills/vc-diligence-questions/SKILL.md) | For founders: prepares you for a fund's due diligence after the first meeting: the questions your own material leaves open, by area, ranked by how much each answer moves the decision, with draft answers from your own material and a data-room checklist scaled to your stage.                                                     | 🧪 Preview   |
 | [`vc-investor-update`](skills/vc-investor-update/SKILL.md) | For founders: writes or reviews your monthly or quarterly update to your current investors so it builds trust before the next raise: the same metrics and definitions every time, lowlights told straight, every figure and promise tied out to the last update, runway from the calculator, and a reader pass that flags spin and missing bad news. | 🧪 Preview   |
-| More venture-style reviews                                 | Term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                                                                                                                                           | 🗺️ Planned   |
+| [`vc-current-investor-update`](skills/vc-current-investor-update/SKILL.md) | For founders: writes or reviews your monthly or quarterly update to your current investors so it builds trust before the next raise: the same metrics and definitions every time, lowlights told straight, every figure and promise tied out to the last update, runway from the calculator, and a reader pass that flags spin and missing bad news. | 🧪 Preview   |
+| More venture-style reviews                                                 | Term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                                                                                                                                           | 🗺️ Planned   |
 
-`vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions` and `vc-investor-update` are in preview until they have been checked on
+`vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-investor-update` and `vc-current-investor-update` are in preview until they have been checked on
 real decks and meetings. The calculator's arithmetic is tested; the reviews' wording may change. The `vc-positioning` and
 `vc-claims-check` evals were run in live Claude Code sessions on 2026-11-22, and each file holds an excerpt of its
 recorded answer with a verdict against its pass sentence: two passed, four passed in part and one failed. Pass means
 every clause of that sentence was met, Partial that exactly one was missed or met only in part, and Fail that two or
 more were missed. Two were run again after a skill fix, as their files say. One run each is a small sample. The
-`vc-deal-math`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions` and `vc-investor-update` evals state the expected behaviour and have not yet been run in a live session.
+`vc-deal-math`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-investor-update` and `vc-current-investor-update` evals state the expected behaviour and have not yet been run in a live session.
 
 The `equity-calculator` skill covers nine scenarios:
 
@@ -219,6 +220,8 @@ The formulas, their sources, every flag and a worked example per scenario are in
       questions for their lawyer (preview)
 - [ ] `vc-investor-update`: founders write updates to their current investors that tie out from one period to the
       next (preview)
+- [ ] `vc-current-investor-update`: founders write updates to their current investors that tie out from one period to
+      the next (preview)
 - [ ] A term-sheet review, clause by clause, with the exit waterfall computed
 - [ ] The due-diligence questions a VC is likely to ask, ranked by how much each answer moves their decision, so you
       can prepare
