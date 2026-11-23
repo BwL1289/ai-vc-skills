@@ -9,7 +9,12 @@ raises is dropped by quoting the draft's own Definitions line, or October's upda
 makes the one call below and gives its printed runway under Numbers, and computes nothing in its own text. The verdict
 is Pass when every clause of that sentence is met, Partial when exactly one clause is missed or met only in part, and
 Fail when two or more are missed; a shortfall against the other points of the expected answer is noted but does not
-change the verdict.
+change the verdict. The recorded run is graded against the pass sentence this eval had then, which asked for two drops
+where it now asks that neither objection is kept: the definition objection dropped by quoting the Definitions line, and
+the moved enterprise target dropped by quoting October's update. It is a Fail against that sentence: no lens raised
+either objection, so neither was dropped, and its fix list compared the two customer counts. Against today's sentence
+only that comparison falls short, so it would be a Partial. The skill and this pass sentence were changed after that
+run (see "Recorded answer").
 
 ## Prompt
 
@@ -91,21 +96,25 @@ change the verdict.
 
 ## Recorded answer
 
-Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository. The answer is trimmed;
-[...] marks each cut.
+Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository, when this eval asked for
+the definition objection and the moved enterprise target each dropped by quoting the founder's own line. The answer is
+trimmed; [...] marks each cut.
 
-**Partial: one clause met only in part.** It made the one call above, gave 19.78 months under Numbers as the tool
-prints it, kept the moved $60,000 MRR target and the head of customer success hire as findings, kept no objection to
-the MRR definition or the enterprise target (no lens raised either; the tie-out shows MRR Same and the March target Not
-yet due), and computed nothing. It marked the customer count Changed definition, but its fix list compares the two
-counts ("a wider count shows a larger number"), so that clause is met only in part. Short of the expected answer: the
-refute pass ran as one subagent for all six objections; the tie-out gives statuses to two September items and two
-statuses to one metric; the revised draft adds a runway definition and a lowlight the founder never wrote; the gross
-margin question was ranked fix before sending. Since this run the lens brief, the refute brief and the fix list never
-set figures under different definitions side by side, Stage B launches one refute subagent per objection in a single
-message, the tie-out has rows only for the last update's items with one status each, and a definition or lowlight the
-founder did not give is a bracketed ask. This eval now accepts either tier for the gross margin question and asks for
-the two Dropped entries only when a lens raises them; it has not been run again.
+**Fail, against the pass sentence this eval had then: two clauses missed and one met only in part.** It made the one
+call above, gave 19.78 months under Numbers as the tool prints it, kept the moved $60,000 MRR target and the head of
+customer success hire as findings, and computed nothing. It missed both drops that sentence asked for: no lens raised an
+objection to the MRR definition or to the moved enterprise target, so neither was dropped by quoting the Definitions
+line or October's update (the tie-out shows MRR Same and the March target Not yet due). It marked the customer count
+Changed definition, but its fix list compares the two counts ("a wider count shows a larger number"), so that clause is
+met only in part. Today's sentence asks only that neither objection is kept, which the run met, so against today's
+sentence it would be a Partial. Short of the expected answer: the refute pass ran as one subagent for all six
+objections; the tie-out gives statuses to two September items and two statuses to one metric; the revised draft adds a
+runway definition and a lowlight the founder never wrote; the gross margin question was ranked fix before sending. Since
+this run the lens brief, the refute brief and the fix list never set figures under different definitions side by side,
+Stage B launches one refute subagent per objection in a single message, the tie-out has rows only for the last update's
+items with one status each, and a definition or lowlight the founder did not give is a bracketed ask. This eval now
+accepts either tier for the gross margin question and asks for the two Dropped entries only when a lens raises them; it
+has not been run again.
 
 > **Don't send this draft as written.** Three lines will cost you trust with anyone who kept the September and October updates. The cash and runway lines hold up.
 >

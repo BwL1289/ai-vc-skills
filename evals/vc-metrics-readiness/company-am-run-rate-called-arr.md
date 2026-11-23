@@ -7,7 +7,10 @@ one tool call below (field order free, money and percents as strings), runs the 
 ranked fix list with the three mismatches and the flag that explains each, computes nothing in its own text, and gives
 no score. The verdict is Pass when every clause of that sentence is met, Partial when exactly one clause is missed or
 met only in part, and Fail when two or more are missed; a shortfall against the other points of the expected answer is
-noted but does not change the verdict.
+noted but does not change the verdict. The recorded run is graded against the pass sentence this eval had then, which
+did not yet ask for the five lenses run as subagents. It is a Pass against that sentence; its lenses ran in the main
+agent, so against today's sentence it would be a Partial. The skill and this pass sentence were changed after that run
+(see "Recorded answer").
 
 ## Prompt
 
@@ -105,21 +108,24 @@ noted but does not change the verdict.
 
 ## Recorded answer
 
-Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository. The answer is trimmed;
-[...] marks each cut.
+Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository, when this eval's pass
+sentence did not yet ask for the five lenses run as subagents. The answer is trimmed; [...] marks each cut.
 
-**Partial: one clause missed.** It made the one call above with the expected inputs, led the ranked fix list with the
-three mismatches, each with the flag that explains it, computed nothing and gave no score. The lenses did not run as
-subagents: the session had the Task tool, yet the transcript holds no subagent call, and the answer says the lenses ran
-in the main agent. Short of the expected answer: the three mismatches sit in the top tier; the fix list has no Lens
-column and no lens result beyond the mismatches; tool values are trimmed or abbreviated ("95%", "7.5x", "$1.2M ARR");
-the deck's 6.25x is set against the 3x benchmark by eye; two flags are relayed as statements, not questions; the
-`cohort_rule` row is never named; the Missing stage rows carry no bracketed ask; and the retention rule is credited to
-Bessemer, though the tool's row marks it as the tool's own unverified judgment. Since this run the skill opens its
-Steps by running the lenses and the refute pass as subagents whenever the tool is there, puts the calculator's
-mismatches ahead of the tiers with no tier, keeps every digit of a tool value, relays a benchmark flag only for the
-value it was raised on, asks for each flag as a question with its fix, names the `cohort_rule` row, puts each Missing
-row's ask in the row, and takes each assumption's source from the tool's row; the eval has not been run again.
+**Pass, against the pass sentence this eval had then; it missed the one clause added since.** It made the one call above
+with the expected inputs, led the ranked fix list with the three mismatches, each with the flag that explains it,
+computed nothing and gave no score; setting the deck's 6.25x against the benchmark by eye is a comparison, not a
+computation, and is counted below as a shortfall. The clause added since was missed: the lenses did not run as subagents
+(the session had the Task tool, yet the transcript holds no subagent call, and the answer says the lenses ran in the
+main agent), so against today's sentence the run would be a Partial. Short of the expected answer: the three mismatches
+sit in the top tier; the fix list has no Lens column and no lens result beyond the mismatches; tool values are trimmed
+or abbreviated ("95%", "7.5x", "$1.2M ARR"); the deck's 6.25x is set against the 3x benchmark by eye; two flags are
+relayed as statements, not questions; the `cohort_rule` row is never named; the Missing stage rows carry no bracketed
+ask; and the retention rule is credited to Bessemer, though the tool's row marks it as the tool's own unverified
+judgment. Since this run the skill opens its Steps by running the lenses and the refute pass as subagents whenever the
+tool is there, puts the calculator's mismatches ahead of the tiers with no tier, keeps every digit of a tool value,
+relays a benchmark flag only for the value it was raised on, asks for each flag as a question with its fix, names the
+`cohort_rule` row, puts each Missing row's ask in the row, and takes each assumption's source from the tool's row; the
+eval has not been run again.
 
 > All three figures on slide 6 fail the check against the parts you gave me: each one matches a looser definition than the one its label claims. I can't give a ready/not-ready verdict, but these are the lines a partner is likely to test first.
 >
