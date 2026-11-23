@@ -15,7 +15,8 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
 
 - "Check my deck's numbers." "Is our raise reasonable?" "What does this round do to my ownership?"
 - "How much runway does this buy?" "Will a VC question our valuation?"
-- A pasted ask slide, a SAFE or note list, a cap table summary or a use-of-funds slide.
+- A pasted ask slide, a SAFE or note list, a cap table summary or a use-of-funds slide. Any of these may come as a file
+  the agent can read in this session.
 - Hand off to the equity-calculator skill for a single question with no deck to check: an option pool alone
   (`equity_pool`), SAFE conversion detail (`equity_round`), a stake through later rounds (`equity_dilution`), vesting
   or an exit waterfall.
@@ -27,10 +28,16 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
 
 ## Steps
 
-1. **List what the deck states, word for word**: the raise, any valuation and whether it is labelled pre- or
-   post-money, the percent sold, the founders' percent after the round, the option pool and whether it sits in the
-   pre-money, outstanding SAFEs and notes, cash on hand, burn, revenue, the runway claim and the use-of-funds lines.
-   Quote each figure as stated; never correct it before the check.
+1. **List what the deck states, word for word**: the raise, any valuation and whether it is labelled pre- or post-money,
+   the percent sold, the founders' percent after the round, the option pool and whether it sits in the pre-money,
+   outstanding SAFEs and notes, cash on hand, burn, revenue, the runway claim and the use-of-funds lines. Quote each
+   figure as stated; never correct it before the check. When the founder gives a file the agent can read (a PDF, HTML, a
+   slides export, Markdown), read it yourself and list what it holds place by place (slide by slide for a deck), in the
+   file's own words, so the founder sees what was read from each. A place you could not read (a slide that is only a
+   picture, a page whose text did not come out, a file that opened only in part) is listed as not read and asked for,
+   never filled in from its title or the places around it, and a figure is never read off a chart or a picture. Ask only
+   for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an input
+   below that it leaves out), and never ask the founder to paste what you already read.
 2. **Ask the founder for what is missing, by name, in one message.** Never guess:
    - **Is the new money a priced round, or a SAFE or note?** `deal_check` works the new money as a priced equity
      round. If the founder is raising on a SAFE or a note, do not pass it as `investment`: a SAFE's share is set only
@@ -200,9 +207,9 @@ the three `runway_plan` flags; the runway plan's `consistent_beyond_rounding` me
   for it: ARR, retention, churn, CAC payback and burn multiple to the vc-metrics-readiness skill
   (`equity_metrics_check`), a market size to the vc-market-sizing skill (`equity_market_sizing`). Growth rates and LTV
   are quoted as stated with "not checked: no tool computes this".
-- It checks the arithmetic of the figures the founder gives. It does not read a deck file, a cap table file or a term
-  sheet; the founder's text is the input, and nothing is sent anywhere. A term sheet goes to the vc-term-sheet-review
-  skill.
+- It checks the arithmetic of the figures the founder gives, pasted or in a file the agent can read in this session. It
+  opens no folder of files, reads no figure off a chart or a picture, and sends nothing anywhere. A term sheet goes to
+  the vc-term-sheet-review skill.
 - It is not investment, legal or tax advice, and it does not say whether to take a round or what a company is worth.
 - It works the new money as a priced equity round. A raise on a SAFE or note is not modelled by `deal_check`; step 2
   routes its ownership to `equity_round` with the next priced round the founder expects, and its runway and

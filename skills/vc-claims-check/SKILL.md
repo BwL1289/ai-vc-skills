@@ -33,7 +33,13 @@ looks anything up, and never adds evidence, figures or facts the founder did not
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess.
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
+read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
+for a deck), in the file's own words, so the founder sees what was read from each. A place you could not read (a slide
+that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
+asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
+Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
+input below that it leaves out), and never ask the founder to paste what you already read.
 
 1. Every document the founder will send or show, each with a name ("deck", "one-pager", "narrative") and its places
    marked (slide numbers, page numbers or paragraph order), so every claim can be located.
@@ -218,9 +224,9 @@ The verdicts:
 
 - **Kept, grounded:** the attack rests on the material: a source the material does not supply, a second line of the
   material that states the claim differently (quoted), or a pattern from the discount table.
-- **Dropped, answered:** the material already shows the evidence the attack asks for, and the attack matches no
-  pattern. Quote the founder's line that shows it. A line that is not in the material word for word does not drop
-  the attack.
+- **Dropped, answered:** the material already shows the evidence the attack asks for, and the attack matches no pattern.
+  Quote the founder's line that shows it. Spacing and line breaks aside, a line that is not in the material word for
+  word does not drop the attack.
 - **Dropped, not grounded:** the attack rests on something outside the material (a market fact, a guess about a
   competitor or a customer, an assumption about the founder), or the quoted line does not say what the attack claims.
 
