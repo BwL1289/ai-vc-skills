@@ -53,10 +53,17 @@ _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
 _TOOLS = {"equity_deal_check", "equity_round", "equity_runway_plan"}
-_HANDOFF_SKILLS = ("vc-partner-meeting", "vc-claims-check", "vc-deal-math", "vc-positioning", "equity-calculator")
+_HANDOFF_SKILLS = (
+    "vc-partner-meeting",
+    "vc-claims-check",
+    "vc-deal-math",
+    "vc-positioning",
+    "equity-calculator",
+    "vc-term-sheet-review",
+)
 # Built in a parallel lane and merged before this skill: named in "When to use it" now; its folder check joins
 # _HANDOFF_SKILLS once the branch is rebased on a main that has the folder.
-_PARALLEL_HANDOFFS = ("vc-term-sheet-review",)
+_PARALLEL_HANDOFFS: tuple[str, ...] = ()
 _README_BOTH_FOLDERS = "`vc-diligence-questions` reads `vc-partner-meeting`'s question bank, so load both folders."
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500

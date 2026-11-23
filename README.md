@@ -69,6 +69,7 @@ pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skill
 
 Add the server to the client's MCP settings, then load `skills/equity-calculator/`, `skills/vc-deal-math/`,
 `skills/vc-positioning/`, `skills/vc-claims-check/`, `skills/vc-deck-review/`, `skills/vc-partner-meeting/`, `skills/vc-taste-check/`, `skills/vc-round-sizing/`, `skills/vc-term-sheet-review/` and `skills/vc-diligence-questions/` where the client reads skills.
+`vc-diligence-questions` reads `vc-partner-meeting`'s question bank, so load both folders.
 Step by step for each client: [docs/install.md](docs/install.md).
 
 </details>
