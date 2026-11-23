@@ -15,7 +15,7 @@ command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives
 scenario; and a Python package, `equity_calculator`. An agent skill in
 [`skills/equity-calculator/`](../skills/equity-calculator/SKILL.md), at the repository root, tells an assistant when and
 how to use it. The fourteen founder reviews in the root README's [skills table](../README.md#skills), all in preview,
-take every number they give from these scenarios; four were built around one: `deal_check` for `vc-deal-math`,
+take every figure they work out from these scenarios; four were built around one: `deal_check` for `vc-deal-math`,
 `runway_plan` for `vc-round-sizing`, `metrics_check` for `vc-metrics-readiness` and `market_sizing` for
 `vc-market-sizing`.
 

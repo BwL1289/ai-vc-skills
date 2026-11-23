@@ -75,8 +75,8 @@ answer is trimmed; [...] marks each cut.
 
 **Partial: one clause met only in part.** It loaded vc-positioning, made the one `equity_deal_check` call above with
 the expected arguments, put the two calculator mismatches at the top of the survivors without a refute pass, kept the
-tool's values as printed (15.33 months in the rewrites too), quoted the growth rate as not checked and relayed the
-runway flag as a common benchmark, not a rule. The third clause is met only in part: its repeatable line says weekly
+tool's 15.33 months as printed in the rewrites too (it shortens the $12,000,000.00 post-money to "$12M post" twice),
+quoted the growth rate as not checked and relayed the runway flag as a common benchmark, not a rule. The third clause is met only in part: its repeatable line says weekly
 active users "more than doubled in six months, from 2,000 to 4,500", a comparison that neither the tool nor the founder
 made. The survivors table ranks the two calculator rows "Ends the meeting", as the skill's text did when it ran. Two
 earlier runs the same day failed. The first loaded vc-deal-math instead: no adversarial review, three calculator calls

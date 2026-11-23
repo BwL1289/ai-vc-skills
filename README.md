@@ -34,8 +34,8 @@
 
 <p align="center">
   <sub>The prompt asks for five short lines, so the answer shortens the tool's figures: the calculator prints a round
-  price of $0.960784 and existing holders at 60.8497%. Otherwise the equity-calculator skill gives the numbers as the
-  tool prints them, never rounded again.</sub>
+  price of $0.960784 and existing holders at 60.8497%. Otherwise the equity-calculator skill tells the agent to give the
+  numbers as the tool prints them, never rounded again.</sub>
 </p>
 
 **AI VC skills** are agent skills for the money side of building a startup: the questions you face when an investor
