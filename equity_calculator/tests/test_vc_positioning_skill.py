@@ -43,6 +43,7 @@ _HANDOFF_SKILLS = (
     "vc-deck-review",
     "vc-partner-meeting",
     "vc-taste-check",
+    "vc-round-sizing",
 )
 _DESCRIPTION_LIMIT = 1024
 _TRIGGERS = (
