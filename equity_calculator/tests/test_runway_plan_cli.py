@@ -167,10 +167,13 @@ async def test_a_downside_a_lean_case_a_late_raise_and_funds_lines_come_from_the
             [*_FLAT, "--raise", "amount=1", "--raise-use-of-funds", "1 50%", "--raise-use-of-funds", "1 5"],
             "--raise #1: give every use-of-funds line as an amount or every one as a percent, not a mix",
         ),
-        ([*_FLAT, "--raise-use-of-funds", "2 5"], "--raise-use-of-funds #1: there is no --raise #2 (there are 0)"),
+        (
+            [*_FLAT, "--raise-use-of-funds", "2 5"],
+            "--raise-use-of-funds #1: there is no --raise #2 (no --raise was given)",
+        ),
         ([*_FLAT, "--cash-floor", "300001"], "--cash-floor is above --cash-on-hand"),
         ([*_FLAT, "--milestone", "601"], "--milestone #1: Input should be less than or equal to 600"),
-        ([*_FLAT, "--milestone", "6", "--milestone", "6"], "each milestone month may appear once"),
+        ([*_FLAT, "--milestone", "6", "--milestone", "6"], "--milestone: each milestone month may appear once"),
     ],
     ids=[
         "phase-term",
@@ -257,6 +260,38 @@ def test_every_flag_has_plain_words() -> None:
     assert list(seen) == list(get_args(RunwayPlanFlag))
     assert all(words and "_" not in words for words in seen.values())
     assert "under 24 months" in seen["runway_below_band"]
+
+
+@pytest.mark.parametrize(("months_to_raise", "named"), [(None, False), (0, True)])
+def test_the_short_milestone_flag_names_the_months_to_raise_only_when_given(
+    months_to_raise: int | None, named: bool
+) -> None:
+    on, _ = FLAG_CASES["milestone_short_on_plan"]
+    sheet = sheet_for(runway_plan(**{**on, "months_to_raise": months_to_raise}))
+    words = next(line.how for line in sheet.lines if line.key == "flag_milestone_short_on_plan")
+
+    assert ("with the months to raise" in words) is named
+
+
+def test_a_runway_stated_from_a_landing_the_cash_misses_says_it_is_not_checked() -> None:
+    """The stated line says why there is no check line: on the plan the cash runs out before the money lands."""
+    raises = [{"amount": "2400000", "lands_month": 5, "stated_runway_months": "24", "stated_runway_from": "landing"}]
+    phases = [{"from_month": 1, "gross_burn": "100000"}, {"from_month": 2, "gross_burn": "100000"}]
+    sheet = sheet_for(runway_plan(cash_on_hand="300000", cases=[{"name": "plan", "phases": phases}], raises=raises))
+    lines = {line.key: line for line in sheet.lines}
+
+    assert lines["raise_1_stated_runway"].how.endswith("not checked: on the plan the cash runs out before it lands")
+    assert not any(key.startswith("check_") for key in lines)
+    assert lines["plan_phase_1_gross"].label == "Plan, phase 1 (month 1): gross burn a month"
+    assert lines["plan_phase_2_gross"].label == "Plan, phase 2 (month 2 on): gross burn a month"
+
+
+async def test_a_use_of_funds_line_for_a_raise_not_given_counts_the_raises() -> None:
+    argv = [*_FLAT, "--raise", "amount=1", "--raise-use-of-funds", "2 50%"]
+    with pytest.raises(SystemExit) as caught:
+        await run(argv)
+
+    assert str(caught.value.code) == "--raise-use-of-funds #1: there is no --raise #2 (only 1 was given)"
 
 
 def test_a_plan_with_nothing_to_check_says_so() -> None:

@@ -61,13 +61,20 @@ def _cases(given: dict[str, Any], places: Places) -> list[dict[str, object]]:
     return cases
 
 
+def _given_count(raises: list[dict[str, Any]]) -> str:
+    """How many ``--raise`` flags were given, in words."""
+    if not raises:
+        return "no --raise was given"
+    return f"only {len(raises)} {'was' if len(raises) == 1 else 'were'} given"
+
+
 def _raises(given: dict[str, Any], places: Places) -> list[dict[str, Any]]:
     """Each ``--raise``, with the ``--raise-use-of-funds`` lines that name it, in the order given."""
     raises: list[dict[str, Any]] = [dict(item) for item in given.get("raises", [])]
     for number, line in enumerate(given.get("raise_use_of_funds", []), start=1):
         option = line["option"]
         if option > len(raises):
-            raise SystemExit(f"--raise-use-of-funds #{number}: there is no --raise #{option} (there are {len(raises)})")
+            raise SystemExit(f"--raise-use-of-funds #{number}: there is no --raise #{option} ({_given_count(raises)})")
         lines = raises[option - 1].setdefault("use_of_funds", [])
         places[("raises", option - 1, "use_of_funds", len(lines))] = f"--raise-use-of-funds #{number}"
         lines.append({key: value for key, value in line.items() if key != "option"})

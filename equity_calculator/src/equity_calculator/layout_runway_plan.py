@@ -17,6 +17,7 @@ from equity_calculator.schemas.equity_runway_plan import (
     MilestoneRow,
     OptionFunds,
     OptionRunway,
+    PhaseRow,
     RequiredRaiseRow,
     RunwayCase,
     RunwayPlanCheck,
@@ -49,12 +50,14 @@ def _flag_words(flag: RunwayPlanFlag, result: RunwayPlanResult) -> str:
         "runway has no end; a stated runway there is not checked",
         "cash_out_before_raise_lands": "On at least one case the cash goes below the floor before a later raise "
         "lands, so that raise comes too late as planned",
-        "milestone_short_on_plan": "A raise does not reach a milestone, with the months to raise, on the plan itself",
+        "milestone_short_on_plan": "A raise does not reach a milestone"
+        + ("" if inputs.months_to_raise is None else ", with the months to raise,")
+        + " on the plan itself",
         "downside_short_where_plan_covers": "A raise reaches a milestone on the plan but not on the downside; be "
         "ready to say what happens if the plan is missed",
         "covered_without_raise": "The cash already reaches a milestone with no raise on at least one case",
         "start_raising_date_passed": "With no raise, the plan's runway less the months to raise is already at or "
-        "past today: the next raise should be under way",
+        "past today: on the plan, raising the next round takes longer than the cash lasts",
         "no_time_to_raise_given": "No months to raise were given, so each milestone is checked at its own month, "
         "with no time left to raise the next round",
         "runway_below_band": f"A raise lasts under {inputs.runway_band_months} months on the plan; be ready to say "
@@ -88,7 +91,7 @@ def _given_lines(result: RunwayPlanResult) -> list[Line]:
                 f"raise_{option}_stated_runway",
                 f"{name}: runway as stated",
                 _maybe(stated),
-                f"given, counted from {'today' if raise_given.stated_runway_from == 'today' else 'when it lands'}",
+                _stated_how(result, option),
             ),
         ]
     for number, month in enumerate(inputs.milestones, start=1):
@@ -118,8 +121,28 @@ def _given_lines(result: RunwayPlanResult) -> list[Line]:
     return [Line(key, label, (value,), how) for key, label, value, how in shown if value is not None]
 
 
+def _stated_how(result: RunwayPlanResult, option: int) -> str:
+    """How a raise's stated runway counts, and why it is not checked when it counts from a landing the cash does not
+    reach on the plan."""
+    if result.inputs.raises[option - 1].stated_runway_from == "today":
+        return "given, counted from today"
+    plan_row = next(row for row in result.runway if row.case == result.cases[0].name and row.option == option)
+    if plan_row.ran_out_before_landing:
+        return "given, counted from when it lands; not checked: on the plan the cash runs out before it lands"
+    return "given, counted from when it lands"
+
+
 def _whole(value: int | None) -> Decimal | None:
     return None if value is None else Decimal(value)
+
+
+def _phase_months(phase: PhaseRow) -> str:
+    """The months a phase covers: ``month 4 on`` for the last, ``month 3`` for one month, else ``months 1-3``."""
+    if phase.to_month is None:
+        return f"month {phase.from_month} on"
+    if phase.to_month == phase.from_month:
+        return f"month {phase.from_month}"
+    return f"months {phase.from_month}-{phase.to_month}"
 
 
 def _case_lines(case: RunwayCase, derived: bool) -> list[Line]:
@@ -127,10 +150,7 @@ def _case_lines(case: RunwayCase, derived: bool) -> list[Line]:
     how = "the plan's, scaled by the case's percent" if derived else GIVEN
     lines = []
     for number, phase in enumerate(case.phases, start=1):
-        months = (
-            f"month {phase.from_month} on" if phase.to_month is None else f"months {phase.from_month}-{phase.to_month}"
-        )
-        name = f"{case.name.capitalize()}, phase {number} ({months})"
+        name = f"{case.name.capitalize()}, phase {number} ({_phase_months(phase)})"
         key = f"{case.name}_phase_{number}"
         lines += [
             Line(f"{key}_gross", f"{name}: gross burn a month", (phase.gross_burn,), how),

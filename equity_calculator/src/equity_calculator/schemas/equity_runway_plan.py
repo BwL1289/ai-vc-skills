@@ -206,13 +206,13 @@ class RunwayPlanInput(BaseModel):
             raise ValueError("the plan needs its own phases: only a downside or a lean case can be percents of it")
         names = [case.name for case in self.cases]
         if len(set(names)) != len(names):
-            raise ValueError("each case name may appear once")
+            raise ValueError("cases: each case name may appear once")
         if self.cash_floor > self.cash_on_hand:
             raise ValueError(
                 "cash_floor is above cash_on_hand: the floor is cash kept in the bank, so it cannot exceed the cash"
             )
         if len(set(self.milestones)) != len(self.milestones):
-            raise ValueError("each milestone month may appear once")
+            raise ValueError("milestones: each milestone month may appear once")
 
         return self
 

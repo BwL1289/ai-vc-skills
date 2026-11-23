@@ -175,7 +175,8 @@ Once the plugin is installed, ask in plain words:
 - **Exact.** Every number is a fraction, rounded once for display (one marked exception: a note's interest over a part
   period). No floating point inside a result.
 - **Checkable.** Each line of a result says how it was computed; each result lists the assumptions it rests on and
-  their sources (Paul Graham, Sam Altman, Y Combinator's SAFE documents), and marks the rest `unverified`.
+  their sources (Paul Graham, Sam Altman, Y Combinator's SAFE documents and its seed fundraising guide), and marks the
+  rest `unverified`.
 - **Four ways to run it.** The MCP server for agents, a command, an `.xlsx` workbook whose investor verdict re-works
   when you change a cell (`--xlsx deal.xlsx`), and a Python package.
 - **Local.** The server runs on your machine and makes no network calls ([SECURITY.md](SECURITY.md)).

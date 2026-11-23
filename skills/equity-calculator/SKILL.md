@@ -68,6 +68,9 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
 ## Answering
 
 1. Pick the scenario, ask for any required input that is missing, and run it. State any value you had to assume.
+   For runway_plan, never assume one: the phases, the downside or lean percents, the milestones, the months to raise,
+   the landing months and the cash floor are the founder's own figures, so ask for them. With no months to raise,
+   run without it and quote the `no_time_to_raise_given` flag.
 2. Give the headline numbers as the tool prints them (the `rounded` value with its unit, or the exact fraction when
    precision matters). Do not round them again or recompute them. A value whose unit is `fraction` is a share of the
    whole: show it as a percent by moving the decimal point of its `rounded` value two places to the right, keeping
@@ -126,10 +129,12 @@ Y Combinator's post-money SAFE forms (valuation cap, discount, MFN) and their us
   floor runs down by each phase's net burn (gross burn - revenue, flat within a phase); a raise lands whole after
   `lands_month` months. Runway is when that cash first goes below zero (none when revenue covers the burn first); a
   no-raise row is always worked. A milestone is covered when the runway reaches its month plus `months_to_raise`;
-  the smallest raise for it is the peak cumulative net burn up to that target less the cash, none when the cash runs
-  out before the money lands. A downside or lean case is its own phases or percents of the plan's. Stated runways and
-  use-of-funds totals use deal_check's tolerances; the 18-month band is a benchmark from the guide's "raising for N
-  months (usually 12-18)", a question, never an error. Cash only: valuation and ownership stay with deal_check,
+  the smallest raise for it is the peak cumulative net burn from the landing month to that target less the cash above
+  the floor (never below zero), none when the cash runs out before the money lands. A downside or lean case is its
+  own phases or percents of the plan's. Stated runways and use-of-funds totals use deal_check's tolerances; a runway
+  stated from landing is not checked when the cash runs out before the money lands. The 18-month band is the top of
+  the guide's "raising for N months (usually 12-18)": a raise inside 12 to 18 is within that range, so the flag is a
+  question, never a shortfall or an error. Cash only: valuation and ownership stay with deal_check,
   round and dilution.
 
 ## Limits

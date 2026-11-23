@@ -165,7 +165,9 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "with the slack; the smallest raise per milestone and landing month is max(0, max cumulative net burn on "
         "[landing, target] - available cash), none when the cash runs out first. Stated runways (no raise, or per "
         "raise from today or from landing) and each raise's use_of_funds total come back consistent or a mismatch; "
-        "flags never change a verdict.",
+        "a runway stated from landing is not checked when the cash runs out before the money lands. The phases, "
+        "percents, milestones, months_to_raise and lands_month are the founder's figures: never assume one. Flags "
+        "never change a verdict.",
     ),
 }
 

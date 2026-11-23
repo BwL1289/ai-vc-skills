@@ -1,9 +1,11 @@
 """The labelled assumptions of a runway plan, each with its source; a row appears only when the input uses it.
 
-Two rows quote Y Combinator's "A guide to seed fundraising", read in full: the milestone rule (raise enough to reach
-the next fundable milestone) and the runway band (raising for N months, usually 12 to 18). The band is a benchmark,
-not a rule, and an input the founder can change. The runway, phase, landing and required-raise rules and the
-tolerances are marked unverified: standard arithmetic or a modelling choice no source was read for.
+Two rows quote Y Combinator's "A guide to seed fundraising", read in full: the milestone rule (a startup that will
+need a follow-on round raises enough to reach its next fundable milestone) and the runway band (raising for N months,
+usually 12 to 18). The default band of 18 months is the top of that range, so the flag is a question, not a shortfall;
+the band is a benchmark, not a rule, and an input the founder can change. The time left to raise the next round, the
+runway, phase, landing and required-raise rules and the tolerances are marked unverified: standard arithmetic or a
+modelling choice no source was read for.
 """
 
 from __future__ import annotations
@@ -85,8 +87,9 @@ def _milestone_rows(inputs: RunwayPlanInput) -> list[EquityAssumption]:
         _assumption(
             "milestone_rule",
             setting,
-            "A raise is sized to reach a milestone with time left to raise the next round; the milestones and the "
-            "months to raise are the founder's.",
+            "For a startup that will need a follow-on round, a raise is sized to reach its next milestone (the "
+            "guide); the milestones and the months to raise are the founder's, and leaving months to raise the "
+            f"next round is ours, {UNVERIFIED}.",
             f"{YC_SEED_GUIDE_SOURCE}: {_MILESTONE_QUOTE}",
         ),
         _assumption(
@@ -119,7 +122,9 @@ def _check_rows(inputs: RunwayPlanInput, checked: bool) -> list[EquityAssumption
                 "runway_band",
                 f"{inputs.runway_band_months} months",
                 "A raise whose runway on the plan, from today, is below this many months is flagged as a question, "
-                "never an error; the band is an input.",
+                "never an error; the band is an input. The default, 18 months, is the top of the guide's usual 12 to "
+                "18, so a raise lasting 12 to 18 months is within the guide's range: the flag asks which milestone it "
+                "reaches, not whether it falls short.",
                 f"{YC_SEED_GUIDE_SOURCE}: {_BAND_QUOTE} (a common benchmark, not a rule)",
             )
         )

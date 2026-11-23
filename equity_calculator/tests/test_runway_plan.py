@@ -306,7 +306,10 @@ def test_a_derived_case_scales_every_plan_phase_exactly() -> None:
     [
         ({"cases": [{"name": "downside", "phases": _FLAT}]}, "the first case must be the plan"),
         ({"cases": [{"name": "plan", "revenue_percent_of_plan": "50"}]}, "the plan needs its own phases"),
-        ({"cases": [_PLAN_FLAT, {"name": "lean", "phases": _FLAT}, {"name": "lean", "phases": _FLAT}]}, "appear once"),
+        (
+            {"cases": [_PLAN_FLAT, {"name": "lean", "phases": _FLAT}, {"name": "lean", "phases": _FLAT}]},
+            "cases: each case name may appear once",
+        ),
         (
             {"cases": [_PLAN_FLAT, {"name": "downside", "phases": _FLAT, "revenue_percent_of_plan": "50"}]},
             "not both",
@@ -318,7 +321,7 @@ def test_a_derived_case_scales_every_plan_phase_exactly() -> None:
             "a later month than the one before it",
         ),
         ({"cash_floor": "100001"}, "cash_floor is above cash_on_hand"),
-        ({"milestones": [12, 12]}, "each milestone month may appear once"),
+        ({"milestones": [12, 12]}, "milestones: each milestone month may appear once"),
         (
             {"raises": [{"amount": "1", "use_of_funds": [{"amount": "1"}, {"percent": "50"}]}]},
             "every use_of_funds line as an amount or every one as a percent",
@@ -469,6 +472,28 @@ def test_a_runway_counted_from_landing_drops_the_months_before_it() -> None:
     assert check.verdict == "consistent"
 
 
+def test_a_runway_counted_from_landing_is_not_checked_when_the_cash_runs_out_first() -> None:
+    """$300k at $100k a month runs out at month 3, before $2.4M lands after 5: no runway from landing to check."""
+    raises = [{"amount": "2400000", "lands_month": 5, "stated_runway_months": "24", "stated_runway_from": "landing"}]
+    result = runway_plan(**_plan((1, "100000", "0"), cash_on_hand="300000", raises=raises))
+    row = next(row for row in result.runway if row.case == "plan" and row.option == 1)
+
+    assert (row.ran_out_before_landing, row.runway_from_landing) == (True, None)
+    assert result.checks == ()
+    assert result.verdict == "not_checked"
+    assert "cash_out_before_raise_lands" in result.flags
+    assert "tolerance" not in {assumption.key for assumption in result.assumptions}
+
+
+def test_a_runway_counted_from_landing_today_is_still_checked() -> None:
+    """$1.2M landing today on $1M at $100k a month lasts 22 months, the same counted from today or from landing."""
+    raises = [{"amount": "1200000", "lands_month": 0, "stated_runway_months": "22", "stated_runway_from": "landing"}]
+    result = runway_plan(**_plan((1, "100000", "0"), cash_on_hand="1000000", raises=raises))
+    (check,) = result.checks
+
+    assert (check.option, check.computed.exact, check.verdict) == (1, 22, "consistent")
+
+
 @pytest.mark.parametrize(
     "lines",
     [
@@ -537,6 +562,12 @@ def test_the_milestone_and_band_rows_quote_the_yc_seed_guide() -> None:
     assert _BAND_QUOTE in rows["runway_band"].source
     assert rows["runway_band"].setting == "18 months"
     assert rows["milestone_rule"].setting.endswith("plus 6 months to raise")
+    assert rows["milestone_rule"].statement.startswith("For a startup that will need a follow-on round")
+    assert rows["milestone_rule"].statement.endswith("leaving months to raise the next round is ours, unverified.")
+    assert rows["runway_band"].statement.endswith(
+        "The default, 18 months, is the top of the guide's usual 12 to 18, so a raise lasting 12 to 18 months is "
+        "within the guide's range: the flag asks which milestone it reaches, not whether it falls short."
+    )
     assert "tolerance" not in rows
 
 

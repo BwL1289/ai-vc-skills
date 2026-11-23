@@ -302,9 +302,10 @@ def _runway_check(
     inputs: RunwayPlanInput, worked: _Worked, option: int, stated: Decimal, from_landing: bool
 ) -> RunwayPlanCheck | None:
     """A stated runway against the plan case's runway for ``option`` (less the landing month when it counts from
-    there); none when the cash never runs out."""
+    there); none when the cash never runs out, or when it counts from landing and the cash runs out before the money
+    lands (there is no runway from landing; ``cash_out_before_raise_lands`` says why)."""
     row = _plan_runway(worked, option)
-    if row.runway_months is None:
+    if row.runway_months is None or (from_landing and row.ran_out_before_landing):
         return None
 
     computed = row.runway_months.exact - (row.lands_month if from_landing else 0)
