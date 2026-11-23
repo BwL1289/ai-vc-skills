@@ -70,13 +70,13 @@ def _flag_words(flag: MetricsFlag, result: MetricsCheckResult) -> str:
     band = "none" if result.payback_band_months is None else f"{result.payback_band_months.rounded} months"
     words: dict[MetricsFlag, str] = {
         "stated_arr_matches_run_rate": "The stated ARR matches the run-rate (12 x the whole month's revenue), not "
-        "recurring revenue; a VC will recompute ARR without one-time, services and usage fees",
+        "recurring revenue; a VC is likely to recompute ARR without one-time, services and usage fees",
         "run_rate_includes_non_recurring": "The latest month has one-time or usage revenue, so its run-rate is above "
         "its ARR; say which figure the document shows",
         "stated_nrr_includes_new": "The stated net retention matches ending over starting recurring revenue, which "
-        "counts new customers; a VC will ask for the starting customers alone",
+        "counts new customers; a VC is likely to ask for the starting customers alone",
         "expansion_hides_churn": "Expansion covers the revenue lost, so net revenue churn is zero or below while "
-        "gross revenue churn is not; show both, as a VC will ask what was lost",
+        "gross revenue churn is not; show both, as a VC is likely to ask what was lost",
         "churn_basis_unlabelled": "The churn figure names no basis, so it was checked on every basis these figures "
         "give; label it logo, gross revenue or net revenue churn",
         "blended_cac_only": "CAC is blended over every new customer; a VC is likely to ask for paid CAC, over the "
@@ -84,7 +84,7 @@ def _flag_words(flag: MetricsFlag, result: MetricsCheckResult) -> str:
         "payback_not_margin_adjusted": "No gross margin was given, so CAC payback is on revenue only and shorter than "
         "on gross margin; give the margin",
         "stated_payback_not_margin_adjusted": "The stated payback matches the revenue-only payback, not the payback "
-        "on gross margin; a VC measures it after gross margin",
+        "on gross margin; Bessemer measures it after gross margin, so a VC may recompute it that way",
         "stated_burn_multiple_uses_new_not_net_arr": "The stated burn multiple matches net burn over new ARR only, "
         "not over net new ARR after churn and contraction",
         "burn_multiple_not_defined": "Net new ARR is zero or below in the period, so there is no burn multiple; a "

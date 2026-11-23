@@ -279,8 +279,16 @@ def _definition_flags(
     points = from_percent(inputs.tolerance_points)
     relative = from_percent(inputs.tolerance_percent)
     flags: list[MetricsFlag] = []
-    if inputs.stated_arr is not None and _mismatched(checks, "arr") and worked.run_rate is not None:
-        if _within(fraction(inputs.stated_arr), worked.run_rate, relative * worked.run_rate):
+    run_rate, month_arr = worked.run_rate, worked.month_arr
+    if inputs.stated_arr is not None and _mismatched(checks, "arr") and run_rate is not None and month_arr is not None:
+        # Only a month with one-time or usage revenue has a run-rate apart from its ARR. A stated ARR that also
+        # matches the month's own ARR points at the movement and the month disagreeing, not at fees in the figure.
+        stated = fraction(inputs.stated_arr)
+        if (
+            run_rate != month_arr
+            and _within(stated, run_rate, relative * run_rate)
+            and not _within(stated, month_arr, relative * month_arr)
+        ):
             flags.append("stated_arr_matches_run_rate")
     if inputs.stated_nrr_percent is not None and _mismatched(checks, "nrr"):
         if _within(from_percent(inputs.stated_nrr_percent), worked.ending_over_start, points):

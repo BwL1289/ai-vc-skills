@@ -121,6 +121,8 @@ _COHORT = (
     ("cohort_contraction_recurring", "contraction_recurring"),
     ("cohort_churned_recurring", "churned_recurring"),
 )
+# The two movements that lose the starting customers' revenue, as (cohort part, total) pairs.
+_COHORT_LOSSES = _COHORT[1:]
 
 
 class MetricsCheckInput(BaseModel):
@@ -198,7 +200,14 @@ class MetricsCheckInput(BaseModel):
         return self.starting_recurring is not None and self.starting_recurring > 0
 
     def _movement_rules(self) -> None:
-        """Refuse a movement without its start, more lost than there was, or a cohort part above its total."""
+        """Refuse a movement without its start, more lost than there was, or a cohort part above its total.
+
+        The four movements are the period's totals, so they include customers won during the period: their losses
+        are bounded by everything there was (start, new and expansion), never by the start alone. The starting
+        customers' own losses (each ``cohort_*`` part, or its total when not given) are bounded by the start, so
+        retention never goes below 0. With nothing at the start, retention is not worked, and only a given
+        ``cohort_*`` loss is held to it.
+        """
         if self.starting_recurring is None:
             moving = [name for name in _MOVEMENTS if getattr(self, name) > 0]
             moving += [cohort for cohort, _ in _COHORT if getattr(self, cohort) is not None]
@@ -209,11 +218,13 @@ class MetricsCheckInput(BaseModel):
                 )
             return
 
+        start = Fraction(self.starting_recurring)
         lost = Fraction(self.contraction_recurring) + Fraction(self.churned_recurring)
-        if lost > Fraction(self.starting_recurring):
+        if lost > start + Fraction(self.new_recurring) + Fraction(self.expansion_recurring):
             raise ValueError(
-                "contraction_recurring + churned_recurring is above starting_recurring: a period cannot lose more "
-                "recurring revenue than there was at its start"
+                "contraction_recurring + churned_recurring is above starting_recurring + new_recurring + "
+                "expansion_recurring: a period cannot lose more recurring revenue than it had (ARR at the end would "
+                "be below 0)"
             )
         for cohort, total in _COHORT:
             part = getattr(self, cohort)
@@ -221,6 +232,24 @@ class MetricsCheckInput(BaseModel):
                 raise ValueError(
                     f"{cohort} is above {total}: the starting customers' part of a movement cannot exceed the total"
                 )
+        if self._cohort_lost() > start:
+            raise ValueError(
+                "cohort_contraction_recurring + cohort_churned_recurring (each the period's total when not given) is "
+                "above starting_recurring: the starting customers cannot lose more recurring revenue than they had at "
+                "the start; give their own contraction and churn"
+            )
+
+    def _cohort_lost(self) -> Fraction:
+        """The starting customers' contraction plus churn: each ``cohort_*`` part when given, else its total when
+        there was recurring revenue at the start (retention is then worked on it), else 0."""
+        lost = Fraction(0)
+        for cohort, total in _COHORT_LOSSES:
+            part = getattr(self, cohort)
+            if part is not None:
+                lost += Fraction(part)
+            elif self.has_revenue_churn():
+                lost += Fraction(getattr(self, total))
+        return lost
 
     def _part_rules(self) -> None:
         """Refuse the month's parts above its total, customers that do not add up, and concentration above 100%."""

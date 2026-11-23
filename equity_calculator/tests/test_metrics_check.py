@@ -209,6 +209,49 @@ def test_the_starting_customers_movements_drive_retention_and_the_totals_drive_a
     assert {row.key: row for row in plain.assumptions}["cohort_rule"].setting == "the period's totals"
 
 
+def test_the_periods_losses_may_exceed_the_start_when_customers_won_in_it_leave() -> None:
+    """A small start and fast growth over 12 months: 15k lost in total, 5k of it from the 10k there at the start and
+    10k from customers won in the period. ARR at the end 12(10k + 100k - 15k) = 1.14M; gross retention 5k/10k."""
+    result = metrics_check(
+        period_months=12,
+        starting_recurring="10000",
+        new_recurring="100000",
+        churned_recurring="15000",
+        cohort_churned_recurring="5000",
+    )
+
+    assert _exact(result, "ending_arr") == 1_140_000
+    assert _exact(result, "gross_revenue_retention") == Fraction(1, 2)
+    assert _exact(result, "net_revenue_retention") == Fraction(1, 2)
+
+
+def test_a_first_paying_period_starts_from_zero() -> None:
+    """Nothing at the start, 5k new MRR over a quarter and 1k of it lost again: ARR 12 x 4k = 48k, all of it net new,
+    so the burn multiple is 72k/48k = 3/2. No retention or churn is worked, with nothing at the start to divide by."""
+    result = metrics_check(
+        period_months=3,
+        starting_recurring="0",
+        new_recurring="5000",
+        churned_recurring="1000",
+        cohort_churned_recurring="0",
+        net_burn="72000",
+        stated_arr="48000",
+        stated_burn_multiple="1.5",
+    )
+
+    assert _exact(result, "starting_arr") == 0
+    assert _exact(result, "ending_arr") == _exact(result, "net_new_arr") == 48_000
+    assert _exact(result, "burn_multiple") == Fraction(3, 2)
+    assert result.gross_revenue_retention is None and result.net_revenue_retention is None
+    assert result.gross_revenue_churn is None and result.net_revenue_churn is None
+    assert _checks(result) == {
+        ("arr", None): (Fraction(48_000), Fraction(48_000), "consistent"),
+        ("burn_multiple", None): (Fraction(3, 2), Fraction(3, 2), "consistent"),
+    }
+    assert result.verdict == "consistent"
+    assert "stated_nrr_includes_new" not in result.flags
+
+
 def test_a_stated_arr_is_checked_against_the_latest_month_when_no_movement_is_given() -> None:
     result = metrics_check(
         period_months=1, month_total_revenue="100000", month_usage_revenue="10000", stated_arr="1.2e6"
@@ -385,6 +428,27 @@ def test_definition_flags_need_a_mismatch() -> None:
     assert result.flags == ()
 
 
+@pytest.mark.parametrize(
+    ("movement", "month", "stated"),
+    [
+        # An all-recurring month: its run-rate is its ARR, so a stated 12 x 125k names no fees.
+        ({"starting_recurring": "100000", "new_recurring": "10000"}, {"month_total_revenue": "125000"}, "1500000"),
+        # A month with fees whose stated figure sits within tolerance of both its run-rate (1,200) and its ARR (1,188).
+        ({"starting_recurring": "50"}, {"month_total_revenue": "100", "month_one_time_revenue": "1"}, "1194"),
+    ],
+    ids=["all-recurring-month", "within-both"],
+)
+def test_a_stated_arr_off_the_movement_names_the_run_rate_only_when_fees_set_it_apart(
+    movement: dict[str, str], month: dict[str, str], stated: str
+) -> None:
+    """The movement's ending ARR (12 x 110k = 1.32M; 12 x 50 = 600) and the latest month disagree: the mismatch is
+    real, yet the stated figure is the month's own ARR, so the run-rate flag would name a cause that is not there."""
+    result = metrics_check(period_months=1, **movement, **month, stated_arr=stated)
+
+    assert [check.verdict for check in result.checks] == ["mismatch"]
+    assert "stated_arr_matches_run_rate" not in result.flags
+
+
 def test_the_payback_band_is_the_segments_target_unless_one_is_given() -> None:
     base = {"period_months": 1, "starting_recurring": "100", "new_recurring": "10", "sales_marketing_spend": "100"}
     base |= {"gross_margin_percent": "50"}
@@ -523,12 +587,44 @@ _NEEDS = "to check it"
         ({"new_recurring": "5"}, "new_recurring needs starting_recurring"),
         ({"cohort_churned_recurring": "1"}, "cohort_churned_recurring needs starting_recurring"),
         (
-            {"starting_recurring": "10", "contraction_recurring": "6", "churned_recurring": "5"},
-            "contraction_recurring + churned_recurring is above starting_recurring",
+            {"starting_recurring": "10", "new_recurring": "1", "contraction_recurring": "6", "churned_recurring": "6"},
+            "contraction_recurring + churned_recurring is above starting_recurring + new_recurring + "
+            "expansion_recurring",
         ),
         (
             {"starting_recurring": "10", "churned_recurring": "2", "cohort_churned_recurring": "3"},
             "cohort_churned_recurring is above churned_recurring",
+        ),
+        (
+            {
+                "starting_recurring": "10",
+                "new_recurring": "100",
+                "contraction_recurring": "3",
+                "churned_recurring": "15",
+            },
+            "cohort_contraction_recurring + cohort_churned_recurring (each the period's total when not given) is "
+            "above starting_recurring",
+        ),
+        (
+            {
+                "starting_recurring": "10",
+                "new_recurring": "100",
+                "contraction_recurring": "3",
+                "churned_recurring": "15",
+                "cohort_churned_recurring": "8",
+            },
+            "cohort_contraction_recurring + cohort_churned_recurring (each the period's total when not given) is "
+            "above starting_recurring",
+        ),
+        (
+            {
+                "starting_recurring": "0",
+                "new_recurring": "5",
+                "churned_recurring": "2",
+                "cohort_churned_recurring": "1",
+            },
+            "cohort_contraction_recurring + cohort_churned_recurring (each the period's total when not given) is "
+            "above starting_recurring",
         ),
         ({"month_usage_revenue": "5"}, "month_usage_revenue needs month_total_revenue"),
         (
@@ -596,6 +692,9 @@ _NEEDS = "to check it"
         "cohort-without-start",
         "more-lost-than-there-was",
         "cohort-above-total",
+        "starting-customers-lose-more-than-the-start",
+        "cohort-part-plus-total-above-the-start",
+        "cohort-loss-with-nothing-at-the-start",
         "month-part-without-total",
         "month-parts-above-total",
         "lost-without-start",

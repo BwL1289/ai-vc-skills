@@ -109,6 +109,12 @@ All notable changes to this repository. Dates are UTC.
   and a refute pass drop what the founder's own material answers; the rest becomes a ranked fix list that revises the
   draft. It keeps every lowlight the founder gives and writes no version for people who are not yet investors.
   `vc-positioning` now points to it. Five evals are in `evals/vc-current-investor-update/`.
+- The calculator's `metrics_check` scenario, also an MCP tool (`equity_metrics_check`), a command and a workbook
+  sheet: a founder's ARR, net and gross revenue retention, churn (logo, gross and net revenue), CAC, CAC payback and
+  burn multiple worked exactly from their parts over one period, each figure the document states returned as
+  consistent or a mismatch, with flags naming the likely cause (a run-rate called ARR, new customers in net
+  retention, payback on revenue rather than gross margin, a multiple on new rather than net new ARR) and three
+  benchmark questions. Its definitions and benchmarks quote a16z, Bessemer, David Sacks and David Skok.
 
 ### Changed
 

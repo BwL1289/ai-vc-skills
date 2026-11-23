@@ -183,7 +183,9 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "customers_start. CAC = sales_marketing_spend / customers_new (paid: / customers_new_paid); CAC payback = "
         "spend / (new monthly recurring x gross margin), and on revenue only; burn multiple = net_burn / net new "
         "ARR (none at or below zero); concentration = largest_customer_revenue / period_revenue. Each stated_* "
-        "figure comes back consistent or a mismatch (a churn with no basis once per basis); flags name the likely "
+        "figure comes back consistent or a mismatch (a churn with no basis once per basis; a stated retention or "
+        "churn over period_months, so set it to the period the document's figure covers, 1 for a monthly churn, 12 "
+        "for an annual NRR, one call per period); flags name the likely "
         "cause of a mismatch (a run-rate called ARR, new customers in NRR, payback on revenue, new not net new ARR) "
         "and three benchmark questions (payback by customer_segment, burn multiple 3x, monthly net revenue churn "
         "2%), never errors. Every part is the founder's figure: never assume one.",

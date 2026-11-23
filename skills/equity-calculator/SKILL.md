@@ -1,6 +1,6 @@
 ---
 name: equity-calculator
-description: Exact startup equity arithmetic with the equity_calculator command or its MCP tools. Use whenever someone asks whether a fundraise or a stake is worth it (Paul Graham's equity equation), how much equity a hire is worth or what to offer them, how big an option pool to add and what it does to the price per share (the option-pool shuffle), how SAFEs or convertible notes convert in a priced round (caps, discounts, MFN, note interest), how a stake dilutes over several rounds, how many shares have vested at a given month (cliff, termination, acceleration, exercise cost), or who gets what at an exit (liquidation preferences, participation, caps). Its deal_check scenario checks a founder's raise before a VC does, testing whether the pre-money, post-money, percent sold, ownership after the round and runway agree; runway_plan shows how long each raise lasts on a phased plan and a downside and which milestones it reaches. Run the calculator instead of doing the arithmetic by hand.
+description: Exact startup equity arithmetic with the equity_calculator command or MCP tools. Use when someone asks whether a fundraise or a stake is worth it (Paul Graham's equity equation), how much equity a hire is worth or what to offer them, how big an option pool to add and its effect on the price per share (the option-pool shuffle), how SAFEs or convertible notes convert in a priced round (caps, discounts, MFN, note interest), how a stake dilutes over several rounds, how many shares have vested by a given month (cliff, termination, acceleration, exercise cost), or who gets what at an exit (liquidation preferences, participation, caps). Its deal_check scenario checks a raise before a VC does, testing whether the valuation, percent sold, ownership after the round and runway agree; runway_plan shows how long each raise lasts on a phased plan and a downside and which milestones it reaches; metrics_check checks ARR, retention, churn, CAC payback and burn multiple. Run it instead of doing the arithmetic by hand.
 ---
 
 # Equity calculator
@@ -70,12 +70,17 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
 ## Answering
 
 1. Pick the scenario, ask for any required input that is missing, and run it. State any value you had to assume.
-   For runway*plan, never assume one: the phases, the downside or lean percents, the milestones, the months to raise,
-   the landing months and the cash floor are the founder's own figures, so ask for them. With no months to raise,
-   run without it and quote the `no_time_to_raise_given` flag. For metrics_check, every part is the founder's own
-   figure for one period: never convert MRR to ARR, a quarter to a year or a percent to a count yourself (the tool
-   annualises by `recurring_unit`), and when the period is longer than a month, ask for the starting customers' own
-   expansion, contraction and churn (`cohort*\*`), or quote the `cohort_rule` row.
+   For `runway_plan`, never assume one: the phases, the downside or lean percents, the milestones, the months to
+   raise, the landing months and the cash floor are the founder's own figures, so ask for them. With no months to
+   raise, run without it and quote the `no_time_to_raise_given` flag. For `metrics_check`, every part is the founder's
+   own figure for one period: never convert MRR to ARR, a quarter to a year or a percent to a count yourself (the tool
+   annualises by `recurring_unit`). Each stated retention or churn figure is checked over `period_months`, so set it
+   to the period the document's figure covers (1 for a monthly churn, 12 for an annual NRR), run one call per period
+   when the document mixes them, and ask when the period is not stated rather than report a mismatch. When the period
+   is longer than a month, ask for the starting customers' own expansion, contraction and churn
+   (`cohort_expansion_recurring`, `cohort_contraction_recurring`, `cohort_churned_recurring`), or quote the
+   `cohort_rule` row. For the payback benchmark, ask who the company sells to (`customer_segment`: `smb`,
+   `mid_market` or `enterprise`); never assume it. A stated CAC is checked as blended CAC.
 2. Give the headline numbers as the tool prints them (the `rounded` value with its unit, or the exact fraction when
    precision matters). Do not round them again or recompute them. A value whose unit is `fraction` is a share of the
    whole: show it as a percent by moving the decimal point of its `rounded` value two places to the right, keeping

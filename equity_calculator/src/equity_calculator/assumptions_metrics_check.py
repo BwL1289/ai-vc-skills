@@ -199,7 +199,8 @@ def _efficiency_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[Eq
             _assumption(
                 "burn_multiple_rule",
                 "net burn / net new ARR, the same period",
-                "No multiple is worked when net new ARR or the net burn is zero or less.",
+                "No multiple is worked when net new ARR or the net burn is zero or less (the source covers a "
+                f"pre-revenue company's zero net new ARR; the other cases are ours, {UNVERIFIED}).",
                 f"{SACKS_SOURCE}: {_BURN_MULTIPLE_QUOTE}",
             )
         )

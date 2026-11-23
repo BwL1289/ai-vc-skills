@@ -186,8 +186,9 @@ Once the plugin is installed, ask in plain words:
 - **Exact.** Every number is a fraction, rounded once for display (one marked exception: a note's interest over a part
   period). No floating point inside a result.
 - **Checkable.** Each line of a result says how it was computed; each result lists the assumptions it rests on and
-  their sources (Paul Graham, Sam Altman, Y Combinator's SAFE documents and its seed fundraising guide), and marks the
-  rest `unverified`.
+  their sources (Paul Graham, Sam Altman, Y Combinator's SAFE documents and its seed fundraising guide, and for the
+  traction metrics a16z's two startup-metrics posts, Bessemer's "Scaling to $100 Million", David Sacks's "The Burn
+  Multiple" and David Skok's "SaaS Metrics 2.0"), and marks the rest `unverified`.
 - **Four ways to run it.** The MCP server for agents, a command, an `.xlsx` workbook whose investor verdict re-works
   when you change a cell (`--xlsx deal.xlsx`), and a Python package.
 - **Local.** The server runs on your machine and makes no network calls ([SECURITY.md](SECURITY.md)).
@@ -282,6 +283,14 @@ MIT, see [LICENSE](LICENSE). The calculator implements:
   fully diluted shares, and the 4-year schedule with a 1-year cliff.
 - Y Combinator's post-money SAFE forms and its Post-Money Safe User Guide,
   [ycombinator.com/documents](https://www.ycombinator.com/documents): the SAFE conversion rules.
+- Y Combinator, ["A guide to seed fundraising"](https://www.ycombinator.com/library/4A-a-guide-to-seed-fundraising):
+  the milestone rule and the runway band in `runway_plan`.
+- a16z, ["16 Startup Metrics"](https://a16z.com/16-startup-metrics/) and
+  ["16 More Startup Metrics"](https://a16z.com/16-more-startup-metrics/), Bessemer Venture Partners,
+  ["Scaling to $100 Million"](https://www.bvp.com/atlas/scaling-to-100-million), David Sacks,
+  ["The Burn Multiple"](https://sacks.substack.com/p/the-burn-multiple-51a7e43cb200) and David Skok,
+  ["SaaS Metrics 2.0"](https://www.forentrepreneurs.com/saas-metrics-2/): the definitions and benchmarks
+  `metrics_check` quotes.
 
 Everything else (option pools, notes, preferred stock, the finer vesting terms) is standard arithmetic, marked
 `unverified` in each result's assumptions. This is a calculator, not investment, legal or tax advice.
