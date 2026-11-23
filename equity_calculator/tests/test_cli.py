@@ -19,6 +19,7 @@ from equity_calculator.__main__ import main, run
 from equity_calculator.schemas.equity import EquityAssumption
 from openpyxl import load_workbook
 from tests.support import (
+    COMPARE_BU,
     DEAL_A,
     MARKET_AX,
     METRICS_AN_DECK,
@@ -26,6 +27,7 @@ from tests.support import (
     RUNWAY_Y,
     deal_check,
     employee,
+    instrument_compare,
     investor,
     market_sizing,
     metrics_check,
@@ -126,6 +128,42 @@ _MARKET_AX = [
     "--stated-tam",
     "11700000000",
 ]
+# Company BU (tests.support.COMPARE_BU) as flags: a priced round or a note, two next rounds and three exits.
+_COMPARE_BU = [
+    "instrument_compare",
+    "--founder-shares",
+    "8,000,000",
+    "--team-shares",
+    "1,000,000",
+    "--unissued-pool-shares",
+    "1,000,000",
+    "--investment",
+    "$2,000,000",
+    "--priced-pre-money",
+    "8000000",
+    "--priced-preference",
+    "standard",
+    "--note-valuation-cap",
+    "6000000",
+    "--note-discount-percent",
+    "20%",
+    "--note-interest-rate-percent",
+    "5",
+    "--note-compounding",
+    "simple",
+    "--note-months-to-conversion",
+    "12",
+    "--next-round",
+    "pre-money=27000000 investment=6000000 standard",
+    "--next-round",
+    "pre-money=9000000 investment=2000000 standard",
+    "--exit",
+    "5000000",
+    "--exit",
+    "20000000",
+    "--exit",
+    "100000000",
+]
 _EMPLOYEE = [
     "employee",
     "--gain-percent",
@@ -201,8 +239,18 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
         (_RUNWAY_Y, runway_plan(**RUNWAY_Y).assumptions),
         (_METRICS_AN, metrics_check(**METRICS_AN_DECK).assumptions),
         (_MARKET_AX, market_sizing(**MARKET_AX).assumptions),
+        (_COMPARE_BU, instrument_compare(**COMPARE_BU).assumptions),
     ],
-    ids=["investor", "employee", "pool", "deal_check", "runway_plan", "metrics_check", "market_sizing"],
+    ids=[
+        "investor",
+        "employee",
+        "pool",
+        "deal_check",
+        "runway_plan",
+        "metrics_check",
+        "market_sizing",
+        "instrument_compare",
+    ],
 )
 async def test_every_assumption_prints_with_its_setting_statement_and_source(
     argv: list[str], assumptions: tuple[EquityAssumption, ...]

@@ -9,7 +9,7 @@
 
 The first of the [AI VC skills](../README.md).
 
-Should we trade stock for this, and what does a round do to the cap table? Eleven scenarios, worked with exact
+Should we trade stock for this, and what does a round do to the cap table? Twelve scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
@@ -25,19 +25,20 @@ and the essay it implements. That script's own TODO
 list asked for Pydantic models and cell formatting (percent, numbers); both are here, along with the employee formula
 and the option-pool shuffle.
 
-| Scenario        | The question it answers                                                                                                                                                         |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `investor`      | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                                                  |
-| `employee`      | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                                              |
-| `pool`          | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?                                     |
-| `round`         | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards?                         |
-| `dilution`      | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                                                  |
-| `vesting`       | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                                           |
-| `waterfall`     | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                            |
-| `deal_check`    | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                         |
-| `runway_plan`   | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there? |
-| `metrics_check` | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback and burn multiple the deck states agree with their parts?                   |
-| `market_sizing` | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?          |
+| Scenario             | The question it answers                                                                                                                                                                             |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `investor`           | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                                                                      |
+| `employee`           | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                                                                  |
+| `pool`               | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?                                                         |
+| `round`              | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards?                                             |
+| `dilution`           | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                                                                      |
+| `vesting`            | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                                                               |
+| `waterfall`          | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                                                |
+| `deal_check`         | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                                             |
+| `runway_plan`        | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there?                     |
+| `metrics_check`      | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback and burn multiple the deck states agree with their parts?                                       |
+| `market_sizing`      | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?                              |
+| `instrument_compare` | A founder choosing between a priced round now and a convertible note now: who owns what after today and after each next round, and who gets what at each exit, A beside B with B - A, never a pick? |
 
 ## Install
 
@@ -105,10 +106,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 `equity_calculator_mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
 instead of doing the arithmetic itself.
 
-| Tool                                                                                                                                                                                                                    | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
-| `equity_workbook`                                                                                                                                                                                                       | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
+| Tool                                                                                                                                                                                                                                                 | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing`, `equity_instrument_compare` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
+| `equity_workbook`                                                                                                                                                                                                                                    | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
 error that says why. The SDK checks the arguments itself and passes the validation library's text through
@@ -630,6 +631,47 @@ A refusal names the field: a SOM given both ways, today's customers above the bu
 above the serviceable customers, a stated SOM or a target with a segment that has no SOM, and a sensitivity row past
 the last segment, on a SOM field the segment does not give, repeated, or with a value the segment would refuse.
 
+### Priced round now vs a note now (the round's and the waterfall's rules; the comparison's own unverified)
+
+The same raise I two ways, from today's cap table by holder group: the founders, the team (granted options and the
+team's common), the unissued pool U, the existing preferred series, and any SAFEs and notes outstanding. Today's fully
+diluted shares FD = founders + team + U + the existing series' shares. Every price comes from the round code above
+and every exit from the waterfall code; nothing is worked a second way.
+
+1. **Option A, today.** A priced round of I at the founder's pre-money V on FD, with any pool top-up and the
+   existing SAFEs and notes converting in it, exactly as `round` works it: p = V/(FD + converted + new pool), new
+   money's shares N = I/p.
+2. **Option B, today.** No shares: the note is outstanding, its principal I now and, when it converts, what the note
+   interest rules above say it owes (principal plus interest, to the cent, or the principal alone when the interest is
+   paid in cash). Its cap price is the cap over FD.
+3. **Each next round, the same for both.** The founder gives its pre-money, raise, any pool top-up and its series'
+   terms. Each next round is an alternative for the one round after today, worked from today's cap table, never after
+   the one before. A prices it on A's shares after today (exact, often fractional) with nothing left to convert. B prices it
+   on FD with the existing SAFEs and notes (each existing note that many months older) and its note converting at the
+   lower of its cap price and its discount price (the round price × (1 - discount)); with neither it takes the round
+   price.
+4. **Each exit, after each next round.** The waterfall splits each option's cap table: the existing series as given;
+   option A's new money and every converted SAFE or note on the series terms of the round they convert in, owed their
+   multiple of the amount converted; the next round's investors on its terms. The founders, the team and (by default)
+   the pool are common. A series' terms are the founder's: `standard` (1x, non-participating) only when the founder
+   says the terms are standard, else the multiple and participation given; rank 1 unless given.
+5. **Side by side.** Ownership is each group's shares over the total. Each option's payouts are split to the cent by
+   largest remainder, so they add up to the exit; every B - A is the exact difference, rounded once, so it can differ
+   by a cent from the difference of the two rounded payouts.
+6. **Flags**, never a pick: `cap_below_round_price_now` (the note's cap price is below A's price today),
+   `note_converts_at_cap`, `note_converts_at_discount`, `note_converts_at_round_price` (the price the note took in
+   at least one next round), `note_interest_converts`, `note_interest_paid_in_cash` (B pays the interest in cash at
+   conversion: it is in no payout line, and A pays none), `maturity_not_given`, `converts_after_maturity` (the
+   maturity comes before the months to conversion: only compared, never modelled),
+   `next_round_below_priced_round_price` (a down round for A's investors; no anti-dilution is applied),
+   `priced_round_below_existing_series_price` (A's price today is below what an existing series paid per share, its
+   amount invested over its shares: a down round for that series; no anti-dilution is applied) and
+   `existing_mfn_safe_beside_note` (an existing MFN SAFE converts on the terms given for it under both options; whether
+   it may take B's note's cap or discount is in the SAFE's own terms, not modelled).
+
+No next round is refused (`no_next_round_given`: the note converts only at one), and so is a comparison with no
+exit. An exit before the next round, while the note is outstanding, is not modelled.
+
 </details>
 
 ## Worked examples
@@ -866,6 +908,46 @@ its comparable part. Of the three ranges, the clinics to win move SOM the most (
 reaching $8M on one assumption alone would take a $640.740741 monthly price, about 1,442 clinics (1,441.67 rounded;
 4325/3 exactly), or winning 34.0741% of the serviceable groups (about 68 of the 200, 17.04% of all 400).
 
+**A priced round now or a note now (Company BU, made up).** 8,000,000 founder shares, 1,000,000 for the team and a
+1,000,000-share unissued pool, raising $2,000,000. Option A prices it at an $8,000,000 pre-money on standard terms
+(the founder said so). Option B is a note with a $6,000,000 cap, a 20% discount and 5% simple interest, converting in
+12 months. The founder expects the next round to raise $6,000,000 at a $27,000,000 pre-money, then a sale for $5M,
+$20M or $100M:
+
+```
+equity_calculator instrument_compare --founder-shares 8,000,000 --team-shares 1,000,000 \
+    --unissued-pool-shares 1,000,000 --investment 2,000,000 --priced-pre-money 8,000,000 --priced-preference standard \
+    --note-valuation-cap 6,000,000 --note-discount-percent 20 --note-interest-rate-percent 5 --note-compounding simple \
+    --note-months-to-conversion 12 --next-round "pre-money=27000000 investment=6000000 standard" \
+    --exit 5,000,000 --exit 20,000,000 --exit 100,000,000
+  Today: price per share                                                      $0.800000                                    p = V/(FD + converted + new pool)
+  Note owed when it converts                                                                $2,100,000.00                  principal + interest, to the cent
+  Note's cap price                                                                              $0.600000                  cap / FD
+  Today: founders                                                              64.0000%          80.0000%        16.0000%  group's shares / total shares
+  Next round 1: price per share                                               $2.160000         $2.000000                  p = V/(each option's shares + converted + new pool)
+  Next round 1: B's note: converts at                                                           $0.600000                  its cap price, the lower
+  Next round 1: B's note: shares                                                                3,500,000                  amount converting / price
+  Next round 1: founders                                                       52.3636%          48.4848%        -3.8788%  group's shares / total shares
+  Next round 1: exit $5,000,000.00: founders                                      $0.00             $0.00           $0.00  the waterfall, every preference honoured
+  Next round 1: exit $5,000,000.00: new money                             $1,250,000.00     $1,296,296.30      $46,296.30  the waterfall, every preference honoured
+  Next round 1: exit $5,000,000.00: preferences paid                      $5,000,000.00     $5,000,000.00                  classes that stay
+  Next round 1: exit $20,000,000.00: founders                             $8,960,000.00     $8,296,296.29    $-663,703.70  the waterfall, every preference honoured
+  Next round 1: exit $20,000,000.00: new money                            $2,800,000.00     $3,629,629.63     $829,629.63  the waterfall, every preference honoured
+  Next round 1: exit $20,000,000.00: next round's investors               $6,000,000.00     $6,000,000.00           $0.00  the waterfall, every preference honoured
+  Next round 1: exit $100,000,000.00: founders                           $52,363,636.36    $48,484,848.49  $-3,878,787.88  the waterfall, every preference honoured
+  Flag                                                        cap_below_round_price_now                                    The note's cap price is below option A's price per share today: at its cap the note buys shares for less than option A's investors pay today
+  Flag                                                             note_converts_at_cap                                    In at least one next round the note converts at its cap price
+  Flag                                                           note_interest_converts                                    The note's interest converts too, so it gets shares for more than the raise
+  Flag                                                               maturity_not_given                                    No maturity was given for the note: what happens if the next round comes late is in the note's own terms, not modelled here
+```
+
+Right after today the founders hold 64% in A and 80% in B, as the note has no shares yet. At the next round the note
+converts its $2.1M at its $0.60 cap price (below A's $0.80 today) into 3,500,000 shares, so the founders end at
+48.4848% in B against 52.3636% in A, 3.8788 points fewer (-32/825 exactly). At a $5M sale both options pay the
+founders nothing: the preferences ($8M in A, $8.1M in B) take it all. At $20M the founders get $8,960,000.00 in A and
+$8,296,296.29 in B ($8,296,296.30 on its own; the cent goes elsewhere by largest remainder), $663,703.70 less; at
+$100M everyone converts and the payouts follow ownership. The report never says which to take.
+
 ## Using it
 
 ```
@@ -910,6 +992,13 @@ equity_calculator metrics_check --period-months P [--recurring-unit monthly|annu
 equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
     [--population N] [--annual-revenue-today R] [--som-years Y] [--som-target T] [--stated-tam A]
     [--stated-sam A] [--stated-som A] [--tolerance-percent Q]
+equity_calculator instrument_compare --founder-shares F --team-shares T --unissued-pool-shares U
+    [--existing-series "TERMS"]... [--existing-safe "TERMS" | --existing-note "TERMS"]... --investment I
+    --priced-pre-money V [--priced-target-pool-percent T] [--priced-pool-timing pre_money|post_money]
+    --priced-preference "TERMS" [--note-valuation-cap K] [--note-discount-percent D]
+    --note-interest-rate-percent R --note-compounding simple|annual|monthly [--note-stub-rule RULE]
+    --note-months-to-conversion M [--note-maturity-months M] [--note-interest-paid-in-cash]
+    --next-round "TERMS"... --exit E... [--pool-at-exit as_common|left_out]
 ```
 
 `deal_check` needs `--investment` and at least one of `--pre-money`, `--post-money` and `--stated-investor-percent`.
@@ -949,22 +1038,37 @@ thousands). `--population` is the population the segments are drawn from, to cat
 `--som-target` is the annual revenue the plan needs from this market; `--stated-som` and `--som-target` need a SOM in
 every segment.
 
+`instrument_compare` needs today's founder shares, the team's shares and the unissued pool (`0` for none: today's
+fully diluted shares are built from them), the raise, option A's pre-money and series terms, option B's
+interest rate, compounding and months until it converts, at least one `--next-round` (with none it is refused,
+`no_next_round_given`, as the note converts only at a next round) and at least one `--exit`. Each `--next-round` is
+an alternative for the one round after today, worked from today, never after the one before. Every term is the
+founder's own figure: `--priced-preference standard` (and `standard` in a `--next-round`) only when the founder says
+the terms are standard, 1x non-participating; otherwise give the multiple and participation. `--existing-series` takes
+`--class`'s terms with `preference-multiple=` and `participation=` always given (that series' own terms; rank is 1
+unless given), and `--existing-safe` and `--existing-note` take `--safe`'s and `--note`'s, an existing note with
+`months-outstanding=` as of today (dates are refused) and `compounding=` always given. `--note-maturity-months` is
+only compared with the months to conversion; nothing at maturity is modelled. `--pool-at-exit left_out` gives the pool
+nothing at an exit.
+
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
 `--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure or sensitivity
 row, given as one quoted string of `key=value` terms and
 bare flags in any order, after the amount for a SAFE or the principal for a note, which comes first:
 
-| Flag            | Terms                                                                                                                                                                                                                                                                                       |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--safe`        | `AMOUNT [valuation-cap=X] [discount-percent=D] [mfn]`                                                                                                                                                                                                                                       |
-| `--note`        | `PRINCIPAL interest-rate-percent=R (months-outstanding=M \| issue-date=YYYY-MM-DD conversion-date=YYYY-MM-DD) [compounding=simple\|annual\|monthly] [stub-rule=simple\|fractional_power] [day-count=actual_365\|actual_360] [valuation-cap=X] [discount-percent=D] [interest-paid-in-cash]` |
-| `--round`       | `(investor-percent=N \| pre-money=V investment=I) [pool-percent=P]`                                                                                                                                                                                                                         |
-| `--class`       | `shares=S invested=I [preference-multiple=M] [rank=K] [participation=none\|full\|capped] [cap-multiple=C]` (a cap only with `capped`)                                                                                                                                                       |
-| `--phase`       | `from-month=M gross-burn=G [revenue=R]` (also `--downside-phase` and `--lean-phase`)                                                                                                                                                                                                        |
-| `--raise`       | `amount=I [lands-month=L] [stated-runway-months=M [stated-runway-from=today\|landing]]` (a basis with no stated runway is refused)                                                                                                                                                          |
-| `--segment`     | `customers=N price=P [price-period-months=M] [units-per-customer=U] [take-rate-percent=R] [serviceable-percent=S] [obtainable-percent=O \| obtainable-customers=C] [customers-today=T]`                                                                                                     |
-| `--top-down`    | `amount=A [comparable-percent=C] [compare-to=tam\|sam]`                                                                                                                                                                                                                                     |
-| `--sensitivity` | `field=F segment=K values=V1/V2/...` (F one of `customers`, `price`, `units-per-customer`, `take-rate-percent`, `serviceable-percent`, `obtainable-percent`, `obtainable-customers`; 1 to 4 values)                                                                                         |
+| Flag                  | Terms                                                                                                                                                                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--safe`              | `AMOUNT [valuation-cap=X] [discount-percent=D] [mfn]`                                                                                                                                                                                                                                       |
+| `--note`              | `PRINCIPAL interest-rate-percent=R (months-outstanding=M \| issue-date=YYYY-MM-DD conversion-date=YYYY-MM-DD) [compounding=simple\|annual\|monthly] [stub-rule=simple\|fractional_power] [day-count=actual_365\|actual_360] [valuation-cap=X] [discount-percent=D] [interest-paid-in-cash]` |
+| `--round`             | `(investor-percent=N \| pre-money=V investment=I) [pool-percent=P]`                                                                                                                                                                                                                         |
+| `--class`             | `shares=S invested=I [preference-multiple=M] [rank=K] [participation=none\|full\|capped] [cap-multiple=C]` (a cap only with `capped`)                                                                                                                                                       |
+| `--phase`             | `from-month=M gross-burn=G [revenue=R]` (also `--downside-phase` and `--lean-phase`)                                                                                                                                                                                                        |
+| `--raise`             | `amount=I [lands-month=L] [stated-runway-months=M [stated-runway-from=today\|landing]]` (a basis with no stated runway is refused)                                                                                                                                                          |
+| `--segment`           | `customers=N price=P [price-period-months=M] [units-per-customer=U] [take-rate-percent=R] [serviceable-percent=S] [obtainable-percent=O \| obtainable-customers=C] [customers-today=T]`                                                                                                     |
+| `--top-down`          | `amount=A [comparable-percent=C] [compare-to=tam\|sam]`                                                                                                                                                                                                                                     |
+| `--sensitivity`       | `field=F segment=K values=V1/V2/...` (F one of `customers`, `price`, `units-per-customer`, `take-rate-percent`, `serviceable-percent`, `obtainable-percent`, `obtainable-customers`; 1 to 4 values)                                                                                         |
+| `--priced-preference` | `standard [rank=K]` or `preference-multiple=M participation=none\|full\|capped [cap-multiple=C] [rank=K]`                                                                                                                                                                                   |
+| `--next-round`        | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]` and the series' terms as `--priced-preference` takes them                                                                                                                                            |
 
 A note that names no `compounding` compounds `annual`, and one that names no `stub-rule` uses `fractional_power`.
 An unknown term, a term given twice, or a value that is not a number is refused, naming the flag.
@@ -1018,7 +1122,8 @@ downside and a lean case) of at most 12 phases, 6 raises of at most 20 use-of-fu
 its months are at most 600 and its months to raise at most 60. A metrics check covers one period of 1 to 36
 months, and its customer counts are whole numbers below 1e16. A market size takes at most 8 segments, 3 top-down
 figures and 6 sensitivity rows of 1 to 4 values each; a price covers at most 120 months and the SOM horizon is 1 to
-20 years.
+20 years. A comparison takes at most 6 existing series, 4 existing SAFEs and notes, 4 next rounds and 6 exits; its
+note converts within 600 months, an existing note's months plus those included.
 A note runs at most 600 months, or at most 18,262 days (about 50 years) between its dates; a vesting schedule, its
 cliff and every month asked about are at most 600 months. These limits keep every exact step small: the largest
 inputs compute in well under a second, and a value like `1e999999999` is refused at once instead of tying up the
@@ -1035,7 +1140,7 @@ tools do not check it.
 ## The Excel workbook
 
 There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` for the round, `Dilution`, `Vesting`,
-`Waterfall`, `Deal check`, `Runway plan`, `Metrics check` or `Market sizing`):
+`Waterfall`, `Deal check`, `Runway plan`, `Metrics check`, `Market sizing` or `Priced vs note`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
@@ -1247,6 +1352,27 @@ the input uses them:
 | `population_rule`  | the segments' customers at most the population                             | `--population`                         | unverified (standard arithmetic)                                           |
 | `sensitivity_rule` | one field of one segment at a time, the rest at base                       | fixed                                  | unverified (standard arithmetic)                                           |
 | `tolerance`        | 2% relative                                                                | `--tolerance-percent`                  | unverified                                                                 |
+
+The `instrument_compare` scenario carries the round's rows (the SAFE rows when an existing SAFE converts, the note
+rows, `converted_shares_in_pre_money`, `tie_rule`, `fractional_shares`, `search`) and the waterfall's rows, and adds
+these (`standard_preference` only when a series is given as standard):
+
+| Key                         | Default                                                                                     | How to change it                                  | Source                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------- |
+| `pool_timing`               | each round's own: option A's today and each next round's                                    | `--priced-pool-timing`, `pool-timing=`            | unverified                                  |
+| `comparison_rule`           | the same raise, next rounds and exits both ways; never a pick                               | fixed                                             | method                                      |
+| `note_outstanding_today`    | option B issues no shares until the next round                                              | fixed                                             | unverified (notes have no standard form)    |
+| `note_price_rule`           | the lower of cap price (cap / FD) and discount price; the round price with neither          | `--note-valuation-cap`, `--note-discount-percent` | unverified (notes have no standard form)    |
+| `note_interest_terms`       | the founder's rate, compounding and months, rounded to the cent                             | the `--note-*` interest flags                     | the founder's terms                         |
+| `maturity_rule`             | the maturity is only compared with the months to conversion                                 | `--note-maturity-months`                          | unverified (the note's own terms decide)    |
+| `exit_after_next_round`     | every exit follows the next round                                                           | fixed                                             | method                                      |
+| `existing_instruments_rule` | existing SAFEs and notes convert at the first priced round: today's in A, the next one in B | fixed                                             | unverified (each instrument's terms decide) |
+| `series_terms`              | converted shares take their round's series terms, a preference on the amount converted      | fixed                                             | unverified (shadow series vary by deal)     |
+| `series_rank`               | rank 1 when not given                                                                       | `rank=`                                           | method                                      |
+| `standard_preference`       | 1x, non-participating, used only where the founder said standard                            | `--priced-preference`, a `--next-round`'s terms   | unverified                                  |
+| `pool_at_exit`              | the pool takes part as common                                                               | `--pool-at-exit left_out`                         | method                                      |
+| `money_split`               | largest remainder within each option                                                        | fixed                                             | display convention                          |
+| `difference_rounding`       | B - A of the exact values, rounded once                                                     | fixed                                             | display convention                          |
 
 </details>
 

@@ -2,12 +2,13 @@
 
 The JSON example must be a valid ``equity_deal_check`` call, the ``equity_calculator`` command must run, and every
 line of the output excerpt that follows it must be a line the command really prints, so no figure in the skill is
-typed by hand. The same holds for each eval prompt in evals/vc-deal-math/: its tool call is valid and its excerpt is
-lines of the report that call prints. An eval whose right answer is no ``equity_deal_check`` call (a raise on a SAFE)
-says so under its tool-call heading and carries no call or excerpt to check. Every flag code has a row in the skill's
-flag table, since the tool's JSON gives the codes only. The fully diluted count the tool takes leaves SAFEs and notes
-out, so step 2 asks which way the founder's total counts them; runway with no raise, or on a SAFE or note raise, goes
-to ``equity_runway_plan``, whose flags the skill explains in words too.
+typed by hand. The same holds for each eval prompt in evals/vc-deal-math/: its tool call is valid for the tool it
+names (``equity_deal_check``, or ``equity_instrument_compare`` for a founder choosing between a priced round and a
+note) and its excerpt is lines of the report that call prints. An eval whose right answer is no ``equity_deal_check``
+call (a raise on a SAFE) says so under its tool-call heading and carries no call or excerpt to check. Every flag code
+has a row in the skill's flag table, since the tool's JSON gives the codes only. The fully diluted count the tool
+takes leaves SAFEs and notes out, so step 2 asks which way the founder's total counts them; runway with no raise, or
+on a SAFE or note raise, goes to ``equity_runway_plan``, whose flags the skill explains in words too.
 """
 
 from __future__ import annotations
@@ -19,18 +20,21 @@ from pathlib import Path
 from typing import get_args
 
 import pytest
-from equity_calculator.__main__ import run
+from equity_calculator.__main__ import _INPUT_MODELS, run
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealFlag
+from equity_calculator.schemas.equity_instrument_compare import InstrumentFlag
 from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag
 from equity_calculator.text import render_sheet
 
 _ROOT = Path(__file__).resolve().parents[2]
 _SKILL = _ROOT / "skills" / "vc-deal-math" / "SKILL.md"
 _EVALS = sorted((_ROOT / "evals" / "vc-deal-math").glob("*.md"))
-_EVAL_COUNT = 4
+_EVAL_COUNT = 5
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_deal_check` call."
+# The tool an eval's call goes to, named first under its tool-call heading ("`equity_deal_check`, once:").
+_CALLED_TOOL = re.compile(r"^## Expected tool call\n\n`equity_([a-z_]+)`, once:$", re.MULTILINE)
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
 _TEXT = _SKILL.read_text(encoding="utf-8")
@@ -56,6 +60,7 @@ _HANDOFF_SKILLS = (
 # A runway_plan call with no milestone, months to raise or landing month can raise only these three flags.
 _RUNWAY_FLAGS_WITHOUT_MILESTONES = ("runway_below_band", "cash_never_runs_out", "consistent_beyond_rounding")
 _NO_TOOL = "not checked: no tool computes this"
+_COMPARE_STEP = "7. **A founder who has not chosen between a priced round now and a convertible note now**"
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -157,8 +162,11 @@ def test_each_eval_call_is_valid_and_its_excerpt_is_what_the_calculator_prints(p
     text = path.read_text(encoding="utf-8")
     (example,) = _fences("json", text)
     (excerpt,) = _fences("text", text)
+    tool = _CALLED_TOOL.search(text)
+    assert tool is not None and tool.group(1) in ("deal_check", "instrument_compare")
+    model = _INPUT_MODELS[tool.group(1)]
 
-    report = render_sheet(sheet_for(compute(DealCheckInput.model_validate(json.loads(example)["inputs"]))))
+    report = render_sheet(sheet_for(compute(model.model_validate(json.loads(example)["inputs"]))))
     printed = [line.rstrip() for line in report.splitlines()]
 
     for line in excerpt.splitlines():
@@ -219,3 +227,44 @@ def test_figures_outside_the_deal_terms_go_to_the_skills_built_for_them() -> Non
     assert "a market size to the vc-market-sizing skill" in limits
     assert f'Growth rates and LTV are quoted as stated with "{_NO_TOOL}"' in limits
     assert "(a growth rate, a market size, unit economics)" not in limits
+
+
+def test_one_eval_calls_the_comparison_tool_and_the_rest_deal_check() -> None:
+    tools = [_CALLED_TOOL.search(path.read_text(encoding="utf-8")) for path in _CALL_EVALS]
+
+    assert sorted(match.group(1) for match in tools if match is not None) == [
+        "deal_check",
+        "deal_check",
+        "deal_check",
+        "instrument_compare",
+    ]
+
+
+def test_a_founder_choosing_between_a_priced_round_and_a_note_goes_to_the_comparison_tool() -> None:
+    """The step asks for both sets of terms, the next rounds and the exits, never picks, and hands law to a lawyer."""
+    steps = _unwrapped(_section("## Steps"))
+    (company_bu,) = (path for path in _EVALS if path.name.startswith("company-bu-"))
+    answer = _unwrapped(_section("## Expected answer", company_bu.read_text(encoding="utf-8")))
+
+    assert "has not chosen between a priced round now and a convertible note now** goes to" in steps
+    assert "`equity_instrument_compare`" in steps and "never to `deal_check`" in steps
+    assert 'Pass `{"standard": true}` only when the founder says the terms are standard' in steps
+    assert "with no next round the tool refuses (`no_next_round_given`)" in steps
+    assert "never assume one" in steps
+    assert "Never pick one for them or call one better" in steps
+    assert "to their lawyer" in steps
+    assert "entry is an alternative for that one round after today, worked from today's cap table" in steps
+    assert "a Series A and then a Series B is not modelled" in steps
+    assert "It passes the two next rounds as alternatives for the one round after today" in answer
+    assert "It never picks an option or calls one better" in answer
+    assert "It does not call `equity_deal_check`" in answer
+
+
+def test_the_comparison_step_carries_every_flag_s_meaning() -> None:
+    """The MCP result gives the comparison's flag codes only, so step 7 says what each one means, in words."""
+    step = _unwrapped(_TEXT.split(_COMPARE_STEP, 1)[1].split("\n## ", 1)[0])
+
+    assert "The MCP result gives flag codes only; relay each in these words" in step
+    for flag in get_args(InstrumentFlag):
+        assert f"`{flag}`" in step, flag
+    assert "the command line's report for `instrument_compare`" not in _TEXT

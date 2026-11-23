@@ -1,5 +1,5 @@
-"""The repeated-flag readers: ``--safe``, ``--note``, ``--round``, ``--class``, ``--use-of-funds``, a runway plan's
-and a market size's.
+"""The repeated-flag readers: ``--safe``, ``--note``, ``--round``, ``--class``, ``--use-of-funds``, a runway plan's,
+a market size's and a priced-round-or-note comparison's.
 
 A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a note's principal) and goes on with
 ``name=value`` terms named like the model fields, hyphens for underscores, plus bare flags; a ``--round`` or a
@@ -20,12 +20,15 @@ A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a n
     --segment "customers=18000 price=400 price-period-months=1 serviceable-percent=60 obtainable-customers=900"
     --top-down "amount=2100000000 comparable-percent=40 compare-to=tam"
     --sensitivity "field=obtainable-customers segment=1 values=600/1200"   (values split on "/")
+    --priced-preference "standard"   (a comparison's series terms: standard, 1x non-participating, only when so said)
+    --priced-preference "preference-multiple=1 participation=none rank=1"
+    --next-round "pre-money=27000000 investment=6000000 target-pool-percent=10 standard"
 
 Numbers read as every other flag's do (``equity_calculator.cli_numbers``); a date is ``YYYY-MM-DD``. An unknown,
 repeated or malformed term is refused naming the term; which terms go together is the model's check
 (``equity_calculator.schemas.equity_round``, ``equity_calculator.schemas.equity_dilution``,
 ``equity_calculator.schemas.equity_waterfall``, ``equity_calculator.schemas.equity_runway_plan``,
-``equity_calculator.schemas.equity_market_sizing``).
+``equity_calculator.schemas.equity_market_sizing``, ``equity_calculator.schemas.equity_instrument_compare``).
 """
 
 from __future__ import annotations
@@ -36,7 +39,7 @@ from datetime import date
 from typing import get_args
 
 from equity_calculator.cli_numbers import parse_decimal, parse_months, parse_percent, parse_rank, parse_whole
-from equity_calculator.schemas.equity_common import MAX_NUMBER_TEXT
+from equity_calculator.schemas.equity_common import MAX_NUMBER_TEXT, PoolTiming
 from equity_calculator.schemas.equity_market_sizing import PERCENT_FIELDS, CompareTo, SegmentField
 from equity_calculator.schemas.equity_round import DayCount, NoteCompounding, StubRule
 from equity_calculator.schemas.equity_runway_plan import RunwayFrom
@@ -45,6 +48,7 @@ from equity_calculator.schemas.equity_waterfall import Participation
 __all__ = [
     "parse_class",
     "parse_funds_line",
+    "parse_next_round",
     "parse_note",
     "parse_phase",
     "parse_raise",
@@ -53,6 +57,7 @@ __all__ = [
     "parse_safe",
     "parse_segment",
     "parse_sensitivity",
+    "parse_series",
     "parse_top_down",
 ]
 
@@ -118,6 +123,22 @@ _CLASS_TERMS: dict[str, _Reader] = {
     "participation": _choice(get_args(Participation)),
     "cap_multiple": parse_decimal,
 }
+# A new series' terms (a comparison's ``--priced-preference``, and inside a ``--next-round``): the bare flag standard,
+# or the multiple and participation the founder gives.
+_SERIES_TERMS: dict[str, _Reader] = {
+    "preference_multiple": parse_decimal,
+    "participation": _choice(get_args(Participation)),
+    "cap_multiple": parse_decimal,
+    "rank": parse_rank,
+}
+_SERIES_FLAGS = ("standard",)
+_NEXT_ROUND_TERMS: dict[str, _Reader] = {
+    "pre_money": parse_decimal,
+    "investment": parse_decimal,
+    "target_pool_percent": parse_percent,
+    "pool_timing": _choice(get_args(PoolTiming)),
+}
+_PREFERENCE = "preference"
 _PHASE_TERMS: dict[str, _Reader] = {
     "from_month": parse_months,
     "gross_burn": parse_decimal,
@@ -244,6 +265,21 @@ def parse_round(raw: str) -> dict[str, object]:
 def parse_class(raw: str) -> dict[str, object]:
     """argparse type for ``--class``: ``shares=S invested=I [preference-multiple=M] [rank=K] [participation=…]``."""
     return _named_terms(_checked_length(raw).split(), {}, _CLASS_TERMS, ())
+
+
+def parse_series(raw: str) -> dict[str, object]:
+    """argparse type for ``--priced-preference``: ``standard [rank=K]`` or ``preference-multiple=M
+    participation=none|full|capped [cap-multiple=C] [rank=K]``."""
+    return _named_terms(_checked_length(raw).split(), {}, _SERIES_TERMS, _SERIES_FLAGS)
+
+
+def parse_next_round(raw: str) -> dict[str, object]:
+    """argparse type for ``--next-round``: ``pre-money=V investment=I [target-pool-percent=T]
+    [pool-timing=pre_money|post_money]`` and the series' terms as ``--priced-preference`` takes them."""
+    terms = _named_terms(_checked_length(raw).split(), {}, {**_NEXT_ROUND_TERMS, **_SERIES_TERMS}, _SERIES_FLAGS)
+    round_terms = {name: value for name, value in terms.items() if name in _NEXT_ROUND_TERMS}
+    series = {name: value for name, value in terms.items() if name not in _NEXT_ROUND_TERMS}
+    return {**round_terms, _PREFERENCE: series}
 
 
 def parse_phase(raw: str) -> dict[str, object]:

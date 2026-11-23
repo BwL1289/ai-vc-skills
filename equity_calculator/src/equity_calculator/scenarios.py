@@ -13,6 +13,7 @@ from typing import assert_never, overload
 from equity_calculator.deal_check import compute_deal_check
 from equity_calculator.dilution import compute_dilution
 from equity_calculator.employee import compute_employee
+from equity_calculator.instrument_compare import compute_instrument_compare
 from equity_calculator.investor import compute_investor
 from equity_calculator.market_sizing import compute_market_sizing
 from equity_calculator.metrics_check import compute_metrics_check
@@ -26,6 +27,8 @@ from equity_calculator.schemas.equity import (
     DilutionResult,
     EmployeeInput,
     EmployeeResult,
+    InstrumentCompareInput,
+    InstrumentCompareResult,
     InvestorInput,
     InvestorResult,
     MarketSizingInput,
@@ -104,13 +107,19 @@ def compute(inputs: MarketSizingInput) -> MarketSizingResult:
     ...
 
 
+@overload
+def compute(inputs: InstrumentCompareInput) -> InstrumentCompareResult:
+    ...
+
+
 def compute(inputs: ScenarioInput) -> ScenarioResult:
     """The worked result of ``inputs``' scenario.
 
     Raises an ``equity_calculator.errors.EquityComputeError`` (a ``ValueError``) when a valid input has no answer: a
-    round (or a deal check's nested round) with no positive price or whose conversions never settle
+    round (or a deal check's or comparison's nested round) with no positive price or whose conversions never settle
     (``RoundHasNoPrice``, ``ConversionDidNotSettle``), or
-    an exit waterfall whose convert-or-stay search finds no stable choice (``NoConversionEquilibrium``).
+    an exit waterfall (or a comparison's exit) whose convert-or-stay search finds no stable choice
+    (``NoConversionEquilibrium``).
     """
     match inputs:
         case InvestorInput():
@@ -135,5 +144,7 @@ def compute(inputs: ScenarioInput) -> ScenarioResult:
             return compute_metrics_check(inputs)
         case MarketSizingInput():
             return compute_market_sizing(inputs)
+        case InstrumentCompareInput():
+            return compute_instrument_compare(inputs)
         case _:
             assert_never(inputs)

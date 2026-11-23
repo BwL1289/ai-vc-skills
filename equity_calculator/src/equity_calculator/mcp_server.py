@@ -4,7 +4,7 @@
 
 Each scenario is one tool, ``equity_<scenario>`` (``equity_investor``, ``equity_employee``, ``equity_pool``,
 ``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``,
-``equity_runway_plan``, ``equity_metrics_check``, ``equity_market_sizing``). A tool takes
+``equity_runway_plan``, ``equity_metrics_check``, ``equity_market_sizing``, ``equity_instrument_compare``). A tool takes
 one argument, ``inputs``: that scenario's input model (``equity_calculator.schemas``). It returns exactly the text
 ``equity_calculator <scenario> --json`` prints: the result model as JSON, exact fractions and labelled assumptions
 included. An input the model refuses, or one it accepts that has no answer (``equity_calculator.errors``), comes back
@@ -56,6 +56,7 @@ from equity_calculator.schemas.equity import (
     DilutionInput,
     EmployeeInput,
     EquityInput,
+    InstrumentCompareInput,
     InvestorInput,
     MarketSizingInput,
     MetricsCheckInput,
@@ -227,6 +228,27 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "a target no row reaches, never errors. Every count, price, share and figure is the founder's: never assume "
         "or look one up.",
     ),
+    "instrument_compare": (
+        InstrumentCompareInput,
+        "Priced round now vs a convertible note now (side by side, never a pick)",
+        "A founder choosing between a priced round now (option A: priced_pre_money, any priced_target_pool_percent, "
+        "priced_preference) and a convertible note now (option B, the same investment: note_valuation_cap, "
+        "note_discount_percent, note_interest_rate_percent, note_compounding, note_months_to_conversion) for the "
+        "same raise, from today's cap table by holder group (founder_shares, team_shares, unissued_pool_shares, "
+        "existing_series, existing_instruments). Each next_rounds scenario (pre_money, investment, any "
+        "target_pool_percent, preference) is the same for both: A prices it on A's shares, B's note converts in it "
+        "at the lower of its cap price (cap / today's fully diluted shares) and discount price (round price x (1 - "
+        "discount)), interest included unless paid in cash. Gives, A beside B with B - A: ownership by group right "
+        "after today (B's note outstanding, no shares), after each next round, and each group's payout at each of "
+        "exit_amounts after it through the exit waterfall with every series' preference honoured (converted shares "
+        "take their round's series terms, a preference on the amount converted). A series' preference is the "
+        "founder's terms, or standard (1x, non-participating) only when the founder says standard; an existing "
+        "series gives its own preference_multiple and participation, and an existing note its compounding. Flags "
+        "(the note on its cap or discount, a cap below today's price, interest converting or paid in cash, maturity "
+        "not given or before conversion, a next round below A's price, A's price below an existing series', an "
+        "existing MFN SAFE beside the note) never pick an option. No next round is refused (no_next_round_given). "
+        "Every term is the founder's: never assume one.",
+    ),
 }
 
 _INSTRUCTIONS = (
@@ -238,7 +260,9 @@ _INSTRUCTIONS = (
     "plan and a downside, which milestones it reaches, the smallest raise that gets there), equity_metrics_check "
     "(a founder's ARR, retention, churn, CAC payback, burn multiple and concentration worked from their parts and "
     "checked against the document's figures), equity_market_sizing (a founder's TAM, SAM and SOM built bottom-up "
-    "from their own segments, checked against the deck, set beside any top-down figure, with ranges). Pass the "
+    "from their own segments, checked against the deck, set beside any top-down figure, with ranges), "
+    "equity_instrument_compare (a priced round now beside a convertible note now: ownership after today and after "
+    "each next round, and each exit's payouts, side by side, never a pick). Pass the "
     "scenario's fields in `inputs`; give money and percents as JSON strings to keep every digit. Quote the result's "
     "numbers and its labelled assumptions; never round them further without saying so. A value whose unit is "
     "fraction is a share of the whole: show it as a percent by moving the decimal point of its rounded value two "
@@ -409,7 +433,8 @@ def build_server(output_dir: Path | None = None) -> FastMCP:
                 f"dot, no control, format or surrogate character), and a name that would land outside the folder, an "
                 f"existing file, a link or an answer too large for a workbook is refused. `inputs` is any "
                 f'scenario\'s input with its `scenario` tag set ("investor", "employee", "pool", "round", "dilution", '
-                f'"vesting", "waterfall", "deal_check", "runway_plan", "metrics_check" or "market_sizing"). Returns '
+                f'"vesting", "waterfall", "deal_check", "runway_plan", "metrics_check", "market_sizing" or '
+                f'"instrument_compare"). Returns '
                 f"the path written. {_DIGITS_ADVICE}"
             ),
             annotations=ToolAnnotations(

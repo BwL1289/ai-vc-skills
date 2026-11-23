@@ -26,16 +26,20 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from decimal import Decimal
 from fractions import Fraction
+from typing import Protocol
 
 from equity_calculator.errors import ConversionDidNotSettle, RoundHasNoPrice
 from equity_calculator.exact import ONE, ZERO, fraction, from_percent
 from equity_calculator.interest import NoteInterest, note_interest
-from equity_calculator.schemas.equity_round import NoteTerms, RoundInput, SafeTerms
+from equity_calculator.schemas.equity_common import PoolTiming
+from equity_calculator.schemas.equity_round import NoteTerms, SafeTerms
 
 __all__ = [
     "Convertible",
     "Priced",
+    "RoundTerms",
     "Settled",
     "cap_price",
     "convertibles",
@@ -46,6 +50,42 @@ __all__ = [
 ]
 
 _FIRST_INDEX = 1
+
+
+class RoundTerms(Protocol):
+    """What pricing a round reads: a ``RoundInput``, or the same terms with exact share counts.
+
+    A round that follows another priced round starts from that round's exact, often fractional, share counts, which
+    ``RoundInput``'s whole-number fields cannot hold (``equity_calculator.instrument_compare`` prices such a round).
+    """
+
+    @property
+    def fully_diluted_shares(self) -> int | Fraction:
+        ...
+
+    @property
+    def unissued_pool_shares(self) -> int | Fraction:
+        ...
+
+    @property
+    def pre_money(self) -> Decimal:
+        ...
+
+    @property
+    def investment(self) -> Decimal:
+        ...
+
+    @property
+    def target_pool_percent(self) -> Decimal:
+        ...
+
+    @property
+    def pool_timing(self) -> PoolTiming:
+        ...
+
+    @property
+    def instruments(self) -> Sequence[SafeTerms | NoteTerms]:
+        ...
 
 
 @dataclass(frozen=True)
@@ -92,12 +132,12 @@ def _convertible(index: int, terms: SafeTerms | NoteTerms) -> Convertible:
     return Convertible(index, terms, interest.converting, keep, cap, interest)
 
 
-def convertibles(inputs: RoundInput) -> tuple[Convertible, ...]:
+def convertibles(inputs: RoundTerms) -> tuple[Convertible, ...]:
     """Every instrument of ``inputs`` ready to convert, in the order given."""
     return tuple(_convertible(index, terms) for index, terms in enumerate(inputs.instruments, start=_FIRST_INDEX))
 
 
-def price_round(inputs: RoundInput, items: Sequence[Convertible], on_cap: Sequence[bool]) -> Priced:
+def price_round(inputs: RoundTerms, items: Sequence[Convertible], on_cap: Sequence[bool]) -> Priced:
     """The round's price, Company Capitalization and new shares with exactly the ``on_cap`` instruments on their cap.
 
     Raises ``RoundHasNoPrice`` when the conversions off their cap leave no positive price.
@@ -169,7 +209,7 @@ def other_price(item: Convertible, priced: Priced) -> Fraction:
     return priced.price * item.keep
 
 
-def next_on_cap(inputs: RoundInput, items: Sequence[Convertible], priced: Priced) -> tuple[bool, ...]:
+def next_on_cap(inputs: RoundTerms, items: Sequence[Convertible], priced: Priced) -> tuple[bool, ...]:
     """Which instruments take their cap at ``priced``: those whose cap price is at most their other price."""
     fully_diluted = fraction(inputs.fully_diluted_shares)
     caps = (cap_price(item, priced, fully_diluted) for item in items)
@@ -177,7 +217,7 @@ def next_on_cap(inputs: RoundInput, items: Sequence[Convertible], priced: Priced
     return tuple(cap is not None and cap <= other_price(item, priced) for item, cap in zip(items, caps, strict=True))
 
 
-def settle(inputs: RoundInput, items: Sequence[Convertible], pass_limit: int | None = None) -> Settled:
+def settle(inputs: RoundTerms, items: Sequence[Convertible], pass_limit: int | None = None) -> Settled:
     """The self-consistent choice of instruments on their cap, from all capped ones on their cap.
 
     ``pass_limit`` defaults to one more pass than there are capped instruments; raises ``ConversionDidNotSettle``

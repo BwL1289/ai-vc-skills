@@ -1,5 +1,5 @@
 """Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check|``
-``runway_plan|metrics_check|market_sizing``).
+``runway_plan|metrics_check|market_sizing|instrument_compare``).
 
 The number readers are ``cli_numbers``; a repeated flag's one-argument terms are ``cli_instruments``.
 """
@@ -12,6 +12,7 @@ from typing import get_args
 from equity_calculator.cli_instruments import (
     parse_class,
     parse_funds_line,
+    parse_next_round,
     parse_note,
     parse_phase,
     parse_raise,
@@ -20,6 +21,7 @@ from equity_calculator.cli_instruments import (
     parse_safe,
     parse_segment,
     parse_sensitivity,
+    parse_series,
     parse_top_down,
 )
 from equity_calculator.cli_numbers import (
@@ -31,7 +33,9 @@ from equity_calculator.cli_numbers import (
     parse_years,
 )
 from equity_calculator.schemas.equity import PoolTiming, ShareRounding
+from equity_calculator.schemas.equity_instrument_compare import PoolAtExit
 from equity_calculator.schemas.equity_metrics_check import CustomerSegment, RecurringUnit, StatedChurnBasis
+from equity_calculator.schemas.equity_round import NoteCompounding, StubRule
 from equity_calculator.schemas.equity_vesting import Acceleration, AccelerationBase
 
 _INSTRUMENTS = "instruments"
@@ -568,4 +572,144 @@ def market_sizing_arguments(parser: argparse.ArgumentParser) -> None:
         "--tolerance-percent",
         type=parse_percent,
         help="How far a stated figure may sit from the computed one, in percent of the computed one (default 2).",
+    )
+
+
+_SERIES_HELP = (
+    "'standard' (1x, non-participating; only when the founder says the terms are standard) or "
+    "'preference-multiple=M participation=none|full|capped [cap-multiple=C]', either with [rank=K] (default 1)"
+)
+
+
+def _today_arguments(parser: argparse.ArgumentParser) -> None:
+    """A comparison's cap table today, by holder group."""
+    parser.add_argument("--founder-shares", type=parse_whole, required=True, help="The founders' shares today.")
+    parser.add_argument(
+        "--team-shares",
+        type=parse_whole,
+        required=True,
+        help="The team's common and granted options today (0 for none).",
+    )
+    parser.add_argument(
+        "--unissued-pool-shares", type=parse_whole, required=True, help="The unissued pool today (U, 0 for none)."
+    )
+    parser.add_argument(
+        "--existing-series",
+        type=parse_class,
+        action="append",
+        dest="existing_series",
+        metavar=_TERMS,
+        help="An existing preferred series: 'shares=S invested=I preference-multiple=M "
+        "participation=none|full|capped [cap-multiple=C] [rank=K]' (the multiple and participation are that "
+        "series' own terms, always given; rank default 1). Repeat for each (at most 6).",
+    )
+    parser.add_argument(
+        "--existing-safe",
+        type=parse_safe,
+        action="append",
+        dest="existing_instruments",
+        metavar=_TERMS,
+        help="An existing post-money SAFE, as --safe takes it in a round. Repeat for each.",
+    )
+    parser.add_argument(
+        "--existing-note",
+        type=parse_note,
+        action="append",
+        dest="existing_instruments",
+        metavar=_TERMS,
+        help="An existing note, as --note takes it in a round, with months-outstanding=M as of today and "
+        "compounding=simple|annual|monthly always given. Repeat for each (at most 4 SAFEs and notes in all).",
+    )
+
+
+def _note_arguments(parser: argparse.ArgumentParser) -> None:
+    """Option B, a convertible note for the raise: its cap and discount, its interest and when it converts."""
+    parser.add_argument(
+        "--note-valuation-cap", type=parse_decimal, help="B: the note's valuation cap, pre-money over today's FD."
+    )
+    parser.add_argument("--note-discount-percent", type=parse_percent, help="B: the note's discount, in percent.")
+    parser.add_argument(
+        "--note-interest-rate-percent",
+        type=parse_percent,
+        required=True,
+        help="B: the note's interest rate a year, in percent (0 for none).",
+    )
+    parser.add_argument(
+        "--note-compounding",
+        choices=get_args(NoteCompounding),
+        required=True,
+        help="B: simple interest, or compounding annual or monthly.",
+    )
+    parser.add_argument(
+        "--note-stub-rule",
+        choices=get_args(StubRule),
+        help="B: how a part period compounds (default fractional_power).",
+    )
+    parser.add_argument(
+        "--note-months-to-conversion",
+        type=parse_months,
+        required=True,
+        help="B: months from today until the note converts at the next round.",
+    )
+    parser.add_argument(
+        "--note-maturity-months", type=parse_months, help="B: the note's maturity in months (compared only)."
+    )
+    parser.add_argument(
+        "--note-interest-paid-in-cash",
+        action="store_true",
+        default=None,
+        help="B: the interest is paid in cash, so only the principal converts.",
+    )
+
+
+def instrument_compare_arguments(parser: argparse.ArgumentParser) -> None:
+    """A priced round now (A) beside a note now (B): the cap table today, the raise, each option's terms, the next
+    rounds and the exits."""
+    _today_arguments(parser)
+    parser.add_argument("--investment", type=parse_decimal, required=True, help="The raise in dollars (I), both ways.")
+    parser.add_argument(
+        "--priced-pre-money", type=parse_decimal, required=True, help="A: the priced round's pre-money (V)."
+    )
+    parser.add_argument(
+        "--priced-target-pool-percent",
+        type=parse_percent,
+        help="A: the unissued pool after the round, in percent (default 0: no top-up).",
+    )
+    parser.add_argument(
+        "--priced-pool-timing",
+        choices=get_args(PoolTiming),
+        help="A: where a pool top-up is counted (default pre_money).",
+    )
+    parser.add_argument(
+        "--priced-preference",
+        type=parse_series,
+        required=True,
+        metavar=_TERMS,
+        help=f"A: the series' liquidation terms, {_SERIES_HELP}.",
+    )
+    _note_arguments(parser)
+    parser.add_argument(
+        "--next-round",
+        type=parse_next_round,
+        action="append",
+        dest="next_rounds",
+        metavar=_TERMS,
+        help="The next priced round, the same for both options: 'pre-money=V investment=I [target-pool-percent=T] "
+        f"[pool-timing=pre_money|post_money]' and its series' terms, {_SERIES_HELP}. Repeat for each alternative "
+        "(at most 4): each is worked from today, never after the one before. At least one is needed, as the note "
+        "converts only there.",
+    )
+    parser.add_argument(
+        "--exit",
+        type=parse_decimal,
+        action="append",
+        dest="exit_amounts",
+        metavar="E",
+        help="What the company sells for after the next round, in dollars. Repeat for each (at most 6); at least "
+        "one is needed.",
+    )
+    parser.add_argument(
+        "--pool-at-exit",
+        choices=get_args(PoolAtExit),
+        help="as_common (default: the pool counted as exercised, as in the ownership lines) or left_out.",
     )

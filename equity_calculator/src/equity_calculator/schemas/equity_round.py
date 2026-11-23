@@ -13,6 +13,7 @@ only as an example, not as a form's definitions.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import date
 from decimal import Decimal
 from fractions import Fraction
@@ -49,6 +50,8 @@ __all__ = [
     "SafeKind",
     "SafeTerms",
     "StubRule",
+    "refuse_caps_over_whole",
+    "refuse_pool_too_large",
 ]
 
 RoundScenario = Literal["round"]
@@ -176,29 +179,47 @@ class RoundInput(BaseModel):
         if self.unissued_pool_shares >= self.fully_diluted_shares:
             raise ValueError("unissued_pool_shares must be below fully_diluted_shares (someone must hold a share)")
 
-        pre_money = Fraction(self.pre_money)
-        holders_share = pre_money / (pre_money + Fraction(self.investment))
-        if Fraction(self.target_pool_percent) / ONE_HUNDRED >= holders_share:
-            raise ValueError(
-                "target_pool_percent must be below pre_money / (pre_money + investment) = "
-                f"{percent_text(holders_share)}: a larger pool leaves no positive share price"
-            )
-
-        capped = sum(
-            (
-                Fraction(item.purchase_amount) / Fraction(item.valuation_cap)
-                for item in self.instruments
-                if isinstance(item, SafeTerms) and item.valuation_cap is not None
-            ),
-            Fraction(0),
-        )
-        if capped >= 1:
-            raise ValueError(
-                "the capped SAFEs' purchase_amount / valuation_cap add up to "
-                f"{percent_text(capped)}: at their caps they would own the whole company"
-            )
-
+        refuse_pool_too_large(self.pre_money, self.investment, self.target_pool_percent)
+        refuse_caps_over_whole(self.instruments)
         return self
+
+
+def refuse_pool_too_large(
+    pre_money: Decimal,
+    investment: Decimal,
+    target_pool_percent: Decimal,
+    names: tuple[str, str, str] = ("target_pool_percent", "pre_money", "investment"),
+) -> None:
+    """Refuse a pool target t of at least V/(V + I): the new pool would take the whole pre-money, leaving no price.
+
+    ``names`` are the fields the message names, in the order target, pre-money, investment.
+    """
+    pre = Fraction(pre_money)
+    holders_share = pre / (pre + Fraction(investment))
+    if Fraction(target_pool_percent) / ONE_HUNDRED >= holders_share:
+        target, pre_name, investment_name = names
+        raise ValueError(
+            f"{target} must be below {pre_name} / ({pre_name} + {investment_name}) = "
+            f"{percent_text(holders_share)}: a larger pool leaves no positive share price"
+        )
+
+
+def refuse_caps_over_whole(instruments: Sequence[SafeTerms | NoteTerms]) -> None:
+    """Refuse capped SAFEs whose purchase_amount / valuation_cap add up to 100% or more: at their caps they would own
+    the whole company."""
+    capped = sum(
+        (
+            Fraction(item.purchase_amount) / Fraction(item.valuation_cap)
+            for item in instruments
+            if isinstance(item, SafeTerms) and item.valuation_cap is not None
+        ),
+        Fraction(0),
+    )
+    if capped >= 1:
+        raise ValueError(
+            "the capped SAFEs' purchase_amount / valuation_cap add up to "
+            f"{percent_text(capped)}: at their caps they would own the whole company"
+        )
 
 
 class ConversionRow(BaseModel):

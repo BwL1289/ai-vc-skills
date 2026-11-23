@@ -1,6 +1,6 @@
 ---
 name: vc-deal-math
-description: Helps a founder check the numbers in their own fundraising ask before a VC does, with the equity calculator's deal_check tool. It tests whether the pre-money, post-money and percent sold agree, what the round really does to the founders' ownership once SAFEs, convertible notes and an option-pool top-up are counted, the effective pre-money after the option-pool shuffle, how many months of runway the raise buys at the planned burn, and whether the use-of-funds lines add up to the raise. Use when a founder says check my deck's numbers, is our raise reasonable, what does this round do to my ownership, how much runway does this buy, will a VC question our valuation, or pastes their ask, SAFE stack or use-of-funds slide. Every figure comes from the calculator and the deck's figures are quoted as stated. Not investment, legal or tax advice. For the story and the ask together use vc-positioning. For one scenario on its own (an option pool, vesting, an exit waterfall) use the equity-calculator skill.
+description: Helps a founder check the numbers in their own fundraising ask before a VC does, with the equity calculator's deal_check tool. It tests whether the pre-money, post-money and percent sold agree, what the round really does to the founders' ownership once SAFEs, convertible notes and an option-pool top-up are counted, the effective pre-money after the option-pool shuffle, how many months of runway the raise buys at the planned burn, and whether the use-of-funds lines add up to the raise. Use when a founder says check my deck's numbers, is our raise reasonable, what does this round do to my ownership, how much runway does this buy, should we raise a priced round or a note, will a VC question our valuation, or pastes their ask, SAFE stack or use-of-funds slide. Every figure comes from the calculator. Not investment, legal or tax advice. For the story and the ask together use vc-positioning. For one scenario on its own (an option pool, vesting, an exit waterfall) use the equity-calculator skill.
 ---
 
 # VC deal math
@@ -147,6 +147,40 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
 6. **Follow-ups the founder asks for go to tools too**: a different pool size or timing, or a smaller raise, by
    re-running `equity_deal_check`; the next round's effect with `equity_dilution`; a full exit split with
    `equity_waterfall`.
+7. **A founder who has not chosen between a priced round now and a convertible note now** goes to
+   `equity_instrument_compare` (from the command line, `equity_calculator instrument_compare`), never to
+   `deal_check`. Ask, by name and in one message, for both sets of terms: today's shares by holder group (founders,
+   team and pool, existing investors: each existing series with its shares, amount invested, preference multiple,
+   participation and rank, each SAFE, and each existing note with its rate, simple or compounding interest and months
+   outstanding), the raise, the priced round's pre-money, any pool top-up and its liquidation terms,
+   and the note's cap, discount, interest rate, simple or compounding
+   interest and months until it converts. Pass `{"standard": true}` only when the founder says the terms are standard
+   (1x, non-participating); otherwise ask for the multiple and the participation. Ask too for the next priced round
+   the founder expects (pre-money, raise, any pool top-up, series terms) and one or more exit values, and never
+   assume one: with no next round the tool refuses (`no_next_round_given`), so ask for it rather than run. Each
+   `next_rounds` entry is an alternative for that one round after today, worked from today's cap table, never after
+   the one before: a Series A and then a Series B is not modelled, so say so and pass only the round after today.
+   Call `equity_instrument_compare` and show the side-by-side table with the tool's figures: ownership by group right
+   after today (the note outstanding, with no shares), after each next round, and each group's payout at each exit,
+   under option A, option B and B - A, the founders' lines first, then the flags and the assumptions the answer leans
+   on. The MCP result gives flag codes only; relay each in these words: `cap_below_round_price_now` (the note's cap
+   price is below option A's price today, so at its cap the note buys shares for less than A's investors pay);
+   `note_converts_at_cap`, `note_converts_at_discount` and `note_converts_at_round_price` (the price the note took in
+   at least one next round: its cap price, its discount price, or the round price when neither gave a lower one);
+   `note_interest_converts` (the interest converts too, so the note gets shares for more than the raise);
+   `note_interest_paid_in_cash` (option B pays the note's interest in cash when it converts, so that cash is in no
+   payout line, and option A pays none);
+   `maturity_not_given` (no maturity was given, and what happens if the next round comes late is in the note's own
+   terms, not modelled); `converts_after_maturity` (the note matures before it converts, and what happens at maturity
+   is in the note's own terms, not modelled); `next_round_below_priced_round_price` (a next round prices below option
+   A's price today, a down round for A's investors, and any anti-dilution in their terms is not modelled);
+   `priced_round_below_existing_series_price` (option A's price today is below what an existing series paid per share,
+   a down round for that series, and any anti-dilution in its terms is not modelled; option B prices no round today);
+   `existing_mfn_safe_beside_note` (an existing MFN SAFE converts on the terms given for it under both options, and
+   whether it may take option B's note's cap or discount is in the SAFE's own terms, not modelled). Never pick
+   one for them or call one better: the table shows what each does on the founder's own figures. Hand the legal terms
+   (the note's maturity and what happens at it, the preference and anti-dilution wording, the conversion mechanics)
+   to their lawyer.
 
 ## Answering
 
