@@ -36,6 +36,7 @@ adds a fact about the company that the founder did not give.
   - The decisions behind the product and what was said no to: the vc-taste-check skill (preview).
   - How much to raise and what it buys: the vc-round-sizing skill (preview).
   - A term sheet you were offered: the vc-term-sheet-review skill (preview).
+  - Diligence after the first meeting, with a data-room checklist: the vc-diligence-questions skill (preview).
 
 ## Inputs
 
