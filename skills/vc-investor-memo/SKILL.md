@@ -7,12 +7,13 @@ description: Helps a founder draft the internal investment memo their champion p
 
 Helps a founder write, ahead of time, the memo their champion partner is likely to write for the rest of the
 partnership. A venture firm rarely decides on one partner's word: the YC seed guide says VCs "will have multiple
-partners involved in the final decision", and that a deck should work as a leave-behind "so VCs can show to other
-partners". The partner who likes the company then makes its case to colleagues who did not meet the founder, often in
-writing (this skill's assumption, unverified; firms differ). This skill drafts that case from the founder's own material, checks every figure of the round with the equity calculator,
-works the outcome case on the founder's own exit assumptions with the calculator, then has a dissent pass attack the
-memo the way a partner arguing against the deal is likely to. A refute pass drops every objection the founder's own
-material answers; the survivors become a ranked fix list.
+partners involved in the final decision", and that founders may leave a deck and an executive summary behind "so VCs
+can show to other partners". The partner who likes the company then makes its case to colleagues who did not meet the
+founder, often in writing (this skill's assumption, unverified; firms differ). This skill drafts that case from the
+founder's own material, checks every figure of the round with the equity calculator, works the outcome case on the
+founder's own exit assumptions with the calculator, then has a dissent pass attack the memo the way a partner arguing
+against the deal is likely to. A refute pass drops every objection the founder's own material answers; the survivors
+become a ranked fix list.
 
 The founder is always the user. The memo is written in the third person about the company and carries no
 recommendation: whether to invest is the partners' call, not the founder's or this skill's. The skill never plays an
@@ -45,7 +46,8 @@ Ask once, in one message, for whatever is missing, by name. Never guess.
    memo uses can be quoted with where it comes from. In review mode, the memo draft too.
 2. The round as the founder states it: amount, instrument (priced round, SAFE or note), valuation or cap with its
    label (pre- or post-money), percent sold, pool target and its timing, SAFEs and notes converting, cash on hand,
-   monthly burn and revenue, the runway claim, the use-of-funds lines, and what the round reaches.
+   monthly burn and revenue as planned after the raise and today's, the runway claim, the use-of-funds lines, and what
+   the round reaches.
 3. The cap table: fully diluted shares, the unissued pool, the founders' shares, earlier preferred classes and their
    terms, and whether granted options are to be counted as exercised; the pro forma cap table if there is one. Ask
    whether the fully diluted total counts SAFEs and notes: the calculator's count leaves them out.
@@ -101,7 +103,8 @@ Rules for the text:
 ## Steps
 
 Without a subagent tool, run Stage A of the dissent pass first, before step 1, on the founder's material (and the
-memo draft, in review mode), as "How to run the lenses" says; step 7 then starts at the quote check.
+memo draft, in review mode), as "How to run the lenses" says; step 7 then starts at the draft checks there (draft
+mode) or at the quote check (review mode).
 
 1. **Quote first.** List every line of the founder's material the memo can use, word for word with its document and
    place, under the section it belongs to. Do not tidy anything yet.
@@ -122,7 +125,8 @@ memo draft, in review mode), as "How to run the lenses" says; step 7 then starts
    figure is quoted as stated or comes from a tool, as printed; every exit value is the founder's and labelled an
    assumption; no fund size, fund share, multiple on invested or return rate appears; no sentence recommends, speaks
    as an investor, names a firm as a voice or claims to know a firm's process; every surviving objection quotes a line
-   that is in the material word for word.
+   that is in the material word for word; every risk the founder's material shows is in Top risks; every Summary point
+   is a fact from a section below.
 
 ## The round
 
@@ -131,9 +135,14 @@ The round's figures are checked once, as the vc-deal-math skill describes:
 - **A priced round:** `equity_deal_check` (from the command line, `equity_calculator deal_check`), money and percents
   as strings, share counts as integers, with every figure the memo states: the raise, the valuation and its label,
   the percent sold (`stated_investor_percent`), the founders' percent after (`holder_shares`,
-  `stated_holder_percent`), cash, burn, revenue, the runway claim and the use-of-funds lines. One call per document
-  that states the round differently. A valuation with no label: call twice, once as `pre_money`, once as
-  `post_money`, and show both readings side by side, as vc-deal-math step 4 does.
+  `stated_holder_percent`), each SAFE or note converting in this round as `instruments` (its terms as the founder
+  gives them; left out, the founders' percent comes out too high), cash, burn and revenue as planned
+  (`planned_monthly_gross_burn`, `planned_monthly_revenue`) and today's (`current_monthly_gross_burn`,
+  `current_monthly_revenue`) when the founder gives a different figure for today, the runway claim and the
+  use-of-funds lines. One call per document that states the round differently. A valuation with no label: call twice,
+  once as `pre_money`, once as `post_money`, and show both readings side by side, as vc-deal-math step 4 does. A
+  mismatch that appears under only one reading is not listed as a computed mismatch: its fix is "say whether the
+  valuation is pre- or post-money", with both readings quoted.
 - **A SAFE or note:** not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round`, with the
   next priced round the founder expects, labelled the founder's assumption in the memo. `equity_round` compares no
   stated figure, so quote its values beside the memo's, without a verdict. The runway claim on a SAFE or note raise
@@ -186,21 +195,30 @@ same question from the founder's side: "If all goes well, what will you have bui
    round's pool timing). A whole share count comes back as `"2714285.000"`; pass it as the integer `2714285`
    (notation, not rounding). Every price, valuation and percent in the memo comes from the round's tool (whole shares
    move the pool's figures by cents, $10,500,000.83 against $10,500,000.00 for Company BM's effective pre-money). When
-   SAFEs or notes convert, the calculator's converted shares are fractional and `equity_waterfall` takes whole shares:
-   run the waterfall only with the pro forma cap table's counts. Without them, say "not run: the waterfall needs whole
-   share counts; send the pro forma cap table" and ask for it. With no pool top-up, no tool prints share counts
-   (`equity_pool` refuses a `target_pool_percent` of 0): use the pro forma's counts, or the same string.
+   SAFEs or notes convert in this priced round, the calculator's converted shares are fractional and
+   `equity_waterfall` takes whole shares: run the waterfall only with the pro forma cap table's counts. Without them,
+   say "not run: the waterfall needs whole share counts; send the pro forma cap table" and ask for it. With no pool
+   top-up, no tool prints share counts (`equity_pool` refuses a `target_pool_percent` of 0): use the pro forma's
+   counts, or the same string. When the round itself is a SAFE or note, run no waterfall, pro forma or not, and say
+   "not run: a SAFE or note holds no shares until the priced round it converts in, so this round has no payout to
+   show"; step 7 says what the memo gives instead.
 3. **`common_shares`:** the issued common that takes part in a sale (the founders' shares, other issued common, and
-   granted options only when the founder says to count them as exercised). The unissued pool takes nothing (the
-   tool's `exit_is_shared_amount` assumption). Take the count from the pro forma cap table or a count of issued common
-   the founder states. The `existing_holders` row of `equity_pool` (every share but the unissued pool) serves only when
-   there are no granted options or the founder says to count them all as exercised. Never add or subtract shares
-   yourself.
+   granted options only when the founder says to count them as exercised). The unissued pool and unexercised options
+   are left out: the tool's `exit_is_shared_amount` assumption (unverified) has `common_shares` count only the common
+   that takes part. Take the count from the pro forma cap table or a count of issued common the founder states. The
+   `existing_holders` row of `equity_pool` (every share but the unissued pool, so earlier preferred shares too) serves
+   only when there are no granted options (or the founder says to count them all as exercised) and no earlier
+   preferred class; otherwise take issued common from the pro forma or the founder's count, or the earlier class is
+   counted twice. Never add or subtract shares yourself.
 4. **Classes.** The round's new series is one class: its shares (from the pro forma or the `investor` row of
    `equity_pool`), `invested` = the raise, and the `preference_multiple`, `participation` and `rank` the term sheet
    gives. With no term sheet yet, call with the tool's defaults (1x, rank 1, no participation) and say in the memo that
    these are the calculator's defaults, not agreed terms. Each earlier preferred class is its own class with the terms
-   the founder gives. Seniority: every class at rank 1 when the terms say pari passu or are silent (say so); the new
+   the founder gives. Each SAFE or note converted in this priced round is its own class too, never part of
+   `common_shares`: its shares from the pro forma, `invested` = its purchase amount (for a note, the amount the
+   founder states as converting; never principal plus interest worked out by hand), and the preference the founder's
+   documents give; with none given, the tool's defaults at the new series' rank, said in the memo as for the new
+   series. Seniority: every class at rank 1 when the terms say pari passu or are silent (say so); the new
    series at rank 1 and earlier ones at 2 when the terms stack them.
 5. **One `equity_waterfall` call per exit value.** Read `rows[]` (`payout`, `converts`, `preference_owed`) and
    `common_payout`. The memo gives, for each exit value, the round's class payout as printed beside the amount
@@ -208,13 +226,20 @@ same question from the founder's side: "If all goes well, what will you have bui
 6. **Later rounds**, only when the founder gives them: `equity_dilution` with `holder_percent` = this round's
    percent as the round's tool printed it, and `rounds` = the founder's assumed later rounds (`investor_percent`,
    `pool_percent`), labelled assumptions. For a priced round, that percent is `equity_deal_check`'s "Investors' share
-   of the cap table". For a SAFE or note, it is the instrument's own row of `equity_round` ("Ownership: SAFE 1", not
-   "Ownership: investor", which is the expected priced round's buyer), and `rounds` holds only the rounds after that
-   priced round, which `equity_round` has already counted. The memo gives the final stake as printed.
+   of the cap table". For a SAFE or note, it is the row `equity_round` prints for the instrument this round sells, never
+   "Ownership: investor", which is the expected priced round's buyer. `equity_round` numbers SAFEs and notes in one
+   count, in the order they are passed ("Ownership: SAFE 1", "Ownership: Note 2"): pass the outstanding ones first and
+   this round's last, and take the row with that number. `rounds` holds only the rounds after that priced round, which
+   `equity_round` has already counted. A round sold as several SAFEs or notes has one row each: one `equity_dilution`
+   call per row, each final stake quoted as printed; their combined stake is not checked: no tool computes this. The
+   memo gives the final stake as printed.
 7. **Label the two apart.** The waterfall's payouts use the cap table right after this round. No tool here combines a
    later round's dilution with an exit, so the memo says: "The payouts above use the cap table right after this round,
    before any later round. After the founder's assumed later rounds the stake is [final stake] (calculator); the payout
-   after those rounds is not checked: no tool computes this." Never multiply a stake by an exit value.
+   after those rounds is not checked: no tool computes this." A SAFE or note round has no payouts (step 2), so its
+   memo says instead: "The stake is [stake] after the founder's assumed priced round and [final stake] after the
+   founder's assumed later rounds (calculator); what the stake pays at an exit is not checked: no tool computes this."
+   Never multiply a stake by an exit value.
 
 ```json
 {
@@ -248,9 +273,9 @@ Part of what it prints for Company BM at the founder's plan exit of $150,000,000
   Common stock's payout                       $116,666,673.49  common shares × per-share part
 ```
 
-The class bought 20.0000% of the cap table, yet takes more than a fifth of this exit: the unissued pool takes nothing
-in a sale (the `exit_is_shared_amount` assumption), so the shares that do take part split the exit among fewer
-shares. Quote that assumption row beside the table, so no reader takes it for a mismatch.
+The class's payout is not its cap-table percent times the exit: the unissued pool takes no part in a sale (step 3),
+so the shares that do take part split the exit among fewer shares. Quote the `exit_is_shared_amount` assumption row
+beside the table, so no reader takes it for a mismatch.
 
 ## Dissent pass (adversarial review)
 
@@ -283,16 +308,21 @@ Every lens gets the same brief, with its own name and test filled in:
   partner arguing against the deal is likely to use it; and how much it hurts (sinks the case, weakens it, or minor).
 - A reason you cannot tie to a line of the memo or the material is not an objection. List it apart as a gap, worded as
   a question to the founder.
-- Do not judge whether another line answers an objection: raise it anyway, and the refute pass decides. Return
-  "nothing found" only when no line gives this lens an objection worth the partnership's time.
+- Do not judge whether another line answers an objection: raise it anyway, and the refute pass decides. A line that
+  carries its own answer (a risk stated with what is being done and what shows it) is not objected to for lacking
+  that answer. Return "nothing found" only when no line gives this lens an objection worth the partnership's time.
 
 **How to run the lenses.** With a subagent tool (in Claude Code, the Agent or Task tool), run the lenses as parallel
 subagents. Give each one only the memo, the founder's material and its lens brief: not this skill's other sections,
 not the tool results, not another lens's output. Without one, run Stage A first, before step 1, on the founder's
 material (and the founder's memo draft in review mode): run the lenses one after another, write each lens's objections
 down in full before reading the next lens's brief, and never revise an earlier list. In draft mode without subagents
-the same agent wrote the memo, so the lenses read the founder's material only, and the answer says they are less
-independent than subagents.
+no memo exists yet and the same agent writes it, so the lenses read the founder's material only: each objection
+quotes the founder's line with its document and place, the Risks left out lens lists every risk the material shows,
+and the Traction and evidence lens lists what the figures do and do not show. After step 6, two draft checks run on
+the drafted memo, each written down before Stage B: every risk on that list is in Top risks, and every Summary point
+is a fact from a section below (the last pattern in the table). A miss is an objection quoting the memo's line, or
+the founder's line the memo leaves out. The answer says these lenses are less independent than subagents.
 
 **The calculator's mismatches** do not go through the lenses or the refute pass. Each heads the ranked fix list
 under **figures that do not match (computed)**, quoting the memo's figure with the tool's value and difference. It is
@@ -328,7 +358,9 @@ The verdicts:
 - **Dropped, not grounded:** the quoted line does not say what the objection claims, or the objection rests on an
   outside fact about the company, its market or its competitors.
 - **Kept:** neither holds. When the best answer needs something the material does not contain, the objection stays
-  and that something becomes the evidence to add, as a bracketed ask.
+  and that something becomes the evidence to add, as a bracketed ask. A line that answers only part of the objection
+  (one founder's achievement when the memo speaks for several founders) does not drop it: the objection is Kept for
+  the part left, the answering line is quoted for the memo to carry, and the part left becomes the bracketed ask.
 
 The refute pass invents nothing on the founder's behalf. An answering line that is not in the material word for word
 does not drop the objection, and neither does one that is the objected line itself.
@@ -356,7 +388,7 @@ in the founder's words, and into Open questions.
 
 ## Answering
 
-Lead with the memo, then what to fix.
+Lead with the biggest fixes, then the memo, then the full fix list.
 
 1. **The biggest fixes,** at most three, one line each: the top of the ranked fix list.
 2. **The memo,** ready to hand to the champion, in the shape above, revised for every kept objection, every gap a

@@ -26,5 +26,8 @@ None: no `equity_deal_check`, `equity_waterfall` or other call. No round, cap ta
 - The Top risks section stays. It says once why: a risks section with no hard risk reads as spin, and a partner arguing
   against the deal is likely to name the risks anyway. The section carries `[the three to five risks most likely to stop
 the case, each with what is being done and what shows it]`.
-- The memo is in the third person with no recommendation; the dissent pass on the draft finds the bracketed asks and
-  nothing else to keep.
+- The memo is in the third person with no recommendation.
+- Dissent, Kept, each fixed by what the memo already carries: "a $10 billion company in the making" as an outcome with
+  no stated basis (the exit-value pattern), fixed by `[the exit value on plan, and why]`; "we'll hit $10M ARR next
+  year" as a target written as a result, fixed by the plan wording above. A run that keeps these two, or drops them
+  with a reason, passes; nothing else is to be kept.

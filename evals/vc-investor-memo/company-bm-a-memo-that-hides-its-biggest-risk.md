@@ -4,8 +4,8 @@ A test prompt for the `vc-investor-memo` skill. The company is made up. The tool
 `equity_calculator` runs with these inputs, on this repository's calculator. The answer states the expected behaviour;
 it is not a recorded run, and this eval has not been run in a live session. A run passes when it makes the five calls
 below (field order free, money and percents as strings), states the round and the outcome case with the tools' values as
-printed, labels every exit value the founder's assumption, writes the customer concentration into Top risks, drops the
-team objection by quoting the deck, and computes nothing in its own text.
+printed, labels every exit value the founder's assumption, writes the customer concentration into Top risks, keeps the
+team objection for the other founders while quoting the deck for the CTO, and computes nothing in its own text.
 
 ## Prompt
 
@@ -17,8 +17,9 @@ team objection by quoting the deck, and computes nothing in its own text.
 > scheduling engine at her last company, used by 2,000 clinics." My notes: "Our largest customer, a 40-location chain,
 > is 45% of MRR." Cap table: 10,000,000 fully diluted shares, 500,000 of them the unissued pool, no options granted,
 > no SAFEs or notes; the founders hold 8,000,000 and two angels hold the other 1,500,000 as common. Cash $400,000; we
-> spend $190,000 a month and bring in $40,000. No term sheet yet. Exits: $8 million if growth stalls (a sale to a
-> billing vendor), $150 million on plan, $1 billion if we become the default system for clinics.
+> spend $190,000 a month and bring in $40,000, and plan the same after the raise. No term sheet yet. Exits: $8 million
+> if growth stalls (a sale to a billing vendor), $150 million on plan, $1 billion if we become the default system for
+> clinics.
 
 ## Expected tool call
 
@@ -171,7 +172,9 @@ Five calls, in this order: `equity_deal_check`, `equity_pool`, then `equity_wate
   risks carries it in the founder's words with `[what is being done about it, and what shows it]`. Kept: "we move
   faster" as a mitigation that names no action under way. Kept: "a $40B market" with no basis (the market pattern), with
   `[who buys, how many, what each pays]`.
-- Dissent, Dropped, answered by slide 6, "Our CTO built the clinic scheduling engine at her last company, used by 2,000
-  clinics.": the Team lens's objection to "a world-class team". The memo's Team section is to carry that line.
+- Dissent, Kept, answered only in part: the Team lens's objection to "a world-class team". Slide 6, "Our CTO built the
+  clinic scheduling engine at her last company, used by 2,000 clinics.", answers it for the CTO alone, and "the founders
+  hold 8,000,000" names more than one founder. The memo's Team section is to carry the slide 6 line, and the objection
+  stays for the other founders as `[one specific achievement for each other founder, and their role]`.
 - "MRR $40,000 in October, up from $12,000 in April" is quoted; no growth rate is worked out.
 - No sentence recommends investing; no firm is named; no score.

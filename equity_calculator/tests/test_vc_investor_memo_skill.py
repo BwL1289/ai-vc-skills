@@ -32,9 +32,9 @@ _SKILL = _ROOT / "skills" / "vc-investor-memo" / "SKILL.md"
 _TEXT = _SKILL.read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-investor-memo").glob("*.md"))
-_EVAL_COUNT = 4
-# The repository gives each made-up company its own letters; this skill's evals use BM to BP.
-_EVAL_LETTERS = ("bm", "bn", "bo", "bp")
+_EVAL_COUNT = 6
+# The repository gives each made-up company its own letters; this skill's evals use BM to BR.
+_EVAL_LETTERS = ("bm", "bn", "bo", "bp", "bq", "br")
 _NO_CALL = "## Expected tool call\n\nNone:"
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
@@ -113,6 +113,14 @@ _HEADER_LINE = (
     "Drafted by the founders from their own material; figures from the equity calculator; not the firm's format."
 )
 _NOT_RUN = "not run: the waterfall needs whole share counts; send the pro forma cap table"
+# A SAFE or note round runs no waterfall at all: the SAFE holds no shares until the priced round it converts in.
+_NOT_RUN_SAFE = (
+    "not run: a SAFE or note holds no shares until the priced round it converts in, so this round has no payout to show"
+)
+_SAFE_LABEL = (
+    "The stake is [stake] after the founder's assumed priced round and [final stake] after the founder's assumed later "
+    "rounds (calculator); what the stake pays at an exit is not checked: no tool computes this."
+)
 _NOT_CHECKED = "not checked: no tool computes this"
 _LABEL = (
     "The payouts above use the cap table right after this round, before any later round. After the founder's assumed "
@@ -135,6 +143,17 @@ _COMPANY_BM_ROUND = {
     "planned_monthly_revenue": "40000",
     "stated_runway_months": "23",
 }
+# The skill's prose quotes the whole-share effective pre-money of Company BM's round from this pool call.
+_COMPANY_BM_POOL = {
+    "fully_diluted_shares": 10000000,
+    "unissued_pool_shares": 500000,
+    "pre_money": "12000000",
+    "investment": "3000000",
+    "target_pool_percent": "10",
+    "pool_timing": "pre_money",
+    "share_rounding": "whole_shares",
+}
+_NEGATION = re.compile(r"\b(no|never|not)\b")
 # A figure an eval's answer takes from the calculator: a percent or months with decimals, or money with cents.
 _PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|-?\d[\d,]*\.\d+ months|\$\d[\d,]*\.\d{2}")
 
@@ -285,6 +304,10 @@ def test_the_round_goes_to_the_round_tools_and_asks_the_fully_diluted_basis() ->
     assert "`equity_deal_check`" in round_ and "`equity_round`" in round_ and "`equity_runway_plan`" in round_
     assert "not passed as `investment`" in round_ and "vc-deal-math step 2" in round_
     assert "call twice, once as `pre_money`, once as `post_money`" in round_
+    assert "A mismatch that appears under only one reading is not listed as a computed mismatch" in round_
+    # A SAFE converting in a priced round goes to the tool, or the founders' percent comes out too high.
+    assert "each SAFE or note converting in this round as `instruments`" in round_
+    assert "`current_monthly_gross_burn`" in round_ and "as planned after the raise and today's" in inputs
     assert "without a verdict" in round_
     # The calculator leaves SAFEs and notes out of the fully diluted count, so both the intake and the round ask.
     assert "SAFEs and notes excluded" in round_ and "ask which way the founder's does" in round_
@@ -342,26 +365,35 @@ def test_the_outcome_rules_name_no_fund_math() -> None:
         "these are the calculator's defaults, not agreed terms",
         "the round's tool printed it",
         # On a SAFE round, the SAFE's own row is the stake, and the priced round equity_round counted is not repeated.
-        'the instrument\'s own row of `equity_round` ("Ownership: SAFE 1", not "Ownership: investor"',
+        'the row `equity_round` prints for the instrument this round sells, never "Ownership: investor"',
+        "pass the outstanding ones first and this round's last, and take the row with that number",
+        "one `equity_dilution` call per row",
         "`rounds` holds only the rounds after that priced round",
+        f'"{_NOT_RUN_SAFE}"',
+        f'"{_SAFE_LABEL}"',
+        # The existing_holders row holds earlier preferred too, so it is common_shares only with no earlier class.
+        "only when there are no granted options (or the founder says to count them all as exercised) and no earlier "
+        "preferred class; otherwise take issued common from the pro forma or the founder's count, or the earlier class "
+        "is counted twice",
+        "Each SAFE or note converted in this priced round is its own class too, never part of `common_shares`",
         "`equity_pool` refuses a `target_pool_percent` of 0",
         "Never add or subtract shares yourself",
         "pass it as the integer `2714285`",
     ):
         assert phrase in outcome, phrase
     assert 'no multiple on invested, no return rate, no "returns the fund"' in limits
-    # A fund-math term appears only where the skill says it does not do it.
-    rules = (
-        _section("## Limits"),
-        _section("## The outcome case"),
-        _section("## Steps"),
-        _frontmatter()["description"],
-    )
-    elsewhere = _TEXT
-    for part in rules:
-        elsewhere = elsewhere.replace(part, "")
-    for term in _FUND_MATH:
-        assert term not in elsewhere, term
+    # A fund-math term appears only in a sentence that says the skill does not do it.
+    for sentence in re.split(r"(?<=\.)\s+", _unwrapped(_TEXT)):
+        for term in _FUND_MATH:
+            if term in sentence:
+                assert _NEGATION.search(sentence), (term, sentence)
+
+
+def test_the_prose_figure_from_the_pool_tool_is_what_it_prints() -> None:
+    printed = _report("pool", _COMPANY_BM_POOL)
+
+    assert re.search(r"^  Effective pre-money +\$10,500,000\.83  ", printed, re.MULTILINE)
+    assert "$10,500,000.83 against $10,500,000.00 for Company BM's effective pre-money" in _unwrapped(_TEXT)
 
 
 def test_the_lenses_are_the_five_and_name_no_person_or_firm() -> None:
@@ -379,6 +411,9 @@ def test_the_lenses_are_the_five_and_name_no_person_or_firm() -> None:
         "Do not judge whether another line answers an objection: raise it anyway",
         "not the tool results",
         "less independent than subagents",
+        # Without subagents a draft has no memo when the lenses run, so two checks run on the draft after step 6.
+        "After step 6, two draft checks run on the drafted memo, each written down before Stage B",
+        "is not objected to for lacking that answer",
         "do not go through the lenses or the refute pass",
     ):
         assert phrase in brief, phrase
@@ -403,6 +438,7 @@ def test_the_refute_pass_uses_the_fixed_verdicts_and_names_no_person_or_firm() -
         "do no arithmetic",
         "invents nothing on the founder's behalf",
         "neither does one that is the objected line itself",
+        "does not drop it: the objection is Kept for the part left",
     ):
         assert rule in words, rule
     assert not _names_a_person_or_firm(words)
@@ -430,6 +466,7 @@ def test_the_ranked_fix_list_has_the_three_tiers_and_no_score() -> None:
     assert "no percentages and no score" in ranked
     assert "goes into the memo's Top risks, in the founder's words" in ranked
     assert answering.index("**The biggest fixes,**") < answering.index("**Ranked fix list,**")
+    assert "Lead with the biggest fixes, then the memo, then the full fix list." in answering
     assert _FIX_COLUMNS.search(answering) and "**Dropped,**" in answering
     assert "not investment, legal or tax advice" in answering
 
@@ -524,11 +561,70 @@ def test_one_eval_runs_no_waterfall_without_whole_shares() -> None:
     scenarios = [scenario for scenario, _, _ in _calls(text)]
     _, answer = _eval("bp")
 
-    assert scenarios == ["round", "runway_plan"]
-    assert _NOT_RUN in answer and re.search(r"^  SAFE 1: shares +1,428,571\.429  ", text, re.MULTILINE)
+    assert scenarios == ["round", "runway_plan", "dilution"]
+    assert _NOT_RUN_SAFE in answer and re.search(r"^  SAFE 1: shares +1,428,571\.429  ", text, re.MULTILINE)
 
 
-@pytest.mark.parametrize("letter", ["bm", "bp"])
+def test_the_safe_eval_feeds_the_safes_own_row_to_dilution() -> None:
+    """A SAFE round's later-round stake starts from the SAFE's row of equity_round, never the priced round's buyer."""
+    (path,) = (path for path in _CALL_EVALS if path.name.startswith("company-bp-"))
+    calls = _calls(path.read_text(encoding="utf-8"))
+    (round_,) = (inputs for scenario, inputs, _ in calls if scenario == "round")
+    (dilution,) = (inputs for scenario, inputs, _ in calls if scenario == "dilution")
+    printed = _report("round", round_)
+    safe = re.search(r"^  Ownership: SAFE 1 +([\d.]+)%  ", printed, re.MULTILINE)
+    investor = re.search(r"^  Ownership: investor +([\d.]+)%  ", printed, re.MULTILINE)
+    rounds = dilution["rounds"]
+
+    assert safe and investor
+    assert dilution["holder_percent"] == safe.group(1) != investor.group(1)
+    # Only the Series B: equity_round already counted the Series A the SAFE converts in.
+    assert isinstance(rounds, list) and len(rounds) == 1
+
+
+def test_one_eval_takes_issued_common_not_the_existing_holders_row_with_an_earlier_class() -> None:
+    (path,) = (path for path in _CALL_EVALS if path.name.startswith("company-bq-"))
+    calls = _calls(path.read_text(encoding="utf-8"))
+    (pool,) = (inputs for scenario, inputs, _ in calls if scenario == "pool")
+    waterfalls = [inputs for scenario, inputs, _ in calls if scenario == "waterfall"]
+    existing = re.search(r"^  Shares: existing holders +([\d,]+) ", _report("pool", pool), re.MULTILINE)
+    prompt, _ = _eval("bq")
+
+    assert existing and waterfalls
+    for waterfall in waterfalls:
+        classes = waterfall["classes"]
+        assert isinstance(classes, list)
+        assert waterfall["common_shares"] == 7500000 != int(existing.group(1).replace(",", ""))
+        assert f"{waterfall['common_shares']:,} are issued common" in prompt
+        # The earlier Seed class is passed as its own class, junior to the new series.
+        assert [(c["shares"], c["rank"]) for c in classes] == [(2714285, 1), (2000000, 2)]
+
+
+def test_one_eval_passes_a_converting_safe_as_an_instrument_and_its_own_class() -> None:
+    (path,) = (path for path in _CALL_EVALS if path.name.startswith("company-br-"))
+    calls = _calls(path.read_text(encoding="utf-8"))
+    (deal,) = (inputs for scenario, inputs, _ in calls if scenario == "deal_check")
+    (waterfall,) = (inputs for scenario, inputs, _ in calls if scenario == "waterfall")
+    prompt, _ = _eval("br")
+    classes = waterfall["classes"]
+
+    assert deal["instruments"] and isinstance(classes, list)
+    assert "9,000,000 common, 1,428,571 SAFE preferred, 2,979,591 Series A preferred" in prompt
+    assert waterfall["common_shares"] == 9000000
+    assert {(c["shares"], c["invested"]) for c in classes} == {(2979591, "4000000"), (1428571, "1000000")}
+
+
+def test_one_eval_keeps_an_objection_a_line_answers_only_in_part() -> None:
+    prompt, answer = _eval("bm")
+    _, kept = answer.split("Kept, answered only in part", 1)
+    objected, answering = _DOUBLE_QUOTED.findall(kept)[:2]
+
+    assert objected in prompt and answering in prompt and objected != answering
+    assert "`[one specific achievement for each other founder, and their role]`" in kept
+    assert "Dropped, answered by slide 6" not in answer
+
+
+@pytest.mark.parametrize("letter", ["bp"])
 def test_one_eval_drops_an_objection_by_quoting_the_founders_line(letter: str) -> None:
     prompt, answer = _eval(letter)
     _, dropped = answer.split("Dropped, answered", 1)
