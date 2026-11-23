@@ -147,13 +147,16 @@ parts]`.
      consistent. It is not a calculator mismatch: it is Will be discounted under the pattern table's row for a burn
      multiple on new ARR when `stated_burn_multiple_uses_new_not_net_arr` is beside it, and Needs a source with
      `[net burn and net new ARR for a period where both are above zero]` otherwise.
-   - Each percent, months or multiple row also says whether the stated figure is the computed one rounded to its own
-     places ("rounds to the deck's"); a stated zero keeps its places, so a document's `0.0%` is passed as the text
-     "0.0". The verdict stays the tool's; `consistent_beyond_rounding` and `mismatch_within_rounding` name a row where
-     the two disagree, and go to the answer as the Flags table says.
+   - A stated percent, months or multiple that is the tool's figure rounded to the places the document writes is
+     consistent, past the tolerance or not, because people write figures rounded to the places they show (9 months
+     against the tool's 9.40 months; a 4% churn against 4.4%, but not against 4.6%); its row says so ("rounds to the
+     deck's"). Those places decide it, so pass each such figure as text with exactly the places the document writes
+     ("9", "9.0", and a document's `0.0%` as "0.0"). Money keeps the tolerance alone. The verdict is the tool's;
+     `consistent_beyond_rounding` names a figure that holds by the tolerance alone, and goes to the answer as the
+     Flags table says.
    - A net revenue churn below zero (expansion above the revenue lost) is passed as stated, with
      `stated_churn_basis` `net_revenue` or left unlabelled; a gross retention above 100% is passed too, and comes back
-     a mismatch unless it is within the tolerance of the computed figure.
+     a mismatch unless it is within the tolerance of the computed figure or its rounding.
    - A stated figure whose parts the founder did not give is left out of the call, because the tool refuses the whole
      call for it: mark it Needs a source with a bracketed ask for the missing parts, and make the call with the rest.
      A refusal that comes anyway is relayed with the parts it names.
@@ -260,9 +263,9 @@ computed it. Each is added to the ranked fix list ahead of the tiers, quoting th
 value and difference, with the flag that explains it, when one does, as the reason. It carries no tier: how much a gap
 hurts depends on its size, which the founder weighs. A stated figure less flattering than the tool's value (an ARR or
 retention below it; a churn, CAC, payback, burn multiple or concentration above it) understates: it goes in the minor
-tier at most. One that no flag explains as another definition may be the founder's rounding, so its fix asks
-`[how the model works this figure, unrounded]`; with `mismatch_within_rounding` beside it, say the stated figure is the
-tool's rounded to its own places. A `not_checked` row is not a mismatch (step 4). An unlabelled churn with one consistent basis row is not a mismatch
+tier at most. A mismatch is never the tool's figure rounded to the stated places (that is consistent), so one that no
+flag explains as another definition may rest on other parts or another working: its fix asks
+`[how the model works this figure, unrounded]`. A `not_checked` row is not a mismatch (step 4). An unlabelled churn with one consistent basis row is not a mismatch
 (step 4).
 
 ### Check the quotes
@@ -330,8 +333,7 @@ ready for, never an error.
 | `payback_not_margin_adjusted`               | No gross margin was given, so payback is on revenue only                                                                                                     | Give gross margin; a partner works payback on margin                          |
 | `stated_payback_not_margin_adjusted`        | The stated payback agrees with the revenue payback, not the margin one                                                                                       | Restate it on gross margin                                                    |
 | `stated_burn_multiple_uses_new_not_net_arr` | The stated multiple agrees with net burn over new ARR, churn left out (also beside a multiple the tool cannot work)                                          | Restate it on net new ARR                                                     |
-| `consistent_beyond_rounding`                | The stated figure is within the tool's tolerance but is not the tool's figure rounded to its own places                                                      | Quote the tool's figure; a partner recomputing gets it                        |
-| `mismatch_within_rounding`                  | The stated figure is past the tool's tolerance but is the tool's figure rounded to its own places                                                            | Give the figure with more places                                              |
+| `consistent_beyond_rounding`                | The stated figure holds by the tool's tolerance alone: it is not the tool's figure rounded to its own places                                                 | Quote the tool's figure; a partner recomputing gets it                        |
 | `burn_multiple_not_defined`                 | Net new ARR is zero or below in the period                                                                                                                   | Drop the multiple; show net burn and the ARR movement                         |
 | `no_net_burn`                               | Net burn is zero or below in the period                                                                                                                      | Say the company is not burning cash in that period                            |
 | `payback_above_band`                        | Payback on gross margin is at or above the tool's benchmark for the segment (with no margin given, the revenue payback already is, so the margin one is too) | Be ready to say why; quote the tool's assumption row, a benchmark, not a rule |

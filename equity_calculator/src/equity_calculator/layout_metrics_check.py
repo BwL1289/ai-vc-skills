@@ -3,10 +3,11 @@
 One value column. The parts as given come first, then the ARR figures and which one a stated ARR is checked against,
 retention and churn (each labelled with its period, never annualised), CAC and payback, the burn multiple,
 concentration and the payback benchmark in force, then each stated figure checked (stated, computed, difference,
-whether it is a rounding of the computed figure, verdict; an unlabelled churn once per basis; a burn multiple with no
-multiple to work shows "none" and not_checked), the flags in plain words, and the overall verdict. Values only: no
-line carries a live formula. When a starting-customers figure is given, retention and revenue churn print primed
-letters (C' for the starting customers' own contraction, else the period's total).
+whether it is a rounding of the computed figure, which is consistent even past the tolerance, verdict; an unlabelled
+churn once per basis; a burn multiple with no multiple to work shows "none" and not_checked), the flags in plain
+words, and the overall verdict. Values only: no line carries a live formula. When a starting-customers figure is
+given, retention and revenue churn print primed letters (C' for the starting customers' own contraction, else the
+period's total).
 """
 
 from __future__ import annotations
@@ -69,7 +70,7 @@ _PRIMED_HOW = {
 }
 _PRIMED_NOTE = "; E', C', X' the starting customers' own when given, else the period's total"
 _UNCHECKED_BURN_MULTIPLE = "none"
-_ROUNDING_HOW = "the computed figure, rounded to the places the deck writes, is the deck's (within half its last place)"
+_ROUNDING_HOW = "the computed figure, rounded half away from zero to the places the deck writes, is the deck's"
 
 
 def _months(count: int) -> str:
@@ -114,10 +115,9 @@ def _flag_words(flag: MetricsFlag, result: MetricsCheckResult) -> str:
         "arr_movement_and_month_disagree": f"The movement's ending ARR ({movement}) and the latest month's ARR "
         f"({month}) differ by more than {inputs.tolerance_percent:f}%, so the parts disagree with each other; a stated "
         "ARR is checked against the movement's: say which figure the document shows and why the two differ",
-        "consistent_beyond_rounding": "A stated figure is within the tolerance but is not the computed figure rounded "
-        "to the places it is written with; a VC recomputing gets a different figure: quote the calculator's",
-        "mismatch_within_rounding": "A stated figure is past the tolerance but is the computed figure rounded to the "
-        "places it is written with, so the gap may be rounding alone; give it with more places",
+        "consistent_beyond_rounding": "A stated figure is consistent only by the tolerance: it is not the computed "
+        "figure rounded to the places it is written with, so a VC recomputing gets a different figure; quote the "
+        "calculator's",
         "expansion_hides_churn": "Expansion covers the revenue lost, so net revenue churn is zero or below while "
         "gross revenue churn is not; show both, as a VC is likely to ask what was lost",
         "churn_basis_unlabelled": unlabelled,
@@ -311,9 +311,14 @@ def _metric_lines(result: MetricsCheckResult) -> list[Line]:
 
 
 def _verdict_how(check: MetricsCheck, inputs: MetricsCheckInput) -> str:
-    """How a checked figure's verdict is read; a mismatch whose difference rounds to the tolerance says it is just
-    over it, so the row never reads as a difference equal to the tolerance marked a mismatch."""
-    how = "within the tolerance is consistent"
+    """How a checked figure's verdict is read (a percent, months or multiple also when it rounds to the deck's); a
+    mismatch whose difference rounds to the tolerance says it is just over it, so the row never reads as a difference
+    equal to the tolerance marked a mismatch."""
+    how = (
+        "within the tolerance is consistent"
+        if check.within_rounding is None
+        else "within the tolerance, or rounding to the deck's, is consistent"
+    )
     if check.verdict != "mismatch" or check.computed is None or check.difference is None:
         return how
     unit = check.stated.unit

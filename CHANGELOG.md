@@ -202,6 +202,14 @@ All notable changes to this repository. Dates are UTC.
   100% and a 0x multiple are checked rather than refused; `arr_movement_and_month_disagree` names an ARR movement and
   a latest month that disagree; the payback benchmark applies to a revenue-only payback already past it; and the
   report prints primed formulas once a starting-customers figure is given.
+- A metrics check's stated percent, months or multiple is now consistent when it is the computed figure rounded half
+  away from zero to the places it is written with, even past the tolerance, since people write figures rounded to the
+  places they show: 12 months against 12.40 and a 2% churn against 2.4% hold, 2% against 2.6% does not, and `12.0`
+  against 12.40 does not. The tolerances and their defaults are unchanged and money keeps the tolerance alone. The
+  four `stated_*` cause flags read agreement with the other definition the same way, `mismatch_within_rounding` is
+  gone (a rounding is no longer a mismatch), and `consistent_beyond_rounding` now names a figure that holds by the
+  tolerance alone. A verdict line on such a row reads "within the tolerance, or rounding to the deck's, is
+  consistent"; the README, the two skills and the metrics evals' excerpts follow.
 
 ## 2026-11-21
 

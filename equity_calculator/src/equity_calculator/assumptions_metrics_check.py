@@ -252,11 +252,13 @@ def _band_rows(inputs: MetricsCheckInput, used: frozenset[str], checked: bool) -
                 "tolerance",
                 f"{inputs.tolerance_points:f} points; {inputs.tolerance_percent:f}% relative",
                 "A stated percent within this many percentage points of the computed one, or a stated money, months "
-                "or multiple figure within this share of it, is consistent (documents round their figures). The "
-                "tolerance sets the verdict; each percent, months or multiple row also says whether the stated figure "
-                "is the computed one rounded to the places it is written with, and a flag names a row where that test "
-                "and the verdict disagree (a small churn within the points but not a rounding of it, or a whole-month "
-                "payback past the share but a rounding of it).",
+                "or multiple figure within this share of it, is consistent. So is a stated percent, months or multiple "
+                "that is the computed figure rounded half away from zero to the places it is written with, whatever "
+                "the tolerance: people write figures rounded to the places they show, so a whole number holds what "
+                "rounds to it and a figure typed with one place (a zero written with one included) holds what rounds "
+                "to it at one place. Money is held to the share alone, since a round money figure typed in full "
+                "carries no places. A flag names a figure consistent by the tolerance alone, not a rounding of the "
+                "computed one.",
                 f"{UNVERIFIED} (the rounding test is standard arithmetic)",
             )
         )
