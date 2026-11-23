@@ -563,7 +563,15 @@ def test_the_lenses_are_the_four_and_name_no_person_or_firm() -> None:
     ):
         assert rule in attack, rule
     assert "rather than a weak objection" not in attack
-    assert "the reader pass runs as subagents, however short the material" in _unwrapped(_section("## Steps"))
+    steps = _unwrapped(_section("## Steps"))
+    assert "the reader pass runs as subagents, however short the material" in steps
+    # A live run added a runway definition and a lowlight the founder never wrote; a moved target is named as moved.
+    assert "a definition or lowlight the founder did not give is a bracketed ask (`[runway definition]`)" in steps
+    assert 'a moved target is named under "Last time we said", with the old and new targets as quoted' in steps
+    assert (
+        "ARR, retention, churn, CAC payback and burn multiple go to the vc-metrics-readiness skill; the rest are "
+        '"not checked: no tool computes this"'
+    ) in steps
 
 
 def test_the_reader_pass_judges_the_founders_draft_as_given_in_review_mode() -> None:
@@ -620,6 +628,9 @@ def test_the_ranked_fix_list_has_the_three_tiers_and_no_score() -> None:
         assert tier in ranked, tier
     # The pack's one rule for a computed mismatch: ahead of the tiers, with no tier; an understated claim is minor.
     assert "The calculator's mismatches lead the list ahead of the tiers, with no tier" in ranked
+    assert "A mismatch with the claim below the printed runway goes in the minor tier at most" in _unwrapped(
+        _section("### Stage A: attack")
+    )
     assert "The first tier opens with a printed runway below a claim stated as a floor" in ranked
     assert "It carries no tier: how much a gap hurts depends on its size" in _unwrapped(_section("### Stage A: attack"))
     assert "figures under different definitions never set side by side" in ranked

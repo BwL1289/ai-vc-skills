@@ -98,17 +98,17 @@ noted but does not change the verdict.
   87.5000% is shown only as its row, with the `cohort_rule` caveat, never as a figure for the slide. Logo churn, CAC
   and payback, gross margin and concentration are Missing, each a bracketed ask.
 - The five lenses run as subagents (Revenue definitions, Retention and churn, Acquisition and payback, Burn and
-  efficiency, Stage fit), then one refute subagent per objection, all launched in one message. The ranked fix list
-  has a Lens column, and the answer lists each lens with what it returned, "nothing found" included.
+  efficiency, Stage fit), then one refute subagent per objection, the refute subagents launched in one message. The
+  ranked fix list has a Lens column, and the answer lists each lens with what it returned, "nothing found" included.
 - No score, no "ready" or "not ready", no firm named as a fit or a voice (Sacks appears only as the cited source);
   nothing is computed, converted or rounded in the answer's own text.
 
 ## Recorded answer
 
-Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from a pinned copy of this repository. The
-answer is trimmed; [...] marks each cut.
+Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository. The answer is trimmed;
+[...] marks each cut.
 
-**Partial: one clause missed.** It made the one call below with the expected inputs, led the ranked fix list with the
+**Partial: one clause missed.** It made the one call above with the expected inputs, led the ranked fix list with the
 three mismatches, each with the flag that explains it, computed nothing and gave no score. The lenses did not run as
 subagents: the session had the Task tool, yet the transcript holds no subagent call, and the answer says the lenses ran
 in the main agent. Short of the expected answer: the three mismatches sit in the top tier; the fix list has no Lens

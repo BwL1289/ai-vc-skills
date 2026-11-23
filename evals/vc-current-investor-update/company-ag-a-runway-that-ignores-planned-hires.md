@@ -90,15 +90,15 @@ Then today's spend held flat, because the plan changes the burn and the claim is
   definition word for word, and no definition the founder did not give (the runway's is a bracketed ask). No score; no
   named firm.
 - The draft comes first, with no status line or headline before it, and is labelled October with a bracketed `[year]`.
-  The four lenses run as subagents, then one refute subagent per objection, all launched in one message; the answer says
-  how many ran.
+  The four lenses run as subagents, then one refute subagent per objection, the refute subagents launched in one
+  message; the answer says how many ran.
 
 ## Recorded answer
 
-Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from a pinned copy of this repository. The
-answer is trimmed; [...] marks each cut.
+Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository. The answer is trimmed;
+[...] marks each cut.
 
-**Pass.** It made the two calls below with the expected inputs, stated 12.79 months on the plan and 15.07 months at
+**Pass.** It made the two calls above with the expected inputs, stated 12.79 months on the plan and 15.07 months at
 today's spend held flat as the tool prints them, wrote both "next month" items as lowlights in the founder's words, and
 computed nothing. Short of the expected answer: the pattern for the same runway two updates running is never named;
 paying clinics came back Different form, not Same, while the draft recasts the last update as "the 12 we reported"; the

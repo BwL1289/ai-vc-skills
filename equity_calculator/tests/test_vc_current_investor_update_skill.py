@@ -351,6 +351,20 @@ def test_an_exact_claim_below_the_printed_runway_is_minor_and_a_repeated_runway_
         RunwayPlanInput.model_validate(zero)
 
 
+def test_the_draft_adds_no_year_definition_or_lowlight_the_founder_did_not_give() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    # A live run added a year and a runway definition of its own to the draft.
+    assert "the period is labelled as the founder gives it (`[year]` when no year is given)" in steps
+    assert "a definition or lowlight the founder did not give is a bracketed ask (`[runway definition]`)" in steps
+    assert "never this skill's words" in steps
+    # Metrics a tool checks are handed off; the rest stay unchecked.
+    assert (
+        "ARR, retention, churn, CAC payback and burn multiple go to the vc-metrics-readiness skill; the rest are "
+        '"not checked: no tool computes this"'
+    ) in steps
+
+
 def test_the_runway_inputs_say_how_to_pass_what_the_tool_refuses_or_cannot_take_as_given() -> None:
     runway = _unwrapped(_section("## Runway"))
     (example,) = _fences("json")

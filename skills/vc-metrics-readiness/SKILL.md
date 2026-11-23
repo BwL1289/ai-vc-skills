@@ -159,8 +159,9 @@ parts]`.
      A multiple keeps its six decimals (7.500000x) and money its cents ($1,200,000.00), never abbreviated ($1.2M).
    - Deal terms of a priced round (the raise, valuation, percent sold, use of funds and the runway it buys) go to
      `equity_deal_check` as the vc-deal-math skill says. A runway with no raise, a runway on a SAFE or note raise and
-     that raise's use-of-funds lines go to `equity_runway_plan` (the raise as cash, or the no-raise row), as the
-     vc-round-sizing skill calls it; with no cash or burn given, ask for them. None goes to this tool.
+     that raise's use-of-funds lines go to `equity_runway_plan` (the no-raise row, or the raise as a raise option that
+     carries its stated runway and its use-of-funds lines), as the vc-round-sizing skill calls it; with no cash or burn
+     given, ask for them. None goes to this tool.
    - A market size goes to `equity_market_sizing` as the vc-market-sizing skill says, never to this tool.
    - Growth rates, LTV and every other metric the table marks quoted: quote as stated with "not checked: no tool
      computes this", and never compute, convert or round one.

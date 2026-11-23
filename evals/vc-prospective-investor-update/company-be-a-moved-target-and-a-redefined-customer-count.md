@@ -84,17 +84,17 @@ change the verdict.
 - The tie-out has a row only for each metric and each of October's items, each with one status. The revised draft adds
   no definition or lowlight the founder did not give: a missing definition is a bracketed ask, and the moved $60,000
   target is named under "Last time we said". The four lenses run as subagents, then one refute subagent per objection,
-  all launched in one message; the answer says how many ran.
+  the refute subagents launched in one message; the answer says how many ran.
 - Numbers: 19.78 months, consistent, as the tool prints it; the stated 20 months stands. Goes to: the five names, with
   "Alex (seed fund)" marked as listed twice; no name appears in the update. The close carries the lawyer line on
   mentioning a coming raise.
 
 ## Recorded answer
 
-Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from a pinned copy of this repository. The
-answer is trimmed; [...] marks each cut.
+Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository. The answer is trimmed;
+[...] marks each cut.
 
-**Partial: one clause met only in part.** It made the one call below, gave 19.78 months under Numbers as the tool
+**Partial: one clause met only in part.** It made the one call above, gave 19.78 months under Numbers as the tool
 prints it, kept the moved $60,000 MRR target and the head of customer success hire as findings, kept no objection to
 the MRR definition or the enterprise target (no lens raised either; the tie-out shows MRR Same and the March target Not
 yet due), and computed nothing. It marked the customer count Changed definition, but its fix list compares the two
