@@ -7,8 +7,10 @@ person or firm. The adversarial review keeps both stages (lenses that quote the 
 that may use only the founder's material), the standing prep questions are never refuted, and the debrief builds each
 stronger answer only from the founder's material. The question bank in references/ is one table per category with
 fixed columns, no figures and no names, competition rows at four fixed levels, and the standing prep questions word
-for word. Each eval in evals/vc-partner-meeting/ has a prompt, an expected tool call and an expected answer; the one
-eval with calculator calls carries valid calls and excerpts that are lines of the reports those calls print.
+for word. The calculator flags table and the standing prep table live in references/ beside the bank, so the skill
+stays under its line cap with its lines wrapped like the rest; the skill links both, and the checks on each table
+read it there. Each eval in evals/vc-partner-meeting/ has a prompt, an expected tool call and an expected answer; the
+one eval with calculator calls carries valid calls and excerpts that are lines of the reports those calls print.
 """
 
 from __future__ import annotations
@@ -33,6 +35,10 @@ _FOLDER = _ROOT / "skills" / "vc-partner-meeting"
 _TEXT = (_FOLDER / "SKILL.md").read_text(encoding="utf-8")
 _BANK_PATH = _FOLDER / "references" / "question-bank.md"
 _BANK = _BANK_PATH.read_text(encoding="utf-8")
+_FLAGS_LINK = "[`references/calculator-flags.md`](references/calculator-flags.md)"
+_FLAGS = (_FOLDER / "references" / "calculator-flags.md").read_text(encoding="utf-8")
+_STANDING_LINK = "[`references/standing-prep.md`](references/standing-prep.md)"
+_STANDING_PREP = (_FOLDER / "references" / "standing-prep.md").read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _EVAL_DIR = _ROOT / "evals" / "vc-partner-meeting"
 _EVALS = sorted(_EVAL_DIR.glob("*.md"))
@@ -259,6 +265,8 @@ def test_the_refute_stage_judges_with_only_the_material_and_moves_answered_quest
         assert verdict in refute, verdict
     assert "launch one subagent per question in a single message" in refute
     assert "never put two questions in one subagent" in refute
+    # A question-bank question is raised by no lens, so lean mode gives it a subagent of its own.
+    assert "one that no lens raised gets a subagent of its own" in refute
     assert "you argue neither side" in refute
     assert "When you cannot decide, return Kept" in refute
     assert "Bring in no outside fact" in refute and "do no arithmetic" in refute
@@ -299,9 +307,10 @@ def test_one_message_mode_debriefs_every_pasted_answer_even_one_no_lens_kept() -
 
 
 def test_the_standing_prep_questions_are_not_refuted_and_invent_nothing() -> None:
-    rows = _table("## Standing prep questions")
+    rows = _table("## The questions", _STANDING_PREP)
     text = _unwrapped(_section("## Standing prep questions"))
 
+    assert _STANDING_LINK in text
     assert len(rows) == 6
     assert "are not refuted" in text and "unverified" in text
     assert "never invents a fund, a commitment, a term sheet or a reference" in text
@@ -362,8 +371,10 @@ def test_every_flag_the_calculator_raises_is_relayed_and_a_benchmark_band_is_nev
     steps = _unwrapped(_section("## Steps"))
     answering = _unwrapped(_section("## Answering"))
 
-    flags = _section("## Calculator flags")
+    flags = _FLAGS
     rows = re.findall(r"^\| `([a-z_]+)` +\|", flags, re.MULTILINE)
+
+    assert _FLAGS_LINK in _section("## Calculator flags")
 
     assert "Read every code in each tool's `flags` too" in steps
     assert "joins the kept questions as weakens it, with its meaning from the calculator flags table below" in steps
@@ -426,7 +437,7 @@ def test_the_competition_rows_use_the_four_levels() -> None:
 
 
 def test_every_standing_prep_question_is_a_standing_row_of_the_bank_word_for_word() -> None:
-    standing = [row[0] for row in _table("## Standing prep questions")]
+    standing = [row[0] for row in _table("## The questions", _STANDING_PREP)]
     bank = {row[1] for row in _bank_rows() if row[5] == _STANDING}
 
     assert set(standing) == bank
@@ -526,6 +537,8 @@ def test_the_sources_are_ones_the_authors_read_and_the_credit_took_no_text() -> 
     assert set(_URL.findall(_TEXT))
     assert set(_BARE_LINK.findall(_TEXT)) == _BARE_LINKS_ALLOWED
     assert not _BARE_LINK.search(_BANK)
+    for reference in (_FLAGS, _STANDING_PREP):
+        assert not _URL.search(reference) and not _BARE_LINK.search(reference)
     assert "github.com/xiapeli/vc-skills" in sources and "MIT-licensed" in sources
     assert "no text was taken" in sources
 
@@ -536,7 +549,7 @@ def test_no_person_or_firm_is_named_outside_sources_or_in_any_eval_answer() -> N
     outside = (_TEXT[:sources_start] + _TEXT[sources_end:]).lower()
     answers = [_section("## Expected answer", path.read_text(encoding="utf-8")).lower() for path in _EVALS]
 
-    for text in (outside, *answers):
+    for text in (outside, _FLAGS.lower(), _STANDING_PREP.lower(), *answers):
         for name in _PEOPLE_AND_FIRMS:
             assert not re.search(rf"\b{re.escape(name)}\b", text), name
 

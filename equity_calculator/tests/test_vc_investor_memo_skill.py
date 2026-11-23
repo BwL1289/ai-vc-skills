@@ -9,8 +9,10 @@ round's stake apart with a fixed label. The dissent pass keeps both stages: five
 objection quoting a line word for word, and a refute pass with the fixed verdicts; the survivors become a ranked fix
 list in three tiers. Each eval in evals/vc-investor-memo/ has a prompt, an expected tool call and an expected answer;
 each call is labelled with its tool, is valid, and carries an excerpt that is lines of the report that call prints.
-The tools' flags come back as bare codes over MCP, so the skill carries a meaning for every code. An eval run in a live
-session records an excerpt of that run under "Recorded answer"; the others say they have not been run.
+The tools' flags come back as bare codes over MCP, so the skill carries a meaning for every code, in a flag table in
+references/ that its "Flags" section links, so the skill stays under its line cap with its lines wrapped like the rest.
+An eval run in a live session records an excerpt of that run under "Recorded answer"; the others say they have not
+been run.
 """
 
 from __future__ import annotations
@@ -34,6 +36,8 @@ from tests.test_vc_claims_check_skill import _READ_SOURCES
 _ROOT = Path(__file__).resolve().parents[2]
 _SKILL = _ROOT / "skills" / "vc-investor-memo" / "SKILL.md"
 _TEXT = _SKILL.read_text(encoding="utf-8")
+_FLAGS_LINK = "[`references/flags.md`](references/flags.md)"
+_FLAGS = (_SKILL.parent / "references" / "flags.md").read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-investor-memo").glob("*.md"))
 _EVAL_COUNT = 6
@@ -572,8 +576,10 @@ def test_a_recorded_run_is_a_blockquoted_excerpt_after_the_expected_answer(lette
 
 def test_every_flag_code_each_round_tool_returns_has_a_meaning_in_the_skill() -> None:
     """Over MCP the tools return bare codes, so the skill must say what each one means."""
-    rows = {row[0].strip("`"): row[1] for row in _table("## Flags")}
+    rows = {row[0].strip("`"): row[1] for row in _table("## Flags", _FLAGS)}
 
+    assert _FLAGS_LINK in _section("## Flags")
+    assert not _URL.search(_FLAGS) and not _names_a_person_or_firm(_FLAGS)
     for code in get_args(DealFlag):
         assert "deal check" in rows[code], code
     for code in get_args(RunwayPlanFlag):

@@ -213,8 +213,8 @@ Once the plugin is installed, ask in plain words.
 
 ## How it works
 
-1. **You ask in plain words.** Paste the ask slide, the SAFE list, the one-liner or the whole deck. The skill asks for
-   what is missing, by name, and a review quotes your own lines word for word.
+1. **You ask in plain words.** Paste the ask slide, the SAFE list, the one-liner or the whole deck, or give the file.
+   The skill asks for what is missing, by name, and a review quotes your own lines word for word.
 2. **The calculator does the math.** Every figure a skill works out comes from the exact equity calculator (its MCP
    tools or its command). Its report says how each line was computed, and each result lists its assumptions and their
    sources. The model reads, asks and writes; it never does the arithmetic.

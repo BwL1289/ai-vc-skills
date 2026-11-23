@@ -41,7 +41,13 @@ the founder did not give. It always tells the founder to have a lawyer review th
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess.
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
+read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
+for a deck), in the file's own words, so the founder sees what was read from each. A place you could not read (a slide
+that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
+asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
+Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
+input below that it leaves out), and never ask the founder to paste what you already read.
 
 1. The term sheet, every term word for word, in its own order and with its own headings (or the key terms, each
    quoted), and whether the text is the whole sheet. Figures are quoted as the sheet states them.
@@ -285,6 +291,15 @@ that one objection, the baseline column of the terms table, and everything from 
 this stage, and nothing else. Without one, decide the objections
 one at a time against the same brief.
 
+**Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run
+one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection
+from its lens (one that two lenses raised goes to one of them only; one that no lens raised gets a subagent of its own),
+and with this instruction, word for word: "Apply the brief to each objection as if it were the only one you were given.
+Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
+answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
+says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
+ask for the full pass, one subagent per objection.
+
 The refute brief:
 
 - You decide whether the sheet itself answers one objection; you argue neither side. Write in the third person; you
@@ -305,8 +320,9 @@ The verdicts:
   outside fact.
 - **Kept:** neither holds. What the founder would need to know becomes a lawyer question.
 
-The refute pass invents nothing: no term, side letter, promise or argument the founder did not give. An answering
-line that is not in the sheet word for word, or that is the objected line itself, does not drop the objection.
+The refute pass invents nothing: no term, side letter, promise or argument the founder did not give. Spacing and line
+breaks aside, an answering line that is not in the sheet word for word, or that is the objected line itself, does not
+drop the objection.
 
 ### Rank what survives
 
@@ -335,11 +351,12 @@ Lead with the reminder, then the terms, then the money, then what a later reader
      shares vested at the month they named, from `equity_vesting`, each in the tool's values.
    - Every not-modelled term with its string, and the waterfall's assumptions the table leans on.
 4. **What a later investor, acquirer or board is likely to object to:** survivors as a table: Rank, Tier, Lens, The
-   sheet's line (quoted), Why that reader objects; the figures that do not match (computed) first, with no tier.
-   Then **Refute verdicts:** one line for every objection that reached the refute pass, Kept ones included, each with
-   its verdict, and for a Dropped one why it fell. Say how the lenses and the refute pass ran (as subagents, one
-   refute subagent per objection); when the lenses ran in one agent, say they are less independent than separate
-   subagents.
+   sheet's line (quoted), Why that reader objects; the figures that do not match (computed) first, with no tier. Then
+   **Refute verdicts:** one line for every objection that reached the refute pass, Kept ones included, each with its
+   verdict, and for a Dropped one why it fell. Say how the lenses and the refute pass ran (as subagents, one refute
+   subagent per objection), or one per lens in lean mode; when the lenses ran in one agent, say they are less
+   independent than separate subagents. When the refute pass ran per lens (lean mode), say so, say it is less
+   independent than one subagent per objection, and say the founder may ask for the full pass.
 5. **Questions for your lawyer,** numbered, under Economics, Control and Process.
 6. **Open asks:** every gap, in one list, with the baseline terms not in what was pasted.
 7. **Sources:** the ones used, with links and dates, and which explanations are this skill's own, unverified.

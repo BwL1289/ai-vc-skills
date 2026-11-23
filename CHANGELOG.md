@@ -256,6 +256,23 @@ All notable changes to this repository. Dates are UTC.
   ask" adds prompts for the metrics, market size, round size and product-decision skills, and the long caption under
   the demo recording is one line. The site's "See it work" introduction fits on one line, its first "How it works"
   step says the same as the README's, and AGENTS.md describes the pack the same way.
+- After a real deck run, plugin version 0.2.4. Every review skill whose lenses feed one refute subagent per objection
+  or question names one exception, in the same words: with more than eight after the quote check, one subagent per lens
+  may take its lens's items, handed word for word an instruction to judge each as if it were the only one, with a
+  verdict and quote of its own; an item no lens raised (a partner-meeting question from the bank) gets a subagent of its
+  own, and one that comes back without its own verdict stays Kept (the deck review's seven lenses can raise up to three
+  objections each). Each such skill's Answering section says when the pass ran per lens, that this is less
+  independent, and that the founder may ask for the full pass, and the market-sizing count check allows it. Every skill
+  with an Inputs section, and the deal-math skill's first step, reads a file the founder gives (a PDF, HTML, a slides
+  export, Markdown), lists what it holds place by place in the file's own words, lists a place it could not read (a
+  slide that is only a picture) as not read and asks for it, never reads a figure off a chart or a picture, and never
+  asks for a paste of what it read; every "When to use it" bullet that names pasted material says it may come as a
+  file, and the README and the site say a file may be given. In the eleven lens-review skills and the claims check, a
+  refute pass now checks its answering line as the quote check does, spacing and line breaks aside, so a line that
+  wraps in a file's text still answers; every quote check says "spacing and line breaks aside". The investor memo's
+  flag table and the partner meeting's calculator flags and standing prep tables move to files beside each skill, so
+  both stay under their line caps with every line wrapped. `test_pack_shared_rules.py` pins the shared sentences, the
+  file note, the carve-out of the claims and round-sizing skills, and the width of the lines that carry them.
 
 ## 2026-11-21
 

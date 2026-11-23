@@ -20,7 +20,8 @@ adds a figure, customer or event the founder did not give, and never leaves out 
 
 - "Write my investor update." "Review my investor update before I send it." "Draft our monthly update." "How do I
   tell investors about a bad month?" "Should I skip this month's update?" "Write our Q3 investor update."
-- Pasted material: the last update, this period's notes, a metrics table, a cash and burn figure, a draft update.
+- Pasted material: the last update, this period's notes, a metrics table, a cash and burn figure, a draft update. Any of
+  these may come as a file the agent can read in this session.
 - A founder who wants to skip a bad month: the sources below say to send it anyway (stopping is itself read as a
   warning). Say so once, then write the update.
 - Built for the founder's current investors: people who already hold shares, SAFEs or notes in the company.
@@ -39,7 +40,13 @@ adds a figure, customer or event the founder did not give, and never leaves out 
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess.
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
+read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
+for a deck), in the file's own words, so the founder sees what was read from each. A place you could not read (a slide
+that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
+asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
+Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
+input below that it leaves out), and never ask the founder to paste what you already read.
 
 1. The last update, word for word, with its date and period; or "this is the first one".
 2. What happened this period, in the founder's notes: what went right, what went wrong, what slipped, who left,
@@ -289,6 +296,15 @@ each the founder's material, the draft, that one objection, the Pattern column o
 "The refute brief:" to the end of this stage, and nothing else. Without a subagent tool, decide the objections one at a
 time against the same brief.
 
+**Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run
+one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection
+from its lens (one that two lenses raised goes to one of them only; one that no lens raised gets a subagent of its own),
+and with this instruction, word for word: "Apply the brief to each objection as if it were the only one you were given.
+Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
+answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
+says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
+ask for the full pass, one subagent per objection.
+
 The refute brief:
 
 - You decide whether the founder's material answers one objection; you argue neither side. Write in the third
@@ -308,9 +324,9 @@ The verdicts:
   outside fact.
 - **Kept:** neither holds. When the fix needs something the material does not contain, it becomes a bracketed ask.
 
-The refute pass invents nothing on the founder's behalf. An answering line that is not in the draft word for word, or is
-the objected line itself, does not drop the objection. In review mode the draft given here is the founder's, as given: a
-line this skill added at step 7 is not in it.
+The refute pass invents nothing on the founder's behalf. Spacing and line breaks aside, an answering line that is not in
+the draft word for word, or is the objected line itself, does not drop the objection. In review mode the draft given
+here is the founder's, as given: a line this skill added at step 7 is not in it.
 
 ### The ranked fix list
 
@@ -353,9 +369,10 @@ Review mode leads with what to fix; draft mode leads with the draft, with no sta
 
 1. **The draft or the revised draft,** in the shape above, ready to copy, every gap a bracketed ask. In review mode,
    first **the biggest fixes,** at most three, one line each.
-2. **Reader pass:** the ranked fix list as a table (Rank, Tier, Section, Lens, The line (quoted), Why an investor
-   reads it that way, Fix), then **Dropped,** one line each with why it fell. Say whether the lenses ran as subagents,
-   and how many refute subagents ran.
+2. **Reader pass:** the ranked fix list as a table (Rank, Tier, Section, Lens, The line (quoted), Why an investor reads
+   it that way, Fix), then **Dropped,** one line each with why it fell. Say whether the lenses ran as subagents, and how
+   many refute subagents ran. When the refute pass ran per lens (lean mode), say so, say it is less independent than one
+   subagent per objection, and say the founder may ask for the full pass.
 3. **Tie-out table:** Metric or item, Period, The last update said (quoted), This update says (quoted), Status. One row
    for each metric, each item of the last update and the runway, each with one status.
 4. **Numbers:** each `equity_runway_plan` call's verdict and runway rows in the tool's values, with its flags and the
