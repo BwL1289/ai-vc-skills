@@ -265,8 +265,10 @@ computed it. Each is added to the ranked fix list ahead of the tiers, quoting th
 value and difference, with the flag that explains it, when one does, as the reason. It carries no tier: how much a gap
 hurts depends on its size, which the founder weighs. A stated figure less flattering than the tool's value (an ARR or
 retention below it; a churn, CAC, payback, burn multiple or concentration above it) understates: it goes in the minor
-tier at most. A mismatch is never the tool's figure rounded to the stated places (that is consistent), so one that no
-flag explains as another definition may rest on other parts or another working: its fix asks
+tier at most. A percent, months or multiple that is the tool's figure rounded to the places the document writes is
+consistent, so a mismatch of one is never that rounding and, when no flag explains it as another definition, may rest
+on other parts or another working. Money is checked by the tolerance alone, so an ARR or CAC mismatch that no flag
+explains may still be the founder's rounding. The fix for either asks
 `[how the model works this figure, unrounded]`. A `not_checked` row is not a mismatch (step 4). An unlabelled churn with one consistent basis row is not a mismatch
 (step 4).
 

@@ -455,15 +455,17 @@ def test_definition_flags_need_a_mismatch() -> None:
     ],
     ids=["all-recurring-month", "within-both"],
 )
-def test_a_stated_arr_off_the_movement_names_the_run_rate_only_when_fees_set_it_apart(
+def test_a_stated_arr_off_the_movement_but_on_the_months_own_arr_holds_and_names_no_run_rate(
     movement: dict[str, str], month: dict[str, str], stated: str
 ) -> None:
-    """The movement's ending ARR (12 x 110k = 1.32M; 12 x 50 = 600) and the latest month disagree: the mismatch is
-    real, yet the stated figure is the month's own ARR, so the run-rate flag would name a cause that is not there."""
+    """The movement's ending ARR (12 x 110k = 1.32M; 12 x 50 = 600) and the latest month disagree, but the stated
+    figure is the month's own ARR: consistent, checked against that ARR, and the run-rate flag names no cause."""
     result = metrics_check(period_months=1, **movement, **month, stated_arr=stated)
 
-    assert [check.verdict for check in result.checks] == ["mismatch"]
+    assert [check.verdict for check in result.checks] == ["consistent"]
+    assert result.arr_basis == "month"
     assert "stated_arr_matches_run_rate" not in result.flags
+    assert "arr_movement_and_month_disagree" in result.flags
 
 
 def test_the_payback_band_is_the_segments_target_unless_one_is_given() -> None:
@@ -863,18 +865,40 @@ def test_a_negative_figure_rounds_half_away_from_zero(stated: str, verdict: str)
     assert (row.verdict, row.within_rounding) == (verdict, verdict == "consistent")
 
 
-def test_a_cause_flag_reads_the_other_definition_with_the_same_rounding() -> None:
-    """Spend 124 on 10 of new monthly revenue at 50% margin: 24.8 months on gross margin, 12.4 on revenue alone. A
-    stated "12" is a mismatch against 24.8, and it is the revenue-only payback rounded to its places, though 0.4 months
-    is past 2% of 12.4 (0.248), so the flag names that cause; a stated "11" is neither."""
+def test_a_cause_flag_reads_the_other_definition_by_the_tolerance_alone() -> None:
+    """The rounding rule decides verdicts, not causes. Spend 124 on 10 of new monthly revenue at 50% margin: 24.8
+    months on gross margin, 12.4 on revenue alone. A stated "12.3" is within 2% of 12.4 (0.248), so the flag names that
+    cause; a stated "12" is 12.4 rounded to its places but 0.4 months off it, so no flag."""
     parts = {**_PAYBACK, "gross_margin_percent": "50", "sales_marketing_spend": "124"}
+    within = metrics_check(**parts, stated_cac_payback_months="12.3")
     rounded = metrics_check(**parts, stated_cac_payback_months="12")
-    neither = metrics_check(**parts, stated_cac_payback_months="11")
 
-    assert [row.verdict for row in rounded.checks] == ["mismatch"]
-    assert "stated_payback_not_margin_adjusted" in rounded.flags
-    assert [row.verdict for row in neither.checks] == ["mismatch"]
-    assert "stated_payback_not_margin_adjusted" not in neither.flags
+    assert [row.verdict for row in within.checks] == [row.verdict for row in rounded.checks] == ["mismatch"]
+    assert "stated_payback_not_margin_adjusted" in within.flags
+    assert "stated_payback_not_margin_adjusted" not in rounded.flags
+
+
+@pytest.mark.parametrize(
+    ("churned", "burn", "stated"),
+    [("5", "180", "2"), ("7.5", "60", "1")],
+    ids=["2x-against-1.5x-on-new", "1x-against-0.5x-on-new"],
+)
+def test_a_stated_multiple_that_is_only_the_new_arr_multiple_rounded_names_no_cause(
+    churned: str, burn: str, stated: str
+) -> None:
+    """New ARR 12·10 = 120. Burn 180: 1.5x on new ARR, 3x on net new (12·5 = 60); a deck's 2x is 1.5 rounded, not
+    within 2% of it. Burn 60 with 7.5 churned: 0.5x on new, 2x on net new (30); a deck's 1x is 0.5 rounded."""
+    result = metrics_check(
+        period_months=12,
+        starting_recurring="100",
+        new_recurring="10",
+        churned_recurring=churned,
+        net_burn=burn,
+        stated_burn_multiple=stated,
+    )
+
+    assert [row.verdict for row in result.checks] == ["mismatch"]
+    assert "stated_burn_multiple_uses_new_not_net_arr" not in result.flags
 
 
 def test_a_revenue_only_payback_already_past_the_band_is_flagged_and_the_row_says_how_far_it_applies() -> None:
@@ -894,20 +918,45 @@ def test_a_revenue_only_payback_already_past_the_band_is_flagged_and_the_row_say
     assert "not applied" not in margin_row.statement
 
 
-def test_a_stated_arr_equal_to_the_months_arr_names_the_disagreeing_parts() -> None:
-    """Movement 12·98k = 1.176M, the latest month 12·100k = 1.2M: a deck's 1.2M is a mismatch against the movement,
-    and the flag says the founder's two sets of parts disagree."""
+@pytest.mark.parametrize(
+    ("stated", "basis", "against", "verdict"),
+    [
+        ("1200000", "month", 1_200_000, "consistent"),
+        ("1176000", "movement", 1_176_000, "consistent"),
+        ("1300000", "movement", 1_176_000, "mismatch"),
+    ],
+    ids=["the-months", "the-movements", "neither"],
+)
+def test_a_stated_arr_holds_against_either_arr_and_the_result_says_which(
+    stated: str, basis: str, against: int, verdict: str
+) -> None:
+    """Movement 12·98k = 1.176M, the latest month 12·100k = 1.2M, 2% apart and more: a deck's 1.2M is the month's ARR
+    and holds against it, 1.176M holds against the movement's, and 1.3M, within 2% of neither, is a mismatch against
+    the movement's. The flag says the founder's two sets of parts disagree whatever the verdict."""
     result = metrics_check(
         period_months=12,
         starting_recurring="80000",
         new_recurring="18000",
         month_total_revenue="100000",
-        stated_arr="1200000",
+        stated_arr=stated,
     )
 
-    assert result.verdict == "mismatch"
+    assert _checks(result) == {("arr", None): (Fraction(int(stated)), Fraction(against), verdict)}
+    assert result.verdict == verdict
+    assert result.arr_basis == basis
     assert "arr_movement_and_month_disagree" in result.flags
     assert "stated_arr_matches_run_rate" not in result.flags
+
+
+def test_a_stated_arr_within_the_tolerance_of_the_months_alone_holds_with_no_disagreement() -> None:
+    """Movement 12·100 = 1,200 and the month 12·102 = 1,224 agree (24 apart, 2% of 1,200, the edge included); a
+    stated 1,248 is 48 off the movement's but 24 off the month's (2% of 1,224 is 24.48), so it holds against the
+    month's, with no disagreement flag."""
+    result = metrics_check(period_months=1, starting_recurring="100", month_total_revenue="102", stated_arr="1248")
+
+    assert _checks(result) == {("arr", None): (Fraction(1248), Fraction(1224), "consistent")}
+    assert result.arr_basis == "month"
+    assert result.flags == ()
 
 
 def test_a_stated_concentration_and_cac_are_checked() -> None:

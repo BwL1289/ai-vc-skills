@@ -48,25 +48,25 @@ refuse the whole call for it.
 ## What the calculator prints (excerpt)
 
 ```text
-  Net new ARR                                                $-72,000.00  k·(N + E - C - X)
-  Gross revenue retention (3 months)                            90.0000%  (S - C' - X')/S; E', C', X' the starting customers' own when given, else the period's total
-  Net revenue retention (3 months)                              91.5000%  (S + E' - C' - X')/S; E', C', X' the starting customers' own when given, else the period's total
-  Gross revenue churn (3 months)                                10.0000%  (C' + X')/S; E', C', X' the starting customers' own when given, else the period's total
-  Net revenue churn (3 months)                                   8.5000%  (C' + X' - E')/S; E', C', X' the starting customers' own when given, else the period's total
-  Logo churn (3 months)                                          6.0000%  customers lost / at the start
-  Churn (logo): the deck says                                    4.0000%  given
-  Churn (logo): the calculator gives                             6.0000%  customers lost / customers at the start
-  Churn (logo): verdict                                         mismatch  within the tolerance, or rounding to the deck's, is consistent
-  Churn (gross revenue): the calculator gives                   10.0000%  (C' + X')/S; E', C', X' the starting customers' own when given, else the period's total
-  Churn (gross revenue): verdict                                mismatch  within the tolerance, or rounding to the deck's, is consistent
-  Churn (net revenue): the calculator gives                      8.5000%  (C' + X' - E')/S; E', C', X' the starting customers' own when given, else the period's total
-  Churn (net revenue): verdict                                  mismatch  within the tolerance, or rounding to the deck's, is consistent
-  Burn multiple: the deck says                                 1.800000x  given
-  Burn multiple: the calculator gives                               none  no multiple: net burn or net new ARR is zero or below
-  Burn multiple: verdict                                     not_checked  nothing to check it against, so the overall verdict cannot be consistent
-  A VC is likely to ask                           churn_basis_unlabelled  The churn figure names no basis, so it was checked on every basis these figures give; label it logo, gross revenue or net revenue churn
-  A VC is likely to ask                        burn_multiple_not_defined  Net new ARR is zero or below in the period, so there is no burn multiple; a stated multiple is not checked, and the overall verdict cannot be consistent
-  Overall verdict                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
+  Net new ARR                                                    $-72,000.00  k·(N + E - C - X)
+  Gross revenue retention (3 months)                                90.0000%  (S - C' - X')/S; E', C', X' the starting customers' own when given, else the period's total
+  Net revenue retention (3 months)                                  91.5000%  (S + E' - C' - X')/S; E', C', X' the starting customers' own when given, else the period's total
+  Gross revenue churn (3 months)                                    10.0000%  (C' + X')/S; E', C', X' the starting customers' own when given, else the period's total
+  Net revenue churn (3 months)                                       8.5000%  (C' + X' - E')/S; E', C', X' the starting customers' own when given, else the period's total
+  Logo churn (3 months)                                              6.0000%  customers lost / at the start
+  Churn (logo): the deck says                                        4.0000%  given
+  Churn (logo): the calculator gives                                 6.0000%  customers lost / customers at the start
+  Churn (logo): verdict                                             mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Churn (gross revenue): the calculator gives                       10.0000%  (C' + X')/S; E', C', X' the starting customers' own when given, else the period's total
+  Churn (gross revenue): verdict                                    mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Churn (net revenue): the calculator gives                          8.5000%  (C' + X' - E')/S; E', C', X' the starting customers' own when given, else the period's total
+  Churn (net revenue): verdict                                      mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Burn multiple: the deck says                                     1.800000x  given
+  Burn multiple: the calculator gives                                   none  no multiple: net burn or net new ARR is zero or below
+  Burn multiple: verdict                                         not_checked  nothing to check it against, so the overall verdict cannot be consistent
+  A VC is likely to ask                               churn_basis_unlabelled  The churn figure names no basis, so it was checked on every basis these figures give; label it logo, gross revenue or net revenue churn
+  A VC is likely to ask                            burn_multiple_not_defined  Net new ARR is zero or below in the period, so there is no burn multiple; a stated multiple is not checked, and the overall verdict cannot be consistent
+  Overall verdict                                                   mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
 ```
 
 ## Expected answer

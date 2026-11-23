@@ -46,31 +46,31 @@ agent, so against today's sentence it would be a Partial. The skill and this pas
 ## What the calculator prints (excerpt)
 
 ```text
-  ARR at the end of the period                                             $1,200,000.00  k·(S + N + E - C - X)
-  Run-rate (12 x the month's revenue)                                      $1,500,000.00  12·T
-  Net new ARR                                                                $240,000.00  k·(N + E - C - X)
-  Gross revenue retention (12 months)                                           87.5000%  (S - C - X)/S
-  Net revenue retention (12 months)                                             95.0000%  (S + E - C - X)/S
-  Burn multiple                                                                7.500000x  net burn / net new ARR
-  Burn multiple on new ARR only                                                6.250000x  net burn / new ARR
-  ARR: the deck says                                                       $1,500,000.00  given
-  ARR: the calculator gives                                                $1,200,000.00  the movement's ending ARR, else the latest month's
-  ARR: difference                                                           $-300,000.00  computed - stated
-  ARR: verdict                                                                  mismatch  within the tolerance is consistent
-  Net revenue retention: the deck says                                         125.0000%  given
-  Net revenue retention: the calculator gives                                   95.0000%  (S + E - C - X)/S
-  Net revenue retention: difference                                            -30.0000%  computed - stated
-  Net revenue retention: verdict                                                mismatch  within the tolerance, or rounding to the deck's, is consistent
-  Burn multiple: the deck says                                                 6.250000x  given
-  Burn multiple: the calculator gives                                          7.500000x  net burn / net new ARR
-  Burn multiple: difference                                                    1.250000x  computed - stated
-  Burn multiple: verdict                                                        mismatch  within the tolerance, or rounding to the deck's, is consistent
-  A VC is likely to ask                                      stated_arr_matches_run_rate  The stated ARR matches the run-rate (12 x the whole month's revenue), not recurring revenue; a VC is likely to recompute ARR without one-time, services and usage fees
-  A VC is likely to ask                                  run_rate_includes_non_recurring  The latest month has one-time or usage revenue, so its run-rate is above its ARR; say which figure the document shows
-  A VC is likely to ask                                          stated_nrr_includes_new  The stated net retention matches ending over starting recurring revenue, which counts revenue from customers who were not there at the start (new customers, or their expansion); a VC is likely to ask for the starting customers alone
-  A VC is likely to ask                        stated_burn_multiple_uses_new_not_net_arr  The stated burn multiple matches net burn over new ARR only, not over net new ARR after churn and contraction
-  A VC is likely to ask                                         burn_multiple_above_band  The burn multiple is at or above 3x; a VC is likely to ask what the spend buys (a benchmark, not a rule)
-  Overall verdict                                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
+  ARR at the end of the period                                                   $1,200,000.00  k·(S + N + E - C - X)
+  Run-rate (12 x the month's revenue)                                            $1,500,000.00  12·T
+  Net new ARR                                                                      $240,000.00  k·(N + E - C - X)
+  Gross revenue retention (12 months)                                                 87.5000%  (S - C - X)/S
+  Net revenue retention (12 months)                                                   95.0000%  (S + E - C - X)/S
+  Burn multiple                                                                      7.500000x  net burn / net new ARR
+  Burn multiple on new ARR only                                                      6.250000x  net burn / new ARR
+  ARR: the deck says                                                             $1,500,000.00  given
+  ARR: the calculator gives                                                      $1,200,000.00  the movement's ending ARR
+  ARR: difference                                                                 $-300,000.00  computed - stated
+  ARR: verdict                                                                        mismatch  within the tolerance is consistent
+  Net revenue retention: the deck says                                               125.0000%  given
+  Net revenue retention: the calculator gives                                         95.0000%  (S + E - C - X)/S
+  Net revenue retention: difference                                                  -30.0000%  computed - stated
+  Net revenue retention: verdict                                                      mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Burn multiple: the deck says                                                       6.250000x  given
+  Burn multiple: the calculator gives                                                7.500000x  net burn / net new ARR
+  Burn multiple: difference                                                          1.250000x  computed - stated
+  Burn multiple: verdict                                                              mismatch  within the tolerance, or rounding to the deck's, is consistent
+  A VC is likely to ask                                            stated_arr_matches_run_rate  The stated ARR matches the run-rate (12 x the whole month's revenue), not recurring revenue; a VC is likely to recompute ARR without one-time, services and usage fees
+  A VC is likely to ask                                        run_rate_includes_non_recurring  The latest month has one-time or usage revenue, so its run-rate is above its ARR; say which figure the document shows
+  A VC is likely to ask                                                stated_nrr_includes_new  The stated net retention matches ending over starting recurring revenue, which counts revenue from customers who were not there at the start (new customers, or their expansion); a VC is likely to ask for the starting customers alone
+  A VC is likely to ask                              stated_burn_multiple_uses_new_not_net_arr  The stated burn multiple matches net burn over new ARR only, not over net new ARR after churn and contraction
+  A VC is likely to ask                                               burn_multiple_above_band  The burn multiple is at or above 3x; a VC is likely to ask what the spend buys (a benchmark, not a rule)
+  Overall verdict                                                                     mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
 ```
 
 ## Expected answer

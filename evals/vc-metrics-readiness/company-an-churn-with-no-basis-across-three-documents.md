@@ -46,32 +46,32 @@ figures. The burn lines go to no call: the tool checks no stated burn. The deck'
 What the calculator prints for the deck (excerpt):
 
 ```text
-  Gross revenue churn (1 month)                                           3.0000%  (C + X)/S
-  Net revenue churn (1 month)                                             2.0000%  (C + X - E)/S
-  Logo churn (1 month)                                                    3.0000%  customers lost / at the start
-  CAC, blended                                                            $800.00  spend / new customers
-  CAC, paid                                                             $1,800.00  spend / new customers from paid channels
-  CAC payback (gross margin)                                          9.60 months  spend/(new monthly recurring·margin)
-  CAC payback (revenue only)                                          7.20 months  spend/new monthly recurring
-  Churn (logo): the deck says                                             2.0000%  given
-  Churn (logo): the calculator gives                                      3.0000%  customers lost / customers at the start
-  Churn (logo): difference                                                1.0000%  computed - stated
-  Churn (logo): verdict                                                  mismatch  within the tolerance, or rounding to the deck's, is consistent
-  Churn (gross revenue): the deck says                                    2.0000%  given
-  Churn (gross revenue): the calculator gives                             3.0000%  (C + X)/S
-  Churn (gross revenue): difference                                       1.0000%  computed - stated
-  Churn (gross revenue): verdict                                         mismatch  within the tolerance, or rounding to the deck's, is consistent
-  Churn (net revenue): the deck says                                      2.0000%  given
-  Churn (net revenue): the calculator gives                               2.0000%  (C + X - E)/S
-  Churn (net revenue): difference                                         0.0000%  computed - stated
-  Churn (net revenue): verdict                                         consistent  within the tolerance, or rounding to the deck's, is consistent
-  CAC payback: the deck says                                          7.20 months  given
-  CAC payback: the calculator gives                                   9.60 months  spend/(new monthly recurring·margin), or on revenue with no margin
-  CAC payback: difference                                             2.40 months  computed - stated
-  CAC payback: verdict                                                   mismatch  within the tolerance, or rounding to the deck's, is consistent
-  A VC is likely to ask                                    churn_basis_unlabelled  The churn figure names no basis, so it was checked on every basis these figures give; label it logo, gross revenue or net revenue churn
-  A VC is likely to ask                        stated_payback_not_margin_adjusted  The stated payback matches the revenue-only payback, not the payback on gross margin; Bessemer measures it after gross margin, so a VC may recompute it that way
-  Overall verdict                                                        mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
+  Gross revenue churn (1 month)                                               3.0000%  (C + X)/S
+  Net revenue churn (1 month)                                                 2.0000%  (C + X - E)/S
+  Logo churn (1 month)                                                        3.0000%  customers lost / at the start
+  CAC, blended                                                                $800.00  spend / new customers
+  CAC, paid                                                                 $1,800.00  spend / new customers from paid channels
+  CAC payback (gross margin)                                              9.60 months  spend/(new monthly recurring·margin)
+  CAC payback (revenue only)                                              7.20 months  spend/new monthly recurring
+  Churn (logo): the deck says                                                 2.0000%  given
+  Churn (logo): the calculator gives                                          3.0000%  customers lost / customers at the start
+  Churn (logo): difference                                                    1.0000%  computed - stated
+  Churn (logo): verdict                                                      mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Churn (gross revenue): the deck says                                        2.0000%  given
+  Churn (gross revenue): the calculator gives                                 3.0000%  (C + X)/S
+  Churn (gross revenue): difference                                           1.0000%  computed - stated
+  Churn (gross revenue): verdict                                             mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Churn (net revenue): the deck says                                          2.0000%  given
+  Churn (net revenue): the calculator gives                                   2.0000%  (C + X - E)/S
+  Churn (net revenue): difference                                             0.0000%  computed - stated
+  Churn (net revenue): verdict                                             consistent  within the tolerance, or rounding to the deck's, is consistent
+  CAC payback: the deck says                                              7.20 months  given
+  CAC payback: the calculator gives                                       9.60 months  spend/(new monthly recurring·margin), or on revenue with no margin
+  CAC payback: difference                                                 2.40 months  computed - stated
+  CAC payback: verdict                                                       mismatch  within the tolerance, or rounding to the deck's, is consistent
+  A VC is likely to ask                                        churn_basis_unlabelled  The churn figure names no basis, so it was checked on every basis these figures give; label it logo, gross revenue or net revenue churn
+  A VC is likely to ask                            stated_payback_not_margin_adjusted  The stated payback matches the revenue-only payback, not the payback on gross margin; Bessemer measures it after gross margin, so a VC may recompute it that way
+  Overall verdict                                                            mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
 ```
 
 The model's call:
@@ -138,12 +138,12 @@ The update's call:
 What the calculator prints for the update (excerpt):
 
 ```text
-  Net revenue churn (1 month)                                    2.0000%  (C + X - E)/S
-  Churn (net revenue): the deck says                             2.0000%  given
-  Churn (net revenue): the calculator gives                      2.0000%  (C + X - E)/S
-  Churn (net revenue): difference                                0.0000%  computed - stated
-  Churn (net revenue): verdict                                consistent  within the tolerance, or rounding to the deck's, is consistent
-  Overall verdict                                             consistent  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
+  Net revenue churn (1 month)                                      2.0000%  (C + X - E)/S
+  Churn (net revenue): the deck says                               2.0000%  given
+  Churn (net revenue): the calculator gives                        2.0000%  (C + X - E)/S
+  Churn (net revenue): difference                                  0.0000%  computed - stated
+  Churn (net revenue): verdict                                  consistent  within the tolerance, or rounding to the deck's, is consistent
+  Overall verdict                                               consistent  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
 ```
 
 ## Expected answer

@@ -72,13 +72,14 @@ CustomerSegment = Literal["smb", "mid_market", "enterprise"]
 # Which stated figure a check is about.
 MetricsCheckKey = Literal["arr", "nrr", "grr", "churn", "cac", "cac_payback", "burn_multiple", "concentration"]
 
-# Which ARR a stated ARR is checked against: the movement's ending ARR (preferred) or the latest month's.
+# Which ARR a stated ARR is checked against: the movement's ending ARR or the latest month's, whichever the stated ARR
+# is within the tolerance of (the movement's when both are worked and it is within both or neither).
 ArrBasis = Literal["movement", "month"]
 
 # Facts and questions a VC is likely to raise. They never change a verdict; their plain words are in
 # ``equity_calculator.layout_metrics_check``. The four ``stated_*`` flags are set only beside a mismatch (the burn
-# multiple's also beside a figure left unchecked), when the stated figure agrees with the named wrong definition
-# instead (within the tolerance, or its rounding to the stated places), so each names the likely cause.
+# multiple's also beside a figure left unchecked), when the stated figure is within the tolerance of the named wrong
+# definition instead, so each names the likely cause.
 # ``consistent_beyond_rounding`` names a stated percent, months or multiple consistent by the tolerance alone, not as
 # the computed figure rounded to the places the document writes it with.
 MetricsFlag = Literal[
@@ -126,6 +127,16 @@ _COHORT = (
 # The two movements that lose the starting customers' revenue, as (cohort part, total) pairs.
 _COHORT_LOSSES = _COHORT[1:]
 
+# The description each stated percent, months or multiple field carries in the JSON schema (the MCP tool's input): its
+# places decide the rounding test, and a JSON number can drop them (12.40 arrives as 12.4) or add one (12.0).
+_AS_WRITTEN = (
+    "Send it as text with exactly the places the document writes ({examples}): a figure that is the computed one "
+    "rounded to those places is consistent, and a JSON number can drop or add a place."
+)
+_PERCENT_AS_WRITTEN = "Percent points. " + _AS_WRITTEN.format(examples='"2", "2.0", "0.0"')
+_MONTHS_AS_WRITTEN = _AS_WRITTEN.format(examples='"12", "12.0"')
+_MULTIPLE_AS_WRITTEN = _AS_WRITTEN.format(examples='"1.5", "1.50"')
+
 
 class MetricsCheckInput(BaseModel):
     """A founder's metrics as a document states them, plus the parts they are made of; see the module docstring.
@@ -167,19 +178,21 @@ class MetricsCheckInput(BaseModel):
     # The stated percent, months and multiple fields are ``WrittenDecimal``: a zero keeps the places it is written with
     # ("0.0" is one place), which the rounding test reads (a figure that is the computed one rounded to its places is
     # consistent).
-    stated_nrr_percent: WrittenDecimal | None = Field(default=None, ge=0)
+    stated_nrr_percent: WrittenDecimal | None = Field(default=None, ge=0, description=_PERCENT_AS_WRITTEN)
     # Above 100% is accepted, never refused: gross retention leaves expansion out, so it is checked like any figure,
     # and comes back a mismatch unless it is within the tolerance of the computed figure or its rounding.
-    stated_grr_percent: WrittenDecimal | None = Field(default=None, ge=0)
+    stated_grr_percent: WrittenDecimal | None = Field(default=None, ge=0, description=_PERCENT_AS_WRITTEN)
     # Below 0 only as net revenue churn (expansion above the revenue lost); ``_churn_rules`` refuses it otherwise.
-    stated_churn_percent: WrittenDecimal | None = Field(default=None, le=WHOLE_PERCENT)
+    stated_churn_percent: WrittenDecimal | None = Field(default=None, le=WHOLE_PERCENT, description=_PERCENT_AS_WRITTEN)
     stated_churn_basis: StatedChurnBasis = "unlabelled"
     stated_cac: BoundedDecimal | None = Field(default=None, gt=0)
-    stated_cac_payback_months: WrittenDecimal | None = Field(default=None, gt=0)
+    stated_cac_payback_months: WrittenDecimal | None = Field(default=None, gt=0, description=_MONTHS_AS_WRITTEN)
     # 0x is accepted (a company at break-even, which the source says the multiple approaches); with no multiple to
     # work it is not checked.
-    stated_burn_multiple: WrittenDecimal | None = Field(default=None, ge=0)
-    stated_concentration_percent: WrittenDecimal | None = Field(default=None, ge=0, le=WHOLE_PERCENT)
+    stated_burn_multiple: WrittenDecimal | None = Field(default=None, ge=0, description=_MULTIPLE_AS_WRITTEN)
+    stated_concentration_percent: WrittenDecimal | None = Field(
+        default=None, ge=0, le=WHOLE_PERCENT, description=_PERCENT_AS_WRITTEN
+    )
     tolerance_points: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_POINTS, ge=0, lt=WHOLE_PERCENT)
     tolerance_percent: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_PERCENT, ge=0, lt=WHOLE_PERCENT)
     customer_segment: CustomerSegment | None = None
@@ -392,7 +405,9 @@ class MetricsCheckResult(BaseModel):
 
     Money is ARR or dollars; retention, churn and concentration are fractions over ``period_months`` (never
     annualised); paybacks are months; multiples are ratios. A value is none when its parts were not given.
-    ``arr_basis`` says which ARR a stated ARR is checked against. ``payback_band_months`` is the benchmark in force.
+    ``arr_basis`` says which ARR a stated ARR is checked against: of the movement's ending ARR and the latest month's,
+    the one it is within the tolerance of (the movement's when it is within both or neither, or with no stated ARR).
+    ``payback_band_months`` is the benchmark in force.
     """
 
     model_config = MODEL_CONFIG
