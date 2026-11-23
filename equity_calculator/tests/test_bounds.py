@@ -18,6 +18,7 @@ from typing import Any
 import pytest
 from equity_calculator.schemas.equity import EmployeeInput, InvestorInput, PoolInput
 from equity_calculator.schemas.equity_common import MAX_NUMBER_TEXT, MAX_SIGNIFICANT_DIGITS, SIZE_LIMIT
+from equity_calculator.schemas.equity_metrics_check import MetricsCheckInput
 from pydantic import ValidationError
 from tests.support import BELOW_SMALLEST, DIGIT_REFUSAL, POOL_EXAMPLE, SIZE_REFUSAL
 
@@ -204,6 +205,20 @@ def test_every_zero_reads_as_a_plain_zero(zero: str) -> None:
     hire = EmployeeInput.model_validate({"outcome_multiplier": "1.2", "margin_percent": zero})
 
     assert hire.margin_percent.as_tuple() == Decimal(0).as_tuple()
+
+
+@pytest.mark.parametrize(
+    ("zero", "kept"),
+    [("0", "0"), ("0.0", "0.0"), ("-0.00", "0.00"), ("0e999999999", "0"), ("-0E-999999999", "0E-15")],
+)
+def test_a_stated_zero_keeps_the_places_it_is_written_with_up_to_15_and_no_sign(zero: str, kept: str) -> None:
+    """A metrics check's stated figure keeps a zero's places for its rounding test ("0.0%" is a claim to one place),
+    at most 15 (the smallest nonzero input's), so no huge exponent survives; its sign is dropped."""
+    parts = {"period_months": 1, "starting_recurring": "100", "churned_recurring": "1"}
+    check = MetricsCheckInput.model_validate({**parts, "stated_nrr_percent": zero})
+
+    assert check.stated_nrr_percent is not None
+    assert check.stated_nrr_percent.as_tuple() == Decimal(kept).as_tuple()
 
 
 @pytest.mark.parametrize(

@@ -20,10 +20,11 @@ Notation (``equity_calculator.schemas.equity_market_sizing``), per segment s, ev
   segment's part, the value at which the total reaches T is x_0 · (T - (M - M_s)) / M_s, exactly.
 
 Money parts are rounded to the cent by largest remainder, and counts of customers to the hundredth the same way, so
-the segments add up to the rounded totals. A unit price (given, a sensitivity value or a break-even value) is shown
-to the cent when that is exact, else to as many places as it needs up to 6, and a price under a hundred-thousandth of
-a dollar keeps two significant digits (up to 15 places, the input floor): a $0.0075 usage price never prints as
-$0.01.
+the segments add up to the rounded totals. A unit price the founder typed (given, a sensitivity base or value) is
+shown exactly, with every place it was typed with and at least to the cent: a $0.0075 usage price never prints as
+$0.01, nor a $0.00000125 one as $0.0000012. A break-even price, which is worked, is shown to the cent when that is
+exact, else to as many places as it needs up to 6, and one under a hundred-thousandth of a dollar keeps two
+significant digits (up to 15 places, the input floor).
 """
 
 from __future__ import annotations
@@ -41,6 +42,7 @@ from equity_calculator.exact import (
     ZERO,
     fraction,
     from_percent,
+    given_price,
     price_quantity,
     quantity,
     round_to_places,
@@ -181,11 +183,19 @@ def field_unit(name: SegmentField) -> EquityUnit:
 
 
 def field_quantity(name: SegmentField, value: Fraction) -> EquityQuantity:
-    """A value of the field ``name`` as its quantity (a percent field's value as the fraction it names, a price as a
-    unit price)."""
+    """A worked value of the field ``name`` (a break-even) as its quantity (a percent field's value as the fraction it
+    names, a price as a unit price, rounded)."""
     if name == "price":
         return price_quantity(value)
     return quantity(field_unit(name), value / HUNDRED if name in PERCENT_FIELDS else value)
+
+
+def given_field_quantity(name: SegmentField, value: Decimal) -> EquityQuantity:
+    """A typed value of the field ``name`` (a sensitivity base or value): as ``field_quantity``, but a price exactly
+    as typed, never rounded."""
+    if name == "price":
+        return given_price(value)
+    return field_quantity(name, fraction(value))
 
 
 def _moves(segment: MarketSegment, name: SegmentField, metric: MarketMetric) -> bool:
@@ -258,7 +268,7 @@ def _sensitivity(inputs: MarketSizingInput, base: _Totals) -> tuple[SensitivityR
             soms.append(worked.som)
             cases.append(
                 SensitivityCase(
-                    value=field_quantity(row.field, fraction(value)),
+                    value=given_field_quantity(row.field, value),
                     tam=quantity("money", worked.tam),
                     sam=quantity("money", worked.sam),
                     som=_optional("money", worked.som),
@@ -279,7 +289,7 @@ def _sensitivity(inputs: MarketSizingInput, base: _Totals) -> tuple[SensitivityR
                 row=number,
                 field=row.field,
                 segment=row.segment,
-                base_value=field_quantity(row.field, fraction(getattr(inputs.segments[row.segment - 1], row.field))),
+                base_value=given_field_quantity(row.field, getattr(inputs.segments[row.segment - 1], row.field)),
                 cases=tuple(cases),
                 som_low=_optional("money", low),
                 som_high=_optional("money", high),

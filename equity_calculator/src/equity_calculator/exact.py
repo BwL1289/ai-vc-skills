@@ -99,9 +99,22 @@ def money_split(parts: Sequence[Fraction]) -> tuple[EquityQuantity, ...]:
     )
 
 
+def given_price(value: Decimal) -> EquityQuantity:
+    """A unit price as the founder typed it, never rounded: the fewest places from 2 that show it exactly ($400.00,
+    $0.0075, $0.00000125, $0.3333333). A typed decimal has a last place, so some count of places is exact."""
+    exact = fraction(value)
+    exponent = value.as_tuple().exponent
+    most = max(_CENT_PLACES, -exponent if isinstance(exponent, int) else _CENT_PLACES)
+    fewest = next(
+        (count for count in range(_CENT_PLACES, most + 1) if Fraction(round_to_places(exact, count)) == exact), most
+    )
+    return EquityQuantity(unit="price", exact=exact, rounded=round_to_places(exact, fewest))
+
+
 def price_quantity(value: Fraction) -> EquityQuantity:
-    """A unit price, exact, and rounded to the fewest places from 2 that show it as 6 places would ($400.00,
-    $0.0075, $640.740741); a price under 1e-5 dollars keeps places until two significant digits show, up to 15."""
+    """A computed unit price (a break-even), exact, and rounded to the fewest places from 2 that show it as 6 places
+    would ($400.00, $0.0075, $640.740741); a price under 1e-5 dollars keeps places until two significant digits show,
+    up to 15. A price the founder typed is ``given_price``'s, never rounded."""
     places = _PRICE_PLACES
     while places < _FINEST_PLACES and ZERO < abs(value) < Fraction(1, _DECIMAL_BASE ** (places - 1)):
         places += 1

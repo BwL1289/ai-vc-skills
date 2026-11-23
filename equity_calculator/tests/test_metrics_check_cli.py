@@ -318,6 +318,77 @@ def test_a_multiple_left_unchecked_prints_none_and_why_the_overall_verdict_canno
     assert lines["verdict"].values == ("not_checked",)
 
 
+# Net burn with no burn multiple to work, each beside a stated ARR that checks out: ARR shrinks (12·94k = 1,128,000),
+# or there is no net burn (12·120k = 1,440,000).
+_NO_MULTIPLE: dict[str, dict[str, object]] = {
+    "burn_multiple_not_defined": {
+        "new_recurring": "24000",
+        "churned_recurring": "30000",
+        "net_burn": "1800000",
+        "stated_arr": "1128000",
+    },
+    "no_net_burn": {"new_recurring": "20000", "net_burn": "0", "stated_arr": "1440000"},
+}
+
+
+@pytest.mark.parametrize("flag", list(_NO_MULTIPLE))
+def test_a_burn_flag_says_the_verdict_cannot_be_consistent_only_beside_a_stated_multiple(flag: str) -> None:
+    """With no multiple stated the flag ends at "no burn multiple", since the overall verdict is consistent; with one
+    stated, that multiple is not checked and the verdict is not consistent, as the flag says."""
+    parts = {"period_months": 12, "starting_recurring": "100000", **_NO_MULTIPLE[flag]}
+    bare = metrics_check(**parts)
+    stated = metrics_check(**parts, stated_burn_multiple="1.5")
+    bare_words = {line.values[_FIRST]: line.how for line in sheet_for(bare).lines if line.key.startswith("flag_")}
+    stated_words = {line.values[_FIRST]: line.how for line in sheet_for(stated).lines if line.key.startswith("flag_")}
+
+    assert bare.verdict == "consistent"
+    assert bare_words[flag].endswith("so there is no burn multiple")
+    assert stated.verdict == "not_checked"
+    assert stated_words[flag].endswith(
+        "; a stated multiple is not checked, and the overall verdict cannot be consistent"
+    )
+
+
+def test_no_flag_says_the_verdict_cannot_be_consistent_beside_a_consistent_verdict() -> None:
+    parts = [{"period_months": 12, "starting_recurring": "100000", **fields} for fields in _NO_MULTIPLE.values()]
+    results = [*_EVERY_FLAG, metrics_check(**_UNCHECKED_MULTIPLE), *(metrics_check(**fields) for fields in parts)]
+
+    for result in results:
+        words = " ".join(line.how for line in sheet_for(result).lines if line.key.startswith("flag_"))
+        assert result.verdict != "consistent" or "cannot be consistent" not in words
+
+
+def test_an_unlabelled_churn_below_zero_says_it_was_checked_as_net_revenue_churn_alone() -> None:
+    """-3% with logo and gross revenue churn both worked (2% each): only the net revenue row is checked, and the flag
+    says so instead of "every basis"; a 3% churn on the same parts is checked on all three."""
+    parts = {"period_months": 1, "starting_recurring": "100000", "expansion_recurring": "5000"}
+    parts |= {"churned_recurring": "2000", "customers_start": 100, "customers_lost": 2}
+    below = {line.key: line for line in sheet_for(metrics_check(**parts, stated_churn_percent="-3")).lines}
+    above = {line.key: line for line in sheet_for(metrics_check(**parts, stated_churn_percent="3")).lines}
+
+    assert [key for key in below if key.startswith("check_churn_") and key.endswith("_verdict")] == [
+        "check_churn_net_revenue_verdict"
+    ]
+    assert "below zero it can only be net revenue churn, so it was checked on that alone" in (
+        below["flag_churn_basis_unlabelled"].how
+    )
+    assert "every basis" not in below["flag_churn_basis_unlabelled"].how
+    assert "checked on every basis these figures give" in above["flag_churn_basis_unlabelled"].how
+
+
+async def test_a_zero_typed_with_a_place_keeps_it_through_the_command() -> None:
+    """--stated-churn-percent 0.0 against 0.4% is no rounding of it; 0 is (half a point either way)."""
+    argv = ["metrics_check", "--period-months", "1", "--starting-recurring", "100000", "--churned-recurring", "400"]
+    argv += ["--stated-churn-basis", "gross_revenue", "--json", "--stated-churn-percent"]
+    one_place = json.loads(await run([*argv, "0.0"]))
+    whole = json.loads(await run([*argv, "0"]))
+
+    assert one_place["inputs"]["stated_churn_percent"] == "0.0"
+    assert one_place["checks"][_FIRST]["within_rounding"] is False
+    assert "consistent_beyond_rounding" in one_place["flags"]
+    assert whole["checks"][_FIRST]["within_rounding"] is True
+
+
 def test_retention_and_revenue_churn_print_primed_letters_once_a_starting_customers_figure_is_given() -> None:
     """The printed formula must give the printed value: with the starting customers' churn (2k) in place of the
     period's 15k, gross retention is (100k - 5k - 2k)/100k = 93%, which only the primed formula describes."""
@@ -336,6 +407,16 @@ def test_retention_and_revenue_churn_print_primed_letters_once_a_starting_custom
     assert primed["check_grr_computed"].how == primed["grr"].how
     rows = {row.key: row for row in cohort.assumptions}
     assert rows["retention_rule"].setting.startswith("GRR = (S - C' - X')/S")
+    # The churn rule's revenue formulas are primed the same way; logo churn has no primes.
+    assert rows["churn_rule"].setting == (
+        "logo = customers lost / at the start; gross = (C' + X')/S; net = (C' + X' - E')/S (primed: the starting "
+        "customers' own)"
+    )
+    plain_rows = {row.key: row for row in metrics_check(**parts, stated_grr_percent="80").assumptions}
+    assert (
+        plain_rows["churn_rule"].setting
+        == "logo = customers lost / at the start; gross = (C + X)/S; net = (C + X - E)/S"
+    )
 
 
 def test_a_mismatch_a_hair_past_the_tolerance_says_it_is_just_over() -> None:

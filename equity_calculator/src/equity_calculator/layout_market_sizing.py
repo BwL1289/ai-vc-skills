@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from equity_calculator.exact import fraction, price_quantity
+from equity_calculator.exact import fraction, given_price
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_market_sizing import (
     BreakEvenRow,
@@ -48,6 +48,7 @@ _FIELD_NAMES: dict[SegmentField, str] = {
 _CROSS_CHECK_NOTE = "; a cross-check with the top-down figure, not a target"
 _UNDER_SMALLEST_SHARE = "under 0.0001%"
 _PERIOD_DEFAULT = "not given: read as a yearly price (give 1 for a monthly one)"
+_CUSTOMERS_SPLIT = "given, shown rounded so the segments add up to the total"
 _REACH_WORDS = {
     "value": "reaches it exactly",
     "met_without_it": "met already with this field at its base",
@@ -93,12 +94,14 @@ def _flag_words(flag: MarketSizingFlag) -> str:
 
 def _segment_given_lines(row: SegmentRow, segment: MarketSegment) -> list[Line]:
     """One segment's inputs as given (the price period marked as the default when it was left out). The buying
-    customers show the model's split rounding, so the segments' lines add up to the total line that sums them."""
+    customers show the model's split rounding, so the segments' lines add up to the total line that sums them; a line
+    whose figure is not the typed count says it was rounded so."""
     name = f"Segment {row.segment}"
     key = f"segment_{row.segment}"
+    customers_how = GIVEN if fraction(row.customers.rounded) == fraction(segment.customers) else _CUSTOMERS_SPLIT
+    customers = Line(f"{key}_customers", f"{name}: buying customers", (row.customers,), customers_how)
     shown: list[tuple[str, str, EquityQuantity | str | None]] = [
-        (f"{key}_customers", f"{name}: buying customers", row.customers),
-        (f"{key}_price", f"{name}: price per unit", price_quantity(fraction(segment.price))),
+        (f"{key}_price", f"{name}: price per unit", given_price(segment.price)),
         (f"{key}_units", f"{name}: units per customer", given("count", segment.units_per_customer)),
         (f"{key}_take_rate", f"{name}: take rate", given_percent(segment.take_rate_percent)),
         (f"{key}_serviceable", f"{name}: serviceable share", given_percent(segment.serviceable_percent)),
@@ -125,7 +128,7 @@ def _segment_given_lines(row: SegmentRow, segment: MarketSegment) -> list[Line]:
         (_months(segment.period_months()),),
         GIVEN if row.price_period_given else _PERIOD_DEFAULT,
     )
-    return [*lines[:2], period, *lines[2:]]
+    return [customers, lines[0], period, *lines[1:]]
 
 
 def _given_lines(result: MarketSizingResult) -> list[Line]:

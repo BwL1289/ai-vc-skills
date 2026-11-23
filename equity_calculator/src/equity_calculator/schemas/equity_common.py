@@ -16,8 +16,10 @@ before the model sees it, so it is read as zero; sent as text, it is refused as 
 
 Every decimal input is a ``BoundedDecimal``, checked before anything turns it into a ``Fraction`` (a Fraction of
 ``1e999999999`` is a billion-digit integer that never finishes building): at most 28 significant digits, trailing
-zeros included, and a nonzero value at least 1e-15 and under 1e16 in size. A share count is a ``ShareCount``, below
-1e16. Every amount therefore stays far below 1e308, the largest number a spreadsheet cell or a JSON float holds.
+zeros included, and a nonzero value at least 1e-15 and under 1e16 in size; every zero becomes a plain ``0``. A
+``WrittenDecimal`` (a figure a document states, whose places a rounding test reads) has the same bounds, but its zero
+keeps the places it is written with, up to 15. A share count is a ``ShareCount``, below 1e16. Every amount therefore
+stays far below 1e308, the largest number a spreadsheet cell or a JSON float holds.
 """
 
 from __future__ import annotations
@@ -104,6 +106,24 @@ def _bounded(value: Decimal) -> Decimal:
 
 
 BoundedDecimal = Annotated[Decimal, BeforeValidator(_refuse_unbounded_raw), AfterValidator(_bounded)]
+
+
+def _written(value: Decimal) -> Decimal:
+    """``_bounded``, except a zero keeps the places it is written with (``0.0`` stays one place), its sign dropped and
+    its places at most 15 (the smallest nonzero input's), so no huge exponent survives the model."""
+    bounded = _bounded(value)
+    exponent = value.as_tuple().exponent
+    if not bounded.is_zero() or not isinstance(exponent, int):
+        return bounded
+
+    places = min(max(0, -exponent), -MIN_ADJUSTED_EXPONENT)
+    return Decimal((0, (0,), -places))
+
+
+# A document's stated figure that is checked for rounding (a metrics check's stated percent, months or multiple): a
+# ``BoundedDecimal`` whose zero keeps the places it is written with, since "0.0%" is a claim to one place, not to none.
+# Echoed back, it reads the same (``0.0`` dumps as "0.0").
+WrittenDecimal = Annotated[Decimal, BeforeValidator(_refuse_unbounded_raw), AfterValidator(_written)]
 
 # strict: a share count is a real int; a bool, a float or a numeric string is refused, never read as one.
 ShareCount = Annotated[int, Field(strict=True, lt=SIZE_LIMIT)]

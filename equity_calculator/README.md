@@ -521,7 +521,9 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    computed one rounded to the places it is written with (within half its last place, so a stated `12` covers 11.5
    to 12.5 and `12.0` covers 11.95 to 12.05); money has no such row. A stated churn with a basis is checked on that
    basis; with none, on every basis the inputs allow, and it holds when any does; a churn below zero is checked only
-   as net revenue churn. A stated gross retention above 100% is checked, and comes back a mismatch. A stated payback
+   as net revenue churn. A stated gross retention above 100% is checked like any other figure: a mismatch unless it
+   is within the tolerance of the computed figure (100.4% against 99.95% is consistent). A stated zero keeps the
+   places it is written with for this test, so `0.0` covers -0.05 to 0.05 and `0` covers -0.5 to 0.5. A stated payback
    is checked on gross margin when one is given. A stated burn multiple with no multiple to work (step 4) comes back
    `not_checked`, with no computed figure. The verdict: mismatch if any figure is, else not_checked if none was
    checked or one was left unchecked, else consistent.
@@ -535,9 +537,11 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    rounded, such as a payback of 12 months against 12.4). With or without a mismatch:
    `arr_movement_and_month_disagree` (step 1), `run_rate_includes_non_recurring` (the latest month has one-time
    or usage revenue), `expansion_hides_churn` (revenue was lost, but net revenue churn is at or below zero),
-   `churn_basis_unlabelled` (a stated churn with no basis), `blended_cac_only` (no paid-channel count),
+   `churn_basis_unlabelled` (a stated churn with no basis; below zero it says it was checked as net revenue churn
+   alone), `blended_cac_only` (no paid-channel count),
    `payback_not_margin_adjusted` (no gross margin), `burn_multiple_not_defined` (net new ARR at or below zero) and
-   `no_net_burn` (a net burn at or below zero). The benchmarks, each an input: `payback_above_band` (at or above
+   `no_net_burn` (a net burn at or below zero); each of these two says the overall verdict cannot be consistent only
+   when a multiple is stated. The benchmarks, each an input: `payback_above_band` (at or above
    Bessemer's target for the customer segment, under 12 months for SMB, 18 for mid-market and 24 for enterprise, or
    the founder's own band), `burn_multiple_above_band` (3x or more, Sacks) and `net_revenue_churn_above_band` (above
    2% in a one-month period, Skok; not asked over a longer period, since nothing is compounded).
@@ -1029,7 +1033,9 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
   ownership. The number formats hide that difference.
 - The pool's and the round's value rows, the waterfall's payouts, a deal check's pre-money split and percent
   use-of-funds lines, and a market size's segment figures (to the cent, or a hundredth of a customer) are rounded by
-  largest remainder, so they add up to their rounded total exactly.
+  largest remainder, so they add up to their rounded total exactly. A segment's buying customers line shows that
+  rounding too: when it is not the typed count (0.335 shows 0.34 in one segment and 0.33 in the next), its
+  how-column says "given, shown rounded so the segments add up to the total".
 - Verdict cells are coloured by conditional formatting: green for accept, grant and in the money, amber for break
   even and at the money, red for reject, no grant and underwater. A deal check's, a runway plan's, a metrics check's and a market size's verdicts are
   green for consistent, red for mismatch and amber for not checked; a runway plan's milestones are green when covered and red
@@ -1045,12 +1051,14 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
 Inside, every number is a `Fraction`. Inputs arrive as `Decimal` (the models refuse NaN and infinity, and hold every
 number to the limits above) and share counts as plain integers (a bool, a float or a numeric string is refused, never
 read as a count). The output carries both the exact fraction and a `Decimal` rounded half-even at a fixed number of
-places: 6 places for ratios and prices, 2 for money and months, 3 for shares. Two exceptions: a market's unit price
-shows the fewest places from 2 that give the same figure as 6 ($400.00, $0.0075; a price under $0.00001 keeps two
-significant digits, up to 15 places), and a runway plan's required raise is rounded up to the cent, so the amount
-shown always covers. Rounding is integer arithmetic. No step reads or
-sets the global decimal context, so a caller's `decimal.localcontext()` cannot change a result, and the note stub's
-private context sets every field, so a changed `decimal.DefaultContext` cannot either.
+places: 6 places for ratios and prices, 2 for money and months, 3 for shares. Three exceptions: a market's unit price
+the founder typed (a segment's price, a sensitivity base or value) is shown exactly, with every place it was typed
+with and at least to the cent ($400.00, $0.0075, $0.00000125, $0.3333333); a break-even price, which is worked, shows
+the fewest places from 2 that give the same figure as 6 (a price under $0.00001 keeps two significant digits, up to 15
+places); and a runway plan's required raise is rounded up to the cent, so the amount shown always covers. Rounding is
+integer arithmetic. No step reads or sets the global decimal context, so a caller's `decimal.localcontext()` cannot
+change a result, and the note stub's private context sets every field, so a changed `decimal.DefaultContext` cannot
+either.
 
 One step is not exact: a note with `stub-rule=fractional_power` (the default) and a stub left over raises its growth
 to a fractional power, which has no exact rational value. It is computed in a private 50-digit decimal context, then

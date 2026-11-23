@@ -28,6 +28,7 @@ from equity_calculator.assumptions_metrics_check import (
     SACKS_SOURCE,
     SKOK_SOURCE,
 )
+from equity_calculator.metrics_check import compute_metrics_check
 from equity_calculator.schemas.equity_metrics_check import (
     MAX_PERIOD_MONTHS,
     MetricsCheckInput,
@@ -654,6 +655,72 @@ def test_a_stated_gross_retention_above_100_is_a_mismatch_not_a_refusal() -> Non
 
     assert _checks(result)[("grr", None)] == (Fraction(104, 100), Fraction(95, 100), "mismatch")
     assert result.verdict == "mismatch"
+
+
+@pytest.mark.parametrize(
+    ("stated", "verdict"),
+    [("100.4", "consistent"), ("100.45", "consistent"), ("100.5", "mismatch"), ("101", "mismatch")],
+)
+def test_a_stated_gross_retention_above_100_within_the_tolerance_is_consistent_as_the_docs_say(
+    stated: str, verdict: str
+) -> None:
+    """(100k - 50)/100k = 99.95%: 100.4% is 0.45 points off and 100.45% 0.5 (the edge), within the half-point tolerance,
+    so each is checked like any figure (the README, the schema comment and the skill say "a mismatch unless within the
+    tolerance"); 100.5% and 101% are past it."""
+    result = metrics_check(
+        period_months=12, starting_recurring="100000", churned_recurring="50", stated_grr_percent=stated
+    )
+
+    (row,) = result.checks
+    assert row.computed is not None and row.computed.exact == Fraction(9995, 10000)
+    assert (row.verdict, result.verdict) == (verdict, verdict)
+
+
+# One-place, two-place and whole zeros, each against a computed 0.4% (or 0.416667x): only a whole "0" (half a point,
+# or half of 1x, either way) is a rounding of it; "0.0" allows 0.05 and "0.00" 0.005, as typed.
+_ZERO_FIELDS: dict[str, dict[str, object]] = {
+    "stated_nrr_percent": {"period_months": 12, "starting_recurring": "100000", "churned_recurring": "99600"},
+    "stated_grr_percent": {"period_months": 12, "starting_recurring": "100000", "churned_recurring": "99600"},
+    "stated_churn_percent": {
+        "period_months": 1,
+        "starting_recurring": "100000",
+        "churned_recurring": "400",
+        "stated_churn_basis": "gross_revenue",
+    },
+    "stated_burn_multiple": {
+        "period_months": 12,
+        "starting_recurring": "100000",
+        "new_recurring": "20000",
+        "net_burn": "100000",
+    },
+    "stated_concentration_percent": {"period_months": 12, "largest_customer_revenue": "4", "period_revenue": "1000"},
+}
+
+
+@pytest.mark.parametrize("field", list(_ZERO_FIELDS))
+@pytest.mark.parametrize(("typed", "within"), [("0", True), ("0.0", False), ("0.00", False), ("-0.0", False)])
+def test_a_stated_zero_is_read_with_the_places_it_is_written_with(field: str, typed: str, within: bool) -> None:
+    result = metrics_check(**_ZERO_FIELDS[field], **{field: typed})
+
+    (row,) = result.checks
+    assert row.stated.exact == 0
+    assert row.within_rounding is within
+    rounding_flags = {"consistent_beyond_rounding", "mismatch_within_rounding"} & set(result.flags)
+    if row.verdict == "consistent":
+        assert rounding_flags == (set() if within else {"consistent_beyond_rounding"})
+    else:
+        assert rounding_flags == ({"mismatch_within_rounding"} if within else set())
+
+
+def test_a_stated_zero_keeps_its_places_when_its_echoed_inputs_are_fed_back() -> None:
+    """The places live in the value itself: "0.0" is echoed as "0.0", and the echo gives the same rounding row."""
+    first = metrics_check(**_ZERO_FIELDS["stated_churn_percent"], stated_churn_percent="0.0")
+    echoed = MetricsCheckInput.model_validate_json(first.inputs.model_dump_json())
+
+    assert first.model_dump(mode="json")["inputs"]["stated_churn_percent"] == "0.0"
+    assert echoed.stated_churn_percent is not None and echoed.stated_churn_percent.as_tuple().exponent == -1
+    assert compute_metrics_check(echoed) == first
+    assert compute_metrics_check(echoed).checks[0].within_rounding is False
 
 
 @pytest.mark.parametrize(

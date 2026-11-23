@@ -29,6 +29,7 @@ from equity_calculator.schemas.equity_common import (
     BoundedDecimal,
     EquityAssumption,
     EquityQuantity,
+    WrittenDecimal,
 )
 from equity_calculator.schemas.equity_deal_check import DEFAULT_TOLERANCE_PERCENT, DEFAULT_TOLERANCE_POINTS, DealVerdict
 from pydantic import BaseModel, Field, model_validator
@@ -162,18 +163,21 @@ class MetricsCheckInput(BaseModel):
     largest_customer_revenue: BoundedDecimal | None = Field(default=None, ge=0)
     period_revenue: BoundedDecimal | None = Field(default=None, gt=0)
     stated_arr: BoundedDecimal | None = Field(default=None, gt=0)
-    stated_nrr_percent: BoundedDecimal | None = Field(default=None, ge=0)
-    # Above 100% is accepted: gross retention leaves expansion out, so it comes back a mismatch, never a refusal.
-    stated_grr_percent: BoundedDecimal | None = Field(default=None, ge=0)
+    # The stated percent, months and multiple fields are ``WrittenDecimal``: a zero keeps the places it is written with
+    # ("0.0" is one place), which the rounding test reads.
+    stated_nrr_percent: WrittenDecimal | None = Field(default=None, ge=0)
+    # Above 100% is accepted, never refused: gross retention leaves expansion out, so it is checked like any figure,
+    # and comes back a mismatch unless it is within the tolerance of the computed figure.
+    stated_grr_percent: WrittenDecimal | None = Field(default=None, ge=0)
     # Below 0 only as net revenue churn (expansion above the revenue lost); ``_churn_rules`` refuses it otherwise.
-    stated_churn_percent: BoundedDecimal | None = Field(default=None, le=WHOLE_PERCENT)
+    stated_churn_percent: WrittenDecimal | None = Field(default=None, le=WHOLE_PERCENT)
     stated_churn_basis: StatedChurnBasis = "unlabelled"
     stated_cac: BoundedDecimal | None = Field(default=None, gt=0)
-    stated_cac_payback_months: BoundedDecimal | None = Field(default=None, gt=0)
+    stated_cac_payback_months: WrittenDecimal | None = Field(default=None, gt=0)
     # 0x is accepted (a company at break-even, which the source says the multiple approaches); with no multiple to
     # work it is not checked.
-    stated_burn_multiple: BoundedDecimal | None = Field(default=None, ge=0)
-    stated_concentration_percent: BoundedDecimal | None = Field(default=None, ge=0, le=WHOLE_PERCENT)
+    stated_burn_multiple: WrittenDecimal | None = Field(default=None, ge=0)
+    stated_concentration_percent: WrittenDecimal | None = Field(default=None, ge=0, le=WHOLE_PERCENT)
     tolerance_points: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_POINTS, ge=0, lt=WHOLE_PERCENT)
     tolerance_percent: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_PERCENT, ge=0, lt=WHOLE_PERCENT)
     customer_segment: CustomerSegment | None = None

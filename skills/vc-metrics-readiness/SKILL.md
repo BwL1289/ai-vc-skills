@@ -141,11 +141,12 @@ parts]`.
      multiple on new ARR when `stated_burn_multiple_uses_new_not_net_arr` is beside it, and Needs a source with
      `[net burn and net new ARR for a period where both are above zero]` otherwise.
    - Each percent, months or multiple row also says whether the stated figure is the computed one rounded to its own
-     places ("rounds to the deck's"). The verdict stays the tool's; `consistent_beyond_rounding` and
-     `mismatch_within_rounding` name a row where the two disagree, and go to the answer as the Flags table says.
+     places ("rounds to the deck's"); a stated zero keeps its places, so a document's `0.0%` is passed as the text
+     "0.0". The verdict stays the tool's; `consistent_beyond_rounding` and `mismatch_within_rounding` name a row where
+     the two disagree, and go to the answer as the Flags table says.
    - A net revenue churn below zero (expansion above the revenue lost) is passed as stated, with
-     `stated_churn_basis` `net_revenue` or left unlabelled; a gross retention above 100% is passed too and comes back
-     a mismatch.
+     `stated_churn_basis` `net_revenue` or left unlabelled; a gross retention above 100% is passed too, and comes back
+     a mismatch unless it is within the tolerance of the computed figure.
    - A stated figure whose parts the founder did not give is left out of the call, because the tool refuses the whole
      call for it: mark it Needs a source with a bracketed ask for the missing parts, and make the call with the rest.
      A refusal that comes anyway is relayed with the parts it names.
@@ -306,7 +307,7 @@ ready for, never an error.
 | `run_rate_includes_non_recurring`           | The month has one-time or usage revenue, so run-rate and ARR differ                                                                                          | Show both, each named                                                         |
 | `stated_nrr_includes_new`                   | The stated net retention agrees with ending over starting revenue, which counts customers who were not there at the start                                    | Restate net retention on the starting customers                               |
 | `expansion_hides_churn`                     | Net revenue churn is zero or below while gross revenue churn is above zero                                                                                   | Show gross revenue churn beside net                                           |
-| `churn_basis_unlabelled`                    | The stated churn names no basis; the tool checked it against each                                                                                            | Name the basis on the slide                                                   |
+| `churn_basis_unlabelled`                    | The stated churn names no basis; the tool checked it against each (a churn below zero only as net revenue churn)                                             | Name the basis on the slide                                                   |
 | `blended_cac_only`                          | No paid-channel split was given                                                                                                                              | Be ready with paid CAC                                                        |
 | `payback_not_margin_adjusted`               | No gross margin was given, so payback is on revenue only                                                                                                     | Give gross margin; a partner works payback on margin                          |
 | `stated_payback_not_margin_adjusted`        | The stated payback agrees with the revenue payback, not the margin one                                                                                       | Restate it on gross margin                                                    |

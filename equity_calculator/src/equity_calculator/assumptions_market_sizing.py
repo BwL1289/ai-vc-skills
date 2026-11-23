@@ -160,7 +160,7 @@ def _check_rows(inputs: MarketSizingInput, checked: bool) -> list[EquityAssumpti
         rows.append(
             _assumption(
                 "tolerance",
-                f"{inputs.tolerance_percent}% of the computed figure",
+                f"{inputs.tolerance_percent:f}% of the computed figure",
                 "A stated TAM, SAM or SOM within this share of the computed one is consistent, the edge included.",
                 f"{UNVERIFIED} (deal_check's default is {DEFAULT_TOLERANCE_PERCENT}%)",
             )

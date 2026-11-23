@@ -32,7 +32,7 @@ from equity_calculator.assumptions_market_sizing import (
     TOP_DOWN_QUOTE,
     YC_BOTTOM_UP_QUOTE,
 )
-from equity_calculator.exact import price_quantity
+from equity_calculator.exact import given_price, price_quantity
 from equity_calculator.layout import sheet_for
 from equity_calculator.market_sizing import compute_market_sizing
 from equity_calculator.scenarios import compute
@@ -681,6 +681,58 @@ def test_a_unit_price_keeps_cents_and_the_places_it_needs(value: Fraction, round
     assert (shown.unit, shown.exact, f"{shown.rounded:f}") == ("price", value, rounded)
 
 
+@pytest.mark.parametrize(
+    ("typed", "shown"),
+    [
+        ("400", "400.00"),
+        ("12.5", "12.50"),
+        ("1.10", "1.10"),
+        ("0.0075000", "0.0075"),
+        ("0.3333333", "0.3333333"),
+        ("0.00000125", "0.00000125"),
+        ("0.00001667", "0.00001667"),
+        ("1E-15", "0.000000000000001"),
+    ],
+)
+def test_a_typed_price_is_shown_exactly_with_every_place_it_was_typed_with(typed: str, shown: str) -> None:
+    """A price the founder typed is never rounded: the fewest places from 2 that show it exactly."""
+    price = given_price(Decimal(typed))
+
+    assert (price.unit, price.exact, f"{price.rounded:f}") == ("price", Fraction(Decimal(typed)), shown)
+
+
+def test_typed_prices_below_a_ten_thousandth_print_as_typed_and_a_break_even_price_stays_rounded() -> None:
+    """$0.00000125 with cases $0.00000115 and $0.00000135: each prints as typed (the given line, the base, each case and
+    its label), so two prices never share one label. SOM 150 · 0.00000125 · 12 · 4e9 = $9M; the price at a $10M SOM,
+    0.00000125 · 10/9, is worked and keeps two significant digits ($0.0000014)."""
+    result = market_sizing(
+        segments=[
+            {
+                "customers": "2000",
+                "price": "0.00000125",
+                "price_period_months": 1,
+                "units_per_customer": "4000000000",
+                "obtainable_customers": "150",
+            }
+        ],
+        som_target="10000000",
+        sensitivity=[{"field": "price", "segment": 1, "values": ["0.00000115", "0.00000135"]}],
+    )
+    (row,) = result.sensitivity
+    report = render_sheet(sheet_for(result))
+
+    assert result.totals.som is not None and result.totals.som.exact == 9_000_000
+    assert row.base_value.rounded == Decimal("0.00000125")
+    assert [case.value.rounded for case in row.cases] == [Decimal("0.00000115"), Decimal("0.00000135")]
+    assert re.search(r"Segment 1: price per unit +\$0\.00000125  given", report)
+    assert re.search(r"Sensitivity 1: segment 1 price, base +\$0\.00000125  given", report)
+    assert "Sensitivity 1 at $0.00000115: SOM " in report and "Sensitivity 1 at $0.00000135: SOM " in report
+    assert row.at_som_target is not None and row.at_som_target.value is not None
+    assert row.at_som_target.value.exact == Fraction(125, 10**8) * Fraction(10, 9)
+    assert row.at_som_target.value.rounded == Decimal("0.0000014")
+    assert "$0.0000012 " not in report
+
+
 def test_a_workbook_price_cell_shows_every_place_it_was_rounded_to() -> None:
     from equity_calculator.workbook import build_workbook
 
@@ -729,6 +781,28 @@ def test_fractional_customer_lines_add_up_to_the_total_line() -> None:
     assert not isinstance(total, str) and total.rounded == Decimal("30.01")
 
 
+_SPLIT_HOW = "given, shown rounded so the segments add up to the total"
+
+
+def test_a_customer_line_shown_rounded_for_the_total_says_so_and_a_typed_count_says_given() -> None:
+    """0.335 in each of two segments prints 0.34 and 0.33 (they add up to 0.67), so neither line is the typed count
+    and each says why; 10.5 and 1,000 print as typed and say given."""
+    split = {
+        line.key: line for line in sheet_for(market_sizing(segments=[{"customers": "0.335", "price": "100"}] * 2)).lines
+    }
+    typed = {
+        line.key: line
+        for line in sheet_for(
+            market_sizing(segments=[{"customers": "10.5", "price": "100"}, {"customers": "1000", "price": "100"}])
+        ).lines
+    }
+
+    shown = [split[f"segment_{number}_customers"].values[0] for number in (1, 2)]
+    assert [part.rounded for part in shown if not isinstance(part, str)] == [Decimal("0.34"), Decimal("0.33")]
+    assert [split[f"segment_{number}_customers"].how for number in (1, 2)] == [_SPLIT_HOW, _SPLIT_HOW]
+    assert [typed[f"segment_{number}_customers"].how for number in (1, 2)] == ["given", "given"]
+
+
 def test_a_share_above_zero_that_rounds_to_zero_says_so() -> None:
     result = market_sizing(
         segments=[{"customers": "40", "price": "100", "price_period_months": 1}], top_down=[{"amount": "840000000000"}]
@@ -751,6 +825,12 @@ def test_the_som_rule_says_one_year_and_the_tolerance_source_names_the_default()
     assert one["som_rule"].setting.endswith("in 1 year") and five["som_rule"].setting.endswith("in 5 years")
     assert one["tolerance"].source == "unverified (deal_check's default is 2%)"
     assert {row.key: row.setting for row in changed}["tolerance"] == "5% of the computed figure"
+
+
+def test_a_tolerance_typed_in_exponent_form_prints_as_a_plain_number() -> None:
+    rows = {row.key: row for row in market_sizing(**_with(stated_tam="1", tolerance_percent="2e1")).assumptions}
+
+    assert rows["tolerance"].setting == "20% of the computed figure"
 
 
 def test_does_not_move_is_reported_before_met_without_it() -> None:

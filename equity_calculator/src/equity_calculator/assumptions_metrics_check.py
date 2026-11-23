@@ -138,8 +138,8 @@ def _revenue_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[Equit
                 f"{A16Z_MORE_METRICS_SOURCE}, item 2: {_ARR_QUOTE}",
             )
         )
+    own = [name for name, field in _COHORT_PARTS if getattr(inputs, field) is not None]
     if "grr" in used:
-        own = [name for name, field in _COHORT_PARTS if getattr(inputs, field) is not None]
         totals = [name for name, field in _COHORT_PARTS if getattr(inputs, field) is None]
         if not own:
             cohort = "the period's totals"
@@ -168,10 +168,16 @@ def _revenue_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[Equit
             ),
         ]
     if used & {"gross_churn", "logo_churn"}:
+        # Primed as the retention rule is, so the printed formula gives the printed churn.
+        revenue = (
+            "gross = (C' + X')/S; net = (C' + X' - E')/S (primed: the starting customers' own)"
+            if own
+            else "gross = (C + X)/S; net = (C + X - E)/S"
+        )
         rows.append(
             _assumption(
                 "churn_rule",
-                "logo = customers lost / at the start; gross = (C + X)/S; net = (C + X - E)/S",
+                f"logo = customers lost / at the start; {revenue}",
                 "Logo churn counts customers, revenue churn recurring revenue; net revenue churn subtracts expansion "
                 f"and can be below zero. The source states each per month; over a longer period it is ours, "
                 f"{UNVERIFIED}.",
