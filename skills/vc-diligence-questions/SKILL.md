@@ -29,6 +29,10 @@ score and no readiness percentage, and never adds a fact, a figure or a document
   - The story and the phrases to drop: the vc-positioning skill.
   - "Review my term sheet": the vc-term-sheet-review skill, clause by clause. This skill lists the term sheet as a
     data-room document and takes its pool for the calculator, but never reviews or judges its clauses.
+  - Metric definitions, and whether ARR, retention, churn, CAC payback and burn multiple match their parts: the
+    vc-metrics-readiness skill (preview).
+  - The sizing model behind the market size, built bottom-up: the vc-market-sizing skill (preview).
+  - The memo the champion writes for the partnership: the vc-investor-memo skill (preview).
 
 ## Inputs
 
@@ -92,9 +96,10 @@ cell it answers, so the bank stays the one place a question is worded.
 
 ## Steps
 
-Without a subagent tool, run Stage A of the adversarial review right after step 1, before step 2, as "How to run the
-lenses" says, so the lenses do not anchor on the numbers, the bank or the checklist; step 3 then starts at the quote
-check.
+With a subagent tool (in Claude Code, the Agent or Task tool), the lenses and the refute pass run as subagents,
+however short the material, as "How to run the lenses" says. Without a subagent tool, run Stage A of the adversarial
+review right after step 1, before step 2, as "How to run the lenses" says, so the lenses do not anchor on the numbers,
+the bank or the checklist; step 3 then starts at the quote check.
 
 1. **Intake.** Ask for the missing inputs in one message. Label the material as it arrives.
 2. **The cap table and the ask go to the calculator.** Follow the vc-deal-math skill's steps; use only the tools'
@@ -104,6 +109,10 @@ check.
      SAFE and note as `instruments`, and each ownership figure a document states: the investors' percent as
      `stated_investor_percent`, the founders' percent after the round as `stated_holder_percent` with the founders'
      shares today as `holder_shares`. One call per document's version of the ask. Never divide the shares yourself.
+   - A valuation with no label: call twice, once as `pre_money`, once as `post_money`, as vc-deal-math step 4 does.
+     Only a check that is a mismatch under every reading is the calculator's mismatch. A mismatch under one reading
+     only is not: it becomes one question, to label the valuation pre- or post-money, quoting both readings in the
+     tool's values.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
      which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask the
@@ -119,20 +128,28 @@ check.
      SAFE or note raise, goes to `equity_runway_plan`, whose one argument is `inputs`, with the plan case inside the
      `cases` list. With no raise:
      `{"inputs": {"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "stated_runway_months": "..."}}`.
-     On a SAFE or note raise, the stated runway is the raise option's own:
-     `{"inputs": {"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "raises": [{"amount": "...", "stated_runway_months": "..."}]}}`.
+     On a SAFE or note raise, the stated runway and the use-of-funds lines are the raise option's own:
+     `{"inputs": {"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "raises": [{"amount": "...", "stated_runway_months": "...", "use_of_funds": [{"percent": "..."}]}]}}`.
+     With no cash on hand or no burn given, ask for them; never assume one, and make no runway call until they are in.
    - A tool's mismatch is a diligence question a partner will ask first, so it goes to the top of the ranked list.
-   - Read every code in the tool's `flags` too, and relay each in the tool's words: beside the mismatch it explains,
-     or, with no mismatch, as a kept question at slows it, not refuted. A flag that rests on a benchmark band quotes
-     the band only as the tool's assumption row gives it, with its `unverified` source, never as a bar to clear.
+   - Read every code in the tool's `flags` too. Over MCP a flag comes back as a bare code: relay the code with its
+     meaning from this skill's flag tables (section "Flags"), beside the mismatch it explains, or, with no mismatch,
+     as a kept question at slows it, not refuted. A flag that rests on a benchmark band quotes the band only as the
+     tool's assumption row gives it, with the source that row gives, never as a bar to clear.
    - What no tool checks: whether the cap table's rows add up to its total, and any percent of the company the
      founder states for today. Quote them as stated, mark them "not checked: no tool adds up a cap table", and never
-     add, subtract or divide shares yourself.
+     add, subtract or divide shares yourself. Never say what a stated percent is made of, what basis it uses or how a
+     document reached it ("the 75% is founders' shares over the fully diluted total", "the 60% counts neither"): that
+     is division done in your head. The draft for such a line is a bracketed ask,
+     `[how the deck's figure was worked out, and on what basis]`.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
      its `rounded` value two places to the right, keeping every digit (0.536170 is 53.6170%, eval AC's founders after
      the round), which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
-   - Growth rates, retention, market sizes and unit economics have no tool here: quote them as stated, check only that
-     each has a definition, a period and a record behind it, and never compute, convert or round one.
+   - This skill computes no metric. ARR, retention, churn, CAC payback and burn multiple go to the
+     vc-metrics-readiness skill, which checks them against their parts with the calculator, and a market size to the
+     vc-market-sizing skill; here they are quoted as stated. Growth rates and LTV are quoted with "not checked: no
+     tool computes this". For each, check only that it has a definition, a period and a record behind it, and never
+     compute, convert or round one.
 3. **Run the adversarial review** (next section): attack, check the quotes, refute, rank.
 4. **Read the bank and the checklist,** only now. Word each kept question with a bank row's Question, or a row of
    this skill's own question table, when one asks the same thing, and cite its ID; otherwise keep the lens's
@@ -140,9 +157,11 @@ check.
 5. **Draft an answer** to each kept question (the section "Draft answers").
 6. **Check before answering.** Every kept question quotes a line that is in the founder's material word for word;
    every draft answer uses only facts from the material or a tool result and marks each gap as a bracketed ask; every
-   figure is quoted as stated or comes from a tool; every checklist status rests on the document list or a quoted
-   line; no document is described that the founder did not name; no sentence speaks as an investor, imitates a named
-   person or firm, or gives a score.
+   figure is quoted as stated or comes from a tool; no sentence says what a quoted percent is built from or how a
+   document's figure was reached; no draft says a fix was made or a document exists that the founder did not name;
+   every bracketed ask names a document or a fact and nothing more (no length or format the founder did not give);
+   every checklist status rests on the document list or a quoted line; no document is described that the founder did
+   not name; no sentence speaks as an investor, imitates a named person or firm, or gives a score.
 
 ## Adversarial review
 
@@ -164,19 +183,28 @@ same brief, with its own name and test filled in:
   that would settle it; and how much an unsettled answer moves the decision (stops the process, slows it, or minor).
 - A question you cannot tie to a line the founder wrote is not an attack. List it apart as a gap, worded as a
   question to the founder.
-- Return "nothing found" rather than a weak question.
+- Do not judge whether another line of the material answers a question: raise it anyway, however short the material;
+  the refute pass decides. Return "nothing found" only when no line of the material gives this lens a question worth
+  the founder's time.
 
 **How to run the lenses.** When the agent has a subagent tool (in Claude Code, the Agent or Task tool), run the six
-lenses as parallel subagents. Give each one only the founder's material, the document list and its lens brief: not
+lenses as parallel subagents, however short the material. Give each one only the founder's material, the document
+list and its lens brief: not
 this skill's other sections, not the bank, not the checklist, not the calculator's output, not another lens's output.
 Without a subagent tool, run Stage A right after step 1, before step 2, without reading the bank or the checklist: run
 the lenses one after another, write each lens's questions down in full before reading the next lens's brief, and never
 revise an earlier lens's list after a later one. Lenses run this way are less independent than subagents, and the
 same agent then judges them in Stage B, so the answer says so.
 
-**The calculator's mismatches** from step 2 do not go through the lenses. Each mismatch row is added to the kept
-questions as stops the process, in the Financials and cap table area, quoting the figure as the founder's document
-states it, with the tool's value as the reason. It is not refuted: the calculator computed it.
+**The calculator's mismatches** from step 2 do not go through the lenses. Each mismatch row heads the ranked list,
+ahead of the tiers, in the Financials and cap table area, quoting the figure as the founder's document states it, with
+the tool's value and difference as the reason. It is not refuted: the calculator computed it. It carries no tier: how
+much a gap hurts depends on its size and on the term, which the founder weighs. A runway mismatch with the claim below
+the computed runway understates it: the founder may keep it or state the computed runway, and it goes in the minor
+tier at most. A question to label a valuation (a mismatch under one reading only) is not a calculator mismatch: it
+takes a tier like any kept question. A kept question about a figure the calculator found consistent is minor at
+most: its draft quotes the tool's value and the assumption row it rests on, word for word, and brackets the
+confirmation from the founder's document; it never states the tool's assumption as what a document says.
 
 ### Check the quotes
 
@@ -186,10 +214,10 @@ the same line, merge them and keep both area names. Gaps from every lens go to t
 
 ### Stage B: refute
 
-Each question gets its own refute pass. With a subagent tool, run one subagent per question, given the founder's
-material, the document list, that one question, and everything from "The refute brief:" to the end of this stage, and
-nothing else; without one, take the questions one at a time and decide each against the same brief before reading the
-next.
+Each question gets its own refute pass. With a subagent tool, launch one subagent per question in a single message;
+never put two questions in one subagent. Give each the founder's material, the document list, that one question, and
+everything from "The refute brief:" to the end of this stage, and nothing else. Without one, take the questions one at
+a time and decide each against the same brief before reading the next.
 
 The refute brief:
 
@@ -219,10 +247,11 @@ kept, and neither does one that is the questioned line itself.
 ### Rank what survives
 
 Order the kept questions in three tiers, by how much each answer moves the fund's decision: **stops the process** (left
-unanswered, it is likely to end diligence: a calculator mismatch, work the company may not own, a dispute, figures
-that disagree), **slows it** (a document a partner will ask for that does not exist yet, a metric with no definition),
-**minor**. The calculator's mismatches lead the first tier. Within a tier, a question raised by more than one lens
-comes first. The tier is a judgment, not a probability: give no percentages and no score.
+unanswered, it is likely to end diligence: work the company may not own, a dispute, figures that disagree), **slows
+it** (a document a partner will ask for that does not exist yet, a metric with no definition), **minor**. The
+calculator's mismatches head the list, ahead of the tiers, with no tier (an understated runway excepted, as above).
+Within a tier, a question raised by more than one lens comes first. The tier is a judgment, not a probability: give no
+percentages and no score.
 
 ## The area prep list
 
@@ -244,7 +273,9 @@ Build it from [`references/data-room.md`](references/data-room.md), by area, kep
 - **Pre-seed:** the rows whose From is pre-seed.
 - **Seed:** the core set, the rows whose From is pre-seed (TEAM-D1, PROD-D1, FIN-D1 to FIN-D3, LEG-D1 to LEG-D4),
   plus a seed row only when a document on the founder's list shows what it needs or a kept question's draft answer
-  names it. Name every other seed row once, in one line, as "if asked", never as Missing.
+  names it because that row's "What it shows" is what settles the question. Name every other seed row once, in one
+  line, as "if asked", never as Missing, each by its ID and short name (`MET-D3 an export of active accounts`), so a
+  row left out can be seen.
 - **Series A or later:** the rows whose From stage is the founder's stage or earlier.
 
 Mark each listed row with one status; when a row earns more than one, take the first in this order:
@@ -268,8 +299,13 @@ For each kept question, in ranked order:
 - **The question,** its area, the bank or own-table ID if one was used, and the founder's line it came from, quoted.
 - **A draft answer,** at most four sentences, the point first, built only from the founder's material and tool
   results, each fact traceable to a label. Never stronger than the facts: no number, customer, document, signature,
-  date or plan that is not in the material. Each gap is a bracketed ask. Where the founder does not know yet, the
-  draft says so plainly and says when they will; saying "we don't know yet" is better than a guess.
+  date or plan that is not in the material. Each gap is a bracketed ask that names the document or fact and nothing
+  more. Where the founder does not know yet, the draft says so plainly and says when they will; saying "we don't know
+  yet" is better than a guess.
+- **A calculator mismatch's draft** gives the tool's figure as printed, then `[the corrected deck line]` and the
+  document that records the figure as a bracketed ask: `[the pro forma cap table after the round, from your lawyer]`
+  for ownership, `[the monthly cash plan, with and without the raise]` for runway. It never says a line was corrected
+  or that a document exists unless the founder said so.
 - **What to put in the data room** to settle it: the checklist row's ID, or "nothing to add".
 
 A legal question gets a draft answer that states the facts the founder gave and the question to put to their lawyer;
@@ -280,21 +316,56 @@ it never says whether something is legally sufficient.
 1. **The three that move the decision most,** one line each: the top of the ranked list.
 2. **Ranked questions,** as a table: Rank, Tier, Area, The founder's line (quoted), The question, What settles it.
    Then **Dropped,** one line each: the question, its area, and why it fell (answered, naming the line or document to
-   point to, which also goes to the have-it-ready list; or not grounded). When the lenses ran one after another in
-   one agent, say they are less independent than separate subagents.
+   point to, which also goes to the have-it-ready list; or not grounded). Say how the lenses and the refute pass ran
+   (as subagents, one refute subagent per question); when the lenses ran one after another in one agent, say they are
+   less independent than separate subagents.
 3. **Draft answers,** question by question, as above.
 4. **Area prep list,** area by area, with bank IDs and this skill's own LEGAL and CAP IDs.
 5. **Data-room checklist,** by area: Row, What it shows, Status (Contradicted, Missing or Ready), the founder's
    document or the bracketed ask.
 6. **Numbers and cap table:** each `equity_deal_check` or `equity_runway_plan` verdict with each mismatch row in the
-   tool's values; each flag, one line, in the tool's words; each `equity_round` result as its price per share and
-   ownership rows, as printed, with no verdict, since that tool gives none; the cap table's own sums and today's
-   percents with "not checked: no tool adds up a cap table"; every other figure quoted as stated.
+   tool's values; each flag, one line, its code with its meaning from the flag tables; each `equity_round` result as
+   its price per share and ownership rows, as printed, with no verdict, since that tool gives none; the cap table's
+   own sums and today's percents with "not checked: no tool adds up a cap table"; every other figure quoted as stated.
 7. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
 8. **Sources:** the frameworks used, with links, and which points rest on this skill's own unverified judgment.
-9. **Close:** this is not legal, tax or investment advice; a lawyer should review the legal rows and every document
-   before it goes into the data room; customer contracts and customer names may need the customer's consent before
-   they are shared; the founder decides what to share and when.
+9. **Close,** word for word: "This is not legal, tax or investment advice. Have a lawyer review the legal rows and
+   every document before it goes into the data room. Customer contracts and customer names may need the customer's
+   consent before they are shared. You decide what to share and when."
+
+## Flags
+
+A tool's `flags` holds codes only; over MCP no sentence comes with them (the command line prints one beside each).
+These tables are what each code means for the founder. A flag is a question to prepare for, never an error, and
+never changes a verdict. `equity_round` returns no flags.
+
+| `equity_deal_check` flag              | What it means for the founder                                                                               |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise and the percent: label it              |
+| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, so the effective pre-money and the price are below the headline |
+| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less than raise / post-money                      |
+| `pool_already_large_enough`           | The unissued pool already meets the target, so no new pool shares are needed                                |
+| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold  |
+| `discount_beat_cap`                   | A discount gave a lower price than the cap, so a cap-only conversion would be wrong                         |
+| `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares                        |
+| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on them                                 |
+| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn: say which one a runway claim uses               |
+| `runway_below_band`                   | Planned runway is under the tool's runway benchmark (a common benchmark, not a rule)                        |
+| `dilution_above_band`                 | The investors get more than the tool's dilution benchmark in one round (a common benchmark, not a rule)    |
+
+| `equity_runway_plan` flag          | What it means for the founder                                                                      |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `cash_never_runs_out`              | Revenue covers the spend before the cash runs out, so that runway has no end and is not checked    |
+| `cash_out_before_raise_lands`      | The cash goes below the floor before a later raise lands                                           |
+| `milestone_short_on_plan`          | A raise does not reach a milestone, even on the plan                                               |
+| `downside_short_where_plan_covers` | A raise reaches a milestone on the plan but not on the downside                                    |
+| `covered_without_raise`            | The cash already reaches a milestone with no raise                                                 |
+| `start_raising_date_passed`        | With the months to raise given, the date to start raising is already at or past today              |
+| `no_time_to_raise_given`           | Milestones were checked at their own month, with no time left to raise the next round              |
+| `runway_below_band`                | A raise lasts under the tool's runway benchmark on the plan (a common benchmark, not a rule)       |
+
+With no milestone, no landing month and no months to raise in the call, as in step 2, only `cash_never_runs_out` and
+`runway_below_band` can come back.
 
 ## Sources
 

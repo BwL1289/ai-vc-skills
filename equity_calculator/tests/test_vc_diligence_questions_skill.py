@@ -10,9 +10,11 @@ bank row's Diligence document exactly once, and its own legal and cap-table ques
 partner-meeting's two stages, with the refute pass free to point at a document on the founder's list. The cap table
 goes to ``equity_deal_check`` and runway with no raise or on a SAFE or note raise to ``equity_runway_plan``, in the
 input shape the skill writes out whole; what no tool checks is quoted as not checked. The data room at seed is the
-core set, the pre-seed rows, plus the seed rows a document or a kept question points to. Each eval in
+core set, the pre-seed rows, plus the seed rows a document or a kept question points to. The flags come back as bare
+codes over MCP, so the skill carries a meaning for every code each tool can return. Each eval in
 evals/vc-diligence-questions/ has a prompt, an expected tool call and an expected answer; each eval with a call
-carries a valid call for the tool it names and an excerpt that is lines of the report that call prints.
+carries a valid call for the tool it names and an excerpt that is lines of the report that call prints. An eval run in
+a live session records an excerpt of that run under "Recorded answer"; the others say they have not been run.
 """
 
 from __future__ import annotations
@@ -20,12 +22,14 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import get_args
 
 import pytest
 from equity_calculator.__main__ import _INPUT_MODELS
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
-from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput
+from equity_calculator.schemas.equity_deal_check import DealFlag
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag, RunwayPlanInput
 from equity_calculator.text import render_sheet
 from tests.test_vc_claims_check_skill import _READ_SOURCES
 
@@ -41,7 +45,7 @@ _PARTNER_MEETING = (_ROOT / "skills" / "vc-partner-meeting" / "SKILL.md").read_t
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-diligence-questions").glob("*.md"))
 _EVAL_COUNT = 5
-_EVAL_LETTERS = ("ac", "ad", "ae", "af", "al")
+_EVAL_LETTERS = ("ac", "ad", "ae", "af", "bs")
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_deal_check` call."
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
@@ -60,6 +64,9 @@ _HANDOFF_SKILLS = (
     "vc-positioning",
     "equity-calculator",
     "vc-term-sheet-review",
+    "vc-metrics-readiness",
+    "vc-market-sizing",
+    "vc-investor-memo",
 )
 # Built in a parallel lane and merged before this skill: named in "When to use it" now; its folder check joins
 # _HANDOFF_SKILLS once the branch is rebased on a main that has the folder.
@@ -86,11 +93,22 @@ _TIERS = ("stops the process", "slows it", "minor")
 _STATUSES = ("Contradicted", "Missing", "Ready")
 _REFUTE_VERDICTS = ("Dropped, answered:", "Dropped, not grounded:", "Kept:")
 _CAP_UNCHECKED = "not checked: no tool adds up a cap table"
+_NOT_COMPUTED = "not checked: no tool computes this"
 _NEXT_ROUND = "for the next round"
 _IF_ASKED = "if asked"
 # Strings an eval's answer quotes that are the skill's own marks or its source's words, not the founder's lines.
 _SKILL_MARKS = {_CAP_UNCHECKED, _NEXT_ROUND, _IF_ASKED, _STAGE_RULE}
 _FD_ASK = "`[fully diluted shares before the round, SAFEs and notes left out]`"
+# The attack brief's fixed sentence and the refute pass's one-question-per-subagent rule, shared across the pack.
+_RAISE_ANYWAY = (
+    "Do not judge whether another line of the material answers a question: raise it anyway, however short the "
+    "material; the refute pass decides."
+)
+_ONE_PER_SUBAGENT = "launch one subagent per question in a single message; never put two questions in one subagent"
+# Evals run in a live session: each records an excerpt of the run, blockquoted, under "## Recorded answer".
+_RECORDED = ("ac",)
+_NOT_RUN_LIVE = "has not been run in a live session"
+_RECORDED_HEADING = "\n## Recorded answer\n"
 _FLAG_CODES = ("conversions_bought_by_pre_money", "pool_in_pre_money_lowers_price")
 _CORE_STAGE = "pre-seed"
 # The step the no-subagent note sends the agent back to, and the title of the review step it must be.
@@ -268,6 +286,7 @@ def test_the_runway_inputs_the_skill_writes_out_are_ones_the_runway_tool_takes_w
     no_raise, on_a_raise = inputs
     assert "raises" not in no_raise and "stated_runway_months" in no_raise
     assert "stated_runway_months" not in on_a_raise and "stated_runway_months" in on_a_raise["raises"][0]
+    assert "use_of_funds" not in on_a_raise and "use_of_funds" in on_a_raise["raises"][0]
     for found in inputs:
         assert set(found) <= set(RunwayPlanInput.model_fields), set(found) - set(RunwayPlanInput.model_fields)
         compute(RunwayPlanInput.model_validate(found))
@@ -371,6 +390,10 @@ def test_the_attack_stage_runs_six_area_lenses_before_the_numbers_and_the_bank()
     assert "not the bank, not the checklist, not the calculator's output" in attack
     assert "less independent than subagents" in attack
     assert "never by a person or firm" in attack
+    assert _RAISE_ANYWAY in attack and "rather than a weak question" not in attack
+    assert "run the six lenses as parallel subagents, however short the material" in attack
+    subagents_first = "With a subagent tool (in Claude Code, the Agent or Task tool), the lenses and the refute pass run"
+    assert subagents_first in steps and steps.index(subagents_first) < steps.index(note)
 
 
 def test_the_refute_stage_judges_with_only_the_material_and_the_document_list() -> None:
@@ -379,7 +402,7 @@ def test_the_refute_stage_judges_with_only_the_material_and_the_document_list() 
 
     for verdict in _REFUTE_VERDICTS:
         assert verdict in refute, verdict
-    assert "one subagent per question" in refute
+    assert _ONE_PER_SUBAGENT in refute
     assert "you argue neither side" in refute
     assert "When you cannot decide, return Kept" in refute
     assert "Bring in no outside fact" in refute and "do no arithmetic" in refute
@@ -396,10 +419,18 @@ def test_the_ranking_has_three_tiers_and_no_score() -> None:
 
     for tier in _TIERS:
         assert f"**{tier}**" in rank, tier
-    assert "The calculator's mismatches lead the first tier" in rank
+    attack = _unwrapped(_section("### Stage A: attack"))
+    assert "The calculator's mismatches head the list, ahead of the tiers, with no tier" in rank
+    assert "a calculator mismatch," not in rank
     assert "give no percentages and no score" in rank
-    assert rank.index("lead the first tier") < rank.index("raised by more than one lens")
-    assert "It is not refuted: the calculator computed it" in _unwrapped(_section("### Stage A: attack"))
+    assert rank.index("head the list") < rank.index("raised by more than one lens")
+    assert "It is not refuted: the calculator computed it" in attack
+    assert "heads the ranked list, ahead of the tiers" in attack and "It carries no tier" in attack
+    # The one carve-out: a runway claim below the computed runway understates it.
+    assert "A runway mismatch with the claim below the computed runway understates it" in attack
+    assert "it goes in the minor tier at most" in attack
+    assert "A kept question about a figure the calculator found consistent is minor at most" in attack
+    assert "it never states the tool's assumption as what a document says" in attack
     for score in ("/100", "out of 100", "readiness score"):
         assert score not in outside_limits, score
 
@@ -421,14 +452,42 @@ def test_the_cap_table_goes_to_the_calculator_and_its_sums_are_quoted_unchecked(
     assert "is not passed as `investment`" in steps
     assert "Runway with no raise, or on a SAFE or note raise, goes to `equity_runway_plan`" in steps
     assert "One call per document's version of the ask" in steps
-    assert "Read every code in the tool's `flags` too, and relay each in the tool's words" in steps
-    assert "with its `unverified` source, never as a bar" in steps
-    assert "each flag, one line, in the tool's words" in answering
+    assert "Over MCP a flag comes back as a bare code: relay the code with its meaning from this skill's flag" in steps
+    assert "in the tool's words" not in _TEXT
+    assert "with the source that row gives, never as a bar" in steps and "its `unverified` source" not in steps
+    assert "each flag, one line, its code with its meaning from the flag tables" in answering
+    assert "Never say what a stated percent is made of, what basis it uses or how a document reached it" in steps
+    assert "`[how the deck's figure was worked out, and on what basis]`" in steps
+    assert "Only a check that is a mismatch under every reading is the calculator's mismatch" in steps
+    assert "it becomes one question, to label the valuation pre- or post-money" in steps
+    assert "With no cash on hand or no burn given, ask for them; never assume one" in steps
     round_rule = "each `equity_round` result as its price per share and ownership rows, as printed, with no verdict"
     assert round_rule in answering
     assert "`equity_round` verdict" not in answering
     for unchecked in ("no tool computes runway without a raise", "no tool computes this for a SAFE or note raise"):
         assert unchecked not in _TEXT, unchecked
+
+
+def test_metrics_and_market_sizes_go_to_their_skills_and_only_growth_and_ltv_stay_unchecked() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "ARR, retention, churn, CAC payback and burn multiple go to the vc-metrics-readiness skill" in steps
+    assert "a market size to the vc-market-sizing skill" in steps
+    assert f'Growth rates and LTV are quoted with "{_NOT_COMPUTED}"' in steps
+    assert "market sizes and unit economics have no tool" not in steps
+
+
+def test_every_flag_code_each_tool_returns_has_a_meaning_in_the_skill() -> None:
+    """Over MCP the tools return bare codes, so the skill must say what each one means."""
+    flags = _section("## Flags")
+
+    for codes in (get_args(DealFlag), get_args(RunwayPlanFlag)):
+        rows = [_cells(line)[0].strip("`") for line in flags.splitlines() if line.startswith("| `")]
+        for code in codes:
+            assert code in rows, code
+    deal = [_cells(line)[0].strip("`") for line in flags.split("\n\n| `equity_runway_plan` flag")[0].splitlines()]
+    assert [code for code in deal if code in get_args(DealFlag)] == list(get_args(DealFlag))
+    assert "`equity_round` returns no flags" in _unwrapped(flags)
 
 
 def test_the_checklist_has_three_statuses_in_order_and_keeps_to_the_stage() -> None:
@@ -477,6 +536,9 @@ def test_draft_answers_build_only_from_the_material_and_never_judge_the_law() ->
     assert "built only from the founder's material and tool results" in drafts
     assert "bracketed ask" in drafts
     assert "never says whether something is legally sufficient" in drafts
+    assert "**A calculator mismatch's draft** gives the tool's figure as printed, then `[the corrected deck line]`" in drafts
+    assert "It never says a line was corrected or that a document exists unless the founder said so" in drafts
+    assert "a bracketed ask that names the document or fact and nothing more" in drafts
 
 
 def test_limits_refuse_invention_hiding_and_legal_opinions() -> None:
@@ -519,10 +581,29 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
         assert "made up" in text and "A run passes when" in _unwrapped(text), path.name
+        recorded = path.name.split("-")[1] in _RECORDED
+        assert (_RECORDED_HEADING in text) == recorded, path.name
+        assert (_NOT_RUN_LIVE in text) != recorded, path.name
+
+
+@pytest.mark.parametrize("letter", _RECORDED)
+def test_a_recorded_run_is_a_blockquoted_excerpt_after_the_expected_answer(letter: str) -> None:
+    """The recorded answer is the run's own text, quoted, so no heading or fence in it is read as the eval's own."""
+    text = _eval(letter).read_text(encoding="utf-8")
+    header = _unwrapped(text.split("\n## Prompt\n", 1)[0])
+    recorded = text.split(_RECORDED_HEADING, 1)[1]
+    lines = [line for line in recorded.splitlines() if line.strip()]
+    quoted = [line for line in lines if line.startswith(">")]
+
+    assert text.index("\n## Expected answer\n") < text.index(_RECORDED_HEADING)
+    assert "is an excerpt of a recorded run (Claude Code" in header
+    assert "Recorded with Claude Code" in recorded and quoted
+    assert all(line.startswith(">") for line in lines[lines.index(quoted[0]) :])
+    assert not any(line.startswith(("#", "```")) for line in lines)
 
 
 def test_the_no_call_evals_carry_no_call_or_excerpt() -> None:
-    assert _CALL_EVALS == [_eval("ac"), _eval("al")]
+    assert _CALL_EVALS == [_eval("ac"), _eval("bs")]
     for path in _NO_CALL_EVALS:
         text = path.read_text(encoding="utf-8")
         assert _fences("json", text) == [] and _fences("text", text) == [], path.name
@@ -559,10 +640,14 @@ def test_the_cap_table_eval_quotes_todays_percent_unchecked_and_marks_the_cap_ta
     assert _CAP_UNCHECKED in answer
     assert "(FIN-D2) is Contradicted" in answer
     assert "is not put through the refute pass" in answer
-    assert "relays the two flag codes in the tool's words" in _unwrapped(_eval("ac").read_text(encoding="utf-8"))
+    header = _unwrapped(_eval("ac").read_text(encoding="utf-8").split("\n## Prompt\n", 1)[0])
+    assert "relays the two flag codes with their meanings from the skill's flag table" in header
     for code in _FLAG_CODES:
         assert f"`{code}`" in answer, code
-    assert f'named once, in one line, as "{_IF_ASKED}", and none is marked Missing' in answer
+    assert "heads the ranked list, ahead of the tiers and with no tier" in answer
+    assert "never says the deck was corrected or that a pro forma is in the data room" in answer
+    assert "No sentence says what the deck's 75% or 60% is made of" in answer
+    assert f'named once, in one line, as "{_IF_ASKED}", each by its ID, never as Missing' in answer
 
 
 def test_the_seed_eval_keeps_the_room_to_the_stage_and_asks_for_the_assignment() -> None:
@@ -575,14 +660,14 @@ def test_the_seed_eval_keeps_the_room_to_the_stage_and_asks_for_the_assignment()
 
 
 def test_the_runway_eval_leads_with_the_mismatch_and_asks_for_the_total_without_the_safe() -> None:
-    text = _eval("al").read_text(encoding="utf-8")
-    answer = _answer("al")
+    text = _eval("bs").read_text(encoding="utf-8")
+    answer = _answer("bs")
     call = _section("## Expected tool call", text)
     tool = _TOOL_NAME.search(call)
 
     assert tool is not None and tool.group(1) == "equity_runway_plan"
     assert "No `equity_deal_check` call" in call
-    assert "The runway mismatch leads the ranked list as stops the process" in answer
+    assert "The runway mismatch heads the ranked list, ahead of the tiers and with no tier" in answer
     assert "is not put through the refute pass" in answer
     assert _FD_ASK in answer and "passes no share count to any tool" in answer
     assert "(FIN-D5) is Missing too, because the runway question's draft answer names it" in answer
