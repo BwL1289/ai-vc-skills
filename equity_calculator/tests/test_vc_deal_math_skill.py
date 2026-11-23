@@ -53,8 +53,8 @@ _HANDOFF_SKILLS = (
     "vc-market-sizing",
     "vc-term-sheet-review",
 )
-# A runway_plan call with no milestone, months to raise or landing month can raise only these two flags.
-_RUNWAY_FLAGS_WITHOUT_MILESTONES = ("runway_below_band", "cash_never_runs_out")
+# A runway_plan call with no milestone, months to raise or landing month can raise only these three flags.
+_RUNWAY_FLAGS_WITHOUT_MILESTONES = ("runway_below_band", "cash_never_runs_out", "consistent_beyond_rounding")
 _NO_TOOL = "not checked: no tool computes this"
 
 

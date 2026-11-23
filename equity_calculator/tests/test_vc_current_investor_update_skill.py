@@ -91,7 +91,7 @@ _STATUSES = ("Same", "Restated", "Different form", "Changed definition", "Droppe
 _LENSES = ("Spin", "Missing bad news", "Definitions", "Tie-out")
 _REFUTE_VERDICTS = ("**Dropped, answered:**", "**Dropped, not grounded:**", "**Kept:**")
 _TIERS = ("**fix before sending**", "**worth fixing**", "**minor**")
-_FLAGS = ("cash_never_runs_out", "start_raising_date_passed")
+_FLAGS = ("cash_never_runs_out", "start_raising_date_passed", "consistent_beyond_rounding")
 # The public guides this skill's authors read in full, each with the short name its Source cells use.
 _READ_SOURCES = {
     "https://500.co/content/founders-guide-sending-investor-updates": "500 Global guide",
@@ -399,6 +399,10 @@ def test_the_flag_table_holds_exactly_the_flags_a_no_raise_call_can_raise() -> N
     # Revenue that covers the spend from month 1: the cash never runs out.
     covered = {**inputs, "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "1", "revenue": "2"}]}]}
     raised |= set(compute(RunwayPlanInput.model_validate(covered)).flags)
+    # A claim within 2% of the plan runway (12.79 months) that is not it rounded to one place (12.8): held by the
+    # tolerance alone.
+    near = {**inputs, "stated_runway_months": "12.7"}
+    raised |= set(compute(RunwayPlanInput.model_validate(near)).flags)
 
     assert rows == _FLAGS
     assert answers["cash_never_runs_out"].startswith("Says so instead of a runway figure")

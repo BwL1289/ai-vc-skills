@@ -137,7 +137,8 @@ the bank or the checklist; step 3 then starts at the quote check.
      (`[planned monthly spend and revenue, from which month]`), never assumed. Until a planned change's start month is
      given, make no runway call and give no runway figure; mark the runway line "not checked: waiting for
      [the month the planned spend starts]". With no cash on hand or no burn given, ask for them; never assume one, and
-     make no runway call until they are in.
+     make no runway call until they are in. A stated runway goes in as text with the document's own places, as in
+     `equity_deal_check`: one that is the tool's runway rounded to them is consistent.
    - A tool's mismatch is a diligence question a partner will ask first, so it goes to the top of the ranked list.
    - Read every code in the tool's `flags` too. Over MCP a flag comes back as a bare code: relay the code with its
      meaning from this skill's flag tables (section "Flags"), beside the mismatch it explains, or, with no mismatch,
@@ -365,19 +366,20 @@ never changes a verdict. `equity_round` returns no flags.
 | `runway_below_band`                   | Planned runway is under the tool's runway benchmark (a common benchmark, not a rule)                           |
 | `dilution_above_band`                 | The investors get more than the tool's dilution benchmark in one round (a common benchmark, not a rule)        |
 
-| `equity_runway_plan` flag          | What it means for the founder                                                                   |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `cash_never_runs_out`              | Revenue covers the spend before the cash runs out, so that runway has no end and is not checked |
-| `cash_out_before_raise_lands`      | The cash goes below the floor before a later raise lands                                        |
-| `milestone_short_on_plan`          | A raise does not reach a milestone, even on the plan                                            |
-| `downside_short_where_plan_covers` | A raise reaches a milestone on the plan but not on the downside                                 |
-| `covered_without_raise`            | The cash already reaches a milestone with no raise                                              |
-| `start_raising_date_passed`        | With the months to raise given, the date to start raising is already at or past today           |
-| `no_time_to_raise_given`           | Milestones were checked at their own month, with no time left to raise the next round           |
-| `runway_below_band`                | A raise lasts under the tool's runway benchmark on the plan (a common benchmark, not a rule)    |
+| `equity_runway_plan` flag          | What it means for the founder                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `cash_never_runs_out`              | Revenue covers the spend before the cash runs out, so that runway has no end and is not checked  |
+| `cash_out_before_raise_lands`      | The cash goes below the floor before a later raise lands                                         |
+| `milestone_short_on_plan`          | A raise does not reach a milestone, even on the plan                                             |
+| `downside_short_where_plan_covers` | A raise reaches a milestone on the plan but not on the downside                                  |
+| `covered_without_raise`            | The cash already reaches a milestone with no raise                                               |
+| `start_raising_date_passed`        | With the months to raise given, the date to start raising is already at or past today            |
+| `no_time_to_raise_given`           | Milestones were checked at their own month, with no time left to raise the next round            |
+| `runway_below_band`                | A raise lasts under the tool's runway benchmark on the plan (a common benchmark, not a rule)     |
+| `consistent_beyond_rounding`       | A stated runway holds by the tolerance alone, not as the tool's runway rounded to its own places |
 
-With no milestone, no landing month and no months to raise in the call, as in step 2, only `cash_never_runs_out` and
-`runway_below_band` can come back.
+With no milestone, no landing month and no months to raise in the call, as in step 2, only `cash_never_runs_out`,
+`runway_below_band` and `consistent_beyond_rounding` can come back.
 
 ## Sources
 

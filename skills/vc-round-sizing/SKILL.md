@@ -65,7 +65,7 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
    lean plan): never merge two (the downside's revenue percent into the lean plan, say) and never add one. When it is
    unclear whether the founder would also cut spend in the downside, that is an open ask,
    `[would you cut spend in the downside, and to what?]`, not a case. The no-raise row is always worked; do not add it
-   as an option. Send money and percents as strings:
+   as an option. Send money and percents as strings, a stated runway with the founder's own places:
 
    ```json
    {
@@ -156,8 +156,12 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
    claim goes in that option's `stated_runway_months`, with `stated_runway_from` set to `landing` when the deck counts
    from the close of a later raise. Use-of-funds lines go in that option's `use_of_funds`. Each comes back consistent,
    a mismatch, or not checked: a runway claim gets no check row when the cash never runs out (`cash_never_runs_out`)
-   or runs out before a later raise lands (`cash_out_before_raise_lands`), and the answer lists it as not checked.
-   Quote the deck's figure; never correct it by hand.
+   or runs out before a later raise lands (`cash_out_before_raise_lands`), and the answer lists it as not checked. A
+   runway claim that is the tool's runway rounded to the places the deck writes is consistent, past the tolerance or
+   not, because people write figures rounded to the places they show (12 months against the tool's 12.40); its row
+   says so ("rounds to the deck's"). Those places decide it, so pass each `stated_runway_months` as text with exactly
+   the places the deck writes ("24", "24.0"). The use-of-funds total keeps the tolerance alone. Quote the deck's
+   figure; never correct it by hand.
 6. **Raise now or wait** (when asked). The waiting option carries its `lands_month`. Put the options side by side in
    tool values: runway per case, the cash above the floor when the waiting option's money lands, whether cash runs out
    first (`cash_out_before_raise_lands`), each option's ownership. Then list what has to be true for waiting to work, in
@@ -272,16 +276,17 @@ Signals, not rules. A row marked unverified has no public source its authors rea
 The result's `flags` holds codes only; this is what each means for the founder. A flag is a question to prepare for,
 never an error, and never changes a verdict.
 
-| Flag                               | What it means for the founder                                                       | What to change or prepare                                                      |
-| ---------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `cash_never_runs_out`              | On that case, revenue covers spend before the cash goes, so there is no runway end. | Say so; a partner will check the revenue that makes it true.                   |
-| `cash_out_before_raise_lands`      | Waiting runs the cash below the floor before the money arrives.                     | That option needs bridge money or an earlier close; show it.                   |
-| `milestone_short_on_plan`          | An amount does not reach a milestone, with time to raise, even on plan.             | See the tool's required raise, move the milestone, or name a lean plan.        |
-| `downside_short_where_plan_covers` | The plan reaches the milestone; the downside does not, with the same raise or none. | Be ready to say what you would cut, and when you would know.                   |
-| `covered_without_raise`            | Cash on hand already reaches a milestone on some case.                              | Say what the raise buys beyond it.                                             |
-| `start_raising_date_passed`        | On cash alone, raising should already have started, given the months to raise.      | Say when the raise started or will close; quote this meaning, not advice.      |
-| `no_time_to_raise_given`           | Milestones were checked at their bare month, with no time to raise after them.      | Give the months you allow, and re-run.                                         |
-| `runway_below_band`                | An amount's plan runway ends before the top of the tool's runway band.              | A common benchmark, not a rule: quote the tool's `runway_band` row and source. |
+| Flag                               | What it means for the founder                                                                       | What to change or prepare                                                      |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `cash_never_runs_out`              | On that case, revenue covers spend before the cash goes, so there is no runway end.                 | Say so; a partner will check the revenue that makes it true.                   |
+| `cash_out_before_raise_lands`      | Waiting runs the cash below the floor before the money arrives.                                     | That option needs bridge money or an earlier close; show it.                   |
+| `milestone_short_on_plan`          | An amount does not reach a milestone, with time to raise, even on plan.                             | See the tool's required raise, move the milestone, or name a lean plan.        |
+| `downside_short_where_plan_covers` | The plan reaches the milestone; the downside does not, with the same raise or none.                 | Be ready to say what you would cut, and when you would know.                   |
+| `covered_without_raise`            | Cash on hand already reaches a milestone on some case.                                              | Say what the raise buys beyond it.                                             |
+| `start_raising_date_passed`        | On cash alone, raising should already have started, given the months to raise.                      | Say when the raise started or will close; quote this meaning, not advice.      |
+| `no_time_to_raise_given`           | Milestones were checked at their bare month, with no time to raise after them.                      | Give the months you allow, and re-run.                                         |
+| `runway_below_band`                | An amount's plan runway ends before the top of the tool's runway band.                              | A common benchmark, not a rule: quote the tool's `runway_band` row and source. |
+| `consistent_beyond_rounding`       | A runway claim holds by the tolerance alone: it is not the tool's runway rounded to its own places. | Quote the tool's runway; a partner recomputing gets it.                        |
 
 A benchmark flag asks which milestone the amount reaches: say that, and never present it as a shortfall ("short of
 the benchmark", "just under it"); the tool's `runway_band` row says what the band means.

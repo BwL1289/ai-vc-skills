@@ -479,10 +479,15 @@ are `deal_check`, `round` and `dilution`). Time t is in elapsed months from toda
    covers; the exact I\* is in the JSON.
 6. **Checks.** A stated runway with no raise is checked against the plan's no-raise runway; each option's stated
    runway against its plan runway from today, or less L when it counts from landing; within 2% of the computed one
-   (an input, the edge included) is consistent. Each option's use-of-funds lines are checked against its amount as
-   `deal_check` checks them (one shared helper, the same tolerances). With no R, a runway claim is not checked, and
-   neither is a runway counted from landing when the cash runs out before the money lands (there is no R - L; the
-   stated line says so and `cash_out_before_raise_lands` fires). The verdict is `deal_check`'s rule.
+   (an input, the edge included) is consistent. A stated runway is also consistent, whatever the tolerance, when it is
+   that computed figure rounded half away from zero to the places it is written with (`deal_check`'s rule, from the
+   same shared helper): a stated `12` holds a computed 12.40 though 0.4 months is past 2% of it, and `12.0` does not.
+   Its row shows the figure as typed and says whether it is that rounding (`rounds to the deck's "12"`, yes or no);
+   send each as text, with the places the founder writes. Each option's use-of-funds lines are checked against its
+   amount as `deal_check` checks them (one shared helper, the same tolerances), with the tolerance alone: the total is
+   a sum of the lines, not a figure typed as one. With no R, a runway claim is not checked, and neither is a runway
+   counted from landing when the cash runs out before the money lands (there is no R - L; the stated line says so and
+   `cash_out_before_raise_lands` fires). The verdict is `deal_check`'s rule.
 7. **Flags**, never errors: `cash_never_runs_out`, `cash_out_before_raise_lands`, `milestone_short_on_plan` (a raise
    short on the plan; the no-raise row does not count), `downside_short_where_plan_covers` (a milestone covered on
    the plan and short on the downside for the same row, the no-raise row included: with a raise or with none),
@@ -490,7 +495,9 @@ are `deal_check`, `round` and `dilution`). Time t is in elapsed months from toda
    no-raise plan runway less the months to raise is at or before today), `no_time_to_raise_given`, and
    `runway_below_band` (a raise lasting under 18 months on the plan, from today; an input, and a benchmark, not a
    rule: 18 is the top of the YC seed guide's "raising for N months (usually 12-18)", so a raise inside 12 to 18 is
-   within the guide's range and the flag is a question, not a shortfall).
+   within the guide's range and the flag is a question, not a shortfall), and `consistent_beyond_rounding` (a stated
+   runway consistent by the tolerance alone, not the computed runway rounded to its places, such as `12.5` against
+   12.62 months, so a reader recomputing gets another figure).
 
 A refusal names the field: a first case that is not the plan, a plan given as percents, a case named twice, a case
 with both phases and a percent or neither, phases that do not start at month 1 or do not move later, a floor above the
@@ -1196,17 +1203,17 @@ The `deal_check` scenario adds these, each only when the input uses it, then the
 
 The `runway_plan` scenario adds these, each only when the input uses it:
 
-| Key                   | Default                                                                      | How to change it                            | Source                                                                      |
-| --------------------- | ---------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
-| `runway_rule`         | cash on hand less the floor, plus the raise, run down by the phased net burn | `--cash-floor`                              | unverified (standard arithmetic)                                            |
-| `phase_rule`          | a phase runs until the next starts; the last runs on                         | fixed                                       | unverified (a modelling choice)                                             |
-| `landing_rule`        | the whole raise lands at once, after its whole months                        | `lands-month=`                              | unverified (a modelling choice)                                             |
-| `derived_case_rule`   | the plan's phases scaled by the case's percents                              | give the case its own phases                | unverified (a modelling choice)                                             |
-| `milestone_rule`      | covered when the cash lasts to the month plus the months to raise            | `--months-to-raise`                         | YC seed guide ("next “fundable” milestone"); the months to raise unverified |
-| `required_raise_rule` | the smallest raise keeping cash at or above the floor to the target          | fixed                                       | unverified (standard arithmetic)                                            |
-| `tolerance`           | 0.5 points; 2% relative                                                      | `--tolerance-points`, `--tolerance-percent` | unverified                                                                  |
-| `runway_band`         | 18 months                                                                    | `--runway-band-months`                      | YC seed guide ("usually 12-18"; 18 is its top; a benchmark, not a rule)     |
-| `use_of_funds_rule`   | the lines add up to the raise                                                | fixed                                       | unverified                                                                  |
+| Key                   | Default                                                                                                                | How to change it                            | Source                                                                      |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
+| `runway_rule`         | cash on hand less the floor, plus the raise, run down by the phased net burn                                           | `--cash-floor`                              | unverified (standard arithmetic)                                            |
+| `phase_rule`          | a phase runs until the next starts; the last runs on                                                                   | fixed                                       | unverified (a modelling choice)                                             |
+| `landing_rule`        | the whole raise lands at once, after its whole months                                                                  | `lands-month=`                              | unverified (a modelling choice)                                             |
+| `derived_case_rule`   | the plan's phases scaled by the case's percents                                                                        | give the case its own phases                | unverified (a modelling choice)                                             |
+| `milestone_rule`      | covered when the cash lasts to the month plus the months to raise                                                      | `--months-to-raise`                         | YC seed guide ("next “fundable” milestone"); the months to raise unverified |
+| `required_raise_rule` | the smallest raise keeping cash at or above the floor to the target                                                    | fixed                                       | unverified (standard arithmetic)                                            |
+| `tolerance`           | 0.5 points; 2% relative; a stated runway that is the computed one rounded to its places also holds; one flag beside it | `--tolerance-points`, `--tolerance-percent` | unverified (the rounding test is standard arithmetic)                       |
+| `runway_band`         | 18 months                                                                                                              | `--runway-band-months`                      | YC seed guide ("usually 12-18"; 18 is its top; a benchmark, not a rule)     |
+| `use_of_funds_rule`   | the lines add up to the raise                                                                                          | fixed                                       | unverified                                                                  |
 
 The `metrics_check` scenario adds these, each only when the input uses it:
 

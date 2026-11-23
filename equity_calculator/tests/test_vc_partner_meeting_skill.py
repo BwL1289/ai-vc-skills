@@ -371,6 +371,7 @@ def test_every_flag_the_calculator_raises_is_relayed_and_a_benchmark_band_is_nev
     # Over MCP a tool returns bare codes, so the skill carries each code's meaning itself, with no band of its own.
     assert rows == list(get_args(DealFlag))
     assert "`cash_never_runs_out`" in flags and "18 months" not in flags and "25%" not in flags
+    assert "and `consistent_beyond_rounding` (its row above)" in _unwrapped(flags)
     for code in ("`runway_below_band`", "`dilution_above_band`", "`runway_band`", "`dilution_band`"):
         assert code in steps, code
     # The runway plan's band row cites a guide and the deal check's does not, so the skill quotes whichever source the
@@ -474,7 +475,9 @@ def test_the_runway_eval_checks_the_no_raise_runway_with_the_runway_plan_and_rec
 
     assert _eval("r") in _CALL_EVALS
     assert [scenario for scenario, _ in _calls(text)] == ["deal_check", "runway_plan"]
-    assert "checked with `equity_runway_plan` on today's spend" in answer and "minor tier at most" in answer
+    assert "checked with `equity_runway_plan` on today's spend" in answer and "6.00 months stated, consistent" in answer
+    # The founder's "6" is 6.25 months rounded to whole months, so the runway plan's rounding rule holds it.
+    assert "rounded to the whole months it is written with" in answer and "minor tier" not in answer
     assert "ahead of the tiers and with no tier" in answer
     assert "## Recorded answer" in text and text.index("## Expected answer") < text.index("## Recorded answer")
 

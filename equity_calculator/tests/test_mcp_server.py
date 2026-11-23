@@ -776,3 +776,59 @@ async def test_the_deal_check_tool_schema_says_to_send_each_rounded_figure_as_te
         assert "Send it as text with exactly the places the document writes" in fields[name]["description"], name
     for name in ("investment", "pre_money", "post_money"):
         assert "description" not in fields[name], name
+
+
+@pytest.mark.parametrize(("typed", "verdict", "within"), [("12", "consistent", True), ("12.0", "mismatch", False)])
+async def test_the_runway_plan_tool_holds_a_runway_sent_as_text_that_is_the_computed_one_rounded(
+    typed: str, verdict: str, within: bool
+) -> None:
+    """$1.24M at $100k a month is 12.40 months: "12" sent as text is it rounded to no places, so it holds although 0.4
+    months is past 2% of 12.40; "12.0" claims a place it does not round to. The echo keeps the places, so a second call
+    built from it gives the same rows."""
+    server = mcp_server.build_server()
+    plan = {"name": "plan", "phases": [{"from_month": 1, "gross_burn": "100000"}]}
+    inputs = {"cash_on_hand": "1240000", "cases": [plan], "stated_runway_months": typed}
+    answer = json.loads(_text(await _call(server, "equity_runway_plan", {"inputs": inputs})))
+    again = json.loads(_text(await _call(server, "equity_runway_plan", {"inputs": answer["inputs"]})))
+
+    assert answer["inputs"]["stated_runway_months"] == typed
+    assert (answer["checks"][0]["verdict"], answer["checks"][0]["within_rounding"]) == (verdict, within)
+    assert answer["verdict"] == verdict
+    assert again["checks"] == answer["checks"]
+
+
+async def test_the_runway_plan_tool_keeps_a_raises_places_and_leaves_the_use_of_funds_to_the_tolerance() -> None:
+    """A raise's runway from landing sent as "16" holds against 16.40 months, and echoes as "16"; its use-of-funds
+    total has no rounding test."""
+    server = mcp_server.build_server()
+    plan = {"name": "plan", "phases": [{"from_month": 1, "gross_burn": "100000"}]}
+    raised = {"amount": "1240000", "lands_month": 6, "stated_runway_months": "16", "stated_runway_from": "landing"}
+    raised |= {"use_of_funds": [{"percent": "60"}, {"percent": "40"}]}
+    answer = json.loads(
+        _text(
+            await _call(
+                server,
+                "equity_runway_plan",
+                {"inputs": {"cash_on_hand": "1000000", "cases": [plan], "raises": [raised]}},
+            )
+        )
+    )
+
+    assert answer["inputs"]["raises"][0]["stated_runway_months"] == "16"
+    assert [(row["key"], row["verdict"], row["within_rounding"]) for row in answer["checks"]] == [
+        ("runway_months", "consistent", True),
+        ("use_of_funds_total", "consistent", None),
+    ]
+
+
+async def test_the_runway_plan_tool_schema_says_to_send_each_stated_runway_as_text() -> None:
+    """The no-raise and each raise's stated runway say, in the tool's own input schema, to send text with the places
+    the founder writes; the money fields keep the tolerance alone and say nothing."""
+    tools = {tool.name: tool for tool in await _tools(mcp_server.build_server())}
+    defs = tools["equity_runway_plan"].inputSchema["$defs"]
+
+    for model in ("RunwayPlanInput", "RaiseOption"):
+        description = defs[model]["properties"]["stated_runway_months"]["description"]
+        assert "Send it as text with exactly the places the document writes" in description, model
+    assert "description" not in defs["RunwayPlanInput"]["properties"]["cash_on_hand"]
+    assert "description" not in defs["RaiseOption"]["properties"]["amount"]

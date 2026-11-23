@@ -66,11 +66,13 @@ The "about 4 months" goes in the top-level `stated_runway_months`; the deck's 24
   Runway, no raise: stated                                          4.00 months  given
   Runway, no raise: the calculator gives                            3.20 months  the plan case's runway
   Runway, no raise: difference                                     -0.80 months  computed - stated
-  Runway, no raise: verdict                                            mismatch  within the tolerance is consistent
+  Runway, no raise: rounds to the deck's "4"                                 no  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+  Runway, no raise: verdict                                            mismatch  within the tolerance, or rounding to the deck's, is consistent
   Runway, raise 1: stated                                          24.00 months  given
   Runway, raise 1: the calculator gives                            13.20 months  the plan case's runway
   Runway, raise 1: difference                                     -10.80 months  computed - stated
-  Runway, raise 1: verdict                                             mismatch  within the tolerance is consistent
+  Runway, raise 1: rounds to the deck's "24"                                 no  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+  Runway, raise 1: verdict                                             mismatch  within the tolerance, or rounding to the deck's, is consistent
   Be ready to answer                                    milestone_short_on_plan  A raise does not reach a milestone, with the months to raise, on the plan itself
   Be ready to answer                                  start_raising_date_passed  With no raise, the plan's runway less the months to raise is already at or past today: on the plan, raising the next round takes longer than the cash lasts
   Be ready to answer                                          runway_below_band  A raise lasts under 18 months on the plan; be ready to say which milestone it reaches (a common benchmark, not a rule)

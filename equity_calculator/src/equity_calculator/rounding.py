@@ -1,10 +1,11 @@
-"""The rounding test every check of a document's stated figure shares (``metrics_check``, ``deal_check``).
+"""The rounding test every check of a document's stated figure shares (``metrics_check``, ``deal_check``,
+``runway_plan``).
 
 People write figures rounded to the places they show: "12 months" for a computed 12.40, "17%" for 16.6667%. A stated
 percent, months or multiple is therefore consistent when it is the computed figure rounded half away from zero to the
 places it is typed with, past the tolerance or not; ``0.0`` is one place. Money keeps the tolerance alone, since a
 figure like $1.2M typed as 1200000 says nothing about its places. Each scenario builds its own check row; the test
-and the report wording live here, so the two read the same. Exact: integer arithmetic on fractions, never the decimal
+and the report wording live here, so the three read the same. Exact: integer arithmetic on fractions, never the decimal
 context.
 """
 

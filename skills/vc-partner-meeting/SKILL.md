@@ -159,9 +159,9 @@ A tool call returns each flag as a bare code; this is what each code means, as a
 | `runway_below_band`                   | Planned net runway is under the tool's runway band: which milestone does the raise reach?                        |
 | `dilution_above_band`                 | The investors get more than the tool's dilution band in one round: why sell that much?                           |
 
-From `equity_runway_plan`, whose calls here carry no milestone, months to raise or landing month, two codes can come
-back: `cash_never_runs_out` (revenue covers spend before the cash goes: what revenue makes that true?) and
-`runway_below_band` (a raise's plan runway ends before the top of the tool's runway band: which milestone does it reach?).
+From `equity_runway_plan` (no milestone, months to raise or landing month here), three codes can come back:
+`cash_never_runs_out` (revenue covers spend first: what revenue makes that true?), `runway_below_band` (a raise's plan
+runway is under the tool's runway band: which milestone?) and `consistent_beyond_rounding` (its row above).
 
 ## Adversarial review
 

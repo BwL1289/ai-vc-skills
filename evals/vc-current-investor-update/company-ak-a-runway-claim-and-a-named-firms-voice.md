@@ -38,7 +38,8 @@ the one call below, puts the runway mismatch first, and keeps the lowlight the f
   Runway, plan, no raise                           27.83 months  months until cash less the floor goes below zero
   Runway, no raise: stated                         30.00 months  given
   Runway, no raise: the calculator gives           27.83 months  the plan case's runway
-  Runway, no raise: verdict                            mismatch  within the tolerance is consistent
+  Runway, no raise: rounds to the deck's "30"                no  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+  Runway, no raise: verdict                            mismatch  within the tolerance, or rounding to the deck's, is consistent
 ```
 
 ## Expected answer

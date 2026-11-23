@@ -53,7 +53,8 @@ the next priced round the founder expects before any `equity_round` call.
   Runway, raise 1: stated                          36.00 months  given
   Runway, raise 1: the calculator gives            28.33 months  the plan case's runway
   Runway, raise 1: difference                      -7.67 months  computed - stated
-  Runway, raise 1: verdict                             mismatch  within the tolerance is consistent
+  Runway, raise 1: rounds to the deck's "36"                 no  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+  Runway, raise 1: verdict                             mismatch  within the tolerance, or rounding to the deck's, is consistent
   Overall verdict                                      mismatch  mismatch if any check is; consistent if all are; not_checked with none
 ```
 

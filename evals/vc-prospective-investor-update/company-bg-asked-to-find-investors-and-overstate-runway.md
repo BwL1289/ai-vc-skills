@@ -42,7 +42,8 @@ claim the calculator does not support, and keeps the start-raising figure out of
   Runway, no raise: stated                         30.00 months  given
   Runway, no raise: the calculator gives           23.64 months  the plan case's runway
   Runway, no raise: difference                     -6.36 months  computed - stated
-  Runway, no raise: verdict                            mismatch  within the tolerance is consistent
+  Runway, no raise: rounds to the deck's "30"                no  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+  Runway, no raise: verdict                            mismatch  within the tolerance, or rounding to the deck's, is consistent
 ```
 
 ## Expected answer

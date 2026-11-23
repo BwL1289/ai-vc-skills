@@ -3,7 +3,9 @@
 One value column. The inputs come first, then each case's phases as worked, a runway line per option and case (with
 the cash when a later raise lands, and when to start raising), a slack and a verdict line per option, case and
 milestone, the smallest raise per milestone, case and landing month, each option's use-of-funds lines (with their
-live total), each stated figure checked, the flags in plain words and the overall verdict. Option 0 is ``no raise``;
+live total), each stated figure checked (stated, computed, difference, for a runway whether the figure as typed is a
+rounding of the computed one, which is consistent even past the tolerance, verdict), the flags in plain words and the
+overall verdict. Option 0 is ``no raise``;
 the raises are ``raise 1``, ``raise 2``, … in the order given. Values only: no line carries a live formula beyond the
 ``=SUM`` totals.
 """
@@ -12,6 +14,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from equity_calculator.rounding import ROUNDING_HOW, ROUNDING_VERDICT_HOW, rounding_label
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_runway_plan import (
     MilestoneRow,
@@ -62,6 +65,9 @@ def _flag_words(flag: RunwayPlanFlag, result: RunwayPlanResult) -> str:
         "with no time left to raise the next round",
         "runway_below_band": f"A raise lasts under {inputs.runway_band_months:f} months on the plan; be ready to say "
         "which milestone it reaches (a common benchmark, not a rule)",
+        "consistent_beyond_rounding": "A stated runway is consistent only by the tolerance: it is not the computed "
+        "runway rounded to the places it is written with, so a reader recomputing gets a different figure; quote the "
+        "calculator's",
     }
     return words[flag]
 
@@ -245,8 +251,17 @@ def _funds_lines(funds: OptionFunds) -> list[Line]:
     return lines
 
 
+def _typed(check: RunwayPlanCheck, result: RunwayPlanResult) -> Decimal | None:
+    """A stated runway as typed, its places kept (the no-raise one, or its raise's); none for a use-of-funds total."""
+    if check.key != "runway_months":
+        return None
+    inputs = result.inputs
+    return inputs.stated_runway_months if check.option == 0 else inputs.raises[check.option - 1].stated_runway_months
+
+
 def _check_lines(check: RunwayPlanCheck, result: RunwayPlanResult) -> list[Line]:
-    """One check: what the founder states, what the calculator gives, the difference and the verdict."""
+    """One check: what the founder states, what the calculator gives, the difference, whether a stated runway as typed
+    is a rounding of the computed one, and the verdict."""
     subject = "Runway" if check.key == "runway_months" else "Use of funds total"
     name = f"{subject}, {option_name(check.option)}"
     key = f"check_{check.key}_{check.option}"
@@ -254,14 +269,18 @@ def _check_lines(check: RunwayPlanCheck, result: RunwayPlanResult) -> list[Line]
     if check.key == "runway_months" and check.option > 0:
         if result.inputs.raises[check.option - 1].stated_runway_from == "landing":
             how += ", from when the money lands"
-    return [
+    lines = [
         Line(f"{key}_stated", f"{name}: stated", (check.stated,), GIVEN),
         Line(f"{key}_computed", f"{name}: the calculator gives", (check.computed,), how),
         Line(f"{key}_difference", f"{name}: difference", (check.difference,), "computed - stated"),
-        Line(
-            f"{key}_verdict", f"{name}: verdict", (check.verdict,), "within the tolerance is consistent", verdict=True
-        ),
     ]
+    typed = _typed(check, result)
+    if check.within_rounding is not None and typed is not None:
+        label = rounding_label(name, typed)
+        lines.append(Line(f"{key}_rounding", label, (yes_no(check.within_rounding),), ROUNDING_HOW))
+    verdict_how = "within the tolerance is consistent" if check.within_rounding is None else ROUNDING_VERDICT_HOW
+    lines.append(Line(f"{key}_verdict", f"{name}: verdict", (check.verdict,), verdict_how, verdict=True))
+    return lines
 
 
 def runway_plan_sheet(result: RunwayPlanResult) -> Sheet:

@@ -171,9 +171,13 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "with the slack; the smallest raise per milestone and landing month is max(0, max cumulative net burn on "
         "[landing, target] - available cash), none when the cash runs out first. Stated runways (no raise, or per "
         "raise from today or from landing) and each raise's use_of_funds total come back consistent or a mismatch; "
-        "a runway stated from landing is not checked when the cash runs out before the money lands. The phases, "
+        "a runway stated from landing is not checked when the cash runs out before the money lands. Each "
+        "stated_runway_months row also says whether the stated runway is the computed one rounded half away from "
+        "zero to the places it is typed with, which makes it consistent even past the tolerance (send it as text, "
+        "those places as the founder writes them); the use_of_funds total keeps the tolerance alone. The phases, "
         "percents, milestones, months_to_raise and lands_month are the founder's figures: never assume one. Flags "
-        "never change a verdict.",
+        "name what to be ready to answer, a runway consistent by the tolerance alone among them, and never change a "
+        "verdict.",
     ),
     "metrics_check": (
         MetricsCheckInput,

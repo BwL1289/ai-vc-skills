@@ -459,7 +459,7 @@ question a partner is likely to ask, never an error, and never a change to a ver
 | `conversions_bought_by_pre_money`     | deal check              | SAFE and note shares come out of the pre-round holders, so their stake falls by more          |
 | `discount_beat_cap`                   | deal check              | A discount gave a lower price than the cap                                                    |
 | `note_interest_converts`              | deal check              | Note interest converts too, so a note gets more than its principal's worth of shares          |
-| `consistent_beyond_rounding`          | deal check              | A stated percent or runway holds by the tolerance alone, not as the tool's figure rounded     |
+| `consistent_beyond_rounding`          | deal check, runway plan | A stated percent or runway holds by the tolerance alone, not as the tool's figure rounded     |
 | `net_burn_not_positive`               | deal check              | Revenue covers the burn on those figures, so there is no net runway on them                   |
 | `current_burn_runway_longer`          | deal check              | Runway on today's burn is longer than on the planned burn                                     |
 | `dilution_above_band`                 | deal check              | The investors get more than the tool's dilution benchmark in one round (not a rule)           |

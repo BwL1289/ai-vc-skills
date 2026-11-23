@@ -531,7 +531,7 @@ def test_every_flag_code_has_its_meaning_in_the_skill() -> None:
     prose = _unwrapped(table.split("\n|", 1)[0])
 
     assert rows == list(get_args(DealFlag))
-    for flag in ("runway_below_band", "cash_never_runs_out"):
+    for flag in ("runway_below_band", "cash_never_runs_out", "consistent_beyond_rounding"):
         assert flag in get_args(RunwayPlanFlag) and f"`{flag}` (" in prose, flag
 
 

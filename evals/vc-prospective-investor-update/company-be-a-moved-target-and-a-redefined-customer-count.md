@@ -57,7 +57,8 @@ run (see "Recorded answer").
   Runway, no raise: stated                         20.00 months  given
   Runway, no raise: the calculator gives           19.78 months  the plan case's runway
   Runway, no raise: difference                     -0.22 months  computed - stated
-  Runway, no raise: verdict                          consistent  within the tolerance is consistent
+  Runway, no raise: rounds to the deck's "20"               yes  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+  Runway, no raise: verdict                          consistent  within the tolerance, or rounding to the deck's, is consistent
 ```
 
 ## Expected answer

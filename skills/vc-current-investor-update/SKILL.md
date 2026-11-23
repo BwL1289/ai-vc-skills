@@ -151,8 +151,9 @@ founder's plan with no raise:
   then, pass the net burn as `gross_burn` with `revenue` `"0"`, and label the line as net burn in the update. A net
   burn of zero or less gets no call until spend and revenue are given (the tool refuses a `gross_burn` of 0 or less);
   meanwhile quote the founder's words.
-- `stated_runway_months`: the runway the update states, when it states one; a "30+ months" claim is passed as
-  `"30"`. With no claim, call without it and put the tool's runway in the update.
+- `stated_runway_months`: the runway the update states, when it states one, as text with the update's own places
+  ("15", "15.0"), since one that is the tool's runway rounded to those places is consistent; a "30+ months" claim is
+  passed as `"30"`. With no claim, call without it and put the tool's runway in the update.
 - `months_to_raise`, only when the founder gives how long the next raise will take: a whole number, as a JSON integer,
   never a string. A range ("4 to 6 months") is asked about once; until answered, pass the upper figure and say so. The
   tool then prints, in the "Start raising by" row, how many months from the cash date the raise has to start by.
@@ -162,7 +163,8 @@ founder's plan with no raise:
   case `plan` too; the answer calls it "today's spend held flat". Make no other call the founder did not ask for.
 
 **A claim stated as a floor** ("30+ months", "over 30 months", "at least 30 months") is passed as its number, but the
-tool's verdict row does not decide it: the tool calls a figure within its tolerance either way consistent. Compare the
+tool's verdict row does not decide it: the tool calls a figure within its tolerance either way, or one that rounds to
+it, consistent. Compare the
 tool's printed runway with that number as written, saying only which is larger. A printed runway at or above the number
 keeps the claim: the update may keep it or state the printed runway, and it goes in no tier. A printed runway below the
 number is a fix before sending, even when the verdict row says consistent.
@@ -199,7 +201,8 @@ $120,000 and $30,000 from month 4 after two hires, and "Runway: 15 months" in th
   Runway, no raise: stated                         15.00 months  given
   Runway, no raise: the calculator gives           12.79 months  the plan case's runway
   Runway, no raise: difference                     -2.21 months  computed - stated
-  Runway, no raise: verdict                            mismatch  within the tolerance is consistent
+  Runway, no raise: rounds to the deck's "15"                no  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+  Runway, no raise: verdict                            mismatch  within the tolerance, or rounding to the deck's, is consistent
 ```
 
 The 15 months does not hold on the plan. Run once more with today's spend held flat, and the update can say both:
@@ -218,10 +221,11 @@ runway's entry in the ranked fix list names the pattern "The same runway figure 
 cost trust) and says it is unverified: the mismatch's entry, or, when the claim holds, its own entry in the worth fixing
 tier, whose fix is the printed runway.
 
-| Flag                        | What it means for the founder                                                         | What the update does                                                    |
-| --------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `cash_never_runs_out`       | Revenue covers the spend before the cash runs out, so the runway has no end           | Says so instead of a runway figure; a stated runway is not checked      |
-| `start_raising_date_passed` | With the months to raise given, the date to start raising is already at or past today | Says the next raise should already be under way, and what is being done |
+| Flag                         | What it means for the founder                                                                         | What the update does                                                                                         |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `cash_never_runs_out`        | Revenue covers the spend before the cash runs out, so the runway has no end                           | Says so instead of a runway figure; a stated runway is not checked                                           |
+| `start_raising_date_passed`  | With the months to raise given, the date to start raising is already at or past today                 | Says the next raise should already be under way, and what is being done                                      |
+| `consistent_beyond_rounding` | The stated runway holds by the tolerance alone: it is not the tool's runway rounded to its own places | May keep the claim, as a consistent one; Numbers gives the printed runway, the figure an investor recomputes |
 
 With no raise and no milestone in the call, the tool raises no other flag.
 

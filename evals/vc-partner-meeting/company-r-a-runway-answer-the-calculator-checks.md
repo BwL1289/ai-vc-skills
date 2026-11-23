@@ -88,7 +88,8 @@ The runway plan:
   Runway, no raise: stated                        6.00 months  given
   Runway, no raise: the calculator gives          6.25 months  the plan case's runway
   Runway, no raise: difference                    0.25 months  computed - stated
-  Runway, no raise: verdict                          mismatch  within the tolerance is consistent
+  Runway, no raise: rounds to the deck's "6"              yes  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+  Runway, no raise: verdict                        consistent  within the tolerance, or rounding to the deck's, is consistent
 ```
 
 ## Expected answer
@@ -103,8 +104,10 @@ The runway plan:
 - The percent sold is consistent (20.0000%) and is not drilled.
 - The Finance lens runs with the Seed lens.
 - "Without the raise we have about 6 months." is checked with `equity_runway_plan` on today's spend: 6.25 months
-  against 6.00 months stated, a mismatch. The claim is below the tool's figure, so it understates: it goes in the minor
-  tier at most, and the founder may keep it or say 6.25 months. No division of cash by burn appears.
+  against 6.00 months stated, consistent. The founder's "6" is the tool's 6.25 months rounded to the whole months it is
+  written with (the row `rounds to the deck's "6"` prints yes), though 0.25 months is past the 2% tolerance, so, like
+  the percent sold, it is not drilled: Numbers gives the tool's verdict, and the founder may keep it or say 6.25
+  months. No division of cash by burn appears.
 - Debrief: "Two years, comfortably." is weak (it disagrees with a tool result, both quoted); the reason for the gap is
   a bracketed ask, such as `[what the deck's 24 months assumes]`, never an argument about which assumptions would make
   24 months true. The stronger answer uses only the tool's figures and the founder's burn plan, and brackets what the
