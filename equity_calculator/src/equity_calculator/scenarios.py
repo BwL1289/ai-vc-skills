@@ -16,6 +16,7 @@ from equity_calculator.employee import compute_employee
 from equity_calculator.investor import compute_investor
 from equity_calculator.pool import compute_pool
 from equity_calculator.round import compute_round
+from equity_calculator.runway_plan import compute_runway_plan
 from equity_calculator.schemas.equity import (
     DealCheckInput,
     DealCheckResult,
@@ -29,6 +30,8 @@ from equity_calculator.schemas.equity import (
     PoolResult,
     RoundInput,
     RoundResult,
+    RunwayPlanInput,
+    RunwayPlanResult,
     ScenarioInput,
     ScenarioResult,
     VestingInput,
@@ -80,6 +83,11 @@ def compute(inputs: DealCheckInput) -> DealCheckResult:
     ...
 
 
+@overload
+def compute(inputs: RunwayPlanInput) -> RunwayPlanResult:
+    ...
+
+
 def compute(inputs: ScenarioInput) -> ScenarioResult:
     """The worked result of ``inputs``' scenario.
 
@@ -105,5 +113,7 @@ def compute(inputs: ScenarioInput) -> ScenarioResult:
             return compute_waterfall(inputs)
         case DealCheckInput():
             return compute_deal_check(inputs)
+        case RunwayPlanInput():
+            return compute_runway_plan(inputs)
         case _:
             assert_never(inputs)

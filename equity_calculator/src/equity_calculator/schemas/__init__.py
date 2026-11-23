@@ -2,5 +2,5 @@
 
 ``equity`` holds the investor and employee scenarios and the tagged ``EquityInput`` / ``EquityResult`` unions, and
 re-exports the other modules' names (``equity_pool``, ``equity_round``, ``equity_dilution``, ``equity_vesting``,
-``equity_waterfall``, ``equity_deal_check``); the shared parts live in ``equity_common``.
+``equity_waterfall``, ``equity_deal_check``, ``equity_runway_plan``); the shared parts live in ``equity_common``.
 """

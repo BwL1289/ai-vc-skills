@@ -9,7 +9,7 @@
 
 The first of the [AI VC skills](../README.md).
 
-Should we trade stock for this, and what does a round do to the cap table? Eight scenarios, worked with exact
+Should we trade stock for this, and what does a round do to the cap table? Nine scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
@@ -23,16 +23,17 @@ and the essay it implements. That script's own TODO
 list asked for Pydantic models and cell formatting (percent, numbers); both are here, along with the employee formula
 and the option-pool shuffle.
 
-| Scenario     | The question it answers                                                                                                                                 |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `investor`   | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                          |
-| `employee`   | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                      |
-| `pool`       | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?             |
-| `round`      | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards? |
-| `dilution`   | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                          |
-| `vesting`    | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                   |
-| `waterfall`  | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                    |
-| `deal_check` | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic? |
+| Scenario      | The question it answers                                                                                                                                                         |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `investor`    | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                                                  |
+| `employee`    | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                                              |
+| `pool`        | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?                                     |
+| `round`       | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards?                         |
+| `dilution`    | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                                                  |
+| `vesting`     | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                                           |
+| `waterfall`   | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                            |
+| `deal_check`  | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                         |
+| `runway_plan` | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there? |
 
 ## Install
 
@@ -100,10 +101,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 `equity_calculator_mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
 instead of doing the arithmetic itself.
 
-| Tool                                                                                                                                              | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
-| `equity_workbook`                                                                                                                                 | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
+| Tool                                                                                                                                                                    | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
+| `equity_workbook`                                                                                                                                                       | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
 error that says why. Money and percents are best sent as JSON strings (`"7"`, `"1.10"`, `"8000000"`): a JSON number
@@ -168,6 +169,12 @@ questions a VC is likely to ask after them.
   both a cap and a discount, so the rule for a SAFE with both (the lower price wins) is marked unverified. YC's
   Post-Money Safe User Guide (version 1.2, February 2023) works a round's price per share in an example: the
   pre-money valuation over the fully diluted shares after the SAFEs convert plus the pool increase.
+- **YC seed guide**: Y Combinator, ["A guide to seed fundraising"](https://www.ycombinator.com/library/4A-a-guide-to-seed-fundraising),
+  read in full on 22 November 2026; the page shows no date, and its round sizes are old. The runway plan quotes two
+  of its lines word for word in its assumptions: for a startup that will need a follow-on round, the guide says to
+  raise enough to reach the next "fundable" milestone, "which will usually be 12 to 18 months later", and founders
+  raise "for N months (usually 12-18)". The runway band's default of 18 months is the top of that range (a
+  benchmark, not a rule); the time left to raise the next round is ours, unverified.
 - **Pre-money SAFEs are not supported.** YC's page has no current pre-money SAFE form; the user guide works one
   pre-money Safe Price only as an example, not as a form's definitions, so they are left out.
 - **Unverified**: neither essay covers option pools, convertible notes, preferred stock or the finer vesting terms,
@@ -400,6 +407,50 @@ in the post-money, and a pre-money worked from the post-money or the percent tha
 dollar, say) or that falls outside the calculator's bounds, when SAFEs, notes or a pool top-up need it as an input to
 the nested round.
 
+### Runway plan (YC seed guide for the milestone rule and the band; the rest unverified)
+
+Cash only: a founder's plan, its cases and the raises to compare, with no valuation, instrument or ownership (those
+are `deal_check`, `round` and `dilution`). Time t is in elapsed months from today.
+
+1. **Phases.** A phase starting in month a covers t from a - 1 until the next phase starts; the last runs on. Net burn
+   n = gross burn - revenue, flat within a phase. The cumulative net burn S(t) is continuous and piecewise linear.
+   A downside or lean case is its own phases, or the plan's with revenue × R/100 and gross burn × G/100 (each 100
+   when left out); the percents are the founder's, with no default.
+2. **Cash.** A = cash on hand - the floor (cash kept in the bank). A raise of I landing after L whole months adds I
+   at t = L (with L = 0, from the start): cash(t) = A - S(t) before L and A + I - S(t) from L on. No fees, interest or
+   collection lag; the whole raise lands at once.
+3. **Runway** R = the first t at which cash(t) goes below zero, worked segment by segment (breakpoints at the phase
+   starts and at L), with no month-by-month loop. Cash that touches zero and then holds or rises has not run out, and
+   cash exactly at zero as the money lands survives. When the last phase's net burn is not positive and the cash has
+   not run out by then, there is no R. A row with no raise is always worked (option 0), on every case. With a later
+   raise the result also gives whether the cash ran out before it landed (R is then the no-raise runway), the cash
+   above the floor just before it lands, and R - L.
+4. **Milestones.** With T = month + `months_to_raise` (the month alone when that is not given), a milestone is covered
+   when R ≥ T or there is no R; the slack is R - month, and start raising by is R - `months_to_raise`. The rule
+   follows the YC seed guide's "next “fundable” milestone" (for a startup that will need a follow-on round); the
+   months to raise are the founder's, and leaving them is ours, unverified.
+5. **Required raise.** For each case, milestone and landing month (0 and every option's): I\* = max(0, the peak of
+   S(t) - A over t from L to T), the peak of a piecewise-linear function falling at a breakpoint or an end. There is
+   none when S(t) > A somewhere from 0 to the earlier of L and T: the cash runs out before the money lands. An
+   option landing at L covers the milestone exactly when its amount is at least I\*; the tests check that on random
+   plans.
+6. **Checks.** A stated runway with no raise is checked against the plan's no-raise runway; each option's stated
+   runway against its plan runway from today, or less L when it counts from landing; within 2% of the computed one
+   (an input, the edge included) is consistent. Each option's use-of-funds lines are checked against its amount as
+   `deal_check` checks them (one shared helper, the same tolerances). With no R, a runway claim is not checked, and
+   neither is a runway counted from landing when the cash runs out before the money lands (there is no R - L; the
+   stated line says so and `cash_out_before_raise_lands` fires). The verdict is `deal_check`'s rule.
+7. **Flags**, never errors: `cash_never_runs_out`, `cash_out_before_raise_lands`, `milestone_short_on_plan` (a raise
+   short on the plan), `downside_short_where_plan_covers`, `covered_without_raise`, `start_raising_date_passed` (the
+   no-raise plan runway less the months to raise is at or before today), `no_time_to_raise_given`, and
+   `runway_below_band` (a raise lasting under 18 months on the plan, from today; an input, and a benchmark, not a
+   rule: 18 is the top of the YC seed guide's "raising for N months (usually 12-18)", so a raise inside 12 to 18 is
+   within the guide's range and the flag is a question, not a shortfall).
+
+A refusal names the field: a first case that is not the plan, a plan given as percents, a case named twice, a case
+with both phases and a percent or neither, phases that do not start at month 1 or do not move later, a floor above the
+cash, a milestone given twice, use-of-funds lines that mix amounts and percents, and every list over its cap.
+
 </details>
 
 ## Worked examples
@@ -536,6 +587,34 @@ leaves out the SAFEs and the pool top-up, both paid for out of the pre-money: ev
 its stake. The report also flags
 `pool_in_pre_money_lowers_price` and `conversions_bought_by_pre_money` as what a VC is likely to ask about.
 
+**How long a raise lasts (Company W, made up).** $500k in the bank; months 1 to 3 spend $120k a month with $10k of
+revenue, months 4 to 12 spend $220k with $25k, and from month 13 $300k with $60k. The downside has half the revenue.
+$3M or $4M raised now; the milestone is month 15, with 6 months to raise the next round:
+
+```
+equity_calculator runway_plan --cash-on-hand 500000 --phase "from-month=1 gross-burn=120000 revenue=10000" \
+    --phase "from-month=4 gross-burn=220000 revenue=25000" --phase "from-month=13 gross-burn=300000 revenue=60000" \
+    --downside-revenue-percent 50 --raise "amount=3000000" --raise "amount=4000000" --milestone 15 --months-to-raise 6
+  Runway, plan, no raise                                                       3.87 months  months until cash less the floor goes below zero
+  Start raising by, plan, no raise                                            -2.13 months  runway - months to raise
+  Runway, plan, raise 1                                                       17.90 months  months until cash less the floor goes below zero
+  Runway, plan, raise 2                                                       22.06 months  months until cash less the floor goes below zero
+  Runway, downside, no raise                                                   3.75 months  months until cash less the floor goes below zero
+  Runway, downside, raise 1                                                   16.77 months  months until cash less the floor goes below zero
+  Runway, downside, raise 2                                                   20.47 months  months until cash less the floor goes below zero
+  Milestone 1 (month 15), plan, raise 1: verdict                                     short  covered when the runway reaches month 21
+  Milestone 1 (month 15), plan, raise 2: verdict                                   covered  covered when the runway reaches month 21
+  Milestone 1 (month 15), downside, raise 1: verdict                                 short  covered when the runway reaches month 21
+  Milestone 1 (month 15), downside, raise 2: verdict                                 short  covered when the runway reaches month 21
+  Required raise, milestone 1, plan, landing month 0                         $3,745,000.00  smallest raise keeping cash at or above the floor to month 21
+  Required raise, milestone 1, downside, landing month 0                     $4,142,500.00  smallest raise keeping cash at or above the floor to month 21
+```
+
+With no raise the cash lasts 3.87 months, so the next raise is already late. $3M lasts 17.90 months, short of month
+21; $4M lasts 22.06 months on the plan but 20.47 on the downside, short there too. The smallest raise that reaches
+month 21 now is $3,745,000.00 on the plan and $4,142,500.00 on the downside. The report also flags
+`milestone_short_on_plan`, `downside_short_where_plan_covers`, `start_raising_date_passed` and `runway_below_band`.
+
 ## Using it
 
 ```
@@ -561,6 +640,11 @@ equity_calculator deal_check --investment I [--pre-money V] [--post-money P] [--
     [--current-monthly-gross-burn B [--current-monthly-revenue R]] [--stated-runway-months M]
     [--use-of-funds AMOUNT|PCT%]... [--tolerance-points P] [--tolerance-percent Q]
     [--dilution-band-percent D] [--runway-band-months M]
+equity_calculator runway_plan --cash-on-hand C [--cash-floor F] --phase "TERMS"...
+    [--downside-phase "TERMS"... | --downside-revenue-percent R [--downside-gross-burn-percent G]]
+    [--lean-phase "TERMS"... | --lean-revenue-percent R [--lean-gross-burn-percent G]]
+    [--raise "TERMS"]... [--raise-use-of-funds "N AMOUNT|PCT%"]... [--milestone M]... [--months-to-raise T]
+    [--stated-runway-months S] [--tolerance-points P] [--tolerance-percent Q] [--runway-band-months B]
 ```
 
 `deal_check` needs `--investment` and at least one of `--pre-money`, `--post-money` and `--stated-investor-percent`.
@@ -568,6 +652,12 @@ Its `--safe` and `--note` take the same terms as `round`'s. `--holder-shares` gi
 of FD instead of `--holder-percent`, and `--unissued-pool-percent` gives the unissued pool as a percent of FD instead of
 `--unissued-pool-shares`. Each `--use-of-funds` is one line of the deck's use of
 funds, an amount (`1250000`) or a percent of the raise (`50%`), all lines the same kind.
+
+`runway_plan` needs `--cash-on-hand` and at least one `--phase`, the plan's, the first starting at month 1. A downside
+or a lean case is its own `--downside-phase` / `--lean-phase` items or the percents of the plan's revenue and gross
+burn, not both. Each `--raise` is one option to compare, and each `--raise-use-of-funds` is one line of the raise it
+names by number (`1` is the first `--raise`), an amount or a percent of that raise. `--milestone` is a month from
+today; `--stated-runway-months` is the runway stated with no raise.
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
 `--class`. Each repeated flag is one instrument, round or class, given as one quoted string of `key=value` terms and
@@ -579,6 +669,8 @@ bare flags in any order, after the amount for a SAFE or the principal for a note
 | `--note`  | `PRINCIPAL interest-rate-percent=R (months-outstanding=M \| issue-date=YYYY-MM-DD conversion-date=YYYY-MM-DD) [compounding=simple\|annual\|monthly] [stub-rule=simple\|fractional_power] [day-count=actual_365\|actual_360] [valuation-cap=X] [discount-percent=D] [interest-paid-in-cash]` |
 | `--round` | `(investor-percent=N \| pre-money=V investment=I) [pool-percent=P]`                                                                                                                                                                                                                         |
 | `--class` | `shares=S invested=I [preference-multiple=M] [rank=K] [participation=none\|full\|capped] [cap-multiple=C]` (a cap only with `capped`)                                                                                                                                                       |
+| `--phase` | `from-month=M gross-burn=G [revenue=R]` (also `--downside-phase` and `--lean-phase`)                                                                                                                                                                                                        |
+| `--raise` | `amount=I [lands-month=L] [stated-runway-months=M] [stated-runway-from=today\|landing]`                                                                                                                                                                                                     |
 
 A note that names no `compounding` compounds `annual`, and one that names no `stub-rule` uses `fractional_power`.
 An unknown term, a term given twice, or a value that is not a number is refused, naming the flag.
@@ -627,7 +719,9 @@ as `"a"`) and `rounded` is the display value as a decimal string.
 Every decimal input has at most 28 significant digits, trailing zeros included, and a nonzero value at least 1e-15
 and under 1e16 in size. A share count is a whole number below 1e16. Number text is at most 100 characters. A round takes at
 most 50 SAFEs and notes, a dilution at most 20 rounds, a waterfall at most 12 preferred classes, ranked 1 to 12, and a
-deal check at most 50 SAFEs and notes and 20 use-of-funds lines.
+deal check at most 50 SAFEs and notes and 20 use-of-funds lines. A runway plan takes at most 3 cases (the plan, a
+downside and a lean case) of at most 12 phases, 6 raises of at most 20 use-of-funds lines each, and 10 milestones;
+its months are at most 600 and its months to raise at most 60.
 A note runs at most 600 months, or at most 18,262 days (about 50 years) between its dates; a vesting schedule, its
 cliff and every month asked about are at most 600 months. These limits keep every exact step small: the largest
 inputs compute in well under a second, and a value like `1e999999999` is refused at once instead of tying up the
@@ -644,7 +738,7 @@ tools do not check it.
 ## The Excel workbook
 
 There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` for the round, `Dilution`, `Vesting`,
-`Waterfall` or `Deal check`):
+`Waterfall`, `Deal check` or `Runway plan`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
@@ -668,14 +762,15 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
   does not calculate, such as a file preview or openpyxl's `data_only` read, shows them empty.
 - Totals are live `=SUM` formulas, so editing a part re-totals: the investor's post-money, total shares, total
   ownership and post-money (pool and round), the stake lost in all (dilution), vested in all and the grant (vesting), the total paid out
-  (waterfall), and the pre-money split and use-of-funds totals (deal check). A live total adds the rounded cells, so it can differ from the model's exact total in the last place
+  (waterfall), the pre-money split and use-of-funds totals (deal check), and each raise's use-of-funds total (runway plan). A live total adds the rounded cells, so it can differ from the model's exact total in the last place
   kept: a cent on the investor's post-money, a thousandth of a share on the pool's total shares, 0.000001 on its total
   ownership. The number formats hide that difference.
 - The pool's and the round's value rows, the waterfall's payouts, and a deal check's pre-money split and percent
   use-of-funds lines are rounded to the cent by largest remainder, so they add up to their rounded total exactly.
 - Verdict cells are coloured by conditional formatting: green for accept, grant and in the money, amber for break
-  even and at the money, red for reject, no grant and underwater. A deal check's verdicts are green for consistent,
-  red for mismatch and amber for not checked. A waterfall choice is blue when the class converts
+  even and at the money, red for reject, no grant and underwater. A deal check's and a runway plan's verdicts are green for
+  consistent, red for mismatch and amber for not checked; a runway plan's milestones are green when covered and red
+  when short. A waterfall choice is blue when the class converts
   and grey when it stays: neither is good or bad. The investor verdict recolours itself when an input changes;
   elsewhere, typing a different verdict recolours the cell.
 - The assumptions follow two rows below, under their own bold header: `Assumption`, `Setting`, `Statement` and
@@ -795,6 +890,20 @@ The `deal_check` scenario adds these, each only when the input uses it, then the
 | `tolerance`           | 0.5 points; 2% relative                                | `--tolerance-points`, `--tolerance-percent` | unverified                                  |
 | `dilution_band`       | 25%                                                    | `--dilution-band-percent`                   | unverified (a common benchmark, not a rule) |
 | `use_of_funds_rule`   | the lines add up to the raise                          | fixed                                       | unverified                                  |
+
+The `runway_plan` scenario adds these, each only when the input uses it:
+
+| Key                   | Default                                                                      | How to change it                            | Source                                                                      |
+| --------------------- | ---------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
+| `runway_rule`         | cash on hand less the floor, plus the raise, run down by the phased net burn | `--cash-floor`                              | unverified (standard arithmetic)                                            |
+| `phase_rule`          | a phase runs until the next starts; the last runs on                         | fixed                                       | unverified (a modelling choice)                                             |
+| `landing_rule`        | the whole raise lands at once, after its whole months                        | `lands-month=`                              | unverified (a modelling choice)                                             |
+| `derived_case_rule`   | the plan's phases scaled by the case's percents                              | give the case its own phases                | unverified (a modelling choice)                                             |
+| `milestone_rule`      | covered when the cash lasts to the month plus the months to raise            | `--months-to-raise`                         | YC seed guide ("next “fundable” milestone"); the months to raise unverified |
+| `required_raise_rule` | the smallest raise keeping cash at or above the floor to the target          | fixed                                       | unverified (standard arithmetic)                                            |
+| `tolerance`           | 0.5 points; 2% relative                                                      | `--tolerance-points`, `--tolerance-percent` | unverified                                                                  |
+| `runway_band`         | 18 months                                                                    | `--runway-band-months`                      | YC seed guide ("usually 12-18"; 18 is its top; a benchmark, not a rule)     |
+| `use_of_funds_rule`   | the lines add up to the raise                                                | fixed                                       | unverified                                                                  |
 
 </details>
 

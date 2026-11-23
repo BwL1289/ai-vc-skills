@@ -1,6 +1,6 @@
 # Command-line interface: stdout is the report.
 """``equity_calculator`` — an equity question: PG's two tests, the option pool, a round, dilution, vesting, an exit,
-or a fundraising ask checked before a VC reads it.
+a fundraising ask checked before a VC reads it, or how long a raise lasts on a founder's plan.
 
     equity_calculator investor (--equity-percent N | --pre-money V --investment I)
         (--outcome-multiplier M | --growth-percent G) [--holder-percent H]
@@ -24,6 +24,11 @@ or a fundraising ask checked before a VC reads it.
         [--current-monthly-gross-burn B [--current-monthly-revenue R]] [--stated-runway-months M]
         [--use-of-funds AMOUNT|PCT%]... [--tolerance-points P] [--tolerance-percent Q]
         [--dilution-band-percent D] [--runway-band-months M]
+    equity_calculator runway_plan --cash-on-hand C [--cash-floor F] (--phase "TERMS")...
+        [--downside-phase "TERMS"... | --downside-revenue-percent R [--downside-gross-burn-percent G]]
+        [--lean-phase "TERMS"... | --lean-revenue-percent R [--lean-gross-burn-percent G]]
+        [--raise "TERMS"]... [--raise-use-of-funds "N AMOUNT|PCT%"]... [--milestone M]... [--months-to-raise T]
+        [--stated-runway-months S] [--tolerance-points P] [--tolerance-percent Q] [--runway-band-months B]
 
 Every scenario also takes ``--json`` (print the whole result model, exact fractions included, instead of the
 report) and ``--xlsx PATH`` (also write the formatted workbook to PATH; the report then names it). The report is
@@ -36,8 +41,9 @@ as ``COLUMNS`` to wrap the help, none of which changes a number); its one output
 any folders on its path that do not exist yet; while saving, the Excel library also writes and deletes a short-lived
 file in the system's temporary folder (``TMPDIR`` if set), so that folder must be writable. The number readers are
 ``equity_calculator.cli_numbers``; each scenario's flags are ``equity_calculator.cli_arguments``; a ``--safe``,
-``--note``, ``--round``, ``--class`` or ``--use-of-funds`` is one argument of terms
-(``equity_calculator.cli_instruments``). A refusal names the flag, or a repeated flag's item as ``--note #2`` (the
+``--note``, ``--round``, ``--class``, ``--use-of-funds``, ``--phase``, ``--raise`` or ``--raise-use-of-funds`` is one
+argument of terms (``equity_calculator.cli_instruments``); a runway plan's flags become its cases and raises in
+``equity_calculator.cli_runway_plan``. A refusal names the flag, or a repeated flag's item as ``--note #2`` (the
 second instrument in the order given) and its term.
 """
 
@@ -47,9 +53,9 @@ import argparse
 import asyncio
 import re
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import get_args
+from typing import Any, get_args
 
 from equity_calculator.cli_arguments import (
     deal_check_arguments,
@@ -58,10 +64,12 @@ from equity_calculator.cli_arguments import (
     investor_arguments,
     pool_arguments,
     round_arguments,
+    runway_plan_arguments,
     vesting_arguments,
     waterfall_arguments,
 )
 from equity_calculator.cli_numbers import parse_workbook_path
+from equity_calculator.cli_runway_plan import Places, runway_plan_fields
 from equity_calculator.errors import EquityComputeError
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
@@ -72,6 +80,7 @@ from equity_calculator.schemas.equity import (
     InvestorInput,
     PoolInput,
     RoundInput,
+    RunwayPlanInput,
     ScenarioInput,
     VestingInput,
     WaterfallInput,
@@ -92,7 +101,10 @@ _INPUT_MODELS: dict[str, type[ScenarioInput]] = {
     "vesting": VestingInput,
     "waterfall": WaterfallInput,
     "deal_check": DealCheckInput,
+    "runway_plan": RunwayPlanInput,
 }
+# A scenario whose flags do not map one to one onto its model's fields: the fields they make, and where each came from.
+_SHAPES: dict[str, Callable[[dict[str, Any]], tuple[dict[str, object], Places]]] = {"runway_plan": runway_plan_fields}
 _OUTPUT_FLAGS = ("json", "xlsx")
 _FIRST = 0
 _TOO_SHORT = "too_short"
@@ -127,6 +139,11 @@ def _build_parser() -> argparse.ArgumentParser:
             "Check your raise before a VC does: valuation, ownership after the round, runway, the deck's figures",
             deal_check_arguments,
         ),
+        (
+            "runway_plan",
+            "How long each raise lasts on your plan and a downside, which milestones it reaches, how much is needed",
+            runway_plan_arguments,
+        ),
     )
     for name, summary, add_arguments in scenarios_help:
         add_arguments(scenarios.add_parser(name, parents=[outputs], help=summary, description=summary))
@@ -145,9 +162,11 @@ def _flags_by_field(parser: argparse.ArgumentParser, scenario: str) -> dict[str,
 
 
 def _item_models(annotation: object) -> list[type[BaseModel]]:
-    """The models inside a field's type: a list's items, a union's members (the items a repeated flag adds)."""
+    """The models inside a field's type: a list's items, a union's members (the items a repeated flag adds), and the
+    models nested in those (a runway plan's case holds its phases)."""
     if isinstance(annotation, type) and issubclass(annotation, BaseModel):
-        return [annotation]
+        nested = [model for field in annotation.model_fields.values() for model in _item_models(field.annotation)]
+        return [annotation, *nested]
 
     return [model for argument in get_args(annotation) for model in _item_models(argument)]
 
@@ -174,8 +193,15 @@ def _cli_names(model: type[BaseModel], flags: dict[str, str]) -> dict[str, str]:
     return names
 
 
-def _place(location: tuple[int | str, ...], flags: dict[str, str]) -> str:
-    """Where a failure is, as the command line names it: a flag, or a repeated flag's item and its term."""
+def _place(location: tuple[int | str, ...], flags: dict[str, str], places: Places) -> str:
+    """Where a failure is, as the command line names it: a flag, or a repeated flag's item and its term.
+
+    A location under one of ``places`` (the longest that matches) is named by the flag that place came from.
+    """
+    for length in range(len(location), 0, -1):
+        if location[:length] in places:
+            return _named_place(places[location[:length]], location[length:])
+
     field, *rest = location
     flag = flags.get(str(field), _as_flag(str(field)))
     if not rest or not isinstance(rest[_FIRST], int):
@@ -190,7 +216,15 @@ def _place(location: tuple[int | str, ...], flags: dict[str, str]) -> str:
     return " ".join([place, *(_as_term(str(part)) for part in inner)])
 
 
-def _input_error(model: type[BaseModel], flags: dict[str, str], error: ValidationError) -> str:
+def _named_place(flag: str, rest: tuple[int | str, ...]) -> str:
+    """``flag``, then the rest of a location under it: an item's number from 1 and each term as the command line
+    writes it."""
+    parts = [f"#{part + _ORDINAL_START}" if isinstance(part, int) else _as_term(part) for part in rest]
+
+    return " ".join([flag, *parts])
+
+
+def _input_error(model: type[BaseModel], flags: dict[str, str], error: ValidationError, places: Places) -> str:
     """The validation failures as one line each, naming flags and terms rather than model fields."""
     names = _cli_names(model, flags)
     pattern = re.compile(r"\b(" + "|".join(sorted(map(re.escape, names), key=len, reverse=True)) + r")\b")
@@ -203,7 +237,7 @@ def _input_error(model: type[BaseModel], flags: dict[str, str], error: Validatio
             continue
         message = pattern.sub(lambda match: names[match.group(1)], failure["msg"].removeprefix(_VALUE_ERROR_PREFIX))
         location = failure["loc"]
-        lines.append(f"{_place(location, flags)}: {message}" if location else message)
+        lines.append(f"{_place(location, flags, places)}: {message}" if location else message)
 
     return "\n".join(lines)
 
@@ -211,7 +245,8 @@ def _input_error(model: type[BaseModel], flags: dict[str, str], error: Validatio
 async def run(argv: Sequence[str] | None = None) -> str:
     """Parse ``argv``, work the scenario and return its printout (``main`` writes it; tests await this).
 
-    Raises ``SystemExit`` with a message for a bad argument, an input the model refuses, an input with no answer
+    Raises ``SystemExit`` with a message for a bad argument, an input the model refuses (or, for a runway plan, a
+    ``--raise-use-of-funds`` line naming a raise not given), an input with no answer
     (``equity_calculator.errors``), an unwritable workbook, or a workbook value too large for a cell
     (``ResultOutOfRange``).
     """
@@ -223,10 +258,14 @@ async def run(argv: Sequence[str] | None = None) -> str:
         for name, value in vars(args).items()
         if name not in (*_OUTPUT_FLAGS, "scenario") and value is not None
     }
+    places: Places = {}
+    shape = _SHAPES.get(args.scenario)
+    if shape is not None:
+        given, places = shape(given)
     try:
         inputs = model.model_validate(given)
     except ValidationError as error:
-        raise SystemExit(_input_error(model, _flags_by_field(parser, args.scenario), error)) from None
+        raise SystemExit(_input_error(model, _flags_by_field(parser, args.scenario), error, places)) from None
 
     try:
         result = compute(inputs)
