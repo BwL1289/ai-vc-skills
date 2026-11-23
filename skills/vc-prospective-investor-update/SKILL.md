@@ -169,8 +169,8 @@ draft written at step 8.
 7. **Other figures:** quote each as stated, with "not checked: no tool computes this".
 8. **Draft or revise.** Draft mode: write the update in the shape above from the founder's material only, every gap a
    bracketed ask. Review mode: keep the founder's draft and words; change only what a status, the calculator, a figure
-   that Differs from the current-investor update or a kept finding requires. With more than one ask in the material,
-   keep one and put the choice in the open asks (`[the one ask for this update: A or B]`).
+   or definition that Differs from the current-investor update or a kept finding requires. With more than one ask in the
+   material, keep one and put the choice in the open asks (`[the one ask for this update: A or B]`).
 9. **Run the reader pass** (below) on the draft it judges (the founder's draft as given in review mode): attack, check
    the quotes, refute, rank. Revise the draft for every kept finding, using only the founder's facts or a bracketed
    ask.
@@ -355,13 +355,14 @@ is the founder's, as given: a line this skill added at step 8 is not in it.
 ### The ranked fix list
 
 Order the kept objections in three tiers: **fix before sending**, **worth fixing**, **minor**. The calculator's
-mismatches lead the first tier, with every figure or definition that Differs from the current-investor update (step 5);
-a Dropped or Restated metric status, or a last-time item with no line in the founder's draft (No word, whatever the
-notes say), goes in it too, even though the revised draft adds its line. An entry the tie-out put in the list takes the
-lens names of any kept objection about the same line, and is not listed twice. Within a tier, an objection raised by
-more than one lens comes first. The tier is a judgment: give no percentages and no score. Each entry: the section, the
-line quoted, why an investor is likely to read it that way in one or two plain sentences, and the change, using only the
-founder's facts or a bracketed ask. The draft is revised for every kept entry.
+mismatches lead the first tier, with every figure or definition that Differs from the current-investor update (step 5),
+though a mismatch with the claim below the printed runway is minor at most (Runway); a Dropped or Restated metric
+status, or a last-time item with no line in the founder's draft (No word, whatever the notes say), goes in it too, even
+though the revised draft adds its line. An entry the tie-out put in the list takes the lens names of any kept objection
+about the same line, and is not listed twice. Within a tier, an objection raised by more than one lens comes first. The
+tier is a judgment: give no percentages and no score. Each entry: the section, the line quoted, why an investor is
+likely to read it that way in one or two plain sentences, and the change, using only the founder's facts or a bracketed
+ask. The draft is revised for every kept entry.
 
 ## Patterns that cost a prospect's trust
 

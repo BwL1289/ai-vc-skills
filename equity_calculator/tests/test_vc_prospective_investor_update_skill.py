@@ -615,6 +615,7 @@ def test_the_ranked_fix_list_has_the_three_tiers_and_no_score() -> None:
         "whatever the notes say), goes in it too" in ranked
     )
     assert "takes the lens names of any kept objection about the same line, and is not listed twice" in ranked
+    assert "though a mismatch with the claim below the printed runway is minor at most (Runway)" in ranked
     assert "give no percentages and no score" in ranked
     assert _FIX_COLUMNS.search(answering) and "**Dropped,**" in answering
     assert _TIE_OUT_COLUMNS in answering
@@ -788,7 +789,7 @@ def test_a_figure_that_differs_from_the_current_investor_update_is_checked_witho
     assert "every figure and definition in this period's update to current investors, when given" in steps
     assert "(in a draft, the notes or the request)" in steps
     assert f"**Matches** or **{_DIFFERS}**" in steps and "This check is this skill's own, not a metric status" in steps
-    assert f"a figure that {_DIFFERS} or a kept finding requires" in steps
+    assert f"a figure or definition that {_DIFFERS} or a kept finding requires" in steps
     assert "every figure and definition this period's current-investor update also gives is word for word the same" in (
         steps
     )
