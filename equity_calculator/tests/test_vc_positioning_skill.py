@@ -217,6 +217,7 @@ def test_one_eval_has_the_phrases_that_cost_the_meeting() -> None:
     answer = _section("## Expected answer", (_ROOT / "evals" / "vc-positioning" / name).read_text(encoding="utf-8"))
 
     assert "survive" in answer and "We have no competitors." in answer
+    assert "names the vc-market-sizing skill, which checks that size" in _unwrapped(answer)
 
 
 def test_one_eval_drops_an_objection_by_quoting_the_line_that_answers_it() -> None:

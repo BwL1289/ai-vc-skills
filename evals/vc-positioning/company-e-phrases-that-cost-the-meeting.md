@@ -32,7 +32,8 @@ to check.
   traction figure.
 - "Our projections are conservative" is flagged on the say-and-avoid list and labelled unverified.
 - It neither confirms nor recomputes the $500M and does not work out 1% of $50B; it asks for who exactly buys, how many
-  of them there are, and what each pays.
+  of them there are, and what each pays, and names the vc-market-sizing skill, which checks that size once the founder
+  gives those figures.
 - The rewrites contain no number, customer or growth claim the founder did not give. Traction is a bracketed ask, such
   as `[paying customers today]`, and competition is `[what customers use today instead]`.
 - The team has no line to quote, so it is a gap in the open asks, not an objection.
@@ -47,7 +48,8 @@ answer is trimmed; [...] marks each cut.
 **Partial: one clause met only in part.** It made no calculator call, kept all four objections with the founder's lines
 quoted, flagged "Our projections are conservative" as unverified and added no fact. It ran the adversarial review only
 in part: it ran the six lenses inline in one agent although it had a subagent tool, and gave no refute pass per
-objection. Since this run the skill says to use subagents however short the material; the eval has not been run again.
+objection. Since this run the skill says to use subagents however short the material, and sends a market size to the
+vc-market-sizing skill; the eval has not been run again.
 
 > Almost every sentence in this opening is a phrase investors discount, and the opening contains no checkable fact about the company. I can restructure it, but the facts have to come from you, so the rewrite below has bracketed gaps for you to fill.
 >

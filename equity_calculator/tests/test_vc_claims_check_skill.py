@@ -15,12 +15,14 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import get_args
 
 import pytest
 from equity_calculator.__main__ import _INPUT_MODELS
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
-from equity_calculator.schemas.equity_deal_check import DealCheckInput
+from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealFlag
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag
 from equity_calculator.text import render_sheet
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -246,6 +248,7 @@ def test_one_eval_flags_the_patterns_a_vc_discounts() -> None:
     assert "letters of intent" in prompts[path] and "1% of it" in prompts[path]
     assert answer.count("Will be discounted") >= len(_PATTERNS) - 1
     assert "does not work out 1% of $40B" in answer
+    assert "the fix names the vc-market-sizing skill, which checks that bottom-up size" in answer
 
 
 def test_one_eval_keeps_a_grounded_attack_and_drops_one_answered_and_one_not_grounded() -> None:
@@ -392,6 +395,7 @@ def test_an_understated_runway_is_never_contradicted_or_checked_first() -> None:
     assert "A runway claim below the computed runway" in skeptic and "are not among them" in skeptic
     # A runway the tool gives no check row for says why, in words, since the MCP result gives flag codes only.
     assert "`net_burn_not_positive` or `cash_never_runs_out` flag (revenue covers the burn" in steps
+    assert "net_burn_not_positive" in get_args(DealFlag) and "cash_never_runs_out" in get_args(RunwayPlanFlag)
 
 
 def test_the_skeptic_raises_every_attack_and_the_refute_pass_judges_one_each() -> None:
