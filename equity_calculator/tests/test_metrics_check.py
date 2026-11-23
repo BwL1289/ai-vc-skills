@@ -287,12 +287,15 @@ def test_money_within_the_relative_tolerance_is_consistent_edge_included(stated:
     assert _checks(result)[("arr", None)][2] == verdict
 
 
-def test_a_zero_tolerance_needs_the_exact_figure() -> None:
+def test_a_zero_tolerance_needs_the_exact_figure_or_its_rounding_to_the_places_typed() -> None:
+    """Payback 9.6 months with no tolerance: 9.6 and 10 (9.6 to no places) hold; 9.61 (9.60 to two places) does not."""
     exact = metrics_check(**{**METRICS_AN_MODEL, "tolerance_percent": "0"})
     off = metrics_check(**{**METRICS_AN_MODEL, "tolerance_percent": "0", "stated_cac_payback_months": "9.61"})
+    rounded = metrics_check(**{**METRICS_AN_MODEL, "tolerance_percent": "0", "stated_cac_payback_months": "10"})
 
     assert exact.verdict == "consistent"
     assert off.verdict == "mismatch"
+    assert rounded.verdict == "consistent"
 
 
 def test_a_named_churn_basis_gets_one_row_and_an_unlabelled_one_a_row_per_basis() -> None:
@@ -414,23 +417,6 @@ _FLAG_CASES: dict[MetricsFlag, tuple[dict[str, object], dict[str, object]]] = {
     "consistent_beyond_rounding": (
         {"starting_recurring": "100", "churned_recurring": "2.1", "stated_churn_percent": "1.7"},
         {"starting_recurring": "100", "churned_recurring": "2.1", "stated_churn_percent": "2"},
-    ),
-    # Payback 124/10 = 12.4 months: a stated 12 is past 2% (0.248 months) but is 12.4 rounded; 12.0 is neither.
-    "mismatch_within_rounding": (
-        {
-            "starting_recurring": "0",
-            "new_recurring": "10",
-            "sales_marketing_spend": "124",
-            "gross_margin_percent": "100",
-            "stated_cac_payback_months": "12",
-        },
-        {
-            "starting_recurring": "0",
-            "new_recurring": "10",
-            "sales_marketing_spend": "124",
-            "gross_margin_percent": "100",
-            "stated_cac_payback_months": "12.0",
-        },
     ),
 }
 # The burn-multiple pair differs only in the stated figure: on new ARR (12·10 = 120) 60/120 = 1/2; net new ARR 60
@@ -676,8 +662,8 @@ def test_a_stated_gross_retention_above_100_within_the_tolerance_is_consistent_a
     assert (row.verdict, result.verdict) == (verdict, verdict)
 
 
-# One-place, two-place and whole zeros, each against a computed 0.4% (or 0.416667x): only a whole "0" (half a point,
-# or half of 1x, either way) is a rounding of it; "0.0" allows 0.05 and "0.00" 0.005, as typed.
+# One-place, two-place and whole zeros, each against a computed 0.4% (or 0.416667x): only a whole "0" is a rounding of
+# it (0.4 rounds half away from zero to 0); "0.0" holds only below 0.05 and "0.00" below 0.005, as typed.
 _ZERO_FIELDS: dict[str, dict[str, object]] = {
     "stated_nrr_percent": {"period_months": 12, "starting_recurring": "100000", "churned_recurring": "99600"},
     "stated_grr_percent": {"period_months": 12, "starting_recurring": "100000", "churned_recurring": "99600"},
@@ -705,11 +691,12 @@ def test_a_stated_zero_is_read_with_the_places_it_is_written_with(field: str, ty
     (row,) = result.checks
     assert row.stated.exact == 0
     assert row.within_rounding is within
-    rounding_flags = {"consistent_beyond_rounding", "mismatch_within_rounding"} & set(result.flags)
-    if row.verdict == "consistent":
-        assert rounding_flags == (set() if within else {"consistent_beyond_rounding"})
-    else:
-        assert rounding_flags == ({"mismatch_within_rounding"} if within else set())
+    # A rounding is consistent whatever the tolerance (the multiple's 0.416667x is far past 2% of itself); a figure
+    # consistent without being one is flagged.
+    if within:
+        assert row.verdict == "consistent"
+    flagged = "consistent_beyond_rounding" in result.flags
+    assert flagged is (row.verdict == "consistent" and not within)
 
 
 def test_a_stated_zero_keeps_its_places_when_its_echoed_inputs_are_fed_back() -> None:
@@ -728,16 +715,27 @@ def test_a_stated_zero_keeps_its_places_when_its_echoed_inputs_are_fed_back() ->
     [
         ("12", "124", True),
         ("12.0", "124", False),
-        ("12", "125", True),
-        ("12", "125.01", False),
+        ("12", "125", False),
+        ("13", "125", True),
+        ("12", "115", True),
+        ("12", "114.99", False),
         ("1.2E+1", "124", True),
     ],
-    ids=["whole-month-rounds", "one-place-does-not", "half-a-month-edge", "just-past-half", "exponent-form-whole"],
+    ids=[
+        "whole-month-rounds",
+        "one-place-does-not",
+        "half-goes-up-not-to-12",
+        "half-goes-up-to-13",
+        "half-below-rounds-up",
+        "just-below-half",
+        "exponent-form-whole",
+    ],
 )
 def test_each_row_says_whether_the_stated_figure_is_a_rounding_of_the_computed_one(
     stated: str, spend: str, within: bool
 ) -> None:
-    """Payback = spend / (10 x 100%): the stated figure is a rounding when within half its own last place."""
+    """Payback = spend / (10 x 100%): the stated figure is a rounding when the computed figure, rounded half away from
+    zero to the stated figure's own places, is it (12.5 rounds to 13, never to 12; 11.5 rounds to 12)."""
     result = metrics_check(
         period_months=12,
         starting_recurring="0",
@@ -763,6 +761,120 @@ def test_the_rounding_test_reads_a_percent_in_points_and_leaves_money_out() -> N
     assert "consistent_beyond_rounding" in off.flags
     assert exact.checks[0].within_rounding is True
     assert "consistent_beyond_rounding" not in exact.flags
+
+
+# Payback = spend / (10 x 100%) months, beside the deck's figure, with the default 2% relative tolerance.
+_PAYBACK = {"period_months": 12, "starting_recurring": "0", "new_recurring": "10", "gross_margin_percent": "100"}
+
+
+@pytest.mark.parametrize(
+    ("stated", "spend", "verdict", "within"),
+    [
+        ("12", "124", "consistent", True),
+        ("12.0", "124", "mismatch", False),
+        ("12.4", "124", "consistent", True),
+        ("12", "125", "mismatch", False),
+        ("13", "125", "consistent", True),
+    ],
+    ids=["12-against-12.40", "12.0-against-12.40", "exact", "12-against-12.5", "13-against-12.5"],
+)
+def test_a_figure_that_is_the_computed_one_rounded_to_its_places_is_consistent_past_the_tolerance(
+    stated: str, spend: str, verdict: str, within: bool
+) -> None:
+    """The operator's ruling: a stated 12 months against a computed 12.40 is consistent, though 0.4 months is past 2%
+    of 12.4 (0.248); "12.0" claims a place 12.4 does not round to. At the half, 12.5 rounds away from zero to 13: 13
+    holds and 12 does not (12.5 - 12 = 0.5 is past 2% of 12.5 as well)."""
+    result = metrics_check(**_PAYBACK, sales_marketing_spend=spend, stated_cac_payback_months=stated)
+
+    (row,) = result.checks
+    assert (row.verdict, row.within_rounding, result.verdict) == (verdict, within, verdict)
+    assert "consistent_beyond_rounding" not in result.flags
+
+
+@pytest.mark.parametrize(
+    ("churned", "points", "verdict", "within"),
+    [
+        ("2.4", "0.5", "consistent", True),
+        ("2.4", "0.1", "consistent", True),
+        ("2.6", "0.5", "mismatch", False),
+        ("2.5", "0.1", "mismatch", False),
+        ("1.5", "0.1", "consistent", True),
+    ],
+    ids=["2.4-default", "2.4-tight-tolerance", "2.6", "2.5-rounds-up-to-3", "1.5-rounds-up-to-2"],
+)
+def test_a_stated_2_percent_churn_holds_on_what_rounds_to_2(
+    churned: str, points: str, verdict: str, within: bool
+) -> None:
+    """The ruling's churn: "2%" monthly against a computed 2.4% is consistent because 2.4 rounds to 2, even with the
+    tolerance tightened to 0.1 points; against 2.6% it is not. 2.5% rounds to 3, 1.5% to 2."""
+    result = metrics_check(
+        period_months=1,
+        starting_recurring="100",
+        churned_recurring=churned,
+        stated_churn_percent="2",
+        stated_churn_basis="gross_revenue",
+        tolerance_points=points,
+    )
+
+    (row,) = result.checks
+    assert (row.verdict, row.within_rounding) == (verdict, within)
+
+
+@pytest.mark.parametrize(
+    ("typed", "churned", "verdict"),
+    [("0.0", "40", "consistent"), ("0.0", "50", "mismatch"), ("0", "400", "consistent"), ("0", "500", "mismatch")],
+    ids=["0.0-against-0.04", "0.0-against-0.05", "0-against-0.4", "0-against-0.5"],
+)
+def test_a_stated_zero_rounds_from_the_places_it_is_typed_with(typed: str, churned: str, verdict: str) -> None:
+    """No tolerance, so only the rounding decides: "0.0" holds a computed 0.04% (0.0 to one place) and not 0.05%
+    (0.1); "0" holds 0.4% and not 0.5% (half away from zero, to 1)."""
+    result = metrics_check(
+        period_months=1,
+        starting_recurring="100000",
+        churned_recurring=churned,
+        stated_churn_percent=typed,
+        stated_churn_basis="gross_revenue",
+        tolerance_points="0",
+    )
+
+    (row,) = result.checks
+    assert (row.verdict, row.within_rounding) == (verdict, verdict == "consistent")
+
+
+@pytest.mark.parametrize(
+    ("stated", "verdict"),
+    [("-2", "consistent"), ("-3", "mismatch"), ("-1.6", "consistent"), ("-1.5", "mismatch")],
+)
+def test_a_negative_figure_rounds_half_away_from_zero(stated: str, verdict: str) -> None:
+    """Net revenue churn (1,550 - 3,100)/100k = -1.55%, no tolerance: -1.55 rounds to -2 (not -1) and to -1.6 (not
+    -1.5), away from zero as a positive figure does."""
+    result = metrics_check(
+        period_months=1,
+        starting_recurring="100000",
+        expansion_recurring="3100",
+        churned_recurring="1550",
+        stated_churn_percent=stated,
+        stated_churn_basis="net_revenue",
+        tolerance_points="0",
+    )
+
+    (row,) = result.checks
+    assert row.computed is not None and row.computed.exact == Fraction(-155, 10000)
+    assert (row.verdict, row.within_rounding) == (verdict, verdict == "consistent")
+
+
+def test_a_cause_flag_reads_the_other_definition_with_the_same_rounding() -> None:
+    """Spend 124 on 10 of new monthly revenue at 50% margin: 24.8 months on gross margin, 12.4 on revenue alone. A
+    stated "12" is a mismatch against 24.8, and it is the revenue-only payback rounded to its places, though 0.4 months
+    is past 2% of 12.4 (0.248), so the flag names that cause; a stated "11" is neither."""
+    parts = {**_PAYBACK, "gross_margin_percent": "50", "sales_marketing_spend": "124"}
+    rounded = metrics_check(**parts, stated_cac_payback_months="12")
+    neither = metrics_check(**parts, stated_cac_payback_months="11")
+
+    assert [row.verdict for row in rounded.checks] == ["mismatch"]
+    assert "stated_payback_not_margin_adjusted" in rounded.flags
+    assert [row.verdict for row in neither.checks] == ["mismatch"]
+    assert "stated_payback_not_margin_adjusted" not in neither.flags
 
 
 def test_a_revenue_only_payback_already_past_the_band_is_flagged_and_the_row_says_how_far_it_applies() -> None:

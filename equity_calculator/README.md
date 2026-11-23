@@ -517,24 +517,30 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    customer's revenue / the period's revenue (a16z), with no benchmark.
 5. **Checks.** Each stated figure is checked with `deal_check`'s tolerances (0.5 points for a percent, 2% of the
    computed value for the rest, each an input, the edge included); a mismatch whose difference shows as equal to the
-   tolerance says it is just over it. Each percent, months or multiple row also says whether the stated figure is the
-   computed one rounded to the places it is written with (within half its last place, so a stated `12` covers 11.5
-   to 12.5 and `12.0` covers 11.95 to 12.05); money has no such row. A stated churn with a basis is checked on that
-   basis; with none, on every basis the inputs allow, and it holds when any does; a churn below zero is checked only
-   as net revenue churn. A stated gross retention above 100% is checked like any other figure: a mismatch unless it
-   is within the tolerance of the computed figure (100.4% against 99.95% is consistent). A stated zero keeps the
-   places it is written with for this test, so `0.0` covers -0.05 to 0.05 and `0` covers -0.5 to 0.5. A stated payback
-   is checked on gross margin when one is given. A stated burn multiple with no multiple to work (step 4) comes back
+   tolerance says it is just over it. A stated percent, months or multiple is also consistent, whatever the
+   tolerance, when it is the computed figure rounded half away from zero to the places it is written with, since
+   people write figures rounded to the places they show: a stated `12` months holds a computed 11.5 up to, but not
+   including, 12.5 (12.40 holds, though 0.4 months is past 2% of it; 12.5 rounds to 13), `12.0` holds 11.95 up to
+   12.05, and a monthly churn stated as `2` (2%) holds 2.4% but not 2.6%. Its row says whether the stated figure is that
+   rounding ("rounds to the deck's"). Money keeps the tolerance alone and has no such row, since a figure like $1.2M
+   carries no places once typed as 1200000. A stated churn with a basis is checked on that basis; with none, on
+   every basis the inputs allow, and it holds when any does; a churn below zero is checked only as net revenue churn,
+   and rounds away from zero as a positive figure does (-1.55% is -2 to no places and -1.6 to one). A stated gross retention
+   above 100% is checked like any other figure: a mismatch unless it is within the tolerance of the computed figure
+   or its rounding (100.4% against 99.95% is consistent). A stated zero keeps the places it is written with for the
+   rounding, so `0.0` holds -0.05 to 0.05 and `0` holds -0.5 to 0.5, both ends left out; send each stated percent,
+   months or multiple as text, with the places the document writes. A stated payback is checked on gross margin when
+   one is given. A stated burn multiple with no multiple to work (step 4) comes back
    `not_checked`, with no computed figure. The verdict: mismatch if any figure is, else not_checked if none was
    checked or one was left unchecked, else consistent.
 6. **Flags**, never errors. Beside a mismatch, the likely cause: `stated_arr_matches_run_rate`,
    `stated_nrr_includes_new` (ending over starting recurring revenue), `stated_payback_not_margin_adjusted` and
    `stated_burn_multiple_uses_new_not_net_arr` (also beside a multiple left unchecked), each only when the stated
-   figure lands within tolerance of that other definition (the run-rate one also only when the latest month has
-   one-time or usage revenue and the stated figure is not also that month's own ARR). Where the rounding test and the
-   verdict disagree: `consistent_beyond_rounding` (within the tolerance, but no rounding of the computed figure, such
-   as a monthly churn of 1.7% against 2.1%) and `mismatch_within_rounding` (past the tolerance, but the computed figure
-   rounded, such as a payback of 12 months against 12.4). With or without a mismatch:
+   figure agrees with that other definition as a check does, within the tolerance or as its rounding (the run-rate
+   one also only when the latest month has one-time or usage revenue and the stated figure is not also that month's
+   own ARR). `consistent_beyond_rounding`: a figure consistent by the tolerance alone, not the computed figure
+   rounded to its places, such as a monthly churn of 1.7% against 2.1%, so a VC recomputing gets another figure. With
+   or without a mismatch:
    `arr_movement_and_month_disagree` (step 1), `run_rate_includes_non_recurring` (the latest month has one-time
    or usage revenue), `expansion_hides_churn` (revenue was lost, but net revenue churn is at or below zero),
    `churn_basis_unlabelled` (a stated churn with no basis; below zero it says it was checked as net revenue churn
@@ -784,8 +790,8 @@ equity_calculator metrics_check --period-months 12 --starting-recurring 80000 --
   Burn multiple                                                                7.500000x  net burn / net new ARR
   Burn multiple on new ARR only                                                6.250000x  net burn / new ARR
   ARR: verdict                                                                  mismatch  within the tolerance is consistent
-  Net revenue retention: verdict                                                mismatch  within the tolerance is consistent
-  Burn multiple: verdict                                                        mismatch  within the tolerance is consistent
+  Net revenue retention: verdict                                                mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Burn multiple: verdict                                                        mismatch  within the tolerance, or rounding to the deck's, is consistent
   Overall verdict                                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
 ```
 
@@ -1197,7 +1203,7 @@ The `metrics_check` scenario adds these, each only when the input uses it:
 | `payback_rule`           | spend / (new monthly recurring revenue × gross margin)                                                                                                           | `--gross-margin-percent`                      | Bessemer (on gross margin); the formula unverified                                                                          |
 | `burn_multiple_rule`     | net burn / net new ARR; none at or below zero, a stated one not checked                                                                                          | fixed                                         | Sacks (the formula, no ratio before revenue, and approaching 0 as burn reaches 0); working none at zero or below unverified |
 | `concentration_rule`     | largest customer / the period's revenue; no benchmark                                                                                                            | fixed                                         | a16z ("16 More Startup Metrics", item 14)                                                                                   |
-| `tolerance`              | 0.5 points; 2% relative; each row's rounding test and two flags beside it                                                                                        | `--tolerance-points`, `--tolerance-percent`   | unverified (the rounding test is standard arithmetic)                                                                       |
+| `tolerance`              | 0.5 points; 2% relative; a percent, months or multiple that is the computed figure rounded to its places also holds; one flag beside it                          | `--tolerance-points`, `--tolerance-percent`   | unverified (the rounding test is standard arithmetic)                                                                       |
 | `payback_band`           | the segment's target: 12, 18 or 24 months; with no margin, set against the revenue-only payback as a floor                                                       | `--customer-segment`, `--payback-band-months` | Bessemer (a benchmark, not a rule)                                                                                          |
 | `burn_multiple_band`     | 3x                                                                                                                                                               | `--burn-multiple-band`                        | Sacks (a benchmark, not a rule)                                                                                             |
 | `net_revenue_churn_band` | 2% a month, one-month periods only                                                                                                                               | `--net-revenue-churn-band-percent`            | Skok (a benchmark, not a rule)                                                                                              |

@@ -196,10 +196,13 @@ page). Everything else is standard arithmetic, labelled `unverified` in the resu
   gives no ratio before revenue and says it approaches 0 as burn reaches 0); none is worked at or below zero
   (unverified), and a stated multiple then comes back `not_checked`, which keeps the overall verdict off
   consistent. Concentration = largest customer / period revenue (a16z). Each stated figure uses deal_check's
-  tolerances, and each percent, months or multiple row also says whether it is the computed figure rounded to its own
-  places; a churn with no basis is checked on every basis and holds when any does, and a churn below zero only as net
-  revenue churn. Flags name the likely cause of a mismatch, a verdict the rounding test would reverse and a movement
-  and latest month that disagree; the payback target by customer segment (Bessemer, set against the revenue-only
+  tolerances, and a stated percent, months or multiple is also consistent when it is the computed figure rounded half
+  away from zero to the places it is written with, past the tolerance or not (people write figures rounded to the
+  places they show: 12 months against 12.40 holds, a 2% churn against 2.4% holds and against 2.6% does not), so send
+  each as text with the document's places ("12", "12.0", "0.0"); its row says whether it is that rounding, and money
+  keeps the tolerance alone. A churn with no basis is checked on every basis and holds when any does, and a churn
+  below zero only as net revenue churn. Flags name the likely cause of a mismatch, a figure consistent by the
+  tolerance alone (`consistent_beyond_rounding`) and a movement and latest month that disagree; the payback target by customer segment (Bessemer, set against the revenue-only
   payback as a floor when no margin is given), a burn multiple of 3x or more (Sacks) and one month's net revenue
   churn above 2% (Skok) raise a question, never an error.
 - **Market sizing (the YC pitch guide for building the market bottom-up from customers and price and for preferring

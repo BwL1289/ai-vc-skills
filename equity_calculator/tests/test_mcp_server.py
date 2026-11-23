@@ -236,6 +236,23 @@ async def test_the_metrics_tool_reads_a_zero_sent_as_text_with_its_places() -> N
     assert again["checks"] == first["checks"]
 
 
+@pytest.mark.parametrize(("typed", "verdict", "within"), [("12", "consistent", True), ("12.0", "mismatch", False)])
+async def test_the_metrics_tool_holds_a_figure_sent_as_text_that_is_the_computed_one_rounded(
+    typed: str, verdict: str, within: bool
+) -> None:
+    """A payback of 12.40 months: "12" sent as text is it rounded to no places, so it holds although 0.4 months is
+    past 2% of 12.4; "12.0" claims a place it does not round to, so it is a mismatch. The echo keeps the places."""
+    server = mcp_server.build_server()
+    inputs = {"period_months": 1, "starting_recurring": "0", "new_recurring": "10", "sales_marketing_spend": "124"}
+    inputs |= {"gross_margin_percent": "100", "stated_cac_payback_months": typed}
+    answer = json.loads(_text(await _call(server, "equity_metrics_check", {"inputs": inputs})))
+
+    assert answer["inputs"]["stated_cac_payback_months"] == typed
+    assert (answer["checks"][0]["verdict"], answer["checks"][0]["within_rounding"]) == (verdict, within)
+    assert answer["verdict"] == verdict
+    assert "consistent_beyond_rounding" not in answer["flags"]
+
+
 async def test_the_investor_tool_answers_what_the_cli_prints_with_json() -> None:
     printed = await run(["investor", "--equity-percent", "7", "--outcome-multiplier", "1.10", "--json"])
     result = await _call(mcp_server.build_server(), "equity_investor", {"inputs": _SAMPLES["investor"]})
