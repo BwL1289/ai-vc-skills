@@ -230,8 +230,9 @@ line itself or that matches a phrase in the phrase table.
 ### Rank what survives
 
 Order the kept objections in three tiers, most damaging first: **ends the meeting**, **weakens it**, **minor**. The
-calculator's mismatches head the list, ahead of the tiers, with no tier, as Stage A says. Within a tier, an objection raised by more than one lens comes first. The tier is a judgment, not a probability: give
-no percentages and no score. For each survivor write:
+calculator's mismatches head the list, ahead of the tiers, with no tier, as Stage A says. Within a tier, an objection
+raised by more than one lens comes first. The tier is a judgment, not a probability: give no percentages and no score.
+For each survivor write:
 
 - the founder's line, quoted word for word;
 - why a partner is likely to read it that way, in one or two plain sentences;

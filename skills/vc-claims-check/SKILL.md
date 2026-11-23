@@ -167,11 +167,11 @@ One pass, named by what it does: it picks the claims a partner is likely to chec
 - Do not judge whether another line of the material answers an attack: raise it anyway, however short the material;
   the refute pass decides. Return "nothing found" only when no claim is worth a partner's check.
 
-**How to run it.** With a subagent tool (in Claude Code, the Agent or Task tool), run the skeptic as a subagent,
-however short the material, given only the founder's material and the brief above, plus the Pattern column of the discount table below: not this
-skill's other sections, not the claims list, so it does not anchor on the list. Without one, run the skeptic before
-step 1 and write its attacks down in full; do not revise them after building the list. A skeptic run in the same agent
-as the rest is less independent than a subagent, so the answer says which way it ran.
+**How to run it.** With a subagent tool (in Claude Code, the Agent or Task tool), run the skeptic as a subagent, however
+short the material, given only the founder's material and the brief above, plus the Pattern column of the discount table
+below: not this skill's other sections, not the claims list, so it does not anchor on the list. Without one, run the
+skeptic before step 1 and write its attacks down in full; do not revise them after building the list. A skeptic run in
+the same agent as the rest is less independent than a subagent, so the answer says which way it ran.
 
 **The calculator's mismatches** from step 5 do not go through the skeptic or the refute pass. They are computed, not
 argued: each is a kept attack on its claim, quoting the document's figure with the tool's value as the reason. A
