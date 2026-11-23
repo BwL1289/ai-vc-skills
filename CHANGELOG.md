@@ -6,6 +6,7 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- Plugin version 0.2.5: the priced-round-or-note comparison reaches installed copies, and `vc-deal-math` now triggers on "should we raise a priced round or a note".
 - The calculator's twelfth scenario, `instrument_compare` (MCP tool `equity_instrument_compare`, a command and a
   `Priced vs note` workbook sheet): a founder choosing between a priced round now and a convertible note now gives
   both sets of terms, the next round (up to four alternatives for it, each worked from today) and the exits, and gets
