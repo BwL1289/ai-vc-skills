@@ -6,6 +6,7 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- Plugin version 0.2.1, so an installed copy picks up the rounding rule in the deal and metrics checks.
 - The website shows the two demo recordings (Claude Code calling the calculator's MCP tool, and the calculator in a
   terminal) in a "See it work" section; the plugin's version is now 0.2.0, so an installed copy updates to the fifteen
   skills.
