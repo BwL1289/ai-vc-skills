@@ -13,12 +13,14 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import get_args
 
 import pytest
 from equity_calculator.__main__ import _INPUT_MODELS
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
-from equity_calculator.schemas.equity_deal_check import DealCheckInput
+from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealFlag
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag
 from equity_calculator.text import render_sheet
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -215,6 +217,7 @@ def test_one_eval_has_the_phrases_that_cost_the_meeting() -> None:
     answer = _section("## Expected answer", (_ROOT / "evals" / "vc-positioning" / name).read_text(encoding="utf-8"))
 
     assert "survive" in answer and "We have no competitors." in answer
+    assert "names the vc-market-sizing skill, which checks that size" in _unwrapped(answer)
 
 
 def test_one_eval_drops_an_objection_by_quoting_the_line_that_answers_it() -> None:
@@ -293,15 +296,93 @@ def test_without_a_subagent_tool_the_lenses_run_before_step_1_and_the_answer_say
     assert "less independent than separate subagents" in _unwrapped(_section("## Answering"))
 
 
-def test_a_safe_raise_quotes_its_runway_and_use_of_funds_unchecked() -> None:
+def test_a_safe_raise_sends_its_runway_and_use_of_funds_to_the_runway_plan_tool() -> None:
+    """The runway tool takes a SAFE raise as cash; with no cash or burn given, the answer asks for them first."""
     steps = _unwrapped(_section("## Steps"))
     prompts = {path: _unwrapped(_section("## Prompt", path.read_text(encoding="utf-8"))) for path in _EVALS}
     (path,) = (path for path, prompt in prompts.items() if "on a SAFE" in prompt and "months of runway" in prompt)
+    text = path.read_text(encoding="utf-8")
+    answer = _unwrapped(_section("## Expected answer", text))
 
-    assert "On a SAFE or note raise, no tool checks the runway claim or the use-of-funds lines" in steps
-    assert _SAFE_UNCHECKED in steps and _SAFE_UNCHECKED in _unwrapped(_section("## Answering"))
-    assert "never work them out by hand" in steps
-    assert _SAFE_UNCHECKED in _unwrapped(_section("## Expected answer", path.read_text(encoding="utf-8")))
+    assert "Runway with no raise, or on a SAFE or note raise, and the use-of-funds lines on such a raise go to" in steps
+    assert "`equity_runway_plan`, as vc-deal-math step 2 says" in steps
+    assert "With no cash or burn given, ask for them by name" in steps and "make no call until they are given" in steps
+    assert "never work it out by hand" in steps
+    assert "`equity_runway_plan`'s rows" in _unwrapped(_section("## Answering"))
+    assert _SAFE_UNCHECKED not in _TEXT and "no tool checks the runway claim" not in _TEXT
+    # The SAFE eval's prompt gives no cash or burn: the true reason it is not checked yet, and the ask, not a tool gap.
+    assert "`equity_runway_plan`" in answer and "asks for the cash on hand, monthly spend and revenue" in answer
+    assert _SAFE_UNCHECKED not in answer and _NO_CALL in text
+
+
+def test_the_attack_brief_raises_every_objection_and_the_refute_pass_judges_one_each() -> None:
+    attack = _unwrapped(_section("### Stage A: attack"))
+    refute = _unwrapped(_section("### Stage B: refute"))
+
+    # A lens that sees the answering line must still raise the objection, or the refute pass has nothing to drop.
+    assert "Do not judge whether another line of the material answers an objection: raise it anyway" in attack
+    assert "however short the material; the refute pass decides" in attack
+    assert "rather than a weak objection" not in attack
+    assert "launch one subagent per objection in a single message" in refute
+    assert "never put two objections in one subagent" in refute
+
+
+def test_computed_mismatches_head_the_survivors_with_no_tier_and_an_understated_runway_is_minor_at_most() -> None:
+    attack = _unwrapped(_section("### Stage A: attack"))
+    rank = _unwrapped(_section("### Rank what survives"))
+    (company_f,) = (path for path in _EVALS if path.name.startswith("company-f-"))
+    answer = _unwrapped(_section("## Expected answer", company_f.read_text(encoding="utf-8")))
+
+    assert "heads the survivors, ahead of the tiers, under **figures that do not match (computed)**" in attack
+    assert "It carries no tier" in attack and "added to the survivors as ends the meeting" not in attack
+    assert "a runway claim below the computed runway understates it" in attack
+    assert "it goes in the minor tier at most" in attack
+    assert "head the list, ahead of the tiers, with no tier" in rank
+    assert "head the surviving objections, ahead of the tiers" in answer and "with no tier" in answer
+    assert "ranked as ends the meeting" not in answer
+
+
+def test_a_mismatch_under_one_reading_of_an_unlabelled_valuation_is_a_fix_to_label_it() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    attack = _unwrapped(_section("### Stage A: attack"))
+
+    assert "A check that is a mismatch under one reading only is not a calculator mismatch" in steps
+    assert "it becomes one fix, to label the valuation pre- or post-money" in steps
+    assert "Only a check that is a mismatch under every reading is the calculator's mismatch" in steps
+    assert "A fix to label the valuation (a mismatch under one reading only) is not a calculator mismatch" in attack
+
+
+def test_step_4_asks_which_way_the_founders_fully_diluted_total_counts_safes_and_notes() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "SAFEs and notes excluded" in steps
+    assert "ask which way the founder's does, and pass the tool its own basis" in steps
+    assert "`[fully diluted shares before the round, SAFEs and notes left out]`" in steps
+    assert "never subtract the SAFE or note shares yourself" in steps
+
+
+def test_every_flag_code_has_its_meaning_in_the_skill() -> None:
+    """The MCP tool returns flag codes only, so the skill carries each flag's meaning itself."""
+    table = _section("## Calculator flags")
+    rows = re.findall(r"^\| `([a-z_]+)` +\|", table, re.MULTILINE)
+    prose = _unwrapped(table.split("\n|", 1)[0])
+
+    assert rows == list(get_args(DealFlag))
+    for flag in ("runway_below_band", "cash_never_runs_out"):
+        assert flag in get_args(RunwayPlanFlag) and f"`{flag}` (" in prose, flag
+    assert 'with its meaning from "Calculator flags" below' in _unwrapped(_section("## Steps"))
+
+
+def test_metrics_and_market_sizes_go_to_their_skills_and_growth_and_ltv_stay_unchecked() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "ARR, retention, churn, CAC payback and burn multiple are checked by the vc-metrics-readiness skill" in steps
+    assert "a market size by the vc-market-sizing skill" in steps
+    assert (
+        'Growth rates and LTV: no tool computes them; quote them as stated with "not checked: no tool computes this"'
+        in steps
+    )
+    assert "no tool in this repository computes them" not in steps
 
 
 def test_a_fraction_from_the_tool_is_shown_as_a_percent_by_notation_only() -> None:

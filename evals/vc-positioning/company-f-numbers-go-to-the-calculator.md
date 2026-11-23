@@ -54,9 +54,10 @@ against the other points of the expected answer is noted but does not change the
 
 ## Expected answer
 
-- The two calculator mismatches lead the surviving objections, ranked as ends the meeting and not put through the
-  refute pass: the deck's 20% against the calculator's 16.6667% (a $12,000,000.00 post-money), and the deck's 18.00
-  months against 15.33 months. Each quotes the deck's figure as stated and gives the tool's value.
+- The two calculator mismatches head the surviving objections, ahead of the tiers, as figures that do not match
+  (computed), with no tier, and are not put through the refute pass: the deck's 20% against the calculator's 16.6667%
+  (a $12,000,000.00 post-money), and the deck's 18.00 months against 15.33 months. Each quotes the deck's figure as
+  stated and gives the tool's value. Neither claim is below the computed figure, so neither moves to the minor tier.
 - Through the MCP tool, the investors' share comes back as the fraction 0.166667 and the difference as -0.033333; the
   answer shows them as 16.6667% and -3.3333% by moving the decimal point two places, the form the report prints, and
   rounds neither.
@@ -78,6 +79,8 @@ asked for, working the 20% back to a pre-money, and its own text rounds the tool
 and the prep script. Since this run, step 4 of the skill asks for one call per version of the ask and the tool's values
 as printed; the eval has not been run again. A first run the same day, before this commit's skill changes, loaded
 vc-deal-math instead: no adversarial review, three calculator calls and the growth rate worked out by hand, also a fail.
+Since this run, too, the calculator's mismatches head the survivors with no tier, where this run ranked them as ends
+the meeting, and each flag is relayed with its meaning from the skill's own flag table.
 This run came after the skill's description and its "When to use it" list gained this prompt's opening words, "check our
 story and our ask", so its routing shows that this wording now reaches vc-positioning, not that other wordings do.
 

@@ -30,7 +30,10 @@ names a firm the deck fits, gives no score, and never adds a fact about the comp
     the claims alone, the founder runs that skill on its own.
   - The ask's arithmetic in full (ownership after the round, the pool, the SAFE stack, runway): the vc-deal-math
     skill, whose steps this skill follows. One equity question with no deck: the equity-calculator skill.
+  - The market slide, built bottom-up from who buys, how many and what each pays: the vc-market-sizing skill (preview).
+  - How much to raise and what it reaches: the vc-round-sizing skill (preview).
   - Rehearsing the partner meeting once the deck is ready: the vc-partner-meeting skill (preview).
+  - The memo your champion writes for the partnership: the vc-investor-memo skill (preview).
   - A term sheet the founder was offered: the vc-term-sheet-review skill (preview).
 
 ## Inputs
@@ -75,7 +78,8 @@ Each dimension gets one mark. When it earns more than one, it takes the first in
 
 - **Contradicted:** two lines of the founder's material state the same thing differently (both quoted, with their
   slides; for a figure, the same metric in the same form for the same period), or the calculator reports a mismatch
-  under every reading of the valuation (step 4).
+  under every reading of the valuation (step 4). A runway claim below the computed runway understates it: it leaves
+  the mark Present, with the printed runway in the fix.
 - **Missing:** no slide shows what the row needs, or the only line that does is a claim vc-claims-check marks Will be
   discounted, or an adjective with nothing a partner could check ("strong traction", "world-class team").
 - **Present:** a slide shows what the row needs, quoted. A claim vc-claims-check marks Needs a source keeps the mark
@@ -111,7 +115,8 @@ doing nothing.
 | Adjacent and platform | A larger product the buyer already uses that could add this as a feature                        |
 | Doing nothing         | Doing it by hand (spreadsheets, phone calls), an outsourced service, or living with the problem |
 
-For each level, quote what the deck says or mark it missing. The skill names no competitor itself: a missing level
+For each level, quote the deck's line word for word or mark the level missing; when a line only implies a level,
+quote it and say "implied", never paraphrase it. The skill names no competitor itself: a missing level
 becomes a bracketed ask (`[the tool your buyer already uses that could add this]`). "No competitors" goes to the
 vc-claims-check discount patterns. A chart that puts the company alone in the best corner shows a position, not why
 customers pick it; ask for the reason (unverified).
@@ -139,19 +144,31 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
      both readings in the tool's values. Only a check that is a mismatch under every reading is the calculator's
      mismatch. In the claims table, such a claim is not Contradicted either: mark it Needs a source, with both
      readings in its fix, since no single reading gives a verdict.
-   - Each code in the result's `flags` goes to the answer as a question a partner is likely to ask, in the words the
-     tool prints beside it, with what to change or prepare from the vc-deal-math skill's flag table. The benchmark
-     flags (`dilution_above_band`, `runway_below_band`) are common benchmarks, not rules: say so and quote the tool's
-     assumption row, whose source is `unverified`. With two readings, relay the flags of each.
+   - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
+     included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
+     which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask for the
+     total without them, as a bracketed ask, `[fully diluted shares before the round, SAFEs and notes left out]`, and
+     make no call that needs it until they give it; never subtract the SAFE or note shares yourself.
+   - Each code in the result's `flags` goes to the answer as a question a partner is likely to ask, with its meaning
+     and what to change or prepare from "Calculator flags" below: the MCP result gives the codes only, so never make
+     up a flag's question. The benchmark flags (`dilution_above_band`, `runway_below_band`) are common benchmarks, not
+     rules: say so and quote the tool's assumption row with the source that row gives. With two readings, relay the
+     flags of each.
    - A SAFE or note: not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round` with the next
-     priced round the founder expects. On a SAFE or note raise, no tool checks the runway claim or the use-of-funds
-     lines: quote them, mark them "not checked: no tool computes this for a SAFE or note raise", and never work them
-     out by hand.
+     priced round the founder expects.
+   - Runway with no raise, or on a SAFE or note raise, and the use-of-funds lines on such a raise go to
+     `equity_runway_plan`, as vc-deal-math step 2 says: `cash_on_hand`, today's monthly spend and revenue as the plan's
+     first phase, the SAFE or note as a raise with its stated runway and use-of-funds lines, and a runway stated with
+     no raise as the top-level `stated_runway_months`; one call per document's version. With no cash or burn given,
+     ask for them by name (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; quote
+     the claim as stated meanwhile, and never work it out by hand. Its mismatches are the calculator's mismatches.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
      its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%), which is what the
      command line's report prints. That is a change of notation, not a calculation; never round it.
-   - Growth rates, market sizes, retention and unit economics have no tool here: quote them as stated and never
-     compute, convert or round one.
+   - ARR, retention, churn, CAC payback and burn multiple are checked by the vc-metrics-readiness skill
+     (`equity_metrics_check`), and a market size by the vc-market-sizing skill (`equity_market_sizing`): quote each as
+     stated and name the skill that checks it in its fix. Growth rates and LTV: no tool computes them; quote them as
+     stated with "not checked: no tool computes this". Of all these figures, never compute, convert or round one.
 5. **Competition.** Fill the four levels from the deck's own lines, as the section above says.
 6. **Mark each dimension** Present, Missing or Contradicted by the rules above, quoting the deciding line, with one
    fix that uses only the founder's facts or a bracketed ask (`[the milestone the raise reaches]`).
@@ -159,8 +176,9 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
 8. **Which investors the story fits** (the section after the review).
 9. **Check before answering.** Every fix uses only the founder's facts, a tool result or a bracketed ask; every figure
    is quoted as stated or comes from a tool; every surviving objection quotes a line that is in the deck word for word
-   (an entry for a dimension no slide covers quotes none); no sentence speaks as an investor, imitates a named person or
-   names a firm; no score appears.
+   (an entry for a dimension no slide covers quotes none); every dimension marked Missing because no slide covers it
+   has its own "no slide covers" entry in the ranked fix list; every tool figure keeps the tool's digits wherever it
+   appears; no sentence speaks as an investor, imitates a named person or names a firm; no score appears.
 
 ## Adversarial review
 
@@ -193,20 +211,23 @@ Every lens gets the same brief, with its own name and test filled in:
   its slide; why a partner is likely to read that line as a reason to pass; and how much it hurts (ends the meeting,
   weakens it, or minor).
 - A reason you cannot tie to a line of the deck is not an objection. List it apart as a gap, worded as a question.
-- Do not judge whether another line of the material answers an objection: raise it anyway, and the refute pass
-  decides. Return "nothing found" only when no line of the deck gives this lens an objection worth a partner's time.
+- Do not judge whether another line of the material answers an objection: raise it anyway, however short the
+  material; the refute pass decides. Return "nothing found" only when no line of the deck gives this lens an objection
+  worth a partner's time.
 
 **How to run the lenses.** When the agent has a subagent tool (in Claude Code, the Agent or Task tool), run the lenses
-as parallel subagents. Give each one only the founder's material and its lens brief: not this skill's other sections,
-not the marks, not another lens's output. Without a subagent tool, run Stage A first, before step 1, without consulting
-the dimension table or any mark: run the lenses one after another, write each lens's objections down in full before
-reading the next lens's brief, and never revise an earlier list. Lenses run this way are less independent than
-subagents, and the same agent then judges them in Stage B, so the answer says so.
+as parallel subagents, however short the material. Give each one only the founder's material and its lens brief: not
+this skill's other sections, not the marks, not another lens's output. Without a subagent tool, run Stage A first,
+before step 1, without consulting the dimension table or any mark: run the lenses one after another, write each lens's
+objections down in full before reading the next lens's brief, and never revise an earlier list. Lenses run this way are
+less independent than subagents, and the same agent then judges them in Stage B, so the answer says so.
 
 **The calculator's mismatches** from step 4 do not go through the lenses. Each is added to the ranked fix list ahead
 of the tiers, quoting the deck's figure with the tool's value and difference as the reason. It is not refuted: the
 calculator computed it. It carries no tier: how much a gap hurts depends on its size and on the term, which the founder
-weighs. A fix to label the valuation (a mismatch under one reading only) is not a calculator mismatch.
+weighs. One exception: a runway claim below the computed runway understates it, so it does not head the list; the
+founder may keep it or state the printed runway, and it goes in the minor tier at most. A fix to label the valuation
+(a mismatch under one reading only) is not a calculator mismatch.
 
 ### Check the quotes
 
@@ -217,9 +238,10 @@ the same line, merge them and keep both lens names. Gaps from every lens go to t
 ### Stage B: refute
 
 Each objection gets its own refute pass, which decides, using only the founder's material, whether that material
-answers the objection. With a subagent tool, run one subagent per objection, given the founder's material, that one
-objection, the Pattern column of the vc-claims-check discount table, and everything from "The refute brief:" to the
-end of this stage, and nothing else; without one, decide the objections one at a time against the same brief.
+answers the objection. With a subagent tool, launch one subagent per objection in a single message; never put two
+objections in one subagent. Give each the founder's material, that one objection, the Pattern column of the
+vc-claims-check discount table, and everything from "The refute brief:" to the end of this stage, and nothing else;
+without one, decide the objections one at a time against the same brief.
 
 The refute brief:
 
@@ -251,7 +273,10 @@ Order the kept objections in three tiers, most damaging first: **ends the meetin
 calculator's mismatches head the list, ahead of the tiers, each one under **figures that do not match (computed)**,
 with no tier. Two kinds of entry that no lens raises join the tiers, placed by the same judgment and not refuted: the
 step 4 fix to label a valuation, and each dimension marked Missing because no slide covers it, as "no slide covers"
-that dimension, with its bracketed ask as the fix (it stays in the open asks too). Within a tier, an objection raised
+that dimension, with its bracketed ask as the fix (it stays in the open asks too). A "no slide covers" entry is its
+own row even when a lens objection on another line touches the same dimension: keep both. A first- or last-slide rule
+that fails in step 2 always has a row too, and a Dropped, answered verdict that says to move a line earlier still
+enters the tiers as a move fix, since the founder still has to make the change. Within a tier, an objection raised
 by more than one lens comes first. The tier is a judgment, not a probability: give no percentages and no score. Each
 entry is one fix: the slide, the deck's line quoted word for word (for a dimension no slide covers, "none"), why a
 partner is likely to read it that way in one or two plain sentences, and the change to make, using only the founder's
@@ -262,7 +287,8 @@ answer; a fix that turns on the story or a phrase also points to the vc-position
 
 A lens on the founder's own deck, never a list of investors. It reads the stage the founder states against what the
 deck shows, and says which kinds of investor the story as told fits best and which less, quoting the lines that decide
-it. It names no firm or person, gives no check sizes and no odds, and looks nothing up. When the founder names firms
+it. It names no firm or person, gives no check sizes and no odds, and looks nothing up. It says which kinds fit best
+and which less well; it never calls a kind "right" or tells the founder whom to pitch. When the founder names firms
 they plan to pitch, the skill does not judge those firms; the founder compares the fit with what they know of each.
 
 | Kind of investor                 | Who they are                                                                          | Source                    |
@@ -281,27 +307,57 @@ only: for a deck raising a later round, say so and name no later-stage kind. Whe
 the deck shows disagree (a Series A label on a deck of pilots), say so as a question a partner is likely to ask, without
 a threshold.
 
+## Calculator flags
+
+The MCP result's `flags` holds codes only; the command line's report prints the meaning beside each one. This table,
+the same as the vc-deal-math skill's, gives each `equity_deal_check` flag's meaning, so a flag reaches the founder in
+words. A flag is a question a partner is likely to ask, never an error. From `equity_runway_plan` (no milestone,
+months to raise or landing month passed), two flags can come back: `runway_below_band` (on the plan the raise lasts
+under the runway benchmark, 18 months by default; a common benchmark, not a rule) and `cash_never_runs_out` (revenue
+covers the spend before the cash runs out, so there is no runway end and a stated runway is not checked).
+
+| Flag                                  | What it means for the founder                                                                                   | What to change or prepare                                                                      |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise and the percent.                            | Label the valuation pre- or post-money in the deck; a VC will ask which it is.                 |
+| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, so the effective pre-money and the price are below the headline. | Expect a VC to price it this way; show the effective pre-money beside the headline.            |
+| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less than raise / post-money.                         | Expect a VC to ask to move the pool into the pre-money; show what that does to the founders.   |
+| `pool_already_large_enough`           | The unissued pool already meets the target, so no new pool shares are needed.                                   | Say so in the deck; a VC may still ask for a bigger target.                                    |
+| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold.     | Show ownership with the SAFEs and notes converted, as a VC reads the cap table.                |
+| `discount_beat_cap`                   | A discount gave a lower price than the cap.                                                                     | Model that instrument at its discount price; a cap-only conversion in the deck would be wrong. |
+| `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares.                           | Count the interest in the cap table.                                                           |
+| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it.                                      | A runway claim is checked on the other burn's net runway; with none, it is not checked.        |
+| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn.                                                      | Say which burn the deck's runway uses; a VC will check it against the planned spend.           |
+| `runway_below_band`                   | Planned net runway is under the runway benchmark (18 months by default).                                        | Be ready to say whether the raise reaches the next milestone (a common benchmark, not a rule). |
+| `dilution_above_band`                 | The investors get more than the dilution benchmark (25% by default) in one round.                               | Be ready to say why so much is sold (a common benchmark, not a rule).                          |
+
 ## Answering
 
 Lead with what to fix, in order, then the evidence behind it.
 
-1. **The biggest fixes,** at most three, one line each: the top of the ranked fix list.
+1. **The biggest fixes,** at most three, one line each: the top of the ranked fix list. A tool figure keeps the
+   tool's digits wherever it appears, here included (95.0000%, never "95%").
 2. **Ranked fix list,** as a table: Rank, Tier, Slide, Lens, The deck's line (quoted), Why a partner reads it that way,
-   Fix, with the figures that do not match (computed) first, then the tiers. Then **Dropped,** one line each: the
-   objection, its lens, and why it fell (answered, quoting the line that answers it and whether to move it earlier, or
-   not grounded). When the lenses ran in one agent, say they are less independent than separate subagents.
+   Fix, with the figures that do not match (computed) first, then the tiers. Each dimension marked Missing because no
+   slide covers it gets its own row (Slide: none; the deck's line: none; Why: "no slide covers" that dimension; Fix: its
+   bracketed ask), even when a lens objection on another line touches the same dimension (keep both rows); so does each
+   failed first- or last-slide rule, and each move fix from a Dropped, answered verdict. Then **Dropped,** one line
+   each: the objection, its lens, and why it fell (answered, quoting the line that answers it and whether to move it
+   earlier, or not grounded). When the lenses ran in one agent, say they are less independent than separate subagents.
 3. **Dimension table:** #, Dimension, Slides, What the deck says (quoted), Evidence (Present, Missing or Contradicted),
    Fix.
 4. **First and last slides:** each rule, the line that decides it, the fix.
 5. **Competition at four levels:** each level, what the deck says or "missing", the bracketed ask.
 6. **Numbers:** the `equity_deal_check` verdict per call with each mismatch row in the tool's values (for a valuation
-   with no label, both readings side by side), and each flag as a question a partner is likely to ask; on a SAFE or note
-   raise, the runway claim and use-of-funds lines with "not checked: no tool computes this for a SAFE or note raise";
-   every other figure quoted as stated with "not checked: no tool computes this".
+   with no label, both readings side by side), and each flag as a question a partner is likely to ask, with its
+   meaning; a runway with no raise or on a SAFE or note raise, and that raise's use-of-funds lines, with
+   `equity_runway_plan`'s rows, or quoted as stated beside the ask for cash and burn when they were not given; each
+   metric or market size with the skill that checks it; growth rates and LTV quoted as stated with "not checked: no
+   tool computes this".
 7. **Claims:** the vc-claims-check claims table, Contradicted first.
 8. **Which investors the story fits:** one short paragraph, with the deciding lines quoted and the judgment marked
    unverified.
-9. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
+9. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting,
+   including the bracketed ask of every competition level the deck leaves missing.
 10. **Sources:** the frameworks used, with links, and which points rest on this skill's own unverified judgment.
 11. **Close:** this is not investment, legal or tax advice; customers or partners named in the deck should have agreed
     to be named, and a lawyer should review the deck before it is sent widely.
@@ -328,7 +384,8 @@ two-stage review (attack, then refute with the founder's own material) is this r
 - It never names a firm or person the deck fits, never role-plays or speaks as a named investor, firm or author, and
   does no investor research: no target lists, fund look-ups, contact details or outreach.
 - It never invents or strengthens traction, customers, partners, credentials or figures, in a fix or in a refute pass.
-- No arithmetic outside the equity calculator's tools. Growth rates, market sizes and unit economics are quoted.
+- No arithmetic outside the equity calculator's tools. Growth rates and LTV are quoted; metrics and market sizes are
+  checked by the vc-metrics-readiness and vc-market-sizing skills.
 - It reads text. It does not judge visual design, and reads no figure off a chart the founder did not state.
 - The review predicts likely objections from the deck's text; a real partner may raise others.
 - It works from the founder's material and sends nothing anywhere.

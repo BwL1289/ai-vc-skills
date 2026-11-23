@@ -25,6 +25,11 @@ work them out by hand, and do not round or re-derive what it returns.
 | Do our ARR, retention, churn, CAC payback and burn multiple match their parts before a VC checks them? | `metrics_check` | `equity_metrics_check` |
 | What are our TAM, SAM and SOM bottom-up, do they match the deck, and which assumption moves them most? | `market_sizing` | `equity_market_sizing` |
 
+A founder's question about a whole raise goes to the review built for it, which runs these tools and explains what
+they return: a deck's ask, ownership after the round and runway to the vc-deal-math skill; how much to raise on a
+phased plan to the vc-round-sizing skill; traction metrics to the vc-metrics-readiness skill; a market slide to the
+vc-market-sizing skill; a term sheet to the vc-term-sheet-review skill. This skill answers one scenario on its own.
+
 ## Running it
 
 **MCP tools** (`equity_calculator_mcp`). Each scenario tool takes one argument, `inputs`, an object with that
@@ -49,8 +54,18 @@ scenario's fields, and returns the same JSON text as `equity_calculator <scenari
 | market_sizing | **`segments`**: a list of up to 8 `{"customers", "price", "price_period_months" (1 to 120, the months the price covers; 12 by default), "units_per_customer", "take_rate_percent", "serviceable_percent", "obtainable_percent"` or `"obtainable_customers"` (the SOM, at most one), `"customers_today"}`; `top_down`: a list of up to 3 `{"amount", "comparable_percent", "compare_to"` (`tam` or `sam`)`}`; `sensitivity`: a list of up to 6 `{"field"` (`customers`, `price`, `units_per_customer`, `take_rate_percent`, `serviceable_percent`, `obtainable_percent`, `obtainable_customers`), `"segment"` (1 is the first), `"values"` (1 to 4)`}`; `population`, `annual_revenue_today`, `som_years` (1 to 20), `som_target`; what the deck states: `stated_tam`, `stated_sam`, `stated_som`; `tolerance_percent`                                                                                                                                                                                                                                                                                                            |
 
 Send money, percents and multipliers as JSON strings (`"7"`, `"1.10"`, `"8000000"`): a JSON number with a decimal
-point arrives as a binary float and keeps only about 15 digits. Percents are percents (`"7"` is 7%). Share counts
-are whole numbers. `equity_workbook` exists only when the server was started with `--output-dir DIR`: it takes
+point arrives as a binary float and keeps only about 15 digits. Percents are percents (`"7"` is 7%). Share counts,
+customer counts (`customers_start`, `customers_lost`, `customers_new`, `customers_new_paid`) and month counts
+(`period_months`, `price_period_months`, `from_month`, `lands_month`, `months_to_raise`, `milestones`, `som_years`,
+and a sensitivity row's `segment`) are whole numbers, sent as JSON integers, never strings; a string is refused.
+
+`fully_diluted_shares` (in `round` and `deal_check`) counts every share before the round, granted options and the
+unissued pool included, and leaves SAFEs and notes out: the tool converts them itself. Some cap tables count SAFEs
+and notes in their fully diluted total; ask which way the user's does, and pass the tool its own basis. If the
+user's total counts them, ask for the total without them, as a bracketed ask,
+`[fully diluted shares before the round, SAFEs and notes left out]`; never subtract the SAFE or note shares yourself.
+
+`equity_workbook` exists only when the server was started with `--output-dir DIR`: it takes
 `inputs` with its `scenario` tag (`{"scenario": "round", ...}`) and a bare `file_name` ending in `.xlsx` with no control,
 format or surrogate character, and writes a new file in DIR; it never overwrites a file. An answer too large for a
 workbook cell (a value of 1e300 or more) is refused and no file is made. While saving, the Excel library also writes
@@ -71,10 +86,14 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
 
 ## Answering
 
-1. Pick the scenario, ask for any required input that is missing, and run it. State any value you had to assume.
-   For `runway_plan`, never assume one: the phases, the downside or lean percents, the milestones, the months to
-   raise, the landing months and the cash floor are the founder's own figures, so ask for them. With no months to
-   raise, run without it and quote the `no_time_to_raise_given` flag. For `metrics_check`, every part is the founder's
+1. Pick the scenario, ask for every required input that is missing, by name, and run it. Never fill a gap with a
+   figure the user did not give. A value the tool fills in itself (a 48-month vesting schedule, the pool in the
+   pre-money) is named in the answer as the tool's default, with how to change it. For `deal_check`, never assume
+   one: the raise, the valuation and its label, the share counts, cash, burn and revenue are the founder's own
+   figures, so ask for them. For `runway_plan`, never assume one: the phases, the downside or lean percents, the
+   milestones, the months to raise, the landing months and the cash floor are the founder's own figures, so ask for
+   them. With no months to raise, run without it and quote the `no_time_to_raise_given` flag (each milestone was
+   checked at its own month, with no time to raise after it). For `metrics_check`, every part is the founder's
    own figure for one period: never convert MRR to ARR, a quarter to a year or a percent to a count yourself (the tool
    annualises by `recurring_unit`). Each stated retention or churn figure is checked over `period_months`, so set it
    to the period the document's figure covers (1 for a monthly churn, 12 for an annual NRR), run one call per period
@@ -86,7 +105,8 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
    never assume a customer count, a price, a take rate or a share: each is the founder's own figure with the founder's
    source, so ask for it; a price is sent with the months it covers, never turned into a year by hand. A SOM is best a
    count of customers the founder plans to win; a SOM given only as a percent runs, with the `som_as_percent_only`
-   flag. A top-down figure is a cross-check: it never sets the market size.
+   flag (the SOM rests on a share, not a count of customers to win). A top-down figure is a cross-check: it never
+   sets the market size.
 2. Give the headline numbers as the tool prints them (the `rounded` value with its unit, or the exact fraction when
    precision matters). Do not round them again or recompute them. A value whose unit is `fraction` is a share of the
    whole: show it as a percent by moving the decimal point of its `rounded` value two places to the right, keeping
@@ -96,7 +116,11 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
    a default when the user's terms differ.
 4. A refusal or a tool error is the answer for those inputs: relay the reason and what to change. Never guess a
    number the calculator refused to give.
-5. The calculator works the arithmetic of the terms given. It does not read a term sheet or a cap table file, and it
+5. A result's `flags` are codes. The command line's report prints each one's meaning beside it; the MCP result does
+   not. Relay a flag with its meaning from the table of the skill built on that tool: vc-deal-math for `deal_check`,
+   vc-round-sizing for `runway_plan`, vc-metrics-readiness for `metrics_check`, vc-market-sizing for
+   `market_sizing`. A flag is a question to be ready for, never an error.
+6. The calculator works the arithmetic of the terms given. It does not read a term sheet or a cap table file, and it
    is not legal, tax or investment advice: say so when the question needs either.
 
 ## The formulas and their sources

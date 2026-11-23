@@ -5,7 +5,9 @@ line of the output excerpt that follows it must be a line the command really pri
 typed by hand. The same holds for each eval prompt in evals/vc-deal-math/: its tool call is valid and its excerpt is
 lines of the report that call prints. An eval whose right answer is no ``equity_deal_check`` call (a raise on a SAFE)
 says so under its tool-call heading and carries no call or excerpt to check. Every flag code has a row in the skill's
-flag table, since the tool's JSON gives the codes only.
+flag table, since the tool's JSON gives the codes only. The fully diluted count the tool takes leaves SAFEs and notes
+out, so step 2 asks which way the founder's total counts them; runway with no raise, or on a SAFE or note raise, goes
+to ``equity_runway_plan``, whose flags the skill explains in words too.
 """
 
 from __future__ import annotations
@@ -21,6 +23,7 @@ from equity_calculator.__main__ import run
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealFlag
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag
 from equity_calculator.text import render_sheet
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -43,6 +46,30 @@ _TRIGGERS = (
     "how much runway does this buy",
     "will a VC question our valuation",
 )
+_HANDOFF_SKILLS = (
+    "equity-calculator",
+    "vc-round-sizing",
+    "vc-metrics-readiness",
+    "vc-market-sizing",
+    "vc-term-sheet-review",
+)
+# A runway_plan call with no milestone, months to raise or landing month can raise only these two flags.
+_RUNWAY_FLAGS_WITHOUT_MILESTONES = ("runway_below_band", "cash_never_runs_out")
+_NO_TOOL = "not checked: no tool computes this"
+
+
+def _section(heading: str, text: str = _TEXT) -> str:
+    """The body under ``heading`` up to the next heading of the same or a higher level."""
+    level = heading.split(" ", 1)[0]
+    start = text.index(f"\n{heading}\n") + len(heading) + 2
+    stops = [text.find(f"\n{'#' * depth} ", start) for depth in range(1, len(level) + 1)]
+    ends = [stop for stop in stops if stop != -1]
+    return text[start : min(ends)] if ends else text[start:]
+
+
+def _unwrapped(text: str) -> str:
+    """``text`` with its Markdown line breaks and blockquote marks taken out, so a wrapped sentence reads as one."""
+    return " ".join(line.lstrip("> ").strip() for line in text.splitlines())
 
 
 def _fences(language: str, text: str = _TEXT) -> list[str]:
@@ -136,3 +163,59 @@ def test_each_eval_call_is_valid_and_its_excerpt_is_what_the_calculator_prints(p
 
     for line in excerpt.splitlines():
         assert line in printed, line
+
+
+def test_every_skill_it_hands_off_to_exists() -> None:
+    handoffs = _unwrapped(_section("## When to use it"))
+
+    for name in _HANDOFF_SKILLS:
+        assert name in handoffs, name
+        assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
+
+
+def test_step_2_asks_which_way_the_founders_fully_diluted_total_counts_safes_and_notes() -> None:
+    """The tool's count leaves SAFEs and notes out; a total that counts them gives the founders too low a figure."""
+    steps = _unwrapped(_section("## Steps"))
+    (company_b,) = (path for path in _EVALS if path.name.startswith("company-b-"))
+    answer = _unwrapped(_section("## Expected answer", company_b.read_text(encoding="utf-8")))
+
+    assert "SAFEs and notes left out, since the tool converts them itself" in steps
+    assert "Some cap tables count SAFEs and notes in their fully diluted total" in steps
+    assert "ask which way the founder's does, and pass the tool its own basis" in steps
+    assert "`[fully diluted shares before the round, SAFEs and notes left out]`" in steps
+    assert "never subtract the SAFE or note shares yourself" in steps
+    assert "leave the two SAFEs out, as the tool's count does" in answer
+    assert "the figures stand only on that basis" in answer
+
+
+def test_the_stand_in_share_count_is_named_as_this_skills_placeholder() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "offer a stand-in of 10,000,000 shares" in steps
+    assert "call it this skill's placeholder in the answer, never a company figure" in steps
+
+
+def test_runway_with_no_raise_or_on_a_safe_goes_to_the_runway_plan_tool() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    handoffs = _unwrapped(_section("## When to use it"))
+
+    assert "**Runway with no raise, or on a SAFE or note raise,** goes to `equity_runway_plan`" in steps
+    assert "never to `deal_check`, which needs a priced round" in steps
+    assert "With no cash or burn given, ask for them by name" in steps
+    assert "make no call until they are given" in steps
+    assert "`equity_runway_plan`" in handoffs
+    # The MCP result gives flag codes only, so the skill carries the meaning of each flag such a call can raise.
+    for flag in _RUNWAY_FLAGS_WITHOUT_MILESTONES:
+        assert flag in get_args(RunwayPlanFlag), flag
+        assert f"`{flag}` (" in steps, flag
+    assert "no runway-plan flag" not in steps
+    assert "which today is `unverified`" not in _TEXT
+
+
+def test_figures_outside_the_deal_terms_go_to_the_skills_built_for_them() -> None:
+    limits = _unwrapped(_section("## Limits"))
+
+    assert "ARR, retention, churn, CAC payback and burn multiple to the vc-metrics-readiness skill" in limits
+    assert "a market size to the vc-market-sizing skill" in limits
+    assert f'Growth rates and LTV are quoted as stated with "{_NO_TOOL}"' in limits
+    assert "(a growth rate, a market size, unit economics)" not in limits
