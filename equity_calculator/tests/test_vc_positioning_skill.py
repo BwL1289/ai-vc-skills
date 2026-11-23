@@ -36,7 +36,7 @@ _FENCE = re.compile(r"^( *)```([a-z]*)\n(.*?)^\1```$", re.MULTILINE | re.DOTALL)
 _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
-_HANDOFF_SKILLS = ("vc-deal-math", "equity-calculator", "vc-claims-check", "vc-deck-review")
+_HANDOFF_SKILLS = ("vc-deal-math", "equity-calculator", "vc-claims-check", "vc-deck-review", "vc-partner-meeting")
 _DESCRIPTION_LIMIT = 1024
 _TRIGGERS = (
     "tighten my pitch",

@@ -46,6 +46,16 @@ All notable changes to this repository. Dates are UTC.
   `equity_round`). An adversarial review turns the surviving objections into a ranked fix list, and the answer says
   which kind of investor the story fits by stage and type. No score and no named firms. `vc-positioning` now points to
   it. Four evals are in `evals/vc-deck-review/`.
+- The `vc-partner-meeting` skill, in preview: a founder rehearses a VC partner meeting. It picks question lenses by
+  stage (pre-seed, seed, Series A, later) and by the partner's background (operator, finance, product, network, sector
+  thesis), frameworks and never named people or firms, and runs an adversarial review: the lenses attack the founder's
+  own lines, and a refute pass moves every question the material already answers to a quick-rehearsal list. It drills
+  the questions that remain, live or in one message, preps what a partner checks around the meeting (who else is in
+  the round, insiders, who has passed, references, no raise), and debriefs each weak answer with a stronger one built
+  only from the founder's material, plus what a yes would need. It moderates and never plays an investor: no pass or
+  invest verdict and no score. The ask's figures go to `equity_deal_check`; runway with no raise is quoted, not
+  computed. A question bank by category sits in `skills/vc-partner-meeting/references/`. `vc-positioning` now points
+  to it. Four evals are in `evals/vc-partner-meeting/`.
 
 ### Changed
 
