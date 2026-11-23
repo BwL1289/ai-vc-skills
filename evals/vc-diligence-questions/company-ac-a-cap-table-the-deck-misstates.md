@@ -4,8 +4,9 @@ A test prompt for the `vc-diligence-questions` skill. The company is made up. Th
 real `equity_calculator deal_check` run with these inputs. The answer states the expected behaviour; it is not a
 recorded run, and this eval has not been run in a live session. A run passes when it makes the one tool call below
 (field order free, money and percents as strings, share counts as whole numbers), puts the founders' mismatch first
-among the ranked questions without refuting it, quotes the founders' percent today and the cap table's own sum as not
-checked, marks the cap table Contradicted in the data-room checklist, and computes nothing in its own text.
+among the ranked questions without refuting it, relays the two flag codes in the tool's words, quotes the founders'
+percent today and the cap table's own sum as not checked, marks the cap table Contradicted in the data-room checklist,
+and computes nothing in its own text. A field passed at its default value (here `pool_timing`) may be left out.
 
 ## Prompt
 
@@ -30,6 +31,7 @@ checked, marks the cap table Contradicted in the data-room checklist, and comput
     "fully_diluted_shares": 8000000,
     "unissued_pool_shares": 700000,
     "target_pool_percent": "10",
+    "pool_timing": "pre_money",
     "instruments": [
       {
         "kind": "safe",
@@ -75,6 +77,9 @@ checked, marks the cap table Contradicted in the data-room checklist, and comput
 - Data room: the cap table (FIN-D2) is Contradicted (the deck against the tool); the signed SAFE and the term sheet
   (FIN-D3) and the incorporation documents (LEG-D1) are Ready as named, with the note that a partner will open them;
   the work assignments (LEG-D2), the founders' stock agreements (LEG-D3) and the disputes list (LEG-D4) are Missing,
-  each with a bracketed ask. Only pre-seed and seed rows are listed.
+  each with a bracketed ask, and so are the founder bios (TEAM-D1), the product walkthrough (PROD-D1) and the
+  executive summary (FIN-D1). These are the core set, the pre-seed rows. No document on the list and no kept question
+  points to a seed row, so the seed rows are named once, in one line, as "if asked", and none is marked Missing; no
+  Series A row is listed.
 - The area prep list for Financials and cap table cites CAP-1 to CAP-4 by ID; for Legal, LEGAL-2 to LEGAL-5.
 - No arithmetic in its own text beyond the tool's values; no score and no readiness percentage.

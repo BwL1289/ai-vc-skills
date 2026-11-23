@@ -2,8 +2,9 @@
 
 A test prompt for the `vc-diligence-questions` skill. The company is made up. The answer states the expected
 behaviour; it is not a recorded run, and this eval has not been run in a live session. A run passes when it makes no
-calculator call, keeps the data room to the seed stage while naming the later documents once, ranks the contractor's
-code as a Legal question with a bracketed assignment ask and no view on who owns the code, and works out no figure.
+calculator call, keeps the data room to the seed stage's core set while naming the other seed rows and the later
+documents once, ranks the contractor's code as a Legal question with a bracketed assignment ask and no view on who
+owns the code, and works out no figure.
 
 ## Prompt
 
@@ -34,6 +35,9 @@ call only if the founder wants the cap table after conversion.
   the answer says which.
 - Data room: the incorporation documents (LEG-D1) and the SAFE form (FIN-D3) are Ready as named; the work assignments
   (LEG-D2), the founders' stock agreements (LEG-D3) and the disputes list (LEG-D4) are Missing, each with a bracketed
-  ask; monthly metrics since launch (MET-D2) is Ready as "a spreadsheet of bookings by month", with the note that a
-  partner will open it.
+  ask, as are the other pre-seed rows (TEAM-D1, PROD-D1, FIN-D1, FIN-D2). Monthly metrics since launch (MET-D2), a
+  seed row, is listed because a document on the list shows it: Ready as "a spreadsheet of bookings by month", with the
+  note that a partner will open it. A seed row the traction question's draft answer names, if that question is kept,
+  is listed too. Every other seed row, the operating plan, the monthly cash plan and the budget (FIN-D4 to FIN-D6)
+  among them, is named once, in one line, as "if asked", and none of them is marked Missing.
 - No runway, revenue or growth figure is worked out; no score and no readiness percentage.

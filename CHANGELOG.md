@@ -73,10 +73,10 @@ All notable changes to this repository. Dates are UTC.
   checklist scaled to the stage follow, each document marked Contradicted, Missing or Ready. The questions come from
   `vc-partner-meeting`'s question bank, read in place and never copied (a test ties the two); the skill's own legal and
   cap-table questions and the checklist sit in `skills/vc-diligence-questions/references/data-room.md`. The cap table
-  goes to `equity_deal_check` (`equity_round` for a SAFE or note raise), runway with no raise to `equity_runway_plan`,
-  and the cap table's own sums are quoted, not computed. No score, no investor voice, no legal opinion, and no invented
-  or backdated document. `vc-positioning` and `vc-partner-meeting` now point to it. Four evals are in
-  `evals/vc-diligence-questions/`.
+  goes to `equity_deal_check` (`equity_round` for a SAFE or note raise), runway with no raise or on a SAFE or note
+  raise to `equity_runway_plan`, and the cap table's own sums are quoted, not computed. No score, no investor voice, no
+  legal opinion, and no invented or backdated document. `vc-positioning` and `vc-partner-meeting` now point to it. Five
+  evals are in `evals/vc-diligence-questions/`.
 - The calculator's `runway_plan` scenario, also an MCP tool (`equity_runway_plan`), a command and a workbook sheet:
   how long each raise lasts on a founder's phased plan, a downside and a lean case, with a no-raise row (and its
   stated runway checked), milestones with time to raise the next round, the smallest raise per milestone and landing

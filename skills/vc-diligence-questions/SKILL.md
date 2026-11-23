@@ -1,6 +1,6 @@
 ---
 name: vc-diligence-questions
-description: Helps a founder prepare for the due-diligence questions a fund asks after a first meeting. By area (team, market, product, traction and metrics, financials and cap table, legal) it finds the questions the founder's own material leaves open, ranks them by how much each answer moves the fund's decision, drafts an answer to each from the founder's material only, and builds a data-room checklist scaled to the stage, each item marked ready, missing or contradicted. An adversarial review has one lens per area attack the founder's lines and a refute pass drop what the material already answers. The questions come from the question bank the vc-partner-meeting skill keeps, read as one shared file. The cap table and the ask go to the calculator's deal_check tool. Use when a founder says prepare me for diligence, what will they ask in diligence, build my data room, data-room checklist, or the fund wants to start diligence. Never invents documents or figures. Not legal, tax or investment advice.
+description: Helps a founder prepare for the due-diligence questions a fund asks after a first meeting. By area (team, market, product, traction and metrics, financials and cap table, legal) it finds the questions the founder's own material leaves open, ranks them by how much each answer moves the fund's decision, drafts an answer to each from the founder's material only, and builds a data-room checklist scaled to the stage, each item marked ready, missing or contradicted. An adversarial review has one lens per area attack the founder's lines and a refute pass drop what the material already answers. The questions come from the question bank the vc-partner-meeting skill keeps, read as one shared file. The cap table, the ask and runway go to the calculator (deal_check, round, runway_plan). Use when a founder says prepare me for diligence, what will they ask in diligence, build my data room, data-room checklist, or the fund wants to start diligence. Never invents documents or figures. Not legal, tax or investment advice.
 ---
 
 # VC diligence questions
@@ -93,7 +93,7 @@ cell it answers, so the bank stays the one place a question is worded.
 ## Steps
 
 Without a subagent tool, run Stage A of the adversarial review right after step 1, before step 2, as "How to run the
-lenses" says, so the lenses do not anchor on the numbers, the bank or the checklist; step 4 then starts at the quote
+lenses" says, so the lenses do not anchor on the numbers, the bank or the checklist; step 3 then starts at the quote
 check.
 
 1. **Intake.** Ask for the missing inputs in one message. Label the material as it arrives.
@@ -106,13 +106,20 @@ check.
      shares today as `holder_shares`. One call per document's version of the ask. Never divide the shares yourself.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
-     which way the founder's does, and pass the tool its own basis.
+     which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask the
+     founder for the total without them, as a bracketed ask,
+     `[fully diluted shares before the round, SAFEs and notes left out]`, and leave every cap-table field out of the
+     call until they give it; never subtract the SAFE or note shares yourself.
    - A raise on a SAFE or note is not passed as `investment`: route it as vc-deal-math step 2 does, to `equity_round`,
-     with the next priced round the founder expects.
+     with the next priced round the founder expects. `equity_round` gives no verdict, no mismatch and no flags: quote
+     its price per share and ownership rows as it prints them. A percent a document states after a SAFE or note raise
+     is quoted beside the tool's ownership row, both as printed; no difference is computed (deal_check computes
+     differences only for priced rounds).
    - Runway: a runway claim on a priced round is part of the `equity_deal_check` call. Runway with no raise, or on a
-     SAFE or note raise, goes to `equity_runway_plan`: `cash_on_hand`, a plan case
-     (`{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}`), the stated runway as
-     `stated_runway_months` (no raise) or as a raise option's own `stated_runway_months` (`raises: [{"amount": "..."}]`).
+     SAFE or note raise, goes to `equity_runway_plan`, the plan case inside the `cases` list. With no raise:
+     `{"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "stated_runway_months": "..."}`.
+     On a SAFE or note raise, the stated runway is the raise option's own:
+     `{"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "raises": [{"amount": "...", "stated_runway_months": "..."}]}`.
    - A tool's mismatch is a diligence question a partner will ask first, so it goes to the top of the ranked list.
    - Read every code in the tool's `flags` too, and relay each in the tool's words: beside the mismatch it explains,
      or, with no mismatch, as a kept question at slows it, not refuted. A flag that rests on a benchmark band quotes
@@ -121,8 +128,8 @@ check.
      founder states for today. Quote them as stated, mark them "not checked: no tool adds up a cap table", and never
      add, subtract or divide shares yourself.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
-     its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%), which is what the
-     command line's report prints. That is a change of notation, not a calculation; never round it.
+     its `rounded` value two places to the right, keeping every digit (0.536170 is 53.6170%, eval AC's founders after
+     the round), which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
    - Growth rates, retention, market sizes and unit economics have no tool here: quote them as stated, check only that
      each has a definition, a period and a record behind it, and never compute, convert or round one.
 3. **Run the adversarial review** (next section): attack, check the quotes, refute, rank.
@@ -222,6 +229,8 @@ Besides the ranked questions, a partner asks the usual questions of each area. F
 rows whose Stages include the founder's stage: first those whose Grounding is a kind of line the material has (a
 traction line, the ask line), then those marked standing. Legal and Financials and cap table also list, in the same
 order and at most five each, the rows of this skill's own question table in `references/data-room.md` for that area.
+Legal also takes RISK-3 and RISK-4 (the mapping's Also read by), under the same stage and grounding order; they stay
+in Product's list too.
 Give each its ID and Question, and the founder's line it touches, quoted, or "standing". These are not attacks and
 are not refuted; the founder prepares a short answer to each. A bank row never enters the ranked list on its own: it
 enters only when a lens tied it to a founder's line quoted word for word and it then passed the quote check and the
@@ -229,9 +238,16 @@ refute pass.
 
 ## The data-room checklist
 
-Build it from [`references/data-room.md`](references/data-room.md): the rows for the founder's stage, by area. Mark
-each row with one status; when a row earns more than one, take the first in this order: **Contradicted**, then
-**Missing**, then **Ready**.
+Build it from [`references/data-room.md`](references/data-room.md), by area, kept to the stage:
+
+- **Pre-seed:** the rows whose From is pre-seed.
+- **Seed:** the core set, the rows whose From is pre-seed (TEAM-D1, PROD-D1, FIN-D1 to FIN-D3, LEG-D1 to LEG-D4),
+  plus a seed row only when a document on the founder's list shows what it needs or a kept question's draft answer
+  names it. Name every other seed row once, in one line, as "if asked", never as Missing.
+- **Series A or later:** the rows whose From stage is the founder's stage or earlier.
+
+Mark each listed row with one status; when a row earns more than one, take the first in this order:
+**Contradicted**, then **Missing**, then **Ready**.
 
 - **Contradicted:** a document or line the founder gave disagrees with another (both quoted), or the calculator
   reports a mismatch on what the document records (the cap table against the deck).
@@ -239,10 +255,10 @@ each row with one status; when a row earns more than one, take the first in this
 - **Ready:** a document on the founder's list shows it, named as the founder named it. The skill has not seen the
   document; the answer says a partner will open it.
 
-Keep the data room to the stage: at seed, a short set (the deck, an executive summary, the cap table, the SAFE or
-note forms, the formation documents and the work assignments) is usually enough, and the guide this skill relies on
-says not to spend much time on diligence documents for a seed round. Rows for a later stage are not listed as
-missing; name them once as "for the next round" when the founder asks for a fuller room.
+Keep the data room to the stage: at seed, the core set (with the deck the fund has already seen) is usually enough,
+and the guide this skill relies on says not to spend much time on diligence documents for a seed round. Rows for a
+later stage are not listed as missing; name them once as "for the next round" when the founder asks for a fuller
+room.
 
 ## Draft answers
 
@@ -269,8 +285,9 @@ it never says whether something is legally sufficient.
 4. **Area prep list,** area by area, with bank IDs and this skill's own LEGAL and CAP IDs.
 5. **Data-room checklist,** by area: Row, What it shows, Status (Contradicted, Missing or Ready), the founder's
    document or the bracketed ask.
-6. **Numbers and cap table:** each `equity_deal_check`, `equity_round` or `equity_runway_plan` verdict with each
-   mismatch row in the tool's values; each flag, one line, in the tool's words; the cap table's own sums and today's
+6. **Numbers and cap table:** each `equity_deal_check` or `equity_runway_plan` verdict with each mismatch row in the
+   tool's values; each flag, one line, in the tool's words; each `equity_round` result as its price per share and
+   ownership rows, as printed, with no verdict, since that tool gives none; the cap table's own sums and today's
    percents with "not checked: no tool adds up a cap table"; every other figure quoted as stated.
 7. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
 8. **Sources:** the frameworks used, with links, and which points rest on this skill's own unverified judgment.

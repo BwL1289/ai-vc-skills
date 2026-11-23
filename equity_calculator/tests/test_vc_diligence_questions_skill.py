@@ -8,9 +8,11 @@ reads must be the bank's, its category-to-area table must cover the bank's categ
 may be copied into the skill. Its own file, references/data-room.md, holds the data-room checklist, which names every
 bank row's Diligence document exactly once, and its own legal and cap-table questions. The adversarial review keeps
 partner-meeting's two stages, with the refute pass free to point at a document on the founder's list. The cap table
-goes to ``equity_deal_check`` and runway with no raise to ``equity_runway_plan``; what no tool checks is quoted as not
-checked. Each eval in evals/vc-diligence-questions/ has a prompt, an expected tool call and an expected answer; the
-one eval with a call carries a valid call and an excerpt that is lines of the report that call prints.
+goes to ``equity_deal_check`` and runway with no raise or on a SAFE or note raise to ``equity_runway_plan``, in the
+input shape the skill writes out whole; what no tool checks is quoted as not checked. The data room at seed is the
+core set, the pre-seed rows, plus the seed rows a document or a kept question points to. Each eval in
+evals/vc-diligence-questions/ has a prompt, an expected tool call and an expected answer; each eval with a call
+carries a valid call for the tool it names and an excerpt that is lines of the report that call prints.
 """
 
 from __future__ import annotations
@@ -23,8 +25,7 @@ import pytest
 from equity_calculator.__main__ import _INPUT_MODELS
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
-from equity_calculator.schemas.equity_deal_check import DealCheckInput
-from equity_calculator.schemas.equity_runway_plan import BurnCase, RaiseOption, RunwayPlanInput
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput
 from equity_calculator.text import render_sheet
 from tests.test_vc_claims_check_skill import _READ_SOURCES
 
@@ -39,8 +40,8 @@ _BANK = _BANK_PATH.read_text(encoding="utf-8")
 _PARTNER_MEETING = (_ROOT / "skills" / "vc-partner-meeting" / "SKILL.md").read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-diligence-questions").glob("*.md"))
-_EVAL_COUNT = 4
-_EVAL_LETTERS = ("ac", "ad", "ae", "af")
+_EVAL_COUNT = 5
+_EVAL_LETTERS = ("ac", "ad", "ae", "af", "al")
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_deal_check` call."
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
@@ -56,6 +57,7 @@ _HANDOFF_SKILLS = ("vc-partner-meeting", "vc-claims-check", "vc-deal-math", "vc-
 # Built in a parallel lane and merged before this skill: named in "When to use it" now; its folder check joins
 # _HANDOFF_SKILLS once the branch is rebased on a main that has the folder.
 _PARALLEL_HANDOFFS = ("vc-term-sheet-review",)
+_README_BOTH_FOLDERS = "`vc-diligence-questions` reads `vc-partner-meeting`'s question bank, so load both folders."
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
 _TRIGGERS = (
@@ -78,8 +80,15 @@ _STATUSES = ("Contradicted", "Missing", "Ready")
 _REFUTE_VERDICTS = ("Dropped, answered:", "Dropped, not grounded:", "Kept:")
 _CAP_UNCHECKED = "not checked: no tool adds up a cap table"
 _NEXT_ROUND = "for the next round"
+_IF_ASKED = "if asked"
 # Strings an eval's answer quotes that are the skill's own marks or its source's words, not the founder's lines.
-_SKILL_MARKS = {_CAP_UNCHECKED, _NEXT_ROUND, _STAGE_RULE}
+_SKILL_MARKS = {_CAP_UNCHECKED, _NEXT_ROUND, _IF_ASKED, _STAGE_RULE}
+_FD_ASK = "`[fully diluted shares before the round, SAFEs and notes left out]`"
+_FLAG_CODES = ("conversions_bought_by_pre_money", "pool_in_pre_money_lowers_price")
+_CORE_STAGE = "pre-seed"
+# The step the no-subagent note sends the agent back to, and the title of the review step it must be.
+_RESUME_STEP = re.compile(r"; step (\d+) then starts at the quote check\.")
+_REVIEW_STEP = "**Run the adversarial review**"
 _BANK_COLUMNS = ["ID", "Question", "Probes", "Lenses", "Stages", "Grounding", "Diligence"]
 _READ_COLUMNS = ("ID", "Question", "Probes", "Stages", "Grounding", "Diligence")
 _MAPPING_COLUMNS = ["Bank category", "Area", "Also read by"]
@@ -104,6 +113,8 @@ _PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|\d[\d,]*\.\d+ months|\$\d[\d,]*\
 # A bar or benchmark the data-room file must never carry: money, a percent, or a multiple such as 3x.
 _FIGURE = re.compile(r"[$%]|\d\s*x\b")
 _FILLER = "1"
+# A whole runway_plan input the skill writes out in step 2, in one code span.
+_RUNWAY_INPUT = re.compile(r'`(\{"cash_on_hand": .*?\})`')
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -183,6 +194,15 @@ def _answer(letter: str) -> str:
     return _unwrapped(_section("## Expected answer", _eval(letter).read_text(encoding="utf-8")))
 
 
+def _report(text: str) -> str:
+    """The report the calculator prints for the eval's call, run on the input model of the tool the eval names."""
+    (example,) = _fences("json", text)
+    tool = _TOOL_NAME.search(_section("## Expected tool call", text))
+    assert tool is not None
+    model = _INPUT_MODELS[tool.group(1).removeprefix(_TOOL_PREFIX)]
+    return render_sheet(sheet_for(compute(model.model_validate(json.loads(example)["inputs"]))))
+
+
 def test_the_frontmatter_names_the_skill_and_the_founders_questions() -> None:
     fields = _frontmatter()
     description = fields["description"]
@@ -222,25 +242,26 @@ def test_every_skill_it_hands_off_to_exists_and_two_skills_point_here() -> None:
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
     for name in _PARALLEL_HANDOFFS:
         assert f"the {name} skill" in hand_off, name
+        # Once the folder lands (at the rebase), the name must move to _HANDOFF_SKILLS so the folder check runs.
+        assert not (_ROOT / "skills" / name / "SKILL.md").is_file(), f"move {name} into _HANDOFF_SKILLS"
     assert '"Review my term sheet": the vc-term-sheet-review skill' in hand_off
     assert "vc-diligence-questions" in _section("## When to use it", _POSITIONING)
     assert "the vc-diligence-questions skill" in _unwrapped(_section("## When to use it", _PARTNER_MEETING))
     assert "Planned, not yet shipped" not in _PARTNER_MEETING
 
 
-def test_the_runway_shapes_the_skill_gives_are_ones_the_runway_tool_takes() -> None:
+def test_the_runway_inputs_the_skill_writes_out_are_ones_the_runway_tool_takes_whole() -> None:
+    """Each runway input in step 2 is a whole object, parsed from the skill's text with nothing added by the test."""
     steps = _section("## Steps")
-    (case,) = re.findall(r'`(\{"name": "plan".*?\})`', steps)
-    (raises,) = re.findall(r"`raises: (\[.*?\])`", steps)
-    filled = case.replace("...", _FILLER)
+    inputs = [json.loads(found.replace("...", _FILLER)) for found in _RUNWAY_INPUT.findall(steps)]
 
-    BurnCase.model_validate(json.loads(filled))
-    RaiseOption.model_validate({**json.loads(raises.replace("...", _FILLER))[0], "stated_runway_months": _FILLER})
-    for field in ("cash_on_hand", "stated_runway_months"):
-        assert f"`{field}`" in steps and field in RunwayPlanInput.model_fields, field
-    RunwayPlanInput.model_validate(
-        {"cash_on_hand": _FILLER, "cases": [json.loads(filled)], "stated_runway_months": _FILLER}
-    )
+    assert len(inputs) == 2
+    no_raise, on_a_raise = inputs
+    assert "raises" not in no_raise and "stated_runway_months" in no_raise
+    assert "stated_runway_months" not in on_a_raise and "stated_runway_months" in on_a_raise["raises"][0]
+    for found in inputs:
+        assert set(found) <= set(RunwayPlanInput.model_fields), set(found) - set(RunwayPlanInput.model_fields)
+        compute(RunwayPlanInput.model_validate(found))
 
 
 def test_the_shared_bank_is_read_in_place_and_mapped_whole() -> None:
@@ -328,9 +349,12 @@ def test_the_attack_stage_runs_six_area_lenses_before_the_numbers_and_the_bank()
     attack = _unwrapped(_section("### Stage A: attack"))
     areas = [row[0] for row in _tables(_TEXT, _AREA_COLUMNS)]
     note = "Without a subagent tool, run Stage A of the adversarial review right after step 1, before step 2"
+    resume = _RESUME_STEP.search(steps)
 
     assert areas == list(_AREAS)
     assert note in steps and steps.index(note) < steps.index("1. **Intake.**")
+    assert resume is not None
+    assert f" {resume.group(1)}. {_REVIEW_STEP}" in steps, resume.group(1)
     assert "quoted word for word" in attack
     assert "only the founder's material, the document list and its lens brief" in attack
     assert "one after another" in attack and "do no arithmetic" in attack
@@ -379,13 +403,21 @@ def test_the_cap_table_goes_to_the_calculator_and_its_sums_are_quoted_unchecked(
     assert "Never divide the shares yourself" in steps
     assert "never add, subtract or divide shares yourself" in steps
     assert "SAFEs and notes excluded" in steps and "ask which way the founder's does" in steps
-    assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
+    assert "0.536170 is 53.6170%" in steps and "a change of notation, not a calculation" in steps
+    fd_rule = "If the founder's total counts them, ask the founder for the total without them, as a bracketed ask"
+    assert f"{fd_rule}, {_FD_ASK}" in steps
+    assert "never subtract the SAFE or note shares yourself" in steps
+    assert "`equity_round` gives no verdict, no mismatch and no flags" in steps
+    assert "both as printed; no difference is computed" in steps
     assert "is not passed as `investment`" in steps
     assert "Runway with no raise, or on a SAFE or note raise, goes to `equity_runway_plan`" in steps
     assert "One call per document's version of the ask" in steps
     assert "Read every code in the tool's `flags` too, and relay each in the tool's words" in steps
     assert "with its `unverified` source, never as a bar" in steps
     assert "each flag, one line, in the tool's words" in answering
+    round_rule = "each `equity_round` result as its price per share and ownership rows, as printed, with no verdict"
+    assert round_rule in answering
+    assert "`equity_round` verdict" not in answering
     for unchecked in ("no tool computes runway without a raise", "no tool computes this for a SAFE or note raise"):
         assert unchecked not in _TEXT, unchecked
 
@@ -397,8 +429,37 @@ def test_the_checklist_has_three_statuses_in_order_and_keeps_to_the_stage() -> N
     for status in _STATUSES:
         assert f"- **{status}:**" in _section("## The data-room checklist"), status
     assert "Rows for a later stage are not listed as missing" in checklist
+    assert "the rows whose From stage is the founder's stage or earlier" in checklist
+    assert f'Name every other seed row once, in one line, as "{_IF_ASKED}", never as Missing' in checklist
     assert f'"{_NEXT_ROUND}"' in checklist
     assert "The skill has not seen the document" in checklist
+
+
+def test_the_seed_core_set_is_the_pre_seed_rows_and_the_skill_names_them() -> None:
+    """At seed the checklist lists the pre-seed rows, not every seed row; the skill's list of them is the file's."""
+    checklist = _unwrapped(_section("## The data-room checklist"))
+    core = [row[0] for row in _checklist() if row[4] == _CORE_STAGE]
+    seed = [row[0] for row in _checklist() if row[4] == "seed"]
+    named = re.search(r"the rows whose From is pre-seed \(([^)]*)\)", checklist)
+
+    assert named is not None
+    listed: list[str] = []
+    for part in re.split(r", | and ", named.group(1)):
+        first, _, last = part.partition(" to ")
+        prefix, start = first.rsplit("D", 1)
+        stop = last.rsplit("D", 1)[1] if last else start
+        listed += [f"{prefix}D{number}" for number in range(int(start), int(stop) + 1)]
+    assert sorted(listed) == sorted(core)
+    assert len(core) < len(seed)
+    assert "plus a seed row only when a document on the founder's list shows what it needs" in checklist
+    assert "except at seed: there it lists the pre-seed rows (the core set)" in _unwrapped(_DATA_ROOM)
+
+
+def test_the_area_prep_list_gives_legal_the_two_risk_rows() -> None:
+    prep = _unwrapped(_section("## The area prep list"))
+
+    assert "Legal also takes RISK-3 and RISK-4 (the mapping's Also read by)" in prep
+    assert "they stay in Product's list too" in prep
 
 
 def test_draft_answers_build_only_from_the_material_and_never_judge_the_law() -> None:
@@ -452,7 +513,7 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
 
 
 def test_the_no_call_evals_carry_no_call_or_excerpt() -> None:
-    assert _CALL_EVALS == [_eval("ac")]
+    assert _CALL_EVALS == [_eval("ac"), _eval("al")]
     for path in _NO_CALL_EVALS:
         text = path.read_text(encoding="utf-8")
         assert _fences("json", text) == [] and _fences("text", text) == [], path.name
@@ -462,10 +523,9 @@ def test_the_no_call_evals_carry_no_call_or_excerpt() -> None:
 def test_each_eval_call_is_valid_and_its_excerpt_is_what_the_calculator_prints(path: Path) -> None:
     """An eval's figures are pasted from the calculator: its excerpt must be lines of the report for its call."""
     text = path.read_text(encoding="utf-8")
-    (example,) = _fences("json", text)
     (excerpt,) = _fences("text", text)
 
-    report = render_sheet(sheet_for(compute(DealCheckInput.model_validate(json.loads(example)["inputs"]))))
+    report = _report(text)
     printed = [line.rstrip() for line in report.splitlines()]
 
     for line in excerpt.splitlines():
@@ -476,8 +536,7 @@ def test_each_eval_call_is_valid_and_its_excerpt_is_what_the_calculator_prints(p
 def test_each_figure_an_eval_answer_takes_from_the_calculator_is_what_it_prints(path: Path) -> None:
     """A percent, a months figure or a money figure with cents in the expected answer is a line the report prints."""
     text = path.read_text(encoding="utf-8")
-    (example,) = _fences("json", text)
-    report = render_sheet(sheet_for(compute(DealCheckInput.model_validate(json.loads(example)["inputs"]))))
+    report = _report(text)
     figures = _PRINTED_FIGURE.findall(_unwrapped(_section("## Expected answer", text)))
 
     assert figures
@@ -491,6 +550,10 @@ def test_the_cap_table_eval_quotes_todays_percent_unchecked_and_marks_the_cap_ta
     assert _CAP_UNCHECKED in answer
     assert "(FIN-D2) is Contradicted" in answer
     assert "is not put through the refute pass" in answer
+    assert "relays the two flag codes in the tool's words" in _unwrapped(_eval("ac").read_text(encoding="utf-8"))
+    for code in _FLAG_CODES:
+        assert f"`{code}`" in answer, code
+    assert f'named once, in one line, as "{_IF_ASKED}", and none is marked Missing' in answer
 
 
 def test_the_seed_eval_keeps_the_room_to_the_stage_and_asks_for_the_assignment() -> None:
@@ -499,6 +562,22 @@ def test_the_seed_eval_keeps_the_room_to_the_stage_and_asks_for_the_assignment()
     assert f'"{_STAGE_RULE}"' in answer and f'"{_NEXT_ROUND}"' in answer
     assert "[a signed assignment of the freelance developer's work to the company]" in answer
     assert "does not say whether the company owns the code" in answer
+    assert "(FIN-D4 to FIN-D6)" in answer and f'as "{_IF_ASKED}", and none of them is marked Missing' in answer
+
+
+def test_the_runway_eval_leads_with_the_mismatch_and_asks_for_the_total_without_the_safe() -> None:
+    text = _eval("al").read_text(encoding="utf-8")
+    answer = _answer("al")
+    call = _section("## Expected tool call", text)
+    tool = _TOOL_NAME.search(call)
+
+    assert tool is not None and tool.group(1) == "equity_runway_plan"
+    assert "No `equity_deal_check` call" in call
+    assert "The runway mismatch leads the ranked list as stops the process" in answer
+    assert "is not put through the refute pass" in answer
+    assert _FD_ASK in answer and "passes no share count to any tool" in answer
+    assert "(FIN-D5) is Missing too, because the runway question's draft answer names it" in answer
+    assert f'as "{_IF_ASKED}"' in answer
 
 
 def test_the_refusal_eval_declines_and_names_no_one() -> None:
@@ -529,6 +608,10 @@ def test_every_line_an_eval_answer_quotes_is_in_its_prompt_or_is_a_mark_of_the_s
 
     for quoted in _DOUBLE_QUOTED.findall(_unwrapped(_section("## Expected answer", text))):
         assert quoted in prompt or quoted in _SKILL_MARKS, quoted
+
+
+def test_the_readme_tells_a_manual_install_to_load_both_folders() -> None:
+    assert _README_BOTH_FOLDERS in (_ROOT / "README.md").read_text(encoding="utf-8")
 
 
 def test_the_readme_badge_counts_the_skill_folders() -> None:

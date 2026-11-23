@@ -11,8 +11,9 @@ named; IDs unique and never the same as a bank ID.
 ## The checklist
 
 "From" is the first stage at which a partner is likely to ask for the document: pre-seed, seed, Series A or later.
-The skill lists the rows from the founder's stage and earlier. "Bank IDs" names the bank rows whose Diligence cell the
-row answers, or none.
+The skill lists the rows from the founder's stage and earlier, except at seed: there it lists the pre-seed rows (the
+core set) and only the seed rows that a document on the founder's list or a kept question points to, and names the
+other seed rows once as "if asked". "Bank IDs" names the bank rows whose Diligence cell the row answers, or none.
 
 | ID      | Document                                                                           | What it shows                                                    | Area                     | From     | Bank IDs                    |
 | ------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------ | -------- | --------------------------- |
