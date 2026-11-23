@@ -43,7 +43,7 @@ _COMPANY_AW = [
     "--sensitivity",
     "field=obtainable-percent segment=2 values=5%/15",
     "--annual-revenue-today",
-    "216000",
+    "324000",
     "--som-years",
     "5",
     "--som-target",
@@ -92,10 +92,11 @@ async def test_company_ax_from_flags_matches_the_model() -> None:
     argv = [
         "market_sizing",
         "--segment",
-        "customers=4000000 price=1800 take-rate-percent=15 serviceable-percent=25 obtainable-percent=2 "
-        "customers-today=3000",
+        "customers=4000000 price=1800 price-period-months=12 take-rate-percent=15 serviceable-percent=25 "
+        "obtainable-percent=2 customers-today=3000",
         "--segment",
-        "customers=2500000 price=1800 take-rate-percent=15 serviceable-percent=30 obtainable-percent=2",
+        "customers=2500000 price=1800 price-period-months=12 take-rate-percent=15 serviceable-percent=30 "
+        "obtainable-percent=2",
         "--top-down",
         "amount=1100000000",
         "--sensitivity",
@@ -108,6 +109,19 @@ async def test_company_ax_from_flags_matches_the_model() -> None:
     ]
 
     assert json.loads(await run(argv)) == json.loads(market_sizing(**MARKET_AX).model_dump_json())
+
+
+@pytest.mark.parametrize(("period", "flagged"), [("", True), (" price-period-months=12", False)])
+async def test_a_price_period_left_out_is_flagged_and_marked_on_its_line(period: str, flagged: bool) -> None:
+    """Left out, the price is read as a yearly one, the line says so and the flag fires; 12 given is the founder's."""
+    argv = ["market_sizing", "--segment", f"customers=1000 price=400{period}"]
+    printed = await run([*argv, "--json"])
+    report = await run(argv)
+
+    result = json.loads(printed)
+    assert ("price_period_defaulted" in result["flags"]) is flagged
+    assert result["segments"][0]["price_period_given"] is not flagged
+    assert ("not given: read as a yearly price" in report) is flagged
 
 
 @pytest.mark.parametrize(

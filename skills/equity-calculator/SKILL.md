@@ -180,8 +180,8 @@ page). Everything else is standard arithmetic, labelled `unverified` in the resu
   is set beside the bottom-up TAM or SAM, never in its place. With a horizon, the new customers a year are a straight
   line from today's. Stated TAM, SAM and SOM use deal_check's 2% tolerance. A sensitivity row works one field of one
   segment at each value, the rest at base; every total is linear in one field, so the value at which SOM reaches
-  the target, and TAM or SAM a top-down figure, is exact (or met without it, does not move, or out of range). Flags
-  (double counting past the population, a bottom-up above the top-down, SAM equal to TAM, no SOM or one given only as
+  the target, and TAM or SAM the first top-down figure, is exact (or met without it, does not move, or out of range).
+  Flags (a price period left out, read as yearly; double counting past the population, a bottom-up above the top-down, SAM equal to TAM, no SOM or one given only as
   a percent, a SOM grown from no customers today or below today's customers, no horizon, a SOM below or out of
   reach of the target) raise a question, never an error.
 

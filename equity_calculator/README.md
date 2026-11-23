@@ -197,8 +197,9 @@ questions a VC is likely to ask after them.
   example device's "lifecycle ... is two years") and for preferring bottom-up to top-down; and the seed guide's
   glossary (the YC seed guide above), for TAM as "the estimated total revenue available for the product(s) you are selling", which is why a
   take rate below 100% counts only the share of the spend the company keeps. Neither page defines SAM or SOM, so
-  those rules, the population check, the sensitivity and break-even rule, the straight-line path to SOM and the
-  tolerance are unverified. No figure comes from the calculator: every count, price and share is the founder's.
+  those rules, the population check, the sensitivity and break-even rule, the straight-line year (price × 12 / the
+  months covered: the pitch guide gives the two-year lifecycle, not the division), the straight-line path to SOM and
+  the tolerance are unverified. No figure comes from the calculator: every count, price and share is the founder's.
 - **Pre-money SAFEs are not supported.** YC's page has no current pre-money SAFE form; the user guide works one
   pre-money Safe Price only as an example, not as a form's definitions, so they are left out.
 - **Unverified**: neither essay covers option pools, convertible notes, preferred stock or the finer vesting terms,
@@ -525,7 +526,8 @@ stated figure without what it needs to be checked, and a churn basis without a s
 ### Market sizing (YC's pitch guide for bottom-up and the seed guide for TAM as revenue; the rest unverified)
 
 A founder's own segments, up to 8: for each, the buying customers, the price of one unit and the months it covers
-(12 by default; 1 for a monthly price, 24 for a two-year device), the units one customer buys, the take rate (100% by
+(12 by default, a yearly price, which the report marks as not given and flags; 1 for a monthly price, 24 for a
+two-year device), the units one customer buys, the take rate (100% by
 default; a marketplace's or a payments company's fee), the serviceable percent (100% by default) and the SOM, as the
 customers to win (preferred) or a share of the serviceable customers to win, never both.
 
@@ -544,16 +546,23 @@ customers to win (preferred) or a share of the serviceable customers to win, nev
 5. **Sensitivity.** Each row works one field of one segment (`customers`, `price`, `units_per_customer`, the three
    percents or `obtainable_customers`) at each of the founder's values, the rest at base, and gives the SOM low,
    high and swing. Every total is linear in one field, so the value at which SOM reaches the plan's target, and TAM
-   or SAM each top-down figure's comparable part, is exact: x\* = x0·(T - the other segments' total) / this
-   segment's total. It is `met_without_it` when the other segments already reach it, `does_not_move` when the field
-   is not a factor of that total, and `out_of_range` when the segment would be refused at that value (a percent
-   above 100, say), the value still given.
-6. **Flags**, never errors: `segments_exceed_population` (the segments' customers add up to more than the
-   population they come from: a buyer counted twice), `bottom_up_above_top_down` (above a top-down figure's
-   comparable part), `sam_equals_tam` (no serviceable percent below 100), `som_not_given` (a segment with no SOM, so
-   no SOM total), `som_as_percent_only`, `som_from_zero_customers`, `som_below_customers_today`, `no_horizon_given`,
-   `som_below_target` (the SOM total is below the plan's target) and `som_target_out_of_reach` (a sensitivity row
-   reaches the target only at a value the segment cannot take).
+   or SAM the first top-down figure's comparable part (only the first: a second or third figure gets the cross-check
+   of step 3, no break-even), is exact: x\* = x0·(T - the other segments' total) / this segment's total. It is
+   `met_without_it` when the target is reached with the field at its base (the other segments alone reach it, or, for
+   the plan's target, the base SOM is already at or above it), with no value; `does_not_move` when the field is not a
+   factor of that total; and `out_of_range` when the segment would be refused at that value (a percent above 100,
+   more customers to win than it can serve, fewer customers than today's, or a number outside the size every input
+   has: at least 1e-15 and under 1e16), the value still given. The top-down break-even is a cross-check, not a
+   target.
+6. **Flags**, never errors: `price_period_defaulted` (a segment left out the months its price covers, so the price
+   was read as a yearly one; a monthly price left out makes that segment 12 times too small),
+   `segments_exceed_population` (the segments' customers add up to more than the population they come from: a buyer
+   counted twice), `bottom_up_above_top_down` (above a top-down figure's comparable part), `sam_equals_tam` (no
+   serviceable percent below 100), `som_not_given` (a segment with no SOM, so no SOM total), `som_as_percent_only`,
+   `som_from_zero_customers`, `som_below_customers_today`, `no_horizon_given`, `som_below_target` (the SOM total is
+   below the plan's target) and `som_target_out_of_reach` (the SOM is below the target, and no sensitivity row
+   reaches it at a value its segment can take: at least one row would need a value out of range and none reaches it
+   exactly).
 
 A refusal names the field: a SOM given both ways, today's customers above the buying customers, customers to win
 above the serviceable customers, a stated SOM or a target with a segment that has no SOM, and a sensitivity row past
@@ -755,14 +764,14 @@ ARR is 12 × $100k = $1,200,000; the $1.5M is the run-rate, with the fees in it.
 month, 60% of them reachable today, 900 to win and 45 customers now; and 400 multi-site groups, 15 locations each at
 $300 a location a month, 50% reachable, 10% of those to win and 2 customers now. An analyst's figure of $2.1B a
 year matches the founder's definition for 40% of it. The plan needs $8M a year from this market in 5 years, today's
-revenue is $216k a year, and the deck says the TAM is $120M. The founder's own ranges: price $300 to $500, clinics to
+revenue is $324k a year (its 47 customers at its own prices), and the deck says the TAM is $120M. The founder's own ranges: price $300 to $500, clinics to
 win 600 to 1,200, the groups' share 5% to 15%:
 
 ```
 equity_calculator market_sizing \
     --segment "customers=18,000 price=400 price-period-months=1 serviceable-percent=60 obtainable-customers=900 customers-today=45" \
     --segment "customers=400 price=300 price-period-months=1 units-per-customer=15 serviceable-percent=50 obtainable-percent=10 customers-today=2" \
-    --top-down "amount=2,100,000,000 comparable-percent=40" --som-years 5 --annual-revenue-today 216000 \
+    --top-down "amount=2,100,000,000 comparable-percent=40" --som-years 5 --annual-revenue-today 324000 \
     --som-target 8000000 --stated-tam 120000000 \
     --sensitivity "field=price segment=1 values=300/500" --sensitivity "field=obtainable-customers segment=1 values=600/1,200" \
     --sensitivity "field=obtainable-percent segment=2 values=5/15"
@@ -773,6 +782,7 @@ equity_calculator market_sizing \
   Total SOM customers                                                                  920  sum of the segments
   Total SOM                                                                  $5,400,000.00  sum of the segments
   SOM share of SAM                                                                 8.6207%  total SOM / total SAM
+  SOM / annual revenue today                                                    16.666667x  total SOM / annual revenue today
   Segment 1: new customers a year to SOM                                               171  (SOM customers - customers today) / years, a straight line
   Top-down 1: comparable part                                              $840,000,000.00  figure × share matching
   Top-down 1: bottom-up as a share of it                                          12.8571%  bottom-up TAM / comparable part (a cross-check)
@@ -787,10 +797,12 @@ equity_calculator market_sizing \
 ```
 
 The TAM is $108,000,000.00, not the deck's $120M (a mismatch past the 2% tolerance), and the SOM is $5,400,000.00
-from 920 customers, 8.6207% of SAM: short of the $8M the plan needs, so the report flags `som_below_target`, and
+from 920 customers, 8.6207% of SAM and 16.666667x today's revenue: short of the $8M the plan needs, so the report
+flags `som_below_target`, and
 `som_as_percent_only` for the groups' 10%. The top-down figure is a cross-check only: the bottom-up TAM is 12.8571% of
 its comparable part. Of the three ranges, the clinics to win move SOM the most ($2,880,000.00 from low to high);
-reaching $8M on one assumption alone would take a $640.74 monthly price, 1,441.67 clinics, or 34.0741% of the groups.
+reaching $8M on one assumption alone would take a $640.74 monthly price, about 1,442 clinics (1,441.67 exactly), or
+34.0741% of the groups.
 
 ## Using it
 

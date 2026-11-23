@@ -42,7 +42,7 @@ from equity_calculator.exact import (
     round_to_places,
     split_cents,
 )
-from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
+from equity_calculator.schemas.equity_common import MIN_ADJUSTED_EXPONENT, SIZE_LIMIT, EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_deal_check import DealVerdict
 from equity_calculator.schemas.equity_market_sizing import (
     PERCENT_FIELDS,
@@ -66,6 +66,8 @@ from equity_calculator.schemas.equity_market_sizing import (
 __all__ = ["compute_market_sizing", "field_unit"]
 
 _MONTHS_PER_YEAR = 12
+# The smallest nonzero size a decimal input may have (``BoundedDecimal``'s floor; its ceiling is ``SIZE_LIMIT``).
+_SIZE_FLOOR = Fraction(1, 10**-MIN_ADJUSTED_EXPONENT)
 _SPLIT_PLACES = 2
 _HUNDREDTHS = 10**_SPLIT_PLACES
 
@@ -191,7 +193,11 @@ def _moves(segment: MarketSegment, name: SegmentField, metric: MarketMetric) -> 
 
 
 def _allowed(segment: MarketSegment, name: SegmentField, value: Fraction) -> bool:
-    """Whether ``segment`` with ``name`` at ``value`` keeps the segment's rules (the input model's, in fractions)."""
+    """Whether ``segment`` with ``name`` at ``value`` keeps the segment's rules (the input model's, in fractions): the
+    size every decimal input has (at least 1e-15 and under 1e16), a percent up to 100, no fewer customers than today's,
+    and no more customers to win than the serviceable ones."""
+    if value != ZERO and not _SIZE_FLOOR <= abs(value) < SIZE_LIMIT:
+        return False
     if name in PERCENT_FIELDS and value > HUNDRED:
         return False
     customers = value if name == "customers" else fraction(segment.customers)
@@ -203,9 +209,20 @@ def _allowed(segment: MarketSegment, name: SegmentField, value: Fraction) -> boo
 
 
 def _break_even(
-    inputs: MarketSizingInput, row: SensitivityRow, base: _Totals, metric: MarketMetric, target: Fraction
+    inputs: MarketSizingInput,
+    row: SensitivityRow,
+    base: _Totals,
+    metric: MarketMetric,
+    target: Fraction,
+    *,
+    at_least: bool = False,
 ) -> BreakEvenRow:
-    """The value of ``row``'s field at which the total ``metric`` equals ``target``."""
+    """The value of ``row``'s field at which the total ``metric`` equals ``target``.
+
+    With ``at_least`` (the plan's revenue, a floor to reach) a total already at or above ``target`` is
+    ``met_without_it``, with no value: the field need not move. Without it (a top-down figure, a cross-check) the value
+    is given either way.
+    """
     segment = inputs.segments[row.segment - 1]
     own = _worked(segment).metric(metric)
     total = base.metric(metric)
@@ -213,7 +230,7 @@ def _break_even(
     if own is None or total is None or not _moves(segment, row.field, metric):
         return BreakEvenRow(metric=metric, target=target_quantity, reach="does_not_move")
     needed = target - (total - own)
-    if needed <= ZERO:
+    if needed <= ZERO or (at_least and total >= target):
         return BreakEvenRow(metric=metric, target=target_quantity, reach="met_without_it")
     value = fraction(getattr(segment, row.field)) * needed / own
     reach: BreakEvenReach = "value" if _allowed(segment, row.field, value) else "out_of_range"
@@ -244,7 +261,7 @@ def _sensitivity(inputs: MarketSizingInput, base: _Totals) -> tuple[SensitivityR
         low, high = (min(known), max(known)) if len(known) == len(soms) else (None, None)
         at_target = None
         if inputs.som_target is not None and base.som is not None:
-            at_target = _break_even(inputs, row, base, "som", fraction(inputs.som_target))
+            at_target = _break_even(inputs, row, base, "som", fraction(inputs.som_target), at_least=True)
         at_top_down = None
         if first_top_down is not None:
             comparable = fraction(first_top_down.amount) * from_percent(first_top_down.comparable_percent)
@@ -299,6 +316,8 @@ def _flags(
     segments = inputs.segments
     worked = [_worked(segment) for segment in segments]
     found: set[MarketSizingFlag] = set()
+    if not all(_period_given(segment) for segment in segments):
+        found.add("price_period_defaulted")
     if inputs.population is not None and base.customers > fraction(inputs.population):
         found.add("segments_exceed_population")
     for top in inputs.top_down:
@@ -322,12 +341,18 @@ def _flags(
         found.add("no_horizon_given")
     if inputs.som_target is not None and base.som is not None and base.som < fraction(inputs.som_target):
         found.add("som_below_target")
-    if any(row.at_som_target is not None and row.at_som_target.reach == "out_of_range" for row in sensitivity):
-        found.add("som_target_out_of_reach")
+        reaches = [row.at_som_target.reach for row in sensitivity if row.at_som_target is not None]
+        if "out_of_range" in reaches and "value" not in reaches:
+            found.add("som_target_out_of_reach")
     return tuple(flag for flag in _FLAG_ORDER if flag in found)
 
 
 _FLAG_ORDER: tuple[MarketSizingFlag, ...] = get_args(MarketSizingFlag)
+
+
+def _period_given(segment: MarketSegment) -> bool:
+    """Whether the founder gave the months the price covers (left out, the price is read as a yearly one)."""
+    return "price_period_months" in segment.model_fields_set
 
 
 def _verdict(checks: tuple[MarketCheck, ...]) -> DealVerdict:
@@ -379,6 +404,7 @@ def _segment_rows(inputs: MarketSizingInput, worked: list[_Segment], base: _Tota
         rows.append(
             SegmentRow(
                 segment=index + 1,
+                price_period_given=_period_given(segment),
                 annual_value_per_customer=quantity("money", figures.value),
                 customers=customers[index],
                 gross_spend=gross[index],

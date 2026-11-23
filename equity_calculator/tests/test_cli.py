@@ -207,11 +207,16 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
 async def test_every_assumption_prints_with_its_setting_statement_and_source(
     argv: list[str], assumptions: tuple[EquityAssumption, ...]
 ) -> None:
-    """The report's last block is every assumption of the result, one line each, its source named, nothing else."""
+    """The report's last block is every assumption of the result, one line each, its source named, nothing else; the
+    source is closed with a period unless it already ends with a quoted sentence's own."""
     report = await run(argv)
 
     _, printed = report.split("\nAssumptions:\n")
-    expected = [f"  - {item.key} = {item.setting}: {item.statement} Source: {item.source}." for item in assumptions]
+    expected = [
+        f"  - {item.key} = {item.setting}: {item.statement} Source: {item.source}"
+        + ("" if item.source.endswith('."') else ".")
+        for item in assumptions
+    ]
     assert assumptions
     assert printed.splitlines() == expected
 

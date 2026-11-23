@@ -80,13 +80,16 @@ MarketMetric = Literal["tam", "sam", "som"]
 CompareTo = Literal["tam", "sam"]
 
 # How a break-even value came out: ``value`` (the field at that value reaches the target exactly), ``met_without_it``
-# (the other segments already reach it), ``does_not_move`` (the field is not a factor of that total) or
-# ``out_of_range`` (the value is returned, but the segment would be refused with it: a percent above 100, say).
+# (the target is reached with the field at its base: the other segments alone reach it, or, for the plan's SOM target,
+# the base SOM is already at or above it), ``does_not_move`` (the field is not a factor of that total) or
+# ``out_of_range`` (the value is returned, but the segment would be refused with it: a percent above 100, say, or a
+# number outside the size every decimal input has).
 BreakEvenReach = Literal["value", "met_without_it", "does_not_move", "out_of_range"]
 
 # Facts and questions a VC is likely to raise. They never change a verdict; their plain words are in
 # ``equity_calculator.layout_market_sizing``.
 MarketSizingFlag = Literal[
+    "price_period_defaulted",
     "segments_exceed_population",
     "bottom_up_above_top_down",
     "sam_equals_tam",
@@ -120,6 +123,8 @@ class MarketSegment(BaseModel):
     ``take_rate_percent`` the share of the spend the company keeps (100 unless it is a marketplace or a payments
     business); ``serviceable_percent`` the share of the customers the product can serve and reach today. SOM is
     ``obtainable_customers`` (preferred) or ``obtainable_percent`` of the serviceable customers, never both.
+    ``price_period_months`` left out reads the price as a yearly one (12) and is flagged ``price_period_defaulted``:
+    send 1 for a monthly price.
     """
 
     model_config = MODEL_CONFIG
@@ -251,11 +256,13 @@ class SegmentRow(BaseModel):
 
     ``som_customers`` and ``som`` are none with no SOM; ``som_multiple_of_today`` is none with no SOM or no customers
     today (or none of them); ``new_customers_per_year`` is none without ``som_years``, customers today or a SOM.
+    ``price_period_given`` is false when the segment left ``price_period_months`` out (the yearly default was used).
     """
 
     model_config = MODEL_CONFIG
 
     segment: int
+    price_period_given: bool
     annual_value_per_customer: EquityQuantity
     customers: EquityQuantity
     gross_spend: EquityQuantity

@@ -137,8 +137,8 @@ All notable changes to this repository. Dates are UTC.
   units, take rate, serviceable share and the customers to win), giving TAM, SAM and SOM per segment and in total,
   the deck's stated figures returned as consistent or a mismatch, top-down figures as a cross-check only, and
   sensitivity rows with the exact value at which SOM reaches the plan's target. Flags name what a VC is likely to
-  ask (double counting, SAM equal to TAM, a SOM given only as a percent or below the target). A new `count` unit
-  prints customer counts. It quotes Y Combinator's "How to Pitch Your Company" and its seed guide's glossary.
+  ask (a price period left out and read as yearly, double counting, SAM equal to TAM, a SOM given only as a percent
+  or below the target). A new `count` unit prints customer counts. It quotes Y Combinator's "How to Pitch Your Company" and its seed guide's glossary.
 
 ### Changed
 

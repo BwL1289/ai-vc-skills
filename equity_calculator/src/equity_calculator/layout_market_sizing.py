@@ -44,9 +44,11 @@ _FIELD_NAMES: dict[SegmentField, str] = {
     "obtainable_percent": "share to win",
     "obtainable_customers": "customers to win",
 }
+_CROSS_CHECK_NOTE = "; a cross-check with the top-down figure, not a target"
+_PERIOD_DEFAULT = "not given: read as a yearly price (give 1 for a monthly one)"
 _REACH_WORDS = {
     "value": "reaches it exactly",
-    "met_without_it": "met by the other segments already",
+    "met_without_it": "met already with this field at its base",
     "does_not_move": "this field does not move that total",
     "out_of_range": "the segment would be refused at this value",
 }
@@ -70,28 +72,30 @@ def _flag_words(flag: MarketSizingFlag) -> str:
         "sam_equals_tam": "No segment gives a serviceable share below 100%, so SAM equals TAM; a VC is likely to ask "
         "who the product cannot reach today",
         "som_not_given": "A segment gives no customers to win, so no SOM total is worked",
-        "som_as_percent_only": "A SOM is given as a share of the market, not as customers; a VC is likely to ask for "
-        "the customers, the channel and the year behind it",
+        "som_as_percent_only": "A SOM is given as a share of the serviceable customers, not as a count of customers; "
+        "a VC is likely to ask for the customers, the channel and the year behind it",
         "som_from_zero_customers": "A segment with a SOM has no customers today; a VC is likely to ask what shows "
         "the first ones will come",
         "som_below_customers_today": "A segment's SOM customers are fewer than its customers today; check the count",
         "no_horizon_given": "A SOM is given with no year to reach it; a VC is likely to ask by when",
         "som_below_target": "The SOM total is below the revenue the plan needs from this market; a VC is likely to "
         "ask where the rest comes from",
-        "som_target_out_of_reach": "Reaching the plan's revenue would need a value the segment cannot take (a share "
-        "above 100%, or more customers than it can serve)",
+        "som_target_out_of_reach": "No sensitivity row reaches the plan's revenue at a value its segment can take: "
+        "each that moves the SOM would need a share above 100%, more customers to win than the segment can serve, or "
+        "a number past the calculator's range; a VC is likely to ask which assumptions together close the gap",
+        "price_period_defaulted": "A segment gives no months for its price, so the price is read as a yearly one; if "
+        "it is a monthly price, that segment's TAM, SAM and SOM are 12 times too small: give the months it covers",
     }
     return words[flag]
 
 
-def _segment_given_lines(number: int, segment: MarketSegment) -> list[Line]:
-    """One segment's inputs as given."""
+def _segment_given_lines(number: int, segment: MarketSegment, period_given: bool) -> list[Line]:
+    """One segment's inputs as given (the price period marked as the default when it was left out)."""
     name = f"Segment {number}"
     key = f"segment_{number}"
     shown: list[tuple[str, str, EquityQuantity | str | None]] = [
         (f"{key}_customers", f"{name}: buying customers", given("count", segment.customers)),
         (f"{key}_price", f"{name}: price per unit", given("money", segment.price)),
-        (f"{key}_price_period", f"{name}: the price covers", _months(segment.price_period_months)),
         (f"{key}_units", f"{name}: units per customer", given("count", segment.units_per_customer)),
         (f"{key}_take_rate", f"{name}: take rate", given_percent(segment.take_rate_percent)),
         (f"{key}_serviceable", f"{name}: serviceable share", given_percent(segment.serviceable_percent)),
@@ -111,15 +115,22 @@ def _segment_given_lines(number: int, segment: MarketSegment) -> list[Line]:
             None if segment.customers_today is None else given("count", segment.customers_today),
         ),
     ]
-    return [Line(line_key, label, (value,), GIVEN) for line_key, label, value in shown if value is not None]
+    lines = [Line(line_key, label, (value,), GIVEN) for line_key, label, value in shown if value is not None]
+    period = Line(
+        f"{key}_price_period",
+        f"{name}: the price covers",
+        (_months(segment.price_period_months),),
+        GIVEN if period_given else _PERIOD_DEFAULT,
+    )
+    return [*lines[:2], period, *lines[2:]]
 
 
 def _given_lines(result: MarketSizingResult) -> list[Line]:
     """Every input as given: the segments, the top-down figures, and the founder's other figures."""
     inputs = result.inputs
     lines: list[Line] = []
-    for number, segment in enumerate(inputs.segments, start=1):
-        lines += _segment_given_lines(number, segment)
+    for row, segment in zip(result.segments, inputs.segments, strict=True):
+        lines += _segment_given_lines(row.segment, segment, row.price_period_given)
     for number, top in enumerate(inputs.top_down, start=1):
         name = f"Top-down {number}"
         lines += [
@@ -250,8 +261,9 @@ def _check_lines(check: MarketCheck) -> list[Line]:
     ]
 
 
-def _break_even_lines(key: str, name: str, field: str, row: BreakEvenRow) -> list[Line]:
-    """Where a field takes a total to its target: the value (when there is one) and how it came out."""
+def _break_even_lines(key: str, name: str, field: str, row: BreakEvenRow, note: str = "") -> list[Line]:
+    """Where a field takes a total to its target: the value (when there is one) and how it came out; ``note`` ends the
+    value line's words."""
     metric = _METRIC_NAMES[row.metric]
     target = display(row.target)
     lines = [
@@ -268,7 +280,7 @@ def _break_even_lines(key: str, name: str, field: str, row: BreakEvenRow) -> lis
                 f"{key}_value",
                 f"{name}: {field} at {metric} = {target}",
                 (row.value,),
-                f"base × (target - other segments' {metric}) / this segment's {metric}",
+                f"base × (target - other segments' {metric}) / this segment's {metric}{note}",
             )
         )
     return lines
@@ -306,7 +318,7 @@ def _sensitivity_lines(row: SensitivityResult) -> list[Line]:
     if row.at_som_target is not None:
         lines += _break_even_lines(f"{key}_at_som_target", name, field, row.at_som_target)
     if row.at_top_down is not None:
-        lines += _break_even_lines(f"{key}_at_top_down", name, field, row.at_top_down)
+        lines += _break_even_lines(f"{key}_at_top_down", name, field, row.at_top_down, _CROSS_CHECK_NOTE)
     return lines
 
 

@@ -5,7 +5,7 @@ Pure arithmetic: no DB, no network, nothing written. Expected values are exact f
 - Company AW, vet-clinic software. Segment 1: $400 a month is $4,800 a year, so TAM 18,000 · 4,800 = $86.4M, SAM
   10,800 · 4,800 = $51.84M, SOM 900 · 4,800 = $4.32M, 900/45 = 20x today, (900 - 45)/5 = 171 a year. Segment 2: 15
   locations at $300 a month is $54,000 a year, TAM 400 · 54,000 = $21.6M, SAM 200 · 54,000 = $10.8M, SOM 20 ·
-  54,000 = $1.08M. Totals $108M, $62.64M (29/50 of TAM), $5.4M (5/58 of SAM, 25x the $216k revenue today). The
+  54,000 = $1.08M. Totals $108M, $62.64M (29/50 of TAM), $5.4M (5/58 of SAM, 50/3x the $324k revenue today). The
   analyst's $2.1B at 40% is $840M; the bottom-up TAM is 9/70 of it. SOM reaches $8M at a price of
   400 · (8M - 1.08M)/4.32M = 17,300/27 (about $640.74), at 900 · 6.92/4.32 = 4,325/3 clinics, or at a share of
   10 · (8M - 4.32M)/1.08M = 920/27 percent.
@@ -88,7 +88,8 @@ def test_company_aw_segments_totals_and_the_deck() -> None:
     assert (totals.som_customers.exact, totals.som.exact) == (920, 5_400_000)
     assert totals.sam_share_of_tam.exact == Fraction(29, 50)
     assert totals.som_share_of_sam is not None and totals.som_share_of_sam.exact == Fraction(5, 58)
-    assert totals.som_multiple_of_revenue_today is not None and totals.som_multiple_of_revenue_today.exact == 25
+    multiple = totals.som_multiple_of_revenue_today
+    assert multiple is not None and multiple.exact == Fraction(50, 3)  # $5.4M over $324k
 
     (top,) = result.top_down
     assert (top.comparable.exact, top.bottom_up.exact) == (840_000_000, 108_000_000)
@@ -313,6 +314,83 @@ def test_break_even_edges() -> None:
     assert (below_today.reach, below_today.value.exact) == ("out_of_range", 500)
 
 
+def test_a_target_the_base_som_already_reaches_is_met_and_never_out_of_reach() -> None:
+    """SOM is $500 against a $100 target: the customers at which SOM equals $100 (20) are fewer than today's 40, which
+    is no reason to call the target out of reach."""
+    above = market_sizing(
+        **_with(
+            {"customers": "100", "price": "10", "obtainable_percent": "50", "customers_today": "40"},
+            som_years=2,
+            som_target="100",
+            sensitivity=[{"field": "customers", "segment": 1, "values": ["90", "110"]}],
+        )
+    )
+    met = above.sensitivity[0].at_som_target
+
+    assert above.totals.som is not None and above.totals.som.exact == 500
+    assert met is not None and (met.reach, met.value) == ("met_without_it", None)
+    assert not {"som_below_target", "som_target_out_of_reach"} & set(above.flags)
+
+
+def test_the_target_is_out_of_reach_only_when_no_row_reaches_it() -> None:
+    """SOM $1,000 against $2,100: segment 1's share to win would need 160% (out of range), but segment 2's customers
+    reach it at 320, so the target is below the SOM yet not out of reach; with the share row alone it is."""
+    halves = [{"customers": "100", "price": "10", "obtainable_percent": "50"}] * 2
+    share = {"field": "obtainable_percent", "segment": 1, "values": ["40"]}
+    customers = {"field": "customers", "segment": 2, "values": ["120"]}
+    mixed = market_sizing(segments=halves, som_target="2100", sensitivity=[share, customers])
+    alone = market_sizing(segments=halves, som_target="2100", sensitivity=[share])
+
+    first, second = (row.at_som_target for row in mixed.sensitivity)
+    assert first is not None and first.value is not None
+    assert (first.reach, first.value.exact) == ("out_of_range", Fraction(8, 5))  # 160%
+    assert second is not None and second.value is not None
+    assert (second.reach, second.value.exact) == ("value", 320)
+    assert "som_below_target" in mixed.flags
+    assert "som_target_out_of_reach" not in mixed.flags
+    assert "som_target_out_of_reach" in alone.flags
+
+
+@pytest.mark.parametrize(
+    ("segment", "amount", "reach"),
+    [
+        ({"customers": "1"}, "0.000000000000001", "value"),  # a price of 1e-15, the smallest size an input may have
+        ({"customers": "2"}, "0.000000000000001", "out_of_range"),  # 5e-16
+        ({"customers": "1"}, "9999999999999999", "value"),  # just under 1e16
+        ({"customers": "1", "units_per_customer": "0.5"}, "9999999999999999", "out_of_range"),  # about 2e16
+    ],
+)
+def test_a_break_even_past_the_size_of_any_input_is_out_of_range(
+    segment: dict[str, object], amount: str, reach: str
+) -> None:
+    """A $1 yearly price: the price at which TAM equals the top-down figure keeps the size every decimal input has (at
+    least 1e-15 and under 1e16), or the segment would refuse it."""
+    result = market_sizing(
+        segments=[{"price": "1", **segment}],
+        top_down=[{"amount": amount}],
+        sensitivity=[{"field": "price", "segment": 1, "values": ["2"]}],
+    )
+    at_top_down = result.sensitivity[0].at_top_down
+
+    assert at_top_down is not None and at_top_down.reach == reach
+
+
+def test_a_som_target_past_the_size_of_any_input_is_out_of_reach() -> None:
+    """The price at which SOM reaches the target would be about 1e34, which no segment takes: out of range, and the
+    flag fires, never "reaches it exactly"."""
+    result = market_sizing(
+        segments=[
+            {"customers": "1", "price": "1", "units_per_customer": "0.000000000000001", "obtainable_customers": "1"}
+        ],
+        som_target="9999999999999999",
+        sensitivity=[{"field": "price", "segment": 1, "values": ["1"]}],
+    )
+    at_target = result.sensitivity[0].at_som_target
+
+    assert at_target is not None and at_target.reach == "out_of_range"
+    assert "som_target_out_of_reach" in result.flags
+
+
 @pytest.mark.parametrize(
     ("field", "value", "metric", "moves"),
     [
@@ -366,6 +444,7 @@ def test_a_top_down_figure_never_changes_the_verdict() -> None:
 
 
 _FLAG_CASES: dict[str, tuple[dict[str, object], dict[str, object]]] = {
+    "price_period_defaulted": (_with(), _with({"price_period_months": 12})),
     "segments_exceed_population": (_with(population="999"), _with(population="1000")),
     "bottom_up_above_top_down": (_with(top_down=[{"amount": "99999"}]), _with(top_down=[{"amount": "100000"}])),
     "sam_equals_tam": (_with(), _with({"serviceable_percent": "99"})),
@@ -415,6 +494,14 @@ def test_flags_never_change_the_verdict() -> None:
     flagged = market_sizing(**_with(population="1", stated_tam="100000"))
 
     assert flagged.flags and flagged.verdict == "consistent"
+
+
+def test_a_source_ending_in_a_quoted_sentence_gets_no_second_period() -> None:
+    report = render_sheet(sheet_for(market_sizing(**MARKET_AX)))
+
+    assert '.".' not in report
+    assert f"{TOP_DOWN_QUOTE}\n" in report and f"{TAM_GLOSSARY_QUOTE}\n" in report
+    assert "(a modelling choice).\n" in report
 
 
 def test_assumption_rows_appear_only_when_used() -> None:

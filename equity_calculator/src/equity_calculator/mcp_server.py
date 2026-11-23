@@ -196,17 +196,19 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "Market sizing (TAM, SAM and SOM bottom-up, with a cross-check and sensitivity)",
         "A founder's market size worked exactly from their own segments (one to eight, numbered in order, no names). "
         "Per segment: value = price x 12 / price_period_months x units_per_customer x take_rate_percent/100 (the "
-        "annual revenue from one buying customer); gross spend = customers x price x 12 / price_period_months x "
-        "units_per_customer (before the take rate); TAM = customers x value; SAM = customers x serviceable_percent/100 "
-        "x value; SOM = obtainable_customers (preferred) or SAM customers x obtainable_percent/100, x value. Totals "
-        "are sums (SOM only when every segment gives one). The path: SOM customers / customers_today and (SOM "
-        "customers - customers_today) / som_years a year, a straight line, no compound rate. Each top_down figure "
-        "(amount x comparable_percent/100) is set beside the bottom-up TAM or SAM as a cross-check, never a verdict. "
-        "stated_tam, stated_sam and stated_som come back consistent or a mismatch within tolerance_percent. Each "
-        "sensitivity row works one field of one segment at the founder's own values, the rest at base, with the SOM "
-        "range and swing and the exact value at which SOM reaches som_target and the total reaches the first "
-        "top-down figure. Flags name double counting, a SOM given only as a share, no horizon and a SOM below the "
-        "target, never errors. Every count, price, share and figure is the founder's: never assume or look one up.",
+        "annual revenue from one buying customer; price_period_months left out is 12, a yearly price, and is flagged: "
+        "send 1 for a monthly price); gross spend = customers x price x 12 / price_period_months x units_per_customer "
+        "(before the take rate); TAM = customers x value; SAM = customers x serviceable_percent/100 x value; SOM = "
+        "obtainable_customers (preferred) or SAM customers x obtainable_percent/100, x value. Totals are sums (SOM "
+        "only when every segment gives one). The path: SOM customers / customers_today and (SOM customers - "
+        "customers_today) / som_years a year, a straight line, no compound rate. Each top_down figure (amount x "
+        "comparable_percent/100) is set beside the bottom-up TAM or SAM as a cross-check, never a verdict. stated_tam, "
+        "stated_sam and stated_som come back consistent or a mismatch within tolerance_percent. Each sensitivity row "
+        "works one field of one segment at the founder's own values, the rest at base, with the SOM range and swing "
+        "and the exact value at which SOM reaches som_target (met_without_it when the base SOM already reaches it) and "
+        "the total reaches the first top-down figure. Flags name a price period left out, double counting, a SOM given "
+        "only as a share, no horizon, a SOM below the target and a target no row reaches, never errors. Every count, "
+        "price, share and figure is the founder's: never assume or look one up.",
     ),
 }
 

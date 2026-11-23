@@ -374,8 +374,8 @@ def metrics_check(**fields: object) -> MetricsCheckResult:
 # Company AW, vet-clinic software: 18,000 independent clinics at $400 a month, 60% on the systems it integrates with,
 # 900 to win, 45 today; 400 multi-site groups, 15 locations each at $300 a location a month, 50% serviceable, 10% of
 # them to win, 2 today. An analyst's $2.1B, 40% of it matching; 5 years; the plan needs $8M a year from this market;
-# $216k revenue today; the deck says a $120M TAM. Its own ranges: price $300 to $500, clinics to win 600 to 1,200, the
-# groups' share 5% to 15%.
+# $324k revenue today (45 clinics × $4,800 and 2 groups × $54,000); the deck says a $120M TAM. Its own ranges: price
+# $300 to $500, clinics to win 600 to 1,200, the groups' share 5% to 15%.
 MARKET_AW: dict[str, object] = {
     "segments": [
         {
@@ -402,7 +402,7 @@ MARKET_AW: dict[str, object] = {
         {"field": "obtainable_customers", "segment": 1, "values": ["600", "1200"]},
         {"field": "obtainable_percent", "segment": 2, "values": ["5", "15"]},
     ],
-    "annual_revenue_today": "216000",
+    "annual_revenue_today": "324000",
     "som_years": 5,
     "som_target": "8000000",
     "stated_tam": "120000000",
@@ -415,6 +415,7 @@ MARKET_AX: dict[str, object] = {
         {
             "customers": "4000000",
             "price": "1800",
+            "price_period_months": 12,
             "take_rate_percent": "15",
             "serviceable_percent": "25",
             "obtainable_percent": "2",
@@ -423,6 +424,7 @@ MARKET_AX: dict[str, object] = {
         {
             "customers": "2500000",
             "price": "1800",
+            "price_period_months": 12,
             "take_rate_percent": "15",
             "serviceable_percent": "30",
             "obtainable_percent": "2",

@@ -18,6 +18,7 @@ _PERCENT_PLACES = 4
 _FIRST = 0
 _COLUMN_GAP = "  "
 _INDENT = "  "
+_QUOTED_STOP = '."'
 
 
 def display(value: EquityQuantity | str) -> str:
@@ -40,6 +41,11 @@ def display(value: EquityQuantity | str) -> str:
             return f"{value.rounded:,f} months"
 
 
+def _sentence(source: str) -> str:
+    """``source`` closed with a period, unless it already ends with a quoted sentence's own (``... enough."``)."""
+    return source if source.endswith(_QUOTED_STOP) else f"{source}."
+
+
 def render_sheet(sheet: Sheet) -> str:
     """The printed report: heading, then label / value(s) / how-computed columns, then the assumptions."""
     header = ("Line", *sheet.columns, "How it is computed")
@@ -55,7 +61,8 @@ def render_sheet(sheet: Sheet) -> str:
         return (_INDENT + _COLUMN_GAP.join(cells)).rstrip()
 
     assumptions = [
-        f"{_INDENT}- {item.key} = {item.setting}: {item.statement} Source: {item.source}." for item in sheet.assumptions
+        f"{_INDENT}- {item.key} = {item.setting}: {item.statement} Source: {_sentence(item.source)}"
+        for item in sheet.assumptions
     ]
 
     return "\n".join([sheet.heading, aligned(header), *(aligned(row) for row in rows), "Assumptions:", *assumptions])

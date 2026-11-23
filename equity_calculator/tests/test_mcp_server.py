@@ -192,6 +192,17 @@ async def test_each_tool_returns_the_scenario_result_as_json(scenario: str) -> N
     assert json.loads(_text(result))["scenario"] == scenario
 
 
+@pytest.mark.parametrize(("segment", "flagged"), [({}, True), ({"price_period_months": 12}, False)])
+async def test_the_market_tool_flags_a_price_period_left_out(segment: dict[str, object], flagged: bool) -> None:
+    """The tool reads a left-out price period as the yearly default and says so; an explicit 12 is the founder's."""
+    inputs = {"segments": [{"customers": "1000", "price": "400", **segment}]}
+    result = await _call(mcp_server.build_server(), "equity_market_sizing", {"inputs": inputs})
+
+    answer = json.loads(_text(result))
+    assert ("price_period_defaulted" in answer["flags"]) is flagged
+    assert answer["segments"][0]["price_period_given"] is not flagged
+
+
 async def test_the_investor_tool_answers_what_the_cli_prints_with_json() -> None:
     printed = await run(["investor", "--equity-percent", "7", "--outcome-multiplier", "1.10", "--json"])
     result = await _call(mcp_server.build_server(), "equity_investor", {"inputs": _SAMPLES["investor"]})
