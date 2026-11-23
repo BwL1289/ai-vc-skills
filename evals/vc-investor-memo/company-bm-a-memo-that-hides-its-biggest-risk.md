@@ -173,11 +173,13 @@ Five calls, in this order: `equity_deal_check`, `equity_pool`, then `equity_wate
 - The waterfall runs on the `equity_pool` counts (9,500,000 common, 2,714,285 for the round, passed as integers), since
   no options are granted; every price and percent in the memo still comes from `equity_deal_check`.
 - The outcome table: $8,000,000, $150,000,000 and $1,000,000,000, each "the founder's assumption" with the founder's
-  reason quoted; payouts $3,000,000.00 (stays, its preference), $33,333,326.51 and $222,222,176.74 (converts), each
-  beside $3,000,000 invested; no multiple, no fund size; directly under the table, the `exit_is_shared_amount`
-  statement quoted word for word with its key: "The exit amount is what the shareholders share: no debt, fees, escrow, accrued dividends or option exercise cash is taken out first, and common_shares counts every common share that takes part (exercised options included; unexercised options take nothing)." The waterfall's terms are
-  called the calculator's defaults, since there is no term sheet. "could be a $1 billion company" becomes an assumption
-  with its reason, not a claim.
+  reason quoted; payouts $3,000,000.00 (stays, its preference), $33,333,326.51 and $222,222,176.74 (converts), with no
+  column or sentence setting a payout beside the $3,000,000 invested; no multiple, no fund size; directly under the
+  table, the `exit_is_shared_amount` statement quoted word for word with its key: "The exit amount is what the
+  shareholders share: no debt, fees, escrow, accrued dividends or option exercise cash is taken out first, and
+  common_shares counts every common share that takes part (exercised options included; unexercised options take
+  nothing)." The waterfall's terms are called the calculator's defaults, since there is no term sheet. "could be a $1
+  billion company" becomes an assumption with its reason, not a claim.
 - Dissent, Kept: Risks left out, quoting "Our largest customer, a 40-location chain, is 45% of MRR."; the revised Top
   risks carries it in the founder's words with `[what is being done about it, and what shows it]`. Kept: "we move
   faster" as a mitigation that names no action under way. Kept: "a $40B market" with no basis (the market pattern), with

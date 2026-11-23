@@ -182,8 +182,11 @@ draft written at step 8.
 10. **Check before answering.** Every figure is quoted as stated or comes from a tool; every lowlight the founder gave
     is in the draft; every figure and definition this period's current-investor update also gives is word for word the
     same as there; every metric an earlier update reported is in the line or said to be dropped; every last-time item
-    has a line; one ask; no investor named in the update, except in a thanks the founder says that person agreed to;
-    no sentence speaks as an investor or names a firm as a voice; nothing is sent anywhere.
+    has a line; one ask; no investor named in the update, except in a thanks the founder says that person agreed to; no
+    sentence speaks as an investor or names a firm as a voice; nothing is sent anywhere. Never work out how two of the
+    founder's figures relate (a difference, a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a
+    line or a table cell unless the founder's material states it or a tool returned it; quote both figures as stated
+    instead ("from 2,000 to 4,500", never "more than doubled").
 
 ## Runway
 

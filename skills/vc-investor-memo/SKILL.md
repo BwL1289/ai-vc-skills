@@ -135,12 +135,14 @@ mode) or at the quote check (review mode).
    objection, using only the founder's facts or a bracketed ask.
 8. **Check before answering.** Every line of the memo appears in the founder's material or in a tool result; every
    figure is quoted as stated or comes from a tool, as printed; every exit value is the founder's and labelled an
-   assumption; no fund size, fund share, multiple on invested or return rate appears; no sentence recommends, speaks
-   as an investor, names a firm as a voice or claims to know a firm's process; every surviving objection quotes a line
-   that is in the material word for word; every risk the founder's material shows is in Top risks; every Summary point
-   is a fact from a section below; the `exit_is_shared_amount` statement is quoted word for word, with its key,
-   directly under the outcome table; the memo's Open questions lists its bracketed asks in full; no figure is restated
-   in words.
+   assumption; no fund size, fund share, multiple on invested or return rate appears; no sentence recommends, speaks as
+   an investor, names a firm as a voice or claims to know a firm's process; every surviving objection quotes a line that
+   is in the material word for word; every risk the founder's material shows is in Top risks; every Summary point is a
+   fact from a section below; the `exit_is_shared_amount` statement is quoted word for word, with its key, directly
+   under the outcome table; the memo's Open questions lists its bracketed asks in full; no figure is restated in words.
+   Never work out how two of the founder's figures relate (a difference, a sum, a ratio or multiple, a share left over,
+   "doubled") in a rewrite, a line or a table cell unless the founder's material states it or a tool returned it; quote
+   both figures as stated instead ("from 2,000 to 4,500", never "more than doubled").
 
 ## The round
 
@@ -157,11 +159,14 @@ The round's figures are checked once, as the vc-deal-math skill describes:
   once as `pre_money`, once as `post_money`, and show both readings side by side, as vc-deal-math step 4 does. A
   mismatch that appears under only one reading is not listed as a computed mismatch: its fix is "say whether the
   valuation is pre- or post-money", with both readings quoted.
-- **A SAFE or note:** not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round`, with the
-  next priced round the founder expects, labelled the founder's assumption in the memo. `equity_round` compares no
-  stated figure, so quote its values beside the memo's, without a verdict. The runway claim and the use-of-funds lines
-  on a SAFE or note raise go to `equity_runway_plan` with the raise as cash only
-  (`raises: [{"amount", "stated_runway_months", "use_of_funds": [{"percent"}]}]`).
+- **A SAFE or note:** not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round`, with the next
+  priced round the founder expects, labelled the founder's assumption in the memo. `equity_round` compares no stated
+  figure, so quote its values beside the memo's, without a verdict. The runway claim and the use-of-funds lines on a
+  SAFE or note raise go to `equity_runway_plan` with the raise as cash only (`raises: [{"amount",
+  "stated_runway_months", "use_of_funds": [{"percent"}]}]`). On a SAFE or note raise, the `plan` case's phases are the
+  founder's own figures: today's monthly spend and revenue as the first phase, from month 1, and each change the founder
+  plans (more spend after the raise, say) as a later phase from the month the founder names, each asked for by name when
+  missing (`[planned monthly spend and revenue, from which month]`), never assumed.
 - **Runway with no raise** (what happens if the round does not close), on any instrument: `equity_runway_plan`, whose
   no-raise row is the figure, with the memo's stated no-raise runway as the top-level `stated_runway_months`. With no
   cash on hand or no burn given, ask for them; make no runway call until they are in.
@@ -242,8 +247,9 @@ same question from the founder's side: "If all goes well, what will you have bui
    series. Seniority: every class at rank 1 when the terms say pari passu or are silent (say so); the new
    series at rank 1 and earlier ones at 2 when the terms stack them.
 5. **One `equity_waterfall` call per exit value.** Read `rows[]` (`payout`, `converts`, `preference_owed`) and
-   `common_payout`. The memo gives, for each exit value, the round's class payout as printed beside the amount
-   invested, and whether the class converted. Never divide one by the other.
+   `common_payout`. The memo gives, for each exit value, each class's payout as printed with whether it converted,
+   and common's payout. The amount invested never sits beside a payout, in the table or in a sentence: side by side
+   they read as a return multiple, which is fund math. The amount invested appears only in "The round".
 6. **Later rounds**, only when the founder gives them: `equity_dilution` with `holder_percent` = this round's
    percent as the round's tool printed it, and `rounds` = the founder's assumed later rounds (`investor_percent`,
    `pool_percent`), labelled assumptions. For a priced round, that percent is `equity_deal_check`'s "Investors' share
@@ -427,12 +433,12 @@ Lead with the biggest fixes, then the memo, then the full fix list.
    deal uses it, Fix; the figures that do not match (computed) first, then the flags. Then **Dropped,** one line
    each: the objection, its lens, and why it fell. Say how the lenses and the refute pass ran (as subagents, one
    refute subagent per objection).
-4. **Numbers:** each tool call's verdict and the rows the memo uses, as printed; each flag as its code with its
-   meaning from the flag table; the outcome table (Exit value, the founder's reason, The round's payout, Invested,
-   Converts?) with the `exit_is_shared_amount` statement quoted under it; the stake after the founder's assumed later
-   rounds; the assumption rows the figures lean on; metrics and market sizes quoted as stated, with the skill that
-   checks them named; growth rates, LTV and every other figure quoted as stated with "not checked: no tool computes
-   this".
+4. **Numbers:** each tool call's verdict and the rows the memo uses, as printed; each flag as its code with its meaning
+   from the flag table; the outcome table (Exit value, the founder's reason, each class's payout, Converts?, Common's
+   payout; never the amount invested) with the `exit_is_shared_amount` statement quoted under it; the stake after the
+   founder's assumed later rounds; the assumption rows the figures lean on; metrics and market sizes quoted as stated,
+   with the skill that checks them named; growth rates, LTV and every other figure quoted as stated with "not checked:
+   no tool computes this".
 5. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
 6. **Sources:** the guides used, with links, and which points are this skill's own judgment.
 7. **Close:** this is not investment, legal or tax advice; the champion decides what to use and writes the firm's

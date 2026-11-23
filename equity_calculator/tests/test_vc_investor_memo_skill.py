@@ -387,7 +387,9 @@ def test_the_outcome_rules_name_no_fund_math() -> None:
     for phrase in (
         "takes no fund size",
         'never writes "this returns the fund"',
-        "Never divide one by the other",
+        # A payout beside the amount invested reads as a return multiple at a glance, so the two never sit together.
+        "The amount invested never sits beside a payout, in the table or in a sentence",
+        'The amount invested appears only in "The round"',
         "Never multiply a stake by an exit value",
         f'"{_LABEL}"',
         f'"{_NOT_RUN}"',
@@ -419,6 +421,17 @@ def test_the_outcome_rules_name_no_fund_math() -> None:
         for term in _FUND_MATH:
             if term in sentence:
                 assert _NEGATION.search(sentence), (term, sentence)
+
+
+def test_the_outcome_table_and_the_evals_never_set_a_payout_beside_the_amount_invested() -> None:
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "beside the amount invested" not in _unwrapped(_TEXT)
+    assert "each class's payout, Converts?, Common's payout; never the amount invested" in answering
+    assert "Invested," not in answering
+    for path in _EVALS:
+        expected = _unwrapped(_section("## Expected answer", path.read_text(encoding="utf-8")))
+        assert not re.search(r"beside \$[\d,]+ invested|\.\d{2} beside \$", expected), path.name
 
 
 def test_the_prose_figure_from_the_pool_tool_is_what_it_prints() -> None:

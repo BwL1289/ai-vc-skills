@@ -130,6 +130,10 @@ the bank or the checklist; step 3 then starts at the quote check.
      `{"inputs": {"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "stated_runway_months": "..."}}`.
      On a SAFE or note raise, the stated runway and the use-of-funds lines are the raise option's own:
      `{"inputs": {"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "raises": [{"amount": "...", "stated_runway_months": "...", "use_of_funds": [{"percent": "..."}]}]}}`.
+     On a SAFE or note raise, the `plan` case's phases are the founder's own figures: today's monthly spend and revenue
+     as the first phase, from month 1, and each change the founder plans (more spend after the raise, say) as a later
+     phase from the month the founder names, each asked for by name when missing (`[planned monthly spend and revenue,
+     from which month]`), never assumed.
      With no cash on hand or no burn given, ask for them; never assume one, and make no runway call until they are in.
    - A tool's mismatch is a diligence question a partner will ask first, so it goes to the top of the ranked list.
    - Read every code in the tool's `flags` too. Over MCP a flag comes back as a bare code: relay the code with its

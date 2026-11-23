@@ -399,12 +399,17 @@ def test_the_letters_of_intent_row_cites_only_the_a16z_items_that_say_so() -> No
     assert "pipeline" not in row.lower()
 
 
-def test_the_prep_session_credit_says_its_source_was_not_fetched() -> None:
-    intro = _TEXT.split("\n## ", 1)[0]
-    (credit,) = (line for line in _section("## Sources").split("\n- ") if "Stebbings" in line)
+def test_the_prep_session_credits_no_unread_source_and_is_marked_unverified() -> None:
+    """No one read the post the prep session was first credited to, so the skill credits no person or post for it."""
+    intro = _unwrapped(_TEXT.split("\n## ", 1)[0])
+    sources = _unwrapped(_section("## Sources"))
+    limits = _unwrapped(_section("## Limits"))
 
-    assert "unverified" in _unwrapped(intro) and "did not fetch the post" in _unwrapped(intro)
-    assert "Unverified" in credit and "did not fetch the post" in _unwrapped(credit)
+    for unread in ("Stebbings", "20VC", "LinkedIn", "did not fetch", "the post that inspired it"):
+        assert unread not in _TEXT, unread
+    assert "The prep session has no public source read and is marked unverified." in intro
+    assert "The prep session has no public source read and is marked unverified; no person or post is credited" in sources
+    assert "plus the prep session (unverified: no public source read)" in limits
 
 
 @pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])

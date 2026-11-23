@@ -158,10 +158,14 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
      priced round the founder expects.
    - Runway with no raise, or on a SAFE or note raise, and the use-of-funds lines on such a raise go to
      `equity_runway_plan`, as vc-deal-math step 2 says: `cash_on_hand`, today's monthly spend and revenue as the plan's
-     first phase, the SAFE or note as a raise with its stated runway and use-of-funds lines, and a runway stated with
-     no raise as the top-level `stated_runway_months`; one call per document's version. With no cash or burn given,
-     ask for them by name (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; quote
-     the claim as stated meanwhile, and never work it out by hand. Its mismatches are the calculator's mismatches.
+     first phase, the SAFE or note as a raise with its stated runway and use-of-funds lines, and a runway stated with no
+     raise as the top-level `stated_runway_months`; one call per document's version. On a SAFE or note raise, the `plan`
+     case's phases are the founder's own figures: today's monthly spend and revenue as the first phase, from month 1,
+     and each change the founder plans (more spend after the raise, say) as a later phase from the month the founder
+     names, each asked for by name when missing (`[planned monthly spend and revenue, from which month]`), never
+     assumed. With no cash or burn given, ask for them by name (`[cash on hand, monthly spend and revenue]`) and make no
+     call until they are given; quote the claim as stated meanwhile, and never work it out by hand. Its mismatches are
+     the calculator's mismatches.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
      its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%), which is what the
      command line's report prints. That is a change of notation, not a calculation; never round it.
@@ -176,9 +180,12 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
 8. **Which investors the story fits** (the section after the review).
 9. **Check before answering.** Every fix uses only the founder's facts, a tool result or a bracketed ask; every figure
    is quoted as stated or comes from a tool; every surviving objection quotes a line that is in the deck word for word
-   (an entry for a dimension no slide covers quotes none); every dimension marked Missing because no slide covers it
-   has its own "no slide covers" entry in the ranked fix list; every tool figure keeps the tool's digits wherever it
-   appears; no sentence speaks as an investor, imitates a named person or names a firm; no score appears.
+   (an entry for a dimension no slide covers quotes none); every dimension marked Missing because no slide covers it has
+   its own "no slide covers" entry in the ranked fix list; every tool figure keeps the tool's digits wherever it
+   appears; no sentence speaks as an investor, imitates a named person or names a firm; no score appears. Never work out
+   how two of the founder's figures relate (a difference, a sum, a ratio or multiple, a share left over, "doubled") in a
+   rewrite, a line or a table cell unless the founder's material states it or a tool returned it; quote both figures as
+   stated instead ("from 2,000 to 4,500", never "more than doubled").
 
 ## Adversarial review
 

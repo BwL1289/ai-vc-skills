@@ -278,7 +278,11 @@ def test_the_calculators_mismatches_head_the_drill_with_no_tier_and_its_flags_op
     assert "flags open weakens it" in rank and "ends the meeting, quoting" not in attack
     assert rank.index("the calculator's flags come first") < rank.index("raised by more than one lens")
     assert "It carries no tier: how much a gap hurts depends on its size" in attack
-    assert "below the tool's figure understates it" in attack and "minor tier at most" in attack
+    # Only a runway below the computed one understates; a percent sold or use of funds below the tool's is a mismatch.
+    assert "a runway claim below the computed runway understates it, so it does not head the drill" in attack
+    assert "minor tier at most" in attack and "below the tool's figure understates it" not in _TEXT
+    assert "A percent sold or use-of-funds total below the tool's figure is still a mismatch" in attack
+    assert "(an understated runway goes in minor)" in rank and "an understated one" not in rank
     assert "Neither goes through the quote check or the refute pass" in attack
     assert _RAISE_IT_ANYWAY in attack and "rather than a weak question" not in attack
 
@@ -369,8 +373,16 @@ def test_every_flag_the_calculator_raises_is_relayed_and_a_benchmark_band_is_nev
     assert "`cash_never_runs_out`" in flags and "18 months" not in flags and "25%" not in flags
     for code in ("`runway_below_band`", "`dilution_above_band`", "`runway_band`", "`dilution_band`"):
         assert code in steps, code
-    assert "with its `unverified` source" in steps and "never as a bar" in steps
-    assert "its meaning from the calculator flags table" in answering and "`unverified` source" in answering
+    # The runway plan's band row cites a guide and the deal check's does not, so the skill quotes whichever source the
+    # row gives rather than calling every band unverified.
+    assert "with the source that row gives, as a common benchmark" in steps and "never as a bar" in steps
+    assert "its meaning from the calculator flags table" in answering and "with the source that row gives" in answering
+    assert "`unverified` source" not in _TEXT
+    # Each question keeps to what the tool's own sentence says, never a motive or a doubt the tool does not raise.
+    meanings = dict(re.findall(r"^\| `([a-z_]+)` +\| (.+?) +\|$", flags, re.MULTILINE))
+    assert "as a VC prices it" in meanings["pool_in_pre_money_lowers_price"]
+    assert meanings["net_burn_not_positive"].endswith("which burn does the runway claim use?")
+    assert "why?" not in flags and "which burn is real?" not in flags
 
 
 def test_the_question_bank_has_fixed_columns_unique_ids_and_known_lenses_and_stages() -> None:

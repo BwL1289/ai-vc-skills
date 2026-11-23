@@ -132,9 +132,12 @@ the draft written at step 7.
 8. **Run the reader pass** (below) on the draft it judges (the founder's draft as given in review mode): attack,
    check the quotes, refute, rank. Revise the draft for every kept finding, using only the founder's facts or a
    bracketed ask.
-9. **Check before answering.** Every figure is quoted as stated or comes from a tool; every lowlight the founder gave
-   is in the draft; no metric the last update reported is silently gone; no sentence speaks as an investor or names a
-   firm as a voice; nothing is sent anywhere.
+9. **Check before answering.** Every figure is quoted as stated or comes from a tool; every lowlight the founder gave is
+   in the draft; no metric the last update reported is silently gone; no sentence speaks as an investor or names a firm
+   as a voice; nothing is sent anywhere. Never work out how two of the founder's figures relate (a difference, a sum, a
+   ratio or multiple, a share left over, "doubled") in a rewrite, a line or a table cell unless the founder's material
+   states it or a tool returned it; quote both figures as stated instead ("from 2,000 to 4,500", never "more than
+   doubled").
 
 ## Runway
 

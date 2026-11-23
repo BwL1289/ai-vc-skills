@@ -100,16 +100,18 @@ lenses" says, so the lenses do not anchor on the numbers or the bank; step 4 the
    - Read every code in each tool's `flags` too. Each is a question a partner is likely to ask, so each joins the kept
      questions as weakens it, with its meaning from the calculator flags table below (a tool call returns codes
      only), and is not refuted. The two benchmark flags (`runway_below_band`, `dilution_above_band`) rest on the
-     tool's assumption rows (`runway_band`, `dilution_band`): quote the band only as that row gives it, with its
-     `unverified` source, as a common benchmark that varies by sector, stage and year, never as a bar to clear.
+     tool's assumption rows (`runway_band`, `dilution_band`): quote the band only as that row gives it, with the
+     source that row gives, as a common benchmark that varies by sector, stage and year, never as a bar to clear.
    - The founder's runway if no new money comes in: `equity_runway_plan`, with today's cash, one `plan` case of
      today's monthly spend and revenue, and the founder's figure as the top-level `stated_runway_months`:
      `{"inputs": {"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "stated_runway_months": "..."}}`.
      With no cash or burn given, ask for them; never divide cash by burn yourself.
-   - On a SAFE or note raise, the runway claim and the use-of-funds lines go to `equity_runway_plan` too, the raise
-     as cash only: a `raises` entry with its `amount`, `stated_runway_months` and `use_of_funds`, on a `plan` case of
-     the spend planned after the raise (today's spend, if it differs, takes its own no-raise call). Never work either
-     out by hand.
+   - On a SAFE or note raise, the runway claim and the use-of-funds lines go to `equity_runway_plan` too, the raise as
+     cash only: a `raises` entry with its `amount`, `stated_runway_months` and `use_of_funds`. On a SAFE or note raise,
+     the `plan` case's phases are the founder's own figures: today's monthly spend and revenue as the first phase, from
+     month 1, and each change the founder plans (more spend after the raise, say) as a later phase from the month the
+     founder names, each asked for by name when missing (`[planned monthly spend and revenue, from which month]`), never
+     assumed. Never work either out by hand.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
      its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%), which is what the
      command line's report prints. That is a change of notation, not a calculation; never round it.
@@ -117,8 +119,7 @@ lenses" says, so the lenses do not anchor on the numbers or the bank; step 4 the
      (`equity_metrics_check`), a market size to the vc-market-sizing skill (`equity_market_sizing`): here, quote them
      as stated, check only that each has a definition and a period, and name that skill. Growth rates and LTV are
      quoted with "not checked: no tool computes this". Never compute, convert or round one.
-4. **Run the adversarial review** (next section): attack, check the quotes, refute, rank. Its kept questions are the
-   drill.
+4. **Run the adversarial review** (next section): attack, check quotes, refute, rank. Its kept questions are the drill.
 5. **Add the standing prep questions** (the section after it). They are asked of every founder and are not refuted.
 6. **Drill.** Live mode: put one question at a time, kept questions first, then the first five standing ones, at
    most twelve in all unless the founder asks for more, keeping five of the twelve for those standing ones; the sixth
@@ -146,13 +147,13 @@ A tool call returns each flag as a bare code; this is what each code means, as a
 | Flag (`equity_deal_check`)            | What a partner is likely to ask                                                                  |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise: pre- or post-money?         |
-| `pool_in_pre_money_lowers_price`      | The new pool comes out of the pre-money, so the effective pre-money and price are lower: why?    |
+| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, as a VC prices it: does the deck show the effective pre-money? |
 | `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less: will you move it into the pre?   |
 | `pool_already_large_enough`           | The unissued pool already meets the target: is the target big enough for the hiring plan?        |
 | `conversions_bought_by_pre_money`     | SAFE and note shares come out of the existing holders: what do you own once they convert?        |
 | `discount_beat_cap`                   | A discount gave a lower price than the cap: is the cap table modelled at that price?             |
 | `note_interest_converts`              | Note interest converts too: is the interest counted in the cap table?                            |
-| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it: which burn is real?   |
+| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it: which burn does the runway claim use? |
 | `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn: which burn does the runway claim use? |
 | `runway_below_band`                   | Planned net runway is under the tool's runway band: which milestone does the raise reach?        |
 | `dilution_above_band`                 | The investors get more than the tool's dilution band in one round: why sell that much?           |
@@ -197,10 +198,11 @@ becomes an open ask, or it is one of the standing prep questions.
 
 **The calculator's mismatches and flags** from step 3 do not go through the lenses. Each mismatch row heads the kept
 questions, ahead of the tiers, quoting the figure as the founder states it with the tool's value as the reason. It
-carries no tier: how much a gap hurts depends on its size, which the founder weighs. A mismatch with the claim below
-the tool's figure understates it: the founder may keep the claim or state the tool's figure, and it goes in the minor
-tier at most. Each flag is added as weakens it, with its meaning from the calculator flags table. Neither goes
-through the quote check or the refute pass: the calculator computed it, and its quote is the tool's row.
+carries no tier: how much a gap hurts depends on its size, which the founder weighs. One exception: a runway claim below
+the computed runway understates it, so it does not head the drill; the founder may keep it or state the printed runway,
+and it goes in the minor tier at most. A percent sold or use-of-funds total below the tool's figure is still a mismatch.
+Each flag is added as weakens it, with its meaning from the calculator flags table. Neither goes through the quote check
+or the refute pass: the calculator computed it, and its quote is the tool's row.
 
 ### Check the quotes
 
@@ -242,7 +244,7 @@ word does not drop the question, which stays kept, and neither does one that is 
 
 ### Rank what survives
 
-The calculator's mismatches head the drill, ahead of the tiers, in the order the tool reports them (an understated one
+The calculator's mismatches head the drill, ahead of the tiers, in the order the tool reports them (an understated runway
 goes in minor). Then order the kept questions in three tiers, hardest first: **ends the meeting**, **weakens it**,
 **minor**. Within a tier, the calculator's flags come first, in the order the tool reports them, ahead of everything
 else: flags open weakens it. After them, a question raised by more than one lens comes first. The tier is a judgment,
@@ -303,8 +305,8 @@ firm would invest, pass or score the company.
 4. **Standing prep:** each standing question with the drafted answer or its bracketed ask.
 5. **Numbers:** each tool's verdict with each mismatch row in the tool's values (the runway with no new money, and on
    a SAFE or note raise the runway claim and use-of-funds lines, from `equity_runway_plan`); each flag, one line, with
-   its meaning from the calculator flags table and a benchmark flag's band quoted from its assumption row and its
-   `unverified` source; every other figure quoted as stated.
+   its meaning from the calculator flags table and a benchmark flag's band quoted from its assumption row with the
+   source that row gives; every other figure quoted as stated.
 6. **What a yes would need,** as a list of bracketed asks.
 7. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
 8. **Sources:** the frameworks used, with links, and which points rest on an unverified source.
@@ -338,8 +340,7 @@ founder's own material) is shared with the vc-positioning skill.
 - It never plays an investor, never speaks as or imitates a named investor, firm or author, and gives no pass, invest
   or readiness score. Asked to "be" a named partner, it declines in one line and offers the lenses instead.
 - It never invents or strengthens traction, customers, investors, term sheets, references or figures, in a question,
-  a stronger answer or a prep answer. Asked to imply interest that does not exist, it declines and drafts a true
-  answer.
+  a stronger answer or a prep answer. Asked to imply interest that does not exist, it declines and drafts a true answer.
 - No investor research: no look-ups of partners, funds, portfolios or contact details, and no outreach. The founder
   says what they know.
 - No arithmetic outside the equity calculator's tools, in any part of the answer; runway with no raise comes from

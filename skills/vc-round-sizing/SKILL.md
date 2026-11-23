@@ -164,12 +164,14 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
    named. No recommendation.
 7. **Run the adversarial review** (below).
 8. **Check before answering.** Scan the whole draft, tables, asks and the skeptic's relayed text included, for any
-   figure that is in neither a tool result nor the founder's text: a difference, a total, a gap, a remainder or
-   "points" counts, and goes. Every case is one
-   the founder named, from one `equity_runway_plan` call. Every code in each result's `flags` appears once, with its
-   table meaning. The no-raise row shows `start_raising_by` as printed, a negative value included. Every attack
-   quotes a founder line word for word and carries its refute verdict; nothing speaks as an investor; no figure,
-   milestone or assumption is the skill's own; the close is item 11's sentence as written.
+   figure that is in neither a tool result nor the founder's text: a difference, a total, a gap, a remainder or "points"
+   counts, and goes. Every case is one the founder named, from one `equity_runway_plan` call. Every code in each
+   result's `flags` appears once, with its table meaning. The no-raise row shows `start_raising_by` as printed, a
+   negative value included. Every attack quotes a founder line word for word and carries its refute verdict; nothing
+   speaks as an investor; no figure, milestone or assumption is the skill's own; the close is item 11's sentence as
+   written. Never work out how two of the founder's figures relate (a difference, a sum, a ratio or multiple, a share
+   left over, "doubled") in a rewrite, a line or a table cell unless the founder's material states it or a tool returned
+   it; quote both figures as stated instead ("from 2,000 to 4,500", never "more than doubled").
 
 Tool values: use each value's `rounded` with its unit; never round again or recompute. A value whose unit is
 `fraction` is shown as a percent by moving the decimal point of its `rounded` value two places right, keeping every

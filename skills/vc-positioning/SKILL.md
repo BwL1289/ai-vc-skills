@@ -9,10 +9,9 @@ Helps a founder package a raise before the first outside meeting: one plain sent
 a story a partner can repeat to their colleagues, and the phrases to keep or drop. It reads the founder's own material,
 checks it against public frameworks for how investors read a pitch, attacks it the way a skeptical partner would, then
 tests each objection against the founder's own words, and returns what survives: the objections still standing, a tightened
-narrative, a say-and-avoid list and a script for a prep session with an existing investor. The prep session follows an
-idea from a LinkedIn post by Harry Stebbings of 20VC (around November 2026; unverified, since this skill's authors saw
-only a pasted copy and did not fetch the post): test the packaging with someone already on your cap table before going
-wide.
+narrative, a say-and-avoid list and a script for a prep session with an existing investor: test the packaging with
+someone already on your cap table before going wide. The prep session has no public source read and is marked
+unverified.
 
 The founder is always the user. The skill never plays an investor, never speaks as a named investor or firm, and never
 adds a fact about the company that the founder did not give.
@@ -109,10 +108,13 @@ so the lenses do not anchor on the dimension marks; step 5 then starts at the qu
      every reading is the calculator's mismatch.
    - Runway with no raise, or on a SAFE or note raise, and the use-of-funds lines on such a raise go to
      `equity_runway_plan`, as vc-deal-math step 2 says: `cash_on_hand`, today's monthly spend and revenue as the plan's
-     first phase, the SAFE or note as a raise with its stated runway and use-of-funds lines, and a runway stated with
-     no raise as the top-level `stated_runway_months`. With no cash or burn given, ask for them by name
-     (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; quote the claim as stated
-     meanwhile, and never work it out by hand.
+     first phase, the SAFE or note as a raise with its stated runway and use-of-funds lines, and a runway stated with no
+     raise as the top-level `stated_runway_months`. On a SAFE or note raise, the `plan` case's phases are the founder's
+     own figures: today's monthly spend and revenue as the first phase, from month 1, and each change the founder plans
+     (more spend after the raise, say) as a later phase from the month the founder names, each asked for by name when
+     missing (`[planned monthly spend and revenue, from which month]`), never assumed. With no cash or burn given, ask
+     for them by name (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; quote the
+     claim as stated meanwhile, and never work it out by hand.
    - Each code in a result's `flags` goes to the answer as a question a partner is likely to ask, with its meaning
      from "Calculator flags" below, since the MCP result gives the codes only. The benchmark flags are common
      benchmarks, not rules: say so and quote the tool's assumption row with the source that row gives.
@@ -127,9 +129,12 @@ so the lenses do not anchor on the dimension marks; step 5 then starts at the qu
 5. **Run the adversarial review** (next section): attack, check the quotes, refute, rank.
 6. **Draft the tightened narrative** (rules below), starting from the surviving objections' rewrites.
 7. **Draft the prep script** (below), with the branch for a founder who has no existing investor.
-8. **Check before answering.** Every fact in the narrative appears in the founder's material or in a tool result;
-   every figure is quoted as stated or comes from a tool; every surviving objection quotes a line that is in the
-   material word for word; no sentence speaks as an investor or imitates a named person.
+8. **Check before answering.** Every fact in the narrative appears in the founder's material or in a tool result; every
+   figure is quoted as stated or comes from a tool; every surviving objection quotes a line that is in the material word
+   for word; no sentence speaks as an investor or imitates a named person. Never work out how two of the founder's
+   figures relate (a difference, a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a line or a
+   table cell unless the founder's material states it or a tool returned it; quote both figures as stated instead ("from
+   2,000 to 4,500", never "more than doubled").
 
 ## Adversarial review
 
@@ -360,13 +365,11 @@ Lead with what to fix, then the material to take into the prep session.
 - Sequoia Capital, "Writing a Business Plan": https://www.sequoiacap.com/article/writing-a-business-plan/
 - Andreessen Horowitz, "16 Startup Metrics" (2015): https://a16z.com/16-startup-metrics/
 - Chris Dixon, "The idea maze" (2013): https://cdixon.org/2013/08/04/the-idea-maze
-- Harry Stebbings (20VC), a LinkedIn post on prepping fundraising messaging with existing investors (around November
-  2026). Unverified: this skill's authors saw only a pasted copy and did not fetch the post. The idea only,
-  paraphrased above.
 
 Several of these guides are years old. They describe how investors read a pitch, which changes slowly, but say their
 dates when a founder leans on one. The adversarial review's two-stage method (attack, then refute with the founder's
-own material) is this skill's own, not taken from any source.
+own material) is this skill's own, not taken from any source. The prep session has no public source read and is marked
+unverified; no person or post is credited for it.
 
 ## Limits
 
@@ -375,7 +378,7 @@ own material) is this skill's own, not taken from any source.
   pass.
 - It never role-plays or speaks as a named investor, firm or author. Asked to "be" one, it offers that firm's public
   framework instead (Sequoia's outline and YC's seven questions, with their links) and the adversarial review's
-  lenses, plus the prep session credited in one line to the post that inspired it, and keeps the founder as the user.
+  lenses, plus the prep session (unverified: no public source read), and keeps the founder as the user.
 - The adversarial review predicts likely objections from the founder's text; it is not a verdict on the company, and
   a real partner may raise others.
 - No investor research: no target lists, fund look-ups, contact details or outreach. The founder names who they meet.

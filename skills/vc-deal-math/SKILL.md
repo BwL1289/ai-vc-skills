@@ -62,10 +62,14 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
    - **Runway with no raise, or on a SAFE or note raise,** goes to `equity_runway_plan` (from the command line,
      `equity_calculator runway_plan`), never to `deal_check`, which needs a priced round. It takes the raise as cash
      and needs no valuation: `cash_on_hand`; one `plan` case whose first phase is today's monthly spend and revenue,
-     `{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}`, each planned change
-     another phase from its month; the new SAFE or note in `raises`, its use-of-funds lines included,
+     `{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}`; the new SAFE or note
+     in `raises`, its use-of-funds lines included,
      `{"amount": "...", "stated_runway_months": "...", "use_of_funds": [{"percent": "..."}]}`; and a runway stated
-     with no raise as the top-level `stated_runway_months`. With no cash or burn given, ask for them by name
+     with no raise as the top-level `stated_runway_months`. On a SAFE or note raise, the `plan` case's phases are the
+     founder's own figures: today's monthly spend and revenue as the first phase, from month 1, and each change the
+     founder plans (more spend after the raise, say) as a later phase from the month the founder names, each asked for
+     by name when missing (`[planned monthly spend and revenue, from which month]`), never assumed. With no cash or
+     burn given, ask for them by name
      (`[cash on hand, monthly spend and revenue]`) and make no call until they are given. A mismatch row is quoted
      with the tool's value, as `deal_check`'s are. With no milestone, months to raise or landing month passed, two
      flags can come back: `runway_below_band` (on the plan the raise lasts under the runway benchmark, 18 months by

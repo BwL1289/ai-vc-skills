@@ -100,6 +100,5 @@ forma's counts.
   class with $1,000,000 invested, never part of `common_shares`, and the Series A's 2,979,591 shares with $4,000,000
   invested, both at rank 1 as the founder states them.
 - The outcome table: $100,000,000, the founder's assumption with `[why $100 million]`; the Series A's payout
-  $22,222,218.08 beside $4,000,000 invested, and the SAFE class's $10,654,487.92 beside $1,000,000; no multiple, no
-  fund size.
+  $22,222,218.08 and the SAFE class's $10,654,487.92, neither beside its amount invested; no multiple, no fund size.
 - No sentence recommends investing; no firm is named; no score.
