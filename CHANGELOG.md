@@ -76,6 +76,17 @@ All notable changes to this repository. Dates are UTC.
   story and a refute pass keeps only what the founder's material grounds. Benchmarks reach the answer only through the
   calculator's own assumption rows. It invents no burn, growth or valuation and gives no recommendation.
   `vc-positioning` now points to it. Four evals are in `evals/vc-round-sizing/`.
+- The `vc-term-sheet-review` skill, in preview: a founder reads a term sheet they were offered before the call with
+  their lawyer. Each term is quoted, explained in plain words and marked against one cited baseline, Y Combinator's
+  standard and clean Series A term sheet, as Matches, Differs, Not in the baseline or Missing, with its source. The
+  round runs on `equity_deal_check` and `equity_pool` (the pool's timing and the whole share counts), the exits on
+  `equity_waterfall` at values the sheet, the tool or the founder gives, low ones included, beside a 1x
+  non-participating baseline when the preference differs; a later round goes to `equity_dilution` and founder vesting
+  to `equity_vesting` on request. Terms no tool models (cumulative dividends, anti-dilution, redemption, pay-to-play,
+  warrants) are quoted as not modelled. Lenses for the next round's lead, an acquirer, the team and control attack
+  the sheet, a refute pass drops what the sheet answers, and the survivors become questions for the lawyer. It never
+  says whether to sign and quotes no survey percentages. `vc-positioning`, `vc-deck-review` and `vc-deal-math` now
+  point to it. Four evals are in `evals/vc-term-sheet-review/`.
 
 ### Changed
 

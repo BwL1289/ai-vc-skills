@@ -158,7 +158,8 @@ same meaning beside each flag.
   economics) is quoted as stated with "not checked: no tool computes this", and no what-if the founder did not ask for
   is run.
 - It checks the arithmetic of the figures the founder gives. It does not read a deck file, a cap table file or a term
-  sheet; the founder's text is the input, and nothing is sent anywhere.
+  sheet; the founder's text is the input, and nothing is sent anywhere. A term sheet goes to the vc-term-sheet-review
+  skill.
 - It is not investment, legal or tax advice, and it does not say whether to take a round or what a company is worth.
 - It works the new money as a priced equity round. A raise on a SAFE or note is not modelled by `deal_check`; step 2
   routes it to `equity_round` with the next priced round the founder expects.
