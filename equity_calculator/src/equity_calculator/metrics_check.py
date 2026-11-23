@@ -18,16 +18,20 @@ customers' own movements when given, else the totals.
   revenue / the period's revenue.
 
 Each stated figure becomes one check (a stated churn with no basis one per basis it can be worked on, consistent when
-any is; a churn below zero only on net revenue): percents within ``tolerance_points`` points, the rest within
-``tolerance_percent`` of the computed figure, the edge included. A stated burn multiple with no multiple to work is
-``not_checked``, and the overall verdict is then ``not_checked`` unless a figure is a mismatch, never ``consistent``.
-Each percent, months or multiple row also says whether the stated figure is the computed one rounded to the places
-it is written with (within half its last place); two flags name a row whose verdict that test would reverse. Flags
-never change a verdict.
+any is; a churn below zero only on net revenue). A stated percent, months or multiple is consistent when it is within
+the tolerance (``tolerance_points`` points for a percent, ``tolerance_percent`` of the computed figure for the rest,
+the edge included) or when it is the computed figure rounded half away from zero to the places it is typed with
+(``12`` against 12.40, ``2`` against 2.4%; ``0.0`` is one place): people write figures rounded to the places they
+show. Money is consistent within ``tolerance_percent`` only, since a figure like $1.2M carries no places once typed as
+1200000. A stated burn multiple with no multiple to work is ``not_checked``, and the overall verdict is then
+``not_checked`` unless a figure is a mismatch, never ``consistent``. The four ``stated_*`` cause flags read a stated
+figure's agreement with the other definition the same way. ``consistent_beyond_rounding`` names a figure that holds by
+the tolerance alone. Flags never change a verdict.
 """
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from decimal import Decimal
 from fractions import Fraction
@@ -187,15 +191,27 @@ def _work(inputs: MetricsCheckInput) -> _Worked:
     )
 
 
-def _rounding_step(written: Decimal, unit: EquityUnit) -> Fraction | None:
-    """Half the last place ``written`` is typed with, in ``unit``'s terms (a percent's place is a percent point's, so
-    it is divided by 100); none for money, whose round figures (ARR of $1.2M) say nothing about their places."""
+def _typed_places(written: Decimal) -> int:
+    """The decimal places ``written`` is typed with: ``12`` none, ``12.40`` two, ``0.0`` one (a zero keeps its places,
+    ``WrittenDecimal``); an exponent form counts what it spells out (``1.2E+1`` none)."""
+    exponent = written.as_tuple().exponent
+    return max(0, -exponent) if isinstance(exponent, int) else 0
+
+
+def _round_half_away(value: Fraction, places: int) -> Fraction:
+    """``value`` rounded half away from zero to ``places`` decimal places, exactly (12.5 to 13, -2.5 to -3)."""
+    scale = _DECIMAL_BASE**places
+    whole = math.floor(abs(value) * scale + _HALF)
+    return Fraction(whole if value >= ZERO else -whole, scale)
+
+
+def _rounds_to(written: Decimal, unit: EquityUnit, computed: Fraction) -> bool | None:
+    """Whether ``written`` (percent points for a fraction) is ``computed`` rounded half away from zero to the places
+    ``written`` is typed with; none for money, whose round figures (ARR of $1.2M) say nothing about their places."""
     if unit == "money":
         return None
-    exponent = written.as_tuple().exponent
-    places = max(0, -exponent) if isinstance(exponent, int) else 0
-    step = _HALF / _DECIMAL_BASE**places
-    return step / HUNDRED if unit == "fraction" else step
+    shown = computed * HUNDRED if unit == "fraction" else computed
+    return _round_half_away(shown, _typed_places(written)) == fraction(written)
 
 
 def _check(
@@ -206,12 +222,12 @@ def _check(
     tolerance: Fraction,
     basis: ChurnBasis | None = None,
 ) -> MetricsCheck:
-    """One check of the figure as ``written`` (percent points for a fraction): within ``tolerance`` of the computed
-    figure (the edge included) is consistent; ``within_rounding`` is whether it is the computed figure rounded to
-    the places it is written with."""
+    """One check of the figure as ``written`` (percent points for a fraction): consistent within ``tolerance`` of the
+    computed figure (the edge included) or, for a percent, months or multiple, when it is the computed figure rounded
+    to the places it is typed with (``within_rounding``)."""
     stated = from_percent(written) if unit == "fraction" else fraction(written)
     difference = computed - stated
-    step = _rounding_step(written, unit)
+    rounds = _rounds_to(written, unit, computed)
 
     return MetricsCheck(
         key=key,
@@ -219,14 +235,23 @@ def _check(
         stated=quantity(unit, stated),
         computed=quantity(unit, computed),
         difference=quantity(unit, difference),
-        verdict="consistent" if abs(difference) <= tolerance else "mismatch",
-        within_rounding=None if step is None else abs(difference) <= step,
+        verdict="consistent" if abs(difference) <= tolerance or rounds else "mismatch",
+        within_rounding=rounds,
     )
 
 
 def _within(stated: Fraction, other: Fraction | None, tolerance: Fraction) -> bool:
     """Whether ``stated`` sits within ``tolerance`` of ``other`` (the edge included)."""
     return other is not None and abs(other - stated) <= tolerance
+
+
+def _agrees(written: Decimal, unit: EquityUnit, other: Fraction | None, tolerance: Fraction) -> bool:
+    """Whether the figure as ``written`` agrees with ``other`` as a check does: within ``tolerance`` of it, or it
+    rounded to the places ``written`` is typed with."""
+    if other is None:
+        return False
+    stated = from_percent(written) if unit == "fraction" else fraction(written)
+    return _within(stated, other, tolerance) or bool(_rounds_to(written, unit, other))
 
 
 def _checked_arr(worked: _Worked) -> Fraction | None:
@@ -304,7 +329,8 @@ def _mismatched(checks: tuple[MetricsCheck, ...], key: MetricsCheckKey, *, or_un
 def _definition_flags(
     inputs: MetricsCheckInput, worked: _Worked, checks: tuple[MetricsCheck, ...]
 ) -> list[MetricsFlag]:
-    """The four ``stated_*`` flags: a mismatch that agrees with the named wrong definition instead."""
+    """The four ``stated_*`` flags: a mismatch that agrees with the named wrong definition instead (within the
+    tolerance of it, or, for a percent, months or multiple, it rounded to the stated figure's places)."""
     points = from_percent(inputs.tolerance_points)
     relative = from_percent(inputs.tolerance_percent)
     flags: list[MetricsFlag] = []
@@ -320,7 +346,7 @@ def _definition_flags(
         ):
             flags.append("stated_arr_matches_run_rate")
     if inputs.stated_nrr_percent is not None and _mismatched(checks, "nrr"):
-        if _within(from_percent(inputs.stated_nrr_percent), worked.ending_over_start, points):
+        if _agrees(inputs.stated_nrr_percent, "fraction", worked.ending_over_start, points):
             flags.append("stated_nrr_includes_new")
     if (
         inputs.stated_cac_payback_months is not None
@@ -329,7 +355,7 @@ def _definition_flags(
         and _mismatched(checks, "cac_payback")
     ):
         revenue = worked.revenue_payback
-        if _within(fraction(inputs.stated_cac_payback_months), revenue, relative * revenue):
+        if _agrees(inputs.stated_cac_payback_months, "months", revenue, relative * revenue):
             flags.append("stated_payback_not_margin_adjusted")
     on_new = worked.burn_multiple_on_new
     # Also beside a multiple left unchecked: with churn above new sales there is no net-new multiple at all, and a
@@ -339,16 +365,16 @@ def _definition_flags(
         and on_new is not None
         and _mismatched(checks, "burn_multiple", or_unchecked=True)
     ):
-        if _within(fraction(inputs.stated_burn_multiple), on_new, relative * on_new):
+        if _agrees(inputs.stated_burn_multiple, "multiplier", on_new, relative * on_new):
             flags.append("stated_burn_multiple_uses_new_not_net_arr")
 
     return flags
 
 
 def _rounding_flags(checks: tuple[MetricsCheck, ...]) -> list[MetricsFlag]:
-    """A stated percent, months or multiple whose verdict the rounding test would reverse: consistent only by the
-    tolerance, not as the computed figure rounded to its own places; or a mismatch that is that rounding. A churn
-    with no basis counts as one figure: it holds on rounding when any of its rows does."""
+    """A stated percent, months or multiple consistent by the tolerance alone: not the computed figure rounded to its
+    own places, so a VC recomputing gets another figure. A churn with no basis counts as one figure: it is a rounding
+    when any of its rows is. (A rounding is always consistent, so no mismatch is one.)"""
     flags: list[MetricsFlag] = []
     keys = dict.fromkeys(check.key for check in checks if check.within_rounding is not None)
     for key in keys:
@@ -357,8 +383,6 @@ def _rounding_flags(checks: tuple[MetricsCheck, ...]) -> list[MetricsFlag]:
         holds = any(check.verdict == "consistent" for check in rows)
         if holds and not rounds:
             flags.append("consistent_beyond_rounding")
-        if not holds and rounds:
-            flags.append("mismatch_within_rounding")
 
     return flags
 

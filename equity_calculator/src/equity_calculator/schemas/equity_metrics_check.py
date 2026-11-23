@@ -78,7 +78,8 @@ ArrBasis = Literal["movement", "month"]
 # Facts and questions a VC is likely to raise. They never change a verdict; their plain words are in
 # ``equity_calculator.layout_metrics_check``. The four ``stated_*`` flags are set only beside a mismatch (the burn
 # multiple's also beside a figure left unchecked), when the stated figure agrees with the named wrong definition
-# instead, so each names the likely cause. The two rounding flags compare a stated percent, months or multiple with
+# instead (within the tolerance, or its rounding to the stated places), so each names the likely cause.
+# ``consistent_beyond_rounding`` names a stated percent, months or multiple consistent by the tolerance alone, not as
 # the computed figure rounded to the places the document writes it with.
 MetricsFlag = Literal[
     "stated_arr_matches_run_rate",
@@ -92,7 +93,6 @@ MetricsFlag = Literal[
     "stated_payback_not_margin_adjusted",
     "stated_burn_multiple_uses_new_not_net_arr",
     "consistent_beyond_rounding",
-    "mismatch_within_rounding",
     "burn_multiple_not_defined",
     "no_net_burn",
     "payback_above_band",
@@ -134,7 +134,8 @@ class MetricsCheckInput(BaseModel):
     movements, the period's totals) is in ``recurring_unit``. The ``cohort_*`` fields are the same three movements for
     the customers there at the start only; retention and revenue churn use them when given. Percent fields take
     percent points (``95`` is 95%). The tolerances say how far a stated figure may sit from the computed one
-    (``deal_check``'s defaults); the three bands raise a benchmark question, never an error.
+    (``deal_check``'s defaults); a stated percent, months or multiple that is the computed figure rounded to the places
+    it is typed with holds even past them. The three bands raise a benchmark question, never an error.
     """
 
     model_config = MODEL_CONFIG
@@ -164,10 +165,11 @@ class MetricsCheckInput(BaseModel):
     period_revenue: BoundedDecimal | None = Field(default=None, gt=0)
     stated_arr: BoundedDecimal | None = Field(default=None, gt=0)
     # The stated percent, months and multiple fields are ``WrittenDecimal``: a zero keeps the places it is written with
-    # ("0.0" is one place), which the rounding test reads.
+    # ("0.0" is one place), which the rounding test reads (a figure that is the computed one rounded to its places is
+    # consistent).
     stated_nrr_percent: WrittenDecimal | None = Field(default=None, ge=0)
     # Above 100% is accepted, never refused: gross retention leaves expansion out, so it is checked like any figure,
-    # and comes back a mismatch unless it is within the tolerance of the computed figure.
+    # and comes back a mismatch unless it is within the tolerance of the computed figure or its rounding.
     stated_grr_percent: WrittenDecimal | None = Field(default=None, ge=0)
     # Below 0 only as net revenue churn (expansion above the revenue lost); ``_churn_rules`` refuses it otherwise.
     stated_churn_percent: WrittenDecimal | None = Field(default=None, le=WHOLE_PERCENT)
@@ -370,8 +372,8 @@ class MetricsCheck(BaseModel):
     ``basis`` names the churn basis a churn row is checked on (an unlabelled churn gets one row per basis).
     ``computed`` and ``difference`` are none, and the verdict ``not_checked``, when the parts give no figure to check
     against (a stated burn multiple with net burn or net new ARR at or below zero). ``within_rounding`` says whether
-    the stated percent, months or multiple is the computed figure rounded to the places it is written with (within
-    half its last place); none for money and for a figure not checked.
+    the stated percent, months or multiple is the computed figure rounded half away from zero to the places it is
+    written with, which makes it consistent even past the tolerance; none for money and for a figure not checked.
     """
 
     model_config = MODEL_CONFIG

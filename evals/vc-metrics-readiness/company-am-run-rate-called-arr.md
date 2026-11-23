@@ -60,11 +60,11 @@ agent, so against today's sentence it would be a Partial. The skill and this pas
   Net revenue retention: the deck says                                         125.0000%  given
   Net revenue retention: the calculator gives                                   95.0000%  (S + E - C - X)/S
   Net revenue retention: difference                                            -30.0000%  computed - stated
-  Net revenue retention: verdict                                                mismatch  within the tolerance is consistent
+  Net revenue retention: verdict                                                mismatch  within the tolerance, or rounding to the deck's, is consistent
   Burn multiple: the deck says                                                 6.250000x  given
   Burn multiple: the calculator gives                                          7.500000x  net burn / net new ARR
   Burn multiple: difference                                                    1.250000x  computed - stated
-  Burn multiple: verdict                                                        mismatch  within the tolerance is consistent
+  Burn multiple: verdict                                                        mismatch  within the tolerance, or rounding to the deck's, is consistent
   A VC is likely to ask                                      stated_arr_matches_run_rate  The stated ARR matches the run-rate (12 x the whole month's revenue), not recurring revenue; a VC is likely to recompute ARR without one-time, services and usage fees
   A VC is likely to ask                                  run_rate_includes_non_recurring  The latest month has one-time or usage revenue, so its run-rate is above its ARR; say which figure the document shows
   A VC is likely to ask                                          stated_nrr_includes_new  The stated net retention matches ending over starting recurring revenue, which counts revenue from customers who were not there at the start (new customers, or their expansion); a VC is likely to ask for the starting customers alone

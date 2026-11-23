@@ -289,14 +289,6 @@ _EVERY_FLAG = (
     metrics_check(period_months=1, starting_recurring="100", churned_recurring="3"),
     metrics_check(period_months=1, starting_recurring="100", month_total_revenue="110"),
     metrics_check(period_months=1, starting_recurring="100", churned_recurring="2.1", stated_churn_percent="1.7"),
-    metrics_check(
-        period_months=1,
-        starting_recurring="0",
-        new_recurring="10",
-        sales_marketing_spend="124",
-        gross_margin_percent="100",
-        stated_cac_payback_months="12",
-    ),
 )
 
 
@@ -377,7 +369,7 @@ def test_an_unlabelled_churn_below_zero_says_it_was_checked_as_net_revenue_churn
 
 
 async def test_a_zero_typed_with_a_place_keeps_it_through_the_command() -> None:
-    """--stated-churn-percent 0.0 against 0.4% is no rounding of it; 0 is (half a point either way)."""
+    """--stated-churn-percent 0.0 against 0.4% is no rounding of it; 0 is (0.4 rounds to 0)."""
     argv = ["metrics_check", "--period-months", "1", "--starting-recurring", "100000", "--churned-recurring", "400"]
     argv += ["--stated-churn-basis", "gross_revenue", "--json", "--stated-churn-percent"]
     one_place = json.loads(await run([*argv, "0.0"]))
@@ -438,6 +430,29 @@ def test_a_mismatch_a_hair_past_the_tolerance_says_it_is_just_over() -> None:
     assert close_lines["check_nrr_verdict"].values == ("mismatch",)
     assert "just over the tolerance" in close_lines["check_nrr_verdict"].how
     assert "just over" not in clear_lines["check_nrr_verdict"].how
+
+
+def test_a_verdict_line_names_the_rounding_where_the_row_has_one() -> None:
+    """A payback of 12 against 12.40 holds by rounding alone (0.4 months is past 2%), and its verdict line says what
+    holds; a money row keeps the tolerance alone, and its line says only that."""
+    rounded = sheet_for(
+        metrics_check(
+            period_months=1,
+            starting_recurring="0",
+            new_recurring="10",
+            sales_marketing_spend="124",
+            gross_margin_percent="100",
+            stated_cac_payback_months="12",
+            stated_arr="120",
+        )
+    )
+    lines = {line.key: line for line in rounded.lines}
+
+    assert lines["check_cac_payback_rounding"].values == ("yes",)
+    assert lines["check_cac_payback_verdict"].values == ("consistent",)
+    assert lines["check_cac_payback_verdict"].how == "within the tolerance, or rounding to the deck's, is consistent"
+    assert lines["check_arr_verdict"].how == "within the tolerance is consistent"
+    assert not any(key.startswith("flag_") for key in lines)
 
 
 def test_each_rounding_line_says_yes_or_no_and_money_has_none() -> None:

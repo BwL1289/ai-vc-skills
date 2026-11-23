@@ -56,11 +56,11 @@ refuse the whole call for it.
   Logo churn (3 months)                                          6.0000%  customers lost / at the start
   Churn (logo): the deck says                                    4.0000%  given
   Churn (logo): the calculator gives                             6.0000%  customers lost / customers at the start
-  Churn (logo): verdict                                         mismatch  within the tolerance is consistent
+  Churn (logo): verdict                                         mismatch  within the tolerance, or rounding to the deck's, is consistent
   Churn (gross revenue): the calculator gives                   10.0000%  (C' + X')/S; E', C', X' the starting customers' own when given, else the period's total
-  Churn (gross revenue): verdict                                mismatch  within the tolerance is consistent
+  Churn (gross revenue): verdict                                mismatch  within the tolerance, or rounding to the deck's, is consistent
   Churn (net revenue): the calculator gives                      8.5000%  (C' + X' - E')/S; E', C', X' the starting customers' own when given, else the period's total
-  Churn (net revenue): verdict                                  mismatch  within the tolerance is consistent
+  Churn (net revenue): verdict                                  mismatch  within the tolerance, or rounding to the deck's, is consistent
   Burn multiple: the deck says                                 1.800000x  given
   Burn multiple: the calculator gives                               none  no multiple: net burn or net new ARR is zero or below
   Burn multiple: verdict                                     not_checked  nothing to check it against, so the overall verdict cannot be consistent
