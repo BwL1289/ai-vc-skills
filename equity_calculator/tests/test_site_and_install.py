@@ -131,3 +131,20 @@ def test_the_plugin_descriptions_promise_nothing_still_to_come() -> None:
 
     for description in descriptions:
         assert _STILL_TO_COME not in description, description
+
+
+def test_every_image_the_site_shows_is_served_from_its_own_folder() -> None:
+    """Pages serves docs/ only, so each image the page loads must sit in docs/, both demo recordings included."""
+    sources = re.findall(r'<img[^>]*?\ssrc="([^"]+)"', _site(), flags=re.DOTALL)
+
+    assert {"demo-claude.gif", "demo-cli.gif"} <= set(sources)
+    for source in sources:
+        assert "://" not in source and not source.startswith(("/", "..")), source
+        assert (_SITE.parent / source).is_file(), source
+
+
+def test_the_plugin_and_its_marketplace_entry_carry_the_same_version() -> None:
+    plugin = json.loads((_ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    marketplace = json.loads((_ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))
+
+    assert marketplace["metadata"]["version"] == plugin["version"]

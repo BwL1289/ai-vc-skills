@@ -6,6 +6,9 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- The website shows the two demo recordings (Claude Code calling the calculator's MCP tool, and the calculator in a
+  terminal) in a "See it work" section; the plugin's version is now 0.2.0, so an installed copy updates to the fifteen
+  skills.
 - The repository is now **AI VC skills**, a Claude Code plugin marketplace with one plugin, `ai-vc-skills`
   (`/plugin marketplace add BwL1289/ai-vc-skills`, then `/plugin install ai-vc-skills@ai-vc-skills`). The plugin
   carries every skill in `skills/` and starts the equity calculator's MCP server with `uvx`.

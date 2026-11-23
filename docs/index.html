@@ -288,6 +288,30 @@
         max-width: 70ch;
       }
 
+      .demos {
+        display: grid;
+        gap: 28px;
+      }
+      .demos figure {
+        margin: 0;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: var(--shadow);
+      }
+      .demos img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+      }
+      .demos figcaption {
+        margin: 12px 4px 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
       /* Code */
       pre {
         margin: 0;
@@ -689,6 +713,7 @@
           ><img src="logo.svg" alt="" width="30" height="30" />AI VC skills</a
         >
         <nav class="site-nav" aria-label="Sections">
+          <a href="#demo">Demo</a>
           <a href="#install">Install</a>
           <a href="#skills">Skills</a>
           <a href="#examples">Examples</a>
@@ -734,6 +759,42 @@
           />
         </div>
       </div>
+
+      <section id="demo" aria-labelledby="demo-title">
+        <div class="wrap">
+          <h2 id="demo-title">See it work</h2>
+          <p class="section-intro">
+            Two recordings of real runs: Claude Code calling the calculator's
+            MCP tool, and the calculator on its own in a terminal.
+          </p>
+          <div class="demos">
+            <figure>
+              <img
+                src="demo-claude.gif"
+                alt="Claude Code calls the equity calculator's MCP tool and answers a SAFE conversion question in the five short lines the prompt asks for: the SAFE converts at $0.70 a share, and existing holders own 60.85% after the round"
+                width="820"
+                loading="lazy"
+              />
+              <figcaption>
+                In Claude Code: a SAFE conversion question answered from the
+                calculator's MCP tool, every number from the tool.
+              </figcaption>
+            </figure>
+            <figure>
+              <img
+                src="demo-cli.gif"
+                alt="The investor test in a terminal: selling 7% for a 10% gain says accept, for a 5% gain says reject"
+                width="720"
+                loading="lazy"
+              />
+              <figcaption>
+                In a terminal: is selling 7% worth it? Accept for a 10% gain,
+                reject for a 5% gain.
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
 
       <section id="install" aria-labelledby="install-title">
         <div class="wrap">
