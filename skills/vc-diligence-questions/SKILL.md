@@ -116,10 +116,11 @@ check.
      is quoted beside the tool's ownership row, both as printed; no difference is computed (deal_check computes
      differences only for priced rounds).
    - Runway: a runway claim on a priced round is part of the `equity_deal_check` call. Runway with no raise, or on a
-     SAFE or note raise, goes to `equity_runway_plan`, the plan case inside the `cases` list. With no raise:
-     `{"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "stated_runway_months": "..."}`.
+     SAFE or note raise, goes to `equity_runway_plan`, whose one argument is `inputs`, with the plan case inside the
+     `cases` list. With no raise:
+     `{"inputs": {"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "stated_runway_months": "..."}}`.
      On a SAFE or note raise, the stated runway is the raise option's own:
-     `{"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "raises": [{"amount": "...", "stated_runway_months": "..."}]}`.
+     `{"inputs": {"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "raises": [{"amount": "...", "stated_runway_months": "..."}]}}`.
    - A tool's mismatch is a diligence question a partner will ask first, so it goes to the top of the ranked list.
    - Read every code in the tool's `flags` too, and relay each in the tool's words: beside the mismatch it explains,
      or, with no mismatch, as a kept question at slows it, not refuted. A flag that rests on a benchmark band quotes

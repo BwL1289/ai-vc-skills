@@ -113,8 +113,8 @@ _PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|\d[\d,]*\.\d+ months|\$\d[\d,]*\
 # A bar or benchmark the data-room file must never carry: money, a percent, or a multiple such as 3x.
 _FIGURE = re.compile(r"[$%]|\d\s*x\b")
 _FILLER = "1"
-# A whole runway_plan input the skill writes out in step 2, in one code span.
-_RUNWAY_INPUT = re.compile(r'`(\{"cash_on_hand": .*?\})`')
+# A whole runway_plan tool argument the skill writes out in step 2, in one code span: {"inputs": {...}}.
+_RUNWAY_INPUT = re.compile(r'`(\{"inputs": \{"cash_on_hand": .*?\}\})`')
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -251,11 +251,13 @@ def test_every_skill_it_hands_off_to_exists_and_two_skills_point_here() -> None:
 
 
 def test_the_runway_inputs_the_skill_writes_out_are_ones_the_runway_tool_takes_whole() -> None:
-    """Each runway input in step 2 is a whole object, parsed from the skill's text with nothing added by the test."""
+    """Each runway argument in step 2 is a whole object, parsed from the skill's text with nothing added by the test."""
     steps = _section("## Steps")
-    inputs = [json.loads(found.replace("...", _FILLER)) for found in _RUNWAY_INPUT.findall(steps)]
+    arguments = [json.loads(found.replace("...", _FILLER)) for found in _RUNWAY_INPUT.findall(steps)]
+    assert len(arguments) == 2
+    assert all(list(argument) == ["inputs"] for argument in arguments)
+    inputs = [argument["inputs"] for argument in arguments]
 
-    assert len(inputs) == 2
     no_raise, on_a_raise = inputs
     assert "raises" not in no_raise and "stated_runway_months" in no_raise
     assert "stated_runway_months" not in on_a_raise and "stated_runway_months" in on_a_raise["raises"][0]
