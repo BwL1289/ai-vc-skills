@@ -123,7 +123,7 @@ All notable changes to this repository. Dates are UTC.
   computed. Five lenses make the definitional attacks a partner makes, a refute pass drops what the founder's material
   answers, and the survivors become a ranked fix list, with the calculator's mismatches first. It lists which metrics
   a fund at the founder's stage usually expects, never what values, and gives no score and no ready-or-not verdict.
-  `vc-positioning` now points to it. Four evals are in `evals/vc-metrics-readiness/`.
+  `vc-positioning` now points to it. Five evals are in `evals/vc-metrics-readiness/`.
 
 ### Changed
 

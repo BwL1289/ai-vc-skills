@@ -24,6 +24,7 @@ from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity_metrics_check import MetricsCheckInput, MetricsCheckResult, MetricsFlag
 from equity_calculator.text import render_sheet
+from pydantic import ValidationError
 from tests.test_vc_claims_check_skill import _READ_SOURCES as _SHARED_READ_SOURCES
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -32,9 +33,9 @@ _TEXT = _SKILL.read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _CLAIMS_CHECK = (_ROOT / "skills" / "vc-claims-check" / "SKILL.md").read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-metrics-readiness").glob("*.md"))
-_EVAL_COUNT = 4
-# The repository gives each made-up company its own letter; this skill's evals use AM to AP.
-_EVAL_LETTERS = ("am", "an", "ao", "ap")
+_EVAL_COUNT = 5
+# The repository gives each made-up company its own letter; this skill's evals use AM to AP and AU.
+_EVAL_LETTERS = ("am", "an", "ao", "ap", "au")
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_metrics_check` call."
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
@@ -209,7 +210,14 @@ def test_the_frontmatter_names_the_skill_and_the_founders_questions() -> None:
     assert ": " not in description
     for trigger in _TRIGGERS:
         assert trigger in description, trigger
-    for phrase in ("founder", "metrics_check", "adversarial review", "No score", "no named firms", "Never invents"):
+    for phrase in (
+        "founder",
+        "metrics_check",
+        "adversarial review",
+        "No score",
+        "no firm named as a fit",
+        "Never invents",
+    ):
         assert phrase in description, phrase
     assert len(_TEXT.splitlines()) < _LINE_LIMIT
 
@@ -307,6 +315,25 @@ def test_the_model_converts_nothing_and_the_calculator_does_every_ratio() -> Non
     assert "the churn is a calculator mismatch only when no basis row is consistent" in steps
     assert "`cohort_rule`" in steps
     assert "Each code in the result's `flags` goes to the answer as a question a partner is likely to ask" in steps
+    for rule in (
+        # A stated ratio is checked over the period the document states for it, or not at all.
+        "A stated retention or churn figure goes in a call whose `period_months` is the period the document states",
+        "With no stated period, or no parts for that period, it is not passed",
+        # Period-total retention is never offered as a slide figure in place of the starting customers' own.
+        "the tool's retention values are not offered as replacement figures for a slide",
+        # The tool checks blended CAC only, so a paid CAC never goes in as stated_cac.
+        "`stated_cac` is checked against blended CAC only. A CAC the document labels paid is not passed",
+        # A stated figure without its parts would make the tool refuse the whole call, so it is left out.
+        "A stated figure whose parts the founder did not give is left out of the call",
+        "A refusal that comes anyway is relayed with the parts it names",
+        "gets no check row: it is not checked, and the flag (`burn_multiple_not_defined` or `no_net_burn`) says why",
+        "With no recurring revenue at all there are no parts to pass: make no call",
+        "Net burn goes into a call only when that call's document states a burn multiple",
+        # The report's fixed label is renamed to the call's document when a row is relayed.
+        'name that call\'s document instead ("the model says", "the update says")',
+        "relay the flag as answered and quote that line",
+    ):
+        assert rule in steps, rule
     assert "No arithmetic outside the equity calculator's tools" in _unwrapped(_section("## Limits"))
 
 
@@ -323,6 +350,8 @@ def test_the_attack_stage_runs_independent_lenses_named_by_what_they_test() -> N
     assert "only the founder's material, the Definitions table and its lens brief" in attack
     # A subagent lens gets no other section, so the stage-fit lens is handed the table it tests against.
     assert "Stage fit" in lenses and "the Stage fit lens also gets the Stage expectations table" in attack
+    # A missing metric has no line of its own, so the stage-fit lens anchors on the stage or the metrics slide.
+    assert "quotes the line that states the stage, or the metrics slide as a whole" in attack
     assert "not the tool's output" in attack
     assert "one after another" in attack and "less independent than subagents" in attack
     assert "do no arithmetic" in brief
@@ -373,7 +402,13 @@ def test_calculator_mismatches_lead_the_first_tier_and_there_is_no_score() -> No
 
     for tier in _TIERS:
         assert tier in ranked, tier
-    assert "The calculator's mismatches lead the first tier" in ranked
+    assert "The calculator's mismatches lead the list" in ranked
+    attack = _unwrapped(_section("### Stage A: attack"))
+    # Only a mismatch a definition flag explains ends the meeting; any other is untiered and may be rounding.
+    assert "One that a `stated_*` flag explains (the document used another definition) is ends the meeting" in attack
+    assert "One that no `stated_*` flag explains carries no tier" in attack
+    assert "`[how the model works this figure, unrounded]`" in attack
+    assert "merges into that mismatch's entry and keeps the lens name" in _unwrapped(_section("### Check the quotes"))
     assert "no percentages and no score" in ranked
     assert "An unlabelled churn with one consistent basis row is not a mismatch" in _unwrapped(
         _section("### Stage A: attack")
@@ -383,6 +418,12 @@ def test_calculator_mismatches_lead_the_first_tier_and_there_is_no_score() -> No
     assert not _SCORE.search(_TEXT)
     limits = _unwrapped(_section("## Limits"))
     assert 'no "ready" or "not ready"' in limits and 'no "raise now or wait"' in limits
+    # Firms and authors are cited as sources; none is named as a fit or speaks.
+    assert "never names a firm or person as an investor to approach or as one the metrics fit" in limits
+    assert "names firms and authors only as cited sources" in limits
+    assert "names a firm as a fit or a voice (firms and authors appear only as cited sources)" in _unwrapped(
+        _section("## Steps")
+    )
 
 
 def test_stage_expectations_name_kinds_of_metric_never_values() -> None:
@@ -439,6 +480,16 @@ def test_each_eval_call_is_valid_and_its_excerpt_is_what_the_calculator_prints(p
 
 
 @pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])
+def test_every_flag_an_eval_call_raises_reaches_its_expected_answer(path: Path) -> None:
+    """Step 4 relays each flag code as a question, so each one the calls raise is named in the expected answer."""
+    answer = _unwrapped(_section("## Expected answer", path.read_text(encoding="utf-8")))
+
+    for call in _calls(path):
+        for flag in _result(call).flags:
+            assert f"`{flag}`" in answer, flag
+
+
+@pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])
 def test_each_figure_an_eval_answer_takes_from_the_calculator_is_what_it_prints(path: Path) -> None:
     """A percent, months, money with cents or a multiple in the expected answer is a figure the report prints."""
     text = path.read_text(encoding="utf-8")
@@ -485,6 +536,8 @@ def test_a_three_document_eval_runs_one_call_per_document_with_only_its_figures(
     _, answer = _eval("an")
     assert "is not a calculator mismatch, because one basis row is consistent" in answer
     assert "Will be discounted" in answer and "CAC payback is Contradicted" in answer
+    assert '"the model says" and "the update says"' in answer
+    assert "`[the stage of this raise and the business model]`" in answer
 
 
 def test_one_eval_drops_an_objection_by_quoting_the_line_that_answers_it() -> None:
@@ -514,3 +567,27 @@ def test_one_eval_declines_a_score_a_verdict_and_a_named_firm() -> None:
     assert "no score" in answer and "no yes or no" in answer
     assert "does not speak as or for a named firm" in answer
     assert "the ratio does not compute" in answer
+
+
+def test_one_eval_takes_the_edge_paths_cohort_movements_no_multiple_and_a_left_out_figure() -> None:
+    (path,) = (path for path in _CALL_EVALS if path.name.startswith("company-au-"))
+    (call,) = _calls(path)
+    result = _result(call)
+    _, answer = _eval("au")
+
+    # The starting customers' own movements go in, so the cohort rule names them.
+    assert {"cohort_expansion_recurring", "cohort_contraction_recurring", "cohort_churned_recurring"} <= set(call)
+    (cohort,) = (row for row in result.assumptions if row.key == "cohort_rule")
+    assert cohort.setting == "the starting customers' own movements"
+    # A stated multiple with net new ARR below zero gets no check row and the flag that says why.
+    assert "stated_burn_multiple" in call and "burn_multiple_not_defined" in result.flags
+    assert all(check.key != "burn_multiple" for check in result.checks)
+    # An unlabelled churn that holds on no basis is a calculator mismatch.
+    churn = [check.verdict for check in result.checks if check.key == "churn"]
+    assert len(churn) == 3 and set(churn) == {"mismatch"} and result.verdict == "mismatch"
+    assert "Contradicted" in answer and "with no tier" in answer
+    # The payback was left out: with it, the tool refuses the whole call.
+    assert "stated_cac_payback_months" not in call
+    with pytest.raises(ValidationError, match="stated_cac_payback_months needs"):
+        MetricsCheckInput.model_validate({**call, "stated_cac_payback_months": "8"})
+    assert "left out of the call" in answer

@@ -26,3 +26,4 @@ the pattern table's "A burn multiple before there is revenue" row (Sacks) covers
 - "60% of September's sign-ups still active in October" is the kind of cohort figure a seed fund looks for; it is
   quoted as stated, with `[the same figure for each monthly cohort]` (a16z "16 More" (10)).
 - Stage expectations (seed, pre-revenue) mark revenue Missing and say so without a threshold.
+- No firm named as a fit or a voice.

@@ -164,4 +164,8 @@ What the calculator prints for the update (excerpt):
 - No `payback_above_band` flag fires, so no benchmark figure appears in the answer.
 - `blended_cac_only` is not raised (the paid split was given); both CACs are shown as the tool printed them, $800.00
   blended and $1,800.00 paid.
-- No figure is converted or computed by the model; no score; no firm named.
+- Check rows from the model's and the update's calls are relayed as "the model says" and "the update says", never
+  as the report's "the deck says": the model says 9.60 months, the deck says 7.20 months.
+- The prompt gives no stage of the raise and no business model, so the open asks include `[the stage of this raise
+and the business model]`, and stage expectations wait for the answer.
+- No figure is converted or computed by the model; no score; no firm named as a fit or a voice.

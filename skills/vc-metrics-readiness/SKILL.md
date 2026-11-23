@@ -1,6 +1,6 @@
 ---
 name: vc-metrics-readiness
-description: Helps a founder check that their traction metrics are ready for a raise before a VC reads them. It checks each metric's definition (ARR against a revenue run-rate, gross against net revenue retention, logo against revenue churn, blended against paid CAC, CAC payback on gross margin, burn multiple on net new ARR), whether the deck, model and investor update state each one the same way, and which metrics a fund at the founder's stage usually expects to see. Every ratio comes from the calculator's metrics_check tool. An adversarial review has independent lenses make the definitional attacks a skeptical partner makes and a refute pass drop what the founder's material answers; what survives becomes a ranked fix list. Use when a founder says are my metrics ready, check my ARR, is this NRR right, what is our burn multiple or CAC payback, do my metrics match across the deck and the model, or what metrics does a Series A fund expect. No score, no named firms. Never invents numbers. Not investment advice.
+description: Helps a founder check that their traction metrics are ready for a raise before a VC reads them. It checks each metric's definition (ARR against a revenue run-rate, gross against net revenue retention, logo against revenue churn, blended against paid CAC, CAC payback on gross margin, burn multiple on net new ARR), whether the deck, model and investor update state each one the same way, and which metrics a fund at the founder's stage usually expects to see. Every ratio comes from the calculator's metrics_check tool. An adversarial review has independent lenses make the definitional attacks a skeptical partner makes and a refute pass drop what the founder's material answers; what survives becomes a ranked fix list. Use when a founder says are my metrics ready, check my ARR, is this NRR right, what is our burn multiple or CAC payback, do my metrics match across the deck and the model, or what metrics does a Series A fund expect. No score, no firm named as a fit. Never invents numbers. Not investment advice.
 ---
 
 # VC metrics readiness
@@ -106,12 +106,20 @@ so the lenses do not anchor on the tool's output; step 7 then starts at the quot
    difference; never convert. Lines in different forms (MRR against ARR, a month against a year) are compared only by
    the calculator, when the founder gives the parts; otherwise mark the metric Needs a source and ask for one figure,
    in one form, with its period.
-4. **The calculator.** Pass the founder's parts and every stated figure to `equity_metrics_check` (from the command
-   line, `equity_calculator metrics_check`), money and percents as strings:
+4. **The calculator.** Pass the founder's parts and every stated figure the tool can check from them to
+   `equity_metrics_check` (from the command line, `equity_calculator metrics_check`), money and percents as strings:
    - **One call per document's version of the figures,** each with only that document's stated figures. Never match a
      figure against a tool value by eye across documents.
+   - The report labels every stated figure "the deck says", whatever the call's document. When relaying a check row,
+     name that call's document instead ("the model says", "the update says"); that is relabelling, not arithmetic.
+   - With no recurring revenue at all there are no parts to pass: make no call. A stated burn multiple then falls
+     under the pattern table's row for a burn multiple before there is revenue.
    - Every flow figure in one call is for the same period, `period_months`. When the founder's burn and revenue
      movements cover different periods, ask for one period; never prorate.
+   - A stated retention or churn figure goes in a call whose `period_months` is the period the document states for
+     it (`period_months` 1 for a monthly figure), one call per period. With no stated period, or no parts for that
+     period, it is not passed: mark it Needs a source with `[the period this figure covers]` or `[that period's
+parts]`.
    - Say whether recurring figures are monthly or annual (`recurring_unit`). The tool converts MRR to ARR; the model
      never does.
    - A churn figure with no basis goes in with `stated_churn_basis` left `unlabelled`: the tool checks it against
@@ -120,12 +128,20 @@ so the lenses do not anchor on the tool's output; step 7 then starts at the quot
      table's row for "Churn" with no basis, with every basis row quoted in the tool's values.
    - For a period longer than a month, pass the starting customers' own movements in the `cohort_*` fields, so
      retention leaves out customers won during the period; without them, say the tool's `cohort_rule` assumption row
-     applies and ask for those movements.
+     applies and ask for those movements. Without them, the tool's retention values are not offered as replacement
+     figures for a slide: the fix is the bracketed ask for the starting customers' movements.
+   - `stated_cac` is checked against blended CAC only. A CAC the document labels paid is not passed: quote it beside
+     the tool's paid CAC row with "not checked: the tool checks blended CAC only", and compare neither by eye.
+   - Net burn goes into a call only when that call's document states a burn multiple, or the founder's stage row
+     expects one. A stated burn alone is quoted: the tool checks no stated burn.
    - A stated burn multiple when net new ARR or net burn is zero or below gets no check row: it is not checked, and
-     the flag (`burn_multiple_not_defined` or `no_net_burn`) says why. A stated figure given without the parts the
-     tool needs to check it is refused; relay the refusal and ask for the parts it names.
+     the flag (`burn_multiple_not_defined` or `no_net_burn`) says why.
+   - A stated figure whose parts the founder did not give is left out of the call, because the tool refuses the whole
+     call for it: mark it Needs a source with a bracketed ask for the missing parts, and make the call with the rest.
+     A refusal that comes anyway is relayed with the parts it names.
    - Each code in the result's `flags` goes to the answer as a question a partner is likely to ask, in the words of
-     the Flags table below.
+     the Flags table below. When a line of the material already does what that row's "What to change" says, relay
+     the flag as answered and quote that line.
    - Give `customer_segment` only as the founder states it; it sets the payback benchmark the tool's assumption row
      quotes.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point
@@ -145,29 +161,30 @@ so the lenses do not anchor on the tool's output; step 7 then starts at the quot
    to the one its grounds give, whichever comes first in the order.
 9. **Check before answering.** Every figure is quoted as stated or comes from a tool result; every objection quotes a
    line that is in the material word for word; no conversion, sum, ratio or growth rate is worked in the answer's own
-   text; no score, no "ready" or "not ready", no raise-or-wait call; no sentence speaks as an investor or names a firm.
+   text; no score, no "ready" or "not ready", no raise-or-wait call; no sentence speaks as an investor or names a firm
+   as a fit or a voice (firms and authors appear only as cited sources).
 
 ## Definitional patterns
 
 Signals, not rules: a founder may have a reason. Flag, explain, and let them decide. A row marked unverified has no
 public source behind it that this skill's authors read.
 
-| Pattern                                                                 | Why a partner is likely to discount it                       | Fix                                                              | Source                                             |
-| ----------------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- | -------------------------------------------------- |
-| "ARR" that is a month's total revenue times 12                          | A run-rate, which one-time revenue in that month can inflate | Call it a run-rate, or state ARR from recurring revenue alone    | a16z "16 More" (2)                                 |
-| ARR that includes setup, services, hardware or usage fees               | Non-recurring revenue presented as recurring                 | ARR from recurring revenue only; other revenue on its own line   | a16z "16 Startup Metrics" (2); a16z "16 More" (2)  |
-| Net retention that counts revenue from new customers                    | Growth presented as retention                                | Net retention from the starting customers only, with the period  | Unverified                                         |
-| "Churn" with no basis (customers or revenue, gross or net)              | Each basis tells a different story                           | Name the basis, and show logo and gross revenue churn beside net | a16z "16 Startup Metrics" (11); Skok               |
-| Net revenue churn shown alone                                           | Expansion can hide what is lost                              | Show gross revenue churn beside it                               | a16z "16 Startup Metrics" (11)                     |
-| CAC that leaves out costs (referral fees, credits, discounts, salaries) | Understates what growth costs                                | Count every acquisition cost; say what is in the spend           | a16z "16 Startup Metrics" (8)                      |
-| Blended CAC only                                                        | Says nothing about whether paid growth works                 | Show paid CAC beside blended                                     | a16z "16 Startup Metrics" (8)                      |
-| CAC payback worked on revenue, not gross margin                         | Understates how long acquisition takes to repay              | Work it on gross-margin-adjusted new recurring revenue           | Bessemer                                           |
-| Burn multiple on new ARR (churn left out), or on gross burn             | Flatters efficiency                                          | Net burn over net new ARR, for one period                        | Sacks                                              |
-| A burn multiple before there is revenue                                 | The ratio does not compute                                   | Drop it; show net burn by month                                  | Sacks                                              |
-| Monthly growth as the simple average of monthly rates                   | Overstates growth in a growing business                      | Compounded monthly growth, or each month's figure                | a16z "16 Startup Metrics" (10)                     |
-| LTV on revenue or gross margin rather than contribution margin          | Sets too high a ceiling on acquisition spend                 | LTV on contribution margin, or 12- and 24-month value to date    | a16z "16 Startup Metrics" (5)                      |
-| "Active users" with no stated action                                    | Nothing to check                                             | Name the action and the period, and keep the definition fixed    | a16z "16 Startup Metrics" (9); a16z "16 More" (12) |
-| A ratio with no period ("NRR 120%")                                     | Cannot be compared with anything                             | State the period beside every ratio                              | Unverified                                         |
+| Pattern                                                        | Why a partner is likely to discount it                       | Fix                                                              | Source                                             |
+| -------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- | -------------------------------------------------- |
+| "ARR" that is a month's total revenue times 12                 | A run-rate, which one-time revenue in that month can inflate | Call it a run-rate, or state ARR from recurring revenue alone    | a16z "16 More" (2)                                 |
+| ARR that includes setup, services, hardware or usage fees      | Non-recurring revenue presented as recurring                 | ARR from recurring revenue only; other revenue on its own line   | a16z "16 Startup Metrics" (2); a16z "16 More" (2)  |
+| Net retention that counts revenue from new customers           | Growth presented as retention                                | Net retention from the starting customers only, with the period  | Unverified                                         |
+| "Churn" with no basis (customers or revenue, gross or net)     | Each basis tells a different story                           | Name the basis, and show logo and gross revenue churn beside net | a16z "16 Startup Metrics" (11); Skok               |
+| Net revenue churn shown alone                                  | Expansion can hide what is lost                              | Show gross revenue churn beside it                               | a16z "16 Startup Metrics" (11)                     |
+| CAC that leaves out costs (referral fees, credits, discounts)  | Understates what growth costs                                | Count every acquisition cost; say what is in the spend           | a16z "16 Startup Metrics" (8)                      |
+| Blended CAC only                                               | Says nothing about whether paid growth works                 | Show paid CAC beside blended                                     | a16z "16 Startup Metrics" (8)                      |
+| CAC payback worked on revenue, not gross margin                | Understates how long acquisition takes to repay              | Work it on gross-margin-adjusted new recurring revenue           | Bessemer                                           |
+| Burn multiple on new ARR (churn left out), or on gross burn    | Flatters efficiency                                          | Net burn over net new ARR, for one period                        | Sacks                                              |
+| A burn multiple before there is revenue                        | The ratio does not compute                                   | Drop it; show net burn by month                                  | Sacks                                              |
+| Monthly growth as the simple average of monthly rates          | Overstates growth in a growing business                      | Compounded monthly growth, or each month's figure                | a16z "16 Startup Metrics" (10)                     |
+| LTV on revenue or gross margin rather than contribution margin | Sets too high a ceiling on acquisition spend                 | LTV on contribution margin, or 12- and 24-month value to date    | a16z "16 Startup Metrics" (5)                      |
+| "Active users" with no stated action                           | Nothing to check                                             | Name the action and the period, and keep the definition fixed    | a16z "16 Startup Metrics" (9); a16z "16 More" (12) |
+| A ratio with no period ("NRR 120%")                            | Cannot be compared with anything                             | State the period beside every ratio                              | Unverified                                         |
 
 ## Adversarial review
 
@@ -180,13 +197,13 @@ founder's material answers, so the founder spends their time on real exposure.
 Each lens tests one family of definitions and is named by it. The lenses are frameworks, never people: none is a named
 investor, firm or author, and none speaks in the first person as an investor.
 
-| Lens                    | What it tests                                                                                                 |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Revenue definitions     | Whether ARR, run-rate, bookings, GMV and revenue are each named for what they are, with a period              |
-| Retention and churn     | The basis of every churn and retention figure, its period, and whether new customers or expansion hide losses |
-| Acquisition and payback | What CAC counts, blended against paid, and whether payback is worked on margin                                |
-| Burn and efficiency     | Net or gross burn, net new or new ARR, and whether both are for the same period                               |
-| Stage fit               | Which metrics a fund at the founder's stage expects that the material does not show                           |
+| Lens                    | What it tests                                                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Revenue definitions     | Whether ARR, run-rate, bookings, GMV and revenue are each named for what they are, with a period                                                                          |
+| Retention and churn     | The basis of every churn and retention figure, its period, and whether new customers or expansion hide losses                                                             |
+| Acquisition and payback | What CAC counts, blended against paid, and whether payback is worked on margin                                                                                            |
+| Burn and efficiency     | Net or gross burn, net new or new ARR, and whether both are for the same period                                                                                           |
+| Stage fit               | Which metrics a fund at the founder's stage expects that the material does not show; its objection quotes the line that states the stage, or the metrics slide as a whole |
 
 Every lens gets the same brief, with its own name and test filled in, and the Definitions table:
 
@@ -211,16 +228,19 @@ step 1: run the lenses one after another, write each lens's objections down in f
 brief, and never revise an earlier list. Lenses run this way are less independent than subagents, and the same agent
 then judges them in Stage B, so the answer says so.
 
-**The calculator's mismatches** from step 4 do not go through the lenses. Each is added to the survivors as ends the
-meeting, quoting the document's figure with the tool's value, and the flag that names its likely cause, as the
-reason. It is not refuted: the calculator computed it. An unlabelled churn with one consistent basis row is not a
-mismatch (step 4).
+**The calculator's mismatches** from step 4 do not go through the lenses, and none is refuted: the calculator
+computed it. Each is added to the survivors, quoting the document's figure with the tool's value and difference. One
+that a `stated_*` flag explains (the document used another definition) is ends the meeting, with that flag as the
+reason. One that no `stated_*` flag explains carries no tier: how much the gap hurts depends on its size, which the
+founder weighs, and it may be the founder's rounding, so its fix asks `[how the model works this figure, unrounded]`.
+An unlabelled churn with one consistent basis row is not a mismatch (step 4).
 
 ### Check the quotes
 
 Before Stage B, check every objection's quote against the founder's material. A quote that does not appear there word
 for word (spacing and line breaks aside) is dropped as not grounded. When two lenses raise the same objection about
-the same line, merge them and keep both lens names. Gaps from every lens go to the open asks.
+the same line, merge them and keep both lens names. An objection about a line the calculator already found a
+mismatch on merges into that mismatch's entry and keeps the lens name. Gaps from every lens go to the open asks.
 
 ### Stage B: refute
 
@@ -256,7 +276,8 @@ material word for word does not drop the objection, and neither does one that is
 ### The ranked fix list
 
 Order the kept objections in three tiers, most damaging first: **ends the meeting**, **weakens it**, **minor**. The
-calculator's mismatches lead the first tier. Within a tier, an objection raised by more than one lens comes first. The
+calculator's mismatches lead the list: those a `stated_*` flag explains at the top of the first tier, then those with
+no tier (Tier: "none, the founder weighs the gap"), ahead of every other entry. Within a tier, an objection raised by more than one lens comes first. The
 tier is a judgment, not a probability: give no percentages and no score. Each entry is one fix: the document and
 place, the line quoted word for word, why a partner is likely to read it that way in one or two plain sentences, and
 the change to make, using only the founder's facts, a tool value or a bracketed ask.
@@ -311,7 +332,8 @@ Lead with what to fix, in order, then the evidence behind it.
    it, or not grounded). When the lenses ran in one agent, say they are less independent than separate subagents.
 3. **Metrics table:** #, Metric (quoted), Where, Definition it uses, The tool gives, Agrees across the documents?,
    Verdict, Fix. Order by verdict, Contradicted first.
-4. **Calculator results,** per call: which document's figures it used, each check row in the tool's values, each flag
+4. **Calculator results,** per call: which document's figures it used, each check row in the tool's values with that
+   document named in place of "the deck says", each flag
    in plain words from the Flags table, and the assumption rows the answer leans on, with their sources and dates.
 5. **Stage expectations:** the row for the founder's stage and model, each metric Present or Missing.
 6. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
@@ -340,8 +362,8 @@ repository's own method.
 - Not investment, legal, tax or accounting advice. It does not say whether to raise, when, or at what valuation.
 - It gives no score and no verdict on readiness: no rating out of any number, no "ready" or "not ready", no "raise now
   or wait".
-- It never names a firm or person, never role-plays or speaks as a named investor, firm or author, and does no investor
-  research.
+- It never names a firm or person as an investor to approach or as one the metrics fit, never role-plays or speaks
+  as a named investor, firm or author, names firms and authors only as cited sources, and does no investor research.
 - It never invents, fills in or strengthens a figure, a definition or evidence, in a fix or in a refute pass.
 - No arithmetic outside the equity calculator's tools: no MRR-to-ARR conversion, sum, ratio or growth rate by hand.
   Growth rates, LTV, magic number and Rule of 40 are quoted, not computed.

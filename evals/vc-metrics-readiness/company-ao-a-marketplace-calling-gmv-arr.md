@@ -26,4 +26,4 @@ buyers spent is GMV, not revenue, and working the take from the 12% would be the
 - Stage expectations use the seed row and the marketplace row: GMV and revenue on separate lines, a run-rate on the
   latest month or quarter, the take as the founder states it, revenue month by month, its growth and net burn, each
   Present (quoted) or Missing (a bracketed ask); no thresholds.
-- No score; no firm named.
+- No score; no firm named as a fit or a voice.
