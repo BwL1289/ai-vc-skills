@@ -36,8 +36,8 @@ All notable changes to this repository. Dates are UTC.
   grounds it. `vc-positioning` now points to it. Three evals are in `evals/vc-claims-check/`.
 - New logo: a chess knight whose head is cut into cap-table slices.
 - A one-page website for the skills, served by GitHub Pages from `docs/` at
-  [bwl1289.github.io/ai-vc-skills](https://bwl1289.github.io/ai-vc-skills/): install lines, the four skills, real
-  calculator output for the two calculator skills and eval excerpts for the two reviews, light and dark themes.
+  [bwl1289.github.io/ai-vc-skills](https://bwl1289.github.io/ai-vc-skills/): install lines, a card per skill, real
+  calculator output for the two calculator skills and eval excerpts for two of the reviews, light and dark themes.
 - The `vc-deck-review` skill, in preview: a founder reviews their own pitch deck the way a partner reads it. Each
   slide is mapped to ten dimensions (problem, solution, why now, market, product, traction, business model,
   competition, team, the ask and use of funds), each marked present, missing or contradicted from the deck's own
@@ -54,7 +54,7 @@ All notable changes to this repository. Dates are UTC.
   round, insiders, who has passed, references, no raise), and debriefs each weak answer with a stronger one built only
   from the founder's material, plus what a yes would need. It moderates and never plays an investor: no pass or invest
   verdict and no score. The ask's figures go to the calculator (`equity_deal_check`, or `equity_round` for a SAFE or
-  note); runway with no raise is quoted, not computed. A question bank by category sits in
+  note). A question bank by category sits in
   `skills/vc-partner-meeting/references/`. `vc-positioning` now hands off to the new skill. Four evals are in
   `evals/vc-partner-meeting/`.
 - The `vc-taste-check` skill, in preview: a founder lists their key product, brand and scope decisions, including what
@@ -131,7 +131,7 @@ All notable changes to this repository. Dates are UTC.
   whole share counts, one `equity_waterfall` call per exit) and its stake after the founder's assumed later rounds
   (`equity_dilution`), labelled apart, with no fund size and no fund math. A dissent pass (five lenses, then a refute
   pass with the founder's material) turns what survives into a ranked fix list, and a risk the founder cannot fix goes
-  into the memo's Top risks. `vc-positioning` now points to it. Four evals are in `evals/vc-investor-memo/`.
+  into the memo's Top risks. `vc-positioning` now points to it. Six evals are in `evals/vc-investor-memo/`.
 - The calculator's `market_sizing` scenario, also an MCP tool (`equity_market_sizing`), a command and a workbook
   sheet: a founder's market built bottom-up from their own segments (customers, price and the months it covers,
   units, take rate, serviceable share and the customers to win), giving TAM, SAM and SOM per segment and in total,
@@ -169,8 +169,9 @@ All notable changes to this repository. Dates are UTC.
   theme), the plugin icon and the social image all use it; shapes and base colours are unchanged.
 - The seven `vc-positioning` and `vc-claims-check` evals were run in live Claude Code sessions (2.1.330, 2026-11-22).
   Each file keeps its expected answer and adds a trimmed excerpt of the recorded answer with a verdict against its pass
-  sentence: two passed, four passed in part and one failed (Pass: every clause met; Partial: exactly one missed or met
-  only in part; Fail: two or more missed). The `vc-deal-math` evals now say they have not been run live.
+  sentence: two passed and five passed in part (Pass: every clause met; Partial: exactly one missed or met only in
+  part; Fail: two or more missed). Eval F failed in its first two runs and passed in part in a third run after the
+  skill fixes below; the third is the one recorded. The `vc-deal-math` evals now say they have not been run live.
 - Skill fixes from those runs. `vc-positioning` now owns "check our story and our ask" (a run had routed it to
   `vc-deal-math`), runs its lenses and refute passes as subagents however short the material, makes one calculator call
   per version of the ask (two for a valuation with no label) and keeps the tool's values as printed, and, asked to play
@@ -178,6 +179,8 @@ All notable changes to this repository. Dates are UTC.
   says to use `vc-positioning` for the story and the ask together, computes nothing outside the calculator's tools and
   runs no what-if the founder did not ask for. In `vc-claims-check`, the skeptic no longer judges whether the material
   answers an attack (the refute pass does), and the "AI-powered" pattern applies when nothing says what the model does.
+- An independent review of the whole pack (a second model) and one live run per new skill; fixes to hand-offs, runway
+  and metrics checks now that the tools exist, the refute pass, and the site and install guide.
 
 ## 2026-11-21
 

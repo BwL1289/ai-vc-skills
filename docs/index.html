@@ -6,7 +6,7 @@
     <title>AI VC skills</title>
     <meta
       name="description"
-      content="Agent skills for founders raising from VCs: exact equity math, a check of your deck's numbers, and adversarial reviews of your messaging and your claims, before the meeting."
+      content="Agent skills for founders raising from VCs: exact equity math and skeptical reviews of your deck, claims, metrics, market size, round, term sheet and investor updates, before the meeting."
     />
     <link rel="canonical" href="https://bwl1289.github.io/ai-vc-skills/" />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -29,7 +29,7 @@
     />
     <meta
       property="og:description"
-      content="Agent skills for founders raising from VCs: exact equity math, a check of your deck's numbers, and adversarial reviews of your messaging and your claims."
+      content="Agent skills for founders raising from VCs: exact equity math and skeptical reviews of your deck, claims, metrics, market size, round, term sheet and investor updates."
     />
     <meta property="og:url" content="https://bwl1289.github.io/ai-vc-skills/" />
     <meta
@@ -49,7 +49,7 @@
     />
     <meta
       name="twitter:description"
-      content="Agent skills for founders raising from VCs: exact equity math, a check of your deck's numbers, and adversarial reviews of your messaging and your claims."
+      content="Agent skills for founders raising from VCs: exact equity math and skeptical reviews of your deck, claims, metrics, market size, round, term sheet and investor updates."
     />
     <meta
       name="twitter:image"
@@ -709,11 +709,12 @@
               meeting.
             </p>
             <p class="lede">
-              Four skills for Claude and any MCP client that work through the
+              Fifteen skills for Claude and any MCP client that work through the
               money and the story of a fundraise from the founder's side of the
               table: equity math done exactly, your deck's ask checked against
-              itself, and skeptical reviews of your messaging and your claims
-              that keep only the objections your own material cannot answer.
+              itself, and skeptical reviews of your deck, messaging, claims,
+              metrics, market size, round, term sheet and investor updates that
+              keep only the objections your own material cannot answer.
             </p>
             <div class="cta">
               <a class="button primary" href="#install">Install the plugin</a>
@@ -752,7 +753,7 @@
               ><code>/plugin marketplace add BwL1289/ai-vc-skills
 /plugin install ai-vc-skills@ai-vc-skills</code></pre>
               <p>
-                This adds all four skills and the calculator's MCP server, which
+                This adds every skill and the calculator's MCP server, which
                 starts with
                 <a href="https://docs.astral.sh/uv/"><code>uv</code></a
                 >'s <code>uvx</code>, so install uv first. Then ask your first
@@ -775,8 +776,13 @@
   }
 }</code></pre>
               <p>
-                Load the four folders under <code>skills/</code> wherever your
-                client reads skills. Step by step for each client:
+                Load every folder under <code>skills/</code> wherever your
+                client reads skills, side by side:
+                <code>vc-diligence-questions</code> reads
+                <code>vc-partner-meeting</code>'s question bank and
+                <code>vc-prospective-investor-update</code> reads
+                <code>vc-current-investor-update</code>'s metric rules file.
+                Step by step for each client:
                 <a
                   href="https://github.com/BwL1289/ai-vc-skills/blob/main/docs/install.md"
                   >the install guide</a
@@ -813,7 +819,7 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
           <p class="section-intro">
             Ask in plain words. The agent picks the skill, asks once for
             anything missing, and never fills a gap with a figure you did not
-            give it.
+            give it or agree to.
           </p>
           <div class="cards">
             <article class="card">
@@ -822,12 +828,13 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
                 <span class="badge available">Available</span>
               </div>
               <p>
-                Works eight equity questions exactly: whether a stake is worth
+                Works eleven equity questions exactly: whether a stake is worth
                 selling, what a hire's grant is worth, the option-pool shuffle,
                 SAFEs and notes converting in a priced round, dilution over
-                several rounds, vesting, exit waterfalls and a check of a
-                raise's numbers. You get the formula and the source behind every
-                line.
+                several rounds, vesting, exit waterfalls, a check of a raise's
+                numbers, how long a raise lasts on a plan, a check of traction
+                metrics and a market size built bottom-up. You get the formula
+                and the source behind every line.
               </p>
               <p class="asks-label">Try asking</p>
               <ul>
@@ -933,23 +940,306 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
                 >
               </p>
             </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-deck-review</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Reads your deck the way a partner will before the meeting: each
+                slide mapped to ten dimensions and marked by the evidence the
+                deck shows, first- and last-slide rules, competition at four
+                levels, and a ranked fix list from an adversarial review. It
+                says which kind of investor the story fits, with no score and no
+                named firms.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>Review my deck before I send it to seed funds.</li>
+                <li>Is my deck ready to send?</li>
+                <li>What will a partner think of my deck?</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-deck-review/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-partner-meeting</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Rehearses a partner meeting: the hardest questions your own
+                material leaves open, asked one at a time or in one message,
+                prep for what a partner checks around the meeting, and a debrief
+                with a stronger answer per weak one, built only from what you
+                said. It moderates and never plays an investor.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>Rehearse my partner meeting on Tuesday.</li>
+                <li>Drill me on the hard questions.</li>
+                <li>Debrief my answers.</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-partner-meeting/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-taste-check</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Shows the judgment behind what you built: your product, brand
+                and scope decisions and what you said no to. It flags choices
+                that read as generic, AI-sounding, copied or polished over, runs
+                the same attack-and-refute review, and turns what survives into
+                why-we-built-it-this-way lines for the deck and the meeting.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>Does our product show taste?</li>
+                <li>Is our brand generic?</li>
+                <li>Which decisions should I show investors?</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-taste-check/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-round-sizing</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Sizes your raise on your own plan: how long each amount lasts on
+                plan and in a downside, which milestone month its cash reaches
+                with time to raise the next round, the smallest raise that gets
+                there, and raise-now against wait side by side. Every number
+                comes from the calculator or your plan, and it gives no
+                recommendation.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>How much should we raise?</li>
+                <li>Raise now or wait?</li>
+                <li>What milestone does this buy?</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-round-sizing/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-term-sheet-review</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Reads a term sheet you were offered in plain words and marks
+                each term against YC's standard and clean Series A term sheet.
+                The round and an exit waterfall at low and high exits run on the
+                calculator, and it ends with questions for your lawyer. It never
+                says whether to sign.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>What does each term in this term sheet mean?</li>
+                <li>What do we get at a low exit?</li>
+                <li>Is this term sheet standard?</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-term-sheet-review/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-diligence-questions</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Prepares you for a fund's due diligence after the first meeting:
+                the questions your own material leaves open, by area, ranked by
+                how much each answer moves the decision, with draft answers from
+                your own material and a data-room checklist scaled to your
+                stage.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>The fund wants to start diligence. Prepare me.</li>
+                <li>What will they ask in diligence?</li>
+                <li>Build my data-room checklist.</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-diligence-questions/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-current-investor-update</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Writes or reviews your monthly or quarterly update to your
+                current investors: the same metrics and definitions every time,
+                lowlights told straight, every figure and promise tied out to
+                the last update, runway from the calculator, and a reader pass
+                that flags spin and missing bad news.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>Write our October investor update.</li>
+                <li>Review my investor update before I send it.</li>
+                <li>How do I tell investors about a bad month?</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-current-investor-update/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-metrics-readiness</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Checks your traction metrics before a VC does: ARR against
+                run-rate, gross and net retention, logo and revenue churn, CAC
+                payback and burn multiple, each ratio from the calculator;
+                whether the deck, model and update agree; which metrics your
+                stage expects; and a ranked fix list from an adversarial review.
+                No score.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>Are my metrics ready for the raise?</li>
+                <li>Check my ARR.</li>
+                <li>Do my metrics match across the deck and the model?</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-metrics-readiness/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-investor-memo</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Drafts the internal investment memo your champion partner is
+                likely to write for the partnership: the case in one shape, the
+                round and the outcome case on the calculator from your own exit
+                assumptions (no fund math), and a dissent pass that finds the
+                holes first.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>Write the investment memo for my champion.</li>
+                <li>What will the partner write about us?</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-investor-memo/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-market-sizing</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Builds your market size bottom-up: who buys, how many there are,
+                what each pays and how many you can win, every assumption with
+                your source and every total from the calculator, checked against
+                the deck and any top-down figure, with sensitivity on the
+                shakiest assumption and an adversarial review.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>How big is our market?</li>
+                <li>Build our TAM, SAM and SOM.</li>
+                <li>Is our TAM credible?</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-market-sizing/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-prospective-investor-update</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Writes or reviews the short update you send the investors you
+                hope to raise from, so they see a line, not a dot: the same
+                metrics every time, earlier values side by side as stated, last
+                update's promises tied out, one ask, runway from the calculator
+                when you show it, and a reader pass that flags spin and moved
+                goalposts.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>Write an update for the VCs we're warming up.</li>
+                <li>Keep investors warm before our raise.</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-prospective-investor-update/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
           </div>
           <p class="preview-note">
-            Preview means the skill has not yet been tried on real decks: the
-            calculator's arithmetic is tested, but the reviews' wording may
-            change. The positioning and claims-check evals describe the
-            behaviour expected of a run; they are not recordings of one.
+            Preview means the skill has not yet been checked on real decks and
+            meetings: the calculator's arithmetic is tested, but the reviews'
+            wording may change. The positioning and claims-check evals were run
+            in live Claude Code sessions on 2026-11-22, and each file holds an
+            excerpt of its recorded answer with a verdict against its pass
+            sentence: two passed and five passed in part. On 2026-11-23 one eval
+            of every other review skill except vc-deal-math was run live too; an
+            eval file whose first paragraph says a live run is recorded holds an
+            excerpt of it with its verdict. One run each is a small sample.
           </p>
         </div>
       </section>
 
       <section id="examples" aria-labelledby="examples-title">
         <div class="wrap">
-          <h2 id="examples-title">One example per skill</h2>
+          <h2 id="examples-title">Four examples</h2>
           <p class="section-intro">
             The two calculator examples are real output, pasted from the command
-            line. The two review examples are excerpts from the skills' evals
-            and say what a run should do. All the companies are made up.
+            line. The two review examples are excerpts from the skills' evals:
+            what a passing run does, and how the recorded live run did. All the
+            companies are made up.
           </p>
 
           <div class="example">
@@ -1072,7 +1362,7 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
                 <code>vc-positioning</code>: phrases that cost the meeting
               </h3>
               <span class="provenance expected"
-                >Expected behaviour, not a recorded run</span
+                >Expected behaviour; the live run passed in part</span
               >
             </div>
             <blockquote>
@@ -1122,7 +1412,9 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
               <a
                 href="https://github.com/BwL1289/ai-vc-skills/blob/main/evals/vc-positioning/company-e-phrases-that-cost-the-meeting.md"
                 >evals/vc-positioning, Company E</a
-              >.
+              >. Its live run is recorded there as Partial: the lenses ran in
+              one agent, not as subagents, with no refute pass per objection.
+              The skill now says to use subagents however short the material.
             </p>
           </div>
 
@@ -1132,7 +1424,7 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
                 <code>vc-claims-check</code>: only grounded attacks survive
               </h3>
               <span class="provenance expected"
-                >Expected behaviour, not a recorded run</span
+                >Expected behaviour; the live run passed in part</span
               >
             </div>
             <blockquote>
@@ -1175,7 +1467,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
               <a
                 href="https://github.com/BwL1289/ai-vc-skills/blob/main/evals/vc-claims-check/company-l-an-attack-the-material-does-not-ground.md"
                 >evals/vc-claims-check, Company L</a
-              >.
+              >. Its live run is recorded there as Partial: the distributor
+              attack was kept and the CTO attack dropped, but only parts of the
+              attacks that rest on guesses outside the material were dropped,
+              never a whole attack.
             </p>
           </div>
         </div>
@@ -1209,9 +1504,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
             <li>
               <h3>A review attacks, then refutes</h3>
               <p>
-                For messaging and claims, skeptical passes raise the strongest
-                objections, and a refute pass drops any that your own material
-                answers or that rest on an outside fact.
+                In the reviews (every skill but the calculator and the deal
+                check), skeptical passes raise the strongest objections, and a
+                refute pass drops any that your own material answers or that
+                rest on an outside fact.
               </p>
             </li>
           </ol>
@@ -1227,7 +1523,9 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
               <b>Checkable</b
               ><span
                 >Sources are named (Paul Graham, Sam Altman, Y Combinator's SAFE
-                documents); anything without one is marked unverified.</span
+                documents and guides, and for the metrics a16z, Bessemer, David
+                Sacks and David Skok); anything without one is marked
+                unverified.</span
               >
             </li>
             <li>
@@ -1289,6 +1587,72 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
               <a
                 href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-claims-check/SKILL.md"
                 >vc-claims-check<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-deck-review/SKILL.md"
+                >vc-deck-review<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-partner-meeting/SKILL.md"
+                >vc-partner-meeting<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-taste-check/SKILL.md"
+                >vc-taste-check<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-round-sizing/SKILL.md"
+                >vc-round-sizing<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-term-sheet-review/SKILL.md"
+                >vc-term-sheet-review<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-diligence-questions/SKILL.md"
+                >vc-diligence-questions<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-current-investor-update/SKILL.md"
+                >vc-current-investor-update<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-metrics-readiness/SKILL.md"
+                >vc-metrics-readiness<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-investor-memo/SKILL.md"
+                >vc-investor-memo<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-market-sizing/SKILL.md"
+                >vc-market-sizing<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-prospective-investor-update/SKILL.md"
+                >vc-prospective-investor-update<span>SKILL.md, preview</span></a
               >
             </li>
             <li>

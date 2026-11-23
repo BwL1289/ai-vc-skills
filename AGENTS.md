@@ -22,6 +22,7 @@ its command or its MCP server.
 
 ## Rules
 
+- The founder is the user of every skill. An investor's view is a lens a review applies, never the role a skill plays.
 - Every number a skill gives comes from a tool or from the user's document, never from the model's own arithmetic.
 - A skill never presents investment, legal or tax advice as fact, never speaks as a named investor or firm, and never
   sends a user's document anywhere.
