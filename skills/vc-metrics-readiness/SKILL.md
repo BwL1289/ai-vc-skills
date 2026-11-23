@@ -22,7 +22,11 @@ score and never says "ready" or "not ready", and never adds a figure the founder
 - "Do my metrics match across the deck, the model and the update?" "What metrics does a Series A fund expect?"
 - A metrics slide, a KPI tab, a monthly investor update, alone or several together.
 - Hand off:
-  - The ask, ownership after the round, the SAFE stack, the pool and runway: the vc-deal-math skill.
+  - The ask, ownership after the round, the SAFE stack, the pool and the runway a priced round buys: the vc-deal-math
+    skill. A runway with no raise, or on a SAFE or note raise, and how much to raise: the vc-round-sizing skill.
+  - Writing the update itself, with the same metric definitions every time: to current investors, the
+    vc-current-investor-update skill; to investors the founder hopes to raise from, the vc-prospective-investor-update
+    skill. This skill checks whether each definition is the one investors expect.
   - Every other claim in the materials (customers, team, market, competition): the vc-claims-check skill, whose steps
     this skill follows for metrics.
   - The story and the one-liner: the vc-positioning skill. One equity question with no metrics: the equity-calculator
@@ -56,24 +60,24 @@ The definitions this skill checks against. "Computed" names the calculator's out
 it here, so it is quoted as stated with "not checked: no tool computes this". A row marked ours is this skill's own
 wording, unverified.
 
-| Metric                  | Definition                                                                                                     | What a partner checks for                   | Computed or quoted            | Source                                                         |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------- | -------------------------------------------------------------- |
-| ARR                     | Recurring revenue on an annual basis, without one-time fees, services or variable usage fees                   | A month's total revenue times 12 called ARR | Computed: ARR                 | a16z "16 More" (2); a16z "16 Startup Metrics" (2)              |
-| Revenue run-rate        | The latest month's or quarter's revenue, annualised; how marketplaces state size                               | Presented as ARR                            | Computed: run-rate            | a16z "16 More" (2)                                             |
-| Bookings, LOIs, GMV     | A contract's value; letters of intent are neither; GMV flows through, revenue is the take                      | Called revenue                              | Quoted                        | a16z "16 Startup Metrics" (1, 6)                               |
-| Gross revenue retention | Of recurring revenue at the start of a period, the share kept after downgrades and cancellations, no expansion | Expansion netted in                         | Computed: GRR                 | Bessemer                                                       |
-| Net revenue retention   | The same with expansion from the same starting customers; new customers left out                               | New customers counted in                    | Computed: NRR                 | Bessemer; Skok; new customers as the mistake: ours, unverified |
-| Gross revenue churn     | Recurring revenue lost (downgrades and cancellations) over recurring revenue at the start                      | Only the net figure shown                   | Computed                      | a16z "16 Startup Metrics" (11)                                 |
-| Net revenue churn       | Revenue lost less expansion, over recurring revenue at the start                                               | Shown alone, it understates the losses      | Computed                      | a16z "16 Startup Metrics" (11)                                 |
-| Logo churn              | Customers lost over customers at the start of the period                                                       | "Churn" with no basis                       | Computed                      | a16z "16 Startup Metrics" (11); Skok                           |
-| CAC                     | Full acquisition cost over new customers (blended); over customers from paid channels (paid)                   | Costs left out; blended only                | Computed: CAC                 | a16z "16 Startup Metrics" (8)                                  |
-| CAC payback             | Months for new recurring revenue, after gross margin, to repay acquisition spend                               | Worked on revenue, not margin               | Computed: payback             | Bessemer (margin-adjusted); the formula is ours, unverified    |
-| Burn multiple           | Net burn over net new ARR, for the same period                                                                 | New ARR instead of net new; gross burn      | Computed: burn multiple       | Sacks                                                          |
-| Net and gross burn      | Net: spend less incoming cash; gross: spend alone                                                              | Gross presented as the burn                 | Quoted (runway: vc-deal-math) | a16z "16 Startup Metrics" (12)                                 |
-| Gross margin            | Revenue less cost of revenue, over revenue                                                                     | What is in cost of revenue left unsaid      | Quoted (used for payback)     | a16z "16 Startup Metrics" (3); Bessemer                        |
-| Growth                  | Compounded monthly growth rather than the simple average of monthly rates                                      | A simple average                            | Quoted                        | a16z "16 Startup Metrics" (10)                                 |
-| Active users            | A defined action, applied the same way every period                                                            | "Active" undefined                          | Quoted                        | a16z "16 Startup Metrics" (9); a16z "16 More" (12)             |
-| Customer concentration  | The largest customer's revenue over total revenue, same period                                                 | Not shown                                   | Computed: concentration       | a16z "16 More" (14)                                            |
+| Metric                  | Definition                                                                                                     | What a partner checks for                   | Computed or quoted        | Source                                                                                                               |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| ARR                     | Recurring revenue on an annual basis, without one-time fees, services or variable usage fees                   | A month's total revenue times 12 called ARR | Computed: ARR             | a16z "16 More" (2); a16z "16 Startup Metrics" (2)                                                                    |
+| Revenue run-rate        | The latest month's or quarter's revenue, annualised; how marketplaces state size                               | Presented as ARR                            | Computed: run-rate        | a16z "16 More" (2)                                                                                                   |
+| Bookings, LOIs, GMV     | A contract's value; letters of intent are neither; GMV flows through, revenue is the take                      | Called revenue                              | Quoted                    | a16z "16 Startup Metrics" (1, 6)                                                                                     |
+| Gross revenue retention | Of recurring revenue at the start of a period, the share kept after downgrades and cancellations, no expansion | Expansion netted in                         | Computed: GRR             | Bessemer                                                                                                             |
+| Net revenue retention   | The same with expansion from the same starting customers; new customers left out                               | New customers counted in                    | Computed: NRR             | Bessemer (gross against net); Skok; leaving new customers out, and counting them in as the mistake: ours, unverified |
+| Gross revenue churn     | Recurring revenue lost (downgrades and cancellations) over recurring revenue at the start                      | Only the net figure shown                   | Computed                  | a16z "16 Startup Metrics" (11)                                                                                       |
+| Net revenue churn       | Revenue lost less expansion, over recurring revenue at the start                                               | Shown alone, it understates the losses      | Computed                  | a16z "16 Startup Metrics" (11)                                                                                       |
+| Logo churn              | Customers lost over customers at the start of the period                                                       | "Churn" with no basis                       | Computed                  | a16z "16 Startup Metrics" (11); Skok                                                                                 |
+| CAC                     | Full acquisition cost over new customers (blended); over customers from paid channels (paid)                   | Costs left out; blended only                | Computed: CAC             | a16z "16 Startup Metrics" (8)                                                                                        |
+| CAC payback             | Months for new recurring revenue, after gross margin, to repay acquisition spend                               | Worked on revenue, not margin               | Computed: payback         | Bessemer (margin-adjusted); the formula is ours, unverified                                                          |
+| Burn multiple           | Net burn over net new ARR, for the same period                                                                 | New ARR instead of net new; gross burn      | Computed: burn multiple   | Sacks                                                                                                                |
+| Net and gross burn      | Net: spend less incoming cash; gross: spend alone                                                              | Gross presented as the burn                 | Quoted (runway: step 4)   | a16z "16 Startup Metrics" (12)                                                                                       |
+| Gross margin            | Revenue less cost of revenue, over revenue                                                                     | What is in cost of revenue left unsaid      | Quoted (used for payback) | a16z "16 Startup Metrics" (3); Bessemer                                                                              |
+| Growth                  | Compounded monthly growth rather than the simple average of monthly rates                                      | A simple average                            | Quoted                    | a16z "16 Startup Metrics" (10)                                                                                       |
+| Active users            | A defined action, applied the same way every period                                                            | "Active" undefined                          | Quoted                    | a16z "16 Startup Metrics" (9); a16z "16 More" (12)                                                                   |
+| Customer concentration  | The largest customer's revenue over total revenue, same period                                                 | Not shown                                   | Computed: concentration   | a16z "16 More" (14)                                                                                                  |
 
 ## The four verdicts
 
@@ -94,8 +98,10 @@ source**, then **Supported**.
 
 ## Steps
 
-Without a subagent tool, run Stage A of the adversarial review first, before step 1, as "How to run the lenses" says,
-so the lenses do not anchor on the tool's output; step 7 then starts at the quote check.
+With a subagent tool (the Agent or Task tool), run the five lenses as subagents (Stage A) and one refute subagent per
+objection (Stage B), however short the material; the fallback below is only for a session without that tool. Without a
+subagent tool, run Stage A of the adversarial review first, before step 1, as "How to run the lenses" says, so the
+lenses do not anchor on the tool's output; step 7 then starts at the quote check.
 
 1. **List every metric word for word,** with its document and place: revenue, ARR, growth, retention, churn,
    customers, users, CAC, payback, margin, burn, efficiency ratios. One metric per row; a metric stated in three
@@ -107,7 +113,8 @@ so the lenses do not anchor on the tool's output; step 7 then starts at the quot
    the calculator, each in a call for its own period (step 4), when the founder gives the parts; otherwise mark the
    metric Needs a source and ask for one figure, in one form, with its period.
 4. **The calculator.** Pass the founder's parts and every stated figure the tool can check from them to
-   `equity_metrics_check` (from the command line, `equity_calculator metrics_check`), money and percents as strings:
+   `equity_metrics_check` (from the command line, `equity_calculator metrics_check`), money and percents as strings,
+   customer counts and `period_months` as whole numbers, never strings:
    - **One call per document's version of the figures,** each with only that document's stated figures. Never match a
      figure against a tool value by eye across documents.
    - The report labels every stated figure "the deck says", whatever the call's document. When relaying a check row,
@@ -142,16 +149,22 @@ parts]`.
      A refusal that comes anyway is relayed with the parts it names.
    - Each code in the result's `flags` goes to the answer as a question a partner is likely to ask, in the words of
      the Flags table below. When a line of the material already does what that row's "What to change" says, relay
-     the flag as answered and quote that line.
+     the flag as answered and quote that line. A benchmark flag is relayed for the tool value it was raised on only;
+     a stated figure is never set against the benchmark by eye.
    - Give `customer_segment` only as the founder states it; it sets the payback benchmark the tool's assumption row
      quotes.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point
-     of its `rounded` value two places to the right, keeping every digit (0.95 is 95%, 0.875 is 87.5%), which is what
-     the command line's report prints. That is a change of notation, not a calculation; never round it.
-   - Deal terms (the raise, valuation, percent sold, use of funds) go to `equity_deal_check` as the vc-deal-math skill
-     says, and a runway claim to the vc-deal-math skill, which picks its tool; none goes to this tool.
-   - Growth rates, LTV, market sizes and every metric the table marks quoted: quote as stated with "not checked: no
-     tool computes this", and never compute, convert or round one.
+     of its `rounded` value two places to the right, keeping every digit (0.950000 is 95.0000%, 0.875000 is 87.5000%),
+     which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
+     A multiple keeps its six decimals (7.500000x) and money its cents ($1,200,000.00), never abbreviated ($1.2M).
+   - Deal terms of a priced round (the raise, valuation, percent sold, use of funds and the runway it buys) go to
+     `equity_deal_check` as the vc-deal-math skill says. A runway with no raise, a runway on a SAFE or note raise and
+     that raise's use-of-funds lines go to `equity_runway_plan` (the no-raise row, or the raise as a raise option that
+     carries its stated runway and its use-of-funds lines), as the vc-round-sizing skill calls it; with no cash or burn
+     given, ask for them. None goes to this tool.
+   - A market size goes to `equity_market_sizing` as the vc-market-sizing skill says, never to this tool.
+   - Growth rates, LTV and every other metric the table marks quoted: quote as stated with "not checked: no tool
+     computes this", and never compute, convert or round one.
    - A refusal or tool error is the answer for those inputs: relay its reason and what to ask the founder for.
 5. **Scan for definitional patterns** (the table below) and vc-claims-check's discount patterns. For each hit, quote
    the line, name the pattern and its source, and write the fix with only the founder's facts or a bracketed ask.
@@ -216,25 +229,27 @@ Every lens gets the same brief, with its own name and test filled in, and the De
   document and place; the definition a partner is likely to test it against; and how much it hurts (ends the meeting,
   weakens it, or minor).
 - A reason you cannot tie to a line the founder wrote is not an objection. List it apart as a gap, worded as a
-  question.
+  question. Never turn an objection into a gap because another line may answer it.
 - Do not judge whether another line of the material answers an objection: raise it anyway, and the refute pass
   decides. Return "nothing found" only when no line of the material gives this lens an objection worth a partner's
   time.
 
 **How to run the lenses.** With a subagent tool (in Claude Code, the Agent or Task tool), run the lenses as parallel
-subagents. Give each one only the founder's material, the Definitions table and its lens brief (the Stage fit lens also
-gets the Stage expectations table, since it tests against it): not this skill's other sections, not the tool's output,
-not another lens's objections. Without a subagent tool, run Stage A first, before
-step 1: run the lenses one after another, write each lens's objections down in full before reading the next lens's
-brief, and never revise an earlier list. Lenses run this way are less independent than subagents, and the same agent
-then judges them in Stage B, so the answer says so.
+subagents, however short the material. Give each one only the founder's material, the Definitions table and its lens
+brief (the Stage fit lens also gets the Stage expectations table, since it tests against it): not this skill's other
+sections, not the tool's output, not another lens's objections. Without a subagent tool, run Stage A first, before step
+1: run the lenses one after another, write each lens's objections down in full before reading the next lens's brief, and
+never revise an earlier list. Lenses run this way are less independent than subagents, and the same agent then judges
+them in Stage B, so the answer says so.
 
 **The calculator's mismatches** from step 4 do not go through the lenses, and none is refuted: the calculator
-computed it. Each is added to the survivors, quoting the document's figure with the tool's value and difference. One
-that a `stated_*` flag explains (the document used another definition) is ends the meeting, with that flag as the
-reason. One that no `stated_*` flag explains carries no tier: how much the gap hurts depends on its size, which the
-founder weighs, and it may be the founder's rounding, so its fix asks `[how the model works this figure, unrounded]`.
-An unlabelled churn with one consistent basis row is not a mismatch (step 4).
+computed it. Each is added to the ranked fix list ahead of the tiers, quoting the document's figure with the tool's
+value and difference, with the flag that explains it, when one does, as the reason. It carries no tier: how much a gap
+hurts depends on its size, which the founder weighs. A stated figure less flattering than the tool's value (an ARR or
+retention below it; a churn, CAC, payback, burn multiple or concentration above it) understates: it goes in the minor
+tier at most. One that no flag explains as another definition may be the founder's rounding, so its fix asks
+`[how the model works this figure, unrounded]`. An unlabelled churn with one consistent basis row is not a mismatch
+(step 4).
 
 ### Check the quotes
 
@@ -245,10 +260,11 @@ mismatch on merges into that mismatch's entry and keeps the lens name. Gaps from
 
 ### Stage B: refute
 
-Each objection gets its own refute pass. With a subagent tool, run one subagent per objection, given the founder's
-material, that one objection, the Pattern column of this skill's pattern table and of vc-claims-check's discount
-table, and everything from "The refute brief:" to the end of this stage, and nothing else; without one, decide the
-objections one at a time against the same brief.
+Each objection gets its own refute pass. With a subagent tool, launch one subagent per objection in a single message,
+so they run in parallel; never put two objections in one subagent, and never judge them in the main agent instead. Give
+each the founder's material, that one objection, the Pattern column of this skill's pattern table and of
+vc-claims-check's discount table, and everything from "The refute brief:" to the end of this stage, and nothing else.
+Without a subagent tool, decide the objections one at a time against the same brief.
 
 The refute brief:
 
@@ -277,11 +293,11 @@ material word for word does not drop the objection, and neither does one that is
 ### The ranked fix list
 
 Order the kept objections in three tiers, most damaging first: **ends the meeting**, **weakens it**, **minor**. The
-calculator's mismatches lead the list: those a `stated_*` flag explains at the top of the first tier, then those with
-no tier (Tier: "none, the founder weighs the gap"), ahead of every other entry. Within a tier, an objection raised by more than one lens comes first. The
-tier is a judgment, not a probability: give no percentages and no score. Each entry is one fix: the document and
-place, the line quoted word for word, why a partner is likely to read it that way in one or two plain sentences, and
-the change to make, using only the founder's facts, a tool value or a bracketed ask.
+calculator's mismatches lead the list ahead of the tiers, with no tier (Tier: "none, the founder weighs the gap"),
+except an understated figure, which is minor at most (Stage A). Within a tier, an objection raised by more than one lens
+comes first. The tier is a judgment, not a probability: give no percentages and no score. Each entry is one fix: the
+document and place, the line quoted word for word, why a partner is likely to read it that way in one or two plain
+sentences, and the change to make, using only the founder's facts, a tool value or a bracketed ask.
 
 ## Flags
 
@@ -330,13 +346,18 @@ Lead with what to fix, in order, then the evidence behind it.
 1. **The biggest fixes,** at most three, one line each: the top of the ranked fix list.
 2. **Ranked fix list,** as a table: Rank, Tier, Where, Lens, The line (quoted), Why a partner reads it that way, Fix.
    Then **Dropped,** one line each: the objection, its lens, and why it fell (answered, quoting the line that answers
-   it, or not grounded). When the lenses ran in one agent, say they are less independent than separate subagents.
+   it, or not grounded). Then each lens with what it returned, "nothing found" included, and how many refute subagents
+   ran. When the lenses ran in one agent, say they are less independent than separate subagents.
 3. **Metrics table:** #, Metric (quoted), Where, Definition it uses, The tool gives, Agrees across the documents?,
    Verdict, Fix. Order by verdict, Contradicted first.
 4. **Calculator results,** per call: which document's figures it used, each check row in the tool's values with that
-   document named in place of "the deck says", each flag
-   in plain words from the Flags table, and the assumption rows the answer leans on, with their sources and dates.
-5. **Stage expectations:** the row for the founder's stage and model, each metric Present or Missing.
+   document named in place of "the deck says", each flag as the question a partner is likely to ask with its "What to
+   change or prepare" from the Flags table, and the assumption rows the answer leans on, each with the source and date
+   the tool's row gives, never a source from the Definitions table. When no `cohort_*` fields were passed, name the
+   `cohort_rule` row and its setting.
+5. **Stage expectations:** the row for the founder's stage and model, each metric Present or Missing. A Missing row
+   carries its bracketed ask in the same row; a metric whose parts were given is Missing with the fix: show it with the
+   tool's values.
 6. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
 7. **Sources:** the frameworks used, with links, and which points rest on this skill's own unverified judgment.
 8. **Close:** this is not investment, legal, tax or accounting advice; how revenue is recognised is a question for an

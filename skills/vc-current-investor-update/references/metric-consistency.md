@@ -21,7 +21,8 @@ skills' tests check the status words below, so a change here is a change to both
 ## Metric statuses
 
 Every metric and every figure is set beside the last update's, as stated. Each gets one status. No arithmetic: two
-figures are compared as written, and whether one is larger may be said, never by how much.
+figures are compared as written, and whether one is larger may be said, never by how much. Two figures under different
+labels or definitions (Changed definition) are not compared at all, not even as larger or smaller.
 
 | Status             | When                                                                                                                                         |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -32,6 +33,10 @@ figures are compared as written, and whether one is larger may be said, never by
 | Dropped            | The last update reported it; this draft does not                                                                                             |
 | New                | This draft reports it; the last update did not                                                                                               |
 
+A count given as an event ("signed our 12th paying clinic") and a count given as a level ("14 paying clinics") of the
+same thing are Same, unless the founder says one counts something else; ask once whether any left in between. The last
+update's words are quoted as written, never recast ("the 12 we reported").
+
 A first update has nothing to tie out: every metric is New, and its Definitions block is the one the next update ties
 out to.
 
@@ -41,8 +46,9 @@ Every metric's definition, word for word the same in every update; a change says
 
 ## Not checked here
 
-Figures no tool here computes stay quoted as stated with "not checked: no tool computes this": growth rates, churn,
-retention, recurring revenue built from a month (ARR), unit economics, and the change in cash between the two updates.
-For the cash, add the bracketed ask
+ARR, retention, churn, CAC payback and burn multiple are not checked by either update skill: each is quoted as stated
+with "not checked here: the vc-metrics-readiness skill checks it from its parts", and the answer points the founder to
+that skill. Figures no tool computes stay quoted as stated with "not checked: no tool computes this": growth rates, LTV,
+and the change in cash between the two updates. For the cash, add the bracketed ask
 `[a one-line bridge from the last update's cash to this one's: net burn plus anything else that moved cash]`, since a
 reader holding both updates can make that comparison.

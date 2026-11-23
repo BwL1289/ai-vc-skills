@@ -1,4 +1,4 @@
-# Eval 5: Company AU, a quarter whose ARR shrank, a churn that matches no basis, and a payback with no parts
+# Eval 5: Company BT, a quarter whose ARR shrank, a churn that matches no basis, and a payback with no parts
 
 A test prompt for the `vc-metrics-readiness` skill. The company is made up. The tool call and the excerpt are from a
 real `equity_calculator metrics_check` run with these inputs. The answer states the expected behaviour; it is not a
@@ -80,8 +80,8 @@ includes]` and `[gross margin in Q3]`. The answer says it can be checked once th
 - The starting customers' movements were given, so the `cohort_rule` row reads "the starting customers' own
   movements", and the tool's retention values (gross 90.0000%, net 91.5000% over the 3 months) may be shown as the
   figures for the slide, with the period beside them.
-- Stage expectations (Series A, recurring revenue): the churn, the payback and the burn multiple are Present
-  (quoted). ARR and its movement, gross and net revenue retention and logo churn are on no line of the update; the
+- Stage expectations (Series A, recurring revenue): the churn, the payback and the burn multiple are Present (quoted).
+  ARR and its movement, gross and net revenue retention and logo churn are Missing, on no line of the update; the
   founder gave their parts, so the fix is to show them with the tool's values and the period. CAC, gross margin and
   concentration are Missing, each a bracketed ask.
 - No score, no "ready" or "not ready", no firm named as a fit or a voice; nothing is computed, converted or rounded in

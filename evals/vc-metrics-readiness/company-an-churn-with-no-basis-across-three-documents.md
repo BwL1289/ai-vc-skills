@@ -148,10 +148,10 @@ What the calculator prints for the update (excerpt):
 
 ## Expected answer
 
-- The deck's payback leads the ranked fix list as ends the meeting: the deck says 7.20 months, the calculator gives
-  9.60 months on gross margin, a difference of 2.40 months, and `stated_payback_not_margin_adjusted` says the 7.2 is
-  the revenue-only payback (7.20 months). The model's 9.6 is consistent (9.60 months). CAC payback is Contradicted,
-  with the fix to state the model's figure and its basis on the slide.
+- The deck's payback leads the ranked fix list ahead of the tiers, with no tier: the deck says 7.20 months, the
+  calculator gives 9.60 months on gross margin, a difference of 2.40 months, and `stated_payback_not_margin_adjusted`
+  says the 7.2 is the revenue-only payback (7.20 months). The model's 9.6 is consistent (9.60 months). CAC payback is
+  Contradicted, with the fix to state the model's figure and its basis on the slide.
 - "Monthly churn: 2%." is not a calculator mismatch, because one basis row is consistent: it matches net revenue
   churn (2.0000%) only, while logo churn and gross revenue churn are 3.0000%. It is Will be discounted under the
   pattern table's row for "Churn" with no basis (a16z "16 Startup Metrics" (11)), and `churn_basis_unlabelled` is relayed. The fix:
