@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/BwL1289/ai-vc-skills/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/BwL1289/ai-vc-skills/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-3fb950"></a>
-  <a href="#skills"><img alt="Skills: 7" src="https://img.shields.io/badge/skills-7-C9470D"></a>
+  <a href="#skills"><img alt="Skills: 5" src="https://img.shields.io/badge/skills-5-C9470D"></a>
   <a href="#install"><img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-d97757"></a>
   <a href="docs/install.md"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-6e7681"></a>
   <img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-3776ab">

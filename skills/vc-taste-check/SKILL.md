@@ -1,14 +1,14 @@
 ---
 name: vc-taste-check
-description: Helps a founder show a VC the judgment behind what they built, framed for the raise. The founder lists their key product, brand and scope decisions, including what they said no to and why, plus their product and brand material. The skill checks each decision for clarity, usefulness and trust, and flags choices that read as generic, AI-sounding, copycat or taste-washed (polish over generic work). An adversarial review has lenses named by what they test (scope discipline, distinctiveness, coherence, customer trust, timing and angle) attack the founder's own lines, and a refute pass drops every objection the founder's material answers. Surviving decisions become why we built it this way lines a partner remembers, with which to show in the deck and which to keep for the meeting. Use when a founder says does our product show taste, what should we cut, is our brand generic, does this sound AI-written, or which decisions should I show investors. Never invents decisions or traction. Not investment advice.
+description: Helps a founder show a VC the judgment behind what they built, framed for the raise. The founder lists their key product, brand and scope decisions, including what they said no to and why, plus their product and brand material. The skill checks each decision for clarity, usefulness and trust, and flags choices that read as generic, AI-sounding, copycat or taste-washed (polish over generic work). In an adversarial review, lenses named by what they test (scope discipline, distinctiveness, coherence, customer trust, timing and angle) attack the founder's own lines, and a refute pass drops every objection the founder's material answers. Surviving decisions become why we built it this way lines a partner remembers, with which to show in the deck and which to keep for the meeting. Use when a founder says does our product show taste, what should we cut, is our brand generic, does this sound AI-written, or which decisions should I show investors. Never invents decisions or traction. Not investment advice.
 ---
 
 # VC taste check
 
 Helps a founder show, before the first outside meeting, the judgment behind what they built: what they chose to build,
 what they cut, and what they turned down. As building gets cheaper, deciding what deserves to exist matters more, and
-at seed, with little data, a partner is largely betting on the founder's judgment. That framing is this skill's own,
-not taken from a source. The skill reads the founder's own list of decisions and their product and brand material,
+at seed, with little data, a partner is largely betting on the founder's judgment. That framing is this skill's own
+judgment, unverified, like the checks and flags below. The skill reads the founder's own list of decisions and their product and brand material,
 checks each decision, flags choices that read as generic, AI-sounding, borrowed or polished over, attacks the decisions
 the way a skeptical partner would, tests each objection against the founder's own words, and turns what survives into
 short "why we built it this way" lines, with where each belongs: the deck, the meeting, or not yet.
@@ -48,7 +48,9 @@ Ask once, in one message, for whatever is missing, by name. Never guess, and nev
    "A judgment before data" is an honest answer; the founder says how they will know.
 
 A missing input does not stop the check. It becomes a named ask in the answer, never a plausible decision or reason.
-A decision list with no NOs is itself the first open ask.
+A decision list with no NOs is itself the first open ask. With no decisions listed at all, run no checks and no review:
+quote what the material says, turn each decision it implies into an open ask, ask for the inputs in one message, and
+stop.
 
 ## The three checks
 
@@ -130,6 +132,8 @@ Every lens gets the same brief, with its own name and test filled in:
   how much it hurts (ends the meeting, weakens it, or minor).
 - A reason you cannot tie to a line the founder wrote is not an objection. List it apart as a gap, worded as a
   question to the founder.
+- A call the founder labels a judgment before data, saying how they will know it was right, is not untrustworthy for
+  lacking data yet.
 - Return "nothing found" rather than a weak objection.
 
 **How to run the lenses.** When the agent has a subagent tool (in Claude Code, the Agent or Task tool), run the lenses
@@ -164,13 +168,17 @@ The refute brief:
 - A claim that a choice copies another company is grounded only when the founder's own material names that company,
   says the choice was borrowed, or gives other companies doing it as the reason. Otherwise it rests on an outside fact.
 - A line that itself matches a pattern in the list you were given never answers an objection.
+- A call the founder labels a judgment before data, saying how they will know it was right, is what the Trust check
+  asks for. An objection that nothing shows that call was right is Dropped, answered, quoting the founder's label,
+  even when the objection quotes the label itself.
 - Return one verdict from the three below, with the founder's line quoted word for word where the verdict needs one.
   When you cannot decide, return Kept.
 
 The verdicts:
 
 - **Dropped, answered:** a line of the material other than the objected line supplies what the objection says is
-  missing: the reason, the trade-off, the NO, the customer, or what shows the call was right. Quote the founder's line
+  missing: the reason, the trade-off, the NO, the customer, or what shows the call was right (or, for a call made
+  before data, the founder's label of it as a judgment, as above). Quote the founder's line
   that answers it, and say whether it should move next to the decision, where a partner will see it.
 - **Dropped, not grounded:** the quoted line does not say what the objection claims, or the objection rests on an
   outside fact about the company, its market or its competitors.
@@ -182,7 +190,7 @@ not give. When it cannot decide, the objection is kept.
 
 After the passes, check every answering line the same way as the objections' quotes: an answering line that is not in
 the material word for word does not drop the objection, which stays kept, and neither does one that is the objected
-line itself or that matches a pattern in the flags table.
+line itself (a judgment-before-data label aside, as the brief says) or that matches a pattern in the flags table.
 
 ### Rank what survives
 
@@ -206,14 +214,17 @@ objection is placed "not yet" until it is fixed. A survivor that turns on a phra
 - **Plain words.** No stacked adjectives, and never the word taste: the line shows judgment by naming the trade-off.
 - **The repeatable line:** mark the one sentence a partner should be able to repeat to their partners on Monday.
 
-**Where each one goes** (a judgment, not a score):
+**Where each one goes** (a judgment, not a score). Every row of the decisions table gets exactly one placement:
 
 - **In the deck:** at most three, each a decision with no kept objection and no flag, Clear on all three checks, and
   tied to the core workflow. Name the slide: the product or solution slide for a scope cut, the competition or insight
   slide for a departure from the alternatives. Never a slide about the founder's taste.
-- **In the meeting:** decisions that need a story to land (a feature removed after launch, a paying customer's request
-  turned down, a channel dropped), ready for when a partner asks "why not build X?" or "what have you learned?".
-- **Not yet:** a decision with a kept objection or a flag, with the fix that would move it.
+- **In the meeting:** decisions with no kept objection and no flag that need a story to land (a feature removed after
+  launch, a paying customer's request turned down, a channel dropped), ready for when a partner asks "why not build
+  X?" or "what have you learned?".
+- **Not yet:** every other decision, with the fix that would move it: any decision with a kept objection or a flag,
+  which outranks the meeting and the deck, and any decision that fits neither of the two above, such as one marked
+  Needs work or Missing on a check with no story behind it.
 
 ## Answering
 

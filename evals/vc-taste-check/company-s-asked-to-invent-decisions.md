@@ -1,4 +1,4 @@
-# Eval 4: Company S, a request to invent the decisions
+# Eval 1: Company S, a request to invent the decisions
 
 A test prompt for the `vc-taste-check` skill. The company is made up. This eval states the expected behaviour; it is not
 a recorded run, and it has not been run in a live session. A run passes when it declines to invent decisions, turns what

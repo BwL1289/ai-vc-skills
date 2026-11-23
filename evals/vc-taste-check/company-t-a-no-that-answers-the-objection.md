@@ -1,4 +1,4 @@
-# Eval 1: Company T, a NO that answers the objection
+# Eval 2: Company T, a NO that answers the objection
 
 A test prompt for the `vc-taste-check` skill. The company is made up. This eval states the expected behaviour; it is not
 a recorded run, and it has not been run in a live session. A run passes when the refute pass drops an objection by
@@ -29,8 +29,14 @@ None: no `equity_deal_check` call. The prompt states no deal terms, and the skil
 - D1 is placed In the meeting, as the story of a feature removed after launch.
 - D2 is Clear on all three checks with no flag: its Trust mark rests on the founder's honest label of a judgment before
   data and how they will know. Its why-we-built-it line uses only the founder's reason and is placed in the deck on the
-  product or solution slide; it may be marked the repeatable line.
+  product or solution slide; it may be marked the repeatable line. A customer-trust objection that nothing shows the
+  call was right, if a lens raises one, is listed under Dropped, answered, quoting "A judgment before data; we will
+  know it was right if coordinators keep filling shifts without calling the office."
+- An objection that a decision copies another product or follows what the market does, if a lens raises one, is
+  listed under Dropped, not grounded: the prompt names no other product and gives no one else doing it as a reason.
+  The answer adds no product or market fact of its own.
 - "11 of 12 pilot agencies kept using the app after we removed the dashboard in June." is quoted as stated, never
   turned into a percent, and named as a claim a partner may check (the vc-claims-check skill).
 - D3 names no NO, so the open asks ask what brand tactic or tone the founder turned down; no NO is invented for it.
+  D3 is placed Not yet, with naming what it turned down as the fix that would move it.
 - No decision is added, no score is given, and the word taste does not appear in the why-we-built-it lines.

@@ -55,6 +55,15 @@ _SURVIVOR_COLUMNS = re.compile(
 )
 _DECISION_COLUMNS = "#, Decision (quoted), Said no to (quoted), Clarity, Usefulness, Trust, Flags, Placement"
 _DOUBLE_QUOTED = re.compile(r'"([^"]+)"')
+_DIGITS = re.compile(r"\d+")
+_EVAL_TITLE = re.compile(r"\A# Eval (\d+): ")
+_BADGE = re.compile(r'alt="Skills: (\d+)" src="https://img\.shields\.io/badge/skills-(\d+)-')
+_CATCH_ALL = "**Not yet:** every other decision"
+_OUTRANKS = "a kept objection or a flag, which outranks the meeting"
+_JUDGMENT_RULE = "A call the founder labels a judgment before data, saying how they will know it was right"
+# Words a prompt uses when the founder's own material grounds a copying claim; an eval that drops a copying claim as
+# not grounded must have none of them.
+_COPYING_WORDS = ("competitor", "copied", "copy", "borrowed", "industry standard", "because every")
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -145,9 +154,12 @@ def test_it_names_no_calculator_tool_and_does_no_arithmetic() -> None:
 def test_it_cites_no_source_since_none_was_read_in_full() -> None:
     sources = _unwrapped(_section("## Sources")).strip()
     urls = set(_URL.findall(_TEXT))
+    for path in _EVALS:
+        urls |= set(_URL.findall(path.read_text(encoding="utf-8")))
 
-    # Any source the skill ever cites must come from the one set of read sources; today it cites none.
+    # The lasting rule: any source the skill or its evals cite comes from the one set of read sources.
     assert urls <= set(_READ_SOURCES)
+    # Today's state: none is cited. Adding a read source later means deleting only this line.
     assert urls == set()
     assert sources.startswith("None.") and "unverified" in sources
 
@@ -161,6 +173,7 @@ def test_the_no_list_is_required_and_decisions_are_never_offered() -> None:
     assert "never offer example decisions" in _unwrapped(inputs)
     assert "never a row" in _unwrapped(_section("## Steps"))
     assert "never offers sample decisions" in _unwrapped(_section("## Limits"))
+    assert "With no decisions listed at all, run no checks and no review" in _unwrapped(inputs)
 
 
 def test_the_checks_and_flags_are_the_fixed_words() -> None:
@@ -224,6 +237,7 @@ def test_the_refute_brief_is_handed_over_whole_and_grounds_copying_in_the_founde
         "grounded only when the founder's own material names that company",
         "never answers an objection",
         "When you cannot decide, return Kept",
+        _JUDGMENT_RULE,
         "invents nothing on the founder's behalf",
     ):
         assert rule in brief, rule
@@ -263,6 +277,21 @@ def test_the_lines_are_placed_in_the_deck_the_meeting_or_not_yet() -> None:
     assert "at most three" in placement
     assert "Never a slide about the founder's taste" in placement
     assert "never the word taste" in placement
+    # Every row of the decisions table needs a placement, so Not yet takes every decision the other two do not, and a
+    # kept objection or a flag outranks the meeting.
+    assert "Every row of the decisions table gets exactly one placement" in placement
+    assert _CATCH_ALL in placement and _OUTRANKS in placement
+    assert "Needs work or Missing" in placement.split(_CATCH_ALL, 1)[1]
+
+
+def test_a_labelled_judgment_before_data_counts_for_trust_in_the_lenses_and_the_refute_pass() -> None:
+    trust = " ".join(row[1] for row in _table("## The three checks") if row[0] == "Trust")
+    attack = _unwrapped(_section("### Stage A: attack"))
+    refute = _unwrapped(_section("### Stage B: refute"))
+
+    assert "labels it a judgment" in trust
+    assert "is not untrustworthy for lacking data yet" in attack
+    assert _JUDGMENT_RULE in refute and "even when the objection quotes the label itself" in refute
 
 
 def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> None:
@@ -273,6 +302,20 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
         assert "made up" in text, path.name
+
+
+def test_the_evals_are_numbered_in_letter_order() -> None:
+    for number, path in enumerate(_EVALS, start=1):
+        title = _EVAL_TITLE.match(path.read_text(encoding="utf-8"))
+        assert title is not None and int(title.group(1)) == number, path.name
+
+
+def test_the_readme_badge_counts_the_skill_folders() -> None:
+    badge = _BADGE.search((_ROOT / "README.md").read_text(encoding="utf-8"))
+    folders = sorted((_ROOT / "skills").glob("*/SKILL.md"))
+
+    assert badge is not None
+    assert int(badge.group(1)) == int(badge.group(2)) == len(folders)
 
 
 def test_every_eval_makes_no_calculator_call() -> None:
@@ -287,6 +330,16 @@ def test_every_quote_in_an_eval_answer_is_in_its_prompt() -> None:
         prompt, answer = _eval_parts(path)
         for quoted in _DOUBLE_QUOTED.findall(answer):
             assert quoted in prompt, (path.name, quoted)
+
+
+def test_no_eval_answer_carries_a_figure_its_prompt_does_not() -> None:
+    # Figures are quoted as stated, never computed, converted or rounded, so an expected answer holds no number and
+    # no percent its prompt lacks, and the skill itself prints no percent.
+    assert "%" not in _TEXT
+    for path in _EVALS:
+        prompt, answer = _eval_parts(path)
+        assert set(_DIGITS.findall(answer)) <= set(_DIGITS.findall(prompt)), path.name
+        assert "%" not in answer or "%" in prompt, path.name
 
 
 def test_one_eval_drops_an_objection_by_quoting_the_line_that_answers_it() -> None:
@@ -308,6 +361,23 @@ def test_a_copying_claim_the_founders_own_words_ground_is_kept() -> None:
 
     assert "Copycat" in answer and "Kept" in answer
     assert "not grounded" not in answer
+
+
+def test_one_eval_drops_a_copying_claim_the_founders_material_does_not_ground() -> None:
+    dropping = [path for path in _EVALS if "Dropped, not grounded" in _eval_parts(path)[1]]
+    assert dropping
+    for path in dropping:
+        prompt = _eval_parts(path)[0].lower()
+        assert not any(word in prompt for word in _COPYING_WORDS), path.name
+
+
+def test_a_request_to_invent_decisions_writes_no_line_and_places_nothing() -> None:
+    (path,) = (path for path in _EVALS if "come up with" in _eval_parts(path)[0])
+    answer = _eval_parts(path)[1]
+
+    assert "declines to make up decisions" in answer
+    assert "No why-we-built-it line is written" in answer and "nothing is placed in the deck" in answer
+    assert "open asks" in answer
 
 
 def test_a_request_to_judge_as_named_people_is_declined() -> None:
