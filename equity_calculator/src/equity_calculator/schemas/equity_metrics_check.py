@@ -23,6 +23,7 @@ from fractions import Fraction
 from typing import Annotated, Literal
 
 from equity_calculator.schemas.equity_common import (
+    AS_WRITTEN,
     MODEL_CONFIG,
     SIZE_LIMIT,
     WHOLE_PERCENT,
@@ -127,15 +128,10 @@ _COHORT = (
 # The two movements that lose the starting customers' revenue, as (cohort part, total) pairs.
 _COHORT_LOSSES = _COHORT[1:]
 
-# The description each stated percent, months or multiple field carries in the JSON schema (the MCP tool's input): its
-# places decide the rounding test, and a JSON number can drop them (12.40 arrives as 12.4) or add one (12.0).
-_AS_WRITTEN = (
-    "Send it as text with exactly the places the document writes ({examples}): a figure that is the computed one "
-    "rounded to those places is consistent, and a JSON number can drop or add a place."
-)
-_PERCENT_AS_WRITTEN = "Percent points. " + _AS_WRITTEN.format(examples='"2", "2.0", "0.0"')
-_MONTHS_AS_WRITTEN = _AS_WRITTEN.format(examples='"12", "12.0"')
-_MULTIPLE_AS_WRITTEN = _AS_WRITTEN.format(examples='"1.5", "1.50"')
+# The description each stated percent, months or multiple field carries in the JSON schema (``AS_WRITTEN``).
+_PERCENT_AS_WRITTEN = "Percent points. " + AS_WRITTEN.format(examples='"2", "2.0", "0.0"')
+_MONTHS_AS_WRITTEN = AS_WRITTEN.format(examples='"12", "12.0"')
+_MULTIPLE_AS_WRITTEN = AS_WRITTEN.format(examples='"1.5", "1.50"')
 
 
 class MetricsCheckInput(BaseModel):

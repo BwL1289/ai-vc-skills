@@ -54,18 +54,18 @@ made of. It would be a Fail against today's sentence too. The skill was changed 
 ## What the calculator prints (excerpt)
 
 ```text
-  After: holder group                                                        53.6170%  h·kept
-  After: SAFE 1                                                               4.7660%  shares/T
-  After: option pool                                                         10.0000%  (U + P)/T
-  Investors' percent: the calculator gives                                   20.0000%  the investor's cap-table share
-  Investors' percent: verdict                                              consistent  within the tolerance is consistent
-  Holder group's percent after: the deck says                                60.0000%  given
-  Holder group's percent after: the calculator gives                         53.6170%  h·(share every pre-round share keeps)
-  Holder group's percent after: difference                                   -6.3830%  computed - stated
-  Holder group's percent after: verdict                                      mismatch  within the tolerance is consistent
-  A VC is likely to ask                                pool_in_pre_money_lowers_price  The new pool is paid for out of the pre-money, so the effective pre-money and the price per share are below the headline; a VC prices it this way
-  A VC is likely to ask                               conversions_bought_by_pre_money  SAFE and note shares come out of the pre-round holders, not the new investor, so their stake falls by more than the percent sold; a VC reads the cap table this way
-  Overall verdict                                                            mismatch  mismatch if any check is; consistent if all are; not_checked with none
+  After: holder group                                                             53.6170%  h·kept
+  After: SAFE 1                                                                    4.7660%  shares/T
+  After: option pool                                                              10.0000%  (U + P)/T
+  Investors' percent: the calculator gives                                        20.0000%  the investor's cap-table share
+  Investors' percent: verdict                                                   consistent  within the tolerance, or rounding to the deck's, is consistent
+  Holder group's percent after: the deck says                                     60.0000%  given
+  Holder group's percent after: the calculator gives                              53.6170%  h·(share every pre-round share keeps)
+  Holder group's percent after: difference                                        -6.3830%  computed - stated
+  Holder group's percent after: verdict                                           mismatch  within the tolerance, or rounding to the deck's, is consistent
+  A VC is likely to ask                                     pool_in_pre_money_lowers_price  The new pool is paid for out of the pre-money, so the effective pre-money and the price per share are below the headline; a VC prices it this way
+  A VC is likely to ask                                    conversions_bought_by_pre_money  SAFE and note shares come out of the pre-round holders, not the new investor, so their stake falls by more than the percent sold; a VC reads the cap table this way
+  Overall verdict                                                                 mismatch  mismatch if any check is; consistent if all are; not_checked with none
 ```
 
 ## Expected answer

@@ -73,11 +73,11 @@ The deal check, as the command line prints it (a tool call returns the same valu
   Net runway, planned burn                                        20.83 months  (cash + I)/net burn
   Net runway, today's burn                                        31.25 months  (cash + I)/net burn
   Investors' percent: the calculator gives                            20.0000%  the investor's cap-table share
-  Investors' percent: verdict                                       consistent  within the tolerance is consistent
+  Investors' percent: verdict                                       consistent  within the tolerance, or rounding to the deck's, is consistent
   Runway: the deck says                                           24.00 months  given
   Runway: the calculator gives                                    20.83 months  (cash + I)/net burn, planned (else current)
   Runway: difference                                              -3.17 months  computed - stated
-  Runway: verdict                                                     mismatch  within the tolerance is consistent
+  Runway: verdict                                                     mismatch  within the tolerance, or rounding to the deck's, is consistent
   A VC is likely to ask                             current_burn_runway_longer  Runway on today's burn is longer than on the planned burn; say which one the deck uses, as a VC will check it against the planned spend
 ```
 

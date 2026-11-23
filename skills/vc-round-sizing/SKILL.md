@@ -65,7 +65,7 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
    lean plan): never merge two (the downside's revenue percent into the lean plan, say) and never add one. When it is
    unclear whether the founder would also cut spend in the downside, that is an open ask,
    `[would you cut spend in the downside, and to what?]`, not a case. The no-raise row is always worked; do not add it
-   as an option. Send money and percents as strings:
+   as an option. Send money and percents as strings, a stated percent with the founder's own places:
 
    ```json
    {
@@ -290,19 +290,20 @@ the benchmark", "just under it"); the tool's `runway_band` row says what the ban
 `equity_deal_check` also returns codes only; this is what each means for the founder. A benchmark flag quotes its band
 only from the tool's `dilution_band` or `runway_band` row.
 
-| Flag                                  | What it means for the founder                                                                       | What to change or prepare                                                    |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise and the percent.                | Label the valuation pre- or post-money; a partner will ask which it is.      |
-| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, so the effective pre-money and price are below it.   | Show the effective pre-money beside the headline.                            |
-| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less than raise / post-money.             | Expect a partner to ask to move the pool into the pre-money.                 |
-| `pool_already_large_enough`           | The unissued pool already meets the target, so no new pool shares are needed.                       | Say so; a partner may still ask for a bigger target.                         |
-| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the sale. | Show ownership with the SAFEs and notes converted.                           |
-| `discount_beat_cap`                   | A discount gave a lower price than the cap.                                                         | Model that instrument at its discount price.                                 |
-| `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares.               | Count the interest in the cap table.                                         |
-| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it.                          | The runway comes from `equity_runway_plan` here; say so.                     |
-| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn.                                          | The runway comes from `equity_runway_plan` here; say which burn a deck uses. |
-| `runway_below_band`                   | Planned net runway is under the tool's runway band.                                                 | Say which milestone the raise reaches (a common benchmark, not a rule).      |
-| `dilution_above_band`                 | The investors get more than the tool's dilution band in one round.                                  | Be ready to say why so much is sold (a common benchmark, not a rule).        |
+| Flag                                  | What it means for the founder                                                                         | What to change or prepare                                                    |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise and the percent.                  | Label the valuation pre- or post-money; a partner will ask which it is.      |
+| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, so the effective pre-money and price are below it.     | Show the effective pre-money beside the headline.                            |
+| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less than raise / post-money.               | Expect a partner to ask to move the pool into the pre-money.                 |
+| `pool_already_large_enough`           | The unissued pool already meets the target, so no new pool shares are needed.                         | Say so; a partner may still ask for a bigger target.                         |
+| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the sale.   | Show ownership with the SAFEs and notes converted.                           |
+| `discount_beat_cap`                   | A discount gave a lower price than the cap.                                                           | Model that instrument at its discount price.                                 |
+| `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares.                 | Count the interest in the cap table.                                         |
+| `consistent_beyond_rounding`          | A stated percent holds by the tolerance alone: it is not the tool's figure rounded to its own places. | Quote the tool's figure; a partner recomputing gets it.                      |
+| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it.                            | The runway comes from `equity_runway_plan` here; say so.                     |
+| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn.                                            | The runway comes from `equity_runway_plan` here; say which burn a deck uses. |
+| `runway_below_band`                   | Planned net runway is under the tool's runway band.                                                   | Say which milestone the raise reaches (a common benchmark, not a rule).      |
+| `dilution_above_band`                 | The investors get more than the tool's dilution band in one round.                                    | Be ready to say why so much is sold (a common benchmark, not a rule).        |
 
 ## Answering
 

@@ -61,34 +61,34 @@ text.
 ## What the calculator prints (excerpt)
 
 ```text
-  Price per share (p)                                                       $1.164844  the round's price
-  After: holder group                                                        74.5500%  h·kept
-  After: Note 1                                                               5.4500%  shares/T
-  After: investors                                                           20.0000%  N/T
-  Net burn, planned burn                                                  $175,000.00  gross burn - revenue
-  Gross runway, planned burn                                             13.33 months  (cash + I)/gross burn
-  Net runway, planned burn                                               16.00 months  (cash + I)/net burn
-  Gross runway, today's burn                                             23.33 months  (cash + I)/gross burn
-  Net runway, today's burn                                               28.00 months  (cash + I)/net burn
-  Use of funds: line 1                                                  $1,250,000.00  as given, or percent·I
-  Use of funds: line 2                                                    $750,000.00  as given, or percent·I
-  Use of funds: line 3                                                    $500,000.00  as given, or percent·I
-  Use of funds: total                                                   $2,500,000.00  every line
-  Holder group's percent after: the deck says                                80.0000%  given
-  Holder group's percent after: the calculator gives                         74.5500%  h·(share every pre-round share keeps)
-  Holder group's percent after: difference                                   -5.4500%  computed - stated
-  Holder group's percent after: verdict                                      mismatch  within the tolerance is consistent
-  Runway: the deck says                                                  24.00 months  given
-  Runway: the calculator gives                                           16.00 months  (cash + I)/net burn, planned (else current)
-  Runway: difference                                                     -8.00 months  computed - stated
-  Runway: verdict                                                            mismatch  within the tolerance is consistent
-  Use of funds total: verdict                                              consistent  within the tolerance is consistent
-  A VC is likely to ask                               conversions_bought_by_pre_money  SAFE and note shares come out of the pre-round holders, not the new investor, so their stake falls by more than the percent sold; a VC reads the cap table this way
-  A VC is likely to ask                                             discount_beat_cap  A discount gave a lower price than the cap, so a cap-only conversion in the deck would be wrong
-  A VC is likely to ask                                        note_interest_converts  Note interest converts too, so a note gets more than its principal's worth of shares; count it in the cap table
-  A VC is likely to ask                                    current_burn_runway_longer  Runway on today's burn is longer than on the planned burn; say which one the deck uses, as a VC will check it against the planned spend
-  A VC is likely to ask                                             runway_below_band  Planned runway is under 18 months; a VC is likely to ask whether the raise reaches the next milestone (a common benchmark, not a rule)
-  Overall verdict                                                            mismatch  mismatch if any check is; consistent if all are; not_checked with none
+  Price per share (p)                                                            $1.164844  the round's price
+  After: holder group                                                             74.5500%  h·kept
+  After: Note 1                                                                    5.4500%  shares/T
+  After: investors                                                                20.0000%  N/T
+  Net burn, planned burn                                                       $175,000.00  gross burn - revenue
+  Gross runway, planned burn                                                  13.33 months  (cash + I)/gross burn
+  Net runway, planned burn                                                    16.00 months  (cash + I)/net burn
+  Gross runway, today's burn                                                  23.33 months  (cash + I)/gross burn
+  Net runway, today's burn                                                    28.00 months  (cash + I)/net burn
+  Use of funds: line 1                                                       $1,250,000.00  as given, or percent·I
+  Use of funds: line 2                                                         $750,000.00  as given, or percent·I
+  Use of funds: line 3                                                         $500,000.00  as given, or percent·I
+  Use of funds: total                                                        $2,500,000.00  every line
+  Holder group's percent after: the deck says                                     80.0000%  given
+  Holder group's percent after: the calculator gives                              74.5500%  h·(share every pre-round share keeps)
+  Holder group's percent after: difference                                        -5.4500%  computed - stated
+  Holder group's percent after: verdict                                           mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Runway: the deck says                                                       24.00 months  given
+  Runway: the calculator gives                                                16.00 months  (cash + I)/net burn, planned (else current)
+  Runway: difference                                                          -8.00 months  computed - stated
+  Runway: verdict                                                                 mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Use of funds total: verdict                                                   consistent  within the tolerance is consistent
+  A VC is likely to ask                                    conversions_bought_by_pre_money  SAFE and note shares come out of the pre-round holders, not the new investor, so their stake falls by more than the percent sold; a VC reads the cap table this way
+  A VC is likely to ask                                                  discount_beat_cap  A discount gave a lower price than the cap, so a cap-only conversion in the deck would be wrong
+  A VC is likely to ask                                             note_interest_converts  Note interest converts too, so a note gets more than its principal's worth of shares; count it in the cap table
+  A VC is likely to ask                                         current_burn_runway_longer  Runway on today's burn is longer than on the planned burn; say which one the deck uses, as a VC will check it against the planned spend
+  A VC is likely to ask                                                  runway_below_band  Planned runway is under 18 months; a VC is likely to ask whether the raise reaches the next milestone (a common benchmark, not a rule)
+  Overall verdict                                                                 mismatch  mismatch if any check is; consistent if all are; not_checked with none
 ```
 
 ## Expected answer

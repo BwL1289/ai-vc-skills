@@ -225,6 +225,13 @@ All notable changes to this repository. Dates are UTC.
   rounding line shows the figure as typed (`rounds to the deck's "12"`), the six stated percent, months and multiple
   fields tell a JSON caller to send text with the document's places, and `vc-metrics-readiness` keeps "may be the
   founder's rounding" for an ARR or CAC mismatch, since money keeps the tolerance alone.
+- A deal check's stated investors' percent, holder group's percent and runway now take the same rule: consistent
+  within the tolerance or when the figure is the computed one rounded half away from zero to the places it is typed
+  with (12 months against 12.40 holds, `12.0` does not; 17% sold against 16.6667% holds, 20% does not). The
+  post-money (money) and the use-of-funds total (a sum of lines) keep the tolerance alone. Each such row says whether
+  it is that rounding, `consistent_beyond_rounding` joins the deal check's flags, the three fields tell a JSON caller
+  to send text with the deck's places, and the rounding test lives in one module both checks use. No eval's verdict
+  changed; their excerpts, the README's and the site's were re-synced, and the skills' flag tables gained the row.
 
 ## 2026-11-21
 

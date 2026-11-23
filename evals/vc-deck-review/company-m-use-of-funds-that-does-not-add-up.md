@@ -52,8 +52,8 @@ flag's question and gave no "no slide covers" rows. Both were fixed in the skill
   Post-money valuation                                          $16,000,000.00  V + I
   Use of funds: total                                            $3,800,000.00  every line
   Use of funds: share of the raise                                    95.0000%  total/I
-  Investors' percent: verdict                                       consistent  within the tolerance is consistent
-  Runway: verdict                                                   consistent  within the tolerance is consistent
+  Investors' percent: verdict                                       consistent  within the tolerance, or rounding to the deck's, is consistent
+  Runway: verdict                                                   consistent  within the tolerance, or rounding to the deck's, is consistent
   Use of funds total: the deck says                                   95.0000%  given
   Use of funds total: the calculator gives                           100.0000%  against the raise (or 100%)
   Use of funds total: difference                                       5.0000%  computed - stated

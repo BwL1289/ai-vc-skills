@@ -420,12 +420,22 @@ the next priced round, so `round` with that round's terms works it).
 5. **Use of funds.** Amount lines are added up and checked against I; percent lines are turned into dollars of I,
    split to the cent, and their total checked against 100%.
 6. **Checks.** A stated percent within 0.5 percentage points of the computed one is consistent, and a stated money or
-   months figure within 2% of it (both inputs; the edge counts as consistent). The verdict is `mismatch` if any check
-   is, `consistent` if all are, and `not_checked` when no stated figure could be checked: none was stated, or the
-   only one was a runway claim with revenue covering every burn.
+   months figure within 2% of it (both inputs; the edge counts as consistent). A stated investors' percent, holder
+   group's percent or runway is also consistent, whatever the tolerance, when it is the computed figure rounded half
+   away from zero to the places it is written with, since people write figures rounded to the places they show: a
+   stated `12` months holds a computed 11.5 up to, but not including, 12.5 (12.40 holds, though 0.4 months is past 2%
+   of it), `12.0` holds 11.95 up to 12.05, and `17` holds 16.6667% sold (16.5 up to 17.5) while `20` does not. Its row
+   shows the figure as typed, since those places decide it, and says whether it is that rounding
+   (`rounds to the deck's "12"`, yes or no); send each as text, with the places the deck writes (`metrics_check`'s
+   rule, from one shared helper). The post-money keeps the tolerance alone, since a round money figure typed in full
+   carries no places, and so does the use-of-funds total, a sum of the lines, not a figure typed as one. The verdict
+   is `mismatch` if any check is, `consistent` if all are, and `not_checked` when no stated figure could be checked:
+   none was stated, or the only one was a runway claim with revenue covering every burn.
 7. **Flags** are questions a VC is likely to ask, never errors, and never change the verdict:
    `valuation_back_solved`, `pool_in_pre_money_lowers_price`, `pool_in_post_money_dilutes_investor`,
    `pool_already_large_enough`, `conversions_bought_by_pre_money`, `discount_beat_cap`, `note_interest_converts`,
+   `consistent_beyond_rounding` (a stated percent or runway consistent by the tolerance alone, not the computed figure
+   rounded to its places, such as `16.5` against 16.6667%, so a VC recomputing gets another figure),
    `net_burn_not_positive`, `current_burn_runway_longer`, and two benchmark flags, `runway_below_band` (planned
    runway under 18 months) and `dilution_above_band` (more than 25% sold in one round). The two benchmarks are
    inputs, and each is a common benchmark, not a rule: no source was read that fixes either.
@@ -726,22 +736,22 @@ equity_calculator deal_check --investment 8000000 --pre-money 32000000 --post-mo
     --stated-investor-percent 20 --fully-diluted-shares 10000000 --unissued-pool-shares 400000 \
     --target-pool-percent 10 --safe "1000000 valuation-cap=10000000" --safe "1500000 valuation-cap=15000000" \
     --holder-percent 90 --stated-holder-percent 72
-  Price per share (p)                                                       $2.314050  the round's price
-  Effective pre-money                                                  $22,214,876.03  (FD - U)·p: the pre-round holders' shares at the round price
-  After: holder group                                                        52.0661%  h·kept
-  After: SAFE 1                                                               7.2314%  shares/T
-  After: SAFE 2                                                               7.2314%  shares/T
-  After: option pool                                                         10.0000%  (U + P)/T
-  After: investors                                                           20.0000%  N/T
-  Share of their stake every pre-round share keeps                           57.8512%  FD/T, or V/(V + I) with no share counts
-  Pre-money pays for: SAFE and note shares                              $5,785,123.97  converted shares·p
-  Post-money: verdict                                                      consistent  within the tolerance is consistent
-  Investors' percent: verdict                                              consistent  within the tolerance is consistent
-  Holder group's percent after: the deck says                                72.0000%  given
-  Holder group's percent after: the calculator gives                         52.0661%  h·(share every pre-round share keeps)
-  Holder group's percent after: difference                                  -19.9339%  computed - stated
-  Holder group's percent after: verdict                                      mismatch  within the tolerance is consistent
-  Overall verdict                                                            mismatch  mismatch if any check is; consistent if all are; not_checked with none
+  Price per share (p)                                                            $2.314050  the round's price
+  Effective pre-money                                                       $22,214,876.03  (FD - U)·p: the pre-round holders' shares at the round price
+  After: holder group                                                             52.0661%  h·kept
+  After: SAFE 1                                                                    7.2314%  shares/T
+  After: SAFE 2                                                                    7.2314%  shares/T
+  After: option pool                                                              10.0000%  (U + P)/T
+  After: investors                                                                20.0000%  N/T
+  Share of their stake every pre-round share keeps                                57.8512%  FD/T, or V/(V + I) with no share counts
+  Pre-money pays for: SAFE and note shares                                   $5,785,123.97  converted shares·p
+  Post-money: verdict                                                           consistent  within the tolerance is consistent
+  Investors' percent: verdict                                                   consistent  within the tolerance, or rounding to the deck's, is consistent
+  Holder group's percent after: the deck says                                     72.0000%  given
+  Holder group's percent after: the calculator gives                              52.0661%  h·(share every pre-round share keeps)
+  Holder group's percent after: difference                                       -19.9339%  computed - stated
+  Holder group's percent after: verdict                                           mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Overall verdict                                                                 mismatch  mismatch if any check is; consistent if all are; not_checked with none
 ```
 
 The post-money and the 20% hold; the 72% does not. It counts only the new investors' 20% against the founders, and
@@ -899,7 +909,9 @@ equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--
 Its `--safe` and `--note` take the same terms as `round`'s. `--holder-shares` gives the holder group as a share count
 of FD instead of `--holder-percent`, and `--unissued-pool-percent` gives the unissued pool as a percent of FD instead of
 `--unissued-pool-shares`. Each `--use-of-funds` is one line of the deck's use of
-funds, an amount (`1250000`) or a percent of the raise (`50%`), all lines the same kind.
+funds, an amount (`1250000`) or a percent of the raise (`50%`), all lines the same kind. Give each stated percent and
+the stated runway with the places the deck writes (`--stated-runway-months 18` for "18 months", not `18.0`), since a
+figure that is the computed one rounded to those places is consistent.
 
 `runway_plan` needs `--cash-on-hand` and at least one `--phase`, the plan's, the first starting at month 1. A downside
 or a lean case is its own `--downside-phase` / `--lean-phase` items or the percents of the plan's revenue and gross
@@ -1169,18 +1181,18 @@ was read for preferred-stock terms:
 The `deal_check` scenario adds these, each only when the input uses it, then the nested round's or pool's own rows
 (above) that it does not already list:
 
-| Key                   | Default                                                | How to change it                            | Source                                      |
-| --------------------- | ------------------------------------------------------ | ------------------------------------------- | ------------------------------------------- |
-| `post_money_rule`     | post-money = V + I                                     | fixed                                       | YC (the Post-Money Safe User Guide)         |
-| `valuation_order`     | pre-money, then post-money, then the stated percent    | give one valuation figure                   | unverified                                  |
-| `back_solve`          | post-money = I / percent                               | give a pre- or post-money                   | unverified (standard arithmetic)            |
-| `holder_scaling`      | h × the share of the stake every pre-round share keeps | fixed                                       | unverified                                  |
-| `effective_pre_money` | (FD - U) × price                                       | fixed                                       | unverified                                  |
-| `runway_rule`         | (cash + I) / monthly burn, net and gross               | fixed                                       | unverified (standard arithmetic)            |
-| `runway_band`         | 18 months                                              | `--runway-band-months`                      | unverified (a common benchmark, not a rule) |
-| `tolerance`           | 0.5 points; 2% relative                                | `--tolerance-points`, `--tolerance-percent` | unverified                                  |
-| `dilution_band`       | 25%                                                    | `--dilution-band-percent`                   | unverified (a common benchmark, not a rule) |
-| `use_of_funds_rule`   | the lines add up to the raise                          | fixed                                       | unverified                                  |
+| Key                   | Default                                                                                                                              | How to change it                            | Source                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- | ----------------------------------------------------- |
+| `post_money_rule`     | post-money = V + I                                                                                                                   | fixed                                       | YC (the Post-Money Safe User Guide)                   |
+| `valuation_order`     | pre-money, then post-money, then the stated percent                                                                                  | give one valuation figure                   | unverified                                            |
+| `back_solve`          | post-money = I / percent                                                                                                             | give a pre- or post-money                   | unverified (standard arithmetic)                      |
+| `holder_scaling`      | h × the share of the stake every pre-round share keeps                                                                               | fixed                                       | unverified                                            |
+| `effective_pre_money` | (FD - U) × price                                                                                                                     | fixed                                       | unverified                                            |
+| `runway_rule`         | (cash + I) / monthly burn, net and gross                                                                                             | fixed                                       | unverified (standard arithmetic)                      |
+| `runway_band`         | 18 months                                                                                                                            | `--runway-band-months`                      | unverified (a common benchmark, not a rule)           |
+| `tolerance`           | 0.5 points; 2% relative; a stated percent or runway that is the computed figure rounded to its places also holds; one flag beside it | `--tolerance-points`, `--tolerance-percent` | unverified (the rounding test is standard arithmetic) |
+| `dilution_band`       | 25%                                                                                                                                  | `--dilution-band-percent`                   | unverified (a common benchmark, not a rule)           |
+| `use_of_funds_rule`   | the lines add up to the raise                                                                                                        | fixed                                       | unverified                                            |
 
 The `runway_plan` scenario adds these, each only when the input uses it:
 

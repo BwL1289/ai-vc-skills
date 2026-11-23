@@ -137,13 +137,14 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
    without its skeptic: this skill's lenses do the attacking. The claims table feeds the marks in step 6.
 4. **The ask.** The deal terms are checked once, in claims-check step 5, which follows the vc-deal-math skill:
    - A priced round: `equity_deal_check` (from the command line, `equity_calculator deal_check`), money and percents
-     as strings, every stated figure, use-of-funds lines included; one call per document's version of the ask. A
-     valuation with no label: call twice, once as `pre_money`, once as `post_money`. Show both readings side by side,
-     as vc-deal-math step 4 does, and say a partner will ask which one is meant. A check that is a mismatch under one
-     reading only is not a calculator mismatch: it becomes one fix, to label the valuation pre- or post-money, quoting
-     both readings in the tool's values. Only a check that is a mismatch under every reading is the calculator's
-     mismatch. In the claims table, such a claim is not Contradicted either: mark it Needs a source, with both
-     readings in its fix, since no single reading gives a verdict.
+     as strings (a stated percent or runway with the deck's own places, since one that is the tool's figure rounded
+     to them is consistent), every stated figure, use-of-funds lines included; one call per document's version of
+     the ask. A valuation with no label: call twice, once as `pre_money`, once as `post_money`. Show both readings
+     side by side, as vc-deal-math step 4 does, and say a partner will ask which one is meant. A check that is a
+     mismatch under one reading only is not a calculator mismatch: it becomes one fix, to label the valuation pre- or
+     post-money, quoting both readings in the tool's values. Only a check that is a mismatch under every reading is
+     the calculator's mismatch. In the claims table, such a claim is not Contradicted either: mark it Needs a source,
+     with both readings in its fix, since no single reading gives a verdict.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
      which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask for the
@@ -333,6 +334,7 @@ covers the spend before the cash runs out, so there is no runway end and a state
 | `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold.     | Show ownership with the SAFEs and notes converted, as a VC reads the cap table.                |
 | `discount_beat_cap`                   | A discount gave a lower price than the cap.                                                                     | Model that instrument at its discount price; a cap-only conversion in the deck would be wrong. |
 | `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares.                           | Count the interest in the cap table.                                                           |
+| `consistent_beyond_rounding`          | A stated percent or runway holds by the tolerance alone: it is not the tool's figure rounded to its own places. | Quote the tool's figure; a VC recomputing gets it.                                             |
 | `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it.                                      | A runway claim is checked on the other burn's net runway; with none, it is not checked.        |
 | `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn.                                                      | Say which burn the deck's runway uses; a VC will check it against the planned spend.           |
 | `runway_below_band`                   | Planned net runway is under the runway benchmark (18 months by default).                                        | Be ready to say whether the raise reaches the next milestone (a common benchmark, not a rule). |

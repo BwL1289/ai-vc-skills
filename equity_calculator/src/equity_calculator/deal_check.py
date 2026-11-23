@@ -13,8 +13,14 @@ V + I and the headline share sold I/(V + I). The round is then worked on one of 
 - Runway on each burn given: (cash on hand + I) / burn, net (gross - revenue) and gross; no net runway when revenue
   covers the burn. A runway claim is checked against the planned net runway, else today's.
 
-Each figure the deck states becomes one check (consistent within the tolerance, inclusive, else a mismatch); flags
-name what a VC is likely to ask and never change a verdict.
+Each figure the deck states becomes one check: consistent within the tolerance (``tolerance_points`` points for a
+percent, ``tolerance_percent`` of the computed figure for the post-money and the runway, the edge included), else a
+mismatch. A stated investors' percent, holder group's percent or runway is also consistent when it is the computed
+figure rounded half away from zero to the places it is typed with (``12`` months against 12.40, ``17`` against
+16.6667%; ``equity_calculator.rounding``): people write figures rounded to the places they show. The post-money is
+money, and money keeps the tolerance alone; so does the use-of-funds total, a sum of lines set against the raise or
+100%, never a figure the deck types. ``consistent_beyond_rounding`` names a figure that holds by the tolerance alone.
+Flags name what a VC is likely to ask and never change a verdict.
 """
 
 from __future__ import annotations
@@ -28,6 +34,7 @@ from equity_calculator.exact import ONE, ZERO, fraction, from_percent, money_spl
 from equity_calculator.funds import work_use_of_funds
 from equity_calculator.pool import compute_pool
 from equity_calculator.round import compute_round
+from equity_calculator.rounding import rounds_to
 from equity_calculator.schemas.equity_common import EquityAssumption, EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_deal_check import (
     CheckKey,
@@ -202,16 +209,27 @@ def _runway(inputs: DealCheckInput) -> tuple[RunwayRow, ...]:
     return tuple(rows)
 
 
-def _check(key: CheckKey, unit: EquityUnit, stated: Fraction, computed: Fraction, tolerance: Fraction) -> DealCheck:
-    """One check: within ``tolerance`` of the computed figure (the edge included) is consistent."""
+def _check(
+    key: CheckKey,
+    unit: EquityUnit,
+    stated: Fraction,
+    computed: Fraction,
+    tolerance: Fraction,
+    written: Decimal | None = None,
+) -> DealCheck:
+    """One check: within ``tolerance`` of the computed figure (the edge included) is consistent, or, given the figure
+    as ``written`` (percent points for a fraction), when it is the computed figure rounded to the places it is typed
+    with (``within_rounding``)."""
     difference = computed - stated
+    rounds = None if written is None else rounds_to(written, unit, computed)
 
     return DealCheck(
         key=key,
         stated=quantity(unit, stated),
         computed=quantity(unit, computed),
         difference=quantity(unit, difference),
-        verdict="consistent" if abs(difference) <= tolerance else "mismatch",
+        verdict="consistent" if abs(difference) <= tolerance or rounds else "mismatch",
+        within_rounding=rounds,
     )
 
 
@@ -244,7 +262,8 @@ def _checks(
     holder_after: Fraction | None,
     runway: tuple[RunwayRow, ...],
 ) -> list[DealCheck]:
-    """One check per valuation, ownership or runway figure the deck states (the use-of-funds check is added after)."""
+    """One check per valuation, ownership or runway figure the deck states (the use-of-funds check is added after); the
+    percents and the runway go in as written, for the rounding test."""
     source = deal_valuation(inputs)[1]
     points = from_percent(inputs.tolerance_points)
     relative = from_percent(inputs.tolerance_percent)
@@ -252,20 +271,17 @@ def _checks(
     if inputs.post_money is not None and source == "pre_money":
         checks.append(_check("post_money", "money", fraction(inputs.post_money), post_money, relative * post_money))
     if inputs.stated_investor_percent is not None and source != "percent":
-        checks.append(
-            _check(
-                "investor_percent", "fraction", from_percent(inputs.stated_investor_percent), worked.investor, points
-            )
-        )
+        written = inputs.stated_investor_percent
+        checks.append(_check("investor_percent", "fraction", from_percent(written), worked.investor, points, written))
     if inputs.stated_holder_percent is not None and holder_after is not None:
-        stated = from_percent(inputs.stated_holder_percent)
-        checks.append(_check("holder_percent", "fraction", stated, holder_after, points))
+        written = inputs.stated_holder_percent
+        checks.append(_check("holder_percent", "fraction", from_percent(written), holder_after, points, written))
     # The planned burn's net runway, else today's: the first row that has one (none when revenue covers every burn).
     basis = next((row.net_runway for row in runway if row.net_runway is not None), None)
     if inputs.stated_runway_months is not None and basis is not None:
         computed = basis.exact
-        stated = fraction(inputs.stated_runway_months)
-        checks.append(_check("runway_months", "months", stated, computed, relative * computed))
+        written = inputs.stated_runway_months
+        checks.append(_check("runway_months", "months", fraction(written), computed, relative * computed, written))
 
     return checks
 
@@ -286,7 +302,11 @@ def _conversion_flags(worked: _Worked) -> list[DealFlag]:
 
 
 def _flags(
-    inputs: DealCheckInput, worked: _Worked, headline: Fraction, runway: tuple[RunwayRow, ...]
+    inputs: DealCheckInput,
+    worked: _Worked,
+    headline: Fraction,
+    runway: tuple[RunwayRow, ...],
+    checks: tuple[DealCheck, ...],
 ) -> tuple[DealFlag, ...]:
     """Every flag that holds, in ``DealFlag``'s order."""
     flags: list[DealFlag] = []
@@ -299,6 +319,9 @@ def _flags(
     if inputs.target_pool_percent > 0 and worked.new_pool_shares == ZERO:
         flags.append("pool_already_large_enough")
     flags += _conversion_flags(worked)
+    # A rounding is always consistent, so a figure consistent with no rounding held by the tolerance alone.
+    if any(check.verdict == "consistent" and check.within_rounding is False for check in checks):
+        flags.append("consistent_beyond_rounding")
     if any(row.net_runway is None for row in runway):
         flags.append("net_burn_not_positive")
     by_basis = {row.basis: row.net_runway for row in runway}
@@ -381,7 +404,7 @@ def compute_deal_check(inputs: DealCheckInput) -> DealCheckResult:
         use_of_funds_total=funds.total,
         use_of_funds_percent_total=funds.share,
         checks=checks,
-        flags=_flags(inputs, worked, headline, runway),
+        flags=_flags(inputs, worked, headline, runway, checks),
         verdict=_verdict(checks),
         round=worked.round,
         pool=worked.pool,

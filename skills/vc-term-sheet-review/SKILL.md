@@ -126,8 +126,9 @@ the labels given in parentheses.
 2. **Explain and mark each term** against the table above: what it does in plain words, the baseline cell from the
    table, the mark, the source. A term the table does not hold is explained in plain words, marked Not in the
    baseline, and made a lawyer question; say the explanation is this skill's own reading, unverified.
-3. **The round's arithmetic.** Send money and percents as strings; one call per figure, never a figure from one tool
-   matched by eye against another.
+3. **The round's arithmetic.** Send money and percents as strings (a stated percent or runway with the document's own
+   places, since one that is the tool's figure rounded to them is consistent); one call per figure, never a figure
+   from one tool matched by eye against another.
    - `equity_deal_check` (from the command line, `equity_calculator deal_check`): the amount, the valuation with its
      label (a valuation with no label: call twice, once as `pre_money` and once as `post_money`), the pool target and
      its timing, every SAFE and note as `instruments`, the founders' shares as `holder_shares`, and every figure the
@@ -360,6 +361,7 @@ beside each). This is what each means for the founder: a question a later reader
 | `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold      |
 | `discount_beat_cap`                   | A discount gave a lower price than the cap, so a cap-only conversion would be wrong                             |
 | `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares                            |
+| `consistent_beyond_rounding`          | A stated percent or runway holds by the tolerance alone, not as the tool's figure rounded to its own places     |
 | `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on them                                     |
 | `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn                                                       |
 | `runway_below_band`                   | Planned runway is under the tool's runway benchmark (a common benchmark, not a rule)                            |

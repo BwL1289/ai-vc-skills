@@ -729,3 +729,50 @@ def test_without_the_mcp_sdk_the_server_names_the_pinned_install_command() -> No
     assert pin == ["mcp==1.28.1"]
     assert finished.returncode == 1
     assert finished.stderr.strip() == "equity_calculator_mcp needs the MCP SDK: pip install 'mcp==1.28.1'"
+
+
+@pytest.mark.parametrize(("typed", "verdict", "within"), [("12", "consistent", True), ("12.0", "mismatch", False)])
+async def test_the_deal_check_tool_holds_a_runway_sent_as_text_that_is_the_computed_one_rounded(
+    typed: str, verdict: str, within: bool
+) -> None:
+    """(240k + 1M)/100k = 12.40 months: "12" sent as text is it rounded to no places, so it holds although 0.4 months
+    is past 2% of 12.40; "12.0" claims a place it does not round to. The echo keeps the places, so a second call
+    built from it gives the same rows."""
+    server = mcp_server.build_server()
+    inputs = {"investment": "1000000", "pre_money": "4000000", "cash_on_hand": "240000"}
+    inputs |= {"planned_monthly_gross_burn": "100000", "stated_runway_months": typed}
+    answer = json.loads(_text(await _call(server, "equity_deal_check", {"inputs": inputs})))
+    again = json.loads(_text(await _call(server, "equity_deal_check", {"inputs": answer["inputs"]})))
+
+    assert answer["inputs"]["stated_runway_months"] == typed
+    assert (answer["checks"][0]["verdict"], answer["checks"][0]["within_rounding"]) == (verdict, within)
+    assert answer["verdict"] == verdict
+    assert again["checks"] == answer["checks"]
+
+
+async def test_the_deal_check_tool_holds_a_percent_sold_sent_as_text_that_rounds_to_it() -> None:
+    """1M at 5M pre is 16.6667% sold: "17" holds with no points tolerance (the rounding alone), "20" does not."""
+    server = mcp_server.build_server()
+    inputs = {"investment": "1000000", "pre_money": "5000000", "post_money": "6000000", "tolerance_points": "0"}
+    held = json.loads(
+        _text(await _call(server, "equity_deal_check", {"inputs": {**inputs, "stated_investor_percent": "17"}}))
+    )
+    missed = json.loads(
+        _text(await _call(server, "equity_deal_check", {"inputs": {**inputs, "stated_investor_percent": "20"}}))
+    )
+
+    assert (held["checks"][-1]["verdict"], held["checks"][-1]["within_rounding"]) == ("consistent", True)
+    assert (missed["checks"][-1]["verdict"], missed["checks"][-1]["within_rounding"]) == ("mismatch", False)
+    assert held["checks"][0]["within_rounding"] is None
+
+
+async def test_the_deal_check_tool_schema_says_to_send_each_rounded_figure_as_text() -> None:
+    """The stated percents and runway say, in the tool's own input schema, to send text with the deck's places; the
+    money fields keep the tolerance alone and say nothing."""
+    tools = {tool.name: tool for tool in await _tools(mcp_server.build_server())}
+    fields = tools["equity_deal_check"].inputSchema["$defs"]["DealCheckInput"]["properties"]
+
+    for name in ("stated_investor_percent", "stated_holder_percent", "stated_runway_months"):
+        assert "Send it as text with exactly the places the document writes" in fields[name]["description"], name
+    for name in ("investment", "pre_money", "post_money"):
+        assert "description" not in fields[name], name

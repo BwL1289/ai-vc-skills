@@ -16,6 +16,7 @@ import pytest
 from equity_calculator.__main__ import run
 from equity_calculator.exact import DISPLAY_PLACES
 from equity_calculator.layout import sheet_for
+from equity_calculator.rounding import ROUNDING_HOW, ROUNDING_VERDICT_HOW
 from equity_calculator.schemas.equity_common import EquityQuantity
 from equity_calculator.workbook import FROZEN_PANE, NUMBER_FORMATS, VERDICT_FILLS, save_workbook
 from openpyxl import load_workbook
@@ -354,3 +355,37 @@ def test_every_flag_has_plain_words() -> None:
     ]
     assert all(line.how and "_" not in line.how for line in flags)
     assert "under 30 months" in flags[1].how and "more than 10%" in flags[2].how
+
+
+@pytest.mark.parametrize(("typed", "rounds", "verdict"), [("12", "yes", "consistent"), ("12.0", "no", "mismatch")])
+async def test_the_runway_as_typed_decides_its_rounding_line_through_the_command(
+    typed: str, rounds: str, verdict: str
+) -> None:
+    """(240k + 1M)/100k = 12.40 months: --stated-runway-months 12 is that rounded to no places, 12.0 is not. The
+    rounding line shows the figure as typed (the deck's line prints both as 12.00 months), and the post-money row,
+    money, has no rounding line and keeps the tolerance's words."""
+    argv = ["deal_check", "--investment", "1000000", "--pre-money", "4000000", "--post-money", "5000000"]
+    argv += ["--cash-on-hand", "240000", "--planned-monthly-gross-burn", "100000", "--stated-runway-months", typed]
+    lines = {line.split("  ")[1]: line for line in (await run(argv)).splitlines() if line.startswith("  ")}
+    answer = json.loads(await run([*argv, "--json"]))
+
+    assert answer["inputs"]["stated_runway_months"] == typed
+    assert [(row["key"], row["within_rounding"]) for row in answer["checks"]] == [
+        ("post_money", None),
+        ("runway_months", rounds == "yes"),
+    ]
+    assert lines[f'Runway: rounds to the deck\'s "{typed}"'].endswith(f" {rounds}  {ROUNDING_HOW}")
+    assert lines["Runway: verdict"].endswith(f"{verdict}  {ROUNDING_VERDICT_HOW}")
+    assert lines["Post-money: verdict"].endswith("consistent  within the tolerance is consistent")
+    assert not any(label.startswith("Post-money: rounds") for label in lines)
+
+
+def test_a_figure_held_by_the_tolerance_alone_prints_its_flag_in_words() -> None:
+    """16.5% sold against 16.6667%: within 0.5 points, not 16.7 rounded to one place."""
+    result = deal_check(investment="1000000", pre_money="5000000", post_money="6000000", stated_investor_percent="16.5")
+    lines = {line.key: line for line in sheet_for(result).lines}
+
+    assert lines["check_investor_percent_rounding"].values == ("no",)
+    assert lines["flag_consistent_beyond_rounding"].how.startswith(
+        "A stated figure is consistent only by the tolerance"
+    )

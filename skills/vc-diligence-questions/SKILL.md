@@ -105,10 +105,11 @@ the bank or the checklist; step 3 then starts at the quote check.
 2. **The cap table and the ask go to the calculator.** Follow the vc-deal-math skill's steps; use only the tools'
    values.
    - A priced round: `equity_deal_check` (from the command line, `equity_calculator deal_check`), money and percents
-     as strings, with `fully_diluted_shares`, `unissued_pool_shares`, `target_pool_percent` and `pool_timing`, every
-     SAFE and note as `instruments`, and each ownership figure a document states: the investors' percent as
-     `stated_investor_percent`, the founders' percent after the round as `stated_holder_percent` with the founders'
-     shares today as `holder_shares`. One call per document's version of the ask. Never divide the shares yourself.
+     as strings (a stated percent or runway with the document's own places), with `fully_diluted_shares`,
+     `unissued_pool_shares`, `target_pool_percent` and `pool_timing`, every SAFE and note as `instruments`, and each
+     ownership figure a document states: the investors' percent as `stated_investor_percent`, the founders' percent
+     after the round as `stated_holder_percent` with the founders' shares today as `holder_shares`. One call per
+     document's version of the ask. Never divide the shares yourself.
    - A valuation with no label: call twice, once as `pre_money`, once as `post_money`, as vc-deal-math step 4 does.
      Only a check that is a mismatch under every reading is the calculator's mismatch. A mismatch under one reading
      only is not: it becomes one question, to label the valuation pre- or post-money, quoting both readings in the
@@ -358,6 +359,7 @@ never changes a verdict. `equity_round` returns no flags.
 | `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold     |
 | `discount_beat_cap`                   | A discount gave a lower price than the cap, so a cap-only conversion would be wrong                            |
 | `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares                           |
+| `consistent_beyond_rounding`          | A stated percent or runway holds by the tolerance alone, not as the tool's figure rounded to its own places    |
 | `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on them                                    |
 | `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn: say which one a runway claim uses                   |
 | `runway_below_band`                   | Planned runway is under the tool's runway benchmark (a common benchmark, not a rule)                           |

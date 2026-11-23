@@ -2,17 +2,19 @@
 
 One value column. The ask as given comes first, then the valuation, ownership after the round (one line per SAFE or
 note), what the pre-money pays for (with its live total), runway per burn, the use-of-funds lines (with their live
-total), each stated figure checked (stated, computed, difference, verdict), the flags in plain words, and the
-overall verdict. Values only: no line carries a live formula beyond the ``=SUM`` totals.
+total), each stated figure checked (stated, computed, difference, for a percent or the runway whether the figure as
+typed is a rounding of the computed one, which is consistent even past the tolerance, verdict), the flags in plain
+words, and the overall verdict. Values only: no line carries a live formula beyond the ``=SUM`` totals.
 """
 
 from __future__ import annotations
 
 from decimal import Decimal
 
+from equity_calculator.rounding import ROUNDING_HOW, ROUNDING_VERDICT_HOW, rounding_label
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
-from equity_calculator.schemas.equity_deal_check import DealCheck, DealCheckResult, DealFlag, RunwayRow
-from equity_calculator.sheet_parts import GIVEN, Line, Sheet, given, given_percent
+from equity_calculator.schemas.equity_deal_check import DealCheck, DealCheckInput, DealCheckResult, DealFlag, RunwayRow
+from equity_calculator.sheet_parts import GIVEN, Line, Sheet, given, given_percent, yes_no
 
 _TITLE = "Deal check"
 _HEADING = "A fundraising ask checked against itself: valuation, ownership after the round, runway, the deck's figures"
@@ -65,6 +67,9 @@ def _flag_words(flag: DealFlag, result: DealCheckResult) -> str:
         "would be wrong",
         "note_interest_converts": "Note interest converts too, so a note gets more than its principal's worth of "
         "shares; count it in the cap table",
+        "consistent_beyond_rounding": "A stated figure is consistent only by the tolerance: it is not the computed "
+        "figure rounded to the places it is written with, so a VC recomputing gets a different figure; quote the "
+        "calculator's",
         "net_burn_not_positive": "Revenue covers the burn on these figures, so there is no net runway figure; a "
         "runway claim is checked on another burn's net runway, and with none it is not checked",
         "current_burn_runway_longer": "Runway on today's burn is longer than on the planned burn; say which one "
@@ -223,18 +228,34 @@ def _funds_lines(result: DealCheckResult) -> list[Line]:
     return lines
 
 
-def _check_lines(check: DealCheck) -> list[Line]:
-    """One check: what the deck says, what the calculator gives, the difference and the verdict."""
+def _typed(check: DealCheck, inputs: DealCheckInput) -> Decimal | None:
+    """The stated percent or runway as typed (percent points for a percent), its places kept; none for the post-money
+    and the use-of-funds total."""
+    typed: dict[str, Decimal | None] = {
+        "investor_percent": inputs.stated_investor_percent,
+        "holder_percent": inputs.stated_holder_percent,
+        "runway_months": inputs.stated_runway_months,
+    }
+    return typed.get(check.key)
+
+
+def _check_lines(check: DealCheck, inputs: DealCheckInput) -> list[Line]:
+    """One check: what the deck says, what the calculator gives, the difference, whether a stated percent or runway as
+    typed is a rounding of the computed one, and the verdict."""
     name = _CHECK_NAMES[check.key]
     key = f"check_{check.key}"
-    return [
+    lines = [
         Line(f"{key}_stated", f"{name}: the deck says", (check.stated,), GIVEN),
         Line(f"{key}_computed", f"{name}: the calculator gives", (check.computed,), _CHECK_HOW[check.key]),
         Line(f"{key}_difference", f"{name}: difference", (check.difference,), "computed - stated"),
-        Line(
-            f"{key}_verdict", f"{name}: verdict", (check.verdict,), "within the tolerance is consistent", verdict=True
-        ),
     ]
+    typed = _typed(check, inputs)
+    if check.within_rounding is not None and typed is not None:
+        label = rounding_label(name, typed)
+        lines.append(Line(f"{key}_rounding", label, (yes_no(check.within_rounding),), ROUNDING_HOW))
+    how = "within the tolerance is consistent" if check.within_rounding is None else ROUNDING_VERDICT_HOW
+    lines.append(Line(f"{key}_verdict", f"{name}: verdict", (check.verdict,), how, verdict=True))
+    return lines
 
 
 def deal_check_sheet(result: DealCheckResult) -> Sheet:
@@ -244,7 +265,7 @@ def deal_check_sheet(result: DealCheckResult) -> Sheet:
         lines += _runway_lines(row)
     lines += _funds_lines(result)
     for check in result.checks:
-        lines += _check_lines(check)
+        lines += _check_lines(check, result.inputs)
     lines += [
         Line(f"flag_{flag}", "A VC is likely to ask", (flag,), _flag_words(flag, result)) for flag in result.flags
     ]

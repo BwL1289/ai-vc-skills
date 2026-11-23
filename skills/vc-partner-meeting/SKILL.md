@@ -45,9 +45,8 @@ Ask once, in one message, for whatever is missing, by name. Never guess. At most
 3. The meeting: a first meeting with one partner, or the full partnership; and the partner's background as the
    founder knows it from public material they have read (operator, finance, product, network, sector thesis), or
    "unknown". The founder names nobody to the skill unless they wish to, and the skill looks nobody up.
-4. The round so far, in the founder's words, each part optional: who else they are talking to or has committed,
-   whether existing investors will take part, who has passed and the reason given, and the cash runway if no new
-   money comes in.
+4. The round so far, in the founder's words, each part optional: who else they are talking to or has committed, whether
+   existing investors will take part, who has passed and the reason given, and the cash runway if no new money comes in.
 5. The mode: **live** (the skill asks one question at a time and waits for each answer) or **one message** (the
    founder pastes the questions they expect, each with their answer, and the skill debriefs every one of them).
 
@@ -154,6 +153,7 @@ A tool call returns each flag as a bare code; this is what each code means, as a
 | `conversions_bought_by_pre_money`     | SAFE and note shares come out of the existing holders: what do you own once they convert?                        |
 | `discount_beat_cap`                   | A discount gave a lower price than the cap: is the cap table modelled at that price?                             |
 | `note_interest_converts`              | Note interest converts too: is the interest counted in the cap table?                                            |
+| `consistent_beyond_rounding`          | A stated percent or runway holds only by the tolerance: will the deck quote the figure a partner recomputes?     |
 | `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it: which burn does the runway claim use? |
 | `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn: which burn does the runway claim use?                 |
 | `runway_below_band`                   | Planned net runway is under the tool's runway band: which milestone does the raise reach?                        |

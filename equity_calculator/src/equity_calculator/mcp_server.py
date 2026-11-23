@@ -153,7 +153,11 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "and notes counted), one holder group's stake after the round (holder_percent), the effective pre-money and "
         "what the pre-money pays for, runway = (cash_on_hand + investment) / monthly net burn on the planned and "
         "current figures, and the use_of_funds total. Each figure the deck states comes back consistent or a "
-        "mismatch with its difference; flags name what a VC is likely to ask and never change a verdict.",
+        "mismatch with its difference. A stated_investor_percent, stated_holder_percent or stated_runway_months row "
+        "also says whether the stated figure is the computed one rounded half away from zero to the places it is "
+        "typed with, which makes it consistent even past the tolerance (send it as text, those places as the deck "
+        "writes them); the post-money and the use_of_funds total keep the tolerance alone. Flags name what a VC is "
+        "likely to ask, a figure consistent by the tolerance alone among them, and never change a verdict.",
     ),
     "runway_plan": (
         RunwayPlanInput,
