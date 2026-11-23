@@ -15,12 +15,14 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import get_args
 
 import pytest
 from equity_calculator.__main__ import _INPUT_MODELS
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
-from equity_calculator.schemas.equity_deal_check import DealCheckInput
+from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealFlag
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag
 from equity_calculator.text import render_sheet
 from tests.test_vc_claims_check_skill import _READ_SOURCES
 
@@ -52,6 +54,10 @@ _HANDOFF_SKILLS = (
     "equity-calculator",
     "vc-term-sheet-review",
     "vc-metrics-readiness",
+    "vc-partner-meeting",
+    "vc-market-sizing",
+    "vc-round-sizing",
+    "vc-investor-memo",
 )
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
@@ -109,6 +115,10 @@ _FIX_COLUMNS = re.compile(
 _SCORE = re.compile(r"/\s*100\b|out of 100", re.IGNORECASE)
 _DOUBLE_QUOTED = re.compile(r'"([^"]+)"')
 _SAFE_UNCHECKED = "not checked: no tool computes this for a SAFE or note raise"
+_NOT_RUN_LIVE = "has not been run in a live session"
+# Evals whose file also records a live run's answer, with its verdict.
+_RECORDED_EVALS = ("m",)
+_RECORDED_VERDICT = re.compile(r"^\*\*(Pass|Partial|Fail)\b[^*]*\.\*\*", re.MULTILINE)
 # A figure an eval's answer takes from the calculator: a percent or months with decimals, or money with cents.
 _PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|\d[\d,]*\.\d+ months|\$\d[\d,]*\.\d{2}")
 
@@ -360,14 +370,17 @@ def test_investor_fit_names_kinds_never_firms() -> None:
     assert "Built for pre-seed and seed decks" in _unwrapped(_section("## When to use it"))
 
 
-def test_the_ask_goes_to_the_calculator_and_a_safe_raise_is_quoted_unchecked() -> None:
+def test_the_ask_goes_to_the_calculator_and_a_safe_raises_runway_goes_to_the_runway_plan_tool() -> None:
     steps = _unwrapped(_section("## Steps"))
 
     assert "checked once" in steps and "without its skeptic" in steps
     assert "not passed as `investment`" in steps and "vc-deal-math step 2" in steps
-    assert "On a SAFE or note raise, no tool checks the runway claim or the use-of-funds lines" in steps
-    assert _SAFE_UNCHECKED in steps and "never work them out by hand" in steps
-    assert _SAFE_UNCHECKED in _unwrapped(_section("## Answering"))
+    assert "Runway with no raise, or on a SAFE or note raise, and the use-of-funds lines on such a raise go to" in steps
+    assert "`equity_runway_plan`, as vc-deal-math step 2 says" in steps
+    assert "With no cash or burn given, ask for them by name" in steps and "make no call until they are given" in steps
+    assert "never work it out by hand" in steps
+    assert "`equity_runway_plan`'s rows" in _unwrapped(_section("## Answering"))
+    assert _SAFE_UNCHECKED not in _TEXT and "no tool checks the runway claim" not in _TEXT
     assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
     # A valuation with no label: two calls, both readings shown, and a one-reading mismatch is a labelling fix.
     assert "call twice, once as `pre_money`, once as `post_money`. Show both readings side by side" in steps
@@ -377,6 +390,8 @@ def test_the_ask_goes_to_the_calculator_and_a_safe_raise_is_quoted_unchecked() -
     assert "a mismatch under every reading of the valuation" in _unwrapped(_section("## The evidence marks"))
     # The calculator's flags reach the founder as questions, the benchmark ones marked as benchmarks.
     assert "Each code in the result's `flags` goes to the answer as a question a partner is likely to ask" in steps
+    assert 'with its meaning and what to change or prepare from "Calculator flags" below' in steps
+    assert "never make up a flag's question" in steps and "whose source is `unverified`" not in steps
     assert "common benchmarks, not rules" in steps
     assert "each flag as a question a partner is likely to ask" in _unwrapped(_section("## Answering"))
     assert "never compute, convert or round one" in steps
@@ -399,7 +414,16 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
         positions = [text.find(f"\n{heading}\n") for heading in _EVAL_HEADINGS]
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
-        assert "made up" in text and "has not been run in a live session" in text, path.name
+        assert "made up" in text, path.name
+        if path.name.split("-")[1] in _RECORDED_EVALS:
+            # A recorded run sits after the expected answer, says how it was recorded, and opens with its verdict.
+            recorded = _section("## Recorded answer", text)
+            assert text.index("\n## Expected answer\n") < text.index("\n## Recorded answer\n"), path.name
+            assert "Recorded with Claude Code" in recorded and _RECORDED_VERDICT.search(recorded), path.name
+            assert '"Recorded answer" is an excerpt of a recorded run' in _unwrapped(text), path.name
+            assert _NOT_RUN_LIVE not in _unwrapped(text), path.name
+        else:
+            assert _NOT_RUN_LIVE in text and "## Recorded answer" not in text, path.name
 
 
 def test_the_no_call_evals_carry_no_call_or_excerpt() -> None:
@@ -447,6 +471,9 @@ def test_one_eval_puts_the_calculator_mismatch_first_and_marks_the_ask_contradic
     assert slide_3 in prompt and slide_3 in answer
     assert "Thank you! Questions?" in prompt and '"Thank you! Questions?" is not an ask' in answer
     assert '"no slide covers" that dimension' in answer
+    # Over MCP the flag is a bare code: the question comes from the skill's own table, never made up.
+    assert "say which burn the 25 months uses" in answer and "Calculator flags table" in answer
+    assert "quoting either slide-6 line" in answer
 
 
 def test_one_eval_drops_an_objection_by_quoting_the_line_that_answers_it() -> None:
@@ -461,7 +488,9 @@ def test_one_eval_drops_an_objection_by_quoting_the_line_that_answers_it() -> No
     assert "move it from the appendix" in answer
     for level in _COMPETITION_LEVELS:
         assert level in answer, level
-    assert "No competitor is named" in answer and _SAFE_UNCHECKED in answer
+    assert "No competitor is named" in answer and _SAFE_UNCHECKED not in answer
+    assert "a SAFE raise's runway goes to `equity_runway_plan`" in answer
+    assert "asks for the cash on hand, monthly spend and revenue that call needs" in answer
     assert "the SAFE's cap" in answer and "no `equity_round` call is made without them" in answer
     assert '"no slide covers" that dimension' in answer
 
@@ -493,3 +522,70 @@ def test_one_eval_turns_a_mismatch_under_one_reading_into_a_fix_to_label_the_val
     assert "to label the valuation pre- or post-money" in answer
     assert "it does not mark Ask and use of funds Contradicted" in answer
     assert 'In the claims table, "investors get 25%" is Needs a source with both readings in its fix' in answer
+
+
+def test_every_flag_code_has_its_meaning_in_the_skill() -> None:
+    """The MCP tool returns flag codes only, so the skill carries each meaning itself (a live run made one up)."""
+    table = _section("## Calculator flags")
+    rows = re.findall(r"^\| `([a-z_]+)` +\|", table, re.MULTILINE)
+    prose = _unwrapped(table.split("\n|", 1)[0])
+
+    assert rows == list(get_args(DealFlag))
+    for flag in ("runway_below_band", "cash_never_runs_out"):
+        assert flag in get_args(RunwayPlanFlag) and f"`{flag}` (" in prose, flag
+
+
+def test_each_uncovered_dimension_failed_slide_rule_and_move_fix_gets_its_own_row() -> None:
+    """A live run folded the missing dimensions into lens objections on other lines and dropped the first-slide fix."""
+    ranked = _unwrapped(_section("### The ranked fix list"))
+    answering = _unwrapped(_section("## Answering"))
+    steps = _unwrapped(_section("## Steps"))
+
+    assert 'A "no slide covers" entry is its own row even when a lens objection on another line touches' in ranked
+    assert "A first- or last-slide rule that fails in step 2 always has a row too" in ranked
+    assert "a Dropped, answered verdict that says to move a line earlier still enters the tiers as a move fix" in ranked
+    assert "Each dimension marked Missing because no slide covers it gets its own row" in answering
+    assert "(keep both rows)" in answering
+    assert "including the bracketed ask of every competition level the deck leaves missing" in answering
+    assert 'has its own "no slide covers" entry in the ranked fix list' in steps
+
+
+def test_tool_figures_keep_their_digits_and_competition_levels_are_quoted_not_paraphrased() -> None:
+    competition = _unwrapped(_section("## Competition at four levels"))
+    answering = _unwrapped(_section("## Answering"))
+    fit = _unwrapped(_section("## Which investors the story fits"))
+
+    assert "A tool figure keeps the tool's digits wherever it appears, here included" in answering
+    assert 'quote it and say "implied", never paraphrase it' in competition
+    assert 'it never calls a kind "right" or tells the founder whom to pitch' in fit
+
+
+def test_an_understated_runway_is_minor_at_most_and_leaves_the_mark_present() -> None:
+    attack = _unwrapped(_section("### Stage A: attack"))
+    marks = _unwrapped(_section("## The evidence marks"))
+
+    assert "a runway claim below the computed runway understates it, so it does not head the list" in attack
+    assert "it goes in the minor tier at most" in attack
+    assert "A runway claim below the computed runway understates it: it leaves the mark Present" in marks
+
+
+def test_the_lenses_and_refute_passes_run_one_per_subagent_however_short_the_material() -> None:
+    attack = _unwrapped(_section("### Stage A: attack"))
+    refute = _unwrapped(_section("### Stage B: refute"))
+
+    assert "run the lenses as parallel subagents, however short the material" in attack
+    assert "raise it anyway, however short the material; the refute pass decides" in attack
+    assert "launch one subagent per objection in a single message" in refute
+    assert "never put two objections in one subagent" in refute
+
+
+def test_step_4_asks_which_way_the_fully_diluted_total_counts_safes_and_metrics_go_to_their_skills() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "ask which way the founder's does, and pass the tool its own basis" in steps
+    assert "`[fully diluted shares before the round, SAFEs and notes left out]`" in steps
+    assert "never subtract the SAFE or note shares yourself" in steps
+    assert "ARR, retention, churn, CAC payback and burn multiple are checked by the vc-metrics-readiness skill" in steps
+    assert "a market size by the vc-market-sizing skill" in steps
+    assert "Growth rates and LTV: no tool computes them" in steps
+    assert "have no tool here" not in steps
