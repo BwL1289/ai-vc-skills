@@ -38,6 +38,14 @@ All notable changes to this repository. Dates are UTC.
 - A one-page website for the skills, served by GitHub Pages from `docs/` at
   [bwl1289.github.io/ai-vc-skills](https://bwl1289.github.io/ai-vc-skills/): install lines, the four skills, real
   calculator output for the two calculator skills and eval excerpts for the two reviews, light and dark themes.
+- The `vc-deck-review` skill, in preview: a founder reviews their own pitch deck the way a partner reads it. Each
+  slide is mapped to ten dimensions (problem, solution, why now, market, product, traction, business model,
+  competition, team, the ask and use of funds), each marked present, missing or contradicted from the deck's own
+  lines with one fix; first- and last-slide rules; competition at four levels, platform risk and doing nothing
+  included. Claims go through the vc-claims-check steps and the ask to `equity_deal_check` (a SAFE raise to
+  `equity_round`). An adversarial review turns the surviving objections into a ranked fix list, and the answer says
+  which kind of investor the story fits by stage and type. No score and no named firms. `vc-positioning` now points to
+  it. Four evals are in `evals/vc-deck-review/`.
 
 ### Changed
 
