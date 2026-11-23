@@ -166,9 +166,15 @@ class RaiseOption(BaseModel):
 
     @model_validator(mode="after")
     def _one_kind_of_funds_line(self) -> RaiseOption:
-        """Refuse use-of-funds lines that mix amounts and percents (``deal_check``'s rule and message)."""
+        """Refuse use-of-funds lines that mix amounts and percents (``deal_check``'s rule and message), and a basis
+        for a stated runway with no stated runway (a claim typed without its figure would go unchecked unseen)."""
         if len({line.amount is None for line in self.use_of_funds}) > 1:
             raise ValueError("give every use_of_funds line as an amount or every one as a percent, not a mix")
+        if self.stated_runway_from == "landing" and self.stated_runway_months is None:
+            raise ValueError(
+                "stated_runway_from needs a stated runway on the same raise: give its stated runway months too, or "
+                "leave the basis out"
+            )
 
         return self
 

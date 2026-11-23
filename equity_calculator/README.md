@@ -109,7 +109,10 @@ instead of doing the arithmetic itself.
 | `equity_workbook`                                                                                                                                                                                                       | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
-error that says why. Money and percents are best sent as JSON strings (`"7"`, `"1.10"`, `"8000000"`): a JSON number
+error that says why. The SDK checks the arguments itself and passes the validation library's text through
+unchanged, so a list with one bad item also carries an untrue line saying the list is too short (for a market's one
+segment: "Tuple should have at least 1 item after validation, not 0"); the first line names the real reason, and the
+command line leaves that extra line out. Money and percents are best sent as JSON strings (`"7"`, `"1.10"`, `"8000000"`): a JSON number
 with a decimal point reaches the server as a binary float, which keeps about 15 digits. Without `--output-dir` the
 server writes nothing at all, and its own code never reads the network or a database. From the environment that code
 takes only `HOME`, to expand a leading `~` in `--output-dir`. The MCP SDK under it (`mcp` 1.28.1) also reads `FASTMCP_*`
@@ -186,15 +189,19 @@ questions a VC is likely to ask after them.
   net retention, CAC payback on gross margin and its payback targets by customer segment (under 12, 18 and 24
   months; its data is Bessemer's own cloud portfolio, not a random sample); David Sacks's
   ["The Burn Multiple"](https://sacks.substack.com/p/the-burn-multiple-51a7e43cb200) (23 April 2020) for the
-  multiple and its 3x line; and David Skok's ["SaaS Metrics 2.0"](https://www.forentrepreneurs.com/saas-metrics-2/)
+  multiple, its 3x line and the multiple approaching 0 as burn reaches 0; and David Skok's ["SaaS Metrics 2.0"](https://www.forentrepreneurs.com/saas-metrics-2/)
   (no date on the page) for net revenue churn above 2% a month. The three lines are benchmarks, not rules: each
   raises a question, never an error, and each is an input. The period rule, the cohort rule, leaving new customers
   out of retention, the exact payback formula and the tolerances are unverified.
 - **Market size**: the market sizing quotes two Y Combinator pages word for word in its assumptions:
   ["How to Pitch Your Company"](https://www.ycombinator.com/library/4b-how-to-pitch-your-company)
-  (the YC pitch guide; no date on the page; read in full on 23 November 2026), for building the market bottom-up ("you can estimate the number of customers that would
-  want your product and approximate how much you could charge them"), for a price that covers more than a year (its
-  example device's "lifecycle ... is two years") and for preferring bottom-up to top-down; and the seed guide's
+  (the YC pitch guide; no date on the page; read in full on 23 November 2026), for building the market from customers
+  and price, its method for "creating a new product or space (like Slack)" ("you can estimate the number of customers
+  that would want your product and approximate how much you could charge them"), for a price that covers more than a
+  year (its example device's "lifecycle ... is two years") and for preferring bottom-up to top-down. The page's own
+  bottom-up is a different build ("With bottom up you figure out where comparable products are sold, how many of them
+  are sold, and what % of those sales you could take."), so its preference is quoted beside that sentence, and calling
+  customers times price bottom-up is common usage, unverified; and the seed guide's
   glossary (the YC seed guide above), for TAM as "the estimated total revenue available for the product(s) you are selling", which is why a
   take rate below 100% counts only the share of the spend the company keeps. Neither page defines SAM or SOM, so
   those rules, the population check, the sensitivity and break-even rule, the straight-line year (price × 12 / the
@@ -458,7 +465,8 @@ are `deal_check`, `round` and `dilution`). Time t is in elapsed months from toda
    S(t) - A over t from L to T), the peak of a piecewise-linear function falling at a breakpoint or an end. There is
    none when S(t) > A somewhere from 0 to the earlier of L and T: the cash runs out before the money lands. An
    option landing at L covers the milestone exactly when its amount is at least I\*; the tests check that on random
-   plans.
+   plans. The amount shown is I\* rounded up to the next cent, never down, so raising the printed figure always
+   covers; the exact I\* is in the JSON.
 6. **Checks.** A stated runway with no raise is checked against the plan's no-raise runway; each option's stated
    runway against its plan runway from today, or less L when it counts from landing; within 2% of the computed one
    (an input, the edge included) is consistent. Each option's use-of-funds lines are checked against its amount as
@@ -466,7 +474,9 @@ are `deal_check`, `round` and `dilution`). Time t is in elapsed months from toda
    neither is a runway counted from landing when the cash runs out before the money lands (there is no R - L; the
    stated line says so and `cash_out_before_raise_lands` fires). The verdict is `deal_check`'s rule.
 7. **Flags**, never errors: `cash_never_runs_out`, `cash_out_before_raise_lands`, `milestone_short_on_plan` (a raise
-   short on the plan), `downside_short_where_plan_covers`, `covered_without_raise`, `start_raising_date_passed` (the
+   short on the plan; the no-raise row does not count), `downside_short_where_plan_covers` (a milestone covered on
+   the plan and short on the downside for the same row, the no-raise row included: with a raise or with none),
+   `covered_without_raise`, `start_raising_date_passed` (the
    no-raise plan runway less the months to raise is at or before today), `no_time_to_raise_given`, and
    `runway_below_band` (a raise lasting under 18 months on the plan, from today; an input, and a benchmark, not a
    rule: 18 is the top of the YC seed guide's "raising for N months (usually 12-18)", so a raise inside 12 to 18 is
@@ -486,48 +496,72 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    k·(S + N + E - C - X), net new ARR k·(N + E - C - X), new ARR k·N. From the latest month's revenue T, of which O
    is one-time and U usage: ARR 12·(T - O - U), and the run-rate 12·T, which is not ARR (a16z: ARR "should exclude
    one-time fees, professional service fees, and any variable usage fees"). A stated ARR is checked against the
-   movement's ending ARR, or the latest month's ARR when no movement is given.
+   movement's ending ARR, or the latest month's ARR when no movement is given; when both are given and differ by more
+   than `tolerance_percent`, `arr_movement_and_month_disagree` says the founder's two sets of parts disagree.
 2. **Retention and churn.** Gross revenue retention (S - C' - X')/S and net (S + E' - C' - X')/S, where E', C' and
    X' are the starting customers' own movements when given and the period's totals otherwise (Bessemer for the
    definitions; leaving new customers out is ours, unverified). Gross revenue churn = 1 - GRR, net revenue churn =
    1 - NRR (below zero when expansion outruns losses), logo churn = customers lost / customers at the start (a16z,
-   stated per month; over a longer period it is ours). None is annualised.
+   stated per month; over a longer period it is ours). None is annualised. Once a starting-customers figure is given,
+   the report prints the primed formula, and the `cohort_rule` row names which movements were the starting
+   customers' own and which fell back to the period's total.
 3. **Acquisition.** Blended CAC = spend / new customers; paid CAC = spend / customers from paid channels (a16z). CAC
    payback = spend / (new monthly recurring revenue × gross margin) in months, and the revenue-only payback leaves
-   the margin out (Bessemer measures payback on gross margin; the formula is unverified).
-4. **Efficiency.** Burn multiple = net burn / net new ARR (Sacks), none when either is zero or less; on new ARR alone
-   it is worked only to name the cause of a stated multiple that matches it. Concentration = the largest customer's
-   revenue / the period's revenue (a16z), with no benchmark.
+   the margin out (Bessemer measures payback on gross margin; the formula is unverified). With no gross margin, the
+   revenue-only payback is a floor under the margin one (a margin is at most 100%), so the payback benchmark is set
+   against it: at or above the band it is flagged; below it the benchmark is not applied, and its row says so.
+4. **Efficiency.** Burn multiple = net burn / net new ARR (Sacks), none when either is zero or less. Sacks gives no
+   ratio before revenue and says the multiple "should also approach 0 over time" as burn reaches 0; working none at
+   zero burn, and none for a negative burn or net new ARR, is ours (unverified). On new ARR alone it is worked
+   whenever a multiple is stated, to test whether the stated figure used new ARR. Concentration = the largest
+   customer's revenue / the period's revenue (a16z), with no benchmark.
 5. **Checks.** Each stated figure is checked with `deal_check`'s tolerances (0.5 points for a percent, 2% of the
-   computed value for the rest, each an input, the edge included). A stated churn with a basis is checked on that
-   basis; with none, on every basis the inputs allow, and it holds when any does. A stated payback is checked on
-   gross margin when one is given. The verdict is `deal_check`'s rule: mismatch if any figure is, not_checked with
-   none.
+   computed value for the rest, each an input, the edge included); a mismatch whose difference shows as equal to the
+   tolerance says it is just over it. Each percent, months or multiple row also says whether the stated figure is the
+   computed one rounded to the places it is written with (within half its last place, so a stated `12` covers 11.5
+   to 12.5 and `12.0` covers 11.95 to 12.05); money has no such row. A stated churn with a basis is checked on that
+   basis; with none, on every basis the inputs allow, and it holds when any does; a churn below zero is checked only
+   as net revenue churn. A stated gross retention above 100% is checked like any other figure: a mismatch unless it
+   is within the tolerance of the computed figure (100.4% against 99.95% is consistent). A stated zero keeps the
+   places it is written with for this test, so `0.0` covers -0.05 to 0.05 and `0` covers -0.5 to 0.5. A stated payback
+   is checked on gross margin when one is given. A stated burn multiple with no multiple to work (step 4) comes back
+   `not_checked`, with no computed figure. The verdict: mismatch if any figure is, else not_checked if none was
+   checked or one was left unchecked, else consistent.
 6. **Flags**, never errors. Beside a mismatch, the likely cause: `stated_arr_matches_run_rate`,
    `stated_nrr_includes_new` (ending over starting recurring revenue), `stated_payback_not_margin_adjusted` and
-   `stated_burn_multiple_uses_new_not_net_arr`, each only when the stated figure lands within tolerance of that
-   other definition (the run-rate one also only when the latest month has one-time or usage revenue and the stated
-   figure is not also that month's own ARR). With or without a mismatch: `run_rate_includes_non_recurring` (the latest month has one-time
+   `stated_burn_multiple_uses_new_not_net_arr` (also beside a multiple left unchecked), each only when the stated
+   figure lands within tolerance of that other definition (the run-rate one also only when the latest month has
+   one-time or usage revenue and the stated figure is not also that month's own ARR). Where the rounding test and the
+   verdict disagree: `consistent_beyond_rounding` (within the tolerance, but no rounding of the computed figure, such
+   as a monthly churn of 1.7% against 2.1%) and `mismatch_within_rounding` (past the tolerance, but the computed figure
+   rounded, such as a payback of 12 months against 12.4). With or without a mismatch:
+   `arr_movement_and_month_disagree` (step 1), `run_rate_includes_non_recurring` (the latest month has one-time
    or usage revenue), `expansion_hides_churn` (revenue was lost, but net revenue churn is at or below zero),
-   `churn_basis_unlabelled` (a stated churn with no basis), `blended_cac_only` (no paid-channel count),
+   `churn_basis_unlabelled` (a stated churn with no basis; below zero it says it was checked as net revenue churn
+   alone), `blended_cac_only` (no paid-channel count),
    `payback_not_margin_adjusted` (no gross margin), `burn_multiple_not_defined` (net new ARR at or below zero) and
-   `no_net_burn` (a net burn at or below zero). The benchmarks, each an input: `payback_above_band` (at or above
+   `no_net_burn` (a net burn at or below zero); each of these two says the overall verdict cannot be consistent only
+   when a multiple is stated. The benchmarks, each an input: `payback_above_band` (at or above
    Bessemer's target for the customer segment, under 12 months for SMB, 18 for mid-market and 24 for enterprise, or
    the founder's own band), `burn_multiple_above_band` (3x or more, Sacks) and `net_revenue_churn_above_band` (above
    2% in a one-month period, Skok; not asked over a longer period, since nothing is compounded).
 
-A refusal names the field: a movement or cohort figure without `starting_recurring`, contraction and churn above
+A refusal names the field: a churn below zero on a basis that cannot go there (logo or gross revenue churn, or no
+recurring revenue to work net revenue churn on), customers lost above customers at the start (only those there at
+the start count; customers won and lost inside the period are left out), a movement or cohort figure without
+`starting_recurring`, contraction and churn above
 everything the period had (the start, new and expansion, so ARR at the end is never below 0), a cohort figure above
 its total, the starting customers' contraction and churn above the start (each the period's total when its `cohort_*`
 figure is not given, so retention is never below 0), the latest month's parts without its total or above it, customers lost or
 paid-channel customers without or above their total, the largest customer without or above the period's revenue, a
 stated figure without what it needs to be checked, and a churn basis without a stated churn or its inputs.
 
-### Market sizing (YC's pitch guide for bottom-up and the seed guide for TAM as revenue; the rest unverified)
+### Market sizing (YC's pitch guide for customers × price and the seed guide for TAM as revenue; the rest unverified)
 
 A founder's own segments, up to 8: for each, the buying customers, the price of one unit and the months it covers
-(12 by default, a yearly price, which the report marks as not given and flags; 1 for a monthly price, 24 for a
-two-year device), the units one customer buys, the take rate (100% by
+(not given, or null, is read as 12, a yearly price, which the report marks as not given and flags, and the result's
+echoed `inputs` keep as null, so feeding them back keeps the flag; 1 for a monthly price, 24 for a two-year device),
+the units one customer buys, the take rate (100% by
 default; a marketplace's or a payments company's fee), the serviceable percent (100% by default) and the SOM, as the
 customers to win (preferred) or a share of the serviceable customers to win, never both.
 
@@ -540,7 +574,8 @@ customers to win (preferred) or a share of the serviceable customers to win, nev
    are a straight line, (SOM customers - today's) / years; no growth rate is compounded.
 3. **Top-down cross-check.** Each top-down figure's comparable part (the figure × the share that matches the
    founder's definition) is set beside the bottom-up TAM or SAM: the bottom-up as a share of it and the difference.
-   It never sets the market size or the verdict (YC's pitch guide prefers bottom-up).
+   It never sets the market size or the verdict (YC's pitch guide prefers its bottom-up, comparable products' sales,
+   to top-down; that the preference carries over to customers × price is unverified).
 4. **Checks.** A stated TAM, SAM or SOM is checked with `deal_check`'s 2% relative tolerance (an input, the edge
    included). The verdict is mismatch if any is, not_checked with none.
 5. **Sensitivity.** Each row works one field of one segment (`customers`, `price`, `units_per_customer`, the three
@@ -548,9 +583,9 @@ customers to win (preferred) or a share of the serviceable customers to win, nev
    high and swing. Every total is linear in one field, so the value at which SOM reaches the plan's target, and TAM
    or SAM the first top-down figure's comparable part (only the first: a second or third figure gets the cross-check
    of step 3, no break-even), is exact: x\* = x0·(T - the other segments' total) / this segment's total. It is
-   `met_without_it` when the target is reached with the field at its base (the other segments alone reach it, or, for
-   the plan's target, the base SOM is already at or above it), with no value; `does_not_move` when the field is not a
-   factor of that total; and `out_of_range` when the segment would be refused at that value (a percent above 100,
+   `does_not_move` when the field is not a factor of that total (tested first, so it is reported even when the
+   target is already met); `met_without_it` when the target is reached with the field at its base (the other segments
+   alone reach it, or, for the plan's target, the base SOM is already at or above it), with no value; and `out_of_range` when the segment would be refused at that value (a percent above 100,
    more customers to win than it can serve, fewer customers than today's, or a number outside the size every input
    has: at least 1e-15 and under 1e16), the value still given. The top-down break-even is a cross-check, not a
    target.
@@ -723,8 +758,8 @@ equity_calculator runway_plan --cash-on-hand 500000 --phase "from-month=1 gross-
   Milestone 1 (month 15), plan, raise 2: verdict                                   covered  covered when the runway reaches month 21
   Milestone 1 (month 15), downside, raise 1: verdict                                 short  covered when the runway reaches month 21
   Milestone 1 (month 15), downside, raise 2: verdict                                 short  covered when the runway reaches month 21
-  Required raise, milestone 1, plan, landing month 0                         $3,745,000.00  smallest raise keeping cash at or above the floor to month 21
-  Required raise, milestone 1, downside, landing month 0                     $4,142,500.00  smallest raise keeping cash at or above the floor to month 21
+  Required raise, milestone 1, plan, landing month 0                         $3,745,000.00  smallest raise keeping cash at or above the floor to month 21 (rounded up to the cent)
+  Required raise, milestone 1, downside, landing month 0                     $4,142,500.00  smallest raise keeping cash at or above the floor to month 21 (rounded up to the cent)
 ```
 
 With no raise the cash lasts 3.87 months, so the next raise is already late. $3M lasts 17.90 months, short of month
@@ -751,7 +786,7 @@ equity_calculator metrics_check --period-months 12 --starting-recurring 80000 --
   ARR: verdict                                                                  mismatch  within the tolerance is consistent
   Net revenue retention: verdict                                                mismatch  within the tolerance is consistent
   Burn multiple: verdict                                                        mismatch  within the tolerance is consistent
-  Overall verdict                                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); not_checked with none
+  Overall verdict                                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
 ```
 
 ARR is 12 × $100k = $1,200,000; the $1.5M is the run-rate, with the fees in it. Net revenue retention is 95%, not
@@ -790,7 +825,7 @@ equity_calculator market_sizing \
   Sensitivity 1: SOM swing                                                   $2,160,000.00  SOM high - SOM low
   Sensitivity 2: SOM swing                                                   $2,880,000.00  SOM high - SOM low
   Sensitivity 3: SOM swing                                                   $1,080,000.00  SOM high - SOM low
-  Sensitivity 1: segment 1 price at SOM = $8,000,000.00                            $640.74  base × (target - other segments' SOM) / this segment's SOM
+  Sensitivity 1: segment 1 price at SOM = $8,000,000.00                        $640.740741  base × (target - other segments' SOM) / this segment's SOM
   Sensitivity 2: segment 1 customers to win at SOM = $8,000,000.00                1,441.67  base × (target - other segments' SOM) / this segment's SOM
   Sensitivity 3: segment 2 share to win at SOM = $8,000,000.00                    34.0741%  base × (target - other segments' SOM) / this segment's SOM
   Overall verdict                                                                 mismatch  mismatch if any stated figure is; not_checked with none; a top-down figure never counts
@@ -801,8 +836,8 @@ from 920 customers, 8.6207% of SAM and 16.666667x today's revenue: short of the 
 flags `som_below_target`, and
 `som_as_percent_only` for the groups' 10%. The top-down figure is a cross-check only: the bottom-up TAM is 12.8571% of
 its comparable part. Of the three ranges, the clinics to win move SOM the most ($2,880,000.00 from low to high);
-reaching $8M on one assumption alone would take a $640.74 monthly price, about 1,442 clinics (1,441.67 exactly), or
-34.0741% of the groups.
+reaching $8M on one assumption alone would take a $640.740741 monthly price, about 1,442 clinics (1,441.67 rounded;
+4325/3 exactly), or winning 34.0741% of the serviceable groups (about 68 of the 200, 17.04% of all 400).
 
 ## Using it
 
@@ -830,8 +865,8 @@ equity_calculator deal_check --investment I [--pre-money V] [--post-money P] [--
     [--use-of-funds AMOUNT|PCT%]... [--tolerance-points P] [--tolerance-percent Q]
     [--dilution-band-percent D] [--runway-band-months M]
 equity_calculator runway_plan --cash-on-hand C [--cash-floor F] --phase "TERMS"...
-    [--downside-phase "TERMS"... | --downside-revenue-percent R [--downside-gross-burn-percent G]]
-    [--lean-phase "TERMS"... | --lean-revenue-percent R [--lean-gross-burn-percent G]]
+    [--downside-phase "TERMS"... | [--downside-revenue-percent R] [--downside-gross-burn-percent G]]
+    [--lean-phase "TERMS"... | [--lean-revenue-percent R] [--lean-gross-burn-percent G]]
     [--raise "TERMS"]... [--raise-use-of-funds "N AMOUNT|PCT%"]... [--milestone M]... [--months-to-raise T]
     [--stated-runway-months S] [--tolerance-points P] [--tolerance-percent Q] [--runway-band-months B]
 equity_calculator metrics_check --period-months P [--recurring-unit monthly|annual]
@@ -867,7 +902,8 @@ figure: recurring revenue in the unit `--recurring-unit` names (monthly by defau
 and `--net-burn` positive when cash goes out (`--net-burn=-50000` for a cash-generative period, with `=` because
 argparse reads a lone negative number as a flag). Give only what the document shows; each stated figure is
 checked when its parts are there, and `--stated-churn-basis` (`logo`, `gross_revenue`, `net_revenue` or
-`unlabelled`) says which churn the document means. A stated retention or churn figure is checked over
+`unlabelled`) says which churn the document means. A net revenue churn below zero goes in the same way:
+`--stated-churn-percent -3` reads as a number, but `-3%` needs the `=` form, `--stated-churn-percent=-3%`. A stated retention or churn figure is checked over
 `--period-months` and never annualised, so give the period the document's figure covers (1 for a monthly churn, 12
 for an annual NRR) and run once per period when the document mixes them. A stated CAC is checked as blended CAC.
 
@@ -894,7 +930,7 @@ bare flags in any order, after the amount for a SAFE or the principal for a note
 | `--round`       | `(investor-percent=N \| pre-money=V investment=I) [pool-percent=P]`                                                                                                                                                                                                                         |
 | `--class`       | `shares=S invested=I [preference-multiple=M] [rank=K] [participation=none\|full\|capped] [cap-multiple=C]` (a cap only with `capped`)                                                                                                                                                       |
 | `--phase`       | `from-month=M gross-burn=G [revenue=R]` (also `--downside-phase` and `--lean-phase`)                                                                                                                                                                                                        |
-| `--raise`       | `amount=I [lands-month=L] [stated-runway-months=M] [stated-runway-from=today\|landing]`                                                                                                                                                                                                     |
+| `--raise`       | `amount=I [lands-month=L] [stated-runway-months=M [stated-runway-from=today\|landing]]` (a basis with no stated runway is refused)                                                                                                                                                          |
 | `--segment`     | `customers=N price=P [price-period-months=M] [units-per-customer=U] [take-rate-percent=R] [serviceable-percent=S] [obtainable-percent=O \| obtainable-customers=C] [customers-today=T]`                                                                                                     |
 | `--top-down`    | `amount=A [comparable-percent=C] [compare-to=tam\|sam]`                                                                                                                                                                                                                                     |
 | `--sensitivity` | `field=F segment=K values=V1/V2/...` (F one of `customers`, `price`, `units-per-customer`, `take-rate-percent`, `serviceable-percent`, `obtainable-percent`, `obtainable-customers`; 1 to 4 values)                                                                                         |
@@ -997,7 +1033,9 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
   ownership. The number formats hide that difference.
 - The pool's and the round's value rows, the waterfall's payouts, a deal check's pre-money split and percent
   use-of-funds lines, and a market size's segment figures (to the cent, or a hundredth of a customer) are rounded by
-  largest remainder, so they add up to their rounded total exactly.
+  largest remainder, so they add up to their rounded total exactly. A segment's buying customers line shows that
+  rounding too: when it is not the typed count (0.335 shows 0.34 in one segment and 0.33 in the next), its
+  how-column says "given, shown rounded so the segments add up to the total".
 - Verdict cells are coloured by conditional formatting: green for accept, grant and in the money, amber for break
   even and at the money, red for reject, no grant and underwater. A deal check's, a runway plan's, a metrics check's and a market size's verdicts are
   green for consistent, red for mismatch and amber for not checked; a runway plan's milestones are green when covered and red
@@ -1013,15 +1051,25 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
 Inside, every number is a `Fraction`. Inputs arrive as `Decimal` (the models refuse NaN and infinity, and hold every
 number to the limits above) and share counts as plain integers (a bool, a float or a numeric string is refused, never
 read as a count). The output carries both the exact fraction and a `Decimal` rounded half-even at a fixed number of
-places: 6 places for ratios and prices, 2 for money and months, 3 for shares. Rounding is integer arithmetic. No step reads or
-sets the global decimal context, so a caller's `decimal.localcontext()` cannot change a result, and the note stub's
-private context sets every field, so a changed `decimal.DefaultContext` cannot either.
+places: 6 places for ratios and prices, 2 for money and months, 3 for shares. Three exceptions: a market's unit price
+the founder typed (a segment's price, a sensitivity base or value) is shown exactly, to the cent at least, with no
+trailing zeros past it ($400.00, $0.0075, $0.00000125, $0.3333333); a break-even price, which is worked, shows
+the fewest places from 2 that give the same figure as 6 (a price under $0.00001 keeps two significant digits, up to 15
+places); and a runway plan's required raise is rounded up to the cent, so the amount shown always covers. Rounding is
+integer arithmetic. No step reads or sets the global decimal context, so a caller's `decimal.localcontext()` cannot
+change a result, and the note stub's private context sets every field, so a changed `decimal.DefaultContext` cannot
+either.
 
 One step is not exact: a note with `stub-rule=fractional_power` (the default) and a stub left over raises its growth
 to a fractional power, which has no exact rational value. It is computed in a private 50-digit decimal context, then
 rounded to the cent like every note's amount, and its assumption says it is approximate. A note with
 `stub-rule=simple` or `compounding=simple` stays exact, and one that ran a whole number of periods has no stub, so it
 compounds exactly under either stub rule.
+
+Verdicts, checks and flags use the exact values, never the rounded ones shown. So a line can look as if it contradicts
+the verdict beside it: a runway of 17.996 months prints as 18.00 months beside a flag for a raise lasting under 18,
+and a difference of 0.50004 points prints as 0.5000% beside a 0.5-point tolerance and the verdict mismatch. The exact
+fraction of each is in the JSON.
 
 Each number shown is its own exact value rounded once. So rounded parts can miss a rounded total by one in the last
 place shown: in the report, a thousandth of a share or 0.0001% beside a total line. The pool's and the round's value
@@ -1138,21 +1186,21 @@ The `runway_plan` scenario adds these, each only when the input uses it:
 
 The `metrics_check` scenario adds these, each only when the input uses it:
 
-| Key                      | Default                                                                 | How to change it                              | Source                                                             |
-| ------------------------ | ----------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------ |
-| `period_rule`            | every flow is for the one period; nothing annualised or compounded      | `--period-months`                             | unverified (a modelling choice)                                    |
-| `arr_rule`               | ARR = k × recurring revenue; run-rate = 12 × the latest month's revenue | `--recurring-unit`                            | a16z ("16 More Startup Metrics", item 2)                           |
-| `retention_rule`         | GRR = (S - C - X)/S; NRR = (S + E - C - X)/S; new customers left out    | fixed                                         | Bessemer for the definitions; leaving new customers out unverified |
-| `cohort_rule`            | the period's totals                                                     | the `--cohort-*` figures                      | unverified (a modelling choice)                                    |
-| `churn_rule`             | logo, gross and net revenue churn over the period                       | fixed                                         | a16z ("16 Startup Metrics", item 11; per month)                    |
-| `cac_rule`               | blended = spend / new customers; paid = spend / paid-channel customers  | fixed                                         | a16z ("16 Startup Metrics", item 8)                                |
-| `payback_rule`           | spend / (new monthly recurring revenue × gross margin)                  | `--gross-margin-percent`                      | Bessemer (on gross margin); the formula unverified                 |
-| `burn_multiple_rule`     | net burn / net new ARR                                                  | fixed                                         | Sacks (pre-revenue); the other zero-or-below cases unverified      |
-| `concentration_rule`     | largest customer / the period's revenue; no benchmark                   | fixed                                         | a16z ("16 More Startup Metrics", item 14)                          |
-| `tolerance`              | 0.5 points; 2% relative                                                 | `--tolerance-points`, `--tolerance-percent`   | unverified                                                         |
-| `payback_band`           | the segment's target: 12, 18 or 24 months                               | `--customer-segment`, `--payback-band-months` | Bessemer (a benchmark, not a rule)                                 |
-| `burn_multiple_band`     | 3x                                                                      | `--burn-multiple-band`                        | Sacks (a benchmark, not a rule)                                    |
-| `net_revenue_churn_band` | 2% a month, one-month periods only                                      | `--net-revenue-churn-band-percent`            | Skok (a benchmark, not a rule)                                     |
+| Key                      | Default                                                                                                                                                          | How to change it                              | Source                                                                                                                      |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `period_rule`            | every flow is for the one period; nothing annualised or compounded                                                                                               | `--period-months`                             | unverified (a modelling choice)                                                                                             |
+| `arr_rule`               | ARR = k × recurring revenue (the movement's); ARR from the latest month = 12 × its recurring revenue; run-rate = 12 × its whole revenue: only the figures worked | `--recurring-unit`                            | a16z ("16 More Startup Metrics", item 2)                                                                                    |
+| `retention_rule`         | GRR = (S - C - X)/S; NRR = (S + E - C - X)/S; new customers left out (primed, C' and so on, once a starting-customers figure is given)                           | fixed                                         | Bessemer for the definitions; leaving new customers out unverified                                                          |
+| `cohort_rule`            | the period's totals; with `--cohort-*` figures, which movements are the starting customers' own and which are totals                                             | the `--cohort-*` figures                      | unverified (a modelling choice)                                                                                             |
+| `churn_rule`             | logo, gross and net revenue churn over the period                                                                                                                | fixed                                         | a16z ("16 Startup Metrics", item 11; per month)                                                                             |
+| `cac_rule`               | blended = spend / new customers; paid = spend / paid-channel customers                                                                                           | fixed                                         | a16z ("16 Startup Metrics", item 8)                                                                                         |
+| `payback_rule`           | spend / (new monthly recurring revenue × gross margin)                                                                                                           | `--gross-margin-percent`                      | Bessemer (on gross margin); the formula unverified                                                                          |
+| `burn_multiple_rule`     | net burn / net new ARR; none at or below zero, a stated one not checked                                                                                          | fixed                                         | Sacks (the formula, no ratio before revenue, and approaching 0 as burn reaches 0); working none at zero or below unverified |
+| `concentration_rule`     | largest customer / the period's revenue; no benchmark                                                                                                            | fixed                                         | a16z ("16 More Startup Metrics", item 14)                                                                                   |
+| `tolerance`              | 0.5 points; 2% relative; each row's rounding test and two flags beside it                                                                                        | `--tolerance-points`, `--tolerance-percent`   | unverified (the rounding test is standard arithmetic)                                                                       |
+| `payback_band`           | the segment's target: 12, 18 or 24 months; with no margin, set against the revenue-only payback as a floor                                                       | `--customer-segment`, `--payback-band-months` | Bessemer (a benchmark, not a rule)                                                                                          |
+| `burn_multiple_band`     | 3x                                                                                                                                                               | `--burn-multiple-band`                        | Sacks (a benchmark, not a rule)                                                                                             |
+| `net_revenue_churn_band` | 2% a month, one-month periods only                                                                                                                               | `--net-revenue-churn-band-percent`            | Skok (a benchmark, not a rule)                                                                                              |
 
 The `market_sizing` scenario adds these: `bottom_up_rule`, `annual_rule` and `sam_rule` always, the rest only when
 the input uses them:

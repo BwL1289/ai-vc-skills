@@ -26,8 +26,8 @@ metrics checked against their parts, or a founder's market size built bottom-up.
         [--use-of-funds AMOUNT|PCT%]... [--tolerance-points P] [--tolerance-percent Q]
         [--dilution-band-percent D] [--runway-band-months M]
     equity_calculator runway_plan --cash-on-hand C [--cash-floor F] (--phase "TERMS")...
-        [--downside-phase "TERMS"... | --downside-revenue-percent R [--downside-gross-burn-percent G]]
-        [--lean-phase "TERMS"... | --lean-revenue-percent R [--lean-gross-burn-percent G]]
+        [--downside-phase "TERMS"... | [--downside-revenue-percent R] [--downside-gross-burn-percent G]]
+        [--lean-phase "TERMS"... | [--lean-revenue-percent R] [--lean-gross-burn-percent G]]
         [--raise "TERMS"]... [--raise-use-of-funds "N AMOUNT|PCT%"]... [--milestone M]... [--months-to-raise T]
         [--stated-runway-months S] [--tolerance-points P] [--tolerance-percent Q] [--runway-band-months B]
     equity_calculator metrics_check --period-months P [--recurring-unit monthly|annual]

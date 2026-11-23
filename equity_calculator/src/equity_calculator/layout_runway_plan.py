@@ -53,14 +53,14 @@ def _flag_words(flag: RunwayPlanFlag, result: RunwayPlanResult) -> str:
         "milestone_short_on_plan": "A raise does not reach a milestone"
         + ("" if inputs.months_to_raise is None else ", with the months to raise,")
         + " on the plan itself",
-        "downside_short_where_plan_covers": "A raise reaches a milestone on the plan but not on the downside; be "
-        "ready to say what happens if the plan is missed",
+        "downside_short_where_plan_covers": "The cash reaches a milestone on the plan but not on the downside, with "
+        "the same raise or with none; be ready to say what happens if the plan is missed",
         "covered_without_raise": "The cash already reaches a milestone with no raise on at least one case",
         "start_raising_date_passed": "With no raise, the plan's runway less the months to raise is already at or "
         "past today: on the plan, raising the next round takes longer than the cash lasts",
         "no_time_to_raise_given": "No months to raise were given, so each milestone is checked at its own month, "
         "with no time left to raise the next round",
-        "runway_below_band": f"A raise lasts under {inputs.runway_band_months} months on the plan; be ready to say "
+        "runway_below_band": f"A raise lasts under {inputs.runway_band_months:f} months on the plan; be ready to say "
         "which milestone it reaches (a common benchmark, not a rule)",
     }
     return words[flag]
@@ -226,7 +226,7 @@ def _required_line(row: RequiredRaiseRow) -> Line:
         f"required_{row.milestone}_{row.case}_{row.lands_month}",
         f"Required raise, milestone {row.milestone}, {row.case}, landing month {row.lands_month}",
         (amount,),
-        f"smallest raise keeping cash at or above the floor to month {row.target_month}",
+        f"smallest raise keeping cash at or above the floor to month {row.target_month} (rounded up to the cent)",
     )
 
 

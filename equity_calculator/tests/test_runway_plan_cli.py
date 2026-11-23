@@ -87,7 +87,7 @@ async def test_the_report_shows_runway_milestones_required_raises_and_the_check(
         "  Milestone 1 (month 12), plan, raise 1: verdict                          short  "
         "covered when the runway reaches month 18",
         "  Required raise, milestone 1, plan, landing month 0              $2,220,000.00  "
-        "smallest raise keeping cash at or above the floor to month 18",
+        "smallest raise keeping cash at or above the floor to month 18 (rounded up to the cent)",
         "  Runway, raise 1: difference                                     -10.80 months  computed - stated",
         "  Overall verdict                                                      mismatch  "
         "mismatch if any check is; consistent if all are; not_checked with none",

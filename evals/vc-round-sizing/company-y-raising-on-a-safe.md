@@ -62,7 +62,7 @@ The "about 4 months" goes in the top-level `stated_runway_months`; the deck's 24
   Runway, plan, raise 1                                            13.20 months  months until cash less the floor goes below zero
   Milestone 1 (month 12), plan, raise 1: slack                      1.20 months  runway - the milestone month
   Milestone 1 (month 12), plan, raise 1: verdict                          short  covered when the runway reaches month 18
-  Required raise, milestone 1, plan, landing month 0              $2,220,000.00  smallest raise keeping cash at or above the floor to month 18
+  Required raise, milestone 1, plan, landing month 0              $2,220,000.00  smallest raise keeping cash at or above the floor to month 18 (rounded up to the cent)
   Runway, no raise: stated                                          4.00 months  given
   Runway, no raise: the calculator gives                            3.20 months  the plan case's runway
   Runway, no raise: difference                                     -0.80 months  computed - stated

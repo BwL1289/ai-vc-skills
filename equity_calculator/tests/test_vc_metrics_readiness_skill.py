@@ -332,7 +332,8 @@ def test_the_model_converts_nothing_and_the_calculator_does_every_ratio() -> Non
         # A stated figure without its parts would make the tool refuse the whole call, so it is left out.
         "A stated figure whose parts the founder did not give is left out of the call",
         "A refusal that comes anyway is relayed with the parts it names",
-        "gets no check row: it is not checked, and the flag (`burn_multiple_not_defined` or `no_net_burn`) says why",
+        "gets a `not_checked` row with no computed figure, and the flag (`burn_multiple_not_defined` or `no_net_burn`) "
+        "says why",
         "With no recurring revenue at all, a stated burn multiple and its net burn are not passed",
         "make no call only when nothing is left to pass",
         "Net burn goes into a call only when that call's document states a burn multiple",
@@ -585,10 +586,12 @@ def test_one_eval_takes_the_edge_paths_cohort_movements_no_multiple_and_a_left_o
     # The starting customers' own movements go in, so the cohort rule names them.
     assert {"cohort_expansion_recurring", "cohort_contraction_recurring", "cohort_churned_recurring"} <= set(call)
     (cohort,) = (row for row in result.assumptions if row.key == "cohort_rule")
-    assert cohort.setting == "the starting customers' own movements"
-    # A stated multiple with net new ARR below zero gets no check row and the flag that says why.
+    assert cohort.setting == "the starting customers' own expansion, contraction and churn"
+    # A stated multiple with net new ARR below zero gets a not_checked row with no computed figure and the flag that
+    # says why.
     assert "stated_burn_multiple" in call and "burn_multiple_not_defined" in result.flags
-    assert all(check.key != "burn_multiple" for check in result.checks)
+    (multiple,) = (check for check in result.checks if check.key == "burn_multiple")
+    assert (multiple.computed, multiple.verdict) == (None, "not_checked")
     # An unlabelled churn that holds on no basis is a calculator mismatch.
     churn = [check.verdict for check in result.checks if check.key == "churn"]
     assert len(churn) == 3 and set(churn) == {"mismatch"} and result.verdict == "mismatch"

@@ -70,7 +70,7 @@ async def test_the_report_shows_the_segments_totals_check_ranges_and_flags() -> 
         "Top-down 1: bottom-up as a share of it",
         "12.8571%",
         "Sensitivity 1: segment 1 price at SOM = $8,000,000.00",
-        "$640.74",
+        "$640.740741",
         "Sensitivity 3: segment 2 share to win at SOM = $8,000,000.00",
         "34.0741%",
         "som_below_target",

@@ -28,6 +28,7 @@ from equity_calculator.assumptions_metrics_check import (
     SACKS_SOURCE,
     SKOK_SOURCE,
 )
+from equity_calculator.metrics_check import compute_metrics_check
 from equity_calculator.schemas.equity_metrics_check import (
     MAX_PERIOD_MONTHS,
     MetricsCheckInput,
@@ -205,7 +206,10 @@ def test_the_starting_customers_movements_drive_retention_and_the_totals_drive_a
     assert _exact(cohort, "net_revenue_retention") == Fraction(1000 + 80 - 50 - 60, 1000)
     assert _exact(cohort, "gross_revenue_retention") == Fraction(1000 - 50 - 60, 1000)
     rows = {row.key: row for row in cohort.assumptions}
-    assert rows["cohort_rule"].setting == "the starting customers' own movements"
+    # The setting names which movements are the starting customers' own and which fell back to the totals.
+    assert (
+        rows["cohort_rule"].setting == "the starting customers' own expansion and churn; the period's total contraction"
+    )
     assert {row.key: row for row in plain.assumptions}["cohort_rule"].setting == "the period's totals"
 
 
@@ -401,6 +405,33 @@ _FLAG_CASES: dict[MetricsFlag, tuple[dict[str, object], dict[str, object]]] = {
         {"starting_recurring": "100", "churned_recurring": "2.01"},
         {"starting_recurring": "100", "churned_recurring": "2"},
     ),
+    # The movement's ending ARR 12·100 = 1,200 against the month's 12·110 = 1,320 (10% apart), then 12·101 (1%).
+    "arr_movement_and_month_disagree": (
+        {"starting_recurring": "100", "month_total_revenue": "110"},
+        {"starting_recurring": "100", "month_total_revenue": "101"},
+    ),
+    # Net revenue churn 2.1%: a stated 1.7% is within 0.5 points but no rounding of it; a stated 2% is both.
+    "consistent_beyond_rounding": (
+        {"starting_recurring": "100", "churned_recurring": "2.1", "stated_churn_percent": "1.7"},
+        {"starting_recurring": "100", "churned_recurring": "2.1", "stated_churn_percent": "2"},
+    ),
+    # Payback 124/10 = 12.4 months: a stated 12 is past 2% (0.248 months) but is 12.4 rounded; 12.0 is neither.
+    "mismatch_within_rounding": (
+        {
+            "starting_recurring": "0",
+            "new_recurring": "10",
+            "sales_marketing_spend": "124",
+            "gross_margin_percent": "100",
+            "stated_cac_payback_months": "12",
+        },
+        {
+            "starting_recurring": "0",
+            "new_recurring": "10",
+            "sales_marketing_spend": "124",
+            "gross_margin_percent": "100",
+            "stated_cac_payback_months": "12.0",
+        },
+    ),
 }
 # The burn-multiple pair differs only in the stated figure: on new ARR (12·10 = 120) 60/120 = 1/2; net new ARR 60
 # gives 1.
@@ -534,9 +565,237 @@ def test_a_burn_multiple_with_nothing_to_divide_is_not_checked_and_flagged(burn:
     )
 
     assert result.burn_multiple is None
-    assert result.checks == ()
+    (row,) = result.checks
+    assert (row.key, row.computed, row.difference, row.verdict) == ("burn_multiple", None, None, "not_checked")
+    assert row.stated.exact == 2
     assert result.verdict == "not_checked"
     assert flag in result.flags
+
+
+def test_a_stated_multiple_left_unchecked_keeps_the_overall_verdict_off_consistent() -> None:
+    """ARR shrinks by 12·6k = 72k, so there is no net-new multiple; the deck's 6.25x is net burn over new ARR
+    (1.8M / 12·24k). The ARR check holds, but the overall verdict can never read consistent, and the cause is named."""
+    parts = {"starting_recurring": "100000", "new_recurring": "24000", "churned_recurring": "30000"}
+    shrinking = metrics_check(period_months=12, **parts, net_burn="1800000", stated_burn_multiple="6.25")
+    with_arr = metrics_check(
+        period_months=12, **parts, net_burn="1800000", stated_burn_multiple="6.25", stated_arr="1128000"
+    )
+    wrong_arr = metrics_check(
+        period_months=12, **parts, net_burn="1800000", stated_burn_multiple="6.25", stated_arr="2000000"
+    )
+
+    assert shrinking.verdict == with_arr.verdict == "not_checked"
+    assert [row.verdict for row in with_arr.checks] == ["consistent", "not_checked"]
+    assert wrong_arr.verdict == "mismatch"
+    assert "stated_burn_multiple_uses_new_not_net_arr" in shrinking.flags
+    assert "burn_multiple_not_defined" in shrinking.flags
+    # A stated multiple off new ARR too names no cause.
+    other = metrics_check(period_months=12, **parts, net_burn="1800000", stated_burn_multiple="9")
+    assert "stated_burn_multiple_uses_new_not_net_arr" not in other.flags
+
+
+def test_a_break_even_company_may_state_zero_and_it_is_not_checked() -> None:
+    """The source says the multiple approaches 0 as burn reaches 0; the calculator works none at zero burn, so a
+    stated 0x comes back not_checked, never refused; a stated multiple below 0 is still refused."""
+    parts = {"period_months": 12, "starting_recurring": "100000", "new_recurring": "20000", "net_burn": "0"}
+    result = metrics_check(**parts, stated_burn_multiple="0")
+
+    assert [(row.key, row.verdict) for row in result.checks] == [("burn_multiple", "not_checked")]
+    assert result.verdict == "not_checked"
+    assert "no_net_burn" in result.flags
+    with pytest.raises(ValidationError, match="greater than or equal to 0"):
+        MetricsCheckInput.model_validate({**parts, "stated_burn_multiple": "-1"})
+
+
+def test_the_burn_multiple_rule_attributes_only_what_the_essay_says() -> None:
+    result = metrics_check(period_months=12, starting_recurring="100", new_recurring="20", net_burn="0")
+    row = {row.key: row for row in result.assumptions}["burn_multiple_rule"]
+
+    assert "approach 0 over time" in row.source
+    assert "covers" not in row.statement
+    assert "working none at zero burn, and none for a negative burn or net new ARR, is ours" in row.statement
+
+
+def test_negative_net_revenue_churn_is_checked_on_net_revenue_alone() -> None:
+    """Expansion 5k above churn 2k on 100k: net revenue churn is -3%, which a deck may state; gross and logo churn
+    cannot go below 0, so an unlabelled -3% is checked only on net revenue."""
+    parts = {"period_months": 1, "starting_recurring": "100000", "expansion_recurring": "5000"}
+    parts |= {"churned_recurring": "2000", "customers_start": 50, "customers_lost": 1}
+    net = metrics_check(**parts, stated_churn_percent="-3", stated_churn_basis="net_revenue")
+    unlabelled = metrics_check(**parts, stated_churn_percent="-3")
+
+    assert [(row.basis, row.verdict) for row in net.checks] == [("net_revenue", "consistent")]
+    assert [(row.basis, row.verdict) for row in unlabelled.checks] == [("net_revenue", "consistent")]
+    assert net.verdict == unlabelled.verdict == "consistent"
+
+
+@pytest.mark.parametrize(
+    "fields",
+    [
+        {"customers_start": 5, "customers_lost": 1, "stated_churn_basis": "logo"},
+        {"starting_recurring": "100", "stated_churn_basis": "gross_revenue"},
+        {"customers_start": 5, "customers_lost": 1},
+    ],
+    ids=["logo", "gross-revenue", "unlabelled-with-only-logo"],
+)
+def test_a_churn_below_zero_on_a_basis_that_cannot_go_there_is_refused_with_why(fields: dict[str, object]) -> None:
+    with pytest.raises(ValidationError, match="stated_churn_percent is below 0, which only net revenue churn can be"):
+        MetricsCheckInput.model_validate({"period_months": 1, "stated_churn_percent": "-1", **fields})
+
+
+def test_a_stated_gross_retention_above_100_is_a_mismatch_not_a_refusal() -> None:
+    """Expansion netted into gross retention: 104% against (100k - 5k)/100k = 95%."""
+    result = metrics_check(
+        period_months=12,
+        starting_recurring="100000",
+        expansion_recurring="9000",
+        churned_recurring="5000",
+        stated_grr_percent="104",
+    )
+
+    assert _checks(result)[("grr", None)] == (Fraction(104, 100), Fraction(95, 100), "mismatch")
+    assert result.verdict == "mismatch"
+
+
+@pytest.mark.parametrize(
+    ("stated", "verdict"),
+    [("100.4", "consistent"), ("100.45", "consistent"), ("100.5", "mismatch"), ("101", "mismatch")],
+)
+def test_a_stated_gross_retention_above_100_within_the_tolerance_is_consistent_as_the_docs_say(
+    stated: str, verdict: str
+) -> None:
+    """(100k - 50)/100k = 99.95%: 100.4% is 0.45 points off and 100.45% 0.5 (the edge), within the half-point tolerance,
+    so each is checked like any figure (the README, the schema comment and the skill say "a mismatch unless within the
+    tolerance"); 100.5% and 101% are past it."""
+    result = metrics_check(
+        period_months=12, starting_recurring="100000", churned_recurring="50", stated_grr_percent=stated
+    )
+
+    (row,) = result.checks
+    assert row.computed is not None and row.computed.exact == Fraction(9995, 10000)
+    assert (row.verdict, result.verdict) == (verdict, verdict)
+
+
+# One-place, two-place and whole zeros, each against a computed 0.4% (or 0.416667x): only a whole "0" (half a point,
+# or half of 1x, either way) is a rounding of it; "0.0" allows 0.05 and "0.00" 0.005, as typed.
+_ZERO_FIELDS: dict[str, dict[str, object]] = {
+    "stated_nrr_percent": {"period_months": 12, "starting_recurring": "100000", "churned_recurring": "99600"},
+    "stated_grr_percent": {"period_months": 12, "starting_recurring": "100000", "churned_recurring": "99600"},
+    "stated_churn_percent": {
+        "period_months": 1,
+        "starting_recurring": "100000",
+        "churned_recurring": "400",
+        "stated_churn_basis": "gross_revenue",
+    },
+    "stated_burn_multiple": {
+        "period_months": 12,
+        "starting_recurring": "100000",
+        "new_recurring": "20000",
+        "net_burn": "100000",
+    },
+    "stated_concentration_percent": {"period_months": 12, "largest_customer_revenue": "4", "period_revenue": "1000"},
+}
+
+
+@pytest.mark.parametrize("field", list(_ZERO_FIELDS))
+@pytest.mark.parametrize(("typed", "within"), [("0", True), ("0.0", False), ("0.00", False), ("-0.0", False)])
+def test_a_stated_zero_is_read_with_the_places_it_is_written_with(field: str, typed: str, within: bool) -> None:
+    result = metrics_check(**_ZERO_FIELDS[field], **{field: typed})
+
+    (row,) = result.checks
+    assert row.stated.exact == 0
+    assert row.within_rounding is within
+    rounding_flags = {"consistent_beyond_rounding", "mismatch_within_rounding"} & set(result.flags)
+    if row.verdict == "consistent":
+        assert rounding_flags == (set() if within else {"consistent_beyond_rounding"})
+    else:
+        assert rounding_flags == ({"mismatch_within_rounding"} if within else set())
+
+
+def test_a_stated_zero_keeps_its_places_when_its_echoed_inputs_are_fed_back() -> None:
+    """The places live in the value itself: "0.0" is echoed as "0.0", and the echo gives the same rounding row."""
+    first = metrics_check(**_ZERO_FIELDS["stated_churn_percent"], stated_churn_percent="0.0")
+    echoed = MetricsCheckInput.model_validate_json(first.inputs.model_dump_json())
+
+    assert first.model_dump(mode="json")["inputs"]["stated_churn_percent"] == "0.0"
+    assert echoed.stated_churn_percent is not None and echoed.stated_churn_percent.as_tuple().exponent == -1
+    assert compute_metrics_check(echoed) == first
+    assert compute_metrics_check(echoed).checks[0].within_rounding is False
+
+
+@pytest.mark.parametrize(
+    ("stated", "spend", "within"),
+    [
+        ("12", "124", True),
+        ("12.0", "124", False),
+        ("12", "125", True),
+        ("12", "125.01", False),
+        ("1.2E+1", "124", True),
+    ],
+    ids=["whole-month-rounds", "one-place-does-not", "half-a-month-edge", "just-past-half", "exponent-form-whole"],
+)
+def test_each_row_says_whether_the_stated_figure_is_a_rounding_of_the_computed_one(
+    stated: str, spend: str, within: bool
+) -> None:
+    """Payback = spend / (10 x 100%): the stated figure is a rounding when within half its own last place."""
+    result = metrics_check(
+        period_months=12,
+        starting_recurring="0",
+        new_recurring="10",
+        sales_marketing_spend=spend,
+        gross_margin_percent="100",
+        stated_cac_payback_months=stated,
+    )
+
+    (row,) = result.checks
+    assert row.within_rounding is within
+
+
+def test_the_rounding_test_reads_a_percent_in_points_and_leaves_money_out() -> None:
+    """Net revenue churn 2.1% on one month: 1.7 is no rounding of it, 2.1 is, and an ARR row has no rounding test."""
+    parts = {"period_months": 1, "starting_recurring": "100000", "churned_recurring": "2100"}
+    off = metrics_check(**parts, stated_churn_percent="1.7", stated_churn_basis="net_revenue", stated_arr="1174800")
+    exact = metrics_check(**parts, stated_churn_percent="2.10", stated_churn_basis="net_revenue")
+
+    rows = {row.key: row for row in off.checks}
+    assert (rows["churn"].verdict, rows["churn"].within_rounding) == ("consistent", False)
+    assert rows["arr"].within_rounding is None
+    assert "consistent_beyond_rounding" in off.flags
+    assert exact.checks[0].within_rounding is True
+    assert "consistent_beyond_rounding" not in exact.flags
+
+
+def test_a_revenue_only_payback_already_past_the_band_is_flagged_and_the_row_says_how_far_it_applies() -> None:
+    """SMB target under 12 months, no gross margin: 300k / 10k = 30 months on revenue alone, a floor under the
+    payback on gross margin, so the band flag fires; at 3 months nothing can be said and the row says so."""
+    parts = {"period_months": 12, "starting_recurring": "100000", "new_recurring": "10000", "customer_segment": "smb"}
+    slow = metrics_check(**parts, sales_marketing_spend="300000")
+    fast = metrics_check(**parts, sales_marketing_spend="30000")
+
+    assert "payback_above_band" in slow.flags
+    assert "payback_above_band" not in fast.flags
+    assert _exact(slow, "payback_band_months") == _exact(fast, "payback_band_months") == 12
+    row = {row.key: row for row in fast.assumptions}["payback_band"]
+    assert "below it the benchmark is not applied" in row.statement
+    margin = metrics_check(**parts, sales_marketing_spend="30000", gross_margin_percent="50")
+    margin_row = {row.key: row for row in margin.assumptions}["payback_band"]
+    assert "not applied" not in margin_row.statement
+
+
+def test_a_stated_arr_equal_to_the_months_arr_names_the_disagreeing_parts() -> None:
+    """Movement 12·98k = 1.176M, the latest month 12·100k = 1.2M: a deck's 1.2M is a mismatch against the movement,
+    and the flag says the founder's two sets of parts disagree."""
+    result = metrics_check(
+        period_months=12,
+        starting_recurring="80000",
+        new_recurring="18000",
+        month_total_revenue="100000",
+        stated_arr="1200000",
+    )
+
+    assert result.verdict == "mismatch"
+    assert "arr_movement_and_month_disagree" in result.flags
+    assert "stated_arr_matches_run_rate" not in result.flags
 
 
 def test_a_stated_concentration_and_cac_are_checked() -> None:
@@ -632,7 +891,11 @@ _NEEDS = "to check it"
             "month_one_time_revenue + month_usage_revenue is above month_total_revenue",
         ),
         ({"customers_lost": 1}, "customers_lost needs customers_start"),
-        ({"customers_start": 1, "customers_lost": 2}, "customers_lost is above customers_start"),
+        (
+            {"customers_start": 1, "customers_lost": 2},
+            "customers_lost is above customers_start: give only the customers lost among those there at the start of "
+            "the period; customers won and lost inside the period are left out of logo churn",
+        ),
         ({"customers_new_paid": 1}, "customers_new_paid needs customers_new"),
         ({"customers_new": 1, "customers_new_paid": 2}, "customers_new_paid is above customers_new"),
         ({"largest_customer_revenue": "1"}, "largest_customer_revenue needs period_revenue"),
@@ -685,7 +948,11 @@ _NEEDS = "to check it"
         ({"period_months": MAX_PERIOD_MONTHS + 1}, f"less than or equal to {MAX_PERIOD_MONTHS}"),
         ({"customers_start": True}, "Input should be a valid integer"),
         ({"customers_start": -1}, "greater than or equal to 0"),
-        ({"stated_grr_percent": "100.1", "starting_recurring": "1"}, "less than or equal to 100"),
+        ({"stated_churn_percent": "100.1", "starting_recurring": "1"}, "less than or equal to 100"),
+        (
+            {"customers_start": 5, "customers_lost": 1, "stated_churn_percent": "-0.5"},
+            "stated_churn_percent is below 0, which only net revenue churn can be (expansion above the revenue lost)",
+        ),
     ],
     ids=[
         "movement-without-start",
@@ -719,9 +986,34 @@ _NEEDS = "to check it"
         "period-too-long",
         "customers-bool",
         "customers-negative",
-        "grr-above-100",
+        "churn-above-100",
+        "churn-below-0-without-revenue",
     ],
 )
 def test_each_refusal_names_its_fields(fields: dict[str, object], message: str) -> None:
     with pytest.raises(ValidationError, match=re.escape(message)):
         MetricsCheckInput.model_validate({"period_months": 1, **fields})
+
+
+@pytest.mark.parametrize(
+    ("unit", "parts", "setting"),
+    [
+        (
+            "annual",
+            {"month_total_revenue": "100"},
+            "ARR from the latest month = 12 × its recurring revenue; run-rate = 12 × its whole revenue",
+        ),
+        ("annual", {"starting_recurring": "1200"}, "ARR = annual recurring revenue"),
+        (
+            "monthly",
+            {"starting_recurring": "100", "month_total_revenue": "100"},
+            "ARR = 12 × monthly recurring revenue; ARR from the latest month = 12 × its recurring revenue; run-rate = "
+            "12 × its whole revenue",
+        ),
+    ],
+    ids=["annual-month-only", "annual-movement-only", "both"],
+)
+def test_the_arr_rule_names_only_the_arr_figures_worked(unit: str, parts: dict[str, object], setting: str) -> None:
+    result = metrics_check(period_months=12, recurring_unit=unit, **parts)
+
+    assert {row.key: row for row in result.assumptions}["arr_rule"].setting == setting
