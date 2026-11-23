@@ -123,7 +123,7 @@ Four calls, in this order: `equity_deal_check`, `equity_waterfall` once per exit
   anywhere.
 - The mismatch leads the fix list under figures that do not match (computed), with no tier: "the round buys 20% of the
   company" against the calculator's 25.0000% at a $20,000,000 post-money, a difference of 5.0000%; the fix states
-  25.0000%, which also matches the pro forma.
+  25.0000%.
 - Outcome table: $40,000,000 and $2,000,000,000, each the founder's assumption with its reason; payouts $10,000,000.00
   and $500,000,000.00 (both convert) beside $5,000,000 invested; the terms are the founder's (1x, non-participating),
   not the calculator's defaults; no multiple.

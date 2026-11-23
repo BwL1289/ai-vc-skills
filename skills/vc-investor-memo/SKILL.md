@@ -205,10 +205,12 @@ same question from the founder's side: "If all goes well, what will you have bui
 5. **One `equity_waterfall` call per exit value.** Read `rows[]` (`payout`, `converts`, `preference_owed`) and
    `common_payout`. The memo gives, for each exit value, the round's class payout as printed beside the amount
    invested, and whether the class converted. Never divide one by the other.
-6. **Later rounds**, only when the founder gives them: `equity_dilution` with `holder_percent` = the round investor's
-   percent as the round's tool printed it (`equity_deal_check`'s "Investors' share of the cap table", or
-   `equity_round`'s "Ownership: investor"), and `rounds` = the founder's assumed later rounds (`investor_percent`,
-   `pool_percent`), labelled assumptions. The memo gives the final stake as printed.
+6. **Later rounds**, only when the founder gives them: `equity_dilution` with `holder_percent` = this round's
+   percent as the round's tool printed it, and `rounds` = the founder's assumed later rounds (`investor_percent`,
+   `pool_percent`), labelled assumptions. For a priced round, that percent is `equity_deal_check`'s "Investors' share
+   of the cap table". For a SAFE or note, it is the instrument's own row of `equity_round` ("Ownership: SAFE 1", not
+   "Ownership: investor", which is the expected priced round's buyer), and `rounds` holds only the rounds after that
+   priced round, which `equity_round` has already counted. The memo gives the final stake as printed.
 7. **Label the two apart.** The waterfall's payouts use the cap table right after this round. No tool here combines a
    later round's dilution with an exit, so the memo says: "The payouts above use the cap table right after this round,
    before any later round. After the founder's assumed later rounds the stake is [final stake] (calculator); the payout

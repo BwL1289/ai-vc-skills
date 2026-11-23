@@ -341,6 +341,9 @@ def test_the_outcome_rules_name_no_fund_math() -> None:
         "`exit_is_shared_amount`",
         "these are the calculator's defaults, not agreed terms",
         "the round's tool printed it",
+        # On a SAFE round, the SAFE's own row is the stake, and the priced round equity_round counted is not repeated.
+        'the instrument\'s own row of `equity_round` ("Ownership: SAFE 1", not "Ownership: investor"',
+        "`rounds` holds only the rounds after that priced round",
         "`equity_pool` refuses a `target_pool_percent` of 0",
         "Never add or subtract shares yourself",
         "pass it as the integer `2714285`",
