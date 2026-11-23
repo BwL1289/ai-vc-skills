@@ -163,9 +163,10 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
      case's phases are the founder's own figures: today's monthly spend and revenue as the first phase, from month 1,
      and each change the founder plans (more spend after the raise, say) as a later phase from the month the founder
      names, each asked for by name when missing (`[planned monthly spend and revenue, from which month]`), never
-     assumed. With no cash or burn given, ask for them by name (`[cash on hand, monthly spend and revenue]`) and make no
-     call until they are given; quote the claim as stated meanwhile, and never work it out by hand. Its mismatches are
-     the calculator's mismatches.
+     assumed. Until a planned change's start month is given, make no runway call and give no runway figure; mark the
+     runway line "not checked: waiting for [the month the planned spend starts]". With no cash or burn given, ask for
+     them by name (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; quote the claim
+     as stated meanwhile, and never work it out by hand. Its mismatches are the calculator's mismatches.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
      its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%), which is what the
      command line's report prints. That is a change of notation, not a calculation; never round it.

@@ -68,13 +68,14 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      with no raise as the top-level `stated_runway_months`. On a SAFE or note raise, the `plan` case's phases are the
      founder's own figures: today's monthly spend and revenue as the first phase, from month 1, and each change the
      founder plans (more spend after the raise, say) as a later phase from the month the founder names, each asked for
-     by name when missing (`[planned monthly spend and revenue, from which month]`), never assumed. With no cash or
-     burn given, ask for them by name
-     (`[cash on hand, monthly spend and revenue]`) and make no call until they are given. A mismatch row is quoted
-     with the tool's value, as `deal_check`'s are. With no milestone, months to raise or landing month passed, two
-     flags can come back: `runway_below_band` (on the plan the raise lasts under the runway benchmark, 18 months by
-     default; a common benchmark, not a rule) and `cash_never_runs_out` (revenue covers the spend before the cash
-     runs out, so there is no runway end and a stated runway is not checked).
+     by name when missing (`[planned monthly spend and revenue, from which month]`), never assumed. Until a planned
+     change's start month is given, make no runway call and give no runway figure; mark the runway line "not checked:
+     waiting for [the month the planned spend starts]". With no cash or burn given, ask for them by name
+     (`[cash on hand, monthly spend and revenue]`) and make no call until they are given. A mismatch row is quoted with
+     the tool's value, as `deal_check`'s are. With no milestone, months to raise or landing month passed, two flags can
+     come back: `runway_below_band` (on the plan the raise lasts under the runway benchmark, 18 months by default; a
+     common benchmark, not a rule) and `cash_never_runs_out` (revenue covers the spend before the cash runs out, so
+     there is no runway end and a stated runway is not checked).
    - Pool timing: if the term sheet or deck does not say, use the pre-money (the usual term sheet), say so, and offer
      to re-run with the pool in the post-money.
 3. **Call `equity_deal_check`** with every stated figure. Send money and percents as strings:
@@ -180,10 +181,13 @@ the two `runway_plan` flags). The text report prints the same meaning beside eac
 
 ## Limits
 
-- No arithmetic outside the calculator's tools, and no what-if the founder did not ask for. A figure outside the
-  deal terms goes to the skill built for it: ARR, retention, churn, CAC payback and burn multiple to the
-  vc-metrics-readiness skill (`equity_metrics_check`), a market size to the vc-market-sizing skill
-  (`equity_market_sizing`). Growth rates and LTV are quoted as stated with "not checked: no tool computes this".
+- No arithmetic outside the calculator's tools, and no what-if the founder did not ask for. Never work out how two of
+  the founder's figures relate (a difference, a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a
+  line or a table cell unless the founder's material states it or a tool returned it; quote both figures as stated
+  instead ("from 2,000 to 4,500", never "more than doubled"). A figure outside the deal terms goes to the skill built
+  for it: ARR, retention, churn, CAC payback and burn multiple to the vc-metrics-readiness skill
+  (`equity_metrics_check`), a market size to the vc-market-sizing skill (`equity_market_sizing`). Growth rates and LTV
+  are quoted as stated with "not checked: no tool computes this".
 - It checks the arithmetic of the figures the founder gives. It does not read a deck file, a cap table file or a term
   sheet; the founder's text is the input, and nothing is sent anywhere. A term sheet goes to the vc-term-sheet-review
   skill.

@@ -2,23 +2,28 @@
 
 Two sentences are copied into several skills and must stay identical there:
 
-- Which monthly spend goes into ``equity_runway_plan`` for a runway claim on a SAFE or note raise. When the skills
-  disagreed, the same founder input gave 11.67 months in one skill and 17.50 in another (a runway plan with today's
-  spend of $120,000 against one with $80,000 and the later phase left out). Every skill that sends a SAFE or note
+- Which monthly spend goes into ``equity_runway_plan`` for a runway claim on a SAFE or note raise, and what happens
+  while a planned change's start month is missing. When the skills disagreed, the same founder input ($400,000 in the
+  bank, a $1,000,000 raise, $80,000 a month today and $120,000 planned after the raise) gave 11.67 months in one skill,
+  which sent the planned $120,000 as the only phase, and 17.50 in another, which sent today's $80,000 and left the rise
+  out. The founder's plan, $80,000 and then $120,000 from month 4, gives 12.67. A plan with the rise and no start month
+  cannot be run, so the call waits for the month and the runway line says so. Every skill that sends a SAFE or note
   raise's runway to that tool carries the sentence.
 - No working out how two of the founder's figures relate in founder-facing text: a live positioning run wrote that
   users "more than doubled", which neither the founder nor the calculator said. Every skill that writes rewrites,
-  lines, draft answers or update text for the founder carries the sentence, except the partner-meeting skill, whose
-  own ban says the same in other words and is checked here too.
+  lines, draft answers, update text or deck fixes for the founder carries the sentence, except the partner-meeting
+  skill, whose own ban says the same in other words and is checked here too.
 
 Every eval that records a live run states the README's verdict rule in its first paragraph and opens its recording
 with a verdict under it: Pass when every clause of the pass sentence is met, Partial when exactly one is missed or met
-only in part, Fail when two or more are missed. Four recordings once carried an outside grader's word instead, one of
-them Partial beside "met every clause"; they are re-graded from their recorded answers.
+only in part, Fail when two or more are missed. The verdict counts the pass sentence as it was at the run. Each
+recorded eval's sentence at its run is pinned here; one whose sentence has changed since says so in its first
+paragraph and its recording, names the clauses that changed, and says how the run reads against today's sentence.
 """
 
 from __future__ import annotations
 
+import hashlib
 import re
 from pathlib import Path
 
@@ -35,25 +40,68 @@ _VERDICT_RULE = (
     " only in part, and Fail when two or more are missed"
 )
 _THEN = "graded against the pass sentence this eval had then"
+_THEN_VERDICT = re.compile(r"\*\*(Pass|Partial|Fail), against the pass sentence this eval had then[;:]")
+_TODAY = "today's sentence"
 _MEMO_HANDOFF = (
     "The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview)."
 )
-# The four recordings re-graded under the rule, each from its own recorded answer.
+# Every recorded eval with the pass sentence it had when its run was recorded: the first 12 hex digits of the SHA-256
+# of that sentence, its line breaks taken out (_pass_sentence). A recording adds its eval here. A pass sentence changed
+# after its run keeps its digest here, so the test sees the change and asks for the README's rule in that file.
+_PASS_SENTENCE_AT_RUN = {
+    "company-ac-a-cap-table-the-deck-misstates": "0b1fd724fbe7",
+    "company-ag-a-runway-that-ignores-planned-hires": "341cf1179008",
+    "company-am-run-rate-called-arr": "d554795c549d",
+    "company-ar-a-2x-participating-seed": "8d634ea67d45",
+    "company-aw-bottom-up-against-the-deck": "d7ee0daae37d",
+    "company-be-a-moved-target-and-a-redefined-customer-count": "686844b0304f",
+    "company-bm-a-memo-that-hides-its-biggest-risk": "a949dba188d6",
+    "company-e-phrases-that-cost-the-meeting": "b0c28683e6ff",
+    "company-f-numbers-go-to-the-calculator": "4245cbea0f66",
+    "company-g-an-objection-the-material-answers": "1ab43e33700b",
+    "company-h-asked-to-imitate-named-investors": "5d5c9d89c8dd",
+    "company-j-figures-that-disagree": "701e7373824c",
+    "company-k-patterns-a-vc-discounts": "b64ad6e93730",
+    "company-l-an-attack-the-material-does-not-ground": "c59bfc8ce84d",
+    "company-m-use-of-funds-that-does-not-add-up": "330879e16c4d",
+    "company-r-a-runway-answer-the-calculator-checks": "891fe89e539a",
+    "company-t-a-no-that-answers-the-objection": "6a76e240266a",
+    "company-w-how-much-should-we-raise": "b5ae91a9f0a7",
+}
+# The recordings re-graded from their recorded answers: one that carried an outside grader's word on an unchanged pass
+# sentence, and every one whose pass sentence changed after its run, each counted on the sentence it had then.
 _REGRADED = {
     "company-ar-a-2x-participating-seed": "**Pass, with shortfalls against the expected answer",
-    "company-ac-a-cap-table-the-deck-misstates": "**Fail: two clauses missed.**",
+    "company-ac-a-cap-table-the-deck-misstates": (
+        "**Fail, against the pass sentence this eval had then: two clauses missed.**"
+    ),
     "company-bm-a-memo-that-hides-its-biggest-risk": (
         "**Pass, against the pass sentence this eval had then; it missed the four clauses added since.**"
     ),
     "company-aw-bottom-up-against-the-deck": (
         "**Pass, against the pass sentence this eval had then; it missed the one clause added since.**"
     ),
+    "company-am-run-rate-called-arr": (
+        "**Pass, against the pass sentence this eval had then; it missed the one clause added since.**"
+    ),
+    "company-be-a-moved-target-and-a-redefined-customer-count": (
+        "**Fail, against the pass sentence this eval had then: two clauses missed and one met only in part.**"
+    ),
+    "company-r-a-runway-answer-the-calculator-checks": (
+        "**Partial, against the pass sentence this eval had then: one clause missed.**"
+    ),
+    "company-t-a-no-that-answers-the-objection": (
+        "**Fail, against the pass sentence this eval had then: two clauses missed.**"
+    ),
 }
+_UNCHANGED_REGRADE = "company-ar-a-2x-participating-seed"
 _PLAN_PHASES = (
     "On a SAFE or note raise, the `plan` case's phases are the founder's own figures: today's monthly spend and revenue"
     " as the first phase, from month 1, and each change the founder plans (more spend after the raise, say) as a later"
     " phase from the month the founder names, each asked for by name when missing (`[planned monthly spend and"
-    " revenue, from which month]`), never assumed."
+    " revenue, from which month]`), never assumed. Until a planned change's start month is given, make no runway call"
+    ' and give no runway figure; mark the runway line "not checked: waiting for [the month the planned spend'
+    ' starts]".'
 )
 _NO_COMPARISON = (
     "Never work out how two of the founder's figures relate (a difference, a sum, a ratio or multiple, a share left"
@@ -74,6 +122,7 @@ _FOUNDER_TEXT_SKILLS = (
     "vc-positioning",
     "vc-deck-review",
     "vc-claims-check",
+    "vc-deal-math",
     "vc-round-sizing",
     "vc-prospective-investor-update",
     "vc-current-investor-update",
@@ -98,12 +147,14 @@ def test_the_skills_that_send_a_safe_raises_runway_to_the_runway_plan_are_the_on
 
 
 @pytest.mark.parametrize("name", _SAFE_RUNWAY_SKILLS)
-def test_a_safe_raises_runway_takes_todays_spend_first_and_each_planned_change_as_a_later_phase(name: str) -> None:
+def test_a_safe_raises_runway_takes_each_planned_change_as_a_later_phase_and_waits_for_its_start_month(
+    name: str,
+) -> None:
     text = _unwrapped(name)
 
     assert _PLAN_PHASES in text
-    # The partner-meeting skill used to send only the spend planned after the raise, which gives a longer runway when
-    # spend rises later and the rise is left out.
+    # Sending only the spend planned after the raise, from month 1, gives a shorter runway than the founder's plan; the
+    # partner-meeting skill used to do that.
     assert "on a `plan` case of the spend planned after the raise" not in text
     assert "today's spend, if it differs, takes its own no-raise call" not in text
 
@@ -121,11 +172,25 @@ def _paragraphs(text: str) -> list[str]:
     return [" ".join(line.strip() for line in block.splitlines()) for block in text.split("\n\n")]
 
 
+def _pass_sentence(text: str) -> str:
+    """An eval's pass sentence, from "A run passes when" to the full stop that ends it, its line breaks taken out."""
+    first = " ".join(_paragraphs(text.split("\n## ", 1)[0])[1].split())
+    match = re.search(r"A run passes when .*?\.(?= [A-Z]|$)", first)
+    assert match, first[:80]
+    return match.group(0)
+
+
+def _changed_since_run(path: Path) -> bool:
+    """Whether the eval's pass sentence differs from the one pinned for its run."""
+    digest = hashlib.sha256(_pass_sentence(path.read_text(encoding="utf-8")).encode("utf-8")).hexdigest()[:12]
+    return digest != _PASS_SENTENCE_AT_RUN.get(path.stem)
+
+
 @pytest.mark.parametrize("path", _RECORDED_EVALS, ids=[path.stem for path in _RECORDED_EVALS])
 def test_a_recorded_eval_states_the_verdict_rule_and_opens_its_recording_with_a_verdict_under_it(path: Path) -> None:
     text = path.read_text(encoding="utf-8")
     first = _paragraphs(text.split("\n## ", 1)[0])[1]
-    header, verdict = _paragraphs(text.split(_RECORDED, 1)[1].strip("\n"))[:2]
+    verdict = _paragraphs(text.split(_RECORDED, 1)[1].strip("\n"))[1]
 
     assert _VERDICT_RULE in first
     # An outside grader's word is not a verdict under the rule, and no other point of an eval can make a run Partial.
@@ -133,19 +198,45 @@ def test_a_recorded_eval_states_the_verdict_rule_and_opens_its_recording_with_a_
     assert re.match(r"\*\*(Pass|Partial|Fail)\b", verdict), verdict[:60]
     if "met every clause" in verdict:
         assert verdict.startswith("**Pass"), verdict[:60]
-    # A verdict counted on the pass sentence as it stood at the run says so, and says which clauses came after.
-    if _THEN in first:
-        assert "pass sentence this eval had then" in verdict or "Fail" in verdict
+
+
+def test_every_recorded_eval_has_its_pass_sentence_at_the_run_pinned() -> None:
+    """A new recording adds its eval's pass sentence as it stood at the run; an eval that loses its recording comes
+    off the list."""
+    assert {path.stem for path in _RECORDED_EVALS} == set(_PASS_SENTENCE_AT_RUN)
+
+
+@pytest.mark.parametrize("path", _RECORDED_EVALS, ids=[path.stem for path in _RECORDED_EVALS])
+def test_a_verdict_counts_the_pass_sentence_the_eval_had_at_the_run(path: Path) -> None:
+    """Under the README's rule a recorded verdict counts the clauses the pass sentence had at the run. An eval whose
+    sentence changed since says so in its first paragraph and in its recording's header, opens its verdict with that
+    rule, and says how the run reads against today's sentence; an eval whose sentence is unchanged says none of it."""
+    text = path.read_text(encoding="utf-8")
+    first = _paragraphs(text.split("\n## ", 1)[0])[1]
+    header, verdict = _paragraphs(text.split(_RECORDED, 1)[1].strip("\n"))[:2]
+
+    if _changed_since_run(path):
+        assert _THEN in first and _TODAY in first
         assert ", when this eval" in header
+        assert _THEN_VERDICT.match(verdict), verdict[:80]
+        assert _TODAY in verdict
+    else:
+        assert _THEN not in first and ", when this eval" not in header
+        assert "pass sentence this eval had then" not in verdict
+    # A verdict on today's sentence with the count on the sentence at the run set beside it is the old, split rule.
+    assert "this eval had when it ran" not in " ".join(text.split())
 
 
-def test_the_four_regraded_evals_carry_the_verdict_their_recorded_answers_give() -> None:
+def test_every_regraded_eval_carries_the_verdict_its_recorded_answer_gives() -> None:
     graded = {path.stem: path.read_text(encoding="utf-8") for path in _RECORDED_EVALS if path.stem in _REGRADED}
 
     assert set(graded) == set(_REGRADED)
     for stem, opening in _REGRADED.items():
         verdict = _paragraphs(graded[stem].split(_RECORDED, 1)[1].strip("\n"))[1]
         assert verdict.startswith(opening), stem
+    # Every recording whose pass sentence changed after its run was re-graded on the sentence it had then.
+    changed = {path.stem for path in _RECORDED_EVALS if _changed_since_run(path)}
+    assert changed == set(_REGRADED) - {_UNCHANGED_REGRADE}
 
 
 def test_every_hand_off_to_the_memo_skill_says_a_champion_is_likely_to_write_it() -> None:

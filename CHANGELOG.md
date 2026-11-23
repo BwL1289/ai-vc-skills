@@ -190,6 +190,14 @@ All notable changes to this repository. Dates are UTC.
   `vc-positioning` no longer credits a post its authors never read; and hand-offs, runway and metrics checks now that
   the tools exist, the refute pass, and the site and install guide. Two evals were renamed to companies BS and BT, so no
   company letter is used twice.
+- Follow-ups from a check of that review. The shared SAFE runway sentence now says what to do while a planned change's
+  start month is missing: make no runway call, give no runway figure and mark the runway line "not checked: waiting
+  for [the month the planned spend starts]", as the skills already did for missing cash or burn. Every recorded verdict
+  now counts the pass sentence as it was at the run, as the README says, and each eval whose sentence changed since
+  names the changed clauses and how the run reads against today's sentence. That re-grades four: taste-check T from
+  Partial to Fail, metrics-readiness AM from Partial to Pass, prospective-investor-update BE from Partial to Fail, and
+  partner-meeting R, already Partial under that rule, now says so (a Fail against today's sentence). `vc-deal-math`
+  carries the shared sentence against working out how two of the founder's figures relate.
 - Calculator fixes from an independent recheck of `market_sizing`, `runway_plan` and `metrics_check`. A market's unit
   price prints as a price, to the cent when exact and with the places it needs otherwise ($0.0075, never $0.01), and
   a price period left out comes back null, so a result's echoed inputs fed back keep `price_period_defaulted`; the

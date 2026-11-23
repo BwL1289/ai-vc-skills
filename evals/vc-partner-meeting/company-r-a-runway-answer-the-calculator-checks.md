@@ -6,7 +6,11 @@ expected behaviour, and "Recorded answer" is an excerpt of a recorded run (Claud
 passes when it makes the two tool calls below (field order free, money and percents as strings), puts the runway
 mismatch at the head of the kept questions without refuting it, checks the runway with no raise with the calculator,
 and computes nothing in its own text. The verdict is Pass when every clause of that sentence is met, Partial when
-exactly one clause is missed or met only in part, and Fail when two or more are missed.
+exactly one clause is missed or met only in part, and Fail when two or more are missed. The recorded run is graded
+against the pass sentence this eval had then, which asked for one `equity_deal_check` call and the runway with no raise
+quoted as not checked, where it now asks for the second call and that runway checked with the calculator. It is a
+Partial against that sentence; it made neither of those two, so against today's sentence it would be a Fail. The skill
+and this pass sentence were changed after that run (see "Recorded answer").
 
 ## Prompt
 
@@ -117,14 +121,16 @@ Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from thi
 this eval expected one `equity_deal_check` call and the runway with no raise quoted as not checked. The answer is
 trimmed; [...] marks each cut.
 
-**Partial: one clause missed.** It made the one call then expected, put the runway mismatch first without refuting it,
-relayed the flag and quoted the runway with no raise as not checked, as the skill then said. But a bracketed ask in its
-table states "$40k", the difference between the founder's two burn figures, which neither the founder nor the tool
-gave; its debrief also argues which assumptions would make the deck's 24 months true. Since this run the skill sends
-the runway with no raise to `equity_runway_plan`, counts bracketed asks, table cells and debrief notes in its
-no-arithmetic check, leaves the reason for a disagreement as a bracketed ask, carries each flag's meaning in a table
-of its own (the tool call returned the bare code), puts a mismatch ahead of the tiers with no tier, and writes the
-hardest three in the third person; this eval now expects the second call. The eval has not been run again.
+**Partial, against the pass sentence this eval had then: one clause missed.** It made the one call then expected, put
+the runway mismatch first without refuting it, relayed the flag and quoted the runway with no raise as not checked, as
+the skill then said. But a bracketed ask in its table states "$40k", the difference between the founder's two burn
+figures, which neither the founder nor the tool gave; its debrief also argues which assumptions would make the deck's 24
+months true. Against today's sentence it also misses the second call and the calculator check of the runway with no
+raise, three clauses in all, so it would be a Fail. Since this run the skill sends the runway with no raise to
+`equity_runway_plan`, counts bracketed asks, table cells and debrief notes in its no-arithmetic check, leaves the reason
+for a disagreement as a bracketed ask, carries each flag's meaning in a table of its own (the tool call returned the
+bare code), puts a mismatch ahead of the tiers with no tier, and writes the hardest three in the third person; this eval
+now expects the second call. The eval has not been run again.
 
 > **The deck's 24 months does not match your own numbers.** $500k in the bank plus the $2M, at $120k a month with no revenue, lasts 20.83 months, which is 3.17 months short of the claim. [...]
 >

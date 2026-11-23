@@ -103,18 +103,18 @@ made of. It would be a Fail against today's sentence too. The skill was changed 
 Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository and no user settings, when
 this eval asked for the two flag codes "in the tool's words". The answer is trimmed; [...] marks each cut.
 
-**Fail: two clauses missed.** It made the one call with the expected arguments, put the founders' mismatch first without
-refuting it, quoted "Founders own 75% today." and the cap table's own sum as not checked, and marked the cap table
-Contradicted; it also ran the six lenses as parallel subagents and then one refute subagent per lens question. It missed
-two clauses. It relayed the two flag codes with meanings in its own words, not the tool's, since over MCP the tool
-returned the codes alone. And it computed in its own text: it said what the deck's two percents were made of ("The 75%
-is founders' shares over the 8,000,000 fully diluted total"), which is division done in its own head. Against today's
-sentence the same two clauses are missed, the first because its meanings are not the skill's flag table's. Short of the
-expected answer as well: its draft for the mismatch said the deck had been corrected and a pro forma was in the data
-room, though the founder named neither, and it marked three seed rows Missing because its own drafts named them. Since
-this run the skill forbids saying what a stated percent is made of, gives a mismatch's draft a fixed shape, carries a
-meaning for every flag code, and lists a seed row only when a draft names it as the row that settles the question, which
-this eval now accepts. The eval has not been run again.
+**Fail, against the pass sentence this eval had then: two clauses missed.** It made the one call with the expected
+arguments, put the founders' mismatch first without refuting it, quoted "Founders own 75% today." and the cap table's
+own sum as not checked, and marked the cap table Contradicted; it also ran the six lenses as parallel subagents and then
+one refute subagent per lens question. It missed two clauses. It relayed the two flag codes with meanings in its own
+words, not the tool's, since over MCP the tool returned the codes alone. And it computed in its own text: it said what
+the deck's two percents were made of ("The 75% is founders' shares over the 8,000,000 fully diluted total"), which is
+division done in its own head. Against today's sentence the same two clauses are missed, the first because its meanings
+are not the skill's flag table's. Short of the expected answer as well: its draft for the mismatch said the deck had
+been corrected and a pro forma was in the data room, though the founder named neither, and it marked three seed rows
+Missing because its own drafts named them. Since this run the skill forbids saying what a stated percent is made of,
+gives a mismatch's draft a fixed shape, carries a meaning for every flag code, and lists a seed row only when a draft
+names it as the row that settles the question, which this eval now accepts. The eval has not been run again.
 
 > **Fix the deck before you open the data room.** "Founders keep 60% after the round." does not survive your own cap table: the calculator gives the founders 53.6170% after the round, 6.3830 points lower. The signed SAFE and the pool top-up both come out of the existing holders, and the 60% counts neither. [...]
 >
