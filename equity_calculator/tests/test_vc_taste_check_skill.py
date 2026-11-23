@@ -30,7 +30,7 @@ _FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 _FENCE = re.compile(r"^( *)```([a-z]*)\n(.*?)^\1```$", re.MULTILINE | re.DOTALL)
 _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _URL = re.compile(r"https?://\S+")
-_HANDOFF_SKILLS = ("vc-positioning", "vc-claims-check", "vc-deal-math", "equity-calculator")
+_HANDOFF_SKILLS = ("vc-positioning", "vc-claims-check", "vc-deal-math", "equity-calculator", "vc-metrics-readiness")
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
 _TRIGGERS = (
@@ -59,7 +59,11 @@ _DIGITS = re.compile(r"\d+")
 _EVAL_TITLE = re.compile(r"\A# Eval (\d+): ")
 _BADGE = re.compile(r'alt="Skills: (\d+)" src="https://img\.shields\.io/badge/skills-(\d+)-')
 _CATCH_ALL = "**Not yet:** every other decision"
-_OUTRANKS = "a kept objection or a flag, which outranks the meeting"
+_OUTRANKS = "a kept objection that ends the meeting or weakens it, or a flag, which outranks the meeting"
+# The one sentence every attack brief in the pack carries since a live run's attacker judged the material for itself.
+_RAISE_IT_ANYWAY = "raise it anyway, however short the material, and the refute pass decides"
+# An objection that only says an input is missing is an open ask, never a kept objection (a live run kept one).
+_MISSING_INPUT = "an input from the Inputs list is missing (what changed, the alternatives, the material)"
 _JUDGMENT_RULE = "A call the founder labels a judgment before data, saying how they will know it was right"
 # Words a prompt uses when the founder's own material grounds a copying claim; an eval that drops a copying claim as
 # not grounded must have none of them.
@@ -208,6 +212,9 @@ def test_the_attack_stage_runs_independent_lenses_named_by_what_they_test() -> N
     assert "subagent" in attack and "only the founder's material and its lens brief" in attack
     assert "one after another" in attack
     assert "do no arithmetic" in attack
+    assert _RAISE_IT_ANYWAY in attack and "rather than a weak objection" not in attack
+    assert "as parallel subagents, however short the material" in attack
+    assert "no list of what the founder did not provide" in attack
 
 
 def test_the_refute_stage_uses_only_the_founders_material_and_says_why_each_objection_fell() -> None:
@@ -215,7 +222,10 @@ def test_the_refute_stage_uses_only_the_founders_material_and_says_why_each_obje
     quotes = _unwrapped(_section("### Check the quotes"))
 
     assert "using only the founder's material" in refute
-    assert "one subagent per objection" in refute
+    assert "launch one subagent per objection in a single message" in refute
+    assert "never put two objections in one subagent" in refute
+    assert "is missing (what changed, the alternatives, the material) rather than about what the line says" in refute
+    assert _MISSING_INPUT in quotes and "is never kept against that decision" in quotes
     for verdict in ("Dropped, answered:", "Dropped, not grounded:", "Kept:"):
         assert verdict in refute, verdict
     assert "Quote the founder's line that answers it" in refute
@@ -251,6 +261,8 @@ def test_the_survivors_are_ranked_with_quotes_and_feed_the_rest_of_the_answer() 
     assert "the founder's line, quoted word for word" in rank
     assert "no percentages and no score" in rank
     assert "biggest issues" in rank and '"not yet"' in rank
+    assert "objection that ends the meeting or weakens it is placed" in rank
+    assert "A minor survivor does not move a decision" in rank
     assert "**Adversarial review:**" in answering and "**Dropped,**" in answering
     assert _SURVIVOR_COLUMNS.search(answering)
     assert _DECISION_COLUMNS in answering
@@ -282,6 +294,19 @@ def test_the_lines_are_placed_in_the_deck_the_meeting_or_not_yet() -> None:
     assert "Every row of the decisions table gets exactly one placement" in placement
     assert _CATCH_ALL in placement and _OUTRANKS in placement
     assert "Needs work or Missing" in placement.split(_CATCH_ALL, 1)[1]
+    assert placement.count("no kept objection above minor and no flag") == 2
+    assert "naming every kept objection on it" in placement
+    assert "A second sentence is allowed only for the founder's evidence line" in placement
+
+
+def test_figure_lines_are_quoted_whole_and_every_not_yet_names_its_objections() -> None:
+    """A live run turned "11 of 12" into "the twelfth" and gave a count of facts its own table did not match."""
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "A figure line goes into a why-we-built-it line word for word" in steps
+    assert "never states what a figure leaves over" in steps
+    assert 'every "not yet" placement names every kept objection on that decision' in steps
+    assert "retention or churn to the vc-metrics-readiness skill" in steps
 
 
 def test_a_labelled_judgment_before_data_counts_for_trust_in_the_lenses_and_the_refute_pass() -> None:
@@ -390,3 +415,16 @@ def test_a_request_to_judge_as_named_people_is_declined() -> None:
     for path in named:
         answer = _eval_parts(path)[1]
         assert "declines" in answer and "named person's or firm's voice" in answer
+
+
+def test_the_drop_eval_scores_only_what_a_run_can_show_and_records_its_live_run() -> None:
+    """A live run raised no objection to D1's reason, which every lens could read, so the drop and placements are
+    conditional on what the lenses keep."""
+    (path,) = (path for path in _EVALS if path.name.startswith("company-t-"))
+    text = path.read_text(encoding="utf-8")
+    answer = _eval_parts(path)[1]
+
+    assert "If a lens objects to" in answer and "Raised or not, that reason sits next to D1" in answer
+    assert "unless an objection that ends the meeting or weakens it survives on D1" in answer
+    assert "when no objection above minor survives on it" in answer and "naming every kept objection on it" in answer
+    assert "## Recorded answer" in text and text.index("## Expected answer") < text.index("## Recorded answer")
