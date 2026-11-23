@@ -73,7 +73,8 @@ says.
 3. **Ask for what is missing** (Inputs), in one message. For each Estimate row (at most three), and for any
    assumption the founder asks about ("what if our price is lower?"), also ask for a low and a high value: the
    founder's numbers, never a percentage the skill picks. When the founder gives none, the call still runs and that
-   Estimate stays a bracketed ask for its range.
+   Estimate stays a bracketed ask for its range. An assumption shared by several segments (one fee, one price) gets
+   one row per segment: the tool moves one segment at a time, so no single row is quoted as the whole company's case.
 4. **Build the ledger.**
 5. **Call `equity_market_sizing` once,** with every segment, top-down figure, sensitivity row and stated figure. Send
    money and percents as strings. Always send `price_period_months` (1 for a monthly price, 12 for a yearly one):
@@ -189,7 +190,9 @@ Every lens gets the same brief, with its own name and test filled in:
 - Return at most three objections, strongest first. For each: the founder's line, quoted word for word with its
   place; why a partner is likely to doubt it; and how much it hurts (ends the meeting, weakens it, or minor).
 - A doubt you cannot tie to a line the founder wrote is not an objection: list it apart as a question to the founder.
-- Return "nothing found" rather than a weak objection.
+- Do not judge whether another line of the material answers an objection: raise it anyway, and the refute pass
+  decides. Return "nothing found" only when no line of the material gives this lens an objection worth a partner's
+  time.
 
 **How to run the lenses.** With a subagent tool (in Claude Code, the Agent or Task tool), run the three lenses as
 parallel subagents, each given only the founder's material, its brief and the Pattern column below: never the tool's
@@ -222,14 +225,16 @@ The refute brief:
 
 The verdicts:
 
-- **Dropped, answered:** another line of the material supplies what the objection says is missing (a source with its
-  publisher and year, a customer count, a channel, a horizon). Quote it; say whether it should move onto the market
-  slide.
+- **Dropped, answered:** a line of the material other than the objected line supplies what the objection says is
+  missing (a source with its publisher and year, a customer count, a channel, a horizon). Quote it; say whether it
+  should move onto the market slide.
 - **Dropped, not grounded:** the quoted line does not say what the objection claims, or the objection rests on an
   outside fact about the market.
 - **Kept:** neither holds. What the founder would need becomes a bracketed ask.
 
-The pass invents nothing on the founder's behalf: no figure, source, customer or channel.
+The pass invents nothing on the founder's behalf: no figure, source, customer or channel. After the passes, an
+answering line that is not in the material word for word does not drop the objection, and neither does one that is the
+objected line itself.
 
 ### Rank what survives
 
@@ -272,7 +277,7 @@ for and never changes a verdict.
 | `som_below_customers_today`  | A segment's SOM is fewer customers than you have today                                         | minor            |
 | `no_horizon_given`           | A SOM has no year by which it is won                                                           | minor            |
 | `som_below_target`           | The SOM is below the revenue your own plan needs from this market                              | weakens it       |
-| `som_target_out_of_reach`    | No single assumption, moved within what it can take, reaches the revenue your plan needs       | minor            |
+| `som_target_out_of_reach`    | No sensitivity row you gave reaches your plan's revenue at a value its segment can take        | minor            |
 
 The tiers are this skill's own ranking (unverified). A survivor from the lenses can still outrank a flag.
 

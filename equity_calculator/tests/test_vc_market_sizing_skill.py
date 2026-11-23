@@ -75,6 +75,7 @@ _PEOPLE_AND_FIRMS = ("sequoia", "a16z", "andreessen", "y combinator", "yc", "gra
 _LENS_HEAD = re.compile(r"^\|\s*Lens\s*\|\s*What it tests\s*\|$", re.MULTILINE)
 _ROW = re.compile(r"^\|\s*([^|]+?)\s*\|", re.MULTILINE)
 _TABLE_ROW = re.compile(r"^\|(.+)\|$", re.MULTILINE)
+_DOUBLE_QUOTED = re.compile(r'"([^"]+)"')
 _SCORE = re.compile(r"/\s*10\b|out of 10\b|/\s*100\b|out of 100\b", re.IGNORECASE)
 # A figure an eval's answer takes from the calculator: money with cents, a percent with decimals, a multiple with the
 # six places the report prints, or a count with decimals.
@@ -241,6 +242,7 @@ def test_the_shakiest_assumption_is_picked_from_tool_values() -> None:
     assert "the one with the largest `som_swing` in the result" in steps
     assert "a comparison of tool values, not a calculation" in steps
     assert "When no row of that kind has a sensitivity row, name none" in steps
+    assert "gets one row per segment" in steps and "no single row is quoted as the whole company's case" in steps
     # The break-even against a top-down figure is the tool's cross-check, never a value to aim for.
     assert "never offer it as a price, a count or a share to aim for" in steps
 
@@ -256,6 +258,9 @@ def test_the_three_lenses_are_named_by_what_they_test() -> None:
     assert "one after another" in attack and "less independent than subagents" in attack
     assert "never the tool's result" in attack
     assert "you are not an investor and do not speak as one, named or not" in attack
+    # A lens that sees the answering line must still raise the objection, or the refute pass has nothing to drop.
+    assert "Do not judge whether another line of the material answers an objection: raise it anyway" in attack
+    assert "rather than a weak objection" not in attack
 
 
 def test_the_refute_pass_uses_the_fixed_verdicts() -> None:
@@ -266,6 +271,8 @@ def test_the_refute_pass_uses_the_fixed_verdicts() -> None:
     assert "When you cannot decide, return Kept" in refute
     assert "invents nothing" in refute and "never answers an objection" in refute
     assert "Bring in no outside fact about the market, and do no arithmetic" in refute
+    assert "a line of the material other than the objected line supplies" in refute
+    assert "neither does one that is the objected line itself" in refute
 
 
 def test_computed_findings_skip_the_review_and_survivors_have_tiers() -> None:
@@ -367,7 +374,11 @@ def test_eval_aw_leads_with_the_mismatch_and_quotes_the_break_even_values() -> N
     assert "the TAM mismatch leads the first tier" in answer
     assert "It works none of them out itself" in answer
     assert "**The shakiest assumption** is segment 1's 900 clinics" in answer
-    assert "**Dropped, answered**" in answer and "is reported but is not a candidate" in answer
+    assert "is reported but is not a candidate" in answer
+    objected, answering = answer.split("**Dropped, answered**", 1)
+    objected_line = _DOUBLE_QUOTED.findall(objected)[-1]
+    answering_line = _DOUBLE_QUOTED.findall(answering)[0]
+    assert objected_line in prompt and answering_line in prompt and objected_line != answering_line
     assert "never offered as a price to aim for" in answer
     assert "`[the channel that reaches multi-site groups]`" in answer
 
@@ -380,6 +391,8 @@ def test_eval_ax_sets_the_deck_beside_the_gross_spend_and_keeps_the_overlap() ->
     assert "Beside it, the tool's gross spend is $11,700,000,000.00" in answer
     assert "`segments_exceed_population` and `bottom_up_above_top_down` are in the first tier" in answer
     assert "no shakiest assumption is named" in answer and "`[a low and a high value for each 2%]`" in answer
+    # The fee is shared by both segments: one row each, and neither is quoted as the whole company's fee.
+    assert "Neither row is quoted as the whole company's fee" in answer
     assert "brings in no fact about pools" in answer
 
 

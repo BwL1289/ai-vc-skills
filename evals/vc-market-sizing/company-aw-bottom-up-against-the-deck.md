@@ -12,10 +12,10 @@ nothing in its own text.
 > Help me size our market. We sell practice software to vet clinics. Our market slide says: "A $120M TAM in US
 > veterinary software." Independent clinics: 18,000 in the US, from a state licensing list we bought; they pay $400 a
 > month, which is what our 45 clinics pay today. 60% of them run one of the two practice-management systems we
-> integrate with (from the same list). We plan to win 900 clinics in five years through two inside sales reps and our
-> booth at regional vet conferences. Multi-site groups: 400 groups with 15 locations each, from the same list, at $300
-> a location a month, which is what our 2 groups pay; 50% of them run those systems, and we plan to win 10% of the
-> groups we can serve. Our 45 clinics and 2 groups bring in $324,000 a year. An industry report from 2025 puts US
+> integrate with (from the same list). We plan to win 900 clinics in five years. We reach clinics through two inside
+> sales reps and our booth at regional vet conferences. Multi-site groups: 400 groups with 15 locations each, from the
+> same list, at $300 a location a month, which is what our 2 groups pay; 50% of them run those systems (from the same
+> list), and we plan to win 10% of the groups we can serve. Our 45 clinics and 2 groups bring in $324,000 a year. An industry report from 2025 puts US
 > veterinary software at $2.1B; about 40% of it is clinics and groups like ours. The plan needs $8M a year from this
 > market in five years. The 900 and the 10% are our estimates. What if our price is lower? We could price clinics
 > anywhere from $300 to $500 a month, win 600 to 1,200 clinics, and the groups' share could be 5% to 15%.
@@ -120,9 +120,10 @@ are the founder's ranges for the two Estimates.
 - `som_as_percent_only` (weakens it): the groups' "we plan to win 10% of the groups we can serve" rests on a share.
   The Path lens's objection on that line survives the refute pass as Kept, with `[the channel that reaches multi-site
 groups]` and `[the number of groups you plan to win]`.
-- A Path objection on "We plan to win 900 clinics in five years" (20.000000x today's clinics, 171 new clinics a year in
-  the tool's straight line) is **Dropped, answered**: the same sentence names the channel, "through two inside sales
-  reps and our booth at regional vet conferences". The answer says to put that channel on the market slide.
+- A Path objection on "We plan to win 900 clinics in five years." (20.000000x today's clinics, 171 new clinics a year
+  in the tool's straight line) is **Dropped, answered** by another line of the material, "We reach clinics through two
+  inside sales reps and our booth at regional vet conferences." The answer says to put that channel on the market
+  slide.
 - **The market table** carries the tool's values per segment and in total: TAM $108,000,000.00, SAM $62,640,000.00, SOM
   $5,400,000.00 (920 customers), and SOM at 16.666667x today's annual revenue.
 - **The shakiest assumption** is segment 1's 900 clinics: an Estimate, with the largest swing of the Estimates,

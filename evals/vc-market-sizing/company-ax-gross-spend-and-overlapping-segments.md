@@ -10,17 +10,19 @@ about pools.
 ## Prompt
 
 > Check our market slide. We run a marketplace that matches pool owners with pool cleaners, and we keep a 15% fee.
-> Slide 4: "$11.7B TAM: every pool in the Sun Belt plus Texas and Florida." Segment 1: 4,000,000 pools in the Sun
-> Belt states, at $1,800 a year per pool, which is what owners on our marketplace pay their cleaner; we can serve 25%
-> of them today (the metro areas where we have cleaners) and plan to win 2%. We have 3,000 pools today. Segment 2:
-> 2,500,000 pools in Texas and Florida, our two biggest Sun Belt states, at the same $1,800 a year and the same fee;
-> we can serve 30% of them and plan to win 2%. There are 5,200,000 pools in the states we serve or plan to serve. An
-> analyst's 2025 report puts the US pool-service market at $1.1B. What happens if our fee is 10% or 20%?
+> Slide 4: "$11.7B TAM: every pool in the Sun Belt plus Texas and Florida." Our pool counts come from a dataset of
+> county pool permits we compiled. Segment 1: 4,000,000 pools in the Sun Belt states, at $1,800 a year per pool, which
+> is what owners on our marketplace pay their cleaner; we can serve 25% of them today (the metro areas where we have
+> cleaners, from our own cleaner map) and plan to win 2%. We have 3,000 pools today. Segment 2: 2,500,000 pools in
+> Texas and Florida, our two biggest Sun Belt states, at the same $1,800 a year and the same fee; we can serve 30% of
+> them (same map) and plan to win 2%. There are 5,200,000 pools in the states we serve or plan to serve. The two 2%
+> figures are our estimates. An analyst's 2025 report puts the US pool-service market at $1.1B. What happens if our
+> fee is 10% or 20%?
 
 ## Expected tool call
 
-`equity_market_sizing`, once. The fee row is in the call because the founder asked; the founder gave no range for
-either 2%, so neither has a row.
+`equity_market_sizing`, once. The fee is the same in both segments, so it gets one row per segment, because the
+founder asked about it; the founder gave no range for either 2%, so neither has a row.
 
 ```json
 {
@@ -54,6 +56,11 @@ either 2%, so neither has a row.
         "field": "take_rate_percent",
         "segment": 1,
         "values": ["10", "20"]
+      },
+      {
+        "field": "take_rate_percent",
+        "segment": 2,
+        "values": ["10", "20"]
       }
     ],
     "population": "5200000",
@@ -82,6 +89,9 @@ either 2%, so neither has a row.
   Sensitivity 1 at 20.0000%: SOM                                              $11,250,000.00  the rest at base
   Sensitivity 1: SOM swing                                                     $3,600,000.00  SOM high - SOM low
   Sensitivity 1: segment 1 take rate at TAM = $1,100,000,000.00                      5.9028%  base × (target - other segments' TAM) / this segment's TAM; a cross-check with the top-down figure, not a target
+  Sensitivity 2 at 10.0000%: SOM                                               $8,100,000.00  the rest at base
+  Sensitivity 2 at 20.0000%: SOM                                              $10,800,000.00  the rest at base
+  Sensitivity 2: SOM swing                                                     $2,700,000.00  SOM high - SOM low
   A VC is likely to ask                                           segments_exceed_population  The segments' customers add up to more than the population they come from, so a buyer is likely counted twice; a VC is likely to ask which segments overlap
   A VC is likely to ask                                             bottom_up_above_top_down  The bottom-up figure is above the comparable part of a top-down figure; a VC is likely to ask whether segments overlap or the definitions differ
   A VC is likely to ask                                                  som_as_percent_only  A SOM is given as a share of the serviceable customers, not as a count of customers; a VC is likely to ask for the customers, the channel and the year behind it
@@ -101,13 +111,17 @@ either 2%, so neither has a row.
   as Kept: the founder's own words put those pools inside segment 1, and no line says segment 1 leaves them out. The
   fix is `[the Sun Belt pool count without Texas and Florida]`.
 - Against the top-down figure: the bottom-up TAM is 159.5455% of the analyst's figure, a cross-check, never the market
-  size; the 5.9028% fee at which the TAM would equal it is a cross-check only, never a fee to aim for. The report has
-  no publisher, so it is an Estimate: `[the report's publisher and its definition]`.
+  size; segment 1's fee of 5.9028% at which the TAM would equal it, with segment 2 at 15%, is a cross-check only,
+  never a fee to aim for. The report has no publisher, so it is an Estimate: `[the report's publisher and its
+definition]`.
 - `som_as_percent_only` (weakens it) becomes `[the pools you plan to win in each segment, and the channel]`, and
   `no_horizon_given` (minor) becomes `[the year you expect to reach 35,000 pools]`.
-- The fee row: the SOM is $7,650,000.00 at 10% and $11,250,000.00 at 20%, a swing of $3,600,000.00, quoted from the
-  tool. The fee is Own data. The two 2% shares are the Estimates and have no range, so no shakiest assumption is named:
-  the answer asks for `[a low and a high value for each 2%]`.
+- The fee rows, each with the other segment's fee at 15%: segment 1's fee moves the SOM to $7,650,000.00 at 10% and
+  $11,250,000.00 at 20%, a swing of $3,600,000.00; segment 2's to $8,100,000.00 and $10,800,000.00, a swing of
+  $2,700,000.00. Neither row is quoted as the whole company's fee at 10% or 20%: the tool moves one segment at a time.
+- The ledger marks the pool counts, the population and the serviceable shares as Own data (a dataset and a map the
+  founder holds), the price and the fee as Own data, and the two 2% shares as Estimates. Those have no range, so no
+  shakiest assumption is named: the answer asks for `[a low and a high value for each 2%]`.
 - It brings in no fact about pools, cleaners or the Sun Belt from outside the founder's message, computes nothing in
   its own text, says each figure is one year of revenue at today's prices, and closes with not investment, legal or
   tax advice.
