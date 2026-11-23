@@ -161,8 +161,9 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
    the founder's terms: the valuation they assume, the revenue the plan needs by then, the raise closing in the month
    named. No recommendation.
 7. **Run the adversarial review** (below).
-8. **Check before answering.** Scan the whole draft, tables and asks included, for any figure that is in neither a
-   tool result nor the founder's text: a difference, a total, a gap or "points" counts, and goes. Every case is one
+8. **Check before answering.** Scan the whole draft, tables, asks and the skeptic's relayed text included, for any
+   figure that is in neither a tool result nor the founder's text: a difference, a total, a gap, a remainder or
+   "points" counts, and goes. Every case is one
    the founder named, from one `equity_runway_plan` call. Every code in each result's `flags` appears once, with its
    table meaning. The no-raise row shows `start_raising_by` as printed, a negative value included. Every attack
    quotes a founder line word for word and carries its refute verdict; nothing speaks as an investor; no figure,
@@ -174,8 +175,9 @@ digit (0.166667 is 16.6667%), which is what the command line's report prints; a 
 Money keeps its cents: 3745000.00 is $3,745,000.00, never $3.7M or $3,745,000; 0.680000 is 68.0000%, never 68%.
 Months to raise and slack are never added or subtracted by hand: the tool gives `target_month`, `slack_months`,
 `runway_from_landing` and `start_raising_by`. Never state the gap between an option's amount and a required raise,
-or between two options' runways or stakes ("short by $X", "clears it by $Y", "N points more"): show both tool values
-side by side and let the founder compare.
+or between two options' runways or stakes ("short by $X", "clears it by $Y", "N points more"), or what a founder's
+percent leaves over (85% of plan never becomes "the other 15%"): show both values side by side and let the founder
+compare.
 
 ## Adversarial review
 

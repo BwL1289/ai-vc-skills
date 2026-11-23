@@ -406,8 +406,14 @@ def test_the_answer_has_required_headings_and_states_no_gap_or_verdict_of_its_ow
     assert "3745000.00 is $3,745,000.00" in steps and "0.680000 is 68.0000%, never 68%" in steps
     assert "never merge two" in steps and "make no second call" in steps
     assert "[would you cut spend in the downside, and to what?]" in steps
-    for check in ("a difference, a total, a gap", "Every case is one the founder named", "appears once, with its"):
+    for check in (
+        "a difference, a total, a gap, a remainder",
+        "Every case is one the founder named",
+        "appears once, with its",
+    ):
         assert check in steps, check
+    # The re-run's one slip: the skeptic wrote "the other 15%" for a lean plan at 85%, and the answer relayed it.
+    assert "the skeptic's relayed text included" in steps and '85% of plan never becomes "the other 15%"' in steps
 
 
 def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> None:
