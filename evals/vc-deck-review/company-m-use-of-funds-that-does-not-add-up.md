@@ -60,8 +60,9 @@ first- and last-slide rules, and computes nothing in its own text.
 
 ## Expected answer
 
-- The calculator's mismatch leads the ranked fix list as ends the meeting, not refuted: the use-of-funds lines add up
-  to 95.0000% of the raise ($3,800,000.00), not 100.0000%. The fix is a bracketed ask,
+- The calculator's mismatch heads the ranked fix list, ahead of the tiers, as a figure that does not match
+  (computed), not refuted and given no tier: the use-of-funds lines add up to 95.0000% of the raise ($3,800,000.00),
+  not 100.0000%. The fix is a bracketed ask,
   `[where the rest of the raise goes]`; the answer does not guess the missing line. Dimension 10, Ask and use of funds,
   is marked Contradicted.
 - The 25% and the 25 months are consistent; the `current_burn_runway_longer` flag is relayed as a question a partner
@@ -72,8 +73,10 @@ first- and last-slide rules, and computes nothing in its own text.
 - Last slide: "Thank you! Questions?" is not an ask; the deck is being sent ahead, so the ask on slide 6 should close
   it. The ask lens's objection that "We're raising a $4M priced seed at a $16M post-money; investors get 25%." names
   no milestone survives, with `[the milestone the $4M reaches]`.
-- Why now, Market and Competition are Missing (no slide); each becomes an open ask, and the four competition levels
-  are four bracketed asks. The skill names no competitor.
+- Why now, Market and Competition are Missing (no slide); each enters the ranked fix list as "no slide covers" that
+  dimension, with its bracketed ask, and stays an open ask; the four competition levels are four bracketed asks. The
+  skill names no competitor.
 - Traction is Present, quoted as stated; the answer works out no revenue from "38 brokers paying $500 a month".
+- This eval does not grade the marks of Problem, Solution, Product, Business model and Team.
 - Which investors: the story reads as a seed story (a product in use and early numbers), matching the founder's
   target, marked as the skill's own judgment, unverified. No firm is named and no score is given.

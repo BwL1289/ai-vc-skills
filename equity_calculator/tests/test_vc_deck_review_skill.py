@@ -22,7 +22,10 @@ from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity_deal_check import DealCheckInput
 from equity_calculator.text import render_sheet
+from tests.test_vc_claims_check_skill import _READ_SOURCES
 
+# _READ_SOURCES is the one set of public frameworks the repository's skills have read in full (the vc-claims-check
+# test holds it); this skill cites only these, and marks everything else as its own judgment, unverified.
 _ROOT = Path(__file__).resolve().parents[2]
 _SKILL = _ROOT / "skills" / "vc-deck-review" / "SKILL.md"
 _TEXT = _SKILL.read_text(encoding="utf-8")
@@ -77,17 +80,6 @@ _REFUTE_VERDICTS = ("Dropped, answered:", "Dropped, not grounded:", "Kept:")
 _TIERS = ("**ends the meeting**", "**weakens it**", "**minor**")
 _MIN_SLIDE_RULES = 5
 _MIN_LENSES = 5
-# The public frameworks the repository's skills have read in full (the same set as the vc-claims-check test); this
-# skill cites only these, and marks everything else as its own judgment, unverified.
-_READ_SOURCES = {
-    "https://www.ycombinator.com/library/4b-how-to-pitch-your-company": "YC seven questions",
-    "https://www.ycombinator.com/howtoapply": 'YC "How to Apply"',
-    "https://www.ycombinator.com/library/2u-how-to-build-your-seed-round-pitch-deck": "YC seed deck guide",
-    "https://www.ycombinator.com/library/4A-a-guide-to-seed-fundraising": "YC seed fundraising guide",
-    "https://www.sequoiacap.com/article/writing-a-business-plan/": "Sequoia",
-    "https://a16z.com/16-startup-metrics/": 'a16z "16 Startup Metrics"',
-    "https://cdixon.org/2013/08/04/the-idea-maze": 'Dixon "The idea maze"',
-}
 _SOURCES_USED = {
     "https://www.ycombinator.com/library/2u-how-to-build-your-seed-round-pitch-deck",
     "https://www.ycombinator.com/library/4b-how-to-pitch-your-company",
@@ -95,6 +87,8 @@ _SOURCES_USED = {
     "https://www.sequoiacap.com/article/writing-a-business-plan/",
 }
 _OURS = "Ours"
+# The short names of the sources this skill uses; every part of a Source cell starts with one, or is its own judgment.
+_USED_NAMES = tuple(sorted(_READ_SOURCES[url] for url in _SOURCES_USED))
 _UNVERIFIED = "unverified"
 _URL = re.compile(r"https?://\S+")
 # Names a lens or an investor kind must never carry: the skill tests frameworks, never people or firms.
@@ -164,6 +158,11 @@ def _names_a_person_or_firm(text: str) -> bool:
     return any(re.search(rf"\b{name}\b", text.lower()) for name in _PEOPLE_AND_FIRMS)
 
 
+def _cites_only_used_sources(cell: str) -> bool:
+    """Each ``; ``-separated part of a Source cell names a source this skill uses or is its own unverified judgment."""
+    return all(part.startswith((*_USED_NAMES, _OURS)) or _UNVERIFIED in part for part in cell.split("; "))
+
+
 def _eval(letter: str) -> tuple[str, str]:
     """The unwrapped prompt and expected answer of the eval for Company ``letter``."""
     (path,) = (path for path in _EVALS if path.name.startswith(f"company-{letter}-"))
@@ -205,13 +204,12 @@ def test_every_skill_it_hands_off_to_exists_and_vc_positioning_points_to_it() ->
 def test_the_ten_dimensions_are_the_fixed_rows_each_with_a_read_source_and_a_lens_that_exists() -> None:
     rows = _table("## The ten dimensions")
     lenses = set(_lens_names())
-    names = tuple(_READ_SOURCES.values())
 
     assert tuple(row[1] for row in rows) == _DIMENSIONS
     for row in rows:
         source, lens = row[-2], row[-1]
         assert lens in lenses, row[1]
-        assert source.startswith((*names, _OURS)) or _UNVERIFIED in source, row[1]
+        assert _cites_only_used_sources(source), row[1]
     (competition,) = (row for row in rows if row[1] == "Competition")
     assert _UNVERIFIED in competition[-2]
 
@@ -233,9 +231,12 @@ def test_the_first_and_last_slide_rules_cite_read_sources() -> None:
     (thanks,) = (row for row in rows if "Thank you" in row[0])
 
     assert len(rows) >= _MIN_SLIDE_RULES
+    for row in rows:
+        assert _cites_only_used_sources(row[1]), row[0]
     assert "YC seed deck guide" in first[1] and "YC seed deck guide" in last[1]
     assert "an appendix after it aside" in last[0]
-    assert _UNVERIFIED in thanks[1]
+    # The YC page names "What do you think?" as a bad ask; the "Thank you" and "Questions?" closes are the skill's own.
+    assert '"Thank you" and "Questions?" as the last slide are ours, unverified' in thanks[1]
     assert "Figures are never read off a picture" in _unwrapped(_section("## Inputs"))
 
 
@@ -244,6 +245,7 @@ def test_competition_has_four_levels_and_names_no_competitor() -> None:
 
     assert tuple(row[0] for row in _table("## Competition at four levels")) == _COMPETITION_LEVELS
     assert _UNVERIFIED in section and "the same four groups vc-claims-check uses" in section
+    assert "with an outsourced service added to doing nothing" in section
     assert "The skill names no competitor itself" in section
     assert "a missing level becomes a bracketed ask" in section
 
@@ -261,6 +263,13 @@ def test_the_attack_stage_runs_independent_lenses_named_by_what_they_test() -> N
     assert "one after another" in attack and "less independent than subagents" in attack
     assert "do no arithmetic" in attack
     assert "do not go through the lenses" in attack
+    # A lens that sees the answering line must still raise the objection, or the refute pass has nothing to drop.
+    assert "Do not judge whether another line of the material answers an objection: raise it anyway" in attack
+    assert "rather than a weak objection" not in attack
+    # A subagent lens gets no other section, so the competition lens's test names the four levels itself.
+    (competition,) = (row for row in _table("### Stage A: attack") if row[0] == "Competition")
+    for level in _COMPETITION_LEVELS:
+        assert level.lower() in competition[1], level
 
 
 def test_without_a_subagent_tool_the_lenses_run_before_step_1_and_the_answer_says_so() -> None:
@@ -308,7 +317,12 @@ def test_the_ranked_fix_list_has_tiers_and_no_score() -> None:
 
     for tier in _TIERS:
         assert tier in ranked, tier
-    assert "The calculator's mismatches lead the first tier" in ranked
+    # A computed mismatch is listed first but carries no tier: how much a gap hurts is not set by rule.
+    assert "calculator's mismatches head the list, ahead of the tiers" in ranked and "with no tier" in ranked
+    assert "carries no tier" in _unwrapped(_section("### Stage A: attack"))
+    # A dimension no slide covers can reach the biggest fixes, ranked with the kept objections.
+    assert "each dimension marked Missing because no slide covers it" in ranked
+    assert '"no slide covers" that dimension' in ranked
     assert "no percentages and no score" in ranked
     assert "the deck's line quoted word for word" in ranked
     assert answering.index("**The biggest fixes,**") < answering.index("**Ranked fix list,**")
@@ -333,6 +347,10 @@ def test_investor_fit_names_kinds_never_firms() -> None:
     assert not _names_a_person_or_firm(uncited)
     for phrase in ("names no firm or person", "no check sizes", "looks nothing up", _UNVERIFIED, "without a threshold"):
         assert phrase in section, phrase
+    # Every kind the fit rule names is a row of the table, and the table says it covers early investors only.
+    assert "fits larger firms that also do seed" in section and "follow on" not in section
+    assert "The table covers early investors only" in section
+    assert "Built for pre-seed and seed decks" in _unwrapped(_section("## When to use it"))
 
 
 def test_the_ask_goes_to_the_calculator_and_a_safe_raise_is_quoted_unchecked() -> None:
@@ -344,6 +362,15 @@ def test_the_ask_goes_to_the_calculator_and_a_safe_raise_is_quoted_unchecked() -
     assert _SAFE_UNCHECKED in steps and "never work them out by hand" in steps
     assert _SAFE_UNCHECKED in _unwrapped(_section("## Answering"))
     assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
+    # A valuation with no label: two calls, both readings shown, and a one-reading mismatch is a labelling fix.
+    assert "call twice, once as `pre_money`, once as `post_money`. Show both readings side by side" in steps
+    assert "A check that is a mismatch under one reading only is not a calculator mismatch" in steps
+    assert "Only a check that is a mismatch under every reading is the calculator's mismatch" in steps
+    assert "a mismatch under every reading of the valuation" in _unwrapped(_section("## The evidence marks"))
+    # The calculator's flags reach the founder as questions, the benchmark ones marked as benchmarks.
+    assert "Each code in the result's `flags` goes to the answer as a question a partner is likely to ask" in steps
+    assert "common benchmarks, not rules" in steps
+    assert "each flag as a question a partner is likely to ask" in _unwrapped(_section("## Answering"))
     assert "never compute, convert or round one" in steps
 
 
@@ -401,6 +428,19 @@ def test_each_figure_an_eval_answer_takes_from_the_calculator_is_what_it_prints(
         assert figure in reports, figure
 
 
+def test_one_eval_puts_the_calculator_mismatch_first_and_marks_the_ask_contradicted() -> None:
+    prompt, answer = _eval("m")
+    slide_3 = "Company M reads load emails and fills the broker's system automatically."
+
+    assert "heads the ranked fix list, ahead of the tiers" in answer and "not refuted and given no tier" in answer
+    assert "Ask and use of funds, is marked Contradicted" in answer
+    assert "`[where the rest of the raise goes]`" in answer
+    assert "the `current_burn_runway_longer` flag is relayed as a question a partner is likely to ask" in answer
+    assert slide_3 in prompt and slide_3 in answer
+    assert "Thank you! Questions?" in prompt and '"Thank you! Questions?" is not an ask' in answer
+    assert '"no slide covers" that dimension' in answer
+
+
 def test_one_eval_drops_an_objection_by_quoting_the_line_that_answers_it() -> None:
     prompt, answer = _eval("n")
     objection, dropped = answer.split("Dropped, answered", 1)
@@ -414,6 +454,8 @@ def test_one_eval_drops_an_objection_by_quoting_the_line_that_answers_it() -> No
     for level in _COMPETITION_LEVELS:
         assert level in answer, level
     assert "No competitor is named" in answer and _SAFE_UNCHECKED in answer
+    assert "the SAFE's cap" in answer and "no `equity_round` call is made without them" in answer
+    assert '"no slide covers" that dimension' in answer
 
 
 def test_one_eval_declines_a_score_and_named_firms() -> None:
@@ -431,3 +473,14 @@ def test_one_eval_marks_a_figure_contradicted_without_computing() -> None:
     assert "Traction is Contradicted" in answer and "computes no difference" in answer
     assert first in prompt and second in prompt and first != second
     assert "no revenue threshold" in answer
+
+
+def test_one_eval_turns_a_mismatch_under_one_reading_into_a_fix_to_label_the_valuation() -> None:
+    prompt, answer = _eval("p")
+
+    assert "at a $24M valuation" in prompt and "pre-money" not in prompt and "post-money" not in prompt
+    assert "both readings are shown side by side" in answer
+    assert "20.0000%" in answer and "25.0000%" in answer
+    assert "A mismatch under one reading only is not a calculator mismatch" in answer
+    assert "to label the valuation pre- or post-money" in answer
+    assert "it does not mark Ask and use of funds Contradicted" in answer

@@ -102,7 +102,7 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 | [`vc-positioning`](skills/vc-positioning/SKILL.md)       | For founders: tightens your raise's messaging before you go out, with an adversarial review (skeptical lenses attack it, then a judge drops what your own material already answers), a say-and-avoid list and a prep script for a session with an existing investor.                                       | 🧪 Preview   |
 | [`vc-claims-check`](skills/vc-claims-check/SKILL.md)     | For founders: checks every claim in your deck, one-pager and narrative before a VC does (a source you can show, figures that agree, patterns a VC discounts), with a skeptic that picks what a partner checks first and a refute pass that keeps only grounded attacks.                                    | 🧪 Preview   |
 | [`vc-deck-review`](skills/vc-deck-review/SKILL.md)       | For founders: reads your deck the way a partner will before the meeting: ten dimensions marked by the evidence the deck shows, first- and last-slide rules, competition at four levels, a ranked fix list from an adversarial review, and which kind of investor the story fits. No score, no named firms. | 🧪 Preview   |
-| More venture-style reviews                               | Pitch decks, term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                                                                                    | 🗺️ Planned   |
+| More venture-style reviews                               | Term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                                                                                                 | 🗺️ Planned   |
 
 `vc-deal-math`, `vc-positioning`, `vc-claims-check` and `vc-deck-review` are in preview until they have been checked on
 real decks. The calculator's arithmetic is tested; the reviews' wording may change. The `vc-positioning` and
@@ -137,6 +137,8 @@ Once the plugin is installed, ask in plain words:
 > How much equity is a hire worth if they make the company 25% more valuable?
 
 > The Series A sells 20% and adds a 10% pool. What's left of my 30%?
+
+> Review my deck before I send it to seed funds: here is each slide's text and our ask.
 
 > We sell for $50M. The investors put in $10M for 25% of the shares, with a 1x non-participating preference. Who gets
 > what?

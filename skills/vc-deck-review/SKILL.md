@@ -1,6 +1,6 @@
 ---
 name: vc-deck-review
-description: Helps a founder review their pitch deck the way a partner reads it before the meeting. It maps every slide to ten dimensions (problem, solution, why now, market, product, traction, business model, competition, team, and the ask with its use of funds), marks each one evidence present, missing or contradicted with one fix, checks the first and last slides, and checks the competition slide at four levels, platform risk and doing nothing included. Claims go through the vc-claims-check steps, the ask's figures to the calculator's deal_check tool. An adversarial review has independent lenses attack the deck and a refute pass drop what the deck already answers; what survives becomes a ranked fix list. It says which kind of investor the story fits by stage and type, never a named firm, and gives no score. Use when a founder says review my deck, tear apart my pitch deck, is my deck ready to send, what will a partner think of my deck, or which investors fit this deck. Never invents traction. Not investment advice.
+description: Helps a founder review their pitch deck the way a partner reads it before the meeting. It maps every slide to ten dimensions (problem, solution, why now, market, product, traction, business model, competition, team, and the ask with its use of funds), marks each one evidence present, missing or contradicted with one fix, checks the first and last slides, and checks the competition slide at four levels, platform risk and doing nothing included. Claims go through the vc-claims-check steps, the ask's figures to the calculator's deal_check tool. An adversarial review has independent lenses attack the deck and a refute pass drop what the deck already answers; what survives becomes a ranked fix list. It says which kind of early investor the story fits, never a named firm, and gives no score. Use when a founder says review my deck, tear apart my pitch deck, is my deck ready to send, what will a partner think of my deck, or which investors fit this deck. Never invents traction. Not investment advice.
 ---
 
 # VC deck review
@@ -20,6 +20,8 @@ names a firm the deck fits, gives no score, and never adds a fact about the comp
 - "Review my deck." "Tear apart my pitch deck." "Is my deck ready to send?" "What will a partner think of my deck?"
   "Which investors fit this deck?" "What should I fix before Monday's meeting?"
 - A deck as slide text, or a deck file the agent can read in this session, alone or with a one-pager or narrative.
+- Built for pre-seed and seed decks. A deck for a later round gets the same review, with a note that the investor-fit
+  table covers early investors only.
 - Hand off:
   - The one-liner, the story and the say-and-avoid list: the vc-positioning skill. Point the founder to it when the
     first slide or the problem fails, or when they ask how to say it.
@@ -70,7 +72,8 @@ Each dimension gets one mark. When it earns more than one, it takes the first in
 **Missing**, then **Present**.
 
 - **Contradicted:** two lines of the founder's material state the same thing differently (both quoted, with their
-  slides; for a figure, the same metric in the same form for the same period), or the calculator reports a mismatch.
+  slides; for a figure, the same metric in the same form for the same period), or the calculator reports a mismatch
+  under every reading of the valuation (step 4).
 - **Missing:** no slide shows what the row needs, or the only line that does is a claim vc-claims-check marks Will be
   discounted, or an adjective with nothing a partner could check ("strong traction", "world-class team").
 - **Present:** a slide shows what the row needs, quoted. A claim vc-claims-check marks Needs a source keeps the mark
@@ -81,14 +84,14 @@ overall score and no score per dimension: a number from one reading is not calib
 
 ## First and last slides
 
-| Rule                                                                                                                   | Source                                                                    |
-| ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| The first slide names the company and says in one line what it does                                                    | YC seed deck guide (title page); Sequoia "Company purpose"                |
-| That line is plain enough to say back: no jargon, no marketing words, no "platform" without what it is                 | YC seven questions (1, and "Improving your answers")                      |
-| The last slide of the main deck (an appendix after it aside) carries the ask: how much and what it gets the company to | YC seed deck guide (the ask closes the template)                          |
-| A close of "Thank you", "Questions?" or "What do you think?" with no ask is not an ask                                 | YC seven questions (7); "Thank you" as the last slide is ours, unverified |
-| A deck sent ahead reads on its own, as a leave-behind a partner can show their colleagues                              | YC seed fundraising guide (documents you need)                            |
-| At seed, each topic is one slide or a short set (at most three)                                                        | YC seed deck guide                                                        |
+| Rule                                                                                                                   | Source                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| The first slide names the company and says in one line what it does                                                    | YC seed deck guide (title page); Sequoia "Company purpose"                                  |
+| That line is plain enough to say back: no jargon, no marketing words, no "platform" without what it is                 | YC seven questions (1, and "Improving your answers")                                        |
+| The last slide of the main deck (an appendix after it aside) carries the ask: how much and what it gets the company to | YC seed deck guide (the ask closes the template)                                            |
+| A close of "Thank you", "Questions?" or "What do you think?" with no ask is not an ask                                 | YC seven questions (7); "Thank you" and "Questions?" as the last slide are ours, unverified |
+| A deck sent ahead reads on its own, as a leave-behind a partner can show their colleagues                              | YC seed fundraising guide (documents you need)                                              |
+| At seed, each topic is one slide or a short set (at most three)                                                        | YC seed deck guide                                                                          |
 
 These are signals, not rules: a founder may have a reason. A deck presented live may hold the ask for the spoken close;
 say so and keep the fix.
@@ -96,7 +99,8 @@ say so and keep the fix.
 ## Competition at four levels
 
 Sequoia's outline asks for direct and indirect competitors and a plan to win. This skill checks four levels; the
-grouping is its own and unverified, the same four groups vc-claims-check uses.
+grouping is its own and unverified, the same four groups vc-claims-check uses, with an outsourced service added to
+doing nothing.
 
 | Level                 | What it covers                                                                                  |
 | --------------------- | ----------------------------------------------------------------------------------------------- |
@@ -119,14 +123,23 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
    number. A slide may serve two dimensions; a dimension may have none. Do not tidy anything yet.
 2. **First and last slides.** Check the first slide, the last slide, the leave-behind rule and set length against the
    table above, quoting the line that decides each.
-3. **Claims.** Run the vc-claims-check skill's steps 1 to 6 on the deck and any document sent with it: the claims
-   listed word for word with their places, classed, their evidence, their agreement across the documents (compared as
-   stated, never converted) and the discount patterns. Set each claim's verdict by that skill's order, without its
-   skeptic: this skill's lenses do the attacking. The claims table feeds the marks in step 6.
+3. **Claims.** Load the vc-claims-check skill's text first; if it is not installed, say so and leave the claims table
+   out rather than improvising it. Run the vc-claims-check skill's steps 1 to 6 on the deck and any document sent with
+   it: the claims listed word for word with their places, classed, their evidence, their agreement across the documents
+   (compared as stated, never converted) and the discount patterns. Set each claim's verdict by that skill's order,
+   without its skeptic: this skill's lenses do the attacking. The claims table feeds the marks in step 6.
 4. **The ask.** The deal terms are checked once, in claims-check step 5, which follows the vc-deal-math skill:
    - A priced round: `equity_deal_check` (from the command line, `equity_calculator deal_check`), money and percents
      as strings, every stated figure, use-of-funds lines included; one call per document's version of the ask. A
-     valuation with no label: call twice, once as `pre_money`, once as `post_money`.
+     valuation with no label: call twice, once as `pre_money`, once as `post_money`. Show both readings side by side,
+     as vc-deal-math step 4 does, and say a partner will ask which one is meant. A check that is a mismatch under one
+     reading only is not a calculator mismatch: it becomes one fix, to label the valuation pre- or post-money, quoting
+     both readings in the tool's values. Only a check that is a mismatch under every reading is the calculator's
+     mismatch.
+   - Each code in the result's `flags` goes to the answer as a question a partner is likely to ask, in the words the
+     tool prints beside it, with what to change or prepare from the vc-deal-math skill's flag table. The benchmark
+     flags (`dilution_above_band`, `runway_below_band`) are common benchmarks, not rules: say so and quote the tool's
+     assumption row, whose source is `unverified`. With two readings, relay the flags of each.
    - A SAFE or note: not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round` with the next
      priced round the founder expects. On a SAFE or note raise, no tool checks the runway claim or the use-of-funds
      lines: quote them, mark them "not checked: no tool computes this for a SAFE or note raise", and never work them
@@ -142,8 +155,9 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
 7. **Run the adversarial review** (next section): attack, check the quotes, refute, rank.
 8. **Which investors the story fits** (the section after the review).
 9. **Check before answering.** Every fix uses only the founder's facts, a tool result or a bracketed ask; every figure
-   is quoted as stated or comes from a tool; every surviving objection quotes a line that is in the deck word for
-   word; no sentence speaks as an investor, imitates a named person or names a firm; no score appears.
+   is quoted as stated or comes from a tool; every surviving objection quotes a line that is in the deck word for word
+   (an entry for a dimension no slide covers quotes none); no sentence speaks as an investor, imitates a named person or
+   names a firm; no score appears.
 
 ## Adversarial review
 
@@ -156,15 +170,15 @@ material does not answer reaches the ranked fix list. The founder sees both: wha
 Each lens tests one thing and is named by it. The lenses are frameworks, never people: none is a named investor, firm
 or author, and none speaks in the first person as an investor.
 
-| Lens                        | What it tests                                                                                       | Dimensions            |
-| --------------------------- | --------------------------------------------------------------------------------------------------- | --------------------- |
-| Opening and close           | Whether the first slide says what the company does, the deck ends on the ask, and it reads alone    | First and last slides |
-| Problem and solution        | Whose pain, what the product does about it, and what exists and works today                         | 1, 2, 5               |
-| Market and why now          | Who exactly buys, how many there are, and what changed to make this the moment                      | 3, 4                  |
-| Traction and business model | Whether the numbers show progress, each with a definition and a period, and how money is made       | 6, 7                  |
-| Competition                 | The alternatives at all four levels, platform risk and doing nothing included, and why this wins    | 8                     |
-| Team                        | Why these founders, shown by specific achievements rather than adjectives or advisors               | 9                     |
-| The ask and use of funds    | The amount, the instrument, what the money reaches, and whether the use of funds says where it goes | 10                    |
+| Lens                        | What it tests                                                                                              | Dimensions            |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------- |
+| Opening and close           | Whether the first slide says what the company does, the deck ends on the ask, and it reads alone           | First and last slides |
+| Problem and solution        | Whose pain, what the product does about it, and what exists and works today                                | 1, 2, 5               |
+| Market and why now          | Who exactly buys, how many there are, and what changed to make this the moment                             | 3, 4                  |
+| Traction and business model | Whether the numbers show progress, each with a definition and a period, and how money is made              | 6, 7                  |
+| Competition                 | The alternatives at four levels (direct, indirect, adjacent and platform, doing nothing) and why this wins | 8                     |
+| Team                        | Why these founders, shown by specific achievements rather than adjectives or advisors                      | 9                     |
+| The ask and use of funds    | The amount, the instrument, what the money reaches, and whether the use of funds says where it goes        | 10                    |
 
 Every lens gets the same brief, with its own name and test filled in:
 
@@ -176,7 +190,8 @@ Every lens gets the same brief, with its own name and test filled in:
   its slide; why a partner is likely to read that line as a reason to pass; and how much it hurts (ends the meeting,
   weakens it, or minor).
 - A reason you cannot tie to a line of the deck is not an objection. List it apart as a gap, worded as a question.
-- Return "nothing found" rather than a weak objection.
+- Do not judge whether another line of the material answers an objection: raise it anyway, and the refute pass
+  decides. Return "nothing found" only when no line of the deck gives this lens an objection worth a partner's time.
 
 **How to run the lenses.** When the agent has a subagent tool (in Claude Code, the Agent or Task tool), run the lenses
 as parallel subagents. Give each one only the founder's material and its lens brief: not this skill's other sections,
@@ -185,8 +200,10 @@ the dimension table or any mark: run the lenses one after another, write each le
 reading the next lens's brief, and never revise an earlier list. Lenses run this way are less independent than
 subagents, and the same agent then judges them in Stage B, so the answer says so.
 
-**The calculator's mismatches** from step 4 do not go through the lenses. Each is added to the survivors as ends the
-meeting, quoting the deck's figure with the tool's value as the reason. It is not refuted: the calculator computed it.
+**The calculator's mismatches** from step 4 do not go through the lenses. Each is added to the ranked fix list ahead
+of the tiers, quoting the deck's figure with the tool's value and difference as the reason. It is not refuted: the
+calculator computed it. It carries no tier: how much a gap hurts depends on its size and on the term, which the founder
+weighs. A fix to label the valuation (a mismatch under one reading only) is not a calculator mismatch.
 
 ### Check the quotes
 
@@ -228,10 +245,14 @@ material word for word does not drop the objection, and neither does one that is
 ### The ranked fix list
 
 Order the kept objections in three tiers, most damaging first: **ends the meeting**, **weakens it**, **minor**. The
-calculator's mismatches lead the first tier. Within a tier, an objection raised by more than one lens comes first. The
-tier is a judgment, not a probability: give no percentages and no score. Each entry is one fix: the slide, the deck's
-line quoted word for word, why a partner is likely to read it that way in one or two plain sentences, and the change
-to make, using only the founder's facts or a bracketed ask. The top three become the biggest fixes at the head of the
+calculator's mismatches head the list, ahead of the tiers, each one under **figures that do not match (computed)**,
+with no tier. Two kinds of entry that no lens raises join the tiers, placed by the same judgment and not refuted: the
+step 4 fix to label a valuation, and each dimension marked Missing because no slide covers it, as "no slide covers"
+that dimension, with its bracketed ask as the fix (it stays in the open asks too). Within a tier, an objection raised
+by more than one lens comes first. The tier is a judgment, not a probability: give no percentages and no score. Each
+entry is one fix: the slide, the deck's line quoted word for word (for a dimension no slide covers, "none"), why a
+partner is likely to read it that way in one or two plain sentences, and the change to make, using only the founder's
+facts or a bracketed ask. The top three become the biggest fixes at the head of the
 answer; a fix that turns on the story or a phrase also points to the vc-positioning skill.
 
 ## Which investors the story fits
@@ -241,19 +262,21 @@ deck shows, and says which kinds of investor the story as told fits best and whi
 it. It names no firm or person, gives no check sizes and no odds, and looks nothing up. When the founder names firms
 they plan to pitch, the skill does not judge those firms; the founder compares the fit with what they know of each.
 
-| Kind of investor                 | Who they are                                                                  | Source                    |
-| -------------------------------- | ----------------------------------------------------------------------------- | ------------------------- |
-| Angels                           | Invest their own money on their own terms; often decide alone and faster      | YC seed fundraising guide |
-| Seed funds and small early funds | Firms that explicitly target brand new, very early companies                  | YC seed fundraising guide |
-| Larger firms that also do seed   | Traditional firms that invest in seed rounds as well as later ones            | YC seed fundraising guide |
-| Sector or thesis funds           | Funds that invest in one market or around one view of where a market is going | Ours, unverified          |
+| Kind of investor                 | Who they are                                                                          | Source                    |
+| -------------------------------- | ------------------------------------------------------------------------------------- | ------------------------- |
+| Angels                           | Back companies with personal money and decide for themselves, often alone and quickly | YC seed fundraising guide |
+| Seed funds and small early funds | Small funds set up to back companies at their very start                              | YC seed fundraising guide |
+| Larger firms that also do seed   | Traditional firms that invest in seed rounds as well as later ones                    | YC seed fundraising guide |
+| Sector or thesis funds           | Funds that invest in one market or around one view of where a market is going         | Ours, unverified          |
 
-How a story fits a kind (this skill's judgment, unverified, and said so in the answer): a story carried by the
-founders and the problem, with an early product, reads as an angel or very early story; a story with a product in use
-and early numbers reads as a seed story; a story whose ask names the milestone that makes the next round possible
-(the YC seed deck guide: "Series A ready" inside a year) fits funds that plan to follow on; a story built on one
-market's shift fits a fund with a thesis on that market. When the stage the founder states and what the deck shows
-disagree (a Series A label on a deck of pilots), say so as a question a partner is likely to ask, without a threshold.
+How a story fits a kind (this skill's judgment, unverified, and said so in the answer): a story carried by the founders
+and the problem, with an early product, reads as an angel or very early story; a story with a product in use and early
+numbers reads as a seed story; a story whose ask names the milestone that makes the next round possible (the YC seed
+deck guide: "Series A ready" inside a year) fits larger firms that also do seed, which can invest again in that next
+round; a story built on one market's shift fits a fund with a thesis on that market. The table covers early investors
+only: for a deck raising a later round, say so and name no later-stage kind. When the stage the founder states and what
+the deck shows disagree (a Series A label on a deck of pilots), say so as a question a partner is likely to ask, without
+a threshold.
 
 ## Answering
 
@@ -261,14 +284,15 @@ Lead with what to fix, in order, then the evidence behind it.
 
 1. **The biggest fixes,** at most three, one line each: the top of the ranked fix list.
 2. **Ranked fix list,** as a table: Rank, Tier, Slide, Lens, The deck's line (quoted), Why a partner reads it that way,
-   Fix. Then **Dropped,** one line each: the objection, its lens, and why it fell (answered, quoting the line that
-   answers it and whether to move it earlier, or not grounded). When the lenses ran in one agent, say they are less
-   independent than separate subagents.
+   Fix, with the figures that do not match (computed) first, then the tiers. Then **Dropped,** one line each: the
+   objection, its lens, and why it fell (answered, quoting the line that answers it and whether to move it earlier, or
+   not grounded). When the lenses ran in one agent, say they are less independent than separate subagents.
 3. **Dimension table:** #, Dimension, Slides, What the deck says (quoted), Evidence (Present, Missing or Contradicted),
    Fix.
 4. **First and last slides:** each rule, the line that decides it, the fix.
 5. **Competition at four levels:** each level, what the deck says or "missing", the bracketed ask.
-6. **Numbers:** the `equity_deal_check` verdict per call with each mismatch row in the tool's values; on a SAFE or note
+6. **Numbers:** the `equity_deal_check` verdict per call with each mismatch row in the tool's values (for a valuation
+   with no label, both readings side by side), and each flag as a question a partner is likely to ask; on a SAFE or note
    raise, the runway claim and use-of-funds lines with "not checked: no tool computes this for a SAFE or note raise";
    every other figure quoted as stated with "not checked: no tool computes this".
 7. **Claims:** the vc-claims-check claims table, Contradicted first.
@@ -281,7 +305,7 @@ Lead with what to fix, in order, then the evidence behind it.
 
 ## Sources
 
-- Y Combinator, "How to build your seed round pitch deck" (Aaron Harris, written for the Winter 2018 Demo Day):
+- Y Combinator, "How to build your seed round pitch deck" (Aaron Harris, 2018):
   https://www.ycombinator.com/library/2u-how-to-build-your-seed-round-pitch-deck
 - Y Combinator, "How to Pitch Your Company" (the seven questions):
   https://www.ycombinator.com/library/4b-how-to-pitch-your-company
@@ -290,7 +314,8 @@ Lead with what to fix, in order, then the evidence behind it.
 
 Several of these guides are years old; they describe how investors read a deck, which changes slowly, but say their
 dates when a founder leans on one. The split of product from solution, the four competition levels, the "Thank you"
-slide, the sector-fund row and how a story fits a kind of investor are this skill's own judgment, unverified. The
+and "Questions?" closes, the sector-fund row, how a story fits a kind of investor, and where computed mismatches and
+missing slides sit in the ranked fix list are this skill's own judgment, unverified. The
 two-stage review (attack, then refute with the founder's own material) is this repository's own method.
 
 ## Limits
