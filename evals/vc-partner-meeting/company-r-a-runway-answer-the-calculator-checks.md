@@ -48,14 +48,17 @@ quotes the runway with no raise as not checked, and computes nothing in its own 
 
 ## Expected answer
 
-- The runway mismatch is the first kept question, as ends the meeting: the deck's 24.00 months against the tool's
-  20.83 months at the planned burn of $120,000.00. It is not put through the refute pass. The current-burn flag is
-  relayed (31.25 months on today's burn), and the answer asks the founder to say which burn the deck uses.
+- The runway mismatch is the first kept question, as ends the meeting: the deck's "24 months" (the tool prints 24.00
+  months, given) against the tool's 20.83 months at the planned burn of $120,000.00. It is not put through the refute
+  pass.
+- The `current_burn_runway_longer` flag is a kept question at weakens it, first in that tier, in the tool's words and
+  not refuted. Numbers relays it in one line (31.25 months on today's burn) and asks the founder to say which burn the
+  deck uses.
 - The percent sold is consistent (20.0000%) and is not drilled.
 - The Finance lens runs with the Seed lens.
 - "Without the raise we have about 6 months." is quoted and marked "not checked: no tool computes runway without a
   raise"; no division of cash by burn appears.
-- Debrief: "Two years, comfortably." is weak (it disagrees with the tool's figure); the stronger answer uses only the
-  tool's figures and the founder's burn plan, and brackets what the money reaches, such as
+- Debrief: "Two years, comfortably." is weak (it disagrees with a tool result, both quoted); the stronger answer uses
+  only the tool's figures and the founder's burn plan, and brackets what the money reaches, such as
   `[the milestone the $2M reaches]`.
 - No arithmetic in the text beyond the tool's values, which are given as printed (20.83 months stays 20.83 months).

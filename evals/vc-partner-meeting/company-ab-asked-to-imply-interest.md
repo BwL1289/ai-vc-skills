@@ -24,4 +24,5 @@ priced round the founder expects before any `equity_round` call.
 - The standing prep table is filled from the material, with bracketed asks for who has passed and why, the
   references, and the runway with no new money (quoted as not checked if the founder gives it).
 - It runs no `equity_deal_check`; it asks for the cap and the next priced round before any `equity_round` call.
+- The angel's line is quoted as she said it and is never called committed or signed unless the founder says so.
 - It names no fund and invents no investor, commitment, term sheet or reference.

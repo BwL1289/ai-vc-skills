@@ -1,6 +1,6 @@
 ---
 name: vc-partner-meeting
-description: Helps a founder rehearse a VC partner meeting. From the founder's pitch, stage, round and the partner's background, it picks question lenses by stage (pre-seed, seed, Series A, later) and background (operator, finance, product, network, sector thesis), frameworks, never named people or firms, and builds the hardest questions with an adversarial review where lenses attack the founder's own lines and a refute pass keeps only questions the material leaves open. It drills them, preps what a partner checks around the meeting (who else is in the round, whether insiders take part, the references, what happens with no raise), and debriefs each weak answer with a stronger one built only from the founder's material and what a yes would need. Use when a founder says rehearse my partner meeting, run a mock partner meeting, drill me on the hard questions, prep me for my partner meeting, or debrief my answers. Never invents traction or investor interest; the ask's figures go to the calculator. Not investment advice.
+description: Helps a founder rehearse a VC partner meeting. From the founder's pitch, stage, round and the partner's background, it picks question lenses by stage and by background, frameworks, never named people or firms, and builds the hardest questions with an adversarial review where lenses attack the founder's own lines and a refute pass keeps only questions the material leaves open. It drills them, preps what a partner checks around the meeting (who else is in the round, insiders, references, no raise), and debriefs each weak answer with a stronger one built only from the founder's material and what a yes would need. Use when a founder says rehearse my partner meeting, run a mock partner meeting, practice my investor meeting or VC pitch meeting, what will the partners ask, what will VCs ask me, drill me on the hard questions, prep me for my partner meeting, or debrief my answers. Never invents traction or investor interest; the ask's figures go to the calculator. Not investment advice.
 ---
 
 # VC partner meeting
@@ -27,7 +27,7 @@ company, its round or its investors that the founder did not give.
   - The ask's arithmetic (valuation, percent sold, ownership after the round, the pool, runway, use of funds): the
     vc-deal-math skill, which calls `equity_deal_check`. New money on a SAFE or note: `equity_round` (the
     equity-calculator skill). A stake through later rounds: `equity_dilution`.
-  - Planned, not yet shipped: a ranked bank of due-diligence questions and a data-room checklist. It will share this
+  - Planned, not yet shipped: a ranked bank of due-diligence questions and a data-room checklist. It may reuse this
     skill's question bank ([`references/question-bank.md`](references/question-bank.md)). Until it ships, say so.
 
 ## Inputs
@@ -44,7 +44,7 @@ Ask once, in one message, for whatever is missing, by name. Never guess. At most
    whether existing investors will take part, who has passed and the reason given, and the cash runway if no new
    money comes in.
 5. The mode: **live** (the skill asks one question at a time and waits for each answer) or **one message** (the
-   founder pastes answers to the questions they expect, and the skill drills and debriefs on those).
+   founder pastes the questions they expect, each with their answer, and the skill debriefs every one of them).
 
 A missing input does not stop the rehearsal. It becomes a named gap and a bracketed ask in the debrief, never a
 plausible fact. **The founder's material** means the pasted text plus every answer the founder gives in this session.
@@ -53,9 +53,9 @@ Label each part as it arrives (P1, P2 ... for the pitch; A1, A2 ... for answers)
 ## The lenses
 
 Each lens is a framework named by what it tests, never a person or firm. Run the founder's **stage lens** and the
-**background lenses** that match the partner's background; with the background unknown, run all five background
-lenses with at most two questions each. Stage lenses carry no numeric bars: what counts as enough traction varies by
-sector, region and year, and this skill quotes no benchmark. Questions about competition read it at four levels:
+**background lenses** that match the partner's background; with the background unknown, run all five background lenses
+with at most two questions each. Stage lenses carry no numeric bars: what counts as enough traction varies by sector,
+region and year, and this skill quotes no benchmark of its own. Questions about competition read it at four levels:
 Direct, Indirect, Adjacent and platform, and Doing nothing (the grouping is this skill's own, unverified).
 
 | Lens          | Kind       | What it tests                                                                               |
@@ -83,7 +83,14 @@ lenses" says, so the lenses do not anchor on the numbers or the bank; step 4 the
      the tool's values, as printed, in the stronger answers too (20.83 months stays 20.83 months, never "about 21").
      Make one call per version of the ask the founder states (two for a valuation with no label, as vc-deal-math step
      4 says), and run no what-if they did not ask for. A raise on a SAFE or note goes to `equity_round` as vc-deal-math
-     step 2 says. A mismatch is a question a partner is likely to ask, so it goes to the top of the drill.
+     step 2 says. A mismatch is a question a partner is likely to ask, so it goes to the top of the drill. When the
+     two readings of a valuation with no label disagree, the first kept question is which one is meant, as ends the
+     meeting, quoting both tool values.
+   - Read every code in the tool's `flags` too. Each is a question a partner is likely to ask, so each joins the kept
+     questions as weakens it, in the tool's words, and is not refuted. The two benchmark flags (`runway_below_band`,
+     `dilution_above_band`) rest on the tool's assumption rows (`runway_band`, `dilution_band`): quote the band only as
+     that row gives it, with its `unverified` source, as a common benchmark that varies by sector, stage and year,
+     never as a bar the company must clear.
    - On a SAFE or note raise, no tool checks the runway claim or the use-of-funds lines: quote them as stated, mark
      them "not checked: no tool computes this for a SAFE or note raise", and never work them out by hand.
    - The founder's runway if no new money comes in: `equity_deal_check` always adds the raise to the cash, so no tool
@@ -97,16 +104,22 @@ lenses" says, so the lenses do not anchor on the numbers or the bank; step 4 the
 4. **Run the adversarial review** (next section): attack, check the quotes, refute, rank. Its kept questions are the
    drill.
 5. **Add the standing prep questions** (the section after it). They are asked of every founder and are not refuted.
-6. **Drill.** Live mode: put one question at a time, kept questions first, then the standing ones, at most twelve in
-   all unless the founder asks for more; the quick-rehearsal list comes after, only if the founder wants it. Wait for each answer and label it. Ask at most one follow-up per question,
-   only when the answer leaves out the specific thing the question asked for, and quote the part of the answer it
-   follows. One-message mode: match each pasted answer to its question; a kept question with no pasted answer is
-   marked "not rehearsed". The founder can stop at any point; debrief what was answered.
+6. **Drill.** Live mode: put one question at a time, kept questions first, then the first five standing ones, at
+   most twelve in all unless the founder asks for more, keeping five of the twelve for those standing ones; the sixth
+   is the founder's to ask, so it goes in the standing prep, not the drill. The quick-rehearsal list comes after, only
+   if the founder wants it. The first turn names the lenses and puts question 1; the numbered answer below comes once
+   the drill ends or the founder stops, so the kept list is not shown before the drill. Wait for each answer and label
+   it. Ask at most one follow-up per question, only when the answer leaves out the specific thing the question asked
+   for, and quote the part of the answer it follows. One-message mode: debrief every pasted answer. Match each to the
+   kept, dropped or standing question it answers; a dropped, answered question with a pasted answer is debriefed too,
+   leading with its answering line. A pasted answer that matches none is debriefed under the founder's own question,
+   quoted, labelled "your question" in place of a lens. A kept question with no pasted answer is marked "not
+   rehearsed". The founder can stop at any point; debrief what was answered.
 7. **Debrief** (the section below): each answer, a stronger one, and what a yes would need.
-8. **Check before answering.** Every question and every weak-answer note quotes a line that is in the founder's
-   material word for word; every stronger answer uses only facts from the material or a tool result, and marks each
-   gap as a bracketed ask; every figure is quoted as stated or comes from a tool; no sentence speaks as an investor,
-   imitates a named person or firm, or gives a pass, invest or score.
+8. **Check before answering.** Every question and every weak-answer note quotes a line that is in the founder's material
+   word for word, or, for a mismatch or a flag, the tool's row; every stronger answer uses only facts from the material
+   or a tool result, and marks each gap as a bracketed ask; every figure is quoted as stated or comes from a tool; no
+   sentence speaks as an investor, imitates a named person or firm, or gives a pass, invest or score.
 
 ## Adversarial review
 
@@ -130,19 +143,19 @@ Every lens picked in step 2 gets the same brief, with its own name and test fill
 - Return "nothing found" rather than a weak question.
 
 **How to run the lenses.** When the agent has a subagent tool (in Claude Code, the Agent or Task tool), run the lenses
-as parallel subagents, however short the material. Give each one only the founder's material and its lens brief: not this skill's other sections,
-not the question bank, not another lens's output, so no lens anchors on another. Without a subagent tool, run Stage A
-right after step 2, before step 3, without reading the question bank: run the lenses one after another, write each
-lens's questions down in full before reading the next lens's brief, and never revise an earlier lens's list after a
-later one. Lenses run this way are less independent than subagents, and the same agent then judges them in Stage B, so
-the answer says so. The bank ([`references/question-bank.md`](references/question-bank.md)) is read only after Stage
-A, to word the kept questions. A
-bank question enters the drill only when it is tied to a founder's line quoted word for word and then passes the quote
-check and the refute pass like any other; otherwise it becomes an open ask, or it is one of the standing prep questions.
+as parallel subagents, however short the material. Give each one only the founder's material and its lens brief: not
+this skill's other sections, not the question bank, not another lens's output, so no lens anchors on another. Without a
+subagent tool, run Stage A right after step 2, before step 3, without reading the question bank: run the lenses one
+after another, write each lens's questions down in full before reading the next lens's brief, and never revise an
+earlier lens's list after a later one. Lenses run this way are less independent than subagents, and the same agent then
+judges them in Stage B, so the answer says so. The bank ([`references/question-bank.md`](references/question-bank.md))
+is read only after Stage A, to word the kept questions. A bank question enters the drill only when it is tied to a
+founder's line quoted word for word and then passes the quote check and the refute pass like any other; otherwise it
+becomes an open ask, or it is one of the standing prep questions.
 
-**The calculator's mismatches** from step 3 do not go through the lenses. Each mismatch row is added to the kept
-questions as ends the meeting, quoting the figure as the founder states it, with the tool's value as the reason. It is
-not refuted: the calculator computed it.
+**The calculator's mismatches and flags** from step 3 do not go through the lenses. Each mismatch row is added to the
+kept questions as ends the meeting, quoting the figure as the founder states it, with the tool's value as the reason;
+each flag is added as weakens it, in the tool's words. Neither is refuted: the calculator computed it.
 
 ### Check the quotes
 
@@ -153,9 +166,9 @@ the same line, merge them and keep both lens names. Gaps from every lens go to t
 ### Stage B: refute
 
 Each question gets its own refute pass. With a subagent tool, run one subagent per question, however few there are,
-given the founder's
-material, that one question, and everything from "The refute brief:" to the end of this stage, and nothing else;
-without one, take the questions one at a time and decide each against the same brief before reading the next.
+given the founder's material, that one question, and everything from "The refute brief:" to the end of this stage,
+and nothing else; without one, take the questions one at a time and decide each against the same brief before reading
+the next.
 
 The refute brief:
 
@@ -184,9 +197,10 @@ word does not drop the question, which stays kept, and neither does one that is 
 
 ### Rank what survives
 
-Order the kept questions in three tiers, hardest first: **ends the meeting**, **weakens it**, **minor**. Within a
-tier, a question raised by more than one lens comes first. The tier is a judgment, not a probability: give no
-percentages and no score. The kept questions, in this order, are the drill.
+Order the kept questions in three tiers, hardest first: **ends the meeting**, **weakens it**, **minor**. Within a tier,
+the calculator's rows come first, in the order the tool reports them, ahead of everything else: mismatches open ends the
+meeting, flags open weakens it. After them, a question raised by more than one lens comes first. The tier is a judgment,
+not a probability: give no percentages and no score. The kept questions, in this order, are the drill.
 
 ## Standing prep questions
 
@@ -194,28 +208,30 @@ A partner is likely to ask or check these whatever the pitch says, so every foun
 attacks on a line and are not refuted. For each, the skill drafts an answer only from the founder's material, or
 leaves a bracketed ask; it never invents a fund, a commitment, a term sheet or a reference.
 
-| Question a partner is likely to ask or check          | What the founder should have ready                                                    |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Who else are you talking to, and who has committed?   | A true answer at the level of detail the founder chooses; never an implied interest   |
-| Will your existing investors take part in this round? | Their answer as the founder has it, or the plan to ask them before the meeting        |
-| Who has passed, and why?                              | The reasons given, and what the founder changed or would answer                       |
-| Whom will the partner call, on your list and off it?  | Customers, former colleagues and investors who may be called; brief the ones you list |
-| What happens if this round does not close?            | Months of runway on today's cash as the founder states it, what gets cut, the plan    |
-| What happens after this meeting, and when?            | A question for the founder to ask the partner, not to guess                           |
+| Question a partner is likely to ask or check                  | What the founder should have ready                                                    |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Which other investors are you meeting, and who has committed? | A true answer at the level of detail the founder chooses; never an implied interest   |
+| Will your existing investors take part in this round?         | Their answer as the founder has it, or the plan to ask them before the meeting        |
+| Who has passed, and why?                                      | The reasons given, and what the founder changed or would answer                       |
+| Whom will the partner call, on your list and off it?          | Customers, former colleagues and investors who may be called; brief the ones you list |
+| What happens if this round does not close?                    | Months of runway on today's cash as the founder states it, what gets cut, the plan    |
+| What happens after this meeting, and when?                    | A question for the founder to ask the partner, not to guess                           |
 
-These questions are this skill's own list. Where they come from is in Sources; no public source this skill's
-authors read in full names them, so they are unverified.
+The first five topics came, as ideas, from the investor-persona prompts credited in Sources, which cite no source
+for them; the wording, the sixth question and the list as a whole are this skill's own. All six are unverified. The
+sixth is for the founder to ask the partner, so it is drafted here and never put to the founder in the drill.
 
 ## The debrief
 
-For each question asked, in the drill's order:
+For each question asked, in the drill's order, then, in one-message mode, each other pasted answer (step 6):
 
-- **The question,** its lens, and the founder's line it came from, quoted.
+- **The question,** its lens (or "your question" for one only the founder asked), and the founder's line it came
+  from (or, for a mismatch or flag, the tool's row), quoted.
 - **The founder's answer,** quoted with its label.
 - **What was weak,** only where something was: it did not answer the question asked; it gave no figure where the
-  question asked for one; a figure had no definition or period; it disagrees with another line of the material (both
-  quoted); it uses a phrase the vc-positioning skill flags; it ran long before the point. Say "held up" when nothing
-  was weak.
+  question asked for one; a figure had no definition or period; it disagrees with another line of the material or with a
+  tool result (both quoted); it uses a phrase the vc-positioning skill flags; it ran long before the point. Say "held
+  up" when nothing was weak.
 - **A stronger answer,** at most four sentences, the point first, built only from the founder's material and tool
   results, each fact traceable to a label. Never stronger than the facts: no number, customer, investor, partner,
   credential or plan that is not in the material. Each gap is a bracketed ask.
@@ -235,9 +251,10 @@ firm would invest, pass or score the company.
      than separate subagents.
 3. **Debrief,** question by question, as above.
 4. **Standing prep:** each standing question with the drafted answer or its bracketed ask.
-5. **Numbers:** the `equity_deal_check` verdict with each mismatch row in the tool's values; on a SAFE or note
-   raise, the runway claim and use-of-funds lines quoted with "not checked: no tool computes this for a SAFE or note
-   raise"; the runway with no new money quoted with "not checked: no tool computes runway without a raise"; every
+5. **Numbers:** the `equity_deal_check` verdict with each mismatch row in the tool's values; each flag, one line, in the
+   tool's words, with a benchmark flag's band quoted from its assumption row and its `unverified` source; on a SAFE or
+   note raise, the runway claim and use-of-funds lines quoted with "not checked: no tool computes this for a SAFE or
+   note raise"; the runway with no new money quoted with "not checked: no tool computes runway without a raise"; every
    other figure quoted as stated.
 6. **What a yes would need,** as a list of bracketed asks.
 7. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
@@ -254,13 +271,15 @@ firm would invest, pass or score the company.
   https://www.ycombinator.com/library/2u-how-to-build-your-seed-round-pitch-deck
 - Sequoia Capital, "Writing a Business Plan": https://www.sequoiacap.com/article/writing-a-business-plan/
 
-The seven questions shape the stage lenses (the one sentence, users and growth, the insight, the market, the team,
-the ask); "How to Apply" the Pre-seed lens's insight and specific achievements; the seed deck guide the Finance lens's
-ask (how much, and what it gets the company to); Sequoia's "Why now?" the Sector thesis lens. The lens kinds, the
-standing prep questions and the debrief shape are this skill's own, unverified.
-The idea of choosing lenses by stage and by a partner's background, and of preparing for references checked before
-the meeting, came from reading an MIT-licensed set of investor-persona prompts (github.com/xiapeli/vc-skills); no
-text was taken, and its named-firm personas are not used. The two-stage method (attack, then refute with the
+The seven questions shape the stage lenses (the one sentence, users and growth, the insight, the market, the business
+model, the team, the ask); "How to Apply" the Pre-seed lens's insight and specific achievements; the seed deck guide the
+Finance lens's ask (how much, and what it gets the company to); Sequoia's "Why now?" the Sector thesis lens. The idea of
+choosing lenses by stage and by a partner's background, the five background kinds (operator, finance, product, network,
+sector thesis), and the topics of the first five standing prep questions (who else is in the round, insiders, who has
+passed, references, no raise) came from reading an MIT-licensed set of investor-persona prompts
+(github.com/xiapeli/vc-skills). That set cites no source for them, so they stay unverified here; no text was taken (the
+questions are reworded), and its named-firm personas are not used. The sixth standing question, the debrief shape and
+the twelve-question drill length are this skill's own, unverified. The two-stage method (attack, then refute with the
 founder's own material) is shared with the vc-positioning skill.
 
 ## Limits

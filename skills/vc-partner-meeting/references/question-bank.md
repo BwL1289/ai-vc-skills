@@ -4,9 +4,10 @@ The questions a partner is likely to ask in a meeting, by category. The vc-partn
 after the attack stage of its adversarial review, to word the questions its lenses kept, so no lens anchors on it. A
 question here enters the drill only when it is tied to a line of the founder's material quoted word for word and then
 passes the quote check and the refute pass; otherwise it becomes an open ask, or it is one of the standing prep
-questions. The planned due-diligence skill will read the same file.
+questions. A planned due-diligence skill may reuse these questions.
 
-The list is this skill's own and unverified: no public source this skill's authors read in full gives it.
+The list and its wording are this skill's own and unverified. A few topics, among them the round-so-far rows, came as
+ideas from the investor-persona prompts the skill's Sources credit, which cite no source for them.
 
 ## How to read a row
 
@@ -144,16 +145,16 @@ and **Doing nothing** (spreadsheets, phone calls, an outsourced service, or livi
 The first six rows are the standing prep questions in the skill, word for word: every founder prepares them, and they
 are not refuted.
 
-| ID      | Question                                              | Probes                                            | Lenses            | Stages                | Grounding    | Diligence             |
-| ------- | ----------------------------------------------------- | ------------------------------------------------- | ----------------- | --------------------- | ------------ | --------------------- |
-| ROUND-1 | Who else are you talking to, and who has committed?   | A true answer, never an implied interest          | Network, Finance  | all                   | standing     | none                  |
-| ROUND-2 | Will your existing investors take part in this round? | The insiders' answer as the founder has it        | Network, Finance  | all                   | standing     | none                  |
-| ROUND-3 | Who has passed, and why?                              | The reasons given, and what changed since         | Network           | all                   | standing     | none                  |
-| ROUND-4 | Whom will the partner call, on your list and off it?  | References ready and briefed                      | Network           | all                   | standing     | a reference list      |
-| ROUND-5 | What happens if this round does not close?            | Runway on today's cash, what gets cut, the plan   | Finance, Operator | all                   | standing     | the monthly cash plan |
-| ROUND-6 | What happens after this meeting, and when?            | A question for the founder to ask, never to guess | Network           | all                   | standing     | none                  |
-| ROUND-7 | Who is leading the round, and who sets the terms?     | The lead named only as the founder states it      | Finance, Network  | seed, Series A, later | a round line | none                  |
-| ROUND-8 | How much of the round is committed, and by whom?      | Committed money stated, never implied             | Finance           | all                   | a round line | signed commitments    |
+| ID      | Question                                                      | Probes                                            | Lenses            | Stages                | Grounding    | Diligence             |
+| ------- | ------------------------------------------------------------- | ------------------------------------------------- | ----------------- | --------------------- | ------------ | --------------------- |
+| ROUND-1 | Which other investors are you meeting, and who has committed? | A true answer, never an implied interest          | Network, Finance  | all                   | standing     | none                  |
+| ROUND-2 | Will your existing investors take part in this round?         | The insiders' answer as the founder has it        | Network, Finance  | all                   | standing     | none                  |
+| ROUND-3 | Who has passed, and why?                                      | The reasons given, and what changed since         | Network           | all                   | standing     | none                  |
+| ROUND-4 | Whom will the partner call, on your list and off it?          | References ready and briefed                      | Network           | all                   | standing     | a reference list      |
+| ROUND-5 | What happens if this round does not close?                    | Runway on today's cash, what gets cut, the plan   | Finance, Operator | all                   | standing     | the monthly cash plan |
+| ROUND-6 | What happens after this meeting, and when?                    | A question for the founder to ask, never to guess | Network           | all                   | standing     | none                  |
+| ROUND-7 | Who is leading the round, and who sets the terms?             | The lead named only as the founder states it      | Finance, Network  | seed, Series A, later | a round line | none                  |
+| ROUND-8 | How much of the round is committed, and by whom?              | Committed money stated, never implied             | Finance           | all                   | a round line | signed commitments    |
 
 ## Risks and what breaks
 

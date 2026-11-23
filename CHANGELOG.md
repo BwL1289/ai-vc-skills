@@ -50,12 +50,13 @@ All notable changes to this repository. Dates are UTC.
   stage (pre-seed, seed, Series A, later) and by the partner's background (operator, finance, product, network, sector
   thesis), frameworks and never named people or firms, and runs an adversarial review: the lenses attack the founder's
   own lines, and a refute pass moves every question the material already answers to a quick-rehearsal list. It drills
-  the questions that remain, live or in one message, preps what a partner checks around the meeting (who else is in
-  the round, insiders, who has passed, references, no raise), and debriefs each weak answer with a stronger one built
-  only from the founder's material, plus what a yes would need. It moderates and never plays an investor: no pass or
-  invest verdict and no score. The ask's figures go to `equity_deal_check`; runway with no raise is quoted, not
-  computed. A question bank by category sits in `skills/vc-partner-meeting/references/`. `vc-positioning` now points
-  to it. Four evals are in `evals/vc-partner-meeting/`.
+  the questions that remain, live or in one message, preps what a partner checks around the meeting (who else is in the
+  round, insiders, who has passed, references, no raise), and debriefs each weak answer with a stronger one built only
+  from the founder's material, plus what a yes would need. It moderates and never plays an investor: no pass or invest
+  verdict and no score. The ask's figures go to the calculator (`equity_deal_check`, or `equity_round` for a SAFE or
+  note); runway with no raise is quoted, not computed. A question bank by category sits in
+  `skills/vc-partner-meeting/references/`. `vc-positioning` now hands off to the new skill. Four evals are in
+  `evals/vc-partner-meeting/`.
 
 ### Changed
 

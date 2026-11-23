@@ -51,6 +51,10 @@ _LINE_LIMIT = 350
 _TRIGGERS = (
     "rehearse my partner meeting",
     "run a mock partner meeting",
+    "practice my investor meeting",
+    "VC pitch meeting",
+    "what will the partners ask",
+    "what will VCs ask me",
     "drill me on the hard questions",
     "prep me for my partner meeting",
     "debrief my answers",
@@ -71,9 +75,18 @@ _MAX_BANK_ROWS = 100
 _BANK_CATEGORIES = 11
 _TABLE_ROW = re.compile(r"^\|(.+)\|$", re.MULTILINE)
 _URL = re.compile(r"https?://\S+")
+# A link written without its scheme, such as example.com/path; the one such credit the skill carries is allowed by name.
+_BARE_LINK = re.compile(r"(?<![/\w.])(?:[\w-]+\.)+(?:com|org|io|me|net|dev)/[\w./-]*[\w/]")
+_BARE_LINKS_ALLOWED = {"github.com/xiapeli/vc-skills"}
+# The README badge: its alt text and its image URL both carry the number of skills.
+_BADGE = re.compile(r'alt="Skills: (\d+)" src="https://img\.shields\.io/badge/skills-(\d+)-')
+# Strings an eval's answer quotes that are the skill's own marks, not lines of the founder's material.
+_NOT_REHEARSED = "not rehearsed"
+_YOUR_QUESTION = "your question"
 _DOUBLE_QUOTED = re.compile(r'"([^"]+)"')
 _SAFE_UNCHECKED = "not checked: no tool computes this for a SAFE or note raise"
 _NO_RAISE_UNCHECKED = "not checked: no tool computes runway without a raise"
+_SKILL_MARKS = {_NOT_REHEARSED, _YOUR_QUESTION, _SAFE_UNCHECKED, _NO_RAISE_UNCHECKED}
 _REFUTE_VERDICTS = ("Dropped, answered:", "Dropped, not grounded:", "Kept:")
 # A figure an eval's answer takes from the calculator: a percent or months with decimals, or money with cents.
 _PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|\d[\d,]*\.\d+ months|\$\d[\d,]*\.\d{2}")
@@ -228,6 +241,27 @@ def test_the_refute_stage_judges_with_only_the_material_and_moves_answered_quest
     assert "no percentages and no score" in _unwrapped(_section("### Rank what survives"))
 
 
+def test_the_calculators_rows_open_their_tiers_ahead_of_questions_from_more_than_one_lens() -> None:
+    rank = _unwrapped(_section("### Rank what survives"))
+    mismatches = _unwrapped(_section("### Stage A: attack"))
+
+    assert "the calculator's rows come first, in the order the tool reports them, ahead of everything else" in rank
+    assert "mismatches open ends the meeting, flags open weakens it" in rank
+    assert rank.index("the calculator's rows come first") < rank.index("raised by more than one lens")
+    assert "Neither is refuted" in mismatches
+
+
+def test_one_message_mode_debriefs_every_pasted_answer_even_one_no_lens_kept() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    debrief = _unwrapped(_section("## The debrief"))
+
+    assert "One-message mode: debrief every pasted answer" in steps
+    assert "a dropped, answered question with a pasted answer is debriefed too" in steps
+    assert f'labelled "{_YOUR_QUESTION}" in place of a lens' in steps
+    assert f'"{_NOT_REHEARSED}"' in steps
+    assert "each other pasted answer" in debrief and f'"{_YOUR_QUESTION}"' in debrief
+
+
 def test_the_standing_prep_questions_are_not_refuted_and_invent_nothing() -> None:
     rows = _table("## Standing prep questions")
     text = _unwrapped(_section("## Standing prep questions"))
@@ -255,6 +289,19 @@ def test_figures_go_to_the_calculator_and_runway_with_no_raise_is_quoted_uncheck
     assert "never divide cash by burn yourself" in steps
     assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
     assert "Make one call per version of the ask" in steps and "as printed" in steps
+
+
+def test_every_flag_the_calculator_raises_is_relayed_and_a_benchmark_band_is_never_a_bar() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "Read every code in the tool's `flags` too" in steps
+    assert "joins the kept questions as weakens it, in the tool's words, and is not refuted" in steps
+    for code in ("`runway_below_band`", "`dilution_above_band`", "`runway_band`", "`dilution_band`"):
+        assert code in steps, code
+    assert "with its `unverified` source" in steps and "never as a bar" in steps
+    assert "each flag, one line, in the tool's words" in answering and "`unverified` source" in answering
+    assert "which one is meant, as ends the meeting, quoting both tool values" in steps
 
 
 def test_the_question_bank_has_fixed_columns_unique_ids_and_known_lenses_and_stages() -> None:
@@ -390,5 +437,35 @@ def test_the_sources_are_ones_the_authors_read_and_the_credit_took_no_text() -> 
 
     assert set(_URL.findall(_TEXT)) <= set(_READ_SOURCES)
     assert set(_URL.findall(_TEXT))
+    assert set(_BARE_LINK.findall(_TEXT)) == _BARE_LINKS_ALLOWED
+    assert not _BARE_LINK.search(_BANK)
     assert "github.com/xiapeli/vc-skills" in sources and "MIT-licensed" in sources
     assert "no text was taken" in sources
+
+
+def test_no_person_or_firm_is_named_outside_sources_or_in_any_eval_answer() -> None:
+    sources_start = _TEXT.index("\n## Sources\n")
+    sources_end = _TEXT.index("\n## ", sources_start + 1)
+    outside = (_TEXT[:sources_start] + _TEXT[sources_end:]).lower()
+    answers = [_section("## Expected answer", path.read_text(encoding="utf-8")).lower() for path in _EVALS]
+
+    for text in (outside, *answers):
+        for name in _PEOPLE_AND_FIRMS:
+            assert not re.search(rf"\b{re.escape(name)}\b", text), name
+
+
+@pytest.mark.parametrize("path", _EVALS, ids=[path.stem for path in _EVALS])
+def test_every_line_an_eval_answer_quotes_is_in_its_prompt_or_is_a_mark_of_the_skill(path: Path) -> None:
+    text = path.read_text(encoding="utf-8")
+    prompt = _unwrapped(_section("## Prompt", text))
+
+    for quoted in _DOUBLE_QUOTED.findall(_unwrapped(_section("## Expected answer", text))):
+        assert quoted in prompt or quoted in _SKILL_MARKS, quoted
+
+
+def test_the_readme_badge_counts_the_skill_folders() -> None:
+    badge = _BADGE.search((_ROOT / "README.md").read_text(encoding="utf-8"))
+    folders = sorted((_ROOT / "skills").glob("*/SKILL.md"))
+
+    assert badge is not None
+    assert int(badge.group(1)) == int(badge.group(2)) == len(folders), (badge.groups(), len(folders))

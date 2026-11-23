@@ -24,15 +24,20 @@ asks for the cap and the next priced round the founder expects before any `equit
 
 - It names the lenses it ran (Seed and Product) in one line, and says how they ran (subagents, or one after another
   in one agent).
-- A Product lens question on whether anyone wants this, raised on the one-liner, is listed under Dropped, answered,
-  quoting "Live in 3 warehouses since June; pick errors fell from 2.1% to 0.6% at the first site over 8 weeks." as the
-  line to lead with. It goes to the quick-rehearsal list, not the hard drill.
+- A Seed or Product lens question on whether anyone wants this, raised on the one-liner, is listed under Dropped,
+  answered, quoting "Live in 3 warehouses since June; pick errors fell from 2.1% to 0.6% at the first site over 8
+  weeks." as the line to lead with. It goes to the quick-rehearsal list, not the hard drill.
 - Kept: a question on "Our moat is our AI." (what the model does that the product could not do without it), with a
   bracketed ask. No pasted answer matches it, so it is marked "not rehearsed".
-- Debrief: "Because pickers love it." is weak (no figure where the question asks for one); the stronger answer leads
-  with the slide-3 line and brackets the missing figure, such as
-  `[share of pickers using it each shift, last 8 weeks]`. "Nobody does voice for small warehouses." is weak (a phrase the vc-positioning skill flags); the stronger
-  answer names the alternatives from "Pickers today read paper lists or handheld screens."
+- Debrief: both pasted answers are debriefed. Each goes under the dropped question it answers when a lens raised
+  one, leading with that question's answering line; otherwise under the founder's own question, labelled "your
+  question" in place of a lens.
+- "Because pickers love it." is weak (it did not answer the question asked: no evidence that pickers come back); the
+  stronger answer leads with the slide-3 line and brackets the missing figure, such as
+  `[share of pickers using it each shift, last 8 weeks]`. "Nobody does voice for small warehouses." is weak (a phrase
+  the vc-positioning skill flags); the stronger answer names the alternatives from "Pickers today read paper lists or
+  handheld screens."
+- It asks for the cap and the next priced round the founder expects before any `equity_round` call.
 - It computes nothing from the error rates (no relative reduction) and quotes them as stated.
 - The standing prep questions are listed with bracketed asks, since the material says nothing about the round so far.
 - No pass, invest or score; every question is put in the third person.
