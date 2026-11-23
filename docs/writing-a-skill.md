@@ -44,6 +44,8 @@ skills/<skill-name>/
    checklist), never an imitation of a named investor or firm.
 5. **Not advice.** Say what a lawyer or accountant should check; never present investment, legal or tax advice as fact.
 6. **Nothing leaves the machine.** A skill never sends a user's document to any service.
+7. **The founder is the user.** A skill answers a founder's question; an investor's view is a lens a review applies,
+   never the role the skill plays.
 
 ## Testing a skill by hand
 

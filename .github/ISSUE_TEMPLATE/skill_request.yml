@@ -1,12 +1,12 @@
 name: Skill request
-description: A question founders or investors ask that a skill should answer
+description: A question a founder asks that a skill should answer
 labels: ["enhancement"]
 body:
   - type: textarea
     id: question
     attributes:
       label: The question
-      description: What a founder or investor asks, in their own words.
+      description: What a founder asks, in their own words. Every skill here works for the founder; an investor's view can be a lens in a review, never the user.
     validations:
       required: true
   - type: textarea

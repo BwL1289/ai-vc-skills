@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
-    <img alt="AI VC skills: exact startup equity math for Claude and any MCP client" src="assets/banner-light.svg" width="100%">
+    <img alt="AI VC skills: exact equity math and skeptical reviews of your raise" src="assets/banner-light.svg" width="100%">
   </picture>
 </p>
 
@@ -29,7 +29,13 @@
 </p>
 
 <p align="center">
-  <img src="assets/demo-claude.gif" alt="Claude Code calls the equity calculator's MCP tool and answers a SAFE conversion question: $0.70 a share, existing holders 60.85%, new investor 20%" width="820">
+  <img src="assets/demo-claude.gif" alt="Claude Code calls the equity calculator's MCP tool and answers a SAFE conversion question in the five short lines the prompt asks for: the SAFE converts at $0.70 a share, and existing holders own 60.85% after the round" width="820">
+</p>
+
+<p align="center">
+  <sub>The prompt asks for five short lines, so the answer shortens the tool's figures: the calculator prints a round
+  price of $0.960784 and existing holders at 60.8497%. Otherwise the equity-calculator skill tells the agent to give the
+  numbers as the tool prints them, never rounded again.</sub>
 </p>
 
 **AI VC skills** are agent skills for the money side of building a startup: the questions you face when an investor
@@ -114,15 +120,16 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 | [`vc-investor-memo`](skills/vc-investor-memo/SKILL.md)                             | For founders: drafts the internal investment memo your champion partner is likely to write for the partnership: the case in one shape, the round and the outcome case on the calculator from your own exit assumptions (no fund math), and a dissent pass that finds the holes first.                                                                                | 🧪 Preview   |
 | [`vc-market-sizing`](skills/vc-market-sizing/SKILL.md)                             | For founders: builds your market size bottom-up (who buys, how many, what each pays, how many you can win), every assumption with your source, checked against the deck and any top-down figure, with sensitivity on the shakiest assumption and an adversarial review of inflation, a SOM with no path and double counting.                                         | 🧪 Preview   |
 | [`vc-prospective-investor-update`](skills/vc-prospective-investor-update/SKILL.md) | For founders: writes or reviews the short update you send the investors you hope to raise from, so they see a line, not a dot: the same metrics and definitions every time, each earlier value side by side as stated, last update's promises tied out, one ask, runway from the calculator when you show it, and a reader pass that flags spin and moved goalposts. | 🧪 Preview   |
-| More venture-style reviews                                                         | Term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                                                                                                                                                           | 🗺️ Planned   |
 
 `vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-current-investor-update`, `vc-metrics-readiness`, `vc-investor-memo`, `vc-market-sizing` and `vc-prospective-investor-update` are in preview until they have been checked on
 real decks and meetings. The calculator's arithmetic is tested; the reviews' wording may change. The `vc-positioning` and
 `vc-claims-check` evals were run in live Claude Code sessions on 2026-11-22, and each file holds an excerpt of its
-recorded answer with a verdict against its pass sentence: two passed, four passed in part and one failed. Pass means
-every clause of that sentence was met, Partial that exactly one was missed or met only in part, and Fail that two or
-more were missed. Two were run again after a skill fix, as their files say. One run each is a small sample. The
-`vc-deal-math`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-current-investor-update`, `vc-metrics-readiness`, `vc-investor-memo`, `vc-market-sizing` and `vc-prospective-investor-update` evals state the expected behaviour and have not yet been run in a live session.
+recorded answer with a verdict against its pass sentence: two passed and five passed in part. Pass means every clause
+of that sentence was met, Partial that exactly one was missed or met only in part, and Fail that two or more were
+missed. Two were run again after a skill fix, as their files say. One run each is a small sample. On 2026-11-23 one
+eval of every other review skill except `vc-deal-math` was run live too. An eval file whose first paragraph says a
+live run is recorded holds an excerpt of it with its verdict; every other eval, the `vc-deal-math` ones included,
+states the expected behaviour only.
 
 The `equity-calculator` skill covers eleven scenarios:
 
@@ -170,8 +177,11 @@ Once the plugin is installed, ask in plain words:
 > Rehearse my partner meeting on Tuesday: here is my pitch, our seed round and the partner's background.
 
 > Here is our term sheet: what does each term mean, and what do we get at a $20M sale?
+
 > The fund wants to start diligence: here is our deck, our cap table and the documents we have.
+
 > Write our October investor update: here is last month's update, this month's numbers and our cash and burn.
+
 > Write the investment memo for my champion: here is our deck, the round, the cap table and the exits we believe in.
 
 > Write this month's update for the VCs we're warming up: here is last month's update, this month's notes and our one
