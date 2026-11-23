@@ -1,6 +1,6 @@
 ---
 name: vc-term-sheet-review
-description: Helps a founder understand a VC term sheet before the talk with their lawyer. It explains each term in plain words, sets it beside a published standard-and-clean Series A term sheet, and marks it as matching that baseline, differing from it, or not covered by it, with the source. The economics run on the equity calculator, never by hand - the valuation and the option-pool shuffle with deal_check and pool, the founders' ownership after the round, and an exit waterfall at several exit values, low ones included, beside a 1x non-participating baseline. An adversarial review reads the terms the way the next round's lead, an acquirer, the team and the board will, and a refute pass drops every objection the sheet itself answers. It ends with questions for the founder's lawyer. Use when a founder says review my term sheet, what does this term mean, is this term sheet standard, what do I get at a low exit, or what is the liquidation preference doing. Never says whether to sign. Not legal, tax or investment advice.
+description: Helps a founder understand a VC term sheet before the lawyer call. It explains each term in plain words, sets it beside a published standard-and-clean Series A term sheet, and marks it as matching that baseline, differing from it, or not covered by it, with the source. The economics run on the equity calculator, never by hand - the valuation and the option-pool shuffle with deal_check and pool, the founders' ownership after the round, and an exit waterfall at several exits, low ones included, beside a 1x non-participating baseline when the preference differs. An adversarial review reads the terms the way the next round's lead, an acquirer, the team and the board will, and a refute pass drops every objection the sheet itself answers. It ends with questions for the lawyer. Use when a founder says review my term sheet, what does this term mean, is this term sheet standard, what do I get at a low exit, or what is the liquidation preference doing. Never says whether to sign. Not legal, tax or investment advice.
 ---
 
 # VC term sheet review
@@ -9,7 +9,8 @@ Helps a founder read a term sheet they have been offered before they sit down wi
 explained in plain words and set beside a public baseline, Y Combinator's standard and clean Series A term sheet,
 marked as matching it, differing from it, or not covered by it. The money is worked by the equity calculator: what
 the valuation really pays for once the option pool is counted, what the founders own after the round, and who gets
-what at several exit values, low ones included, under the sheet's terms and under a 1x non-participating baseline.
+what at several exit values, low ones included, under the sheet's terms and, when the sheet's preference differs, under
+a 1x non-participating baseline.
 Independent lenses then read the sheet the way the next round's lead, an acquirer, the team and the board will, a
 refute pass drops what the sheet itself answers, and the survivors become questions for the founder's lawyer.
 
@@ -40,7 +41,7 @@ the founder did not give. It always tells the founder to have a lawyer review th
 Ask once, in one message, for whatever is missing, by name. Never guess.
 
 1. The term sheet, every term word for word, in its own order and with its own headings (or the key terms, each
-   quoted). Figures are quoted as the sheet states them.
+   quoted), and whether the text is the whole sheet. Figures are quoted as the sheet states them.
 2. The round: the amount, the valuation and whether the sheet labels it pre- or post-money, the option pool target
    and whether the sheet counts it in the valuation, and any SAFEs or notes that convert (amount, cap, discount).
 3. The cap table today: the fully diluted shares (every share, granted options and the unissued pool included), the
@@ -60,12 +61,21 @@ The baseline is Y Combinator's standard and clean Series A term sheet (the templ
 which says it "substantively reflect[s] what we see most often"). It is a Series A sheet: say so when the round is a
 seed round, and keep the comparison. Each term gets one mark:
 
-- **Matches:** the sheet says what the baseline says, quoted side by side.
+- **Matches:** the sheet says what the baseline cell says; the sheet's line is quoted beside the cell.
 - **Differs:** the sheet says something else; quote both and say which way it moves money or control, citing the
   row's source. "Differs" is a fact about two texts, never a verdict on the term.
 - **Not in the baseline:** the baseline has no such term (redemption, pay-to-play, warrants). Say what it does, cite
   the row's source, and make it a lawyer question.
-- **Missing:** the baseline has the term and the sheet is silent (no drag-along, no vesting line). A lawyer question.
+- **Missing:** the founder has said the text is the whole sheet, the baseline has the term, and the sheet is silent
+  (no drag-along, no vesting line). A lawyer question.
+
+When the founder pasted only some terms, or has not said the text is the whole sheet, a baseline term the text leaves
+out gets no mark: it goes to the open asks as "not in what was pasted", with a request for the whole sheet. Only a
+term the baseline has can be Missing. Founder vesting, which the baseline leaves blank to negotiate, is Differs when
+the sheet fills it in and Missing when a whole sheet is silent on it.
+
+The Baseline column below summarises the YC template in this skill's own words and leaves the template's amounts and
+rates out on purpose; it is not a quotation, and the answer never presents it as one.
 
 ## The terms
 
@@ -108,9 +118,9 @@ The tools return JSON. The field names below are the JSON's; the command line's 
 the labels given in parentheses.
 
 1. **Quote the sheet.** List every term word for word with its heading, in the sheet's order. Do not tidy it.
-2. **Explain and mark each term** against the table above: what it does in plain words, the baseline quoted, the
-   mark, the source. A term the table does not hold is explained in plain words, marked Not in the baseline, and
-   made a lawyer question; say the explanation is this skill's own reading, unverified.
+2. **Explain and mark each term** against the table above: what it does in plain words, the baseline cell from the
+   table, the mark, the source. A term the table does not hold is explained in plain words, marked Not in the
+   baseline, and made a lawyer question; say the explanation is this skill's own reading, unverified.
 3. **The round's arithmetic.** Send money and percents as strings; one call per figure, never a figure from one tool
    matched by eye against another.
    - `equity_deal_check` (from the command line, `equity_calculator deal_check`): the amount, the valuation with its
@@ -122,11 +132,16 @@ the labels given in parentheses.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
      which way the founder's does, and pass the tool its own basis.
-   - `equity_pool`, only when no SAFE or note converts: the same round with `share_rounding` set to `whole_shares`.
-     Use it for two things only: `pool_in_pre_money` beside `pool_in_post_money` (what moving the pool would change),
-     and the whole share counts the waterfall needs (its `rows`). Its `pre_money` is `equity_deal_check`'s `pre_money`
-     ("Pre-money valuation (V)"), passed on, never subtracted by hand. A whole share count prints as `2307692.000`;
-     pass it as the integer `2307692` (notation, not rounding).
+   - `equity_pool`, only when no SAFE or note converts and the sheet sets a pool target: the same round with
+     `share_rounding` set to `whole_shares` and the same `pool_timing` as `equity_deal_check`. It returns two tables,
+     `pool_in_pre_money` and `pool_in_post_money`, each with its own `rows`. The one that matches the sheet's pool
+     timing is the deal (`inputs.pool_timing` names it; the report marks its column "(this deal)"): take the whole
+     share counts the waterfall needs from that table's `rows` only. The other table is the what-if (what moving the
+     pool would change). It holds the pre-money fixed, so its price and post-money are not the sheet's: quote its
+     `post_money` ("Post-money (every share at p)") and `price_per_share` ("Price per share (p)") beside its investor
+     ownership, and say the sheet's own post-money stays as stated. Its `pre_money` is `equity_deal_check`'s
+     `pre_money` ("Pre-money valuation (V)"), passed on, never subtracted by hand. A whole share count prints as
+     `2307692.000`; pass it as the integer `2307692` (notation, not rounding).
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point
      of its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%), which is what the
      command line's report prints. That is a change of notation, not a calculation; never round it.
@@ -136,20 +151,32 @@ the labels given in parentheses.
      assumed. Its `final_stake` ("Final stake") is the founders' stake after it.
    - `equity_vesting`, only when the founder asks how much of their shares would be vested at a month they name
      under the sheet's founder vesting: `grant_shares`, `total_months`, `cliff_months`, `acceleration` and
-     `acceleration_percent` as the sheet and the founder state them, and `month` as the founder names it.
+     `acceleration_percent` as the sheet and the founder state them, `acceleration_base` `grant` when the sheet's
+     percent is of the whole grant, and `month` as the founder names it. With acceleration, also
+     `change_of_control_month`, the month of the sale the founder names; for a double trigger, also
+     `termination_month`, the month the founder names for being let go, without which the acceleration never fires.
+     A month the founder has not named is never picked: say "not run: name the month of the sale" (or "of the
+     termination") and ask for it. Credit for time served has no tool input: quote it with "not modelled: no tool
+     computes this term's effect", run no vesting call for that grant, never shift a month by hand, and make it a
+     lawyer question.
 4. **The waterfall,** `equity_waterfall`, one call per exit value:
    - `common_shares`: the issued common that takes part in a sale (the founders' shares, other issued common, and
      granted options only when the founder says to count them as exercised). The unissued pool takes nothing. Take
      the count from the pro forma cap table or a count of issued common the founder states. The `existing_holders`
-     row of `equity_pool` (every share but the unissued pool) serves only when there are no granted options or the
-     founder says to count them all as exercised. Never add or subtract shares yourself.
-   - `classes`: the new series with its `shares` from the pro forma or from the `investor` row of `equity_pool`,
+     row of `equity_pool` (every share but the unissued pool, so earlier preferred shares too) serves only when there
+     are no granted options (or the founder says to count them all as exercised) and no earlier preferred class;
+     otherwise take issued common from the pro forma or the founder's count, or the earlier class is counted twice.
+     Never add or subtract shares yourself.
+   - `classes`: the new series with its `shares` from the pro forma or from the `investor` row of the `equity_pool`
+     table that matches the sheet's pool timing (`pool_in_pre_money` when the pool is inside the valuation),
      `invested`, `preference_multiple`, `participation` (`none`, `full`, or `capped` with `cap_multiple`) and `rank`;
      then each earlier preferred class with its own terms. Seniority: every class at rank 1 when the sheet says pari
      passu or is silent (say so); the new series at rank 1 and earlier ones at 2 when the sheet stacks them.
    - When SAFEs or notes convert, the calculator's converted shares are fractional and `equity_waterfall` takes whole
-     shares: run the waterfall only with the pro forma cap table's counts. Without them, say "not run: the waterfall
-     needs whole share counts; send the pro forma cap table" and ask for it.
+     shares; when the sheet sets no pool target, `equity_pool` does not run (it takes no 0% target) and no other tool
+     gives the new series' whole share count. In either case run the waterfall only with the pro forma cap table's
+     counts. Without them, say "not run: the waterfall needs whole share counts; send the pro forma cap table" and
+     ask for it; never divide the amount by the price yourself.
    - Exit values, each named with where it comes from: the amount raised as the sheet states it; the post-money (as
      the sheet states it, or `equity_deal_check`'s `post_money`); the new series' preference owed, as the first
      waterfall run gives it (`rows[0].preference_owed`, "Class 1: preference owed"), when it differs from the amount
@@ -159,10 +186,12 @@ the labels given in parentheses.
      a second time with the new series at `preference_multiple` 1 and `participation` `none`, every other input the
      same, as the baseline column. Run no other what-if unless the founder asks.
    - Read each result: every row's `converts` (true: it converts; false: it stays), its `payout`, and
-     `common_payout` ("Common stock's payout"). When the founders hold every common share that takes part, the common payout is the founders' payout; otherwise give the
-     common payout and its per-share part and say "not checked: no tool splits the common payout by holder".
+     `common_payout` ("Common stock's payout"). When the founders hold every common share that takes part, the
+     common payout is the founders' payout; otherwise give the common payout and its per-share part and say "not
+     checked: no tool splits the common payout by holder".
 5. **Terms the calculator does not model.** Cumulative dividends, anti-dilution, redemption, pay-to-play, warrants,
-   conversion thresholds, management carve-outs, and debt, fees or escrow taken out of a sale are quoted with
+   conversion thresholds, management carve-outs, credit for time served on founder vesting, and debt, fees or
+   escrow taken out of a sale are quoted with
    "not modelled: no tool computes this term's effect", and the waterfall's `exit_is_shared_amount` and
    `conversion_one_to_one` assumptions are quoted beside the exit table. Never fold one into another input (a
    dividend into `preference_multiple`, a ratchet into the share count).
@@ -217,7 +246,9 @@ brief, and never revise an earlier list. Lenses run this way are less independen
 then judges them, so the answer says so.
 
 **The calculator's mismatches** from step 3 do not go through the lenses: each is added to the survivors as a later
-deal is likely to stall on it, quoting the founder's belief with the tool's value. It is computed, not argued.
+deal is likely to stall on it, quoting the founder's belief with the tool's value. It is computed, not argued. It
+leads because the founder's own figure for the round is wrong, which matters before anything else; it is not a
+prediction about a later deal.
 
 ### Check the quotes
 
@@ -268,12 +299,14 @@ Lead with the reminder, then the terms, then the money, then what a later reader
 
 1. **First:** this is a plain-words reading to prepare for the lawyer, not legal, tax or investment advice; whether to
    sign, and on what changes, is for the founder with their lawyer. One line, no verdict.
-2. **The terms,** as a table: Term, The sheet says (quoted), In plain words, Baseline (quoted), Mark, Source.
+2. **The terms,** as a table: Term, The sheet says (quoted), In plain words, Baseline (YC template, this skill's
+   summary), Mark, Source.
 3. **The money:**
    - `equity_deal_check`: the headline valuation beside the effective pre-money, the founders' percent after, the
      pool, each SAFE or note, and every mismatch with the founder's belief in the tool's values; its flags in plain
      words, as vc-deal-math's flag table says.
-   - The pool counted in the pre-money beside the post-money, from `equity_pool`, when it ran.
+   - The pool counted in the pre-money beside the post-money, from `equity_pool`, when it ran: the what-if column's
+     investor ownership with its own price and post-money, saying it holds the pre-money fixed.
    - **Exit table:** Exit value, Where it comes from, the new series' choice, its payout, the common payout under the
      sheet, the common payout under the baseline (when run). Compute no difference between columns.
    - When the founder asked: the founders' stake after the later round they named, from `equity_dilution`, and the
@@ -283,7 +316,7 @@ Lead with the reminder, then the terms, then the money, then what a later reader
    sheet's line (quoted), Why that reader objects. Then **Dropped,** one line each with why it fell. When the lenses
    ran in one agent, say they are less independent than separate subagents.
 5. **Questions for your lawyer,** numbered, under Economics, Control and Process.
-6. **Open asks:** every gap, in one list.
+6. **Open asks:** every gap, in one list, with the baseline terms not in what was pasted.
 7. **Sources:** the ones used, with links and dates, and which explanations are this skill's own, unverified.
 8. **Close:** have a lawyer who works on startup and venture financings review the sheet before signing; ask them
    which parts bind on signing (the sheet itself says, often the no-shop and fees); this is not legal, tax or
@@ -326,8 +359,8 @@ repository's own method.
 - No number of its own: every figure is quoted from the sheet or comes from a tool. No market-survey percentages, no
   "most deals", no exit value or breakpoint it worked out.
 - Not modelled by any tool here: cumulative dividends, anti-dilution, redemption, pay-to-play, warrants, conversion
-  thresholds, carve-outs, and debt or fees ahead of shareholders in a sale. They are explained and quoted, never
-  estimated.
+  thresholds, carve-outs, credit for time served on founder vesting, and debt or fees ahead of shareholders in a
+  sale. They are explained and quoted, never estimated.
 - It never role-plays or speaks as a named investor, firm or law firm, and does no investor research: it does not
   say whether a named investor offers better terms.
 - The adversarial review predicts likely objections from the sheet's text; a real investor or acquirer may raise

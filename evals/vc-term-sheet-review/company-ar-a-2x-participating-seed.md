@@ -2,8 +2,9 @@
 
 A test prompt for the `vc-term-sheet-review` skill. The company is made up. The tool calls and their excerpts are real
 calculator output for these inputs. The answer states the expected behaviour; it is not a recorded run, and this eval
-has not been run in a live session. A run passes when it marks the preference, participation, dividends,
-anti-dilution, board and redemption terms Differs or Not in the baseline with their sources, reports the founders' 75%
+has not been run in a live session. A run passes when it marks the valuation's label, the preference, participation,
+dividends, anti-dilution, board and redemption terms Differs or Not in the baseline with their sources, marks no term
+Missing (the founder has not said the text is the whole sheet), reports the founders' 75%
 as a mismatch, runs every exit under the sheet's terms and under the 1x non-participating baseline with no difference
 computed, quotes the not-modelled terms with the fixed string, and says nothing about whether to sign.
 
@@ -271,11 +272,15 @@ computed, quotes the not-modelled terms with the fixed string, and says nothing 
 
 ## Expected answer
 
-- Marks: the preference (2x against the template's 1x) Differs, participation Differs, dividends (cumulative)
-  Differs, anti-dilution (full ratchet against broad-based weighted average) Differs, the board (two investor seats of
-  three against one of three) Differs, redemption Not in the baseline, drag-along and founder vesting Missing. Each
-  cites the YC article or template and the matching Feld post, and the answer notes that the baseline is a Series A
-  sheet while this is a seed round.
+- Marks: amount and valuation Differs on the label (the sheet's pre-money against the template's post-money, with
+  the pool's place quoted: "included in the pre-money"), the preference (2x against the template's 1x) Differs, and
+  its mark also cites the YC article's point that a round's terms set a precedent for later rounds; participation
+  Differs, dividends (cumulative) Differs, anti-dilution (full ratchet against broad-based weighted average) Differs,
+  the board (two investor seats of three against one of three) Differs, redemption Not in the baseline. Each cites the
+  YC article or template and the matching Feld post, and the answer notes that the baseline is a Series A sheet while
+  this is a seed round. The founder has not said the text is the whole sheet, so no term is marked Missing:
+  conversion, protective provisions, drag-along, founder vesting, the investor rights and the no-shop and conditions
+  go to the open asks as not in what was pasted, with a request for the whole sheet.
 - The 75% is a mismatch: the calculator gives 65.0000%, because the 10% pool is paid for out of the pre-money
   (effective pre-money $7,800,000.00 against $9,000,000.00). It leads the first tier. The investors' 25% is consistent.
 - Exit table with both columns and no difference computed: at $6M (the preference owed) common gets $0.00 under the
@@ -283,7 +288,7 @@ computed, quotes the not-modelled terms with the fixed string, and says nothing 
   against $21,666,667.47, and under the baseline the seed converts. At $3M common gets $0.00 under both.
 - Cumulative dividends, the full ratchet and redemption are quoted with "not modelled: no tool computes this term's
   effect"; the dividend is not folded into the 2x.
-- Survivors include, from the next round's lead lens, that a later investor is likely to ask for the same 2x
-  participating terms (the YC article: terms set a precedent for later rounds), and from the control lens the
+- Survivors include, from the next round's lead lens, that a later lead investor is likely to ask to match
+  "Liquidation Preference: 2x, fully participating", grounded in that line alone, and from the control lens the
   investors' board majority; each becomes a lawyer question, such as "What does the 2x participating preference pay
   common at our low exit?". No sentence says whether to sign or calls a term off the market.

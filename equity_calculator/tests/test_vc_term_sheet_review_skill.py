@@ -23,15 +23,16 @@ from equity_calculator.__main__ import _INPUT_MODELS
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.text import render_sheet
+from pydantic import ValidationError
 
 _ROOT = Path(__file__).resolve().parents[2]
 _SKILL = _ROOT / "skills" / "vc-term-sheet-review" / "SKILL.md"
 _TEXT = _SKILL.read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-term-sheet-review").glob("*.md"))
-_EVAL_COUNT = 4
-# The repository gives each made-up company its own letter; this skill's evals use AQ to AT.
-_EVAL_LETTERS = ("aq", "ar", "as", "at")
+_EVAL_COUNT = 5
+# The repository gives each made-up company its own letter; this skill's evals use AQ to AU.
+_EVAL_LETTERS = ("aq", "ar", "as", "at", "au")
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_deal_check` or `equity_waterfall` call."
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
@@ -280,6 +281,14 @@ def test_the_marks_are_four_and_none_is_a_verdict() -> None:
         assert f"**{mark}:**" in marks, mark
     assert "never a verdict on the term" in marks
     assert "It is a Series A sheet: say so when the round is a seed round" in marks
+    # Silence is Missing only on a whole sheet; a term a partial paste leaves out is an open ask, not a mark.
+    assert "**Missing:** the founder has said the text is the whole sheet, the baseline has the term" in marks
+    assert 'leaves out gets no mark: it goes to the open asks as "not in what was pasted"' in marks
+    assert "Founder vesting, which the baseline leaves blank to negotiate, is Differs when the sheet fills it" in marks
+    # The baseline cells are this skill's summary of the template, never presented as a quotation.
+    assert "it is not a quotation, and the answer never presents it as one" in marks
+    assert "Baseline (YC template, this skill's summary)" in _unwrapped(_section("## Answering"))
+    assert "Baseline (quoted)" not in _TEXT
     for word in _VERDICT_WORDS:
         assert word not in lowered, word
     assert lowered.count("do not sign") == lowered.count(_ALLOWED_DO_NOT_SIGN) == 1
@@ -300,6 +309,21 @@ def test_the_round_goes_to_the_calculator_on_the_tools_own_basis() -> None:
     assert "`holder_percent` is `equity_deal_check`'s `holder_ownership_after`" in steps
     assert "are the founder's own figures for that round, never assumed" in steps
     assert "`equity_vesting`, only when the founder asks" in steps
+    # equity_pool returns the deal and a what-if; only the table matching the sheet's pool timing feeds the waterfall.
+    assert "the same `pool_timing` as `equity_deal_check`" in steps
+    assert "take the whole share counts the waterfall needs from that table's `rows` only" in steps
+    assert "It holds the pre-money fixed, so its price and post-money are not the sheet's" in steps
+    # Acceleration needs the sale month, and a double trigger the termination month too, both as the founder names them.
+    for rule in (
+        "`acceleration_base` `grant`",
+        "With acceleration, also `change_of_control_month`",
+        "for a double trigger, also `termination_month`",
+        "without which the acceleration never fires",
+        "A month the founder has not named is never picked",
+        "Credit for time served has no tool input",
+        "never shift a month by hand",
+    ):
+        assert rule in steps, rule
 
 
 def test_the_waterfall_rules_name_no_computed_exit() -> None:
@@ -315,6 +339,13 @@ def test_the_waterfall_rules_name_no_computed_exit() -> None:
         "The unissued pool takes nothing",
         "Never add or subtract shares yourself",
         "Run no other what-if unless the founder asks",
+        # The existing_holders row holds earlier preferred shares too, so it never stands in for common beside them.
+        "and no earlier preferred class",
+        "or the earlier class is counted twice",
+        "table that matches the sheet's pool timing",
+        # No pool target means no equity_pool call, so no tool gives the new series' whole share count.
+        "when the sheet sets no pool target, `equity_pool` does not run",
+        "never divide the amount by the price yourself",
     ):
         assert rule in steps, rule
     assert "Compute no difference between columns" in _unwrapped(_section("## Answering"))
@@ -488,11 +519,59 @@ def test_one_eval_passes_the_founders_stake_to_the_dilution_tool() -> None:
     (dilution,) = (inputs for tool, inputs, _ in calls if tool == "equity_dilution")
     (after,) = (line for line in deal if line.strip().startswith("After: holder group"))
 
-    # The founders' percent after the round is passed on as the report prints it; only the notation changes.
-    assert after.split()[-2] == f"{dilution['holder_percent']}.0000%"
+    # The founders' percent after the round is passed on as the report prints it, digit for digit.
+    assert after.split()[-2] == f"{dilution['holder_percent']}%"
     assert "sells 20% with a 5% pool" in prompt
     assert dilution["rounds"] == [{"investor_percent": "20", "pool_percent": "5"}]
     assert "52.5000%" in answer and "No baseline column" in answer
+    # The founder did not say the paste is the whole sheet, so nothing is Missing; the rest is an open ask.
+    assert "no term is marked Missing" in answer and "not in what was pasted" in answer
+    assert "$42,666,665.60" in answer and "pre-money held fixed" in answer
+
+
+def test_a_partial_paste_marks_nothing_missing() -> None:
+    for letter in ("ar", "at"):
+        _, _, answer = _eval(letter)
+        assert "no term is marked Missing" in answer, letter
+        assert "Differs on the label" in answer, letter
+
+
+def test_one_eval_stacks_an_earlier_preferred_class_and_runs_vesting() -> None:
+    text, prompt, answer = _eval("au")
+    calls = _calls(text)
+    (deal,) = (inputs for tool, inputs, _ in calls if tool == "equity_deal_check")
+    ((pool, pool_excerpt),) = ((inputs, excerpt) for tool, inputs, excerpt in calls if tool == "equity_pool")
+    waterfalls = [inputs for tool, inputs, _ in calls if tool == "equity_waterfall"]
+    (vesting,) = (inputs for tool, inputs, _ in calls if tool == "equity_vesting")
+    (existing,) = (line for line in pool_excerpt if line.strip().startswith("Shares: existing holders"))
+    (investor,) = (line for line in pool_excerpt if line.strip().startswith("Shares: investor"))
+    (header,) = (line for line in pool_excerpt if line.strip().startswith("Line"))
+
+    # The deal's pool timing is the table the shares come from, and the report marks that table as the deal.
+    assert pool["pool_timing"] == deal.get("pool_timing", "pre_money") == "pre_money"
+    assert "Pool in pre-money (this deal)" in header
+    deal_investor_shares = int(investor.split()[2].replace(",", ""))
+    existing_holders = int(existing.split()[3].replace(",", ""))
+    assert len(waterfalls) == 4
+    for waterfall in waterfalls:
+        # Common is the founders' own count, never the existing_holders row, which holds the seed preferred too.
+        assert waterfall["common_shares"] == deal["holder_shares"] != existing_holders
+        series_a, seed = waterfall["classes"]
+        assert (series_a["rank"], seed["rank"]) == (1, 2)
+        assert series_a["shares"] == deal_investor_shares
+        assert waterfall["common_shares"] + seed["shares"] == existing_holders
+    # A double trigger fires only with the termination month; without the sale month the tool refuses the call.
+    assert vesting["acceleration"] == "double_trigger"
+    assert {"change_of_control_month", "termination_month"} <= set(vesting)
+    vesting_model = _INPUT_MODELS["vesting"]
+    without_sale = {key: value for key, value in vesting.items() if key != "change_of_control_month"}
+    with pytest.raises(ValidationError, match="change_of_control_month"):
+        vesting_model.model_validate(without_sale)
+    without_termination = {key: value for key, value in vesting.items() if key != "termination_month"}
+    assert compute(vesting_model.model_validate(without_termination)).model_dump()["acceleration_fired"] is False
+    assert compute(vesting_model.model_validate(vesting)).model_dump()["acceleration_fired"] is True
+    assert "the whole Series A term sheet" in prompt and "nothing is left out" in prompt
+    assert "are Missing, each a lawyer question" in answer and "count the seed class twice" in answer
 
 
 def test_one_eval_declines_the_verdict_and_the_named_firm() -> None:

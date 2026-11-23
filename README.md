@@ -156,6 +156,7 @@ Once the plugin is installed, ask in plain words:
 > Fact-check my deck: do the figures in the deck and the one-pager agree, and what will a partner check first?
 
 > Review my deck before I send it to seed funds: here is each slide's text and our ask.
+
 > Rehearse my partner meeting on Tuesday: here is my pitch, our seed round and the partner's background.
 
 > Here is our term sheet: what does each term mean, and what do we get at a $20M sale?

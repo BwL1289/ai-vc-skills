@@ -86,7 +86,7 @@ All notable changes to this repository. Dates are UTC.
   warrants) are quoted as not modelled. Lenses for the next round's lead, an acquirer, the team and control attack
   the sheet, a refute pass drops what the sheet answers, and the survivors become questions for the lawyer. It never
   says whether to sign and quotes no survey percentages. `vc-positioning`, `vc-deck-review` and `vc-deal-math` now
-  point to it. Four evals are in `evals/vc-term-sheet-review/`.
+  point to it. Five evals are in `evals/vc-term-sheet-review/`.
 
 ### Changed
 
