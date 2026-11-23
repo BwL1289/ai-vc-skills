@@ -112,9 +112,11 @@ so the lenses do not anchor on the dimension marks; step 5 then starts at the qu
      raise as the top-level `stated_runway_months`. On a SAFE or note raise, the `plan` case's phases are the founder's
      own figures: today's monthly spend and revenue as the first phase, from month 1, and each change the founder plans
      (more spend after the raise, say) as a later phase from the month the founder names, each asked for by name when
-     missing (`[planned monthly spend and revenue, from which month]`), never assumed. With no cash or burn given, ask
-     for them by name (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; quote the
-     claim as stated meanwhile, and never work it out by hand.
+     missing (`[planned monthly spend and revenue, from which month]`), never assumed. Until a planned change's start
+     month is given, make no runway call and give no runway figure; mark the runway line "not checked: waiting for
+     [the month the planned spend starts]". With no cash or burn given, ask for them by name
+     (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; quote the claim as stated
+     meanwhile, and never work it out by hand.
    - Each code in a result's `flags` goes to the answer as a question a partner is likely to ask, with its meaning
      from "Calculator flags" below, since the MCP result gives the codes only. The benchmark flags are common
      benchmarks, not rules: say so and quote the tool's assumption row with the source that row gives.

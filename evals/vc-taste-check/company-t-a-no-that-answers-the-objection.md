@@ -6,7 +6,12 @@ founder's reason for the cut beside D1, drops any objection the founder's materi
 answers it, places each decision by the skill's rules (a minor survivor moves nothing; a kept objection that ends the
 meeting or weakens it holds a decision at Not yet and is named there), and invents nothing on the founder's behalf. The
 verdict is Pass when every clause of that sentence is met, Partial when exactly one clause is missed or met only in
-part, and Fail when two or more are missed.
+part, and Fail when two or more are missed. The recorded run is graded against the pass sentence this eval had then,
+which asked for an objection dropped by quoting the founder's reason for the cut, a clear decision placed in the deck
+with its slide and the removed feature in the meeting, and nothing invented. It is a Fail against that sentence: nothing
+was dropped, and D1 was not placed in the meeting nor D2 in the deck. Against today's sentence it misses only the
+placement clause, so it would be a Partial. The skill and this pass sentence were changed after that run (see "Recorded
+answer").
 
 ## Prompt
 
@@ -58,18 +63,19 @@ Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from thi
 this eval expected an objection dropped by quoting D1's reason, D1 in the meeting and D2 in the deck. The answer is
 trimmed; [...] marks each cut.
 
-**Partial: one clause of the pass sentence above missed.** It ran the five lenses and five refute passes as subagents,
-put the founder's reason beside D1 in its why-we-built-it line, said that D2's own label answers a "no data"
-objection, invented no decision, figure or product, quoted "11 of 12" as stated, and asked what voice D3 turned down.
-It missed the placement clause: one minor objection held D1 at Not yet, and D2's Not yet named two of the three
-objections kept on it, the third only saying that the founder had not said what changed. Against the pass sentence
-this eval had when it ran (an objection dropped by quoting D1's reason, D1 in the meeting, D2 in the deck) it missed
-two clauses, though the run's reviewer graded it Partial: no lens objected to D1's missing reason, since the reason
-was in the material every lens read, and the reviewer traced the misses to this eval and to two loose rules in the
-skill rather than to the model. Since this run a minor survivor no longer moves a decision, an objection that only
-says an input is missing goes to the open asks, the lenses get no list of what was not provided, a figure line is
-never turned into what it leaves over, and every Not yet names each kept objection on it; this eval's drop and
-placement points are now conditional. The eval has not been run again.
+**Fail, against the pass sentence this eval had then: two clauses missed.** It ran the five lenses and five refute
+passes as subagents, put the founder's reason beside D1 in its why-we-built-it line, said that D2's own label answers a
+"no data" objection, invented no decision, figure or product, quoted "11 of 12" as stated, and asked what voice D3
+turned down. It missed the drop: no lens objected to D1's missing reason, since the reason was in the material every
+lens read, so no objection was dropped by quoting it. It missed the placements: one minor objection held D1 at Not yet,
+and D2 was Not yet too. The run's reviewer graded it Partial and traced the misses to this eval and to two loose rules
+in the skill rather than to the model. Against today's sentence, which puts the reason beside D1, asks for a drop only
+of an objection the material answers and places each decision by the skill's rules, it misses one clause, so it would be
+a Partial: the minor objection moved D1, and D2's Not yet named two of the three objections kept on it, the third only
+saying that the founder had not said what changed. Since this run a minor survivor no longer moves a decision, an
+objection that only says an input is missing goes to the open asks, the lenses get no list of what was not provided, a
+figure line is never turned into what it leaves over, and every Not yet names each kept objection on it; this eval's
+drop and placement points are now conditional. The eval has not been run again.
 
 > **Short answer:** as written, none of the three is ready to show yet. D2 (the chat assistant no) is one fact away from the deck, D1 (the dashboard cut) is two facts away from being your meeting story, and D3 (brand voice) should be left out until it names something you turned down.
 >

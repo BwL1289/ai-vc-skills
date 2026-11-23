@@ -590,10 +590,13 @@ def test_one_eval_leads_with_three_mismatches_and_the_flag_that_explains_each() 
     # Twelve months with no starting-customer movements: the cohort rule applies and the answer asks for them.
     assert "`cohort_rule`" in answer and "alone]`" in answer
     assert "a benchmark, not a rule" in answer and "No score" in answer
-    # The live run is recorded: the lenses ran in the main agent, so one clause of the pass sentence was missed.
+    # The live run is recorded: it passes the pass sentence it had then; the lenses ran in the main agent, which misses
+    # the clause added since.
     assert "the deck's 6.25x is never set against the benchmark" in answer and "has a Lens column" in answer
     assert "runs the five lenses as subagents" in _unwrapped(path.read_text(encoding="utf-8").split("\n## ", 1)[0])
-    assert "**Partial: one clause missed.**" in _section(_RECORDED, path.read_text(encoding="utf-8"))
+    assert "**Pass, against the pass sentence this eval had then; it missed the one clause added since.**" in _section(
+        _RECORDED, path.read_text(encoding="utf-8")
+    )
 
 
 def test_a_three_document_eval_runs_one_call_per_document_with_only_its_figures() -> None:

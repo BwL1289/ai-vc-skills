@@ -127,8 +127,10 @@ claims list; step 7 then runs only the quote check and the refute pass.
      case's phases are the founder's own figures: today's monthly spend and revenue as the first phase, from month 1,
      and each change the founder plans (more spend after the raise, say) as a later phase from the month the founder
      names, each asked for by name when missing (`[planned monthly spend and revenue, from which month]`), never
-     assumed. With no cash or burn given, ask for them by name (`[cash on hand, monthly spend and revenue]`) and make no
-     call until they are given; the claim is Needs a source meanwhile, and is never worked out by hand.
+     assumed. Until a planned change's start month is given, make no runway call and give no runway figure; mark the
+     runway line "not checked: waiting for [the month the planned spend starts]". With no cash or burn given, ask for
+     them by name (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; the claim is
+     Needs a source meanwhile, and is never worked out by hand.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
      its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%, -0.033333 is -3.3333%),
      which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
