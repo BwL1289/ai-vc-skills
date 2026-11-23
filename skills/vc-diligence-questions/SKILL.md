@@ -314,7 +314,8 @@ it never says whether something is legally sufficient.
 ## Answering
 
 1. **The three that move the decision most,** one line each: the top of the ranked list.
-2. **Ranked questions,** as a table: Rank, Tier, Area, The founder's line (quoted), The question, What settles it.
+2. **Ranked questions,** as a table: Rank, Tier, Area, The founder's line (quoted), The question, What settles it; the
+   calculator's mismatches first, each with "computed, no tier" in its Tier cell (an understated runway: "minor").
    Then **Dropped,** one line each: the question, its area, and why it fell (answered, naming the line or document to
    point to, which also goes to the have-it-ready list; or not grounded). Say how the lenses and the refute pass ran
    (as subagents, one refute subagent per question); when the lenses ran one after another in one agent, say they are

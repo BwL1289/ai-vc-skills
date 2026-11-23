@@ -501,6 +501,9 @@ def test_the_checklist_has_three_statuses_in_order_and_keeps_to_the_stage() -> N
     assert "Rows for a later stage are not listed as missing" in checklist
     assert "the rows whose From stage is the founder's stage or earlier" in checklist
     assert f'Name every other seed row once, in one line, as "{_IF_ASKED}", never as Missing' in checklist
+    # A draft lists a seed row only when that row settles its question; the rest are named by ID so a gap shows.
+    assert "names it because that row's \"What it shows\" is what settles the question" in checklist
+    assert "each by its ID and short name (`MET-D3 an export of active accounts`)" in checklist
     assert f'"{_NEXT_ROUND}"' in checklist
     assert "The skill has not seen the document" in checklist
 
@@ -543,6 +546,21 @@ def test_draft_answers_build_only_from_the_material_and_never_judge_the_law() ->
         in drafts
     )
     assert "It never says a line was corrected or that a document exists unless the founder said so" in drafts
+    answering = _unwrapped(_section("## Answering"))
+    steps = _unwrapped(_section("## Steps"))
+    assert 'the calculator\'s mismatches first, each with "computed, no tier" in its Tier cell' in answering
+    assert "Say how the lenses and the refute pass ran (as subagents, one refute subagent per question)" in answering
+    assert (
+        '**Close,** word for word: "This is not legal, tax or investment advice. Have a lawyer review the legal rows '
+        "and every document before it goes into the data room. Customer contracts and customer names may need the "
+        'customer\'s consent before they are shared. You decide what to share and when."' in answering
+    )
+    for check in (
+        "no sentence says what a quoted percent is built from or how a document's figure was reached",
+        "no draft says a fix was made or a document exists that the founder did not name",
+        "every bracketed ask names a document or a fact and nothing more",
+    ):
+        assert check in steps, check
     assert "a bracketed ask that names the document or fact and nothing more" in drafts
 
 

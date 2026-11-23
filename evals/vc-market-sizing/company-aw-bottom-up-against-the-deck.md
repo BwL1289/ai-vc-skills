@@ -167,7 +167,7 @@ answer is trimmed; [...] marks each cut.
 **Partial.** It made the one call with the expected inputs and computed nothing itself: the TAM mismatch came first,
 the break-even values sat beside the founder's high values with the rows' SOM highs, the 900 clinics were named the
 shakiest by their swing, the ledger marked each kind, and the three lenses ran as subagents launched together. It fell
-short in six places. The refute pass ran as one subagent for all nine objections. It kept the Path objection on the 900
+short in these places. The refute pass ran as one subagent for all nine objections. It kept the Path objection on the 900
 clinics and asked for capacity, never saying to put the channel on the slide, because the pattern's fix named
 "channel and capacity" and the skill had no rule for an objection answered in part. It gave no gross spend beside the
 deck's TAM and no Against the deck section. Its ask on the groups' share left out the number of groups. It did not say

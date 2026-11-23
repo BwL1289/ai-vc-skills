@@ -256,7 +256,8 @@ review. Lenses run that way are less independent than subagents; say in the answ
 **Computed findings do not go through the lenses or the refute pass.** Each check mismatch and each flag is a
 computed fact, added to the survivors as is, quoting the founder's line it bears on with the tool's values as the
 reason. A mismatch on a stated TAM, SAM or SOM heads the list, ahead of the tiers, with no tier: how much a gap hurts
-depends on its size, which the founder weighs. The flags take the tier the Flags table gives.
+depends on its size, which the founder weighs. A stated figure below the tool's understates it: the founder may keep
+it or state the tool's figure, and it goes in the minor tier at most. The flags take the tier the Flags table gives.
 A lens objection on the same line as a flag joins the flag's entry, keeping the lens name.
 
 ### Check the quotes
@@ -268,7 +269,8 @@ Merge two lenses' objections on the same line, keeping both names. Questions go 
 
 Each objection gets its own pass. With a subagent tool, N objections after the quote check means N subagents: launch
 one subagent per objection in a single message; never put two objections in one subagent. Give each only the
-founder's material, that objection, the Pattern column below and the brief, and add no rule of your own to the brief.
+founder's material, that objection, the Pattern and Fix columns of the Patterns table, and everything from "The refute
+brief:" to the end of this stage (the verdicts and the rule on what is missing included), and add no rule of your own.
 Without one, decide them one at a time against the same brief.
 
 The refute brief:

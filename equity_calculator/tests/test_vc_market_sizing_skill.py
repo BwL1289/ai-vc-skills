@@ -330,6 +330,9 @@ def test_the_answer_names_every_break_even_outcome_and_how_the_lenses_ran() -> N
         _section("## Steps")
     )
     flags = _unwrapped(_section("## Flags"))
+    assert "over MCP no sentence comes with them" in flags
+    assert "Then the one line on each other row's kind and swing (step 7)" in answering
+    assert "no reason for a top-down gap is offered except as a question" in _unwrapped(_section("## Steps"))
     assert "`[the number of <buyers> you plan to win]`" in flags and "`[the year you expect to win them]`" in flags
 
 
@@ -416,7 +419,9 @@ def test_the_refute_pass_uses_the_fixed_verdicts() -> None:
     assert "neither does one that is the objected line itself" in refute
     # The refute pass is countable: one objection per subagent, all in one message, with no rule added to the brief.
     assert "N objections after the quote check means N subagents" in refute and _ONE_PER_SUBAGENT in refute
-    assert "add no rule of your own to the brief" in refute
+    assert "add no rule of your own" in refute
+    assert "the Pattern and Fix columns of the Patterns table" in refute
+    assert 'everything from "The refute brief:" to the end of this stage' in refute
     # What is missing is what the pattern names; a line answering part of it keeps the objection for the rest.
     assert "What is missing is what the objection's pattern names in its Fix column, nothing more" in refute
     assert "goes to the open asks as a question and does not keep it" in refute
@@ -434,6 +439,8 @@ def test_computed_findings_skip_the_review_and_survivors_have_tiers() -> None:
     assert "Computed findings do not go through the lenses or the refute pass" in attack
     assert "A mismatch on a stated TAM, SAM or SOM heads the list, ahead of the tiers, with no tier" in attack
     assert "leads the first tier" not in _TEXT
+    # The one carve-out: a stated figure below the tool's understates it.
+    assert "A stated figure below the tool's understates it" in attack and "minor tier at most" in attack
     for tier in _TIERS:
         assert f"**{tier}**" in ranked, tier
     assert "no percentages and no score" in ranked
