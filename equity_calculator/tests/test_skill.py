@@ -86,6 +86,19 @@ def test_the_frontmatter_names_the_skill_and_describes_it() -> None:
     assert 0 < len(entries["description"]) <= _DESCRIPTION_LIMIT
 
 
+def test_it_hands_a_founders_review_to_the_skill_built_for_it_and_asks_for_the_tools_share_basis() -> None:
+    """A review goes to the skill that reads the results; a fully diluted total that counts SAFEs is asked about."""
+    text = " ".join(line.strip() for line in _TEXT.splitlines())
+
+    for name in ("vc-deal-math", "vc-round-sizing", "vc-metrics-readiness", "vc-market-sizing", "vc-term-sheet-review"):
+        assert f"the {name} skill" in text, name
+        assert (_SKILL.parents[1] / name / "SKILL.md").is_file(), name
+    assert "leaves SAFEs and notes out" in text and "ask which way the user's does" in text
+    assert "never subtract the SAFE or note shares yourself" in text
+    assert "never strings" in text and "For `deal_check`, never assume one" in text
+    assert "never as an assumed figure" in text and "State any value you had to assume" not in text
+
+
 def test_the_field_table_names_every_input_field_and_nothing_else() -> None:
     rows = _table_rows()
 

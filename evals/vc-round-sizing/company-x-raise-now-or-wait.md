@@ -142,6 +142,7 @@ The two deal checks, now then wait:
   `cash_out_before_raise_lands`.
 - Adversarial review: the calculator's short milestones first, not refuted; then the skeptic's kept attacks, each with
   a founder line quoted word for word, for example "The milestone is month 18" under "A milestone with no number, date
-  or check"; then Dropped, one line each, including an attack under "No downside case", Dropped, answered, quoting
-  "Downside: revenue at 60% of plan". The answer says whether the skeptic ran as a subagent.
+  or check"; then Dropped, one line each. If the skeptic raises an attack under "No downside case", it is Dropped,
+  answered, quoting "Downside: revenue at 60% of plan". Every attack carries its refute verdict. The answer says
+  whether the skeptic ran as a subagent.
 - No recommendation to raise now or wait. It closes as not investment, legal or tax advice.

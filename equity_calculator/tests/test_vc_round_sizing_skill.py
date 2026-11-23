@@ -23,6 +23,7 @@ from equity_calculator.__main__ import _INPUT_MODELS, run
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity import ScenarioInput, ScenarioResult
+from equity_calculator.schemas.equity_deal_check import DealFlag
 from equity_calculator.schemas.equity_runway_plan import (
     BurnCase,
     CaseName,
@@ -58,7 +59,7 @@ _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
 _PROGRAM = "equity_calculator "
 _NEEDED_TOOLS = {"equity_runway_plan", "equity_deal_check", "equity_round", "equity_dilution"}
-_HANDOFF_SKILLS = ("vc-deal-math", "equity-calculator", "vc-positioning", "vc-claims-check")
+_HANDOFF_SKILLS = ("vc-deal-math", "equity-calculator", "vc-positioning", "vc-claims-check", "vc-metrics-readiness")
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
 _TRIGGERS = (
@@ -90,6 +91,10 @@ _SAID_PATTERNS = (
 )
 _MISSING_MARKERS = ("no ", "No ", "One amount only")
 _SKEPTIC_RAN = "whether the skeptic ran as a subagent"
+# The one sentence every attack brief in the pack carries since a live run's attacker judged the material for itself.
+_RAISE_IT_ANYWAY = "raise it anyway, however short the material, and the refute pass decides"
+# The eval whose live runs are recorded in its file; the others say they have not been run.
+_RECORDED_EVALS = ("w",)
 # A figure an eval's answer takes from the calculator: a percent or months with decimals, or money with cents.
 _PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|-?\d[\d,]*\.\d+ months|\$\d[\d,]*\.\d{2}")
 
@@ -222,6 +227,16 @@ def test_every_flag_code_has_a_row_in_the_skills_flag_table() -> None:
     rows = re.findall(r"^\| `([a-z_]+)` +\|", _section("## Flags"), re.MULTILINE)
 
     assert rows == list(get_args(RunwayPlanFlag))
+    assert "never present it as a shortfall" in _unwrapped(_section("## Flags"))
+
+
+def test_every_ownership_flag_code_carries_its_meaning_in_this_skill() -> None:
+    """Over MCP a tool returns bare codes, so the skill carries each deal check code's meaning itself."""
+    rows = re.findall(r"^\| `([a-z_]+)` +\|", _section("## Ownership flags"), re.MULTILINE)
+    table = _section("## Ownership flags")
+
+    assert rows == list(get_args(DealFlag))
+    assert "18 months" not in table and "25%" not in table
 
 
 def test_the_steps_send_both_runway_claims_and_a_safe_to_the_right_place() -> None:
@@ -235,7 +250,8 @@ def test_the_steps_send_both_runway_claims_and_a_safe_to_the_right_place() -> No
     assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
     assert "`slack_months`" in steps and "`start_raising_by`" in steps and "never added or subtracted by hand" in steps
     assert "No recommendation." in steps
-    assert "means what the vc-deal-math skill's flag table says" in steps
+    assert "means what this skill's Ownership flags table says (the tool returns codes only)" in steps
+    assert "its `dilution_band` row is quoted with its source, flag or not" in steps
     assert "never from the table's text" in steps
     assert "a mismatch, or not checked" in steps and "the answer lists it as not checked" in steps
 
@@ -319,9 +335,13 @@ def test_the_skeptic_reads_only_the_material_and_quotes_it() -> None:
     assert "third person" in skeptic and "do not speak as one" in skeptic
     assert "Read only the founder's material" in skeptic and "do no arithmetic" in skeptic
     assert "quoted word for word" in skeptic and '"nothing found"' in skeptic
+    assert _RAISE_IT_ANYWAY in skeptic and "rather than a weak attack" not in skeptic
+    assert "run the skeptic as a subagent, however short the material" in skeptic
     assert "only the founder's material, the brief above and the Pattern column below" in skeptic
     assert "run it before step 1" in skeptic and "Say in the answer which way it ran" in skeptic
     assert "Calculator results do not go through the review." in skeptic
+    assert "listed ahead of the kept attacks with no tier" in skeptic
+    assert "below the tool's figure understates it" in skeptic and "as minor at most" in skeptic
     assert note in steps and steps.index(note) < steps.index("1. **Quote first.**")
 
 
@@ -331,7 +351,10 @@ def test_the_refute_pass_has_the_three_verdicts_and_keeps_what_it_cannot_decide(
 
     for verdict in _REFUTE_VERDICTS:
         assert verdict in refute, verdict
-    assert "a subagent per attack" in refute and "do no arithmetic" in refute
+    assert "a subagent per attack, all in a single message" in refute and "do no arithmetic" in refute
+    assert "never put two attacks in one subagent" in refute
+    assert "Only without a subagent tool, take the attacks one at a time" in refute
+    assert "asserts a result no tool computed" in refute and "Say in the answer which way the refute pass ran" in refute
     assert "is Kept, grounded even when the material shows evidence" in refute
     assert "applies only while the material lacks that thing" in refute
     assert "the attack is Dropped, answered, quoting that line" in refute
@@ -364,6 +387,27 @@ def test_the_answer_leads_with_what_each_amount_buys_and_gives_no_recommendation
     assert "does not recommend raising now or waiting" in limits
     assert "never role-plays or speaks as a named investor" in limits
     assert "No arithmetic outside the equity calculator's tools" in limits
+    assert "no gap to a required raise or difference between two options stated" in limits
+    assert "never builds a case the founder did not state" in limits
+
+
+def test_the_answer_has_required_headings_and_states_no_gap_or_verdict_of_its_own() -> None:
+    """A live run computed gaps, merged two cases and wrote its own layout; the text now rules each out."""
+    steps = _unwrapped(_section("## Steps"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert 'required headings, in this order; write "none"' in answering
+    assert "No headline verdict of the skill's own" in answering
+    assert '"safe", "works", "fails", "only works", "needs to"' in answering
+    assert "the lean rows for the other amounts are left out" in answering
+    assert 'never "already passed"' in answering and "never their difference" in answering
+    assert "each skeptic attack with its refute verdict" in answering
+    assert "Never state the gap between an option's amount and a required raise" in steps
+    assert "3745000.00 is $3,745,000.00" in steps and "0.680000 is 68.0000%, never 68%" in steps
+    assert "never merge two" in steps and "make no second call" in steps
+    assert "[would you cut spend in the downside, and to what?]" in steps
+    for check in ("a difference, a total, a gap", "Every case is one the founder named", "appears once, with its"):
+        assert check in steps, check
 
 
 def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> None:
@@ -374,7 +418,12 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
         positions = [text.find(f"\n{heading}\n") for heading in _EVAL_HEADINGS]
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
-        assert "made up" in text and "has not been run in a live session" in text, path.name
+        assert "made up" in text, path.name
+        if path.name.split("-")[1] in _RECORDED_EVALS:
+            assert "## Recorded answer" in text and "is an excerpt of a recorded run" in _unwrapped(text), path.name
+            assert text.index("## Expected answer") < text.index("## Recorded answer"), path.name
+        else:
+            assert "has not been run in a live session" in text, path.name
 
 
 def test_the_no_call_eval_carries_no_call_or_excerpt() -> None:
@@ -451,7 +500,10 @@ def test_the_two_amounts_eval_leaves_the_arr_figure_unchecked_and_drops_what_the
 
     assert f'"$1M ARR" itself is quoted as stated, "{_NOT_CHECKED}"' in answer
     assert '"A revenue milestone with no monthly figure"' in answer
-    assert "Dropped, answered" in answer and '"No downside case"' in answer
+    # A drop can be scored only when the skeptic raises the attack, so it is conditional; no merged case is run.
+    assert "If the skeptic raises an attack" in answer and "Dropped, answered" in answer
+    assert '"No downside case"' in answer and "no case merges the downside's revenue cut into the lean plan" in answer
+    assert "the open asks ask whether spend would also be cut in the downside" in answer
     for line in answered:
         assert line in prompt and f'"{line}"' in answer, line
 

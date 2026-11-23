@@ -27,7 +27,8 @@ adds a figure the founder did not give: no burn, growth rate, haircut, valuation
   - The story and the say-and-avoid list: the vc-positioning skill. Each claim's evidence, and figures that disagree
     across documents: the vc-claims-check skill.
   - One scenario on its own (a pool, a SAFE's conversion, a stake through later rounds): the equity-calculator skill.
-  - Whether the metrics are ready for the next round: not built yet; say so.
+  - Whether the metrics are ready for the next round (ARR, retention, churn, CAC payback, burn multiple): the
+    vc-metrics-readiness skill (preview).
 
 ## Inputs
 
@@ -59,8 +60,12 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
 1. **Quote first.** List what the founder states, word for word: the ask, instrument and valuation, cash, burn,
    revenue, any runway claim, the use-of-funds lines, the milestones. Do not tidy or correct them yet.
 2. **Ask for what is missing** (Inputs), in one message.
-3. **Call `equity_runway_plan` once,** with every option, every case and every milestone. The no-raise row is always
-   worked; do not add it as an option. Send money and percents as strings:
+3. **Call `equity_runway_plan` once,** with every option, every case and every milestone; make no second call unless
+   the founder asks for another case. Each case is exactly one the founder stated (the plan, their downside, their
+   lean plan): never merge two (the downside's revenue percent into the lean plan, say) and never add one. When it is
+   unclear whether the founder would also cut spend in the downside, that is an open ask,
+   `[would you cut spend in the downside, and to what?]`, not a case. The no-raise row is always worked; do not add it
+   as an option. Send money and percents as strings:
 
    ```json
    {
@@ -134,10 +139,16 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
      shows two runway figures.
    - A SAFE or note: `equity_round`, with the next priced round the founder expects. With none, the SAFE's share is
      "not computed: set at the next priced round", as the vc-deal-math skill says; never pass a SAFE as `investment`.
+     The tool's `fully_diluted_shares` counts every share before the round, granted options and the unissued pool
+     included, and leaves SAFEs and notes out. Some cap tables count SAFEs and notes in their fully diluted total; ask
+     which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask for the
+     total without them, `[fully diluted shares before the round, SAFEs and notes left out]`; never subtract the SAFE
+     or note shares yourself.
    - Through the next round: `equity_dilution`, with this round and the next as the founder expects it.
-   - A code in an ownership tool's `flags` means what the vc-deal-math skill's flag table says; a benchmark one is
-     quoted with the tool's own assumption row and its source. Take only the meaning from that table: the figure comes
-     from the tool's `dilution_band` or `runway_band` row as printed, never from the table's text.
+   - A code in an ownership tool's `flags` means what this skill's Ownership flags table says (the tool returns codes
+     only); a benchmark one is quoted with the tool's own assumption row and its source. Take only the meaning from
+     that table: the figure comes from the tool's `dilution_band` or `runway_band` row as printed, never from the
+     table's text. Whenever `equity_deal_check` ran, its `dilution_band` row is quoted with its source, flag or not.
 5. **Deck claims.** "We have N months without raising" goes in the top-level `stated_runway_months`. A raise's runway
    claim goes in that option's `stated_runway_months`, with `stated_runway_from` set to `landing` when the deck counts
    from the close of a later raise. Use-of-funds lines go in that option's `use_of_funds`. Each comes back consistent,
@@ -150,14 +161,21 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
    the founder's terms: the valuation they assume, the revenue the plan needs by then, the raise closing in the month
    named. No recommendation.
 7. **Run the adversarial review** (below).
-8. **Check before answering.** Every figure is quoted as stated or comes from a tool result; every attack quotes a
-   founder line word for word; nothing speaks as an investor; no figure, milestone or assumption is the skill's own.
+8. **Check before answering.** Scan the whole draft, tables and asks included, for any figure that is in neither a
+   tool result nor the founder's text: a difference, a total, a gap or "points" counts, and goes. Every case is one
+   the founder named, from one `equity_runway_plan` call. Every code in each result's `flags` appears once, with its
+   table meaning. The no-raise row shows `start_raising_by` as printed, a negative value included. Every attack
+   quotes a founder line word for word and carries its refute verdict; nothing speaks as an investor; no figure,
+   milestone or assumption is the skill's own; the close is item 11's sentence as written.
 
 Tool values: use each value's `rounded` with its unit; never round again or recompute. A value whose unit is
 `fraction` is shown as a percent by moving the decimal point of its `rounded` value two places right, keeping every
 digit (0.166667 is 16.6667%), which is what the command line's report prints; a change of notation, not a calculation.
+Money keeps its cents: 3745000.00 is $3,745,000.00, never $3.7M or $3,745,000; 0.680000 is 68.0000%, never 68%.
 Months to raise and slack are never added or subtracted by hand: the tool gives `target_month`, `slack_months`,
-`runway_from_landing` and `start_raising_by`.
+`runway_from_landing` and `start_raising_by`. Never state the gap between an option's amount and a required raise,
+or between two options' runways or stakes ("short by $X", "clears it by $Y", "N points more"): show both tool values
+side by side and let the founder compare.
 
 ## Adversarial review
 
@@ -176,14 +194,20 @@ Its brief:
 - Return at most three attacks, strongest first. For each: the founder's line, quoted word for word; why a partner is
   likely to doubt it; and the evidence that would answer it, or the pattern it matches.
 - A doubt you cannot tie to a line the founder wrote is not an attack: list it apart as a question to the founder.
-- Return "nothing found" rather than a weak attack.
+- Do not judge whether another line of the material answers an attack: raise it anyway, however short the material,
+  and the refute pass decides. Return "nothing found" only when no line of the material gives an attack worth a
+  partner's time.
 
-**How to run it.** With a subagent tool (in Claude Code, the Agent or Task tool), run the skeptic as a subagent given
-only the founder's material, the brief above and the Pattern column below. Without one, run it before step 1 and write
-its attacks down in full; never revise them after the tool results are in. Say in the answer which way it ran.
+**How to run it.** With a subagent tool (in Claude Code, the Agent or Task tool), run the skeptic as a subagent,
+however short the material, given only the founder's material, the brief above and the Pattern column below. Without
+one, run it before step 1 and write its attacks down in full; never revise them after the tool results are in. Say in
+the answer which way it ran.
 
 **Calculator results do not go through the review.** A milestone the tool marks short, a runway or use-of-funds
-mismatch, a cash-out before the money lands: each is a computed fact, added to the survivors as is, never refuted.
+mismatch, a cash-out before the money lands: each is a computed fact, listed ahead of the kept attacks with no tier,
+never refuted: how much a gap hurts depends on its size, which the founder weighs. A runway mismatch whose claim is
+below the tool's figure understates it: the founder may keep the claim or state the tool's figure, and it is listed
+last among the computed facts, as minor at most.
 
 ### Check the quotes
 
@@ -192,11 +216,15 @@ Questions to the founder go to the open asks.
 
 ### The refute pass
 
-Each attack gets its own pass (a subagent per attack, given only the material, that attack, the Pattern column and
-this brief; or one at a time in the same agent):
+Each attack gets its own pass. With a subagent tool, launch a subagent per attack, all in a single message, each given
+only the material, that one attack, the Pattern column and this brief; never put two attacks in one subagent. Only
+without a subagent tool, take the attacks one at a time in the same agent and decide each before reading the next.
+Say in the answer which way the refute pass ran.
 
 - You decide whether one attack is grounded in the founder's material. Write in the third person; you are not an
   investor. Use only the material; bring in no outside fact, and do no arithmetic.
+- An attack that asserts a result no tool computed (that a case misses a revenue milestone, say) is Dropped, not
+  grounded; its doubt goes to the open asks as a question to the founder.
 - The patterns below are of two kinds.
   - **Something said:** "Runway that ends at the milestone month", "Runway quoted on today's burn while the plan
     hires", "A monthly revenue milestone above the plan's revenue a month then", "Detailed multi-year financials
@@ -244,30 +272,63 @@ never an error, and never changes a verdict.
 | `milestone_short_on_plan`          | An amount does not reach a milestone, with time to raise, even on plan.             | See the tool's required raise, move the milestone, or name a lean plan.        |
 | `downside_short_where_plan_covers` | The plan reaches the milestone; the founder's downside does not.                    | Be ready to say what you would cut, and when you would know.                   |
 | `covered_without_raise`            | Cash on hand already reaches a milestone on some case.                              | Say what the raise buys beyond it.                                             |
-| `start_raising_date_passed`        | On cash alone, raising should already have started, given the months to raise.      | Say when the raise started or will close.                                      |
+| `start_raising_date_passed`        | On cash alone, raising should already have started, given the months to raise.      | Say when the raise started or will close; quote this meaning, not advice.      |
 | `no_time_to_raise_given`           | Milestones were checked at their bare month, with no time to raise after them.      | Give the months you allow, and re-run.                                         |
-| `runway_below_band`                | An amount's plan runway is under the tool's runway band.                            | A common benchmark, not a rule: quote the tool's `runway_band` row and source. |
+| `runway_below_band`                | An amount's plan runway ends before the top of the tool's runway band.              | A common benchmark, not a rule: quote the tool's `runway_band` row and source. |
+
+A benchmark flag asks which milestone the amount reaches: say that, and never present it as a shortfall ("short of
+the benchmark", "just under it"); the tool's `runway_band` row says what the band means.
+
+## Ownership flags
+
+`equity_deal_check` also returns codes only; this is what each means for the founder. A benchmark flag quotes its band
+only from the tool's `dilution_band` or `runway_band` row.
+
+| Flag                                  | What it means for the founder                                                                       | What to change or prepare                                                    |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise and the percent.                | Label the valuation pre- or post-money; a partner will ask which it is.      |
+| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, so the effective pre-money and price are below it.   | Show the effective pre-money beside the headline.                            |
+| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less than raise / post-money.             | Expect a partner to ask to move the pool into the pre-money.                 |
+| `pool_already_large_enough`           | The unissued pool already meets the target, so no new pool shares are needed.                       | Say so; a partner may still ask for a bigger target.                         |
+| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the sale. | Show ownership with the SAFEs and notes converted.                           |
+| `discount_beat_cap`                   | A discount gave a lower price than the cap.                                                         | Model that instrument at its discount price.                                 |
+| `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares.               | Count the interest in the cap table.                                         |
+| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it.                          | The runway comes from `equity_runway_plan` here; say so.                     |
+| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn.                                          | The runway comes from `equity_runway_plan` here; say which burn a deck uses. |
+| `runway_below_band`                   | Planned net runway is under the tool's runway band.                                                 | Say which milestone the raise reaches (a common benchmark, not a rule).      |
+| `dilution_above_band`                 | The investors get more than the tool's dilution band in one round.                                  | Be ready to say why so much is sold (a common benchmark, not a rule).        |
 
 ## Answering
 
 Lead with what each amount buys, then the ownership, then what will be doubted. Use the tool's printed values only.
+The eleven items below are required headings, in this order; write "none" under one that has nothing. No headline
+verdict of the skill's own opens the answer.
 
-1. **What each amount buys,** one line per option: plan runway, downside runway, each milestone covered or short with
-   its slack, and the tool's required raise per milestone, on plan and in the downside. A lean plan's runway, verdict
-   and required raise go on the line of the option the founder ties it to, and nowhere else;
-   `milestone_short_on_plan` counts the plan case only, so a smaller raise can carry it while its lean rows cover
-   the milestone: quote both. Each milestone's own figure is quoted with "not checked: no tool computes this".
-2. **Table:** Option, Case, Runway, Milestone (month), Covered?, Slack, Start raising by. The no-raise row first.
+1. **What each amount buys,** one line per option in the tool's words: plan runway, downside runway, each milestone
+   covered or short with its slack, and the tool's required raise per milestone, on plan and in the downside, beside
+   the amount, with no gap worked between them. No word the tool does not print about an option ("safe", "works",
+   "fails", "only works", "needs to"). A lean plan's runway, verdict and required raise go on the line of the option
+   the founder ties it to, and nowhere else; one line says the lean rows for the other amounts are left out because
+   the founder ties the lean plan to that amount. `milestone_short_on_plan` counts the plan case only, so a smaller
+   raise can carry it while its lean rows cover the milestone: quote both. Each milestone's own figure is quoted with
+   "not checked: no tool computes this".
+2. **Table:** Option, Case, Runway, Milestone (month), Covered?, Slack, Start raising by. The no-raise row first, its
+   start raising by as printed (a negative value stays negative, never "already passed").
 3. **Ownership per option:** percent sold and the founders' stake after, from `equity_deal_check`; after the next
    round from `equity_dilution`; a SAFE's share from `equity_round`, or "not computed: set at the next priced round".
+   The options' values side by side; never their difference.
 4. **Raise now or wait,** when asked: the side-by-side, then what has to be true for each, in the founder's terms.
    No recommendation.
 5. **Deck claims:** each runway and use-of-funds check, the deck's figure and the tool's, consistent or a mismatch.
-6. **Adversarial review:** the calculator's short milestones and mismatches first, then the skeptic's kept attacks
-   (at most three), each with the line quoted, the doubt and the fix; then **Dropped,** one line each with why. Say
+6. **Adversarial review:** three parts: the calculator's short milestones, mismatches and cash-outs first, as
+   computed facts; then each skeptic attack with its refute verdict (Kept, grounded; Dropped, answered; Dropped, not
+   grounded) and the founder's line quoted, the kept ones (at most three) with the doubt and the fix, then
+   **Dropped,** one line each with why; then one sentence on how each pass ran ("The skeptic ran as a subagent" or
+   "inline, before step 1"; the refute pass as one subagent per attack, or one at a time in this agent), which says
    whether the skeptic ran as a subagent.
-7. **Flags,** one line each from the table above. A benchmark (the runway band, the dilution band) is quoted only
-   from the tool's own assumption row, with the source that row gives; never as a figure of the skill's own.
+7. **Flags,** one line per code in each result's `flags`, with its meaning from the tables above. A benchmark (the
+   runway band, the dilution band) is quoted only from the tool's own assumption row, with the source that row gives;
+   never as a figure of the skill's own. Whenever `equity_deal_check` ran, its `dilution_band` row is quoted here.
 8. **Assumptions** the answer leans on, quoted from the result with their sources: phases are flat inside, the raise
    lands at once, no fees or interest, and a milestone is covered when the cash lasts to its month plus the months to
    raise (`milestone_rule`); the months to raise and every case are the founder's.
@@ -301,7 +362,9 @@ this skill's own judgment, unverified.
   is the founder's; a gap stays a bracketed ask.
 - It never role-plays or speaks as a named investor, firm or author. Asked to "be" one, it offers the YC seed
   fundraising guide's framework, as a framework, and the skeptic's review, and keeps the founder as the user.
-- No arithmetic outside the equity calculator's tools: no months added, runways subtracted or amounts divided by hand.
+- No arithmetic outside the equity calculator's tools: no months added, runways subtracted or amounts divided by hand,
+  and no gap to a required raise or difference between two options stated, in prose, a table or an ask.
+- It never builds a case the founder did not state, by merging two of theirs or by a second call.
 - The plan is a model: spend and revenue are flat inside each phase, the raise lands at once, and fees, interest and
   late payments are left out. Say so beside the results.
 - The review predicts what a partner is likely to doubt; a real partner may doubt other things.
