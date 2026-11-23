@@ -62,7 +62,8 @@ for the pro forma cap table.
 - No `equity_pool` call (SAFEs convert) and no `equity_waterfall` call: "not run: the waterfall needs whole share
   counts; send the pro forma cap table". The $25M sale is not estimated.
 - Amount and valuation Differs on the label (the sheet's pre-money against the template's post-money, with the pool's
-  place quoted: "in the pre-money"). The shadow-series line Matches the YC template's wording; the lawyer questions
-  include each shadow series' preference and seniority, which the waterfall will need once the pro forma arrives.
+  place quoted: "in the pre-money"). The shadow-series line Matches the baseline cell (SAFEs and notes convert into
+  shadow series); the lawyer questions include each shadow series' preference and seniority, which the waterfall will
+  need once the pro forma arrives.
 - The founder quoted only some terms and has not said it is the whole sheet, so no term is marked Missing; the
   baseline terms not in what was pasted go to the open asks, with a request for the whole sheet.

@@ -20,12 +20,12 @@ sheet; runs no baseline column; and gives no sign or do-not-sign verdict.
 > Series A names one director and the holders of common name two. Founder Vesting: from closing, each founder's
 > 4,000,000 shares vest monthly over 48 months after a 12-month cliff; if the company is sold and the founder is then
 > let go, all of that founder's unvested shares vest. No Shop: for 30 days the company talks to no other investor;
-> this is the only binding term. Expenses: the company pays the lead's legal fees up to a cap." Our cap table: 11,000,000
-> fully diluted shares and no SAFEs or notes. The two of us hold 8,000,000 common, our seed investors hold 2,000,000
-> Series Seed preferred (they paid $2,000,000 for a 1x non-participating preference), and 1,000,000 are an unissued
-> pool with no options granted. We think the two of us keep 60%. What do we get at a $10M sale, or at $60M? And if we
-> are acquired in month 20 and both let go in month 22, how much of each founder's 4,000,000 shares has vested by
-> month 24?
+> this is the only binding term. Expenses: the company pays the lead's legal fees up to a cap." Our cap table:
+> 11,000,000 fully diluted shares and no SAFEs or notes. The two of us hold 8,000,000 common, our seed investors hold
+> 2,000,000 Series Seed preferred (they paid $2,000,000 for a 1x non-participating preference), and 1,000,000 are an
+> unissued pool with no options granted. We think the two of us keep 60%. What do we get at a $10M sale, or at $60M?
+> And if we are acquired in month 20 and both let go in month 22, how much of each founder's 4,000,000 shares has
+> vested by month 24?
 
 ## Expected tool call
 

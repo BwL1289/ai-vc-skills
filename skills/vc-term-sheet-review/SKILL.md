@@ -156,9 +156,10 @@ the labels given in parentheses.
      `change_of_control_month`, the month of the sale the founder names; for a double trigger, also
      `termination_month`, the month the founder names for being let go, without which the acceleration never fires.
      A month the founder has not named is never picked: say "not run: name the month of the sale" (or "of the
-     termination") and ask for it. Credit for time served has no tool input: quote it with "not modelled: no tool
-     computes this term's effect", run no vesting call for that grant, never shift a month by hand, and make it a
-     lawyer question.
+     termination") and ask for it. A founder who says they stay on after the sale has no termination month: leave
+     `termination_month` out and say the double trigger does not fire. Credit for time served has no tool input:
+     quote it with "not modelled: no tool computes this term's effect", run no vesting call for that grant, never
+     shift a month by hand, and make it a lawyer question.
 4. **The waterfall,** `equity_waterfall`, one call per exit value:
    - `common_shares`: the issued common that takes part in a sale (the founders' shares, other issued common, and
      granted options only when the founder says to count them as exercised). The unissued pool takes nothing. Take

@@ -320,6 +320,7 @@ def test_the_round_goes_to_the_calculator_on_the_tools_own_basis() -> None:
         "for a double trigger, also `termination_month`",
         "without which the acceleration never fires",
         "A month the founder has not named is never picked",
+        "leave `termination_month` out and say the double trigger does not fire",
         "Credit for time served has no tool input",
         "never shift a month by hand",
     ):
