@@ -4,8 +4,8 @@ Two rows quote Y Combinator's "A guide to seed fundraising", read in full: the m
 need a follow-on round raises enough to reach its next fundable milestone) and the runway band (raising for N months,
 usually 12 to 18). The default band of 18 months is the top of that range, so the flag is a question, not a shortfall;
 the band is a benchmark, not a rule, and an input the founder can change. The time left to raise the next round, the
-runway, phase, landing and required-raise rules and the tolerances are marked unverified: standard arithmetic or a
-modelling choice no source was read for.
+runway, phase, landing and required-raise rules and the tolerances (and the rounding test beside them) are marked
+unverified: standard arithmetic or a modelling choice no source was read for.
 """
 
 from __future__ import annotations
@@ -111,9 +111,13 @@ def _check_rows(inputs: RunwayPlanInput, checked: bool) -> list[EquityAssumption
                 "tolerance",
                 f"{inputs.tolerance_points:f} points; {inputs.tolerance_percent:f}% relative",
                 "A stated runway within this share of the computed one, a use-of-funds total within this share of "
-                "the raise, or percent lines within this many points of 100%, is consistent (decks round their "
-                "figures).",
-                UNVERIFIED,
+                "the raise, or percent lines within this many points of 100%, is consistent. So is a stated runway "
+                "that is the computed one rounded half away from zero to the places it is written with, whatever the "
+                "tolerance: people write figures rounded to the places they show, so a whole number holds what "
+                "rounds to it and a figure typed with one place holds what rounds to it at one place. The "
+                "use-of-funds total is held to the tolerance alone: it is a sum of the lines, not a figure typed as "
+                "one. A flag names a runway consistent by the tolerance alone, not a rounding of the computed one.",
+                f"{UNVERIFIED} (the rounding test is standard arithmetic)",
             )
         )
     if inputs.raises:

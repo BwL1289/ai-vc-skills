@@ -16,8 +16,12 @@ month L adds I at time L (with L = 0, from the start), so cash(t) = A - S(t) bef
   cash runs out first). An option landing at L covers T exactly when its amount is at least I*.
 - A downside or lean case given as percents scales every plan phase's revenue by R/100 and gross burn by G/100.
 
-Each stated runway becomes one check (relative tolerance, the edge included), each option's use-of-funds lines one
-more (``equity_calculator.funds``); flags name what to be ready to answer and never change a verdict.
+Each stated runway becomes one check: consistent within ``tolerance_percent`` of the computed runway (the edge
+included), or when it is the computed runway rounded half away from zero to the places it is typed with (``12`` months
+against 12.40, never ``12.0``; ``equity_calculator.rounding``, as ``deal_check`` does), else a mismatch. Each option's
+use-of-funds lines become one more (``equity_calculator.funds``), held to the tolerance alone: the total is a sum of
+lines, never a figure typed as one. ``consistent_beyond_rounding`` names a stated runway that holds by the tolerance
+alone. Flags name what to be ready to answer and never change a verdict.
 """
 
 from __future__ import annotations
@@ -31,6 +35,7 @@ from fractions import Fraction
 from equity_calculator.assumptions_runway_plan import runway_plan_assumptions
 from equity_calculator.exact import ZERO, fraction, from_percent, quantity, round_to_places
 from equity_calculator.funds import work_use_of_funds
+from equity_calculator.rounding import rounds_to
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_deal_check import DealVerdict
 from equity_calculator.schemas.equity_runway_plan import (
@@ -291,10 +296,19 @@ def _work(inputs: RunwayPlanInput, cases: tuple[tuple[CaseName, tuple[Phase, ...
 
 
 def _check(
-    key: RunwayCheckKey, option: int, unit: EquityUnit, stated: Fraction, computed: Fraction, tolerance: Fraction
+    key: RunwayCheckKey,
+    option: int,
+    unit: EquityUnit,
+    stated: Fraction,
+    computed: Fraction,
+    tolerance: Fraction,
+    written: Decimal | None = None,
 ) -> RunwayPlanCheck:
-    """One check: within ``tolerance`` of the computed figure (the edge included) is consistent."""
+    """One check: within ``tolerance`` of the computed figure (the edge included) is consistent, or, given the figure
+    as ``written`` (a stated runway only), when it is the computed figure rounded to the places it is typed with
+    (``within_rounding``)."""
     difference = computed - stated
+    rounds = None if written is None else rounds_to(written, unit, computed)
 
     return RunwayPlanCheck(
         key=key,
@@ -302,7 +316,8 @@ def _check(
         stated=quantity(unit, stated),
         computed=quantity(unit, computed),
         difference=quantity(unit, difference),
-        verdict="consistent" if abs(difference) <= tolerance else "mismatch",
+        verdict="consistent" if abs(difference) <= tolerance or rounds else "mismatch",
+        within_rounding=rounds,
     )
 
 
@@ -313,16 +328,17 @@ def _plan_runway(worked: _Worked, option: int) -> OptionRunway:
 def _runway_check(
     inputs: RunwayPlanInput, worked: _Worked, option: int, stated: Decimal, from_landing: bool
 ) -> RunwayPlanCheck | None:
-    """A stated runway against the plan case's runway for ``option`` (less the landing month when it counts from
-    there); none when the cash never runs out, or when it counts from landing and the cash runs out before the money
-    lands (there is no runway from landing; ``cash_out_before_raise_lands`` says why)."""
+    """A stated runway, as typed, against the plan case's runway for ``option`` (less the landing month when it counts
+    from there), for the tolerance and the rounding test alike; none when the cash never runs out, or when it counts
+    from landing and the cash runs out before the money lands (there is no runway from landing;
+    ``cash_out_before_raise_lands`` says why)."""
     row = _plan_runway(worked, option)
     if row.runway_months is None or (from_landing and row.ran_out_before_landing):
         return None
 
     computed = row.runway_months.exact - (row.lands_month if from_landing else 0)
     relative = from_percent(inputs.tolerance_percent)
-    return _check("runway_months", option, "months", fraction(stated), computed, relative * abs(computed))
+    return _check("runway_months", option, "months", fraction(stated), computed, relative * abs(computed), stated)
 
 
 def _checks_and_funds(
@@ -372,7 +388,7 @@ def _milestone_flags(inputs: RunwayPlanInput, worked: _Worked) -> list[RunwayPla
     return flags
 
 
-def _flags(inputs: RunwayPlanInput, worked: _Worked) -> tuple[RunwayPlanFlag, ...]:
+def _flags(inputs: RunwayPlanInput, worked: _Worked, checks: tuple[RunwayPlanCheck, ...]) -> tuple[RunwayPlanFlag, ...]:
     """Every flag that holds, in ``RunwayPlanFlag``'s order."""
     flags: list[RunwayPlanFlag] = []
     if any(row.runway_months is None for row in worked.runway):
@@ -389,6 +405,9 @@ def _flags(inputs: RunwayPlanInput, worked: _Worked) -> tuple[RunwayPlanFlag, ..
     plan_raises = [row for row in worked.runway if row.case == _PLAN and row.option != _NO_RAISE]
     if any(row.runway_months is not None and row.runway_months.exact < band for row in plan_raises):
         flags.append("runway_below_band")
+    # A rounding is always consistent, so a runway consistent with no rounding held by the tolerance alone.
+    if any(check.verdict == "consistent" and check.within_rounding is False for check in checks):
+        flags.append("consistent_beyond_rounding")
 
     return tuple(flags)
 
@@ -420,7 +439,7 @@ def compute_runway_plan(inputs: RunwayPlanInput) -> RunwayPlanResult:
         required=worked.required,
         use_of_funds=funds,
         checks=checks,
-        flags=_flags(inputs, worked),
+        flags=_flags(inputs, worked, checks),
         verdict=_verdict(checks),
         assumptions=runway_plan_assumptions(inputs, bool(checks)),
     )

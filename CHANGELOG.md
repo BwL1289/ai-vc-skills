@@ -236,6 +236,14 @@ All notable changes to this repository. Dates are UTC.
   it is that rounding, `consistent_beyond_rounding` joins the deal check's flags, the three fields tell a JSON caller
   to send text with the deck's places, and the rounding test lives in one module both checks use. No eval's verdict
   changed; their excerpts, the README's and the site's were re-synced, and the skills' flag tables gained the row.
+- A runway plan's stated runways (the no-raise one and each raise's, from today or from landing) take the same rule,
+  with plugin version 0.2.2 so an installed copy picks it up: consistent within the tolerance or when the figure is the
+  computed runway rounded half away from zero to the places it is typed with (12 against 12.40 months holds, `12.0`
+  does not). The use-of-funds total keeps the tolerance alone. Each runway row says whether it is that rounding,
+  `consistent_beyond_rounding` joins the runway plan's flags, both fields tell a JSON caller to send text with the
+  founder's places, and the skills that relay the runway plan say so and explain the flag. One eval's verdict changed:
+  Company R's "about 6 months" with no raise is 6.25 months rounded to whole months, so it is now consistent, not a
+  minor-tier mismatch; every runway plan excerpt was re-synced.
 
 ## 2026-11-21
 

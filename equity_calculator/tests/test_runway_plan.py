@@ -421,6 +421,11 @@ FLAG_CASES: dict[str, tuple[dict[str, object], dict[str, object]]] = {
         _plan((1, "100000", "0"), raises=[{"amount": "1699999"}]),
         _plan((1, "100000", "0"), raises=[{"amount": "1700000"}]),
     ),
+    # 12.62 months: 12.5 is within 2% of it (0.2524) but not it rounded to one place (12.6); 12.6 is.
+    "consistent_beyond_rounding": (
+        _plan((1, "100000", "0"), cash_on_hand="1262000", stated_runway_months="12.5"),
+        _plan((1, "100000", "0"), cash_on_hand="1262000", stated_runway_months="12.6"),
+    ),
 }
 
 
@@ -527,6 +532,170 @@ def test_the_use_of_funds_check_matches_the_deal_checks(lines: list[dict[str, st
         deal_funds.difference,
         deal_funds.verdict,
     )
+
+
+# --- the rounding test ---------------------------------------------------------------------------------------------
+# A stated runway that is the computed one rounded half away from zero to the places it is typed with is consistent,
+# whatever the tolerance (equity_calculator.rounding, deal_check's rule); the use-of-funds total keeps the tolerance
+# alone. $1.24M at $100k a month is 12.40 months, and 2% of it is 0.248 months, so 12 holds only as a rounding.
+
+
+@pytest.mark.parametrize(
+    ("typed", "verdict", "within"),
+    [
+        ("12", "consistent", True),
+        ("12.0", "mismatch", False),
+        ("12.4", "consistent", True),
+        ("12.40", "consistent", True),
+    ],
+    ids=["whole", "one-place", "exact", "two-places"],
+)
+def test_a_12_month_runway_holds_against_12_40_but_12_0_does_not(typed: str, verdict: str, within: bool) -> None:
+    """0.4 months is past 2% of 12.40, so 12 holds only as 12.40 rounded to no places; 12.0 claims a place that rounds
+    to 12.4. The rounding verdict matches deal_check's on the same runway."""
+    result = runway_plan(**_plan((1, "100000", "0"), cash_on_hand="1240000", stated_runway_months=typed))
+    deal = deal_check(
+        investment="1000000",
+        pre_money="4000000",
+        cash_on_hand="240000",
+        planned_monthly_gross_burn="100000",
+        stated_runway_months=typed,
+    )
+    (check,) = result.checks
+
+    assert (check.option, check.computed.exact) == (0, Fraction(62, 5))
+    assert (check.verdict, check.within_rounding, result.verdict) == (verdict, within, verdict)
+    assert (check.verdict, check.within_rounding) == (deal.checks[0].verdict, deal.checks[0].within_rounding)
+    assert "consistent_beyond_rounding" not in result.flags
+
+
+@pytest.mark.parametrize(
+    ("fields", "held", "missed"),
+    [
+        ({"cash_on_hand": "1250000"}, "13", "12"),
+        ({"cash_on_hand": "1245000", "tolerance_percent": "0"}, "12.5", "12.4"),
+    ],
+    ids=["no-places-12.5", "one-place-12.45"],
+)
+def test_a_half_rounds_away_from_zero(fields: dict[str, object], held: str, missed: str) -> None:
+    """12.5 months rounds to 13, never to the even 12; 12.45 rounds to 12.5 at one place, never to 12.4 (with no
+    tolerance, only the rounding can hold)."""
+    up = runway_plan(**_plan((1, "100000", "0"), **fields, stated_runway_months=held)).checks[0]
+    even = runway_plan(**_plan((1, "100000", "0"), **fields, stated_runway_months=missed)).checks[0]
+
+    assert (up.verdict, up.within_rounding) == ("consistent", True)
+    assert (even.verdict, even.within_rounding) == ("mismatch", False)
+
+
+@pytest.mark.parametrize(
+    ("raised", "computed", "typed", "verdict", "within"),
+    [
+        ({"amount": "240000"}, Fraction(62, 5), "12", "consistent", True),
+        ({"amount": "240000"}, Fraction(62, 5), "12.0", "mismatch", False),
+        (
+            {"amount": "1240000", "lands_month": 6, "stated_runway_from": "landing"},
+            Fraction(82, 5),
+            "16",
+            "consistent",
+            True,
+        ),
+        (
+            {"amount": "1240000", "lands_month": 6, "stated_runway_from": "landing"},
+            Fraction(82, 5),
+            "16.0",
+            "mismatch",
+            False,
+        ),
+    ],
+    ids=["today-whole", "today-one-place", "landing-whole", "landing-one-place"],
+)
+def test_a_raises_stated_runway_takes_the_rounding_test_on_its_own_basis(
+    raised: dict[str, object], computed: Fraction, typed: str, verdict: str, within: bool
+) -> None:
+    """$1M at $100k a month: $240k now lasts 12.40 months; $1.24M landing after 6 months lasts 22.40 months from today,
+    16.40 from landing, and the rounding test reads the figure the claim counts from (0.4 months is past 2% of
+    16.40, so 16 holds only as a rounding)."""
+    raises = [{**raised, "stated_runway_months": typed}]
+    result = runway_plan(**_plan((1, "100000", "0"), cash_on_hand="1000000", raises=raises))
+    (check,) = result.checks
+
+    assert (check.option, check.computed.exact) == (1, computed)
+    assert (check.verdict, check.within_rounding, result.verdict) == (verdict, within, verdict)
+
+
+def test_the_no_raise_and_each_raise_are_tested_apart() -> None:
+    """Two claims in one call: the no-raise 12 holds against 12.40 as a rounding, the raise's 22.0 against 22.40 by the
+    tolerance alone (0.4 is within 2% of 22.40, 0.448, but 22.40 rounds to 22.4), so the verdict is consistent and the
+    flag fires for the second."""
+    raises = [{"amount": "1000000", "lands_month": 0, "stated_runway_months": "22.0"}]
+    result = runway_plan(**_plan((1, "100000", "0"), cash_on_hand="1240000", stated_runway_months="12", raises=raises))
+
+    assert [(check.option, check.verdict, check.within_rounding) for check in result.checks] == [
+        (0, "consistent", True),
+        (1, "consistent", False),
+    ]
+    assert result.verdict == "consistent"
+    assert "consistent_beyond_rounding" in result.flags
+
+
+def test_a_mismatch_is_never_flagged_as_held_by_the_tolerance() -> None:
+    result = runway_plan(**_plan((1, "100000", "0"), cash_on_hand="1240000", stated_runway_months="12.0"))
+
+    assert result.verdict == "mismatch" and "consistent_beyond_rounding" not in result.flags
+
+
+@pytest.mark.parametrize(
+    ("lines", "verdict"),
+    [
+        ([{"percent": "33"}, {"percent": "33"}, {"percent": "33"}], "mismatch"),
+        ([{"amount": "1000000"}, {"amount": "990000"}], "mismatch"),
+        ([{"amount": "1000000"}, {"amount": "1000000"}], "consistent"),
+    ],
+    ids=["percents-99", "amounts-1.99m", "amounts-exact"],
+)
+def test_the_use_of_funds_total_keeps_the_tolerance_alone(lines: list[dict[str, str]], verdict: str) -> None:
+    """With no tolerance, lines of 33% three times (99%) and $1.99M of a $2M raise are mismatches: a total is a sum of
+    lines, never a figure typed as one, so it has no rounding test and no flag."""
+    raises = [{"amount": "2000000", "use_of_funds": lines}]
+    result = runway_plan(**_plan((1, "100000", "0"), raises=raises, tolerance_points="0", tolerance_percent="0"))
+    (check,) = result.checks
+
+    assert (check.key, check.verdict, check.within_rounding) == ("use_of_funds_total", verdict, None)
+    assert "consistent_beyond_rounding" not in result.flags
+
+
+@pytest.mark.parametrize("where", ["no-raise", "raise"])
+def test_a_stated_zero_runway_with_places_is_still_refused(where: str) -> None:
+    """A stated runway keeps a zero's places like metrics_check's, but it is above zero, so "0.0" is refused, naming
+    the field, before any rounding test."""
+    fields: dict[str, object] = {"cash_on_hand": "1", "cases": [_PLAN_FLAT]}
+    if where == "no-raise":
+        fields["stated_runway_months"] = "0.0"
+    else:
+        fields["raises"] = [{"amount": "1", "stated_runway_months": "0.0"}]
+
+    with pytest.raises(ValidationError, match="stated_runway_months"):
+        RunwayPlanInput.model_validate(fields)
+
+
+def test_a_stated_runway_echoes_with_the_places_it_was_typed_with() -> None:
+    raises = [{"amount": "240000", "stated_runway_months": "12.40"}]
+    result = runway_plan(
+        **_plan((1, "100000", "0"), cash_on_hand="1000000", stated_runway_months="10.0", raises=raises)
+    )
+    dumped = result.inputs.model_dump(mode="json")
+
+    assert (dumped["stated_runway_months"], dumped["raises"][0]["stated_runway_months"]) == ("10.0", "12.40")
+
+
+def test_the_tolerance_row_states_the_rounding_rule_and_what_keeps_the_tolerance_alone() -> None:
+    result = runway_plan(**_plan((1, "100000", "0"), cash_on_hand="1240000", stated_runway_months="12"))
+    rows = {row.key: row for row in result.assumptions}
+
+    assert "rounded half away from zero to the places it is written with" in rows["tolerance"].statement
+    assert "people write figures rounded to the places they show" in rows["tolerance"].statement
+    assert "The use-of-funds total is held to the tolerance alone" in rows["tolerance"].statement
+    assert rows["tolerance"].source == "unverified (the rounding test is standard arithmetic)"
 
 
 # --- assumption rows ------------------------------------------------------------------------------------------------

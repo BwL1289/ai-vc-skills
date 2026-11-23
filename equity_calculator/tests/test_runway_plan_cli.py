@@ -15,6 +15,7 @@ import pytest
 from equity_calculator.__main__ import run
 from equity_calculator.layout import sheet_for
 from equity_calculator.layout_runway_plan import option_name
+from equity_calculator.rounding import ROUNDING_HOW, ROUNDING_VERDICT_HOW
 from equity_calculator.schemas.equity_common import EquityQuantity
 from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag, RunwayPlanInput
 from equity_calculator.workbook import NUMBER_FORMATS, VERDICT_FILLS, save_workbook
@@ -311,3 +312,54 @@ async def test_the_help_lists_the_scenario(capsys: pytest.CaptureFixture[str]) -
         await run(["--help"])
 
     assert "runway_plan" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(("typed", "rounds", "verdict"), [("12", "yes", "consistent"), ("12.0", "no", "mismatch")])
+async def test_the_runway_as_typed_decides_its_rounding_line_through_the_command(
+    typed: str, rounds: str, verdict: str
+) -> None:
+    """$1.24M at $100k a month is 12.40 months: --stated-runway-months 12 is that rounded to no places, 12.0 is not.
+    The rounding line shows the figure as typed (the stated line prints both as 12.00 months), and the JSON echo keeps
+    the places."""
+    argv = ["runway_plan", "--cash-on-hand", "1240000", "--phase", "from-month=1 gross-burn=100000"]
+    argv += ["--stated-runway-months", typed]
+    lines = {line.split("  ")[1]: line for line in (await run(argv)).splitlines() if line.startswith("  ")}
+    answer = json.loads(await run([*argv, "--json"]))
+
+    assert answer["inputs"]["stated_runway_months"] == typed
+    assert [(row["key"], row["within_rounding"]) for row in answer["checks"]] == [("runway_months", rounds == "yes")]
+    assert lines["Runway, no raise: stated"].split()[-3:] == ["12.00", "months", "given"]
+    assert lines[f'Runway, no raise: rounds to the deck\'s "{typed}"'].endswith(f" {rounds}  {ROUNDING_HOW}")
+    assert lines["Runway, no raise: verdict"].endswith(f"{verdict}  {ROUNDING_VERDICT_HOW}")
+
+
+async def test_a_raises_runway_from_landing_takes_the_rounding_line_and_the_use_of_funds_does_not() -> None:
+    """$1M at $100k a month, $1.24M landing after 6 months: 16.40 months from landing, so "16" holds as a rounding; the
+    use-of-funds total beside it has no rounding line and keeps the tolerance's words."""
+    argv = ["runway_plan", "--cash-on-hand", "1000000", "--phase", "from-month=1 gross-burn=100000"]
+    argv += ["--raise", "amount=1240000 lands-month=6 stated-runway-months=16 stated-runway-from=landing"]
+    argv += ["--raise-use-of-funds", "1 60%", "--raise-use-of-funds", "1 40%"]
+    lines = {line.split("  ")[1]: line for line in (await run(argv)).splitlines() if line.startswith("  ")}
+    answer = json.loads(await run([*argv, "--json"]))
+
+    assert answer["inputs"]["raises"][0]["stated_runway_months"] == "16"
+    assert [(row["key"], row["within_rounding"]) for row in answer["checks"]] == [
+        ("runway_months", True),
+        ("use_of_funds_total", None),
+    ]
+    assert lines['Runway, raise 1: rounds to the deck\'s "16"'].endswith(f" yes  {ROUNDING_HOW}")
+    assert lines["Runway, raise 1: verdict"].endswith(f"consistent  {ROUNDING_VERDICT_HOW}")
+    assert lines["Use of funds total, raise 1: verdict"].endswith("consistent  within the tolerance is consistent")
+    assert not any(label.startswith("Use of funds total, raise 1: rounds") for label in lines)
+
+
+def test_a_runway_held_by_the_tolerance_alone_prints_its_flag_in_words() -> None:
+    """12.5 against 12.62 months: within 2%, not 12.6 rounded to one place."""
+    on, _ = FLAG_CASES["consistent_beyond_rounding"]
+    lines = {line.key: line for line in sheet_for(runway_plan(**on)).lines}
+
+    assert lines["check_runway_months_0_rounding"].values == ("no",)
+    assert lines["check_runway_months_0_verdict"].values == ("consistent",)
+    assert lines["flag_consistent_beyond_rounding"].how.startswith(
+        "A stated runway is consistent only by the tolerance"
+    )

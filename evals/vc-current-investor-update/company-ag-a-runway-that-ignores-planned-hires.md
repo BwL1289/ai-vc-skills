@@ -46,7 +46,8 @@ verdict.
   Runway, no raise: stated                         15.00 months  given
   Runway, no raise: the calculator gives           12.79 months  the plan case's runway
   Runway, no raise: difference                     -2.21 months  computed - stated
-  Runway, no raise: verdict                            mismatch  within the tolerance is consistent
+  Runway, no raise: rounds to the deck's "15"                no  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+  Runway, no raise: verdict                            mismatch  within the tolerance, or rounding to the deck's, is consistent
 ```
 
 Then today's spend held flat, because the plan changes the burn and the claim is a mismatch:
@@ -70,7 +71,8 @@ Then today's spend held flat, because the plan changes the burn and the claim is
 
 ```text
   Runway, plan, no raise                           15.07 months  months until cash less the floor goes below zero
-  Runway, no raise: verdict                          consistent  within the tolerance is consistent
+  Runway, no raise: rounds to the deck's "15"               yes  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+  Runway, no raise: verdict                          consistent  within the tolerance, or rounding to the deck's, is consistent
 ```
 
 ## Expected answer

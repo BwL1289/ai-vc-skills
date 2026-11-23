@@ -8,8 +8,11 @@ allows to raise the next round after reaching one. The scenario is cash only: va
 stay with ``deal_check``, ``round`` and ``dilution``.
 
 Stated runways are checked: ``stated_runway_months`` for the plan with no raise, and each option's own
-``stated_runway_months`` (from today, or from when its money lands). Each option's use-of-funds lines are checked
-against its amount as ``deal_check`` checks them, with the same tolerances and defaults.
+``stated_runway_months`` (from today, or from when its money lands). Each is a ``WrittenDecimal``: a stated runway
+that is the computed one rounded half away from zero to the places it is typed with is consistent even past the
+tolerance (``deal_check``'s rule, ``equity_calculator.rounding``), so it goes in with the places the founder writes.
+Each option's use-of-funds lines are checked against its amount as ``deal_check`` checks them, with the same
+tolerances and defaults, and keep the tolerance alone.
 
 This module reuses ``equity_deal_check``'s ``FundsLine``, its list cap, its verdict words and its default
 tolerances and runway band (which import only ``equity_common`` and two other scenario modules), so no cycle.
@@ -22,11 +25,13 @@ from decimal import Decimal
 from typing import Annotated, Literal
 
 from equity_calculator.schemas.equity_common import (
+    AS_WRITTEN,
     MODEL_CONFIG,
     WHOLE_PERCENT,
     BoundedDecimal,
     EquityAssumption,
     EquityQuantity,
+    WrittenDecimal,
 )
 from equity_calculator.schemas.equity_deal_check import (
     DEFAULT_RUNWAY_BAND_MONTHS,
@@ -82,7 +87,8 @@ RunwayCheckKey = Literal["runway_months", "use_of_funds_total"]
 RunwayFrom = Literal["today", "landing"]
 
 # Facts and questions about the plan. They never change a verdict; their plain words are in
-# ``equity_calculator.layout_runway_plan``.
+# ``equity_calculator.layout_runway_plan``. ``consistent_beyond_rounding`` names a stated runway consistent by the
+# tolerance alone, not as the computed runway rounded to the places the founder writes it with.
 RunwayPlanFlag = Literal[
     "cash_never_runs_out",
     "cash_out_before_raise_lands",
@@ -92,6 +98,7 @@ RunwayPlanFlag = Literal[
     "start_raising_date_passed",
     "no_time_to_raise_given",
     "runway_below_band",
+    "consistent_beyond_rounding",
 ]
 
 # The list caps; the worst case (3 cases x 7 options x 10 milestones, 12 phases) computes at once.
@@ -105,6 +112,8 @@ MAX_MONTHS_TO_RAISE = 60
 # A derived case's percents may go up to ten times the plan (a lean or upside case can raise revenue).
 _MAX_PERCENT_OF_PLAN = WHOLE_PERCENT * 10
 _PLAN: CaseName = "plan"
+# The description each stated runway carries in the JSON schema (``AS_WRITTEN``).
+_MONTHS_AS_WRITTEN = AS_WRITTEN.format(examples='"18", "18.0"')
 
 # strict: a month is a real int; a bool, a float or a numeric string is refused, never read as one.
 Month = Annotated[int, Field(strict=True, ge=1, le=MAX_MONTH)]
@@ -160,7 +169,8 @@ class RaiseOption(BaseModel):
 
     amount: BoundedDecimal = Field(gt=0)
     lands_month: int = Field(default=0, strict=True, ge=0, le=MAX_MONTH)
-    stated_runway_months: BoundedDecimal | None = Field(default=None, gt=0)
+    # A ``WrittenDecimal``, whose places the rounding test reads (above zero, so no zero's places to keep).
+    stated_runway_months: WrittenDecimal | None = Field(default=None, gt=0, description=_MONTHS_AS_WRITTEN)
     stated_runway_from: RunwayFrom = "today"
     use_of_funds: tuple[FundsLine, ...] = Field(default=(), max_length=MAX_USE_OF_FUNDS_LINES)
 
@@ -184,7 +194,9 @@ class RunwayPlanInput(BaseModel):
 
     ``cash_floor`` is cash kept in the bank that the plan must never spend. ``stated_runway_months`` is the runway the
     founder states with no raise. The tolerances say how far a stated figure may sit from the computed one
-    (``deal_check``'s defaults); the runway band raises a question, never an error.
+    (``deal_check``'s defaults); a stated runway that is the computed one rounded to the places it is typed with holds
+    even past them, so it goes in with the places the founder writes. The runway band raises a question, never an
+    error.
     """
 
     model_config = MODEL_CONFIG
@@ -196,7 +208,7 @@ class RunwayPlanInput(BaseModel):
     raises: tuple[RaiseOption, ...] = Field(default=(), max_length=MAX_RAISES)
     milestones: tuple[Month, ...] = Field(default=(), max_length=MAX_MILESTONES)
     months_to_raise: int | None = Field(default=None, strict=True, ge=0, le=MAX_MONTHS_TO_RAISE)
-    stated_runway_months: BoundedDecimal | None = Field(default=None, gt=0)
+    stated_runway_months: WrittenDecimal | None = Field(default=None, gt=0, description=_MONTHS_AS_WRITTEN)
     tolerance_points: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_POINTS, ge=0, lt=WHOLE_PERCENT)
     tolerance_percent: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_PERCENT, ge=0, lt=WHOLE_PERCENT)
     runway_band_months: BoundedDecimal = Field(default=DEFAULT_RUNWAY_BAND_MONTHS, gt=0)
@@ -307,7 +319,12 @@ class OptionFunds(BaseModel):
 
 
 class RunwayPlanCheck(BaseModel):
-    """One stated figure checked for one option (0: no raise): stated, computed, computed - stated, the verdict."""
+    """One stated figure checked for one option (0: no raise): stated, computed, computed - stated, the verdict.
+
+    ``within_rounding`` says whether a stated runway is the computed one rounded half away from zero to the places it
+    is typed with, which makes it consistent even past the tolerance; none for a use-of-funds total (a sum of lines,
+    set against the raise or 100%, never a figure typed as one).
+    """
 
     model_config = MODEL_CONFIG
 
@@ -317,6 +334,7 @@ class RunwayPlanCheck(BaseModel):
     computed: EquityQuantity
     difference: EquityQuantity
     verdict: CheckVerdict
+    within_rounding: bool | None = None
 
 
 class RunwayPlanResult(BaseModel):

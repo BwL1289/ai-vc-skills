@@ -321,9 +321,10 @@ a threshold.
 The MCP result's `flags` holds codes only; the command line's report prints the meaning beside each one. This table,
 the same as the vc-deal-math skill's, gives each `equity_deal_check` flag's meaning, so a flag reaches the founder in
 words. A flag is a question a partner is likely to ask, never an error. From `equity_runway_plan` (no milestone,
-months to raise or landing month passed), two flags can come back: `runway_below_band` (on the plan the raise lasts
-under the runway benchmark, 18 months by default; a common benchmark, not a rule) and `cash_never_runs_out` (revenue
-covers the spend before the cash runs out, so there is no runway end and a stated runway is not checked).
+months to raise or landing month passed), three flags can come back: `runway_below_band` (on the plan the raise lasts
+under the runway benchmark, 18 months by default; a common benchmark, not a rule), `cash_never_runs_out` (revenue
+covers the spend before the cash runs out, so there is no runway end and a stated runway is not checked) and
+`consistent_beyond_rounding` (a stated runway holds by the tolerance alone, as the table's row says).
 
 | Flag                                  | What it means for the founder                                                                                   | What to change or prepare                                                                      |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |

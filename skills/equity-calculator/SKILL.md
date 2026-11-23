@@ -184,9 +184,12 @@ page). Everything else is standard arithmetic, labelled `unverified` in the resu
   no-raise row is always worked. A milestone is covered when the runway reaches its month plus `months_to_raise`;
   the smallest raise for it is the peak cumulative net burn from the landing month to that target less the cash above
   the floor (never below zero), none when the cash runs out before the money lands. A downside or lean case is its
-  own phases or percents of the plan's. Stated runways and use-of-funds totals use deal_check's tolerances (the
-  tolerance alone: no rounding test here); a runway stated from landing is not checked when the cash runs out before
-  the money lands. The 18-month band is the top of the guide's "raising for N months (usually 12-18)": a raise inside
+  own phases or percents of the plan's. Stated runways and use-of-funds totals use deal_check's tolerances, and a
+  stated runway that is the computed one rounded half away from zero to the places it is written with also holds, as
+  in deal_check ("12" against 12.40 holds, "12.0" does not), so send each `stated_runway_months` as text with the
+  founder's places; its row says whether it is that rounding, the use-of-funds total keeps the tolerance alone, and
+  `consistent_beyond_rounding` names a runway that holds by the tolerance alone. A runway stated from landing is not
+  checked when the cash runs out before the money lands. The 18-month band is the top of the guide's "raising for N months (usually 12-18)": a raise inside
   12 to 18 is within that range, so the flag is a question, never a shortfall or an error. Cash only: valuation and
   ownership stay with deal_check, round and dilution.
 - **Metrics check (a16z, Bessemer, Sacks and Skok for the definitions and the three benchmarks; the rest

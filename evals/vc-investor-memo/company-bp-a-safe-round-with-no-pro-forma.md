@@ -85,7 +85,8 @@ call.
   Runway, raise 1: stated                          24.00 months  given
   Runway, raise 1: the calculator gives            20.00 months  the plan case's runway
   Runway, raise 1: difference                      -4.00 months  computed - stated
-  Runway, raise 1: verdict                             mismatch  within the tolerance is consistent
+  Runway, raise 1: rounds to the deck's "24"                 no  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+  Runway, raise 1: verdict                             mismatch  within the tolerance, or rounding to the deck's, is consistent
 ```
 
 ### Call 3: `equity_dilution`

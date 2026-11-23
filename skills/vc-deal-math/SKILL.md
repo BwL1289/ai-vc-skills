@@ -72,20 +72,21 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      change's start month is given, make no runway call and give no runway figure; mark the runway line "not checked:
      waiting for [the month the planned spend starts]". With no cash or burn given, ask for them by name
      (`[cash on hand, monthly spend and revenue]`) and make no call until they are given. A mismatch row is quoted with
-     the tool's value, as `deal_check`'s are. With no milestone, months to raise or landing month passed, two flags can
-     come back: `runway_below_band` (on the plan the raise lasts under the runway benchmark, 18 months by default; a
-     common benchmark, not a rule) and `cash_never_runs_out` (revenue covers the spend before the cash runs out, so
-     there is no runway end and a stated runway is not checked).
+     the tool's value, as `deal_check`'s are. With no milestone, months to raise or landing month passed, three flags
+     can come back: `runway_below_band` (on the plan the raise lasts under the runway benchmark, 18 months by default; a
+     common benchmark, not a rule), `cash_never_runs_out` (revenue covers the spend before the cash runs out, so there
+     is no runway end and a stated runway is not checked) and `consistent_beyond_rounding` (a stated runway holds by
+     the tolerance alone, as the flag table's row says).
    - Pool timing: if the term sheet or deck does not say, use the pre-money (the usual term sheet), say so, and offer
      to re-run with the pool in the post-money.
-   - In `equity_deal_check`, a stated percent or runway that is the tool's figure rounded to the places the deck
-     writes is consistent, past the tolerance or not, because people write figures rounded to the places they show (a
-     12-month runway against the tool's 12.40 months; 17% sold against 16.6667%, but not 20%); its row says so
-     ("rounds to the deck's"). Those places decide it, so pass `stated_investor_percent`, `stated_holder_percent` and
-     `stated_runway_months` as text with exactly the places the deck writes ("12", "12.0"). The post-money and the
-     use-of-funds total keep the tolerance alone, and so does `equity_runway_plan`'s stated runway. The verdict is the
-     tool's; `consistent_beyond_rounding` names a figure that holds by the tolerance alone, and goes to the answer as
-     the flag table says.
+   - In `equity_deal_check` and `equity_runway_plan`, a stated percent or runway that is the tool's figure rounded to
+     the places the deck writes is consistent, past the tolerance or not, because people write figures rounded to the
+     places they show (a 12-month runway against the tool's 12.40 months; 17% sold against 16.6667%, but not 20%); its
+     row says so ("rounds to the deck's"). Those places decide it, so pass `stated_investor_percent`,
+     `stated_holder_percent` and `stated_runway_months` (the runway plan's top-level one and each raise's) as text with
+     exactly the places the deck writes ("12", "12.0"). The post-money and the use-of-funds total keep the tolerance
+     alone. The verdict is the tool's; `consistent_beyond_rounding` names a figure that holds by the tolerance alone,
+     and goes to the answer as the flag table says.
 3. **Call `equity_deal_check`** with every stated figure. Send money and percents as strings, each stated percent
    and the runway with the deck's own places:
 
@@ -173,7 +174,7 @@ is a change of notation, not a calculation.
 ## Flags
 
 The result's `flags` holds codes only; this table is what each `deal_check` flag means for the founder (step 2 gives
-the two `runway_plan` flags). The text report prints the same meaning beside each flag; the MCP result does not.
+the three `runway_plan` flags; the runway plan's `consistent_beyond_rounding` means what its row here says). The text report prints the same meaning beside each flag; the MCP result does not.
 
 | Flag                                  | What it means for the founder                                                                                   | What to change or prepare                                                                      |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
