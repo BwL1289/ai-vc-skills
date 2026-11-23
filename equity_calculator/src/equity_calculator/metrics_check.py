@@ -7,7 +7,8 @@ customers' own movements when given, else the totals.
 
 - ARR at the start k·S; at the end k·(S + N + E - C - X); net new ARR k·(N + E - C - X); new ARR k·N.
 - ARR from the latest month 12·(T - O - U), its run-rate 12·T (T the month's revenue, O one-time, U usage). A stated
-  ARR is checked against the movement's ending ARR when the movement is given, else the latest month's ARR.
+  ARR is checked against the movement's ending ARR or the latest month's ARR, whichever it is within the tolerance of
+  (the movement's when it is within both or neither, the one worked when only one is); ``arr_basis`` says which.
 - Gross revenue retention (S - C' - X')/S, net (S + E' - C' - X')/S; gross revenue churn (C' + X')/S, net
   (C' + X' - E')/S; over the period, never annualised. Logo churn = customers lost / customers at the start.
 - CAC: spend / new customers (blended) and spend / paid-channel customers (paid). CAC payback in months:
@@ -25,8 +26,8 @@ the edge included) or when it is the computed figure rounded half away from zero
 show. Money is consistent within ``tolerance_percent`` only, since a figure like $1.2M carries no places once typed as
 1200000. A stated burn multiple with no multiple to work is ``not_checked``, and the overall verdict is then
 ``not_checked`` unless a figure is a mismatch, never ``consistent``. The four ``stated_*`` cause flags read a stated
-figure's agreement with the other definition the same way. ``consistent_beyond_rounding`` names a figure that holds by
-the tolerance alone. Flags never change a verdict.
+figure's agreement with the other definition by the tolerance alone. ``consistent_beyond_rounding`` names a figure that
+holds by the tolerance alone. Flags never change a verdict.
 """
 
 from __future__ import annotations
@@ -42,6 +43,7 @@ from equity_calculator.exact import HUNDRED, ONE, ZERO, fraction, from_percent, 
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_deal_check import DealVerdict
 from equity_calculator.schemas.equity_metrics_check import (
+    ArrBasis,
     ChurnBasis,
     MetricsCheck,
     MetricsCheckInput,
@@ -245,18 +247,25 @@ def _within(stated: Fraction, other: Fraction | None, tolerance: Fraction) -> bo
     return other is not None and abs(other - stated) <= tolerance
 
 
-def _agrees(written: Decimal, unit: EquityUnit, other: Fraction | None, tolerance: Fraction) -> bool:
-    """Whether the figure as ``written`` agrees with ``other`` as a check does: within ``tolerance`` of it, or it
-    rounded to the places ``written`` is typed with."""
-    if other is None:
-        return False
-    stated = from_percent(written) if unit == "fraction" else fraction(written)
-    return _within(stated, other, tolerance) or bool(_rounds_to(written, unit, other))
+def _checked_arr(inputs: MetricsCheckInput, worked: _Worked) -> tuple[ArrBasis, Fraction] | None:
+    """The ARR a stated ARR is checked against, and which one: of the movement's ending ARR and the latest month's,
+    the first a stated ARR is within ``tolerance_percent`` of, else the first worked (the movement's); none when
+    neither is worked. With no stated ARR it is the first worked."""
+    candidates: tuple[tuple[ArrBasis, Fraction | None], ...] = (
+        ("movement", worked.ending_arr),
+        ("month", worked.month_arr),
+    )
+    worked_arrs: list[tuple[ArrBasis, Fraction]] = [(basis, value) for basis, value in candidates if value is not None]
+    if not worked_arrs:
+        return None
+    if inputs.stated_arr is not None:
+        stated = fraction(inputs.stated_arr)
+        relative = from_percent(inputs.tolerance_percent)
+        for basis, value in worked_arrs:
+            if _within(stated, value, relative * value):
+                return basis, value
 
-
-def _checked_arr(worked: _Worked) -> Fraction | None:
-    """The ARR a stated ARR is checked against: the movement's ending ARR, else the latest month's."""
-    return worked.ending_arr if worked.ending_arr is not None else worked.month_arr
+    return worked_arrs[0]
 
 
 def _churn_rows(inputs: MetricsCheckInput, worked: _Worked, points: Fraction) -> list[MetricsCheck]:
@@ -291,9 +300,10 @@ def _checks(inputs: MetricsCheckInput, worked: _Worked) -> tuple[MetricsCheck, .
     points = from_percent(inputs.tolerance_points)
     relative = from_percent(inputs.tolerance_percent)
     checks: list[MetricsCheck] = []
-    arr = _checked_arr(worked)
+    arr = _checked_arr(inputs, worked)
     if inputs.stated_arr is not None and arr is not None:
-        checks.append(_check("arr", "money", inputs.stated_arr, arr, relative * arr))
+        _, against = arr
+        checks.append(_check("arr", "money", inputs.stated_arr, against, relative * against))
     percents: tuple[tuple[MetricsCheckKey, Decimal | None, Fraction | None], ...] = (
         ("nrr", inputs.stated_nrr_percent, worked.nrr),
         ("grr", inputs.stated_grr_percent, worked.grr),
@@ -329,24 +339,20 @@ def _mismatched(checks: tuple[MetricsCheck, ...], key: MetricsCheckKey, *, or_un
 def _definition_flags(
     inputs: MetricsCheckInput, worked: _Worked, checks: tuple[MetricsCheck, ...]
 ) -> list[MetricsFlag]:
-    """The four ``stated_*`` flags: a mismatch that agrees with the named wrong definition instead (within the
-    tolerance of it, or, for a percent, months or multiple, it rounded to the stated figure's places)."""
+    """The four ``stated_*`` flags: a mismatch that agrees with the named wrong definition instead, within the
+    tolerance of it (the tolerance alone: the rounding rule decides verdicts, not causes)."""
     points = from_percent(inputs.tolerance_points)
     relative = from_percent(inputs.tolerance_percent)
     flags: list[MetricsFlag] = []
     run_rate, month_arr = worked.run_rate, worked.month_arr
     if inputs.stated_arr is not None and _mismatched(checks, "arr") and run_rate is not None and month_arr is not None:
-        # Only a month with one-time or usage revenue has a run-rate apart from its ARR. A stated ARR that also
-        # matches the month's own ARR points at the movement and the month disagreeing, not at fees in the figure.
+        # Only a month with one-time or usage revenue has a run-rate apart from its ARR. A stated ARR within the
+        # tolerance of the month's own ARR never gets here: it is consistent, checked against that ARR.
         stated = fraction(inputs.stated_arr)
-        if (
-            run_rate != month_arr
-            and _within(stated, run_rate, relative * run_rate)
-            and not _within(stated, month_arr, relative * month_arr)
-        ):
+        if run_rate != month_arr and _within(stated, run_rate, relative * run_rate):
             flags.append("stated_arr_matches_run_rate")
     if inputs.stated_nrr_percent is not None and _mismatched(checks, "nrr"):
-        if _agrees(inputs.stated_nrr_percent, "fraction", worked.ending_over_start, points):
+        if _within(from_percent(inputs.stated_nrr_percent), worked.ending_over_start, points):
             flags.append("stated_nrr_includes_new")
     if (
         inputs.stated_cac_payback_months is not None
@@ -355,7 +361,7 @@ def _definition_flags(
         and _mismatched(checks, "cac_payback")
     ):
         revenue = worked.revenue_payback
-        if _agrees(inputs.stated_cac_payback_months, "months", revenue, relative * revenue):
+        if _within(fraction(inputs.stated_cac_payback_months), revenue, relative * revenue):
             flags.append("stated_payback_not_margin_adjusted")
     on_new = worked.burn_multiple_on_new
     # Also beside a multiple left unchecked: with churn above new sales there is no net-new multiple at all, and a
@@ -365,7 +371,7 @@ def _definition_flags(
         and on_new is not None
         and _mismatched(checks, "burn_multiple", or_unchecked=True)
     ):
-        if _agrees(inputs.stated_burn_multiple, "multiplier", on_new, relative * on_new):
+        if _within(fraction(inputs.stated_burn_multiple), on_new, relative * on_new):
             flags.append("stated_burn_multiple_uses_new_not_net_arr")
 
     return flags
@@ -469,10 +475,7 @@ def compute_metrics_check(inputs: MetricsCheckInput) -> MetricsCheckResult:
     worked = _work(inputs)
     checks = _checks(inputs, worked)
     band = payback_band(inputs)
-    if worked.ending_arr is not None:
-        arr_basis = "movement"
-    else:
-        arr_basis = "month" if worked.month_arr is not None else None
+    arr = _checked_arr(inputs, worked)
 
     return MetricsCheckResult(
         inputs=inputs,
@@ -482,7 +485,7 @@ def compute_metrics_check(inputs: MetricsCheckInput) -> MetricsCheckResult:
         new_arr=_optional("money", worked.new_arr),
         month_arr=_optional("money", worked.month_arr),
         run_rate=_optional("money", worked.run_rate),
-        arr_basis=arr_basis,
+        arr_basis=None if arr is None else arr[0],
         gross_revenue_retention=_optional("fraction", worked.grr),
         net_revenue_retention=_optional("fraction", worked.nrr),
         gross_revenue_churn=_optional("fraction", worked.gross_churn),

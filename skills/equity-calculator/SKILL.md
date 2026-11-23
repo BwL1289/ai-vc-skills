@@ -200,8 +200,9 @@ page). Everything else is standard arithmetic, labelled `unverified` in the resu
   away from zero to the places it is written with, past the tolerance or not (people write figures rounded to the
   places they show: 12 months against 12.40 holds, a 2% churn against 2.4% holds and against 2.6% does not), so send
   each as text with the document's places ("12", "12.0", "0.0"); its row says whether it is that rounding, and money
-  keeps the tolerance alone. A churn with no basis is checked on every basis and holds when any does, and a churn
-  below zero only as net revenue churn. Flags name the likely cause of a mismatch, a figure consistent by the
+  keeps the tolerance alone. A stated ARR holds within the tolerance of either the movement's ending ARR or the latest
+  month's, and `arr_basis` says which it was checked against. A churn with no basis is checked on every basis and
+  holds when any does, and a churn below zero only as net revenue churn. Flags name the likely cause of a mismatch, a figure consistent by the
   tolerance alone (`consistent_beyond_rounding`) and a movement and latest month that disagree; the payback target by customer segment (Bessemer, set against the revenue-only
   payback as a floor when no margin is given), a burn multiple of 3x or more (Sacks) and one month's net revenue
   churn above 2% (Skok) raise a question, never an error.

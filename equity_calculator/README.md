@@ -496,8 +496,11 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    k·(S + N + E - C - X), net new ARR k·(N + E - C - X), new ARR k·N. From the latest month's revenue T, of which O
    is one-time and U usage: ARR 12·(T - O - U), and the run-rate 12·T, which is not ARR (a16z: ARR "should exclude
    one-time fees, professional service fees, and any variable usage fees"). A stated ARR is checked against the
-   movement's ending ARR, or the latest month's ARR when no movement is given; when both are given and differ by more
-   than `tolerance_percent`, `arr_movement_and_month_disagree` says the founder's two sets of parts disagree.
+   movement's ending ARR, or the latest month's ARR when no movement is given. With both given, it is consistent
+   within `tolerance_percent` of either, and the report says which it was checked against: the month's when it is
+   within the tolerance of the month's alone, else the movement's. When the two differ by more than
+   `tolerance_percent`, `arr_movement_and_month_disagree` says the founder's two sets of parts disagree, whatever the
+   verdict.
 2. **Retention and churn.** Gross revenue retention (S - C' - X')/S and net (S + E' - C' - X')/S, where E', C' and
    X' are the starting customers' own movements when given and the period's totals otherwise (Bessemer for the
    definitions; leaving new customers out is ours, unverified). Gross revenue churn = 1 - GRR, net revenue churn =
@@ -521,8 +524,9 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    tolerance, when it is the computed figure rounded half away from zero to the places it is written with, since
    people write figures rounded to the places they show: a stated `12` months holds a computed 11.5 up to, but not
    including, 12.5 (12.40 holds, though 0.4 months is past 2% of it; 12.5 rounds to 13), `12.0` holds 11.95 up to
-   12.05, and a monthly churn stated as `2` (2%) holds 2.4% but not 2.6%. Its row says whether the stated figure is that
-   rounding ("rounds to the deck's"). Money keeps the tolerance alone and has no such row, since a figure like $1.2M
+   12.05, and a monthly churn stated as `2` (2%) holds 2.4% but not 2.6%. Its row shows the figure as typed, since
+   those places decide it, and says whether it is that rounding (`rounds to the deck's "12"`, yes or no). Money keeps
+   the tolerance alone and has no such row, since a figure like $1.2M
    carries no places once typed as 1200000. A stated churn with a basis is checked on that basis; with none, on
    every basis the inputs allow, and it holds when any does; a churn below zero is checked only as net revenue churn,
    and rounds away from zero as a positive figure does (-1.55% is -2 to no places and -1.6 to one). A stated gross retention
@@ -536,9 +540,9 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
 6. **Flags**, never errors. Beside a mismatch, the likely cause: `stated_arr_matches_run_rate`,
    `stated_nrr_includes_new` (ending over starting recurring revenue), `stated_payback_not_margin_adjusted` and
    `stated_burn_multiple_uses_new_not_net_arr` (also beside a multiple left unchecked), each only when the stated
-   figure agrees with that other definition as a check does, within the tolerance or as its rounding (the run-rate
-   one also only when the latest month has one-time or usage revenue and the stated figure is not also that month's
-   own ARR). `consistent_beyond_rounding`: a figure consistent by the tolerance alone, not the computed figure
+   figure lands within tolerance of that other definition (the tolerance alone: the rounding rule of step 5 decides a
+   verdict, never a cause; the run-rate one also only when the latest month has one-time or usage revenue).
+   `consistent_beyond_rounding`: a figure consistent by the tolerance alone, not the computed figure
    rounded to its places, such as a monthly churn of 1.7% against 2.1%, so a VC recomputing gets another figure. With
    or without a mismatch:
    `arr_movement_and_month_disagree` (step 1), `run_rate_includes_non_recurring` (the latest month has one-time
@@ -783,16 +787,16 @@ equity_calculator metrics_check --period-months 12 --starting-recurring 80000 --
     --expansion-recurring 6000 --contraction-recurring 2000 --churned-recurring 8000 \
     --month-total-revenue 125000 --month-one-time-revenue 25000 --net-burn 1800000 \
     --stated-arr 1500000 --stated-nrr-percent 125 --stated-burn-multiple 6.25
-  ARR at the end of the period                                             $1,200,000.00  k·(S + N + E - C - X)
-  Run-rate (12 x the month's revenue)                                      $1,500,000.00  12·T
-  Gross revenue retention (12 months)                                           87.5000%  (S - C - X)/S
-  Net revenue retention (12 months)                                             95.0000%  (S + E - C - X)/S
-  Burn multiple                                                                7.500000x  net burn / net new ARR
-  Burn multiple on new ARR only                                                6.250000x  net burn / new ARR
-  ARR: verdict                                                                  mismatch  within the tolerance is consistent
-  Net revenue retention: verdict                                                mismatch  within the tolerance, or rounding to the deck's, is consistent
-  Burn multiple: verdict                                                        mismatch  within the tolerance, or rounding to the deck's, is consistent
-  Overall verdict                                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
+  ARR at the end of the period                                                   $1,200,000.00  k·(S + N + E - C - X)
+  Run-rate (12 x the month's revenue)                                            $1,500,000.00  12·T
+  Gross revenue retention (12 months)                                                 87.5000%  (S - C - X)/S
+  Net revenue retention (12 months)                                                   95.0000%  (S + E - C - X)/S
+  Burn multiple                                                                      7.500000x  net burn / net new ARR
+  Burn multiple on new ARR only                                                      6.250000x  net burn / new ARR
+  ARR: verdict                                                                        mismatch  within the tolerance is consistent
+  Net revenue retention: verdict                                                      mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Burn multiple: verdict                                                              mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Overall verdict                                                                     mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
 ```
 
 ARR is 12 × $100k = $1,200,000; the $1.5M is the run-rate, with the fees in it. Net revenue retention is 95%, not

@@ -462,6 +462,14 @@ def test_calculator_mismatches_lead_the_list_and_there_is_no_score() -> None:
         "burn multiple or concentration above it) understates: it goes in the minor tier at most"
     ) in attack
     assert "`[how the model works this figure, unrounded]`" in attack
+    # The rounding rule covers a percent, months or multiple only; money keeps the tolerance alone, so an ARR or CAC
+    # mismatch may still be the founder's rounding.
+    assert (
+        "A percent, months or multiple that is the tool's figure rounded to the places the document writes is "
+        "consistent, so a mismatch of one is never that rounding"
+    ) in attack
+    assert "an ARR or CAC mismatch that no flag explains may still be the founder's rounding" in attack
+    assert "A mismatch is never the tool's figure rounded" not in attack
     assert "merges into that mismatch's entry and keeps the lens name" in _unwrapped(_section("### Check the quotes"))
     assert "no percentages and no score" in ranked
     assert "An unlabelled churn with one consistent basis row is not a mismatch" in _unwrapped(

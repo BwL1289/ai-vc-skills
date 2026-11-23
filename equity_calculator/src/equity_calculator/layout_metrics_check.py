@@ -3,9 +3,9 @@
 One value column. The parts as given come first, then the ARR figures and which one a stated ARR is checked against,
 retention and churn (each labelled with its period, never annualised), CAC and payback, the burn multiple,
 concentration and the payback benchmark in force, then each stated figure checked (stated, computed, difference,
-whether it is a rounding of the computed figure, which is consistent even past the tolerance, verdict; an unlabelled
-churn once per basis; a burn multiple with no multiple to work shows "none" and not_checked), the flags in plain
-words, and the overall verdict. Values only: no line carries a live formula. When a starting-customers figure is
+whether the figure as typed is a rounding of the computed one, which is consistent even past the tolerance, verdict; an
+unlabelled churn once per basis; a burn multiple with no multiple to work shows "none" and not_checked), the flags in
+plain words, and the overall verdict. Values only: no line carries a live formula. When a starting-customers figure is
 given, retention and revenue churn print primed letters (C' for the starting customers' own contraction, else the
 period's total).
 """
@@ -48,7 +48,7 @@ _CHECK_NAMES = {
     "concentration": "Customer concentration",
 }
 _CHECK_HOW = {
-    "arr": "the movement's ending ARR, else the latest month's",
+    "arr": "the movement's ending ARR or the latest month's",
     "nrr": "(S + E - C - X)/S",
     "grr": "(S - C - X)/S",
     "cac": "spend / new customers (blended)",
@@ -114,7 +114,8 @@ def _flag_words(flag: MetricsFlag, result: MetricsCheckResult) -> str:
         "likely to ask for the starting customers alone",
         "arr_movement_and_month_disagree": f"The movement's ending ARR ({movement}) and the latest month's ARR "
         f"({month}) differ by more than {inputs.tolerance_percent:f}%, so the parts disagree with each other; a stated "
-        "ARR is checked against the movement's: say which figure the document shows and why the two differ",
+        "ARR within the tolerance of either is consistent: say which figure the document shows and why the two "
+        "differ",
         "consistent_beyond_rounding": "A stated figure is consistent only by the tolerance: it is not the computed "
         "figure rounded to the places it is written with, so a VC recomputing gets a different figure; quote the "
         "calculator's",
@@ -254,7 +255,13 @@ def _metric_lines(result: MetricsCheckResult) -> list[Line]:
         ("new_arr", "New ARR", result.new_arr, "k·N"),
         ("month_arr", "ARR from the latest month", result.month_arr, "12·(T - O - U)"),
         ("run_rate", "Run-rate (12 x the month's revenue)", result.run_rate, "12·T"),
-        ("arr_basis", "A stated ARR is checked against", arr_basis, "the movement when given, else the month"),
+        (
+            "arr_basis",
+            "A stated ARR is checked against",
+            arr_basis,
+            "the movement's when given, else the month's; the month's too when a stated ARR is within the tolerance of "
+            "it alone",
+        ),
         (
             "grr",
             f"Gross revenue retention ({period})",
@@ -331,12 +338,31 @@ def _verdict_how(check: MetricsCheck, inputs: MetricsCheckInput) -> str:
     return how
 
 
-def _check_lines(check: MetricsCheck, inputs: MetricsCheckInput) -> list[Line]:
-    """One check: what the document says, what the calculator gives, the difference, whether the stated figure is a
-    rounding of the computed one, and the verdict; a figure with nothing to check it against says so."""
+def _typed(check: MetricsCheck, inputs: MetricsCheckInput) -> Decimal | None:
+    """The stated percent, months or multiple as typed (percent points for a percent), its places kept; none for
+    money."""
+    typed: dict[str, Decimal | None] = {
+        "nrr": inputs.stated_nrr_percent,
+        "grr": inputs.stated_grr_percent,
+        "churn": inputs.stated_churn_percent,
+        "cac_payback": inputs.stated_cac_payback_months,
+        "burn_multiple": inputs.stated_burn_multiple,
+        "concentration": inputs.stated_concentration_percent,
+    }
+    return typed.get(check.key)
+
+
+def _check_lines(check: MetricsCheck, result: MetricsCheckResult) -> list[Line]:
+    """One check: what the document says, what the calculator gives (for ARR, from which ARR), the difference, whether
+    the stated figure as typed is a rounding of the computed one, and the verdict; a figure with nothing to check it
+    against says so."""
+    inputs = result.inputs
     if check.basis is None:
         name, key = _CHECK_NAMES[check.key], f"check_{check.key}"
-        how = _CHECK_HOW[check.key]
+        if check.key == "arr" and result.arr_basis is not None:
+            how = _ARR_BASIS_WORDS[result.arr_basis]
+        else:
+            how = _CHECK_HOW[check.key]
         if check.key in ("grr", "nrr"):
             how = _retention_how(inputs, check.key, how)
     else:
@@ -361,10 +387,10 @@ def _check_lines(check: MetricsCheck, inputs: MetricsCheckInput) -> list[Line]:
             Line(f"{key}_difference", f"{name}: difference", (check.difference,), "computed - stated"),
         ]
         verdict_how = _verdict_how(check, inputs)
-    if check.within_rounding is not None:
-        lines.append(
-            Line(f"{key}_rounding", f"{name}: rounds to the deck's", (yes_no(check.within_rounding),), _ROUNDING_HOW)
-        )
+    typed = _typed(check, inputs)
+    if check.within_rounding is not None and typed is not None:
+        label = f'{name}: rounds to the deck\'s "{typed:f}"'
+        lines.append(Line(f"{key}_rounding", label, (yes_no(check.within_rounding),), _ROUNDING_HOW))
     lines.append(Line(f"{key}_verdict", f"{name}: verdict", (check.verdict,), verdict_how, verdict=True))
     return lines
 
@@ -373,7 +399,7 @@ def metrics_check_sheet(result: MetricsCheckResult) -> Sheet:
     """The metrics check's lines: the parts, the metrics, each check, the flags and the overall verdict."""
     lines = [*_given_lines(result), *_metric_lines(result)]
     for check in result.checks:
-        lines += _check_lines(check, result.inputs)
+        lines += _check_lines(check, result)
     lines += [
         Line(f"flag_{flag}", "A VC is likely to ask", (flag,), _flag_words(flag, result)) for flag in result.flags
     ]

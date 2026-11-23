@@ -467,7 +467,45 @@ def test_each_rounding_line_says_yes_or_no_and_money_has_none() -> None:
     lines = {line.key: line for line in sheet_for(result).lines}
 
     assert lines["check_churn_net_revenue_rounding"].values == ("no",)
+    assert lines["check_churn_net_revenue_rounding"].label == 'Churn (net revenue): rounds to the deck\'s "1.7"'
     assert "check_arr_rounding" not in lines
+
+
+async def test_the_rounding_line_shows_the_figure_as_typed_since_its_places_decide_it() -> None:
+    """A payback of 12.40 months: "12" and "12.0" both print as 12.00 months on the deck's line, so the rounding line
+    shows what was typed, the only line that tells the consistent report from the mismatch."""
+    parts = ["metrics_check", "--period-months", "1", "--starting-recurring", "0", "--new-recurring", "10"]
+    parts += ["--sales-marketing-spend", "124", "--gross-margin-percent", "100", "--stated-cac-payback-months"]
+    whole = await run([*parts, "12"])
+    one_place = await run([*parts, "12.0"])
+
+    assert re.search(r'CAC payback: rounds to the deck\'s "12" +yes', whole)
+    assert re.search(r'CAC payback: rounds to the deck\'s "12\.0" +no', one_place)
+    assert re.search(r"CAC payback: the deck says +12\.00 months", whole)
+    assert re.search(r"CAC payback: the deck says +12\.00 months", one_place)
+
+
+@pytest.mark.parametrize(
+    ("stated", "words"),
+    [("1200000", "the latest month's ARR"), ("1176000", "the movement's ending ARR")],
+    ids=["the-months", "the-movements"],
+)
+def test_a_stated_arr_names_the_arr_it_holds_against(stated: str, words: str) -> None:
+    """Movement 1.176M and the latest month 1.2M disagree; each is consistent with the deck's own figure, and both the
+    basis line and the ARR row's computed line name the one it was checked against."""
+    result = metrics_check(
+        period_months=12,
+        starting_recurring="80000",
+        new_recurring="18000",
+        month_total_revenue="100000",
+        stated_arr=stated,
+    )
+    lines = {line.key: line for line in sheet_for(result).lines}
+
+    assert lines["arr_basis"].values == (words,)
+    assert lines["check_arr_computed"].how == words
+    assert lines["check_arr_verdict"].values == ("consistent",)
+    assert lines["flag_arr_movement_and_month_disagree"].values == ("arr_movement_and_month_disagree",)
 
 
 def test_bands_and_tolerances_typed_in_exponent_form_print_as_plain_numbers() -> None:

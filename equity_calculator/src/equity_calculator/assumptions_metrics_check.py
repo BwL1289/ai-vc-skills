@@ -134,7 +134,8 @@ def _revenue_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[Equit
                 "; ".join(built),
                 "ARR is recurring revenue on an annual basis, without one-time, services or usage fees; the run-rate "
                 "annualises the whole month, so it is not ARR. With the movement and the latest month both given, a "
-                "stated ARR is checked against the movement's ending ARR.",
+                "stated ARR is checked against whichever it is within the tolerance of, the movement's ending ARR when "
+                "it is within both or neither.",
                 f"{A16Z_MORE_METRICS_SOURCE}, item 2: {_ARR_QUOTE}",
             )
         )

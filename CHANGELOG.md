@@ -210,6 +210,13 @@ All notable changes to this repository. Dates are UTC.
   gone (a rounding is no longer a mismatch), and `consistent_beyond_rounding` now names a figure that holds by the
   tolerance alone. A verdict line on such a row reads "within the tolerance, or rounding to the deck's, is
   consistent"; the README, the two skills and the metrics evals' excerpts follow.
+- Metrics check follow-ups to that rule. The four `stated_*` cause flags are back on the tolerance alone, so the
+  rounding rule decides a verdict, never a cause (a deck's 2x beside 1.5x on new ARR names no cause). A stated ARR is
+  consistent within the tolerance of either the movement's ending ARR or the latest month's, and `arr_basis` and the
+  report name the one it was checked against; `arr_movement_and_month_disagree` still says when the two differ. The
+  rounding line shows the figure as typed (`rounds to the deck's "12"`), the six stated percent, months and multiple
+  fields tell a JSON caller to send text with the document's places, and `vc-metrics-readiness` keeps "may be the
+  founder's rounding" for an ARR or CAC mismatch, since money keeps the tolerance alone.
 
 ## 2026-11-21
 
