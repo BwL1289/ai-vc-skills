@@ -65,6 +65,13 @@ _BURN_MULTIPLE_QUOTE = (
     '"Burn Multiple = Net Burn / Net New ARR"; for a pre-revenue startup "net new ARR will be zero so the ratio will '
     'not even compute"'
 )
+# The essay on a company at break-even: the multiple heads to 0. The calculator does not work 0x; see the row.
+_ZERO_BURN_QUOTE = '"burn must reach 0, which implies that the Burn Multiple should also approach 0 over time"'
+_COHORT_PARTS = (
+    ("expansion", "cohort_expansion_recurring"),
+    ("contraction", "cohort_contraction_recurring"),
+    ("churn", "cohort_churned_recurring"),
+)
 _CONCENTRATION_QUOTE = (
     '"the revenue of your largest customer or handful of customers relative to total revenue, with both revenues '
     'reflecting the same time period"'
@@ -95,6 +102,11 @@ def _months(count: int) -> str:
     return "1 month" if count == 1 else f"{count} months"
 
 
+def _listed(names: list[str]) -> str:
+    """``names`` as words: "churn", "expansion and churn", "expansion, contraction and churn"."""
+    return names[0] if len(names) == 1 else f"{', '.join(names[:-1])} and {names[-1]}"
+
+
 def _revenue_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[EquityAssumption]:
     """The period rule always; the ARR rule with any ARR; retention, cohort and churn rules when worked."""
     rows = [
@@ -107,11 +119,19 @@ def _revenue_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[Equit
         )
     ]
     if used & {"ending_arr", "month_arr"}:
-        unit = "12 × monthly recurring revenue" if inputs.recurring_unit == "monthly" else "annual recurring revenue"
+        # Built from the ARR figures actually worked: the movement's in its unit, the month's always 12 × the month.
+        built = []
+        if "ending_arr" in used:
+            unit = (
+                "12 × monthly recurring revenue" if inputs.recurring_unit == "monthly" else "annual recurring revenue"
+            )
+            built.append(f"ARR = {unit}")
+        if "month_arr" in used:
+            built.append("ARR from the latest month = 12 × its recurring revenue; run-rate = 12 × its whole revenue")
         rows.append(
             _assumption(
                 "arr_rule",
-                f"ARR = {unit}; run-rate = 12 × the latest month's revenue",
+                "; ".join(built),
                 "ARR is recurring revenue on an annual basis, without one-time, services or usage fees; the run-rate "
                 "annualises the whole month, so it is not ARR. With the movement and the latest month both given, a "
                 "stated ARR is checked against the movement's ending ARR.",
@@ -119,22 +139,20 @@ def _revenue_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[Equit
             )
         )
     if "grr" in used:
-        cohort = (
-            "the starting customers' own movements"
-            if any(
-                value is not None
-                for value in (
-                    inputs.cohort_expansion_recurring,
-                    inputs.cohort_contraction_recurring,
-                    inputs.cohort_churned_recurring,
-                )
-            )
-            else "the period's totals"
-        )
+        own = [name for name, field in _COHORT_PARTS if getattr(inputs, field) is not None]
+        totals = [name for name, field in _COHORT_PARTS if getattr(inputs, field) is None]
+        if not own:
+            cohort = "the period's totals"
+            formulas = "GRR = (S - C - X)/S; NRR = (S + E - C - X)/S"
+        else:
+            cohort = f"the starting customers' own {_listed(own)}"
+            if totals:
+                cohort += f"; the period's total {_listed(totals)}"
+            formulas = "GRR = (S - C' - X')/S; NRR = (S + E' - C' - X')/S (primed: the starting customers' own)"
         rows += [
             _assumption(
                 "retention_rule",
-                "GRR = (S - C - X)/S; NRR = (S + E - C - X)/S",
+                formulas,
                 "Gross revenue retention keeps the recurring revenue at the start less contraction and churn, with no "
                 "expansion; net revenue retention adds the starting customers' expansion back. New customers are left "
                 f"out of both (ours, {UNVERIFIED}).",
@@ -199,9 +217,11 @@ def _efficiency_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[Eq
             _assumption(
                 "burn_multiple_rule",
                 "net burn / net new ARR, the same period",
-                "No multiple is worked when net new ARR or the net burn is zero or less (the source covers a "
-                f"pre-revenue company's zero net new ARR; the other cases are ours, {UNVERIFIED}).",
-                f"{SACKS_SOURCE}: {_BURN_MULTIPLE_QUOTE}",
+                "No multiple is worked when net new ARR or the net burn is zero or less, and a stated multiple is "
+                "then not checked. The source gives no ratio for a pre-revenue company's zero net new ARR, and says "
+                "the multiple approaches 0 as burn reaches 0; working none at zero burn, and none for a negative "
+                f"burn or net new ARR, is ours, {UNVERIFIED}.",
+                f"{SACKS_SOURCE}: {_BURN_MULTIPLE_QUOTE}; {_ZERO_BURN_QUOTE}",
             )
         )
     if "concentration" in used:
@@ -224,21 +244,25 @@ def _band_rows(inputs: MetricsCheckInput, used: frozenset[str], checked: bool) -
         rows.append(
             _assumption(
                 "tolerance",
-                f"{inputs.tolerance_points} points; {inputs.tolerance_percent}% relative",
+                f"{inputs.tolerance_points:f} points; {inputs.tolerance_percent:f}% relative",
                 "A stated percent within this many percentage points of the computed one, or a stated money, months "
-                "or multiple figure within this share of it, is consistent (documents round their figures).",
-                UNVERIFIED,
+                "or multiple figure within this share of it, is consistent (documents round their figures). The "
+                "tolerance sets the verdict; each percent, months or multiple row also says whether the stated figure "
+                "is the computed one rounded to the places it is written with, and a flag names a row where that test "
+                "and the verdict disagree (a small churn within the points but not a rounding of it, or a whole-month "
+                "payback past the share but a rounding of it).",
+                f"{UNVERIFIED} (the rounding test is standard arithmetic)",
             )
         )
     band = payback_band(inputs)
-    if band is not None and "payback" in used:
-        rows.append(_payback_band_row(inputs, band))
+    if band is not None and used & {"payback", "revenue_payback"}:
+        rows.append(_payback_band_row(inputs, band, margin_given="payback" in used))
     if "burn_multiple" in used:
         default = inputs.burn_multiple_band == DEFAULT_BURN_MULTIPLE_BAND
         rows.append(
             _assumption(
                 "burn_multiple_band",
-                f"{inputs.burn_multiple_band}x",
+                f"{inputs.burn_multiple_band:f}x",
                 "A burn multiple at or above this is flagged as something a VC is likely to ask about; it is a "
                 "question, never an error, and the band is an input"
                 + ("." if default else " (the founder's own band here)."),
@@ -250,7 +274,7 @@ def _band_rows(inputs: MetricsCheckInput, used: frozenset[str], checked: bool) -
         rows.append(
             _assumption(
                 "net_revenue_churn_band",
-                f"{inputs.net_revenue_churn_band_percent}% a month",
+                f"{inputs.net_revenue_churn_band_percent:f}% a month",
                 "One month's net revenue churn above this is flagged as a question, never an error; it is checked "
                 "only on a one-month period, since the calculator compounds nothing, and the band is an input"
                 + ("." if default else " (the founder's own band here)."),
@@ -261,17 +285,23 @@ def _band_rows(inputs: MetricsCheckInput, used: frozenset[str], checked: bool) -
     return rows
 
 
-def _payback_band_row(inputs: MetricsCheckInput, band: Decimal) -> EquityAssumption:
-    """The payback benchmark: the founder's band, or their segment's target, and which one won."""
+def _payback_band_row(inputs: MetricsCheckInput, band: Decimal, *, margin_given: bool) -> EquityAssumption:
+    """The payback benchmark: the founder's band, or their segment's target, and which one won; with no gross margin,
+    how far it could be applied."""
     segment = inputs.customer_segment
     statement = (
         "A CAC payback on gross margin at or above this many months is flagged as a question, never an error: the "
         "target is to stay under it."
     )
+    if not margin_given:
+        statement += (
+            " No gross margin was given, so only the revenue-only payback, a floor under the payback on gross margin, "
+            "is set against it: at or above the band it is flagged; below it the benchmark is not applied."
+        )
     if inputs.payback_band_months is None and segment is not None:
         return _assumption(
             "payback_band",
-            f"{band} months ({_SEGMENT_NAMES[segment]})",
+            f"{band:f} months ({_SEGMENT_NAMES[segment]})",
             f"{statement} The band is the target for the customer segment given, an input.",
             f"{BESSEMER_SOURCE}: {PAYBACK_BAND_QUOTE} ({_BENCHMARK})",
         )
@@ -279,7 +309,7 @@ def _payback_band_row(inputs: MetricsCheckInput, band: Decimal) -> EquityAssumpt
     over = "" if segment is None else f" It is used over the {_SEGMENT_NAMES[segment]} target."
     return _assumption(
         "payback_band",
-        f"{band} months (given)",
+        f"{band:f} months (given)",
         f"{statement} The band is the founder's own.{over}",
         f"given; the segment targets are {BESSEMER_SOURCE}: {PAYBACK_BAND_QUOTE} ({_BENCHMARK})",
     )

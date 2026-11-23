@@ -189,7 +189,7 @@ questions a VC is likely to ask after them.
   net retention, CAC payback on gross margin and its payback targets by customer segment (under 12, 18 and 24
   months; its data is Bessemer's own cloud portfolio, not a random sample); David Sacks's
   ["The Burn Multiple"](https://sacks.substack.com/p/the-burn-multiple-51a7e43cb200) (23 April 2020) for the
-  multiple and its 3x line; and David Skok's ["SaaS Metrics 2.0"](https://www.forentrepreneurs.com/saas-metrics-2/)
+  multiple, its 3x line and the multiple approaching 0 as burn reaches 0; and David Skok's ["SaaS Metrics 2.0"](https://www.forentrepreneurs.com/saas-metrics-2/)
   (no date on the page) for net revenue churn above 2% a month. The three lines are benchmarks, not rules: each
   raises a question, never an error, and each is an input. The period rule, the cohort rule, leaving new customers
   out of retention, the exact payback formula and the tolerances are unverified.
@@ -496,28 +496,44 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    k·(S + N + E - C - X), net new ARR k·(N + E - C - X), new ARR k·N. From the latest month's revenue T, of which O
    is one-time and U usage: ARR 12·(T - O - U), and the run-rate 12·T, which is not ARR (a16z: ARR "should exclude
    one-time fees, professional service fees, and any variable usage fees"). A stated ARR is checked against the
-   movement's ending ARR, or the latest month's ARR when no movement is given.
+   movement's ending ARR, or the latest month's ARR when no movement is given; when both are given and differ by more
+   than `tolerance_percent`, `arr_movement_and_month_disagree` says the founder's two sets of parts disagree.
 2. **Retention and churn.** Gross revenue retention (S - C' - X')/S and net (S + E' - C' - X')/S, where E', C' and
    X' are the starting customers' own movements when given and the period's totals otherwise (Bessemer for the
    definitions; leaving new customers out is ours, unverified). Gross revenue churn = 1 - GRR, net revenue churn =
    1 - NRR (below zero when expansion outruns losses), logo churn = customers lost / customers at the start (a16z,
-   stated per month; over a longer period it is ours). None is annualised.
+   stated per month; over a longer period it is ours). None is annualised. Once a starting-customers figure is given,
+   the report prints the primed formula, and the `cohort_rule` row names which movements were the starting
+   customers' own and which fell back to the period's total.
 3. **Acquisition.** Blended CAC = spend / new customers; paid CAC = spend / customers from paid channels (a16z). CAC
    payback = spend / (new monthly recurring revenue × gross margin) in months, and the revenue-only payback leaves
-   the margin out (Bessemer measures payback on gross margin; the formula is unverified).
-4. **Efficiency.** Burn multiple = net burn / net new ARR (Sacks), none when either is zero or less; on new ARR alone
-   it is worked only to name the cause of a stated multiple that matches it. Concentration = the largest customer's
-   revenue / the period's revenue (a16z), with no benchmark.
+   the margin out (Bessemer measures payback on gross margin; the formula is unverified). With no gross margin, the
+   revenue-only payback is a floor under the margin one (a margin is at most 100%), so the payback benchmark is set
+   against it: at or above the band it is flagged; below it the benchmark is not applied, and its row says so.
+4. **Efficiency.** Burn multiple = net burn / net new ARR (Sacks), none when either is zero or less. Sacks gives no
+   ratio before revenue and says the multiple "should also approach 0 over time" as burn reaches 0; working none at
+   zero burn, and none for a negative burn or net new ARR, is ours (unverified). On new ARR alone it is worked
+   whenever a multiple is stated, to test whether the stated figure used new ARR. Concentration = the largest
+   customer's revenue / the period's revenue (a16z), with no benchmark.
 5. **Checks.** Each stated figure is checked with `deal_check`'s tolerances (0.5 points for a percent, 2% of the
-   computed value for the rest, each an input, the edge included). A stated churn with a basis is checked on that
-   basis; with none, on every basis the inputs allow, and it holds when any does. A stated payback is checked on
-   gross margin when one is given. The verdict is `deal_check`'s rule: mismatch if any figure is, not_checked with
-   none.
+   computed value for the rest, each an input, the edge included); a mismatch whose difference shows as equal to the
+   tolerance says it is just over it. Each percent, months or multiple row also says whether the stated figure is the
+   computed one rounded to the places it is written with (within half its last place, so a stated `12` covers 11.5
+   to 12.5 and `12.0` covers 11.95 to 12.05); money has no such row. A stated churn with a basis is checked on that
+   basis; with none, on every basis the inputs allow, and it holds when any does; a churn below zero is checked only
+   as net revenue churn. A stated gross retention above 100% is checked, and comes back a mismatch. A stated payback
+   is checked on gross margin when one is given. A stated burn multiple with no multiple to work (step 4) comes back
+   `not_checked`, with no computed figure. The verdict: mismatch if any figure is, else not_checked if none was
+   checked or one was left unchecked, else consistent.
 6. **Flags**, never errors. Beside a mismatch, the likely cause: `stated_arr_matches_run_rate`,
    `stated_nrr_includes_new` (ending over starting recurring revenue), `stated_payback_not_margin_adjusted` and
-   `stated_burn_multiple_uses_new_not_net_arr`, each only when the stated figure lands within tolerance of that
-   other definition (the run-rate one also only when the latest month has one-time or usage revenue and the stated
-   figure is not also that month's own ARR). With or without a mismatch: `run_rate_includes_non_recurring` (the latest month has one-time
+   `stated_burn_multiple_uses_new_not_net_arr` (also beside a multiple left unchecked), each only when the stated
+   figure lands within tolerance of that other definition (the run-rate one also only when the latest month has
+   one-time or usage revenue and the stated figure is not also that month's own ARR). Where the rounding test and the
+   verdict disagree: `consistent_beyond_rounding` (within the tolerance, but no rounding of the computed figure, such
+   as a monthly churn of 1.7% against 2.1%) and `mismatch_within_rounding` (past the tolerance, but the computed figure
+   rounded, such as a payback of 12 months against 12.4). With or without a mismatch:
+   `arr_movement_and_month_disagree` (step 1), `run_rate_includes_non_recurring` (the latest month has one-time
    or usage revenue), `expansion_hides_churn` (revenue was lost, but net revenue churn is at or below zero),
    `churn_basis_unlabelled` (a stated churn with no basis), `blended_cac_only` (no paid-channel count),
    `payback_not_margin_adjusted` (no gross margin), `burn_multiple_not_defined` (net new ARR at or below zero) and
@@ -526,7 +542,10 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    the founder's own band), `burn_multiple_above_band` (3x or more, Sacks) and `net_revenue_churn_above_band` (above
    2% in a one-month period, Skok; not asked over a longer period, since nothing is compounded).
 
-A refusal names the field: a movement or cohort figure without `starting_recurring`, contraction and churn above
+A refusal names the field: a churn below zero on a basis that cannot go there (logo or gross revenue churn, or no
+recurring revenue to work net revenue churn on), customers lost above customers at the start (only those there at
+the start count; customers won and lost inside the period are left out), a movement or cohort figure without
+`starting_recurring`, contraction and churn above
 everything the period had (the start, new and expansion, so ARR at the end is never below 0), a cohort figure above
 its total, the starting customers' contraction and churn above the start (each the period's total when its `cohort_*`
 figure is not given, so retention is never below 0), the latest month's parts without its total or above it, customers lost or
@@ -763,7 +782,7 @@ equity_calculator metrics_check --period-months 12 --starting-recurring 80000 --
   ARR: verdict                                                                  mismatch  within the tolerance is consistent
   Net revenue retention: verdict                                                mismatch  within the tolerance is consistent
   Burn multiple: verdict                                                        mismatch  within the tolerance is consistent
-  Overall verdict                                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); not_checked with none
+  Overall verdict                                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
 ```
 
 ARR is 12 × $100k = $1,200,000; the $1.5M is the run-rate, with the fees in it. Net revenue retention is 95%, not
@@ -1158,21 +1177,21 @@ The `runway_plan` scenario adds these, each only when the input uses it:
 
 The `metrics_check` scenario adds these, each only when the input uses it:
 
-| Key                      | Default                                                                 | How to change it                              | Source                                                             |
-| ------------------------ | ----------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------ |
-| `period_rule`            | every flow is for the one period; nothing annualised or compounded      | `--period-months`                             | unverified (a modelling choice)                                    |
-| `arr_rule`               | ARR = k × recurring revenue; run-rate = 12 × the latest month's revenue | `--recurring-unit`                            | a16z ("16 More Startup Metrics", item 2)                           |
-| `retention_rule`         | GRR = (S - C - X)/S; NRR = (S + E - C - X)/S; new customers left out    | fixed                                         | Bessemer for the definitions; leaving new customers out unverified |
-| `cohort_rule`            | the period's totals                                                     | the `--cohort-*` figures                      | unverified (a modelling choice)                                    |
-| `churn_rule`             | logo, gross and net revenue churn over the period                       | fixed                                         | a16z ("16 Startup Metrics", item 11; per month)                    |
-| `cac_rule`               | blended = spend / new customers; paid = spend / paid-channel customers  | fixed                                         | a16z ("16 Startup Metrics", item 8)                                |
-| `payback_rule`           | spend / (new monthly recurring revenue × gross margin)                  | `--gross-margin-percent`                      | Bessemer (on gross margin); the formula unverified                 |
-| `burn_multiple_rule`     | net burn / net new ARR                                                  | fixed                                         | Sacks (pre-revenue); the other zero-or-below cases unverified      |
-| `concentration_rule`     | largest customer / the period's revenue; no benchmark                   | fixed                                         | a16z ("16 More Startup Metrics", item 14)                          |
-| `tolerance`              | 0.5 points; 2% relative                                                 | `--tolerance-points`, `--tolerance-percent`   | unverified                                                         |
-| `payback_band`           | the segment's target: 12, 18 or 24 months                               | `--customer-segment`, `--payback-band-months` | Bessemer (a benchmark, not a rule)                                 |
-| `burn_multiple_band`     | 3x                                                                      | `--burn-multiple-band`                        | Sacks (a benchmark, not a rule)                                    |
-| `net_revenue_churn_band` | 2% a month, one-month periods only                                      | `--net-revenue-churn-band-percent`            | Skok (a benchmark, not a rule)                                     |
+| Key                      | Default                                                                                                                                                          | How to change it                              | Source                                                                                                                      |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `period_rule`            | every flow is for the one period; nothing annualised or compounded                                                                                               | `--period-months`                             | unverified (a modelling choice)                                                                                             |
+| `arr_rule`               | ARR = k × recurring revenue (the movement's); ARR from the latest month = 12 × its recurring revenue; run-rate = 12 × its whole revenue: only the figures worked | `--recurring-unit`                            | a16z ("16 More Startup Metrics", item 2)                                                                                    |
+| `retention_rule`         | GRR = (S - C - X)/S; NRR = (S + E - C - X)/S; new customers left out (primed, C' and so on, once a starting-customers figure is given)                           | fixed                                         | Bessemer for the definitions; leaving new customers out unverified                                                          |
+| `cohort_rule`            | the period's totals; with `--cohort-*` figures, which movements are the starting customers' own and which are totals                                             | the `--cohort-*` figures                      | unverified (a modelling choice)                                                                                             |
+| `churn_rule`             | logo, gross and net revenue churn over the period                                                                                                                | fixed                                         | a16z ("16 Startup Metrics", item 11; per month)                                                                             |
+| `cac_rule`               | blended = spend / new customers; paid = spend / paid-channel customers                                                                                           | fixed                                         | a16z ("16 Startup Metrics", item 8)                                                                                         |
+| `payback_rule`           | spend / (new monthly recurring revenue × gross margin)                                                                                                           | `--gross-margin-percent`                      | Bessemer (on gross margin); the formula unverified                                                                          |
+| `burn_multiple_rule`     | net burn / net new ARR; none at or below zero, a stated one not checked                                                                                          | fixed                                         | Sacks (the formula, no ratio before revenue, and approaching 0 as burn reaches 0); working none at zero or below unverified |
+| `concentration_rule`     | largest customer / the period's revenue; no benchmark                                                                                                            | fixed                                         | a16z ("16 More Startup Metrics", item 14)                                                                                   |
+| `tolerance`              | 0.5 points; 2% relative; each row's rounding test and two flags beside it                                                                                        | `--tolerance-points`, `--tolerance-percent`   | unverified (the rounding test is standard arithmetic)                                                                       |
+| `payback_band`           | the segment's target: 12, 18 or 24 months; with no margin, set against the revenue-only payback as a floor                                                       | `--customer-segment`, `--payback-band-months` | Bessemer (a benchmark, not a rule)                                                                                          |
+| `burn_multiple_band`     | 3x                                                                                                                                                               | `--burn-multiple-band`                        | Sacks (a benchmark, not a rule)                                                                                             |
+| `net_revenue_churn_band` | 2% a month, one-month periods only                                                                                                                               | `--net-revenue-churn-band-percent`            | Skok (a benchmark, not a rule)                                                                                              |
 
 The `market_sizing` scenario adds these: `bottom_up_rule`, `annual_rule` and `sam_rule` always, the rest only when
 the input uses them:

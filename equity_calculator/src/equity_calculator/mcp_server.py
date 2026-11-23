@@ -184,10 +184,13 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "customers_start. CAC = sales_marketing_spend / customers_new (paid: / customers_new_paid); CAC payback = "
         "spend / (new monthly recurring x gross margin), and on revenue only; burn multiple = net_burn / net new "
         "ARR (none at or below zero); concentration = largest_customer_revenue / period_revenue. Each stated_* "
-        "figure comes back consistent or a mismatch (a churn with no basis once per basis; a stated retention or "
-        "churn over period_months, so set it to the period the document's figure covers, 1 for a monthly churn, 12 "
-        "for an annual NRR, one call per period); flags name the likely "
-        "cause of a mismatch (a run-rate called ARR, new customers in NRR, payback on revenue, new not net new ARR) "
+        "figure comes back consistent or a mismatch, or not_checked for a stated burn multiple with no multiple to "
+        "work (the overall verdict is then never consistent); a churn with no basis once per basis, a churn below 0 "
+        "only as net revenue churn; a stated retention or churn over period_months, so set it to the period the "
+        "document's figure covers, 1 for a monthly churn, 12 for an annual NRR, one call per period. Each percent, "
+        "months or multiple row also says whether the stated figure is the computed one rounded to its own places. "
+        "Flags name the likely cause of a mismatch (a run-rate called ARR, new customers in NRR, payback on revenue, "
+        "new not net new ARR), a verdict the rounding test would reverse, a movement and latest month that disagree, "
         "and three benchmark questions (payback by customer_segment, burn multiple 3x, monthly net revenue churn "
         "2%), never errors. Every part is the founder's figure: never assume one.",
     ),

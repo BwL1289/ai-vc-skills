@@ -13,12 +13,17 @@ customers' own movements when given, else the totals.
 - CAC: spend / new customers (blended) and spend / paid-channel customers (paid). CAC payback in months:
   spend / (n·m), n the new recurring revenue per month (N, or N/12 for an annual unit) and m the gross margin; on
   revenue only, spend / n.
-- Burn multiple: net burn / net new ARR, when both are above 0; on new ARR only, net burn / k·N, only to test a
-  stated multiple. Customer concentration: the largest customer's revenue / the period's revenue.
+- Burn multiple: net burn / net new ARR, when both are above 0; on new ARR only, net burn / k·N, worked whenever a
+  multiple is stated, to test whether the stated figure used new ARR. Customer concentration: the largest customer's
+  revenue / the period's revenue.
 
 Each stated figure becomes one check (a stated churn with no basis one per basis it can be worked on, consistent when
-any is): percents within ``tolerance_points`` points, the rest within ``tolerance_percent`` of the computed figure,
-the edge included. Flags never change a verdict.
+any is; a churn below zero only on net revenue): percents within ``tolerance_points`` points, the rest within
+``tolerance_percent`` of the computed figure, the edge included. A stated burn multiple with no multiple to work is
+``not_checked``, and the overall verdict is then ``not_checked`` unless a figure is a mismatch, never ``consistent``.
+Each percent, months or multiple row also says whether the stated figure is the computed one rounded to the places
+it is written with (within half its last place); two flags name a row whose verdict that test would reverse. Flags
+never change a verdict.
 """
 
 from __future__ import annotations
@@ -29,7 +34,7 @@ from fractions import Fraction
 from typing import get_args
 
 from equity_calculator.assumptions_metrics_check import metrics_check_assumptions
-from equity_calculator.exact import ONE, ZERO, fraction, from_percent, quantity
+from equity_calculator.exact import HUNDRED, ONE, ZERO, fraction, from_percent, quantity
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_deal_check import DealVerdict
 from equity_calculator.schemas.equity_metrics_check import (
@@ -46,6 +51,8 @@ __all__ = ["compute_metrics_check"]
 
 _MONTHS_PER_YEAR = 12
 _ONE_MONTH = 1
+_DECIMAL_BASE = 10
+_HALF = Fraction(1, 2)
 
 
 @dataclass(frozen=True)
@@ -180,16 +187,31 @@ def _work(inputs: MetricsCheckInput) -> _Worked:
     )
 
 
+def _rounding_step(written: Decimal, unit: EquityUnit) -> Fraction | None:
+    """Half the last place ``written`` is typed with, in ``unit``'s terms (a percent's place is a percent point's, so
+    it is divided by 100); none for money, whose round figures (ARR of $1.2M) say nothing about their places."""
+    if unit == "money":
+        return None
+    exponent = written.as_tuple().exponent
+    places = max(0, -exponent) if isinstance(exponent, int) else 0
+    step = _HALF / _DECIMAL_BASE**places
+    return step / HUNDRED if unit == "fraction" else step
+
+
 def _check(
     key: MetricsCheckKey,
     unit: EquityUnit,
-    stated: Fraction,
+    written: Decimal,
     computed: Fraction,
     tolerance: Fraction,
     basis: ChurnBasis | None = None,
 ) -> MetricsCheck:
-    """One check: within ``tolerance`` of the computed figure (the edge included) is consistent."""
+    """One check of the figure as ``written`` (percent points for a fraction): within ``tolerance`` of the computed
+    figure (the edge included) is consistent; ``within_rounding`` is whether it is the computed figure rounded to
+    the places it is written with."""
+    stated = from_percent(written) if unit == "fraction" else fraction(written)
     difference = computed - stated
+    step = _rounding_step(written, unit)
 
     return MetricsCheck(
         key=key,
@@ -198,6 +220,7 @@ def _check(
         computed=quantity(unit, computed),
         difference=quantity(unit, difference),
         verdict="consistent" if abs(difference) <= tolerance else "mismatch",
+        within_rounding=None if step is None else abs(difference) <= step,
     )
 
 
@@ -216,7 +239,7 @@ def _churn_rows(inputs: MetricsCheckInput, worked: _Worked, points: Fraction) ->
     if inputs.stated_churn_percent is None:
         return []
 
-    stated = from_percent(inputs.stated_churn_percent)
+    written = inputs.stated_churn_percent
     by_basis: dict[ChurnBasis, Fraction | None] = {
         "logo": worked.logo_churn,
         "gross_revenue": worked.gross_churn,
@@ -225,8 +248,11 @@ def _churn_rows(inputs: MetricsCheckInput, worked: _Worked, points: Fraction) ->
     wanted = inputs.stated_churn_basis
     rows = []
     for basis, computed in by_basis.items():
+        # A churn below zero can only be net revenue churn: it is never checked on a basis that cannot go below 0.
+        if written < 0 and basis != "net_revenue":
+            continue
         if computed is not None and wanted in (basis, "unlabelled"):
-            rows.append(_check("churn", "fraction", stated, computed, points, basis))
+            rows.append(_check("churn", "fraction", written, computed, points, basis))
 
     return rows
 
@@ -235,21 +261,21 @@ def _checks(inputs: MetricsCheckInput, worked: _Worked) -> tuple[MetricsCheck, .
     """One check per stated figure (a churn with no basis one per basis), in ``MetricsCheckKey``'s order.
 
     The validator made sure each stated figure has its parts, except a burn multiple with no multiple to check (net
-    burn or net new ARR at or below zero), which is left unchecked and flagged.
+    burn or net new ARR at or below zero), which gets a ``not_checked`` row (no computed figure) and a flag.
     """
     points = from_percent(inputs.tolerance_points)
     relative = from_percent(inputs.tolerance_percent)
     checks: list[MetricsCheck] = []
     arr = _checked_arr(worked)
     if inputs.stated_arr is not None and arr is not None:
-        checks.append(_check("arr", "money", fraction(inputs.stated_arr), arr, relative * arr))
+        checks.append(_check("arr", "money", inputs.stated_arr, arr, relative * arr))
     percents: tuple[tuple[MetricsCheckKey, Decimal | None, Fraction | None], ...] = (
         ("nrr", inputs.stated_nrr_percent, worked.nrr),
         ("grr", inputs.stated_grr_percent, worked.grr),
     )
     for key, stated, computed in percents:
         if stated is not None and computed is not None:
-            checks.append(_check(key, "fraction", from_percent(stated), computed, points))
+            checks.append(_check(key, "fraction", stated, computed, points))
     checks += _churn_rows(inputs, worked, points)
     payback = worked.payback if worked.payback is not None else worked.revenue_payback
     relatives: tuple[tuple[MetricsCheckKey, EquityUnit, Decimal | None, Fraction | None], ...] = (
@@ -259,17 +285,20 @@ def _checks(inputs: MetricsCheckInput, worked: _Worked) -> tuple[MetricsCheck, .
     )
     for key, unit, stated, computed in relatives:
         if stated is not None and computed is not None:
-            checks.append(_check(key, unit, fraction(stated), computed, relative * computed))
+            checks.append(_check(key, unit, stated, computed, relative * computed))
+        elif key == "burn_multiple" and stated is not None:
+            checks.append(MetricsCheck(key=key, stated=quantity(unit, fraction(stated)), verdict="not_checked"))
     if inputs.stated_concentration_percent is not None and worked.concentration is not None:
-        stated = from_percent(inputs.stated_concentration_percent)
-        checks.append(_check("concentration", "fraction", stated, worked.concentration, points))
+        written = inputs.stated_concentration_percent
+        checks.append(_check("concentration", "fraction", written, worked.concentration, points))
 
     return tuple(checks)
 
 
-def _mismatched(checks: tuple[MetricsCheck, ...], key: MetricsCheckKey) -> bool:
-    """Whether the stated figure ``key`` was checked and is a mismatch."""
-    return any(check.key == key and check.verdict == "mismatch" for check in checks)
+def _mismatched(checks: tuple[MetricsCheck, ...], key: MetricsCheckKey, *, or_unchecked: bool = False) -> bool:
+    """Whether the stated figure ``key`` was checked and is a mismatch (or, with ``or_unchecked``, was not checked)."""
+    wrong = ("mismatch", "not_checked") if or_unchecked else ("mismatch",)
+    return any(check.key == key and check.verdict in wrong for check in checks)
 
 
 def _definition_flags(
@@ -303,9 +332,33 @@ def _definition_flags(
         if _within(fraction(inputs.stated_cac_payback_months), revenue, relative * revenue):
             flags.append("stated_payback_not_margin_adjusted")
     on_new = worked.burn_multiple_on_new
-    if inputs.stated_burn_multiple is not None and on_new is not None and _mismatched(checks, "burn_multiple"):
+    # Also beside a multiple left unchecked: with churn above new sales there is no net-new multiple at all, and a
+    # stated one that matches net burn over new ARR is exactly the mistake this flag names.
+    if (
+        inputs.stated_burn_multiple is not None
+        and on_new is not None
+        and _mismatched(checks, "burn_multiple", or_unchecked=True)
+    ):
         if _within(fraction(inputs.stated_burn_multiple), on_new, relative * on_new):
             flags.append("stated_burn_multiple_uses_new_not_net_arr")
+
+    return flags
+
+
+def _rounding_flags(checks: tuple[MetricsCheck, ...]) -> list[MetricsFlag]:
+    """A stated percent, months or multiple whose verdict the rounding test would reverse: consistent only by the
+    tolerance, not as the computed figure rounded to its own places; or a mismatch that is that rounding. A churn
+    with no basis counts as one figure: it holds on rounding when any of its rows does."""
+    flags: list[MetricsFlag] = []
+    keys = dict.fromkeys(check.key for check in checks if check.within_rounding is not None)
+    for key in keys:
+        rows = [check for check in checks if check.key == key and check.within_rounding is not None]
+        rounds = any(check.within_rounding for check in rows)
+        holds = any(check.verdict == "consistent" for check in rows)
+        if holds and not rounds:
+            flags.append("consistent_beyond_rounding")
+        if not holds and rounds:
+            flags.append("mismatch_within_rounding")
 
     return flags
 
@@ -315,7 +368,10 @@ def _band_flags(inputs: MetricsCheckInput, worked: _Worked) -> list[MetricsFlag]
     month's net revenue churn above its band."""
     flags: list[MetricsFlag] = []
     band = payback_band(inputs)
-    if band is not None and worked.payback is not None and worked.payback >= fraction(band):
+    # With no gross margin, the revenue-only payback is a floor under the payback on gross margin (a margin is at
+    # most 100%), so one already at or above the band shows the payback on gross margin is too.
+    payback = worked.payback if worked.payback is not None else worked.revenue_payback
+    if band is not None and payback is not None and payback >= fraction(band):
         flags.append("payback_above_band")
     if worked.burn_multiple is not None and worked.burn_multiple >= fraction(inputs.burn_multiple_band):
         flags.append("burn_multiple_above_band")
@@ -330,8 +386,13 @@ def _band_flags(inputs: MetricsCheckInput, worked: _Worked) -> list[MetricsFlag]
 def _flags(inputs: MetricsCheckInput, worked: _Worked, checks: tuple[MetricsCheck, ...]) -> tuple[MetricsFlag, ...]:
     """Every flag that holds, in ``MetricsFlag``'s order."""
     found = set(_definition_flags(inputs, worked, checks)) | set(_band_flags(inputs, worked))
+    found |= set(_rounding_flags(checks))
     if inputs.month_total_revenue is not None and (inputs.month_one_time_revenue > 0 or inputs.month_usage_revenue > 0):
         found.add("run_rate_includes_non_recurring")
+    movement, month = worked.ending_arr, worked.month_arr
+    if movement is not None and month is not None:
+        if not _within(month, movement, from_percent(inputs.tolerance_percent) * abs(movement)):
+            found.add("arr_movement_and_month_disagree")
     if worked.gross_churn is not None and worked.net_churn is not None:
         if worked.gross_churn > ZERO and worked.net_churn <= ZERO:
             found.add("expansion_hides_churn")
@@ -355,13 +416,24 @@ _FLAG_ORDER: tuple[MetricsFlag, ...] = get_args(MetricsFlag)
 
 def _verdict(checks: tuple[MetricsCheck, ...]) -> DealVerdict:
     """``not_checked`` with no check; else each stated figure is consistent when any of its rows is (an unlabelled
-    churn has one row per basis), and the verdict is ``mismatch`` if any figure is one."""
+    churn has one row per basis), not checked when its only row is, and a mismatch otherwise. The verdict is
+    ``mismatch`` if any figure is one, else ``not_checked`` if any figure went unchecked, else ``consistent``."""
     if not checks:
         return "not_checked"
 
     keys = dict.fromkeys(check.key for check in checks)
-    held = [any(row.verdict == "consistent" for row in checks if row.key == key) for key in keys]
-    return "consistent" if all(held) else "mismatch"
+    outcomes = set()
+    for key in keys:
+        rows = [row.verdict for row in checks if row.key == key]
+        if "consistent" in rows:
+            outcomes.add("consistent")
+        elif all(verdict == "not_checked" for verdict in rows):
+            outcomes.add("not_checked")
+        else:
+            outcomes.add("mismatch")
+    if "mismatch" in outcomes:
+        return "mismatch"
+    return "not_checked" if "not_checked" in outcomes else "consistent"
 
 
 def _optional(unit: EquityUnit, value: Fraction | None) -> EquityQuantity | None:
@@ -400,7 +472,9 @@ def compute_metrics_check(inputs: MetricsCheckInput) -> MetricsCheckResult:
         burn_multiple=_optional("multiplier", worked.burn_multiple),
         burn_multiple_on_new_arr=_optional("multiplier", worked.burn_multiple_on_new),
         concentration=_optional("fraction", worked.concentration),
-        payback_band_months=None if band is None or worked.payback is None else quantity("months", fraction(band)),
+        payback_band_months=None
+        if band is None or (worked.payback is None and worked.revenue_payback is None)
+        else quantity("months", fraction(band)),
         checks=checks,
         flags=_flags(inputs, worked, checks),
         verdict=_verdict(checks),

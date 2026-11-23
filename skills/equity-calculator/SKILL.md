@@ -167,11 +167,16 @@ page). Everything else is standard arithmetic, labelled `unverified` in the resu
   for the definitions; leaving new customers out is unverified). Gross revenue churn (C + X)/S, net (C + X - E)/S,
   logo churn = customers lost / at the start (a16z). Blended CAC = spend / new customers, paid = spend / paid-channel
   customers (a16z). CAC payback = spend / (new monthly recurring revenue × gross margin) (Bessemer measures it on
-  gross margin; the formula is unverified), and on revenue only. Burn multiple = net burn / net new ARR, none at or
-  below zero (Sacks). Concentration = largest customer / period revenue (a16z). Each stated figure uses deal_check's
-  tolerances; a churn with no basis is checked on every basis and holds when any does. Flags name the likely cause of
-  a mismatch; the payback target by customer segment (Bessemer), a burn multiple of 3x or more (Sacks) and one
-  month's net revenue churn above 2% (Skok) raise a question, never an error.
+  gross margin; the formula is unverified), and on revenue only. Burn multiple = net burn / net new ARR (Sacks, who
+  gives no ratio before revenue and says it approaches 0 as burn reaches 0); none is worked at or below zero
+  (unverified), and a stated multiple then comes back `not_checked`, which keeps the overall verdict off
+  consistent. Concentration = largest customer / period revenue (a16z). Each stated figure uses deal_check's
+  tolerances, and each percent, months or multiple row also says whether it is the computed figure rounded to its own
+  places; a churn with no basis is checked on every basis and holds when any does, and a churn below zero only as net
+  revenue churn. Flags name the likely cause of a mismatch, a verdict the rounding test would reverse and a movement
+  and latest month that disagree; the payback target by customer segment (Bessemer, set against the revenue-only
+  payback as a floor when no margin is given), a burn multiple of 3x or more (Sacks) and one month's net revenue
+  churn above 2% (Skok) raise a question, never an error.
 - **Market sizing (the YC pitch guide for building the market bottom-up from customers and price and for preferring
   it to top-down; the YC seed guide for TAM as revenue; the rest unverified).** Per segment, annual revenue from one
   customer = price × units × 12 / the months the price covers × take rate; TAM = customers × that, summed; SAM =

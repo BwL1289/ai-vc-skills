@@ -203,8 +203,25 @@ async def test_xlsx_writes_the_metrics_check_sheet(tmp_path: Path) -> None:
     assert load_workbook(target).sheetnames == ["Metrics check"]
 
 
-@pytest.mark.parametrize("fields", [METRICS_AM, METRICS_AN_DECK], ids=["company-am", "company-an"])
-def test_the_sheet_reads_back_with_formats_and_verdict_fills(tmp_path: Path, fields: dict[str, object]) -> None:
+# A stated burn multiple with no multiple to work: ARR shrinks, so the row is not checked.
+_UNCHECKED_MULTIPLE: dict[str, object] = {
+    "period_months": 12,
+    "starting_recurring": "100000",
+    "new_recurring": "24000",
+    "churned_recurring": "30000",
+    "net_burn": "1800000",
+    "stated_burn_multiple": "6.25",
+}
+
+
+@pytest.mark.parametrize(
+    ("fields", "overall"),
+    [(METRICS_AM, "mismatch"), (METRICS_AN_DECK, "mismatch"), (_UNCHECKED_MULTIPLE, "not_checked")],
+    ids=["company-am", "company-an", "multiple-left-unchecked"],
+)
+def test_the_sheet_reads_back_with_formats_and_verdict_fills(
+    tmp_path: Path, fields: dict[str, object], overall: str
+) -> None:
     sheet = sheet_for(metrics_check(**fields))
     target = tmp_path / "metrics.xlsx"
     save_workbook(target, (sheet,))
@@ -233,7 +250,7 @@ def test_the_sheet_reads_back_with_formats_and_verdict_fills(tmp_path: Path, fie
         assert set(coloured) == {f'"{verdict}"' for verdict in VERDICT_FILLS}
         for verdict, colour in _VERDICT_COLOURS.items():
             assert coloured[f'"{verdict}"'].endswith(colour), verdict
-    assert page[f"B{rows['verdict']}"].value == "mismatch"
+    assert page[f"B{rows['verdict']}"].value == overall
 
 
 def test_the_churn_check_lines_name_their_basis() -> None:
@@ -270,6 +287,16 @@ _EVERY_FLAG = (
         customer_segment="smb",
     ),
     metrics_check(period_months=1, starting_recurring="100", churned_recurring="3"),
+    metrics_check(period_months=1, starting_recurring="100", month_total_revenue="110"),
+    metrics_check(period_months=1, starting_recurring="100", churned_recurring="2.1", stated_churn_percent="1.7"),
+    metrics_check(
+        period_months=1,
+        starting_recurring="0",
+        new_recurring="10",
+        sales_marketing_spend="124",
+        gross_margin_percent="100",
+        stated_cac_payback_months="12",
+    ),
 )
 
 
@@ -278,3 +305,143 @@ def test_every_flag_has_plain_words() -> None:
 
     assert {line.values[_FIRST] for line in flags} == set(get_args(MetricsFlag))
     assert all(line.how and "_" not in line.how for line in flags)
+
+
+def test_a_multiple_left_unchecked_prints_none_and_why_the_overall_verdict_cannot_be_consistent() -> None:
+    lines = {line.key: line for line in sheet_for(metrics_check(**_UNCHECKED_MULTIPLE)).lines}
+
+    assert lines["check_burn_multiple_computed"].values == ("none",)
+    assert "check_burn_multiple_difference" not in lines
+    assert "check_burn_multiple_rounding" not in lines
+    assert lines["check_burn_multiple_verdict"].values == ("not_checked",)
+    assert "cannot be consistent" in lines["check_burn_multiple_verdict"].how
+    assert lines["verdict"].values == ("not_checked",)
+
+
+def test_retention_and_revenue_churn_print_primed_letters_once_a_starting_customers_figure_is_given() -> None:
+    """The printed formula must give the printed value: with the starting customers' churn (2k) in place of the
+    period's 15k, gross retention is (100k - 5k - 2k)/100k = 93%, which only the primed formula describes."""
+    parts = {"period_months": 12, "starting_recurring": "100000", "new_recurring": "50000"}
+    parts |= {"expansion_recurring": "20000", "contraction_recurring": "5000", "churned_recurring": "15000"}
+    plain = {line.key: line for line in sheet_for(metrics_check(**parts, stated_grr_percent="80")).lines}
+    cohort = metrics_check(**parts, cohort_churned_recurring="2000", stated_grr_percent="80")
+    primed = {line.key: line for line in sheet_for(cohort).lines}
+
+    assert plain["grr"].how == "(S - C - X)/S"
+    assert plain["check_grr_computed"].how == "(S - C - X)/S"
+    assert primed["grr"].how.startswith("(S - C' - X')/S; E', C', X' the starting customers' own when given")
+    assert primed["nrr"].how.startswith("(S + E' - C' - X')/S")
+    assert primed["gross_churn"].how.startswith("(C' + X')/S")
+    assert primed["net_churn"].how.startswith("(C' + X' - E')/S")
+    assert primed["check_grr_computed"].how == primed["grr"].how
+    rows = {row.key: row for row in cohort.assumptions}
+    assert rows["retention_rule"].setting.startswith("GRR = (S - C' - X')/S")
+
+
+def test_a_mismatch_a_hair_past_the_tolerance_says_it_is_just_over() -> None:
+    """NRR (2.5M - 112,499)/2.5M = 95.50004%: 0.50004 points from the deck's 95, past 0.5 but shown as 0.5000%."""
+    close = sheet_for(
+        metrics_check(
+            period_months=12, starting_recurring="2500000", churned_recurring="112499", stated_nrr_percent="95"
+        )
+    )
+    clear = sheet_for(
+        metrics_check(
+            period_months=12, starting_recurring="2500000", churned_recurring="112499", stated_nrr_percent="90"
+        )
+    )
+    close_lines = {line.key: line for line in close.lines}
+    clear_lines = {line.key: line for line in clear.lines}
+
+    assert close_lines["check_nrr_difference"].values[_FIRST].rounded == Decimal("0.005000")
+    assert close_lines["check_nrr_verdict"].values == ("mismatch",)
+    assert "just over the tolerance" in close_lines["check_nrr_verdict"].how
+    assert "just over" not in clear_lines["check_nrr_verdict"].how
+
+
+def test_each_rounding_line_says_yes_or_no_and_money_has_none() -> None:
+    result = metrics_check(
+        period_months=1,
+        starting_recurring="100000",
+        churned_recurring="2100",
+        stated_churn_percent="1.7",
+        stated_churn_basis="net_revenue",
+        stated_arr="1174800",
+    )
+    lines = {line.key: line for line in sheet_for(result).lines}
+
+    assert lines["check_churn_net_revenue_rounding"].values == ("no",)
+    assert "check_arr_rounding" not in lines
+
+
+def test_bands_and_tolerances_typed_in_exponent_form_print_as_plain_numbers() -> None:
+    result = metrics_check(
+        period_months=1,
+        starting_recurring="100",
+        new_recurring="10",
+        churned_recurring="3",
+        net_burn="1000",
+        stated_arr="1284",
+        burn_multiple_band="3E+0",
+        net_revenue_churn_band_percent="2E+0",
+        tolerance_points="5E-1",
+        tolerance_percent="2E+0",
+    )
+    rows = {row.key: row for row in result.assumptions}
+    words = {line.values[_FIRST]: line.how for line in sheet_for(result).lines if line.key.startswith("flag_")}
+
+    assert rows["tolerance"].setting == "0.5 points; 2% relative"
+    assert rows["burn_multiple_band"].setting == "3x"
+    assert rows["net_revenue_churn_band"].setting == "2% a month"
+    assert "at or above 3x" in words["burn_multiple_above_band"]
+    assert "above 2%;" in words["net_revenue_churn_above_band"]
+    assert "E+" not in str(words) + str([row.setting for row in result.assumptions])
+
+
+def test_the_flag_words_blame_what_the_parts_show() -> None:
+    """NRR with the period's expansion over the starting customers' own: revenue from customers who were not there at
+    the start, not new customers by name; a revenue-only payback past the band says the margin only lengthens it."""
+    nrr = metrics_check(
+        period_months=12,
+        starting_recurring="100000",
+        expansion_recurring="20000",
+        cohort_expansion_recurring="10000",
+        churned_recurring="5000",
+        stated_nrr_percent="115",
+    )
+    payback = metrics_check(
+        period_months=12,
+        starting_recurring="100000",
+        new_recurring="10000",
+        sales_marketing_spend="300000",
+        customer_segment="smb",
+    )
+    nrr_words = {line.values[_FIRST]: line.how for line in sheet_for(nrr).lines if line.key.startswith("flag_")}
+    payback_words = {line.values[_FIRST]: line.how for line in sheet_for(payback).lines if line.key.startswith("flag_")}
+
+    assert "customers who were not there at the start" in nrr_words["stated_nrr_includes_new"]
+    assert "on revenue alone is at or above the 12.00 months benchmark" in payback_words["payback_above_band"]
+    assert "a margin only lengthens it" in payback_words["payback_above_band"]
+
+
+async def test_a_negative_net_revenue_churn_reads_from_the_command_line() -> None:
+    report = await run(
+        [
+            "metrics_check",
+            "--period-months",
+            "1",
+            "--starting-recurring",
+            "100000",
+            "--expansion-recurring",
+            "5000",
+            "--churned-recurring",
+            "2000",
+            "--stated-churn-percent",
+            "-3",
+            "--stated-churn-basis",
+            "net_revenue",
+        ]
+    )
+
+    assert re.search(r"Churn \(net revenue\): the deck says +-3\.0000%", report)
+    assert re.search(r"Overall verdict +consistent", report)

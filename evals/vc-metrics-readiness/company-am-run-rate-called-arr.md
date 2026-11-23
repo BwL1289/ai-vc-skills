@@ -61,10 +61,10 @@ that explains each, computes nothing in its own text, and gives no score.
   Burn multiple: verdict                                                        mismatch  within the tolerance is consistent
   A VC is likely to ask                                      stated_arr_matches_run_rate  The stated ARR matches the run-rate (12 x the whole month's revenue), not recurring revenue; a VC is likely to recompute ARR without one-time, services and usage fees
   A VC is likely to ask                                  run_rate_includes_non_recurring  The latest month has one-time or usage revenue, so its run-rate is above its ARR; say which figure the document shows
-  A VC is likely to ask                                          stated_nrr_includes_new  The stated net retention matches ending over starting recurring revenue, which counts new customers; a VC is likely to ask for the starting customers alone
+  A VC is likely to ask                                          stated_nrr_includes_new  The stated net retention matches ending over starting recurring revenue, which counts revenue from customers who were not there at the start (new customers, or their expansion); a VC is likely to ask for the starting customers alone
   A VC is likely to ask                        stated_burn_multiple_uses_new_not_net_arr  The stated burn multiple matches net burn over new ARR only, not over net new ARR after churn and contraction
   A VC is likely to ask                                         burn_multiple_above_band  The burn multiple is at or above 3x; a VC is likely to ask what the spend buys (a benchmark, not a rule)
-  Overall verdict                                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); not_checked with none
+  Overall verdict                                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
 ```
 
 ## Expected answer
