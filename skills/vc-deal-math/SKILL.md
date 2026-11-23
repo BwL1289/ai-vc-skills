@@ -1,6 +1,6 @@
 ---
 name: vc-deal-math
-description: Helps a founder check the numbers in their own fundraising ask before a VC does, with the equity calculator's deal_check tool. It tests whether the pre-money, post-money and percent sold agree, what the round really does to the founders' ownership once SAFEs, convertible notes and an option-pool top-up are counted, the effective pre-money after the option-pool shuffle, how many months of runway the raise buys at the planned burn, and whether the use-of-funds lines add up to the raise. Use when a founder says check my deck's numbers, is our raise reasonable, what does this round do to my ownership, how much runway does this buy, will a VC question our valuation, or pastes their ask, SAFE stack or use-of-funds slide. Every figure comes from the calculator and the deck's figures are quoted as stated. Not investment, legal or tax advice. For one scenario on its own (an option pool, vesting, an exit waterfall) use the equity-calculator skill.
+description: Helps a founder check the numbers in their own fundraising ask before a VC does, with the equity calculator's deal_check tool. It tests whether the pre-money, post-money and percent sold agree, what the round really does to the founders' ownership once SAFEs, convertible notes and an option-pool top-up are counted, the effective pre-money after the option-pool shuffle, how many months of runway the raise buys at the planned burn, and whether the use-of-funds lines add up to the raise. Use when a founder says check my deck's numbers, is our raise reasonable, what does this round do to my ownership, how much runway does this buy, will a VC question our valuation, or pastes their ask, SAFE stack or use-of-funds slide. Every figure comes from the calculator and the deck's figures are quoted as stated. Not investment, legal or tax advice. For the story and the ask together use vc-positioning. For one scenario on its own (an option pool, vesting, an exit waterfall) use the equity-calculator skill.
 ---
 
 # VC deal math
@@ -98,8 +98,9 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
 5. **Read the result before answering**: `verdict`, every row in `checks`, every code in `flags`, `runway`,
    `pre_money_split` and `assumptions`. A refusal or tool error is the answer for those inputs: relay its reason and
    what to change.
-6. **Follow-ups go to tools too**: a different pool size or timing, or a smaller raise, by re-running
-   `equity_deal_check`; the next round's effect with `equity_dilution`; a full exit split with `equity_waterfall`.
+6. **Follow-ups the founder asks for go to tools too**: a different pool size or timing, or a smaller raise, by
+   re-running `equity_deal_check`; the next round's effect with `equity_dilution`; a full exit split with
+   `equity_waterfall`.
 
 ## Answering
 
@@ -151,6 +152,9 @@ same meaning beside each flag.
 
 ## Limits
 
+- No arithmetic outside the calculator's tools. A figure outside the deal terms (a growth rate, a market size, unit
+  economics) is quoted as stated with "not checked: no tool computes this", and no what-if the founder did not ask for
+  is run.
 - It checks the arithmetic of the figures the founder gives. It does not read a deck file, a cap table file or a term
   sheet; the founder's text is the input, and nothing is sent anywhere.
 - It is not investment, legal or tax advice, and it does not say whether to take a round or what a company is worth.
