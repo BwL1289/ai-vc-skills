@@ -27,6 +27,7 @@ from equity_calculator.schemas.equity import (
 from equity_calculator.schemas.equity_deal_check import DealCheckInput
 from equity_calculator.schemas.equity_dilution import DilutionInput
 from equity_calculator.schemas.equity_round import RoundInput
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput
 from equity_calculator.schemas.equity_vesting import VestingInput
 from equity_calculator.schemas.equity_waterfall import WaterfallInput
 from equity_calculator.text import display, render_sheet
@@ -161,6 +162,38 @@ _EXAMPLES: tuple[ScenarioInput, ...] = (
             "use_of_funds": [{"amount": "2062500"}, {"amount": "1237500"}, {"amount": "825000"}],
         }
     ),
+    # A runway plan with every part: a floor, a derived downside, a lean case of its own, a raise landing later with
+    # a runway stated from landing, percent use-of-funds lines, two milestones and months to raise.
+    RunwayPlanInput.model_validate(
+        {
+            "cash_on_hand": "812500",
+            "cash_floor": "62500",
+            "cases": [
+                {
+                    "name": "plan",
+                    "phases": [
+                        {"from_month": 1, "gross_burn": "137500", "revenue": "12500"},
+                        {"from_month": 5, "gross_burn": "212500", "revenue": "37500"},
+                    ],
+                },
+                {"name": "downside", "revenue_percent_of_plan": "62.5", "gross_burn_percent_of_plan": "105"},
+                {"name": "lean", "phases": [{"from_month": 1, "gross_burn": "112500", "revenue": "7500"}]},
+            ],
+            "raises": [
+                {"amount": "2125000"},
+                {
+                    "amount": "3125000",
+                    "lands_month": 3,
+                    "stated_runway_months": "17.5",
+                    "stated_runway_from": "landing",
+                    "use_of_funds": [{"percent": "62.5"}, {"percent": "37.5"}],
+                },
+            ],
+            "milestones": [9, 14],
+            "months_to_raise": 5,
+            "stated_runway_months": "5.5",
+        }
+    ),
 )
 _EXAMPLE_IDS = [
     "investor",
@@ -172,6 +205,7 @@ _EXAMPLE_IDS = [
     "vesting-double-trigger",
     "waterfall-capped",
     "deal-check-from-post-money",
+    "runway-plan-with-a-late-raise",
 ]
 
 

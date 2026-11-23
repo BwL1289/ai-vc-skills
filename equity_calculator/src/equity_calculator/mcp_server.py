@@ -3,7 +3,8 @@
     equity_calculator_mcp [--output-dir DIR]
 
 Each scenario is one tool, ``equity_<scenario>`` (``equity_investor``, ``equity_employee``, ``equity_pool``,
-``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``). A tool takes
+``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``,
+``equity_runway_plan``). A tool takes
 one argument, ``inputs``: that scenario's input model (``equity_calculator.schemas``). It returns exactly the text
 ``equity_calculator <scenario> --json`` prints: the result model as JSON, exact fractions and labelled assumptions
 included. An input the model refuses, or one it accepts that has no answer (``equity_calculator.errors``), comes back
@@ -58,6 +59,7 @@ from equity_calculator.schemas.equity import (
     InvestorInput,
     PoolInput,
     RoundInput,
+    RunwayPlanInput,
     ScenarioInput,
     VestingInput,
     WaterfallInput,
@@ -151,18 +153,33 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "current figures, and the use_of_funds total. Each figure the deck states comes back consistent or a "
         "mismatch with its difference; flags name what a VC is likely to ask and never change a verdict.",
     ),
+    "runway_plan": (
+        RunwayPlanInput,
+        "Runway plan (how long a raise lasts, and what it buys)",
+        "A founder's runway on their own phased plan, cash only (no valuation or ownership): cases (the plan's "
+        "phases of monthly gross_burn and revenue from each from_month, plus a downside or lean case as its own "
+        "phases or as revenue_percent_of_plan / gross_burn_percent_of_plan), raises (amount landing after "
+        "lands_month whole months) and milestones (months from today). Runway is when cash_on_hand + the raise - "
+        "cash_floor first goes below zero under the phased net burn, worked exactly segment by segment; a no-raise "
+        "row is always included. Each milestone is covered when the runway reaches its month + months_to_raise, "
+        "with the slack; the smallest raise per milestone and landing month is max(0, max cumulative net burn on "
+        "[landing, target] - available cash), none when the cash runs out first. Stated runways (no raise, or per "
+        "raise from today or from landing) and each raise's use_of_funds total come back consistent or a mismatch; "
+        "flags never change a verdict.",
+    ),
 }
 
 _INSTRUCTIONS = (
     "Exact startup-equity arithmetic. Pick the tool for the question: equity_investor (should we sell stock for this "
-    "deal?), equity_employee (the most a hire is worth), equity_pool (option-pool shuffle), equity_round (priced round "
-    "with SAFEs and notes), equity_dilution (one holder through rounds), equity_vesting (a grant at a month), "
+    "deal?), equity_employee (the most a hire is worth), equity_pool (option-pool shuffle), equity_round (priced "
+    "round with SAFEs and notes), equity_dilution (one holder through rounds), equity_vesting (a grant at a month), "
     "equity_waterfall (who gets what of an exit), equity_deal_check (a founder's raise checked: valuation, ownership "
-    "after the round, runway, the deck's own figures). Pass the scenario's fields in `inputs`; give money and "
-    "percents as JSON strings to keep every digit. Quote the result's numbers and its labelled assumptions; never "
-    "round them further without saying so. A value whose unit is fraction is a share of the whole: show it as a "
-    "percent by moving the decimal point of its rounded value two places to the right (0.166667 is 16.6667%), as the "
-    "command line's report prints it."
+    "after the round, runway, the deck's own figures), equity_runway_plan (how long each raise lasts on a phased "
+    "plan and a downside, which milestones it reaches, the smallest raise that gets there). Pass the scenario's "
+    "fields in `inputs`; give money and percents as JSON strings to keep every digit. Quote the result's numbers and "
+    "its labelled assumptions; never round them further without saying so. A value whose unit is fraction is a share "
+    "of the whole: show it as a percent by moving the decimal point of its rounded value two places to the right "
+    "(0.166667 is 16.6667%), as the command line's report prints it."
 )
 
 
@@ -329,7 +346,7 @@ def build_server(output_dir: Path | None = None) -> FastMCP:
                 f"dot, no control, format or surrogate character), and a name that would land outside the folder, an "
                 f"existing file, a link or an answer too large for a workbook is refused. `inputs` is any "
                 f'scenario\'s input with its `scenario` tag set ("investor", "employee", "pool", "round", "dilution", '
-                f'"vesting", "waterfall" or "deal_check"). Returns the path written. {_DIGITS_ADVICE}'
+                f'"vesting", "waterfall", "deal_check" or "runway_plan"). Returns the path written. {_DIGITS_ADVICE}'
             ),
             annotations=ToolAnnotations(
                 readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False

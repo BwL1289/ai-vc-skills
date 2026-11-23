@@ -25,6 +25,7 @@ from fractions import Fraction
 
 from equity_calculator.assumptions_deal_check import deal_check_assumptions
 from equity_calculator.exact import ONE, ZERO, fraction, from_percent, money_split, quantity
+from equity_calculator.funds import work_use_of_funds
 from equity_calculator.pool import compute_pool
 from equity_calculator.round import compute_round
 from equity_calculator.schemas.equity_common import EquityAssumption, EquityQuantity, EquityUnit
@@ -226,23 +227,14 @@ class _Funds:
 
 def _use_of_funds(inputs: DealCheckInput) -> _Funds:
     """Amount lines as given, percent lines as dollars of the raise; the total checked against the raise or 100%."""
-    if not inputs.use_of_funds:
+    worked = work_use_of_funds(
+        inputs.use_of_funds, fraction(inputs.investment), inputs.tolerance_points, inputs.tolerance_percent
+    )
+    if worked is None:
         return _Funds()
 
-    investment = fraction(inputs.investment)
-    percents = [from_percent(line.percent) for line in inputs.use_of_funds if line.percent is not None]
-    if percents:
-        dollars = [investment * share for share in percents]
-        share = sum(percents, ZERO)
-        check = _check("use_of_funds_total", "fraction", share, ONE, from_percent(inputs.tolerance_points))
-    else:
-        dollars = [fraction(line.amount) for line in inputs.use_of_funds if line.amount is not None]
-        total = sum(dollars, ZERO)
-        share = total / investment
-        tolerance = from_percent(inputs.tolerance_percent) * investment
-        check = _check("use_of_funds_total", "money", total, investment, tolerance)
-
-    return _Funds(money_split(dollars), quantity("money", sum(dollars, ZERO)), quantity("fraction", share), check)
+    check = _check("use_of_funds_total", worked.unit, worked.stated, worked.computed, worked.tolerance)
+    return _Funds(worked.lines, worked.total, worked.share, check)
 
 
 def _checks(

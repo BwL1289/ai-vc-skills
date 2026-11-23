@@ -65,6 +65,10 @@ All notable changes to this repository. Dates are UTC.
   why-we-built-it-this-way lines, with which to show in the deck (at most three) and which to keep for the meeting. It
   invents no decisions, scores no taste and calls no calculator tool. `vc-positioning` now points to it. Four evals are
   in `evals/vc-taste-check/`.
+- The calculator's `runway_plan` scenario, also an MCP tool (`equity_runway_plan`), a command and a workbook sheet:
+  how long each raise lasts on a founder's phased plan, a downside and a lean case, with a no-raise row (and its
+  stated runway checked), milestones with time to raise the next round, the smallest raise per milestone and landing
+  month, and raises that land later. Cash only; the use-of-funds check moved to a helper both scenarios share.
 
 ### Changed
 

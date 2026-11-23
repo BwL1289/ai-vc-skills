@@ -1,4 +1,5 @@
-"""Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check``).
+"""Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check|``
+``runway_plan``).
 
 The number readers are ``cli_numbers``; a repeated flag's one-argument terms are ``cli_instruments``.
 """
@@ -8,7 +9,16 @@ from __future__ import annotations
 import argparse
 from typing import get_args
 
-from equity_calculator.cli_instruments import parse_class, parse_funds_line, parse_note, parse_round, parse_safe
+from equity_calculator.cli_instruments import (
+    parse_class,
+    parse_funds_line,
+    parse_note,
+    parse_phase,
+    parse_raise,
+    parse_raise_funds_line,
+    parse_round,
+    parse_safe,
+)
 from equity_calculator.cli_numbers import parse_decimal, parse_months, parse_percent, parse_whole
 from equity_calculator.schemas.equity import PoolTiming, ShareRounding
 from equity_calculator.schemas.equity_vesting import Acceleration, AccelerationBase
@@ -286,4 +296,99 @@ def deal_check_arguments(parser: argparse.ArgumentParser) -> None:
         "--runway-band-months",
         type=parse_decimal,
         help="Flag planned net runway below this many months (default 18; a common benchmark, not a rule).",
+    )
+
+
+_PHASE_TERMS = "'from-month=M gross-burn=G [revenue=R]'"
+
+
+def _case_arguments(parser: argparse.ArgumentParser, case: str) -> None:
+    """A downside or lean case: its own phases, or percents of the plan's revenue and gross burn (not both)."""
+    parser.add_argument(
+        f"--{case}-phase",
+        type=parse_phase,
+        action="append",
+        dest=f"{case}_phases",
+        metavar=_TERMS,
+        help=f"One phase of the {case} case, as --phase. Repeat for each phase; or give the percents below instead.",
+    )
+    parser.add_argument(
+        f"--{case}-revenue-percent",
+        type=parse_percent,
+        dest=f"{case}_revenue_percent",
+        help=f"The {case} case's revenue as a percent of the plan's in every phase (left out: 100).",
+    )
+    parser.add_argument(
+        f"--{case}-gross-burn-percent",
+        type=parse_percent,
+        dest=f"{case}_gross_burn_percent",
+        help=f"The {case} case's gross burn as a percent of the plan's in every phase (left out: 100).",
+    )
+
+
+def runway_plan_arguments(parser: argparse.ArgumentParser) -> None:
+    """A runway plan's flags: cash, the plan's phases, a downside and a lean case, the raises, milestones, checks."""
+    parser.add_argument("--cash-on-hand", type=parse_decimal, required=True, help="Cash in the bank today.")
+    parser.add_argument(
+        "--cash-floor", type=parse_decimal, help="Cash kept in the bank that the plan never spends (default 0)."
+    )
+    parser.add_argument(
+        "--phase",
+        type=parse_phase,
+        action="append",
+        dest="phases",
+        required=True,
+        metavar=_TERMS,
+        help=f"One phase of the plan: {_PHASE_TERMS}, monthly figures from that month until the next phase (the "
+        "last runs on). The first starts at month 1. Repeat for each phase, in order.",
+    )
+    _case_arguments(parser, "downside")
+    _case_arguments(parser, "lean")
+    parser.add_argument(
+        "--raise",
+        type=parse_raise,
+        action="append",
+        dest="raises",
+        metavar=_TERMS,
+        help="One raise to compare: 'amount=I [lands-month=L] [stated-runway-months=M] "
+        "[stated-runway-from=today|landing]'; L whole months from today (default 0: now). Repeat for each raise.",
+    )
+    parser.add_argument(
+        "--raise-use-of-funds",
+        type=parse_raise_funds_line,
+        action="append",
+        dest="raise_use_of_funds",
+        metavar=_TERMS,
+        help="One use-of-funds line of a raise: its number (1 is the first --raise), then dollars ('1 1250000') or "
+        "a percent of that raise ('1 50%%'). Repeat for each line.",
+    )
+    parser.add_argument(
+        "--milestone",
+        type=parse_months,
+        action="append",
+        dest="milestones",
+        help="A milestone, as a month from today. Repeat for each milestone.",
+    )
+    parser.add_argument(
+        "--months-to-raise",
+        type=parse_months,
+        help="Months allowed to raise the next round after a milestone (left out: none, flagged).",
+    )
+    parser.add_argument(
+        "--stated-runway-months", type=parse_decimal, help="The runway you state with no raise, in months."
+    )
+    parser.add_argument(
+        "--tolerance-points",
+        type=parse_percent,
+        help="How far percent use-of-funds lines may sit from 100%%, in percentage points (default 0.5).",
+    )
+    parser.add_argument(
+        "--tolerance-percent",
+        type=parse_percent,
+        help="How far a stated runway or a use-of-funds total may sit, in percent of the computed one (default 2).",
+    )
+    parser.add_argument(
+        "--runway-band-months",
+        type=parse_decimal,
+        help="Flag a raise lasting under this many months on the plan (default 18; a common benchmark, not a rule).",
     )

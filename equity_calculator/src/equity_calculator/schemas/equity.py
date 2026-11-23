@@ -38,6 +38,7 @@ from equity_calculator.schemas.equity_pool import (
     PoolScenario,
 )
 from equity_calculator.schemas.equity_round import RoundInput, RoundResult
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput, RunwayPlanResult
 from equity_calculator.schemas.equity_vesting import VestingInput, VestingResult
 from equity_calculator.schemas.equity_waterfall import WaterfallInput, WaterfallResult
 from pydantic import BaseModel, Field, model_validator
@@ -70,6 +71,8 @@ __all__ = [
     "PoolTiming",
     "RoundInput",
     "RoundResult",
+    "RunwayPlanInput",
+    "RunwayPlanResult",
     "ScenarioInput",
     "ScenarioResult",
     "ShareRounding",
@@ -229,6 +232,7 @@ ScenarioInput = (
     | VestingInput
     | WaterfallInput
     | DealCheckInput
+    | RunwayPlanInput
 )
 ScenarioResult = (
     InvestorResult
@@ -239,6 +243,7 @@ ScenarioResult = (
     | VestingResult
     | WaterfallResult
     | DealCheckResult
+    | RunwayPlanResult
 )
 
 EquityInput = Annotated[ScenarioInput, Field(discriminator="scenario")]

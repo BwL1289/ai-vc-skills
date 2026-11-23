@@ -37,6 +37,10 @@ from equity_calculator.schemas.equity_round import MAX_INSTRUMENTS, Instrument, 
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
 __all__ = [
+    "DEFAULT_DILUTION_BAND_PERCENT",
+    "DEFAULT_RUNWAY_BAND_MONTHS",
+    "DEFAULT_TOLERANCE_PERCENT",
+    "DEFAULT_TOLERANCE_POINTS",
     "MAX_USE_OF_FUNDS_LINES",
     "CheckKey",
     "CheckVerdict",
@@ -101,10 +105,11 @@ RunwayBasis = Literal["planned", "current"]
 # The list cap on use-of-funds lines; the worst case computes at once.
 MAX_USE_OF_FUNDS_LINES = 20
 
-_DEFAULT_TOLERANCE_POINTS = Decimal("0.5")
-_DEFAULT_TOLERANCE_PERCENT = Decimal("2")
-_DEFAULT_DILUTION_BAND_PERCENT = Decimal("25")
-_DEFAULT_RUNWAY_BAND_MONTHS = Decimal("18")
+# The defaults of the tolerances and the two benchmark bands; the runway plan reuses them (``equity_runway_plan``).
+DEFAULT_TOLERANCE_POINTS = Decimal("0.5")
+DEFAULT_TOLERANCE_PERCENT = Decimal("2")
+DEFAULT_DILUTION_BAND_PERCENT = Decimal("25")
+DEFAULT_RUNWAY_BAND_MONTHS = Decimal("18")
 _TWO = 2
 _FIVE = 5
 _ZERO = Fraction(0)
@@ -260,10 +265,10 @@ class DealCheckInput(BaseModel):
     current_monthly_revenue: BoundedDecimal | None = Field(default=None, ge=0)
     stated_runway_months: BoundedDecimal | None = Field(default=None, gt=0)
     use_of_funds: tuple[FundsLine, ...] = Field(default=(), max_length=MAX_USE_OF_FUNDS_LINES)
-    tolerance_points: BoundedDecimal = Field(default=_DEFAULT_TOLERANCE_POINTS, ge=0, lt=WHOLE_PERCENT)
-    tolerance_percent: BoundedDecimal = Field(default=_DEFAULT_TOLERANCE_PERCENT, ge=0, lt=WHOLE_PERCENT)
-    dilution_band_percent: BoundedDecimal = Field(default=_DEFAULT_DILUTION_BAND_PERCENT, gt=0, lt=WHOLE_PERCENT)
-    runway_band_months: BoundedDecimal = Field(default=_DEFAULT_RUNWAY_BAND_MONTHS, gt=0)
+    tolerance_points: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_POINTS, ge=0, lt=WHOLE_PERCENT)
+    tolerance_percent: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_PERCENT, ge=0, lt=WHOLE_PERCENT)
+    dilution_band_percent: BoundedDecimal = Field(default=DEFAULT_DILUTION_BAND_PERCENT, gt=0, lt=WHOLE_PERCENT)
+    runway_band_months: BoundedDecimal = Field(default=DEFAULT_RUNWAY_BAND_MONTHS, gt=0)
 
     @model_validator(mode="after")
     def _deal_can_be_checked(self) -> DealCheckInput:

@@ -4,7 +4,7 @@ Built from the ``equity_equation`` script this repository first held (``src/equi
 and the essay it implements, Paul Graham's "The Equity Equation" (July 2007). Every number is exact (``Fraction``
 inside, ``Decimal`` in and out); the input and result models live in ``equity_calculator.schemas.equity`` and the
 ``equity_calculator.schemas.equity_*`` modules it re-exports (``equity_common``, ``equity_pool``, ``equity_round``,
-``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``).
+``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``, ``equity_runway_plan``).
 
   - ``exact``       — exact arithmetic, display rounding, the money split that adds up to the cent;
   - ``equation``    — PG's test, R = (1 - n)·m, and its inverse for a hire, n = (i - 1)/i;
@@ -25,6 +25,10 @@ inside, ``Decimal`` in and out); the input and result models live in ``equity_ca
   - ``deal_check``  — a fundraising ask checked against itself: valuation, ownership after the round, runway, checks;
   - ``assumptions_deal_check`` — the deal check's labelled assumptions (post = pre + raise from YC, the rest
     unverified);
+  - ``funds``       — a raise's use-of-funds lines worked and checked, shared by the deal check and the runway plan;
+  - ``runway_plan`` — how long each raise lasts on a phased plan and its cases, milestones, the smallest raise;
+  - ``assumptions_runway_plan`` — the runway plan's labelled assumptions (the YC seed guide's milestone and band,
+    the rest unverified);
   - ``scenarios``   — ``compute``: any scenario's input to its result;
   - ``result_range`` — the size limit on an answer: no value a spreadsheet cell cannot hold reaches a workbook;
   - ``sheet_parts`` — ``Line`` and ``Sheet``, the parts every report is built from;
@@ -36,13 +40,16 @@ inside, ``Decimal`` in and out); the input and result models live in ``equity_ca
   - ``layout_vesting`` — the report lines of a grant's vesting (the Vesting sheet);
   - ``layout_waterfall`` — the report lines of an exit waterfall (the Waterfall sheet);
   - ``layout_deal_check`` — the report lines of a deal check (the Deal check sheet);
+  - ``layout_runway_plan`` — the report lines of a runway plan (the Runway plan sheet);
   - ``text``        — the CLI's printed report;
   - ``workbook``    — the formatted Excel workbook (real formulas, number formats, verdict colours);
   - ``cli_numbers`` — the CLI's number readers (amounts, percents, whole counts, the workbook path);
   - ``cli_arguments`` — each scenario's CLI flags;
-  - ``cli_instruments`` — the repeated-flag readers: ``--safe``, ``--note``, ``--round`` and ``--class``;
-  - ``__main__``    — the CLI, ``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check
-    [--json] [--xlsx PATH]``;
+  - ``cli_instruments`` — the repeated-flag readers: ``--safe``, ``--note``, ``--round``, ``--class``, ``--phase``,
+    ``--raise`` and the use-of-funds lines;
+  - ``cli_runway_plan`` — a runway plan's flags gathered into its cases and raises, and where each came from;
+  - ``__main__``    — the CLI, ``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check|
+    runway_plan [--json] [--xlsx PATH]``;
   - ``mcp_server``  — the MCP server, ``equity_calculator_mcp [--output-dir DIR]``: one tool per scenario over stdio.
 
 Nothing here reads the network or a database; it is pure arithmetic plus the workbook writes: the CLI's ``--xlsx``

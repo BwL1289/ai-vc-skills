@@ -26,6 +26,7 @@ from equity_calculator.schemas.equity_common import (
 from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealCheckResult
 from equity_calculator.schemas.equity_dilution import DilutionInput, DilutionResult
 from equity_calculator.schemas.equity_round import RoundInput, RoundResult
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput, RunwayPlanResult
 from equity_calculator.schemas.equity_vesting import VestingInput, VestingResult
 from equity_calculator.schemas.equity_waterfall import WaterfallInput, WaterfallResult
 
@@ -258,3 +259,60 @@ DEAL_C: dict[str, object] = {
 def deal_check(**fields: object) -> DealCheckResult:
     """The deal check for ``fields`` (a ``DealCheckInput``'s fields)."""
     return compute(DealCheckInput.model_validate(fields))
+
+
+# Made-up runway plans, worked by exact fractions in test_runway_plan.py.
+# Company W: $500k in the bank; months 1-3 spend $120k with $10k revenue, months 4-12 $220k with $25k, month 13 on
+# $300k with $60k; a downside at half the revenue; $3M or $4M raised now; milestone month 15 with 6 months to raise.
+RUNWAY_W_PLAN: list[dict[str, object]] = [
+    {"from_month": 1, "gross_burn": "120000", "revenue": "10000"},
+    {"from_month": 4, "gross_burn": "220000", "revenue": "25000"},
+    {"from_month": 13, "gross_burn": "300000", "revenue": "60000"},
+]
+RUNWAY_W: dict[str, object] = {
+    "cash_on_hand": "500000",
+    "cases": [{"name": "plan", "phases": RUNWAY_W_PLAN}, {"name": "downside", "revenue_percent_of_plan": "50"}],
+    "raises": [{"amount": "3000000"}, {"amount": "4000000"}],
+    "milestones": [15],
+    "months_to_raise": 6,
+}
+# Company X: $1.2M in the bank, $2M now against $3M landing after six months; milestone month 18, 6 months to raise.
+RUNWAY_X: dict[str, object] = {
+    "cash_on_hand": "1200000",
+    "cases": [
+        {
+            "name": "plan",
+            "phases": [
+                {"from_month": 1, "gross_burn": "150000", "revenue": "30000"},
+                {"from_month": 7, "gross_burn": "200000", "revenue": "50000"},
+                {"from_month": 13, "gross_burn": "260000", "revenue": "80000"},
+            ],
+        },
+        {"name": "downside", "revenue_percent_of_plan": "60"},
+    ],
+    "raises": [{"amount": "2000000"}, {"amount": "3000000", "lands_month": 6}],
+    "milestones": [18],
+    "months_to_raise": 6,
+}
+# Company Y: $300k in the bank, $90k a month for three months then $160k with $10k revenue; $1.5M with a stated
+# 24-month runway; milestone month 12, 6 months to raise.
+RUNWAY_Y: dict[str, object] = {
+    "cash_on_hand": "300000",
+    "cases": [
+        {
+            "name": "plan",
+            "phases": [
+                {"from_month": 1, "gross_burn": "90000"},
+                {"from_month": 4, "gross_burn": "160000", "revenue": "10000"},
+            ],
+        }
+    ],
+    "raises": [{"amount": "1500000", "stated_runway_months": "24"}],
+    "milestones": [12],
+    "months_to_raise": 6,
+}
+
+
+def runway_plan(**fields: object) -> RunwayPlanResult:
+    """The runway plan for ``fields`` (a ``RunwayPlanInput``'s fields)."""
+    return compute(RunwayPlanInput.model_validate(fields))

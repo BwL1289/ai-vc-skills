@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from equity_calculator.assumptions import UNVERIFIED
 from equity_calculator.assumptions_round import YC_GUIDE_SOURCE
+from equity_calculator.funds import use_of_funds_assumption
 from equity_calculator.schemas.equity_common import EquityAssumption
 from equity_calculator.schemas.equity_deal_check import DealCheckInput, deal_valuation
 
@@ -133,15 +134,7 @@ def _check_rows(inputs: DealCheckInput, checked: bool) -> list[EquityAssumption]
         )
     )
     if inputs.use_of_funds:
-        rows.append(
-            _assumption(
-                "use_of_funds_rule",
-                "the lines add up to the raise",
-                "Use-of-funds lines are checked only for adding up to the raise (or to 100%); percent lines become "
-                "dollars of the raise, split to the cent. No split by category is judged.",
-                UNVERIFIED,
-            )
-        )
+        rows.append(use_of_funds_assumption())
 
     return rows
 

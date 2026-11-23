@@ -1,14 +1,14 @@
 """The formatted Excel workbook: one sheet per scenario, real number formats, live ``=SUM`` totals, verdict colours.
 
-Each value cell holds the model's display rounding (a ``Decimal``) under its unit's number format; a total line
-holds a live ``=SUM`` of the cells it adds, so an edited part re-totals; a line with a ``formula`` (the investor test's
+Each value cell holds the model's display rounding (a ``Decimal``) under its unit's number format; a total line holds
+a live ``=SUM`` of the cells it adds, so an edited part re-totals; a line with a ``formula`` (the investor test's
 derived lines and verdict) is written as that live formula over its inputs' cells, which then hold the inputs at full
-precision, so an edited input recomputes it and its verdict; a verdict cell is coloured by conditional
-formatting (green accept / grant / in the money / consistent, amber break even / at the money / not checked, red
-reject / no grant / underwater / mismatch; a waterfall class's choice is blue for converts and grey for stays,
-neither good nor bad), so an edited verdict recolours. Row 1 is the bold header, frozen; the labelled assumptions
-follow under their own bold header. A value of ``equity_calculator.result_range.RESULT_LIMIT`` or more in size is
-refused with ``ResultOutOfRange`` before any file is written: openpyxl would write it as a blank cell and an
+precision, so an edited input recomputes it and its verdict; a verdict cell is coloured by conditional formatting
+(green accept / grant / in the money / consistent / covered, amber break even / at the money / not checked, red
+reject / no grant / underwater / mismatch / short; a waterfall class's choice is blue for converts and grey for
+stays, neither good nor bad), so an edited verdict recolours. Row 1 is the bold header, frozen; the labelled
+assumptions follow under their own bold header. A value of ``equity_calculator.result_range.RESULT_LIMIT`` or more in
+size is refused with ``ResultOutOfRange`` before any file is written: openpyxl would write it as a blank cell and an
 ``=SUM`` over it would add it as zero.
 """
 
@@ -57,6 +57,8 @@ VERDICT_FILLS: dict[str, str] = {
     "consistent": _GREEN,
     "mismatch": _RED,
     "not_checked": _AMBER,
+    "covered": _GREEN,
+    "short": _RED,
 }
 
 FROZEN_PANE = "A2"
