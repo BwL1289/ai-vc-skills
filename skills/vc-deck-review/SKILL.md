@@ -23,6 +23,7 @@ names a firm the deck fits, gives no score, and never adds a fact about the comp
 - Built for pre-seed and seed decks. A deck for a later round gets the same review, with a note that the investor-fit
   table covers early investors only.
 - Hand off:
+  - Traction metrics and their definitions: the vc-metrics-readiness skill (preview).
   - The one-liner, the story and the say-and-avoid list: the vc-positioning skill. Point the founder to it when the
     first slide or the problem fails, or when they ask how to say it.
   - Claims: this skill runs the vc-claims-check steps for every claim in the deck. For its skeptic and refute pass on

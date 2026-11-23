@@ -22,6 +22,8 @@ looks anything up, and never adds evidence, figures or facts the founder did not
 - A deck, one-pager, executive summary, investor update, data-room index or spoken pitch, alone or several together.
 - Called from the vc-positioning skill when its review needs each claim's evidence or finds figures that may disagree.
 - Hand off:
+  - Retention, churn, CAC payback and burn multiple, with their definitions: the vc-metrics-readiness skill
+    (preview).
   - The ask's arithmetic in full (ownership after the round, the pool, runway): the vc-deal-math skill, whose steps
     this skill follows for deal terms.
   - A raise on a SAFE or note: `equity_round`, as vc-deal-math step 2 says (the equity-calculator skill).

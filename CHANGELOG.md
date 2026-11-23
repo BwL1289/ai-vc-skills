@@ -115,6 +115,15 @@ All notable changes to this repository. Dates are UTC.
   consistent or a mismatch, with flags naming the likely cause (a run-rate called ARR, new customers in net
   retention, payback on revenue rather than gross margin, a multiple on new rather than net new ARR) and three
   benchmark questions. Its definitions and benchmarks quote a16z, Bessemer, David Sacks and David Skok.
+- The `vc-metrics-readiness` skill, in preview: a founder checks their traction metrics before a VC does. Each metric
+  in the deck, model and investor update is listed word for word with where it appears, its definition named (ARR or
+  a run-rate, gross or net revenue retention, logo or revenue churn, blended or paid CAC, CAC payback on gross margin,
+  a burn multiple on net new ARR) and its agreement across the documents checked as stated. Every ratio comes from
+  `equity_metrics_check`, one call per document's version of the figures; growth rates and LTV are quoted, not
+  computed. Five lenses make the definitional attacks a partner makes, a refute pass drops what the founder's material
+  answers, and the survivors become a ranked fix list, with the calculator's mismatches first. It lists which metrics
+  a fund at the founder's stage usually expects, never what values, and gives no score and no ready-or-not verdict.
+  `vc-positioning` now points to it. Five evals are in `evals/vc-metrics-readiness/`.
 
 ### Changed
 
