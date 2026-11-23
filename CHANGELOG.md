@@ -69,6 +69,13 @@ All notable changes to this repository. Dates are UTC.
   how long each raise lasts on a founder's phased plan, a downside and a lean case, with a no-raise row (and its
   stated runway checked), milestones with time to raise the next round, the smallest raise per milestone and landing
   month, and raises that land later. Cash only; the use-of-funds check moved to a helper both scenarios share.
+- The `vc-round-sizing` skill, in preview: a founder sizes their own raise on their own plan. One `equity_runway_plan`
+  call works how long each amount lasts on plan, in a downside and with no raise, which milestone it reaches with time
+  to raise the next round, the smallest raise that gets there, and raise-now against wait side by side; ownership per
+  option comes from `equity_deal_check`, `equity_round` and `equity_dilution`. A skeptic attacks the round story and a
+  refute pass keeps only what the founder's material grounds. Benchmarks reach the answer only through the
+  calculator's own assumption rows. It invents no burn, growth or valuation and gives no recommendation.
+  `vc-positioning` now points to it. Four evals are in `evals/vc-round-sizing/`.
 
 ### Changed
 
