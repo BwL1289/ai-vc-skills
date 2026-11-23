@@ -38,8 +38,11 @@ score and no readiness percentage, and never adds a fact, a figure or a document
 
 Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
 read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
-for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the
-figures behind a chart), and never ask the founder to paste what the file already holds. At most five questions:
+for a deck), in the file's own words, so the founder sees what was read from each. A place you could not read (a slide
+that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
+asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
+Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
+input below that it leaves out), and never ask the founder to paste what you already read. At most five questions:
 
 1. The material the fund has seen or will see: the deck, a one-pager, the answers given in the meeting as the founder
    remembers them, and anything the fund has already asked for, in its words.
@@ -236,10 +239,12 @@ a time and decide each against the same brief before reading the next.
 
 **Lean mode,** the one exception: with more than eight questions after the quote check, the refute pass may instead run
 one subagent per lens, all in a single message. Each gets what a one-question subagent gets, but with every question
-from its lens (one that two lenses raised goes to one of them only), and judges each question separately against the
-brief, with its own verdict and its own quote where the verdict needs one, never weighing one question against another.
-The answer then says the refute pass ran per lens, which is less independent than one subagent per question. The founder
-may ask for the full pass, one subagent per question.
+from its lens (one that two lenses raised goes to one of them only; one that no lens raised gets a subagent of its own),
+and with this instruction, word for word: "Apply the brief to each question as if it were the only one you were given.
+Return one verdict for each, with its own quote where the verdict needs one. Never let one question, its verdict or its
+answering line decide another." Any question that comes back without a verdict of its own stays Kept. The answer then
+says the refute pass ran per lens, which is less independent than one subagent per question, and that the founder may
+ask for the full pass, one subagent per question.
 
 The refute brief:
 
@@ -337,11 +342,12 @@ it never says whether something is legally sufficient.
 
 1. **The three that move the decision most,** one line each: the top of the ranked list.
 2. **Ranked questions,** as a table: Rank, Tier, Area, The founder's line (quoted), The question, What settles it; the
-   calculator's mismatches first, each with "computed, no tier" in its Tier cell (an understated runway: "minor").
-   Then **Dropped,** one line each: the question, its area, and why it fell (answered, naming the line or document to
-   point to, which also goes to the have-it-ready list; or not grounded). Say how the lenses and the refute pass ran
-   (as subagents, one refute subagent per question); when the lenses ran one after another in one agent, say they are
-   less independent than separate subagents.
+   calculator's mismatches first, each with "computed, no tier" in its Tier cell (an understated runway: "minor"). Then
+   **Dropped,** one line each: the question, its area, and why it fell (answered, naming the line or document to point
+   to, which also goes to the have-it-ready list; or not grounded). Say how the lenses and the refute pass ran (as
+   subagents, one refute subagent per question), or one per lens in lean mode; when the lenses ran one after another in
+   one agent, say they are less independent than separate subagents. When the refute pass ran per lens (lean mode), say
+   so, say it is less independent than one subagent per question, and say the founder may ask for the full pass.
 3. **Draft answers,** question by question, as above.
 4. **Area prep list,** area by area, with bank IDs and this skill's own LEGAL and CAP IDs.
 5. **Data-room checklist,** by area: Row, What it shows, Status (Contradicted, Missing or Ready), the founder's

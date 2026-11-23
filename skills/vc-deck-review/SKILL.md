@@ -40,8 +40,11 @@ names a firm the deck fits, gives no score, and never adds a fact about the comp
 
 Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
 read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
-for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the
-figures behind a chart), and never ask the founder to paste what the file already holds.
+for a deck), in the file's own words, so the founder sees what was read from each. A place you could not read (a slide
+that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
+asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
+Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
+input below that it leaves out), and never ask the founder to paste what you already read.
 
 1. The deck, slide by slide: its number, its title, every word on it, and for each chart, table or picture what it
    shows, with the figures as the founder would state them. Figures are never read off a picture.
@@ -257,10 +260,12 @@ without one, decide the objections one at a time against the same brief.
 
 **Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run
 one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection
-from its lens (one that two lenses raised goes to one of them only), and judges each objection separately against the
-brief, with its own verdict and its own quote where the verdict needs one, never weighing one objection against another.
-The answer then says the refute pass ran per lens, which is less independent than one subagent per objection. The
-founder may ask for the full pass, one subagent per objection.
+from its lens (one that two lenses raised goes to one of them only; one that no lens raised gets a subagent of its own),
+and with this instruction, word for word: "Apply the brief to each objection as if it were the only one you were given.
+Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
+answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
+says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
+ask for the full pass, one subagent per objection.
 
 The refute brief:
 
@@ -365,6 +370,8 @@ Lead with what to fix, in order, then the evidence behind it.
    failed first- or last-slide rule, and each move fix from a Dropped, answered verdict. Then **Dropped,** one line
    each: the objection, its lens, and why it fell (answered, quoting the line that answers it and whether to move it
    earlier, or not grounded). When the lenses ran in one agent, say they are less independent than separate subagents.
+   When the refute pass ran per lens (lean mode), say so, say it is less independent than one subagent per objection,
+   and say the founder may ask for the full pass.
 3. **Dimension table:** #, Dimension, Slides, What the deck says (quoted), Evidence (Present, Missing or Contradicted),
    Fix.
 4. **First and last slides:** each rule, the line that decides it, the fix.

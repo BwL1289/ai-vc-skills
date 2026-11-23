@@ -16,15 +16,20 @@ Four sentences are copied into several skills and must stay identical there:
 - A lean refute pass. One refute subagent per objection is the default, and the deck review's seven lenses may raise up
   to three objections each, so one review could start more than twenty refute subagents, as a real deck run showed.
   Every skill whose lenses feed a refute pass of one subagent per objection (or per question) now names one exception,
-  word for word: with more than eight, one subagent per lens may judge each of its lens's objections on its own, and
-  the answer says that is less independent.
-  The claims and round-sizing skills are not on the list: one skeptic raises at most three attacks there.
-- A file the founder gives is read, never pasted. Every skill with an Inputs section reads a file the agent can open
-  (a PDF, HTML, a slides export, Markdown), lists what it read place by place, and asks only for what the file cannot
-  show; and every "When to use it" bullet that names pasted material says it may come as a file.
+  word for word: with more than eight, one subagent per lens, given an instruction to judge each of its lens's
+  objections as if it were the only one, with a verdict of its own; one no lens raised gets its own subagent, and one
+  that comes back without its own verdict stays Kept. The section the answer is composed from says, in the same words
+  in every such skill, that a lean pass is less independent and that the founder may ask for the full pass. The claims
+  and round-sizing skills are not on the list: one skeptic raises at most three attacks there, and a test says so. The
+  lean paragraph stands as its own paragraph, wrapped like the rest, so no line cap is met by joining lines.
+- A file the founder gives is read, never pasted. Every skill with an Inputs section, and the deal-math skill's first
+  step, reads a file the agent can open (a PDF, HTML, a slides export, Markdown), lists what it holds place by place in
+  the file's own words, lists a place it could not read as not read and asks for it, never reads a figure off a chart
+  or a picture, and never asks for a paste of what it read; and every "When to use it" bullet that names pasted
+  material says it may come as a file. No line of those two sections is wider than 120 characters.
 
 A refute pass checks its answering line as the quote check does, spacing and line breaks aside: a line that wraps in
-the founder's file is still the founder's line.
+the founder's file is still the founder's line, and a line that is not there does not drop the item.
 
 Every eval that records a live run states the README's verdict rule in its first paragraph and opens its recording
 with a verdict under it: Pass when every clause of the pass sentence is met, Partial when exactly one is missed or met
@@ -146,11 +151,20 @@ _PARTNER_MEETING_BAN = 'never a difference, sum or ratio of two figures the foun
 _LEAN_REFUTE = (
     "**Lean mode,** the one exception: with more than eight {noun}s after the quote check, the refute pass may instead"
     " run one subagent per lens, all in a single message. Each gets what a one-{noun} subagent gets, but with every"
-    " {noun} from its lens (one that two lenses raised goes to one of them only), and judges each {noun} separately"
-    " against the brief, with its own verdict and its own quote where the verdict needs one, never weighing one {noun}"
-    " against another. The answer then says the refute pass ran per lens, which is less independent than one subagent"
-    " per {noun}. The founder may ask for the full pass, one subagent per {noun}."
+    " {noun} from its lens (one that two lenses raised goes to one of them only; one that no lens raised gets a"
+    ' subagent of its own), and with this instruction, word for word: "Apply the brief to each {noun} as if it were the'
+    " only one you were given. Return one verdict for each, with its own quote where the verdict needs one. Never let"
+    ' one {noun}, its verdict or its answering line decide another." Any {noun} that comes back without a verdict of'
+    " its own stays Kept. The answer then says the refute pass ran per lens, which is less independent than one"
+    " subagent per {noun}, and that the founder may ask for the full pass, one subagent per {noun}."
 )
+# What the answer says after a lean refute pass, in the section the agent composes the answer from.
+_LEAN_ANSWER = (
+    "When the refute pass ran per lens (lean mode), say so, say it is less independent than one subagent per {noun},"
+    " and say the founder may ask for the full pass."
+)
+_LEAN_PARAGRAPH = "\n\n**Lean mode,** the one exception:"
+_LINE_WIDTH = 120
 _LEAN_REFUTE_SKILLS = {
     "vc-current-investor-update": "objection",
     "vc-deck-review": "objection",
@@ -166,9 +180,12 @@ _LEAN_REFUTE_SKILLS = {
 }
 _READ_THE_FILE = (
     "When the founder gives a file the agent can read (a PDF, HTML, a slides export, Markdown), read it yourself and"
-    " list what it holds place by place (slide by slide for a deck), so the founder sees what was read from each; ask"
-    " only for what the file cannot show (speaker notes, the figures behind a chart), and never ask the founder to"
-    " paste what the file already holds."
+    " list what it holds place by place (slide by slide for a deck), in the file's own words, so the founder sees what"
+    " was read from each. A place you could not read (a slide that is only a picture, a page whose text did not come"
+    " out, a file that opened only in part) is listed as not read and asked for, never filled in from its title or the"
+    " places around it, and a figure is never read off a chart or a picture. Ask only for what you could not read and"
+    " what the file does not show (speaker notes, the figures behind a chart, an input below that it leaves out), and"
+    " never ask the founder to paste what you already read."
 )
 _READ_THE_FILE_SKILLS = (
     "vc-claims-check",
@@ -186,11 +203,19 @@ _READ_THE_FILE_SKILLS = (
     "vc-term-sheet-review",
 )
 _FILE_TOO = "Any of these may come as a file the agent can read in this session."
-# How a refute pass checks the line it says answers an item: as the quote check does, spacing and line breaks aside.
+# The one paste bullet that names its file in its own words, inside its list of what may be pasted.
+_FILE_TOO_OWN_WORDING = {"vc-term-sheet-review": "or a term sheet file the agent can read in this session"}
+_PASTE_BULLETS = 10
+# How a refute pass checks the line it says answers an item: as the quote check does, spacing and line breaks aside,
+# through to what such a line does not do.
 _ANSWER_SPACING = re.compile(
-    r"[Ss]pacing and line breaks aside, an? (?:answering )?line that is not"
-    r"|check every answering line the same way as the (?:objections' )?quotes"
+    r"[Ss]pacing and line breaks aside, an? (?:answering )?line that is not[^.]*?word for word[^.]*?does not drop the"
+    r" (?:objection|question|attack)"
+    r"|check every answering line the same way as the (?:objections' )?quotes: an answering line that is not in the"
+    r" material word for word does not drop the (?:objection|question)"
 )
+# The skills with one skeptic and at most three attacks, whose refute pass is small enough to need no lean mode.
+_NO_LEAN_SKILLS = ("vc-claims-check", "vc-round-sizing")
 
 
 def _unwrapped(name: str) -> str:
@@ -262,6 +287,38 @@ def test_a_refute_pass_of_more_than_eight_may_run_one_subagent_per_lens_and_says
     raw = (_SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
     before_brief = raw.split("\nThe refute brief:\n", 1)[0]
     assert lean in " ".join(line.strip() for line in before_brief.splitlines())
+    # The per-lens subagent is handed the rule that keeps each item on its own, and an item left without a verdict of
+    # its own is not dropped.
+    assert "as if it were the only one you were given" in lean and "stays Kept" in lean
+
+
+@pytest.mark.parametrize("name", sorted(_LEAN_REFUTE_SKILLS))
+def test_the_answer_says_when_the_refute_pass_ran_per_lens(name: str) -> None:
+    """The disclosure sits in the section the answer is composed from, not only in Stage B."""
+    raw = (_SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+    answering = raw.split("\n## Answering\n", 1)[1].split("\n## ", 1)[0]
+
+    assert _LEAN_ANSWER.format(noun=_LEAN_REFUTE_SKILLS[name]) in " ".join(
+        line.strip() for line in answering.splitlines()
+    )
+
+
+@pytest.mark.parametrize("name", sorted(_LEAN_REFUTE_SKILLS))
+def test_the_lean_paragraph_stands_alone_and_is_wrapped_like_the_rest(name: str) -> None:
+    """A line cap is a stand-in for size, so it is never met by joining a new paragraph onto an old line."""
+    raw = (_SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+    paragraph = raw.split(_LEAN_PARAGRAPH, 1)[1].split("\n\n", 1)[0]
+
+    assert _LEAN_PARAGRAPH in raw
+    assert all(len(line) <= _LINE_WIDTH for line in (_LEAN_PARAGRAPH.strip(), *paragraph.splitlines())), name
+
+
+@pytest.mark.parametrize("name", _NO_LEAN_SKILLS)
+def test_a_skill_with_one_skeptic_and_at_most_three_attacks_has_no_lean_mode(name: str) -> None:
+    text = _unwrapped(name)
+
+    assert "Return at most three attacks" in text and "never put two attacks in one subagent" in text
+    assert "Lean mode" not in text and "one subagent per lens" not in text
 
 
 @pytest.mark.parametrize("name", [*sorted(_LEAN_REFUTE_SKILLS), "vc-claims-check"])
@@ -286,6 +343,30 @@ def test_a_file_the_founder_gives_is_read_never_asked_for_as_a_paste(name: str) 
     text = _unwrapped(name)
     assert "from text the founder pastes" not in text
     assert "the pasted text plus every answer" not in text
+
+
+def test_a_place_the_agent_could_not_read_is_listed_and_asked_for() -> None:
+    """A slide that is only a picture is still in the file; it is asked for, never filled in from what surrounds it."""
+    assert "is listed as not read and asked for, never filled in" in _READ_THE_FILE
+    assert "in the file's own words" in _READ_THE_FILE
+
+
+@pytest.mark.parametrize("name", _READ_THE_FILE_SKILLS)
+def test_no_line_of_the_inputs_or_when_to_use_it_section_is_wider_than_the_rest(name: str) -> None:
+    """The shared sentences are wrapped at the repository's width, so a line cap is never met by joining lines."""
+    raw = (_SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+    for heading in ("\n## Inputs\n", "\n## When to use it\n"):
+        section = raw.split(heading, 1)[1].split("\n## ", 1)[0]
+        wide = [line for line in section.splitlines() if len(line) > _LINE_WIDTH]
+        assert not wide, (name, heading.strip(), wide[0][:60] if wide else "")
+
+
+def test_the_deal_math_skill_reads_a_file_by_the_same_rule() -> None:
+    """Its figures go straight to the calculator, so a figure off a chart or a half-read page must never reach it."""
+    text = _unwrapped("vc-deal-math")
+
+    assert _READ_THE_FILE in text
+    assert "It does not read a deck file" not in text
 
 
 def _paragraphs(text: str) -> list[str]:
@@ -387,6 +468,6 @@ def test_every_when_to_use_bullet_that_names_pasted_material_says_it_may_come_as
             if line.startswith(("- A pasted", "- Pasted material")):
                 pasted.append((path.parent.name, line))
 
-    assert len(pasted) >= 9
+    assert len(pasted) == _PASTE_BULLETS
     for name, line in pasted:
-        assert _FILE_TOO in line or "file the agent can read in this session" in line, name
+        assert _FILE_TOO_OWN_WORDING.get(name, _FILE_TOO) in line, name

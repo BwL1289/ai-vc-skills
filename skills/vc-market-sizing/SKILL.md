@@ -35,9 +35,12 @@ looks up a market figure, and never adds a count, price, share, adoption rate or
 
 Ask once, in one message, for whatever is missing, by name. Never guess, never look anything up, and never fill a gap
 with a typical figure. When the founder gives a file the agent can read (a PDF, HTML, a slides export, Markdown), read
-it yourself and list what it holds place by place (slide by slide for a deck), so the founder sees what was read from
-each; ask only for what the file cannot show (speaker notes, the figures behind a chart), and never ask the founder to
-paste what the file already holds.
+it yourself and list what it holds place by place (slide by slide for a deck), in the file's own words, so the founder
+sees what was read from each. A place you could not read (a slide that is only a picture, a page whose text did not come
+out, a file that opened only in part) is listed as not read and asked for, never filled in from its title or the places
+around it, and a figure is never read off a chart or a picture. Ask only for what you could not read and what the file
+does not show (speaker notes, the figures behind a chart, an input below that it leaves out), and never ask the founder
+to paste what you already read.
 
 1. **Who buys, as segments** (one to eight): the buying customer (a clinic, a household, a store), how many there
    are, and where that count comes from. Segments must not overlap: one buyer in one segment only.
@@ -216,9 +219,10 @@ says. A turn that makes no call runs no review.
    candidate while an Estimate is in play), or a smaller swing.
 8. **Run the adversarial review** (below).
 9. **Check before answering.** Every figure is quoted as stated or comes from a tool result; every objection quotes a
-   founder line word for word; no market fact, source or competitor is brought in; nothing speaks as an investor; with
-   a subagent tool, the number of refute subagents equals the number of objections that passed the quote check, each
-   given exactly one; no reason for a top-down gap is offered except as a question.
+   founder line word for word; no market fact, source or competitor is brought in; nothing speaks as an investor; with a
+   subagent tool, the number of refute subagents equals the number of objections that passed the quote check, each given
+   exactly one (in lean mode: one per lens that still has an objection, each given only that lens's objections, and
+   every objection has a verdict of its own); no reason for a top-down gap is offered except as a question.
 
 Tool values: use each value's `rounded` with its unit; never round again or recompute. A `fraction` value is shown as
 a percent by moving its decimal point two places right, keeping every digit (0.580000 is 58.0000%); a change of
@@ -269,8 +273,8 @@ A lens objection on the same line as a flag joins the flag's entry, keeping the 
 
 ### Check the quotes
 
-Drop any objection whose quoted line is not in the founder's material word for word (spacing aside) as not grounded.
-Merge two lenses' objections on the same line, keeping both names. Questions go to the open asks.
+Drop any objection whose quoted line is not in the founder's material word for word (spacing and line breaks aside) as
+not grounded. Merge two lenses' objections on the same line, keeping both names. Questions go to the open asks.
 
 ### Stage B: refute
 
@@ -282,10 +286,12 @@ Without one, decide them one at a time against the same brief.
 
 **Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run
 one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection
-from its lens (one that two lenses raised goes to one of them only), and judges each objection separately against the
-brief, with its own verdict and its own quote where the verdict needs one, never weighing one objection against another.
-The answer then says the refute pass ran per lens, which is less independent than one subagent per objection. The
-founder may ask for the full pass, one subagent per objection.
+from its lens (one that two lenses raised goes to one of them only; one that no lens raised gets a subagent of its own),
+and with this instruction, word for word: "Apply the brief to each objection as if it were the only one you were given.
+Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
+answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
+says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
+ask for the full pass, one subagent per objection.
 
 The refute brief:
 
@@ -369,7 +375,8 @@ Lead with what a partner will doubt first, then the numbers.
 1. **Doubted first:** the computed findings (mismatches with no tier, then flags by tier), then the kept objections in
    their tiers, each with the line quoted, its lens or lenses in brackets after the quote ("(Path)", "(Inflation,
    Overlap)"), why, and the fix. Then **Dropped,** one line each with why it fell. Say whether the lenses ran as
-   subagents, and give the number of refute subagents run.
+   subagents, and give the number of refute subagents run. When the refute pass ran per lens (lean mode), say so, say it
+   is less independent than one subagent per objection, and say the founder may ask for the full pass.
 2. **The market:** a table per segment and in total: Customers, Gross spend, TAM, SAM, SOM, Share of TAM, SOM
    customers / today, New customers a year. Tool values only. Each whole-company run's totals follow, labelled with
    its value.

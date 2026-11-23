@@ -34,9 +34,12 @@ adds a figure the founder did not give: no burn, growth rate, haircut, valuation
 
 Ask once, in one message, for whatever is missing, by name. Never guess, and never fill a gap with a typical figure.
 When the founder gives a file the agent can read (a PDF, HTML, a slides export, Markdown), read it yourself and list
-what it holds place by place (slide by slide for a deck), so the founder sees what was read from each; ask only for what
-the file cannot show (speaker notes, the figures behind a chart), and never ask the founder to paste what the file
-already holds.
+what it holds place by place (slide by slide for a deck), in the file's own words, so the founder sees what was read
+from each. A place you could not read (a slide that is only a picture, a page whose text did not come out, a file that
+opened only in part) is listed as not read and asked for, never filled in from its title or the places around it, and a
+figure is never read off a chart or a picture. Ask only for what you could not read and what the file does not show
+(speaker notes, the figures behind a chart, an input below that it leaves out), and never ask the founder to paste what
+you already read.
 
 1. **Cash and the plan:** cash in the bank today, and the monthly plan as a few phases (from which month, gross
    spend, revenue). Three to five phases is plenty; a detailed model is not needed.
@@ -226,8 +229,8 @@ last among the computed facts, as minor at most.
 
 ### Check the quotes
 
-Drop any attack whose quoted line is not in the founder's material word for word (spacing aside) as not grounded.
-Questions to the founder go to the open asks.
+Drop any attack whose quoted line is not in the founder's material word for word (spacing and line breaks aside) as not
+grounded. Questions to the founder go to the open asks.
 
 ### The refute pass
 

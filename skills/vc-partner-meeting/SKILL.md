@@ -19,7 +19,8 @@ company, its round or its investors that the founder did not give.
 
 - "Rehearse my partner meeting." "Run a mock partner meeting." "Drill me on the hard questions." "Prep me for my
   partner meeting on Monday." "What will the partners ask?" "Debrief my answers."
-- A pasted pitch, deck outline or slide text, with the stage, the round and a note on who the founder is meeting. Any of these may come as a file the agent can read in this session.
+- A pasted pitch, deck outline or slide text, with the stage, the round and a note on who the founder is meeting. Any of
+  these may come as a file the agent can read in this session.
 - Hand off:
   - Metric definitions a partner will test: the vc-metrics-readiness skill (preview).
   - The story, the one-liner and the phrases to drop: the vc-positioning skill. Suggest it first when the pitch has
@@ -37,7 +38,13 @@ company, its round or its investors that the founder did not give.
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the figures behind a chart), and never ask the founder to paste what the file already holds. At most five questions:
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
+read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
+for a deck), in the file's own words, so the founder sees what was read from each. A place you could not read (a slide
+that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
+asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
+Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
+input below that it leaves out), and never ask the founder to paste what you already read. At most five questions:
 
 1. The pitch as the founder gives it: the one-liner, then the slides or the spoken pitch in order.
 2. The stage and the round: pre-seed, seed, Series A or later; the amount, the instrument (priced round, SAFE or
@@ -52,7 +59,8 @@ Ask once, in one message, for whatever is missing, by name. Never guess. When th
 
 A missing input does not stop the rehearsal. It becomes a named gap and a bracketed ask in the debrief, never a
 plausible fact. **The founder's material** means the pasted text and any file read, plus every answer the founder gives
-in this session. Label each part as it arrives (P1, P2 ... for the pitch; A1, A2 ... for answers), so every quote can be located.
+in this session. Label each part as it arrives (P1, P2 ... for the pitch; A1, A2 ... for answers), so every quote can be
+located.
 
 ## The lenses
 
@@ -142,26 +150,9 @@ lenses" says, so the lenses do not anchor on the numbers or the bank; step 4 the
 
 ## Calculator flags
 
-A tool call returns each flag as a bare code; this is what each code means, as a question a partner is likely to ask.
-
-| Flag (`equity_deal_check`)            | What a partner is likely to ask                                                                                  |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `valuation_back_solved`               | No valuation was given, so the post-money was worked from the raise: pre- or post-money?                         |
-| `pool_in_pre_money_lowers_price`      | The new pool is paid for out of the pre-money, as a VC prices it: does the deck show the effective pre-money?    |
-| `pool_in_post_money_dilutes_investor` | The pool is counted after the money, so the investor gets less: will you move it into the pre?                   |
-| `pool_already_large_enough`           | The unissued pool already meets the target: is the target big enough for the hiring plan?                        |
-| `conversions_bought_by_pre_money`     | SAFE and note shares come out of the existing holders: what do you own once they convert?                        |
-| `discount_beat_cap`                   | A discount gave a lower price than the cap: is the cap table modelled at that price?                             |
-| `note_interest_converts`              | Note interest converts too: is the interest counted in the cap table?                                            |
-| `consistent_beyond_rounding`          | A stated percent or runway holds only by the tolerance: will the deck quote the figure a partner recomputes?     |
-| `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it: which burn does the runway claim use? |
-| `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn: which burn does the runway claim use?                 |
-| `runway_below_band`                   | Planned net runway is under the tool's runway band: which milestone does the raise reach?                        |
-| `dilution_above_band`                 | The investors get more than the tool's dilution band in one round: why sell that much?                           |
-
-From `equity_runway_plan` (no milestone, months to raise or landing month here), three codes can come back:
-`cash_never_runs_out` (revenue covers spend first: what revenue makes that true?), `runway_below_band` (a raise's plan
-runway is under the tool's runway band: which milestone?) and `consistent_beyond_rounding` (its row above).
+A tool call returns each flag as a bare code. What each code means, as a question a partner is likely to ask, is the
+calculator flags table in [`references/calculator-flags.md`](references/calculator-flags.md), with the three codes
+`equity_runway_plan` can return; read it when a tool returns a flag.
 
 ## Adversarial review
 
@@ -216,7 +207,16 @@ the same line, merge them and keep both lens names. Gaps from every lens go to t
 Each question gets its own refute pass. With a subagent tool, launch one subagent per question in a single message,
 however few there are, each given the founder's material, that one question, and everything from "The refute brief:" to
 the end of this stage, and nothing else; never put two questions in one subagent. Without one, take the questions one at
-a time and decide each against the same brief before reading the next. **Lean mode,** the one exception: with more than eight questions after the quote check, the refute pass may instead run one subagent per lens, all in a single message. Each gets what a one-question subagent gets, but with every question from its lens (one that two lenses raised goes to one of them only), and judges each question separately against the brief, with its own verdict and its own quote where the verdict needs one, never weighing one question against another. The answer then says the refute pass ran per lens, which is less independent than one subagent per question. The founder may ask for the full pass, one subagent per question.
+a time and decide each against the same brief before reading the next.
+
+**Lean mode,** the one exception: with more than eight questions after the quote check, the refute pass may instead run
+one subagent per lens, all in a single message. Each gets what a one-question subagent gets, but with every question
+from its lens (one that two lenses raised goes to one of them only; one that no lens raised gets a subagent of its own),
+and with this instruction, word for word: "Apply the brief to each question as if it were the only one you were given.
+Return one verdict for each, with its own quote where the verdict needs one. Never let one question, its verdict or its
+answering line decide another." Any question that comes back without a verdict of its own stays Kept. The answer then
+says the refute pass ran per lens, which is less independent than one subagent per question, and that the founder may
+ask for the full pass, one subagent per question.
 
 The refute brief:
 
@@ -253,18 +253,10 @@ not a probability: give no percentages and no score. The kept questions, in this
 
 ## Standing prep questions
 
-A partner is likely to ask or check these whatever the pitch says, so every founder prepares them. They are not
-attacks on a line and are not refuted. For each, the skill drafts an answer only from the founder's material, or
-leaves a bracketed ask; it never invents a fund, a commitment, a term sheet or a reference.
-
-| Question a partner is likely to ask or check                  | What the founder should have ready                                                      |
-| ------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Which other investors are you meeting, and who has committed? | A true answer at the level of detail the founder chooses; never an implied interest     |
-| Will your existing investors take part in this round?         | Their answer as the founder has it, or the plan to ask them before the meeting          |
-| Who has passed, and why?                                      | The reasons given, and what the founder changed or would answer                         |
-| Whom will the partner call, on your list and off it?          | Customers, former colleagues and investors who may be called; brief the ones you list   |
-| What happens if this round does not close?                    | Runway on today's cash from `equity_runway_plan` with no raise, what gets cut, the plan |
-| What happens after this meeting, and when?                    | A question for the founder to ask the partner, not to guess                             |
+A partner is likely to ask or check these whatever the pitch says, so every founder prepares them. They are not attacks
+on a line and are not refuted. For each, the skill drafts an answer only from the founder's material, or leaves a
+bracketed ask; it never invents a fund, a commitment, a term sheet or a reference. The six questions, each with what the
+founder should have ready, are in [`references/standing-prep.md`](references/standing-prep.md).
 
 The first five topics came, as ideas, from the investor-persona prompts credited in Sources, which cite no source
 for them; the wording, the sixth question and the list as a whole are this skill's own. All six are unverified. The
@@ -302,6 +294,8 @@ firm would invest, pass or score the company.
      lead with, or not grounded), so the founder sees it was tested. The answered ones are the quick-rehearsal list.
    - When the lenses ran one after another in one agent, with no subagent tool, say so: they are less independent
      than separate subagents.
+   - When the refute pass ran per lens (lean mode), say so, say it is less independent than one subagent per question,
+     and say the founder may ask for the full pass.
 3. **Debrief,** question by question, as above.
 4. **Standing prep:** each standing question with the drafted answer or its bracketed ask.
 5. **Numbers:** each tool's verdict with each mismatch row in the tool's values (the runway with no new money, and on

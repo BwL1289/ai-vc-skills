@@ -25,7 +25,8 @@ and never adds a figure, customer or fact the founder did not give. It takes no 
 - "Write the investment memo for my champion." "Draft our IC memo." "What will the partner write about us?" "Make the
   case for us internally." "What would a partner arguing against us say?" "Review the memo I drafted for our lead."
 - Pasted material: a deck or its text, a one-pager, the round's terms, a cap table, metrics, the founder's notes on the
-  team and the risks, and the exits the founder believes in. Or a memo draft the founder wrote (review mode). Any of these may come as a file the agent can read in this session.
+  team and the risks, and the exits the founder believes in. Or a memo draft the founder wrote (review mode). Any of
+  these may come as a file the agent can read in this session.
 - A founder who asks "show that we return their fund": the skill shows what the round's stake pays at the founder's
   own exit values, takes no fund size and says why once (see "The outcome case").
 - Hand off:
@@ -46,7 +47,13 @@ and never adds a figure, customer or fact the founder did not give. It takes no 
 
 ## Inputs
 
-Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide for a deck), so the founder sees what was read from each; ask only for what the file cannot show (speaker notes, the figures behind a chart), and never ask the founder to paste what the file already holds.
+Ask once, in one message, for whatever is missing, by name. Never guess. When the founder gives a file the agent can
+read (a PDF, HTML, a slides export, Markdown), read it yourself and list what it holds place by place (slide by slide
+for a deck), in the file's own words, so the founder sees what was read from each. A place you could not read (a slide
+that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
+asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
+Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
+input below that it leaves out), and never ask the founder to paste what you already read.
 
 1. The founder's material, each document named and its places marked (slide, page or paragraph), so every line the
    memo uses can be quoted with where it comes from. In review mode, the memo draft too.
@@ -371,7 +378,16 @@ objection about the same line, merge them and keep both lens names. Gaps go to t
 Each objection gets its own refute pass. With a subagent tool, launch one subagent per objection in a single message;
 never put two objections in one subagent. Give each the founder's material, the memo, that one objection, the Pattern
 column of the table below and everything from "The refute brief:" to the end of this stage, and nothing else. Without
-one, decide the objections one at a time against the same brief. **Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection from its lens (one that two lenses raised goes to one of them only), and judges each objection separately against the brief, with its own verdict and its own quote where the verdict needs one, never weighing one objection against another. The answer then says the refute pass ran per lens, which is less independent than one subagent per objection. The founder may ask for the full pass, one subagent per objection.
+one, decide the objections one at a time against the same brief.
+
+**Lean mode,** the one exception: with more than eight objections after the quote check, the refute pass may instead run
+one subagent per lens, all in a single message. Each gets what a one-objection subagent gets, but with every objection
+from its lens (one that two lenses raised goes to one of them only; one that no lens raised gets a subagent of its own),
+and with this instruction, word for word: "Apply the brief to each objection as if it were the only one you were given.
+Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
+answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
+says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
+ask for the full pass, one subagent per objection.
 
 The refute brief:
 
@@ -429,10 +445,11 @@ Lead with the biggest fixes, then the memo, then the full fix list.
    bracketed ask, every exit value labelled the founder's assumption, and one line at its head: "Drafted by the founders
    from their own material; figures from the equity calculator; not the firm's format." The memo is handed on alone, so
    its Open questions section lists its own bracketed asks in full and never points to the answer's Open asks.
-3. **Ranked fix list,** as a table: Rank, Tier, Section, Lens, The line (quoted), Why a partner arguing against the
-   deal uses it, Fix; the figures that do not match (computed) first, then the flags. Then **Dropped,** one line
-   each: the objection, its lens, and why it fell. Say how the lenses and the refute pass ran (as subagents, one
-   refute subagent per objection).
+3. **Ranked fix list,** as a table: Rank, Tier, Section, Lens, The line (quoted), Why a partner arguing against the deal
+   uses it, Fix; the figures that do not match (computed) first, then the flags. Then **Dropped,** one line each: the
+   objection, its lens, and why it fell. Say how the lenses and the refute pass ran (as subagents, one refute subagent
+   per objection); in lean mode, one per lens. When the refute pass ran per lens (lean mode), say so, say it is less
+   independent than one subagent per objection, and say the founder may ask for the full pass.
 4. **Numbers:** each tool call's verdict and the rows the memo uses, as printed; each flag as its code with its meaning
    from the flag table; the outcome table (Exit value, the founder's reason, each class's payout, Converts?, Common's
    payout; never the amount invested) with the `exit_is_shared_amount` statement quoted under it; the stake after the
@@ -447,30 +464,9 @@ Lead with the biggest fixes, then the memo, then the full fix list.
 
 ## Flags
 
-A tool's `flags` holds codes only; over MCP no sentence comes with them. This is what each means for the founder: a
-question a partner is likely to ask, never an error, and never a change to a verdict.
-
-| Flag                                  | Tool                    | What it means for the founder                                                                 |
-| ------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------------- |
-| `valuation_back_solved`               | deal check              | No valuation was given, so the post-money was worked from the raise and the percent           |
-| `pool_in_pre_money_lowers_price`      | deal check              | The new pool is paid for out of the pre-money, so the effective pre-money and price are lower |
-| `pool_in_post_money_dilutes_investor` | deal check              | The pool is counted after the money, so the investor gets less than raise / post-money        |
-| `pool_already_large_enough`           | deal check              | The unissued pool already meets the target, so no new pool shares are needed                  |
-| `conversions_bought_by_pre_money`     | deal check              | SAFE and note shares come out of the pre-round holders, so their stake falls by more          |
-| `discount_beat_cap`                   | deal check              | A discount gave a lower price than the cap                                                    |
-| `note_interest_converts`              | deal check              | Note interest converts too, so a note gets more than its principal's worth of shares          |
-| `consistent_beyond_rounding`          | deal check, runway plan | A stated percent or runway holds by the tolerance alone, not as the tool's figure rounded     |
-| `net_burn_not_positive`               | deal check              | Revenue covers the burn on those figures, so there is no net runway on them                   |
-| `current_burn_runway_longer`          | deal check              | Runway on today's burn is longer than on the planned burn                                     |
-| `dilution_above_band`                 | deal check              | The investors get more than the tool's dilution benchmark in one round (not a rule)           |
-| `runway_below_band`                   | deal check, runway plan | Planned runway is under the tool's runway benchmark (not a rule)                              |
-| `cash_never_runs_out`                 | runway plan             | Revenue covers the spend before the cash runs out, so that runway has no end                  |
-| `cash_out_before_raise_lands`         | runway plan             | The cash goes below the floor before a later raise lands                                      |
-| `milestone_short_on_plan`             | runway plan             | A raise does not reach a milestone, even on the plan                                          |
-| `downside_short_where_plan_covers`    | runway plan             | A raise reaches a milestone on the plan but not on the downside                               |
-| `covered_without_raise`               | runway plan             | The cash already reaches a milestone with no raise                                            |
-| `start_raising_date_passed`           | runway plan             | With the months to raise given, the date to start raising is already at or past today         |
-| `no_time_to_raise_given`              | runway plan             | Milestones were checked at their own month, with no time left to raise the next round         |
+A tool's `flags` holds codes only; over MCP no sentence comes with them. What each code means for the founder (a
+question a partner is likely to ask, never an error, and never a change to a verdict) is the flag table in
+[`references/flags.md`](references/flags.md); read it when a tool returns a flag.
 
 ## Sources
 
