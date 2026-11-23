@@ -46,7 +46,14 @@ _FENCE = re.compile(r"^( *)```([a-z]*)\n(.*?)^\1```$", re.MULTILINE | re.DOTALL)
 _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
-_HANDOFF_SKILLS = ("vc-claims-check", "vc-deal-math", "vc-positioning", "equity-calculator", "vc-deck-review")
+_HANDOFF_SKILLS = (
+    "vc-claims-check",
+    "vc-deal-math",
+    "vc-positioning",
+    "equity-calculator",
+    "vc-deck-review",
+    "vc-market-sizing",
+)
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
 _TRIGGERS = (
@@ -238,8 +245,7 @@ def test_every_skill_it_hands_off_to_exists_and_vc_positioning_points_to_it() ->
         assert f"the {name} skill" in handoff, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
     assert "the vc-metrics-readiness skill" in _unwrapped(_section("## When to use it", _POSITIONING))
-    # Market sizing has no skill yet; the line says so until its skill ships.
-    assert "Planned, not yet shipped: market sizing. Until it ships, say so." in handoff
+    assert "Planned, not yet shipped" not in handoff
 
 
 def test_the_definitions_table_has_the_fixed_metrics_each_computed_or_quoted_with_a_read_source() -> None:

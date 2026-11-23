@@ -28,7 +28,7 @@ score and never says "ready" or "not ready", and never adds a figure the founder
   - The story and the one-liner: the vc-positioning skill. One equity question with no metrics: the equity-calculator
     skill.
   - A slide-by-slide review of the whole deck: the vc-deck-review skill (preview).
-  - Planned, not yet shipped: market sizing. Until it ships, say so.
+  - Market size, built bottom-up: the vc-market-sizing skill (preview).
 
 ## Inputs
 

@@ -40,6 +40,7 @@ adds a fact about the company that the founder did not give.
   - Writing the investor updates themselves: the vc-current-investor-update skill (preview).
   - Metrics and their definitions: the vc-metrics-readiness skill (preview).
   - The memo your champion writes for the partnership: the vc-investor-memo skill (preview).
+  - Market size, bottom-up: the vc-market-sizing skill (preview).
 
 ## Inputs
 
