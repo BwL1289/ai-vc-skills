@@ -28,10 +28,12 @@ __all__ = [
     "MAX_CLASSES",
     "Participation",
     "PreferredClass",
+    "Rank",
     "WaterfallClassRow",
     "WaterfallInput",
     "WaterfallResult",
     "WaterfallScenario",
+    "refuse_cap_mismatch",
 ]
 
 WaterfallScenario = Literal["waterfall"]
@@ -64,18 +66,24 @@ class PreferredClass(BaseModel):
     @model_validator(mode="after")
     def _cap_goes_with_capped(self) -> PreferredClass:
         """Refuse a capped class without a cap, a cap on any other class, or a cap below the preference."""
-        if self.participation == "capped" and self.cap_multiple is None:
-            raise ValueError("participation capped needs cap_multiple: the whole take as a multiple of invested")
-        if self.participation != "capped" and self.cap_multiple is not None:
-            raise ValueError("cap_multiple goes with participation capped only")
-
-        if self.cap_multiple is not None and self.cap_multiple < self.preference_multiple:
-            raise ValueError(
-                f"cap_multiple ({self.cap_multiple}) is below preference_multiple ({self.preference_multiple}): "
-                "the cap includes the preference, so it is at least the preference"
-            )
-
+        refuse_cap_mismatch(self.participation, self.cap_multiple, self.preference_multiple)
         return self
+
+
+def refuse_cap_mismatch(
+    participation: Participation, cap_multiple: Decimal | None, preference_multiple: Decimal
+) -> None:
+    """Refuse a capped class without a cap, a cap on any other class, or a cap below the preference."""
+    if participation == "capped" and cap_multiple is None:
+        raise ValueError("participation capped needs cap_multiple: the whole take as a multiple of invested")
+    if participation != "capped" and cap_multiple is not None:
+        raise ValueError("cap_multiple goes with participation capped only")
+
+    if cap_multiple is not None and cap_multiple < preference_multiple:
+        raise ValueError(
+            f"cap_multiple ({cap_multiple}) is below preference_multiple ({preference_multiple}): "
+            "the cap includes the preference, so it is at least the preference"
+        )
 
 
 class WaterfallInput(BaseModel):

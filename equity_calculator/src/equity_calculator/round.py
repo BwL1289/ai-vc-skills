@@ -24,7 +24,7 @@ from equity_calculator.schemas.equity_round import (
     SafeTerms,
 )
 
-__all__ = ["compute_round"]
+__all__ = ["compute_round", "conversion_row"]
 
 
 class _Holding(NamedTuple):
@@ -43,8 +43,11 @@ def _basis(item: Convertible, on_cap: bool) -> ConversionBasis:
     return "round_price" if item.terms.discount_percent is None else "discount"
 
 
-def _conversion(item: Convertible, on_cap: bool, priced: Priced, fully_diluted: Fraction) -> ConversionRow:
-    """``item`` converted at ``priced``: its cap price, its other price, the one it took and its shares."""
+def conversion_row(item: Convertible, on_cap: bool, priced: Priced, fully_diluted: Fraction) -> ConversionRow:
+    """``item`` converted at ``priced``: its cap price, its other price, the one it took and its shares.
+
+    ``fully_diluted`` is the round's FD, the base of a note's cap price; ``on_cap`` is the settled choice for it.
+    """
     cap = cap_price(item, priced, fully_diluted)
     other = other_price(item, priced)
     price = cap if on_cap and cap is not None else other
@@ -78,7 +81,7 @@ def compute_round(inputs: RoundInput) -> RoundResult:
     fully_diluted = fraction(inputs.fully_diluted_shares)
     unissued = fraction(inputs.unissued_pool_shares)
     conversions = tuple(
-        _conversion(item, capped, priced, fully_diluted) for item, capped in zip(items, settled.on_cap, strict=True)
+        conversion_row(item, capped, priced, fully_diluted) for item, capped in zip(items, settled.on_cap, strict=True)
     )
 
     holders = [

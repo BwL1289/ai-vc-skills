@@ -25,6 +25,7 @@ from equity_calculator.schemas.equity_common import (
 )
 from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealCheckResult
 from equity_calculator.schemas.equity_dilution import DilutionInput, DilutionResult
+from equity_calculator.schemas.equity_instrument_compare import InstrumentCompareInput, InstrumentCompareResult
 from equity_calculator.schemas.equity_market_sizing import MarketSizingInput, MarketSizingResult
 from equity_calculator.schemas.equity_metrics_check import MetricsCheckInput, MetricsCheckResult
 from equity_calculator.schemas.equity_round import RoundInput, RoundResult
@@ -440,3 +441,33 @@ MARKET_AX: dict[str, object] = {
 def market_sizing(**fields: object) -> MarketSizingResult:
     """The market size for ``fields`` (a ``MarketSizingInput``'s fields)."""
     return compute(MarketSizingInput.model_validate(fields))
+
+
+# Company BU, made up, worked by exact fractions in test_instrument_compare.py: 8,000,000 founder shares, 1,000,000 for
+# the team and a 1,000,000 unissued pool (FD 10,000,000), raising $2,000,000. A: priced at an $8,000,000 pre-money,
+# standard terms. B: a note with a $6,000,000 cap, a 20% discount and 5% simple interest, converting in 12 months.
+# Next round 1: $6,000,000 at $27,000,000 pre (the note on its cap); next round 2: $2,000,000 at $9,000,000 pre (the
+# note on its discount, a down round for A). Exits of $5,000,000 (below the preferences), $20,000,000 and $100,000,000.
+COMPARE_BU: dict[str, object] = {
+    "founder_shares": 8_000_000,
+    "team_shares": 1_000_000,
+    "unissued_pool_shares": 1_000_000,
+    "investment": "2000000",
+    "priced_pre_money": "8000000",
+    "priced_preference": {"standard": True},
+    "note_valuation_cap": "6000000",
+    "note_discount_percent": "20",
+    "note_interest_rate_percent": "5",
+    "note_compounding": "simple",
+    "note_months_to_conversion": 12,
+    "next_rounds": [
+        {"pre_money": "27000000", "investment": "6000000", "preference": {"standard": True}},
+        {"pre_money": "9000000", "investment": "2000000", "preference": {"standard": True}},
+    ],
+    "exit_amounts": ["5000000", "20000000", "100000000"],
+}
+
+
+def instrument_compare(**fields: object) -> InstrumentCompareResult:
+    """The priced-round-or-note comparison for ``fields`` (an ``InstrumentCompareInput``'s fields)."""
+    return compute(InstrumentCompareInput.model_validate(fields))

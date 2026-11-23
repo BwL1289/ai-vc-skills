@@ -29,6 +29,7 @@ from equity_calculator.schemas.equity_common import (
 )
 from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealCheckResult
 from equity_calculator.schemas.equity_dilution import DilutionInput, DilutionResult
+from equity_calculator.schemas.equity_instrument_compare import InstrumentCompareInput, InstrumentCompareResult
 from equity_calculator.schemas.equity_market_sizing import MarketSizingInput, MarketSizingResult
 from equity_calculator.schemas.equity_metrics_check import MetricsCheckInput, MetricsCheckResult
 from equity_calculator.schemas.equity_pool import (
@@ -63,6 +64,8 @@ __all__ = [
     "EquityUnit",
     "GrantVerdict",
     "HolderOutcome",
+    "InstrumentCompareInput",
+    "InstrumentCompareResult",
     "InvestorInput",
     "InvestorResult",
     "InvestorScenario",
@@ -241,6 +244,7 @@ ScenarioInput = (
     | RunwayPlanInput
     | MetricsCheckInput
     | MarketSizingInput
+    | InstrumentCompareInput
 )
 ScenarioResult = (
     InvestorResult
@@ -254,6 +258,7 @@ ScenarioResult = (
     | RunwayPlanResult
     | MetricsCheckResult
     | MarketSizingResult
+    | InstrumentCompareResult
 )
 
 EquityInput = Annotated[ScenarioInput, Field(discriminator="scenario")]

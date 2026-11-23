@@ -19,19 +19,18 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from decimal import Decimal
 from fractions import Fraction
+from typing import Protocol
 
 from equity_calculator.assumptions_waterfall import waterfall_assumptions
 from equity_calculator.errors import NoConversionEquilibrium
 from equity_calculator.exact import ZERO, fraction, money_split, quantity
-from equity_calculator.schemas.equity_waterfall import (
-    PreferredClass,
-    WaterfallClassRow,
-    WaterfallInput,
-    WaterfallResult,
-)
+from equity_calculator.schemas.equity_waterfall import Participation, WaterfallClassRow, WaterfallInput, WaterfallResult
 
 __all__ = [
+    "ClassTerms",
+    "ExitTerms",
     "Split",
     "compute_waterfall",
     "conversion_profile",
@@ -47,6 +46,54 @@ _FIRST_PASS = 1
 _EXTRA_PASSES = 1
 # money_split takes the classes' payouts then the common stock's, so the common's is the last part.
 _COMMON_PART = -1
+
+
+class ClassTerms(Protocol):
+    """What the waterfall reads of a preferred class: a ``PreferredClass``, or the same terms with exact shares.
+
+    Shares issued in a priced round are exact and often fractional, which ``PreferredClass``'s whole-number field
+    cannot hold (``equity_calculator.instrument_compare`` splits such an exit).
+    """
+
+    @property
+    def shares(self) -> int | Fraction:
+        ...
+
+    @property
+    def invested(self) -> Decimal | Fraction:
+        ...
+
+    @property
+    def preference_multiple(self) -> Decimal:
+        ...
+
+    @property
+    def rank(self) -> int:
+        ...
+
+    @property
+    def participation(self) -> Participation:
+        ...
+
+    @property
+    def cap_multiple(self) -> Decimal | None:
+        ...
+
+
+class ExitTerms(Protocol):
+    """What the waterfall reads of an exit: a ``WaterfallInput``, or the same terms with exact share counts."""
+
+    @property
+    def exit_amount(self) -> Decimal:
+        ...
+
+    @property
+    def common_shares(self) -> int | Fraction:
+        ...
+
+    @property
+    def classes(self) -> Sequence[ClassTerms]:
+        ...
 
 
 @dataclass(frozen=True)
@@ -66,12 +113,12 @@ class Split:
         return self.paid[index] + self.parts[index]
 
 
-def _owed(item: PreferredClass) -> Fraction:
+def _owed(item: ClassTerms) -> Fraction:
     """What a class that stays is owed ahead of common: ``preference_multiple`` × ``invested``."""
     return fraction(item.preference_multiple) * fraction(item.invested)
 
 
-def _cap(item: PreferredClass) -> Fraction | None:
+def _cap(item: ClassTerms) -> Fraction | None:
     """A capped class's whole take at most, ``cap_multiple`` × ``invested``; None for a class with no cap."""
     if item.cap_multiple is None:
         return None
@@ -79,7 +126,7 @@ def _cap(item: PreferredClass) -> Fraction | None:
     return fraction(item.cap_multiple) * fraction(item.invested)
 
 
-def _preferences(classes: Sequence[PreferredClass], converts: Sequence[bool], exit_amount: Fraction) -> list[Fraction]:
+def _preferences(classes: Sequence[ClassTerms], converts: Sequence[bool], exit_amount: Fraction) -> list[Fraction]:
     """Each class's preference paid: rank by rank, pro rata to what is owed within a rank, never past the exit."""
     remaining = exit_amount
     paid = [ZERO] * len(classes)
@@ -97,7 +144,7 @@ def _preferences(classes: Sequence[PreferredClass], converts: Sequence[bool], ex
     return paid
 
 
-def split_exit(inputs: WaterfallInput, converts: Sequence[bool]) -> Split:
+def split_exit(inputs: ExitTerms, converts: Sequence[bool]) -> Split:
     """The waterfall for one profile (``converts[i]`` True when class i converts); payouts sum to the exit exactly."""
     classes = inputs.classes
     exit_amount = fraction(inputs.exit_amount)
@@ -145,7 +192,7 @@ def _flipped(converts: Sequence[bool], index: int, choice: bool) -> list[bool]:
     return profile
 
 
-def converting_pays_more(inputs: WaterfallInput, converts: Sequence[bool], index: int) -> bool:
+def converting_pays_more(inputs: ExitTerms, converts: Sequence[bool], index: int) -> bool:
     """True when class ``index`` takes strictly more converting than staying, the others' choices held fixed."""
     stays = split_exit(inputs, _flipped(converts, index, False)).payout(index)
     converted = split_exit(inputs, _flipped(converts, index, True)).payout(index)
@@ -153,12 +200,12 @@ def converting_pays_more(inputs: WaterfallInput, converts: Sequence[bool], index
     return converted > stays
 
 
-def default_pass_limit(inputs: WaterfallInput) -> int:
+def default_pass_limit(inputs: ExitTerms) -> int:
     """The search's bound: one pass more than the number of classes."""
     return len(inputs.classes) + _EXTRA_PASSES
 
 
-def conversion_profile(inputs: WaterfallInput, pass_limit: int) -> tuple[tuple[bool, ...], int]:
+def conversion_profile(inputs: ExitTerms, pass_limit: int) -> tuple[tuple[bool, ...], int]:
     """A profile no class wants to leave, and the passes the search took (at most ``pass_limit``).
 
     Raises ``NoConversionEquilibrium`` when a pass still changes a choice at the limit.

@@ -1,8 +1,9 @@
 """The report of any scenario's result, shared by the printed report (``text``) and the workbook (``workbook``).
 
 ``sheet_for`` picks the scenario's sheet builder (``layout_pg``, ``layout_pool``, …, ``layout_deal_check``,
-``layout_runway_plan``, ``layout_metrics_check``, ``layout_market_sizing``); the parts a sheet is built from
-(``Line``, ``Sheet``) live in ``sheet_parts`` and are re-exported here for callers that read a report.
+``layout_runway_plan``, ``layout_metrics_check``, ``layout_market_sizing``, ``layout_instrument_compare``); the parts
+a sheet is built from (``Line``, ``Sheet``) live in ``sheet_parts`` and are re-exported here for callers that read a
+report.
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ from typing import assert_never
 
 from equity_calculator.layout_deal_check import deal_check_sheet
 from equity_calculator.layout_dilution import dilution_sheet
+from equity_calculator.layout_instrument_compare import instrument_compare_sheet
 from equity_calculator.layout_market_sizing import market_sizing_sheet
 from equity_calculator.layout_metrics_check import metrics_check_sheet
 from equity_calculator.layout_pg import employee_sheet, investor_sheet
@@ -23,6 +25,7 @@ from equity_calculator.schemas.equity import (
     DealCheckResult,
     DilutionResult,
     EmployeeResult,
+    InstrumentCompareResult,
     InvestorResult,
     MarketSizingResult,
     MetricsCheckResult,
@@ -63,5 +66,7 @@ def sheet_for(result: ScenarioResult) -> Sheet:
             return metrics_check_sheet(result)
         case MarketSizingResult():
             return market_sizing_sheet(result)
+        case InstrumentCompareResult():
+            return instrument_compare_sheet(result)
         case _:
             assert_never(result)

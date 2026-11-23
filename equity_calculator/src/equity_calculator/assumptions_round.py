@@ -10,8 +10,9 @@ note rows only when it has a note.
 from __future__ import annotations
 
 from equity_calculator.assumptions import UNVERIFIED
+from equity_calculator.convertibles import RoundTerms
 from equity_calculator.schemas.equity_common import EquityAssumption
-from equity_calculator.schemas.equity_round import NoteTerms, RoundInput, SafeTerms
+from equity_calculator.schemas.equity_round import NoteTerms, SafeTerms
 
 YC_SOURCE = "Y Combinator, post-money SAFE (valuation cap; discount; MFN), ycombinator.com/documents"
 YC_GUIDE_SOURCE = "Y Combinator, Post-Money Safe User Guide (version 1.2, February 2023), ycombinator.com/documents"
@@ -47,7 +48,7 @@ def _assumption(key: str, setting: str, statement: str, source: str) -> EquityAs
     return EquityAssumption(key=key, setting=setting, statement=statement, source=source)
 
 
-def _safe_rows(inputs: RoundInput) -> list[EquityAssumption]:
+def _safe_rows(inputs: RoundTerms) -> list[EquityAssumption]:
     """The rows every round with a SAFE carries, plus the MFN row when one is MFN."""
     rows = [
         _assumption(
@@ -129,7 +130,7 @@ def _note_rows() -> list[EquityAssumption]:
     ]
 
 
-def round_assumptions(inputs: RoundInput) -> tuple[EquityAssumption, ...]:
+def round_assumptions(inputs: RoundTerms) -> tuple[EquityAssumption, ...]:
     """The round's assumptions; SAFE rows only with a SAFE, note rows only with a note."""
     rows = _safe_rows(inputs) if any(isinstance(item, SafeTerms) for item in inputs.instruments) else []
     if any(isinstance(item, NoteTerms) for item in inputs.instruments):

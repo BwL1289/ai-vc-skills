@@ -111,7 +111,7 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 
 | Skill                                                                              | What it does                                                                                                                                                                                                                                                                                                                                                         | Status       |
 | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| [`equity-calculator`](skills/equity-calculator/SKILL.md)                           | Eleven equity scenarios worked exactly: the investor test, a hire's grant, the option-pool shuffle, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls, a check of a raise's numbers, how long a raise lasts on a plan, a check of traction metrics, and a market size built bottom-up.                                                           | ✅ Available |
+| [`equity-calculator`](skills/equity-calculator/SKILL.md)                           | Twelve equity scenarios worked exactly: the investor test, a hire's grant, the option-pool shuffle, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls, a check of a raise's numbers, how long a raise lasts on a plan, a check of traction metrics, a market size built bottom-up, and a priced round now set beside a convertible note now.     | ✅ Available |
 | [`vc-deal-math`](skills/vc-deal-math/SKILL.md)                                     | For founders: checks your own deck's ask before a VC does (valuation, ownership after the round, the pool top-up, the SAFE stack, runway, use of funds), every number from the calculator.                                                                                                                                                                           | 🧪 Preview   |
 | [`vc-positioning`](skills/vc-positioning/SKILL.md)                                 | For founders: tightens your raise's messaging before you go out, with an adversarial review (skeptical lenses attack it, then a judge drops what your own material already answers), a say-and-avoid list and a prep script for a session with an existing investor.                                                                                                 | 🧪 Preview   |
 | [`vc-claims-check`](skills/vc-claims-check/SKILL.md)                               | For founders: checks every claim in your deck, one-pager and narrative before a VC does (a source you can show, figures that agree, patterns a VC discounts), with a skeptic that picks what a partner checks first and a refute pass that keeps only grounded attacks.                                                                                              | 🧪 Preview   |
@@ -139,21 +139,22 @@ eval of every other review skill except `vc-deal-math` was run live too. An eval
 live run is recorded holds an excerpt of it with its verdict; every other eval, the `vc-deal-math` ones included,
 states the expected behaviour only.
 
-The `equity-calculator` skill covers eleven scenarios:
+The `equity-calculator` skill covers twelve scenarios:
 
-| Scenario        | The question it answers                                                                                                |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `investor`      | An investor wants n of the company. Is the deal worth it? (Paul Graham's equity equation)                              |
-| `employee`      | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                     |
-| `pool`          | A round asks for a bigger option pool. What is the real price per share, and who owns what afterwards?                 |
-| `round`         | A priced round converts post-money SAFEs and convertible notes. At what price, and who owns what afterwards?           |
-| `dilution`      | A holder owns h of the company. What is left after a series of rounds?                                                 |
-| `vesting`       | How much of a grant has vested at a given month, and what is it worth above the strike?                                |
-| `waterfall`     | The company is sold. Who gets what, with preferences paid by rank and each preferred class free to convert?            |
-| `deal_check`    | Do a raise's valuation, percent sold, ownership after the round and runway agree, as a VC will check them?             |
-| `runway_plan`   | How long does each raise last on a phased plan and a downside, which milestones does it reach, and how much is needed? |
-| `metrics_check` | Do the ARR, retention, churn, CAC payback and burn multiple a deck states match their parts?                           |
-| `market_sizing` | What are a market's TAM, SAM and SOM built bottom-up, and which assumption moves them most?                            |
+| Scenario             | The question it answers                                                                                                       |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `investor`           | An investor wants n of the company. Is the deal worth it? (Paul Graham's equity equation)                                     |
+| `employee`           | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                            |
+| `pool`               | A round asks for a bigger option pool. What is the real price per share, and who owns what afterwards?                        |
+| `round`              | A priced round converts post-money SAFEs and convertible notes. At what price, and who owns what afterwards?                  |
+| `dilution`           | A holder owns h of the company. What is left after a series of rounds?                                                        |
+| `vesting`            | How much of a grant has vested at a given month, and what is it worth above the strike?                                       |
+| `waterfall`          | The company is sold. Who gets what, with preferences paid by rank and each preferred class free to convert?                   |
+| `deal_check`         | Do a raise's valuation, percent sold, ownership after the round and runway agree, as a VC will check them?                    |
+| `runway_plan`        | How long does each raise last on a phased plan and a downside, which milestones does it reach, and how much is needed?        |
+| `metrics_check`      | Do the ARR, retention, churn, CAC payback and burn multiple a deck states match their parts?                                  |
+| `market_sizing`      | What are a market's TAM, SAM and SOM built bottom-up, and which assumption moves them most?                                   |
+| `instrument_compare` | A priced round now or a convertible note now: who owns what after the next round, and who gets what at an exit, side by side? |
 
 ## What you can ask
 
@@ -259,7 +260,7 @@ The formulas, their sources, every flag and a worked example per scenario are in
 
 ## Roadmap
 
-- [x] `equity-calculator`: eleven scenarios, command, workbook, MCP server, Python package
+- [x] `equity-calculator`: twelve scenarios, command, workbook, MCP server, Python package
 - [x] Claude Code plugin and marketplace
 - [ ] `vc-deal-math`: founders check their own deck's numbers with the calculator (preview)
 - [ ] `vc-positioning`: founders tighten their raise's messaging, stress-tested by an adversarial review, and prep it

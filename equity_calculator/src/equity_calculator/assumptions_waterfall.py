@@ -7,9 +7,13 @@ that sets it. The participation rows appear only when some class participates or
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from equity_calculator.assumptions import UNVERIFIED
 from equity_calculator.schemas.equity_common import EquityAssumption
-from equity_calculator.schemas.equity_waterfall import WaterfallInput
+
+if TYPE_CHECKING:  # waterfall imports this module, so its protocol is read for type checks only
+    from equity_calculator.waterfall import ExitTerms
 
 __all__ = ["waterfall_assumptions"]
 
@@ -20,7 +24,7 @@ def _assumption(key: str, setting: str, statement: str, source: str) -> EquityAs
     return EquityAssumption(key=key, setting=setting, statement=statement, source=source)
 
 
-def waterfall_assumptions(inputs: WaterfallInput, pass_limit: int) -> tuple[EquityAssumption, ...]:
+def waterfall_assumptions(inputs: ExitTerms, pass_limit: int) -> tuple[EquityAssumption, ...]:
     """The waterfall's rows (``pass_limit`` the search's bound); participation and cap rows only when used."""
     participations = {item.participation for item in inputs.classes}
     rows = [

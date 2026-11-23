@@ -140,6 +140,21 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
 6. **Follow-ups the founder asks for go to tools too**: a different pool size or timing, or a smaller raise, by
    re-running `equity_deal_check`; the next round's effect with `equity_dilution`; a full exit split with
    `equity_waterfall`.
+7. **A founder who has not chosen between a priced round now and a convertible note now** goes to
+   `equity_instrument_compare` (from the command line, `equity_calculator instrument_compare`), never to
+   `deal_check`. Ask, by name and in one message, for both sets of terms: today's shares by holder group (founders,
+   team and pool, existing investors with each series and each SAFE or note), the raise, the priced round's pre-money,
+   any pool top-up and its liquidation terms, and the note's cap, discount, interest rate, simple or compounding
+   interest and months until it converts. Pass `{"standard": true}` only when the founder says the terms are standard
+   (1x, non-participating); otherwise ask for the multiple and the participation. Ask too for the next priced round or
+   rounds the founder expects (pre-money, raise, any pool top-up, series terms) and one or more exit values, and never
+   assume one: with no next round the tool refuses (`no_next_round_given`), so ask for it rather than run. Call
+   `equity_instrument_compare` and show the side-by-side table with the tool's figures: ownership by group right after
+   today (the note outstanding, with no shares), after each next round, and each group's payout at each exit, under
+   option A, option B and B - A, the founders' lines first, then the flags with the meanings the report prints and the
+   assumptions the answer leans on. Never pick one for them or call one better: the table shows what each does on the
+   founder's own figures. Hand the legal terms (the note's maturity and what happens at it, the preference and
+   anti-dilution wording, the conversion mechanics) to their lawyer.
 
 ## Answering
 

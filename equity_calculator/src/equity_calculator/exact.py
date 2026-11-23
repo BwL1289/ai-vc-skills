@@ -44,8 +44,8 @@ _PRICE_PLACES = DISPLAY_PLACES["price"]
 _FINEST_PLACES = -MIN_ADJUSTED_EXPONENT
 
 
-def fraction(value: Decimal | int) -> Fraction:
-    """``value`` as an exact fraction (a ``Decimal`` converts exactly; no context is read)."""
+def fraction(value: Decimal | int | Fraction) -> Fraction:
+    """``value`` as an exact fraction (a ``Decimal`` converts exactly; no context is read; a ``Fraction`` is kept)."""
     return Fraction(value)
 
 

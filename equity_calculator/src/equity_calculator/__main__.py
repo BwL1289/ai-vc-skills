@@ -1,7 +1,8 @@
 # Command-line interface: stdout is the report.
 """``equity_calculator`` — an equity question: PG's two tests, the option pool, a round, dilution, vesting, an exit,
 a fundraising ask checked before a VC reads it, how long a raise lasts on a founder's plan, a founder's traction
-metrics checked against their parts, or a founder's market size built bottom-up.
+metrics checked against their parts, a founder's market size built bottom-up, or a priced round now set beside a
+convertible note now.
 
     equity_calculator investor (--equity-percent N | --pre-money V --investment I)
         (--outcome-multiplier M | --growth-percent G) [--holder-percent H]
@@ -44,6 +45,13 @@ metrics checked against their parts, or a founder's market size built bottom-up.
     equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
         [--population N] [--annual-revenue-today R] [--som-years Y] [--som-target T] [--stated-tam X]
         [--stated-sam X] [--stated-som X] [--tolerance-percent Q]
+    equity_calculator instrument_compare --founder-shares F [--team-shares T] [--unissued-pool-shares U]
+        [--existing-series "TERMS"]... [--existing-safe "TERMS" | --existing-note "TERMS"]... --investment I
+        --priced-pre-money V [--priced-target-pool-percent T] [--priced-pool-timing pre_money|post_money]
+        --priced-preference "TERMS" [--note-valuation-cap K] [--note-discount-percent D]
+        --note-interest-rate-percent R --note-compounding simple|annual|monthly [--note-stub-rule RULE]
+        --note-months-to-conversion M [--note-maturity-months M] [--note-interest-paid-in-cash]
+        (--next-round "TERMS")... (--exit E)... [--pool-at-exit as_common|left_out]
 
 Every scenario also takes ``--json`` (print the whole result model, exact fractions included, instead of the
 report) and ``--xlsx PATH`` (also write the formatted workbook to PATH; the report then names it). The report is
@@ -57,8 +65,9 @@ any folders on its path that do not exist yet; while saving, the Excel library a
 file in the system's temporary folder (``TMPDIR`` if set), so that folder must be writable. The number readers are
 ``equity_calculator.cli_numbers``; each scenario's flags are ``equity_calculator.cli_arguments``; a ``--safe``,
 ``--note``, ``--round``, ``--class``, ``--use-of-funds``, ``--phase``, ``--raise``, ``--raise-use-of-funds``,
-``--segment``, ``--top-down`` or ``--sensitivity`` is one argument of terms (``equity_calculator.cli_instruments``); a
-runway plan's flags become its cases and raises in ``equity_calculator.cli_runway_plan``. A refusal names the flag,
+``--segment``, ``--top-down``, ``--sensitivity``, ``--priced-preference`` or ``--next-round`` is one argument of
+terms (``equity_calculator.cli_instruments``); a runway plan's flags become its cases and raises in
+``equity_calculator.cli_runway_plan``. A refusal names the flag,
 or a repeated flag's item as ``--note #2`` (the second instrument in the order given) and its term.
 """
 
@@ -76,6 +85,7 @@ from equity_calculator.cli_arguments import (
     deal_check_arguments,
     dilution_arguments,
     employee_arguments,
+    instrument_compare_arguments,
     investor_arguments,
     market_sizing_arguments,
     metrics_check_arguments,
@@ -94,6 +104,7 @@ from equity_calculator.schemas.equity import (
     DealCheckInput,
     DilutionInput,
     EmployeeInput,
+    InstrumentCompareInput,
     InvestorInput,
     MarketSizingInput,
     MetricsCheckInput,
@@ -123,6 +134,7 @@ _INPUT_MODELS: dict[str, type[ScenarioInput]] = {
     "runway_plan": RunwayPlanInput,
     "metrics_check": MetricsCheckInput,
     "market_sizing": MarketSizingInput,
+    "instrument_compare": InstrumentCompareInput,
 }
 # A scenario whose flags do not map one to one onto its model's fields: the fields they make, and where each came from.
 _SHAPES: dict[str, Callable[[dict[str, Any]], tuple[dict[str, object], Places]]] = {"runway_plan": runway_plan_fields}
@@ -175,6 +187,12 @@ def _build_parser() -> argparse.ArgumentParser:
             "Build your market size bottom-up before a VC does: TAM, SAM and SOM per segment, the deck's figures "
             "checked, and the ranges that move it",
             market_sizing_arguments,
+        ),
+        (
+            "instrument_compare",
+            "A priced round now beside a convertible note now: who owns what after today and after each next "
+            "round, and who gets what at each exit, B - A; never a recommendation",
+            instrument_compare_arguments,
         ),
     )
     for name, summary, add_arguments in scenarios_help:

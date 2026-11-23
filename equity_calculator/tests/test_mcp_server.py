@@ -23,6 +23,7 @@ from equity_calculator.result_range import OUT_OF_RANGE_REASON
 from equity_calculator.scenarios import compute
 from openpyxl import load_workbook
 from tests.support import (
+    COMPARE_BU,
     DEAL_B,
     DILUTION_ROUNDS,
     MARKET_AW,
@@ -130,6 +131,7 @@ _SAMPLES: dict[str, dict[str, object]] = {
     "runway_plan": RUNWAY_W,
     "metrics_check": METRICS_AM,
     "market_sizing": MARKET_AW,
+    "instrument_compare": COMPARE_BU,
 }
 # $1M in at a $1M pre-money with a 25% pre-money pool target and a $250k SAFE at a 50% discount: the pooled price is
 # exactly zero, so the round has no price (the same case as test_round_pool.py).
@@ -176,7 +178,7 @@ async def test_one_read_only_tool_per_scenario_and_no_workbook_tool_without_a_fo
     tools = await _tools(mcp_server.build_server())
 
     assert sorted(tool.name for tool in tools) == sorted(f"equity_{scenario}" for scenario in _INPUT_MODELS)
-    assert len(tools) == len(_SAMPLES) == 11
+    assert len(tools) == len(_SAMPLES) == 12
     for tool in tools:
         assert tool.annotations.readOnlyHint is True
         assert tool.annotations.openWorldHint is False
@@ -190,6 +192,21 @@ async def test_each_tool_returns_the_scenario_result_as_json(scenario: str) -> N
     assert result.isError is False
     assert _text(result) == _expected(scenario, _SAMPLES[scenario])
     assert json.loads(_text(result))["scenario"] == scenario
+
+
+async def test_the_comparison_tool_schema_names_both_options_the_next_rounds_and_the_exits() -> None:
+    """The tool's input schema carries every field of both options; a missing next round is a tool error saying so."""
+    tools = await _tools(mcp_server.build_server())
+    tool = next(tool for tool in tools if tool.name == "equity_instrument_compare")
+    schema = json.dumps(tool.inputSchema)
+
+    for field in ("priced_pre_money", "priced_preference", "note_valuation_cap", "next_rounds", "exit_amounts"):
+        assert f'"{field}"' in schema, field
+    assert "never a pick" in (tool.title or "")
+    without = {key: value for key, value in COMPARE_BU.items() if key != "next_rounds"}
+    refused = await _call(mcp_server.build_server(), "equity_instrument_compare", {"inputs": without})
+    assert refused.isError is True
+    assert "no_next_round_given" in _text(refused)
 
 
 @pytest.mark.parametrize(("segment", "flagged"), [({}, True), ({"price_period_months": 12}, False)])
