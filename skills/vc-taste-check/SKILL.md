@@ -49,8 +49,8 @@ Ask once, in one message, for whatever is missing, by name. Never guess, and nev
 
 A missing input does not stop the check. It becomes a named ask in the answer, never a plausible decision or reason.
 A decision list with no NOs is itself the first open ask. With no decisions listed at all, run no checks and no review:
-quote what the material says, turn each decision it implies into an open ask, ask for the inputs in one message, and
-stop.
+still scan any material for flags, turn each decision it implies into an open ask, ask for the inputs in one message,
+and stop.
 
 ## The three checks
 
@@ -168,8 +168,8 @@ The refute brief:
 - A claim that a choice copies another company is grounded only when the founder's own material names that company,
   says the choice was borrowed, or gives other companies doing it as the reason. Otherwise it rests on an outside fact.
 - A line that itself matches a pattern in the list you were given never answers an objection.
-- A call the founder labels a judgment before data, saying how they will know it was right, is what the Trust check
-  asks for. An objection that nothing shows that call was right is Dropped, answered, quoting the founder's label,
+- A call the founder labels a judgment before data, saying how they will know it was right, is an honest answer on
+  trust. An objection that nothing shows that call was right is Dropped, answered, quoting the founder's label,
   even when the objection quotes the label itself.
 - Return one verdict from the three below, with the founder's line quoted word for word where the verdict needs one.
   When you cannot decide, return Kept.
@@ -218,7 +218,8 @@ objection is placed "not yet" until it is fixed. A survivor that turns on a phra
 
 - **In the deck:** at most three, each a decision with no kept objection and no flag, Clear on all three checks, and
   tied to the core workflow. Name the slide: the product or solution slide for a scope cut, the competition or insight
-  slide for a departure from the alternatives. Never a slide about the founder's taste.
+  slide for a departure from the alternatives. Never a slide about the founder's taste. A decision that needs a story
+  to land goes in the meeting even when it also qualifies here, and so does a fourth decision that qualifies.
 - **In the meeting:** decisions with no kept objection and no flag that need a story to land (a feature removed after
   launch, a paying customer's request turned down, a channel dropped), ready for when a partner asks "why not build
   X?" or "what have you learned?".
