@@ -39,7 +39,7 @@ _FENCE = re.compile(r"^( *)```([a-z]*)\n(.*?)^\1```$", re.MULTILINE | re.DOTALL)
 _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
-_HANDOFF_SKILLS = ("vc-deal-math", "equity-calculator", "vc-positioning", "vc-metrics-readiness")
+_HANDOFF_SKILLS = ("vc-deal-math", "equity-calculator", "vc-positioning", "vc-metrics-readiness", "vc-market-sizing")
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
 _TRIGGERS = (
@@ -341,14 +341,76 @@ def test_checked_first_lists_every_mismatch_outside_the_cap_of_three() -> None:
     assert "the calculator's mismatches first, each one, outside any cap; then the skeptic's kept attacks" in answering
 
 
-def test_a_safe_raise_has_no_tool_verdict_and_its_runway_is_quoted_unchecked() -> None:
+def test_a_safe_raise_has_no_ownership_verdict_and_its_runway_goes_to_the_runway_plan_tool() -> None:
     steps = _unwrapped(_section("## Steps"))
+    verdicts = {row[0]: row[1] for row in _table("## The four verdicts")}
 
     assert "it gives no consistent or mismatch verdict" in steps
-    assert "Only a consistent `equity_deal_check` row makes a deal term Supported" in steps
-    assert "On a SAFE or note raise, no tool checks the runway claim or the use-of-funds lines" in steps
-    assert _SAFE_UNCHECKED in steps and "never work them out by hand" in steps
+    assert (
+        "Only a consistent `equity_deal_check` row, or for a runway an `equity_runway_plan` row, makes a deal term "
+        "Supported"
+    ) in steps
+    assert "Runway with no raise, or on a SAFE or note raise, and the use-of-funds lines on such a raise go to" in steps
+    assert "`equity_runway_plan`, as vc-deal-math step 2 says" in steps
+    assert "With no cash or burn given, ask for them by name" in steps and "make no call until they are given" in steps
+    assert "is never worked out by hand" in steps
+    assert _SAFE_UNCHECKED not in _TEXT and "no tool checks the runway claim" not in _TEXT
+    assert "`equity_runway_plan`" in verdicts["Supported"]
+    assert "a SAFE or note raise's ownership" in verdicts["Needs a source"]
     assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
+
+
+def test_step_5_asks_which_way_the_founders_fully_diluted_total_counts_safes_and_notes() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "SAFEs and notes excluded" in steps
+    assert "ask which way the founder's does, and pass the tool its own basis" in steps
+    assert "`[fully diluted shares before the round, SAFEs and notes left out]`" in steps
+    assert "never subtract the SAFE or note shares yourself" in steps
+
+
+def test_a_mismatch_under_one_reading_of_an_unlabelled_valuation_is_needs_a_source() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    verdicts = {row[0]: row[1] for row in _table("## The four verdicts")}
+
+    assert "A check that is a mismatch under one reading only is not a calculator mismatch" in steps
+    assert "the claim is Needs a source with both readings in its fix" in steps
+    assert "Only a check that is a mismatch under every reading is the calculator's mismatch" in steps
+    assert "under every reading of a valuation with no label" in verdicts["Contradicted"]
+    assert "a mismatch under one reading only of a valuation with no label" in verdicts["Needs a source"]
+
+
+def test_an_understated_runway_is_never_contradicted_or_checked_first() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    skeptic = _unwrapped(_section("### The skeptic"))
+    verdicts = {row[0]: row[1] for row in _table("## The four verdicts")}
+
+    assert "a runway claim below the computed runway understates it, so it is Needs a source" in steps
+    assert "never Contradicted" in steps
+    assert "apart from a runway claim below the computed runway" in verdicts["Contradicted"]
+    assert "a runway claim below the computed runway (it understates)" in verdicts["Needs a source"]
+    assert "A runway claim below the computed runway" in skeptic and "are not among them" in skeptic
+    # A runway the tool gives no check row for says why, in words, since the MCP result gives flag codes only.
+    assert "`net_burn_not_positive` or `cash_never_runs_out` flag (revenue covers the burn" in steps
+
+
+def test_the_skeptic_raises_every_attack_and_the_refute_pass_judges_one_each() -> None:
+    skeptic = _unwrapped(_section("### The skeptic"))
+    refute = _unwrapped(_section("### The refute pass"))
+
+    assert "raise it anyway, however short the material; the refute pass decides" in skeptic
+    assert "run the skeptic as a subagent, however short the material" in skeptic
+    assert "launch one subagent per attack in a single message" in refute
+    assert "never put two attacks in one subagent" in refute
+
+
+def test_metrics_and_market_sizes_go_to_their_skills_and_growth_and_ltv_stay_unchecked() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "ARR, retention, churn, CAC payback and burn multiple are checked by the vc-metrics-readiness skill" in steps
+    assert "a market size by the vc-market-sizing skill" in steps
+    assert 'Growth rates and LTV: no tool computes them; quote them with "not checked: no tool computes this"' in steps
+    assert "have no tool here" not in steps
 
 
 def test_the_letters_of_intent_row_cites_only_the_a16z_items_that_say_so() -> None:

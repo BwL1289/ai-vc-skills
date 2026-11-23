@@ -22,11 +22,13 @@ looks anything up, and never adds evidence, figures or facts the founder did not
 - A deck, one-pager, executive summary, investor update, data-room index or spoken pitch, alone or several together.
 - Called from the vc-positioning skill when its review needs each claim's evidence or finds figures that may disagree.
 - Hand off:
-  - Retention, churn, CAC payback and burn multiple, with their definitions: the vc-metrics-readiness skill
+  - ARR, retention, churn, CAC payback and burn multiple, with their definitions: the vc-metrics-readiness skill
     (preview).
+  - A market size built bottom-up: the vc-market-sizing skill (preview).
   - The ask's arithmetic in full (ownership after the round, the pool, runway): the vc-deal-math skill, whose steps
     this skill follows for deal terms.
-  - A raise on a SAFE or note: `equity_round`, as vc-deal-math step 2 says (the equity-calculator skill).
+  - A raise on a SAFE or note: `equity_round`, as vc-deal-math step 2 says (the equity-calculator skill), and its
+    runway and use of funds `equity_runway_plan`.
   - The story, the one-liner and the say-and-avoid list: the vc-positioning skill.
 
 ## Inputs
@@ -61,12 +63,12 @@ Every claim gets exactly one class. A claim that fits two takes the one a partne
 Each claim gets one verdict. When a claim earns more than one, it takes the first in this order and the others go in
 its fix: **Contradicted**, then **Will be discounted**, then **Needs a source**, then **Supported**.
 
-| Verdict            | When                                                                                                                                                                                                                                                   |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Contradicted       | Two lines of the founder's material state the claim differently (both quoted, with their places; for a figure, the same metric in the same form for the same period), or the calculator reports a mismatch on a deal term                              |
-| Will be discounted | The claim matches a pattern in the discount table below, whatever its evidence                                                                                                                                                                         |
-| Needs a source     | The founder names no evidence they can show, or the claim can only be compared with another line after a conversion this skill does not do (MRR against ARR, a month against a year), or a deal term no tool gives a verdict on (a SAFE or note raise) |
-| Supported          | The founder names evidence they can show, every place the claim appears agrees, and no discount pattern applies; a deal term also needs a consistent verdict from `equity_deal_check`                                                                  |
+| Verdict            | When                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Contradicted       | Two lines of the founder's material state the claim differently (both quoted, with their places; for a figure, the same metric in the same form for the same period), or a calculator tool reports a mismatch on a deal term (under every reading of a valuation with no label), apart from a runway claim below the computed runway                                                             |
+| Will be discounted | The claim matches a pattern in the discount table below, whatever its evidence                                                                                                                                                                                                                                                                                                                   |
+| Needs a source     | The founder names no evidence they can show, or the claim can only be compared with another line after a conversion this skill does not do (MRR against ARR, a month against a year), or a deal term no tool gives a verdict on (a SAFE or note raise's ownership), a mismatch under one reading only of a valuation with no label, or a runway claim below the computed runway (it understates) |
+| Supported          | The founder names evidence they can show, every place the claim appears agrees, and no discount pattern applies; a deal term also needs a consistent verdict from `equity_deal_check`, or for a runway with no raise or on a SAFE or note raise, from `equity_runway_plan`                                                                                                                       |
 
 "Supported" means supported by what the founder says they can show. The skill does not see or verify that evidence;
 the answer says a partner will ask for it.
@@ -93,24 +95,43 @@ claims list; step 7 then runs only the quote check and the refute pass.
    after the round, outstanding SAFEs and notes, cash, burn, revenue, runway claim and use-of-funds lines are checked
    with `equity_deal_check` (from the command line, `equity_calculator deal_check`), following the vc-deal-math skill's
    steps: ask for what is missing, send money and percents as strings, and call twice for a valuation with no label.
+   - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
+     included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
+     which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask for the
+     total without them, as a bracketed ask, `[fully diluted shares before the round, SAFEs and notes left out]`, and
+     make no call that needs it until they give it; never subtract the SAFE or note shares yourself.
+   - A valuation with no label: show both readings side by side. A check that is a mismatch under one reading only
+     is not a calculator mismatch: it becomes one fix, to label the valuation pre- or post-money, and the claim is
+     Needs a source with both readings in its fix, since no single reading gives a verdict. Only a check that is a
+     mismatch under every reading is the calculator's mismatch.
    - **One call per version of the ask.** When two documents state the same term differently, run one call per
      document, each with only that document's figures. Never match a figure against the tool's output by eye across
      documents.
-   - A mismatch row makes the claim Contradicted: quote the document's figure and give the tool's value. A consistent
-     row is the arithmetic half of Supported; the founder still needs to show the documents behind the figures.
+   - A mismatch row makes the claim Contradicted: quote the document's figure and give the tool's value. One
+     exception: a runway claim below the computed runway understates it, so it is Needs a source with the printed
+     runway in its fix (the founder may keep it or state the printed runway), never Contradicted. A consistent row is
+     the arithmetic half of Supported; the founder still needs to show the documents behind the figures. A claim the
+     tool prints no check row for is Needs a source, with the reason in its fix; for a runway that reason is the
+     `net_burn_not_positive` or `cash_never_runs_out` flag (revenue covers the burn, so there is no runway end to
+     check).
    - A raise on a SAFE or note is not passed as `investment`: route it as vc-deal-math step 2 does, to `equity_round`.
      `equity_round` works out ownership after the round but compares no stated figure, so it gives no consistent or
      mismatch verdict: quote its values next to the document's figure without judging the match, and mark the term
-     Needs a source with the tool's value in the fix. Only a consistent `equity_deal_check` row makes a deal term
-     Supported.
-   - On a SAFE or note raise, no tool checks the runway claim or the use-of-funds lines: `equity_round` takes neither,
-     and `equity_deal_check` needs a priced round's valuation. Quote them as stated, mark them Needs a source with
-     "not checked: no tool computes this for a SAFE or note raise", and never work them out by hand.
+     Needs a source with the tool's value in the fix. Only a consistent `equity_deal_check` row, or for a runway an
+     `equity_runway_plan` row, makes a deal term Supported.
+   - Runway with no raise, or on a SAFE or note raise, and the use-of-funds lines on such a raise go to
+     `equity_runway_plan`, as vc-deal-math step 2 says: `cash_on_hand`, today's monthly spend and revenue as the plan's
+     first phase, the SAFE or note as a raise with its stated runway and use-of-funds lines, and a runway stated with
+     no raise as the top-level `stated_runway_months`; one call per document, as above. With no cash or burn given,
+     ask for them by name (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; the
+     claim is Needs a source meanwhile, and is never worked out by hand.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
      its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%, -0.033333 is -3.3333%),
      which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
-   - Growth rates, market sizes, retention and unit economics have no tool here: quote them, never compute, convert
-     or round one.
+   - ARR, retention, churn, CAC payback and burn multiple are checked by the vc-metrics-readiness skill
+     (`equity_metrics_check`), and a market size by the vc-market-sizing skill (`equity_market_sizing`): quote each as
+     stated and name the skill that checks it in its fix. Growth rates and LTV: no tool computes them; quote them with
+     "not checked: no tool computes this". Of all these figures, never compute, convert or round one.
 6. **Scan for discount patterns** (the table below). For each hit, quote the line, name the pattern and its source,
    and write the fix using only the founder's facts, or a bracketed ask: `[the signed contract's start date]`.
 7. **Run the adversarial review** (next section): the skeptic, the quote check, the refute pass.
@@ -143,17 +164,19 @@ One pass, named by what it does: it picks the claims a partner is likely to chec
   would ask to see, the other line of the material it conflicts with (quoted word for word), or the discount pattern
   it matches, named from the pattern list you were given.
 - An attack you cannot tie to a line the founder wrote is not an attack. List it apart as a question to the founder.
-- Do not judge whether another line of the material answers an attack: raise it anyway, and the refute pass decides.
-  Return "nothing found" only when no claim is worth a partner's check.
+- Do not judge whether another line of the material answers an attack: raise it anyway, however short the material;
+  the refute pass decides. Return "nothing found" only when no claim is worth a partner's check.
 
-**How to run it.** With a subagent tool (in Claude Code, the Agent or Task tool), run the skeptic as a subagent given
-only the founder's material and the brief above, plus the Pattern column of the discount table below: not this
+**How to run it.** With a subagent tool (in Claude Code, the Agent or Task tool), run the skeptic as a subagent,
+however short the material, given only the founder's material and the brief above, plus the Pattern column of the discount table below: not this
 skill's other sections, not the claims list, so it does not anchor on the list. Without one, run the skeptic before
 step 1 and write its attacks down in full; do not revise them after building the list. A skeptic run in the same agent
 as the rest is less independent than a subagent, so the answer says which way it ran.
 
 **The calculator's mismatches** from step 5 do not go through the skeptic or the refute pass. They are computed, not
-argued: each is a kept attack on its claim, quoting the document's figure with the tool's value as the reason.
+argued: each is a kept attack on its claim, quoting the document's figure with the tool's value as the reason. A
+runway claim below the computed runway, and a mismatch under one reading only of a valuation with no label, are not
+among them (step 5).
 
 ### Check the quotes
 
@@ -163,9 +186,10 @@ grounded. Questions to the founder go to the open asks.
 
 ### The refute pass
 
-Each attack gets its own refute pass. With a subagent tool, run one subagent per attack, given the founder's material,
-that one attack, the Pattern column of the discount table below and the brief below with its three verdicts and the
-rules after them, and nothing else; without one, decide the attacks one at a time against the same brief. The brief:
+Each attack gets its own refute pass. With a subagent tool, launch one subagent per attack in a single message; never
+put two attacks in one subagent. Give each the founder's material, that one attack, the Pattern column of the
+discount table below and the brief below with its three verdicts and the rules after them, and nothing else; without
+one, decide the attacks one at a time against the same brief. The brief:
 
 - You decide whether one attack is grounded in the founder's material. Write in the third person; you are not an
   investor and do not speak as one, named or not.
@@ -222,8 +246,9 @@ Lead with what a partner will check first, then the full list.
    tested.
 2. **Claims table:** #, Claim (quoted), Where, Class, Evidence the founder can show, Agrees across the materials?,
    Verdict, Fix. Order by verdict, Contradicted first.
-3. **Deal terms:** the `equity_deal_check` verdict for each call, which document's figures it used, and each mismatch
-   row in the tool's values.
+3. **Deal terms:** the `equity_deal_check` verdict for each call (for a valuation with no label, both readings side
+   by side), which document's figures it used, and each mismatch row in the tool's values; the same for each
+   `equity_runway_plan` call, or the ask for cash and burn when they were not given.
 4. **Disagreements:** each pair of lines that disagree, side by side with their places, and which one the founder
    should keep once they confirm it.
 5. **Open asks:** every bracketed gap and every question from the skeptic, in one list.
@@ -254,6 +279,7 @@ attacks) is this skill's own method.
   founder's material and the calculator support it.
 - It never invents, strengthens or finds evidence: no web look-ups, no market data, no checks on people or companies.
 - It never role-plays or speaks as a named investor, firm or author.
-- No arithmetic outside the equity calculator's tools. Figures are compared as stated, never converted.
+- No arithmetic outside the equity calculator's tools. Figures are compared as stated, never converted. Metrics and
+  market sizes are checked by the vc-metrics-readiness and vc-market-sizing skills; growth rates and LTV by no tool.
 - The adversarial review predicts which claims a partner is likely to check first; a real partner may check others.
 - It works from the founder's text and sends nothing anywhere.
