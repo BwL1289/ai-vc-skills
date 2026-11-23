@@ -29,7 +29,8 @@ names a firm the deck fits, gives no score, and never adds a fact about the comp
     the claims alone, the founder runs that skill on its own.
   - The ask's arithmetic in full (ownership after the round, the pool, the SAFE stack, runway): the vc-deal-math
     skill, whose steps this skill follows. One equity question with no deck: the equity-calculator skill.
-  - Planned, not yet shipped: rehearsing the partner meeting, a term-sheet review. Until they ship, say so.
+  - Rehearsing the partner meeting once the deck is ready: the vc-partner-meeting skill (preview).
+  - Planned, not yet shipped: a term-sheet review. Until it ships, say so.
 
 ## Inputs
 
