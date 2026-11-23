@@ -898,7 +898,8 @@ figure: recurring revenue in the unit `--recurring-unit` names (monthly by defau
 and `--net-burn` positive when cash goes out (`--net-burn=-50000` for a cash-generative period, with `=` because
 argparse reads a lone negative number as a flag). Give only what the document shows; each stated figure is
 checked when its parts are there, and `--stated-churn-basis` (`logo`, `gross_revenue`, `net_revenue` or
-`unlabelled`) says which churn the document means. A stated retention or churn figure is checked over
+`unlabelled`) says which churn the document means. A net revenue churn below zero goes in the same way:
+`--stated-churn-percent -3` reads as a number, but `-3%` needs the `=` form, `--stated-churn-percent=-3%`. A stated retention or churn figure is checked over
 `--period-months` and never annualised, so give the period the document's figure covers (1 for a monthly churn, 12
 for an annual NRR) and run once per period when the document mixes them. A stated CAC is checked as blended CAC.
 

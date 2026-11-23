@@ -22,6 +22,7 @@ from equity_calculator.schemas.equity_metrics_check import (
     MetricsFlag,
 )
 from equity_calculator.sheet_parts import GIVEN, Line, Sheet, given, given_percent, yes_no
+from equity_calculator.text import display
 
 _TITLE = "Metrics check"
 _HEADING = (
@@ -87,6 +88,8 @@ def _flag_words(flag: MetricsFlag, result: MetricsCheckResult) -> str:
         else f"CAC payback on revenue alone is at or above the {band} benchmark, so on gross margin it is too (a "
         "margin only lengthens it)"
     )
+    movement = "none" if result.ending_arr is None else display(result.ending_arr)
+    month = "none" if result.month_arr is None else display(result.month_arr)
     words: dict[MetricsFlag, str] = {
         "stated_arr_matches_run_rate": "The stated ARR matches the run-rate (12 x the whole month's revenue), not "
         "recurring revenue; a VC is likely to recompute ARR without one-time, services and usage fees",
@@ -95,9 +98,9 @@ def _flag_words(flag: MetricsFlag, result: MetricsCheckResult) -> str:
         "stated_nrr_includes_new": "The stated net retention matches ending over starting recurring revenue, which "
         "counts revenue from customers who were not there at the start (new customers, or their expansion); a VC is "
         "likely to ask for the starting customers alone",
-        "arr_movement_and_month_disagree": "The movement's ending ARR and the latest month's ARR differ by more than "
-        "the tolerance, so the parts disagree with each other; a stated ARR is checked against the movement's: say "
-        "which figure the document shows and why the two differ",
+        "arr_movement_and_month_disagree": f"The movement's ending ARR ({movement}) and the latest month's ARR "
+        f"({month}) differ by more than {inputs.tolerance_percent:f}%, so the parts disagree with each other; a stated "
+        "ARR is checked against the movement's: say which figure the document shows and why the two differ",
         "consistent_beyond_rounding": "A stated figure is within the tolerance but is not the computed figure rounded "
         "to the places it is written with; a VC recomputing gets a different figure: quote the calculator's",
         "mismatch_within_rounding": "A stated figure is past the tolerance but is the computed figure rounded to the "

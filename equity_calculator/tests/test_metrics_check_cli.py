@@ -445,3 +445,33 @@ async def test_a_negative_net_revenue_churn_reads_from_the_command_line() -> Non
 
     assert re.search(r"Churn \(net revenue\): the deck says +-3\.0000%", report)
     assert re.search(r"Overall verdict +consistent", report)
+
+
+async def test_a_negative_churn_with_its_percent_sign_reads_in_the_equals_form(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """argparse reads ``-3%`` as a flag, so a lone one exits 2; ``--stated-churn-percent=-3%`` reads as -3%."""
+    parts = ["metrics_check", "--period-months", "1", "--starting-recurring", "100000"]
+    parts += ["--expansion-recurring", "5000", "--churned-recurring", "2000", "--stated-churn-basis", "net_revenue"]
+    report = await run([*parts, "--stated-churn-percent=-3%"])
+
+    assert re.search(r"Churn \(net revenue\): the deck says +-3\.0000%", report)
+    with pytest.raises(SystemExit) as raised:
+        await run([*parts, "--stated-churn-percent", "-3%"])
+    assert raised.value.code == _ARGPARSE_EXIT
+    assert "--stated-churn-percent: expected one argument" in capsys.readouterr().err
+
+
+def test_the_disagreeing_arr_flag_names_both_figures_and_the_tolerance() -> None:
+    result = metrics_check(
+        period_months=12,
+        starting_recurring="80000",
+        new_recurring="18000",
+        month_total_revenue="100000",
+        stated_arr="1200000",
+    )
+    words = {line.values[_FIRST]: line.how for line in sheet_for(result).lines if line.key.startswith("flag_")}
+
+    assert "($1,176,000.00)" in words["arr_movement_and_month_disagree"]
+    assert "($1,200,000.00)" in words["arr_movement_and_month_disagree"]
+    assert "differ by more than 2%" in words["arr_movement_and_month_disagree"]
