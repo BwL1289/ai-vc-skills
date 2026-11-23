@@ -44,11 +44,11 @@ against the other points of the expected answer is noted but does not change the
   Investors' percent: the deck says                          20.0000%  given
   Investors' percent: the calculator gives                   16.6667%  the investor's cap-table share
   Investors' percent: difference                             -3.3333%  computed - stated
-  Investors' percent: verdict                                mismatch  within the tolerance is consistent
+  Investors' percent: verdict                                mismatch  within the tolerance, or rounding to the deck's, is consistent
   Runway: the deck says                                  18.00 months  given
   Runway: the calculator gives                           15.33 months  (cash + I)/net burn, planned (else current)
   Runway: difference                                     -2.67 months  computed - stated
-  Runway: verdict                                            mismatch  within the tolerance is consistent
+  Runway: verdict                                            mismatch  within the tolerance, or rounding to the deck's, is consistent
   A VC is likely to ask                             runway_below_band  Planned runway is under 18 months; a VC is likely to ask whether the raise reaches the next milestone (a common benchmark, not a rule)
   Overall verdict                                            mismatch  mismatch if any check is; consistent if all are; not_checked with none
 ```

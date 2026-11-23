@@ -120,10 +120,17 @@ def _written(value: Decimal) -> Decimal:
     return Decimal((0, (0,), -places))
 
 
-# A document's stated figure that is checked for rounding (a metrics check's stated percent, months or multiple): a
-# ``BoundedDecimal`` whose zero keeps the places it is written with, since "0.0%" is a claim to one place, not to none.
-# Echoed back, it reads the same (``0.0`` dumps as "0.0").
+# A document's stated figure that is checked for rounding (a metrics check's stated percent, months or multiple, a deal
+# check's stated percent or runway): a ``BoundedDecimal`` whose zero keeps the places it is written with, since "0.0%"
+# is a claim to one place, not to none. Echoed back, it reads the same (``0.0`` dumps as "0.0").
 WrittenDecimal = Annotated[Decimal, BeforeValidator(_refuse_unbounded_raw), AfterValidator(_written)]
+
+# The description a ``WrittenDecimal`` field carries in the JSON schema (an MCP tool's input), formatted with examples:
+# its places decide the rounding test, and a JSON number can drop them (12.40 arrives as 12.4) or add one (12.0).
+AS_WRITTEN = (
+    "Send it as text with exactly the places the document writes ({examples}): a figure that is the computed one "
+    "rounded to those places is consistent, and a JSON number can drop or add a place."
+)
 
 # strict: a share count is a real int; a bool, a float or a numeric string is refused, never read as one.
 ShareCount = Annotated[int, Field(strict=True, lt=SIZE_LIMIT)]

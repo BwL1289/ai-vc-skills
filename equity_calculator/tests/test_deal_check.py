@@ -532,3 +532,153 @@ def test_assumption_rows_appear_only_when_used_and_bands_are_benchmarks() -> Non
     assert full["runway_rule"].source.startswith("unverified")
     assert {"holder_scaling", "tolerance", "use_of_funds_rule", "note_interest", "pool_timing"} <= set(full)
     assert len(full) == len(rows)
+
+
+# The rounding test (equity_calculator.rounding): a stated percent or runway that is the computed figure rounded half
+# away from zero to the places it is typed with is consistent, whatever the tolerance; money and the use-of-funds total
+# keep the tolerance alone. (240k + 1M)/100k = 12.40 months; 1M/(5M + 1M) = 1/6 = 16.6667% sold.
+_RUNWAY_12_40 = {"investment": "1000000", "pre_money": "4000000", "cash_on_hand": "240000"}
+_RUNWAY_12_40 |= {"planned_monthly_gross_burn": "100000"}
+_SOLD_ONE_SIXTH = {"investment": "1000000", "pre_money": "5000000"}
+
+
+@pytest.mark.parametrize(
+    ("typed", "verdict", "within"),
+    [
+        ("12", "consistent", True),
+        ("12.0", "mismatch", False),
+        ("12.4", "consistent", True),
+        ("12.40", "consistent", True),
+    ],
+    ids=["whole", "one-place", "exact", "two-places"],
+)
+def test_a_12_month_runway_holds_against_12_40_but_12_0_does_not(typed: str, verdict: str, within: bool) -> None:
+    """0.4 months is past 2% of 12.40 (0.248), so 12 holds only as 12.40 rounded to no places; 12.0 claims a place
+    that rounds to 12.4."""
+    result = deal_check(**_RUNWAY_12_40, stated_runway_months=typed)
+    (row,) = result.checks
+
+    assert row.computed.exact == Fraction(62, 5)
+    assert (row.verdict, row.within_rounding, result.verdict) == (verdict, within, verdict)
+    assert "consistent_beyond_rounding" not in result.flags
+
+
+@pytest.mark.parametrize(
+    ("typed", "verdict", "within"),
+    [("17", "consistent", True), ("16.7", "consistent", True), ("20", "mismatch", False), ("16.6", "mismatch", False)],
+    ids=["whole", "one-place", "far", "one-place-off"],
+)
+def test_a_percent_sold_holds_on_what_rounds_to_it_with_no_tolerance(typed: str, verdict: str, within: bool) -> None:
+    """With the points tolerance at zero only the rounding can hold: 17% and 16.7% are 16.6667% rounded, 20% and
+    16.6% are not (16.6667% is 16.7 at one place)."""
+    result = deal_check(**_SOLD_ONE_SIXTH, post_money="6000000", stated_investor_percent=typed, tolerance_points="0")
+    row = result.checks[-1]
+
+    assert row.key == "investor_percent" and row.computed.exact == Fraction(1, 6)
+    assert (row.verdict, row.within_rounding) == (verdict, within)
+
+
+def test_a_percent_sold_of_17_against_16_6667_holds_at_the_default_tolerance_too() -> None:
+    result = deal_check(**_SOLD_ONE_SIXTH, post_money="6000000", stated_investor_percent="17")
+
+    assert (result.checks[-1].verdict, result.checks[-1].within_rounding, result.verdict) == (
+        "consistent",
+        True,
+        "consistent",
+    )
+    assert "consistent_beyond_rounding" not in result.flags
+
+
+@pytest.mark.parametrize(
+    ("typed", "verdict", "within"),
+    [("58", "consistent", True), ("58.3", "consistent", True), ("58.0", "mismatch", False)],
+    ids=["whole", "one-place", "one-place-off"],
+)
+def test_a_holder_percent_after_holds_on_what_rounds_to_it(typed: str, verdict: str, within: bool) -> None:
+    """70% before keeps 5/6 of itself: 175/3 = 58.3333% after."""
+    result = deal_check(**_SOLD_ONE_SIXTH, holder_percent="70", stated_holder_percent=typed, tolerance_points="0")
+    (row,) = result.checks
+
+    assert row.key == "holder_percent" and row.computed.exact == Fraction(7, 12)
+    assert (row.verdict, row.within_rounding) == (verdict, within)
+
+
+@pytest.mark.parametrize(
+    ("fields", "field", "held", "missed"),
+    [
+        ({**_RUNWAY_12_40, "cash_on_hand": "250000"}, "stated_runway_months", "13", "12"),
+        (
+            {"investment": "1650000", "pre_money": "8350000", "post_money": "10000000", "tolerance_points": "0"},
+            "stated_investor_percent",
+            "17",
+            "16",
+        ),
+    ],
+    ids=["runway-12.5", "percent-16.5"],
+)
+def test_a_half_rounds_away_from_zero(fields: dict[str, object], field: str, held: str, missed: str) -> None:
+    """12.5 months and 16.5% round to 13 and 17, never to the even 12 or 16: 13 and 17 hold, 12 and 16 do not."""
+    up = deal_check(**fields, **{field: held}).checks[-1]
+    even = deal_check(**fields, **{field: missed}).checks[-1]
+
+    assert (up.verdict, up.within_rounding) == ("consistent", True)
+    assert (even.verdict, even.within_rounding) == ("mismatch", False)
+
+
+def test_a_figure_held_by_the_tolerance_alone_is_flagged() -> None:
+    """16.5% is within 0.5 points of 16.6667% but is not it rounded to one place (16.7): consistent, and flagged, as a
+    VC recomputing gets 16.7%."""
+    result = deal_check(**_SOLD_ONE_SIXTH, post_money="6000000", stated_investor_percent="16.5")
+
+    assert (result.checks[-1].verdict, result.checks[-1].within_rounding) == ("consistent", False)
+    assert result.verdict == "consistent"
+    assert "consistent_beyond_rounding" in result.flags
+
+
+def test_a_mismatch_is_never_flagged_as_held_by_the_tolerance() -> None:
+    result = deal_check(**_RUNWAY_12_40, stated_runway_months="12.0")
+
+    assert result.verdict == "mismatch" and "consistent_beyond_rounding" not in result.flags
+
+
+def test_money_and_the_use_of_funds_total_keep_the_tolerance_alone() -> None:
+    """A post-money of 10M against 10.04M is no rounding test (money carries no places once typed in full), and a
+    use-of-funds total is a sum of lines, never a figure typed as one: both have no rounding row and hold only within
+    the tolerance."""
+    fields = {"investment": "2040000", "pre_money": "8000000", "post_money": "10000000"}
+    held = deal_check(**fields)
+    tight = deal_check(**fields, tolerance_percent="0")
+    funds = deal_check(
+        investment="1000000",
+        pre_money="4000000",
+        use_of_funds=[{"percent": "33"}, {"percent": "33"}, {"percent": "33"}],
+        tolerance_points="0",
+    )
+
+    assert (held.checks[0].verdict, held.checks[0].within_rounding) == ("consistent", None)
+    assert (tight.checks[0].verdict, tight.checks[0].within_rounding) == ("mismatch", None)
+    assert (funds.checks[0].key, funds.checks[0].verdict, funds.checks[0].within_rounding) == (
+        "use_of_funds_total",
+        "mismatch",
+        None,
+    )
+    assert "consistent_beyond_rounding" not in held.flags
+
+
+@pytest.mark.parametrize("field", ["stated_runway_months", "stated_investor_percent", "stated_holder_percent"])
+def test_a_stated_zero_with_places_is_still_refused(field: str) -> None:
+    """The three fields keep their zero's places like metrics_check's, but each is above zero, so "0.0" is refused,
+    naming the field, before any rounding test."""
+    fields: dict[str, object] = {**_RUNWAY_12_40, "post_money": "5000000", "holder_percent": "70", field: "0.0"}
+
+    with pytest.raises(ValidationError, match=field):
+        DealCheckInput.model_validate(fields)
+
+
+def test_the_tolerance_row_states_the_rounding_rule_and_what_keeps_the_tolerance_alone() -> None:
+    rows = {row.key: row for row in deal_check(**_RUNWAY_12_40, stated_runway_months="12").assumptions}
+
+    assert "rounded half away from zero to the places it is written with" in rows["tolerance"].statement
+    assert "people write figures rounded to the places they show" in rows["tolerance"].statement
+    assert "The post-money and the use-of-funds total are held to the tolerance alone" in rows["tolerance"].statement
+    assert rows["tolerance"].source == "unverified (the rounding test is standard arithmetic)"

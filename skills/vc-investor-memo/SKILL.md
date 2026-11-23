@@ -87,9 +87,8 @@ guides below, so the partner gets the material in the order those guides use, an
 
 Rules for the text:
 
-- **Third person, no verdict.** "The company sells ...", never "we recommend", "we should invest", "pass" or "a
-  strong yes". No conviction score, no grade, no odds. The champion adds their own view; the memo leaves no slot
-  for one.
+- **Third person, no verdict.** "The company sells ...", never "we recommend", "we should invest", "pass" or "a strong
+  yes". No conviction score, no grade, no odds. The champion adds their own view; the memo leaves no slot for one.
 - **The founder's facts only.** Each line quotes or closely restates a line of the founder's material; a figure is
   quoted as stated or comes from a tool. A target is written as a plan with its date ("plans to reach ... by ..."),
   never as a result.
@@ -149,15 +148,16 @@ mode) or at the quote check (review mode).
 The round's figures are checked once, as the vc-deal-math skill describes:
 
 - **A priced round:** `equity_deal_check` (from the command line, `equity_calculator deal_check`), money and percents as
-  strings, share counts as integers, with every figure the memo states: the raise, the valuation and its label, the
-  percent sold (`stated_investor_percent`), the founders' percent after (`holder_shares`, `stated_holder_percent`), each
-  SAFE or note converting in this round as `instruments` (its terms as the founder gives them; left out, the founders'
-  percent comes out too high), cash, burn and revenue as planned (`planned_monthly_gross_burn`,
-  `planned_monthly_revenue`) and today's (`current_monthly_gross_burn`, `current_monthly_revenue`) only when the founder
-  gives a different figure for today, the runway claim and the use-of-funds lines. One call per document that states the
-  round differently. A valuation with no label: call twice, once as `pre_money`, once as `post_money`, and show both
-  readings side by side, as vc-deal-math step 4 does. A mismatch that appears under only one reading is not listed as a
-  computed mismatch: its fix is "say whether the valuation is pre- or post-money", with both readings quoted.
+  strings (a stated percent or runway with the document's own places), share counts as integers, with every figure the
+  memo states: the raise, the valuation and its label, the percent sold (`stated_investor_percent`), the founders'
+  percent after (`holder_shares`, `stated_holder_percent`), each SAFE or note converting in this round as `instruments`
+  (its terms as the founder gives them; left out, the founders' percent comes out too high), cash, burn and revenue as
+  planned (`planned_monthly_gross_burn`, `planned_monthly_revenue`) and today's (`current_monthly_gross_burn`,
+  `current_monthly_revenue`) only when the founder gives a different figure for today, the runway claim and the
+  use-of-funds lines. One call per document that states the round differently. A valuation with no label: call twice,
+  once as `pre_money`, once as `post_money`, and show both readings side by side, as vc-deal-math step 4 does. A
+  mismatch that appears under only one reading is not listed as a computed mismatch: its fix is "say whether the
+  valuation is pre- or post-money", with both readings quoted.
 - **A SAFE or note:** not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round`, with the
   next priced round the founder expects, labelled the founder's assumption in the memo. `equity_round` compares no
   stated figure, so quote its values beside the memo's, without a verdict. The runway claim and the use-of-funds lines
@@ -189,13 +189,13 @@ up to 10% in the pre-money, founders with 8,000,000 of 10,000,000 shares, and th
 "23 months of runway"):
 
 ```text
-  Investors' share of the cap table                                         20.0000%  N/T
-  Effective pre-money                                                 $10,500,000.00  (FD - U)·p: the pre-round holders' shares at the round price
-  Holder group's percent after: the calculator gives                        58.9474%  h·(share every pre-round share keeps)
-  Holder group's percent after: verdict                                   consistent  within the tolerance is consistent
-  Runway: the calculator gives                                          22.67 months  (cash + I)/net burn, planned (else current)
-  Runway: verdict                                                         consistent  within the tolerance is consistent
-  A VC is likely to ask                               pool_in_pre_money_lowers_price  The new pool is paid for out of the pre-money, so the effective pre-money and the price per share are below the headline; a VC prices it this way
+  Investors' share of the cap table                                              20.0000%  N/T
+  Effective pre-money                                                      $10,500,000.00  (FD - U)·p: the pre-round holders' shares at the round price
+  Holder group's percent after: the calculator gives                             58.9474%  h·(share every pre-round share keeps)
+  Holder group's percent after: verdict                                        consistent  within the tolerance, or rounding to the deck's, is consistent
+  Runway: the calculator gives                                               22.67 months  (cash + I)/net burn, planned (else current)
+  Runway: verdict                                                              consistent  within the tolerance, or rounding to the deck's, is consistent
+  A VC is likely to ask                                    pool_in_pre_money_lowers_price  The new pool is paid for out of the pre-money, so the effective pre-money and the price per share are below the headline; a VC prices it this way
 ```
 
 The memo then states the round with the tool's values ("founders hold 58.9474% after the round") and the effective
@@ -426,10 +426,9 @@ Lead with the biggest fixes, then the memo, then the full fix list.
 
 1. **The biggest fixes,** at most three, one line each: the top of the ranked fix list.
 2. **The memo,** ready to hand to the champion, in the shape above, revised for every kept objection, every gap a
-   bracketed ask, every exit value labelled the founder's assumption, and one line at its head: "Drafted by the
-   founders from their own material; figures from the equity calculator; not the firm's format." The memo is handed
-   on alone, so its Open questions section lists its own bracketed asks in full and never points to the answer's
-   Open asks.
+   bracketed ask, every exit value labelled the founder's assumption, and one line at its head: "Drafted by the founders
+   from their own material; figures from the equity calculator; not the firm's format." The memo is handed on alone, so
+   its Open questions section lists its own bracketed asks in full and never points to the answer's Open asks.
 3. **Ranked fix list,** as a table: Rank, Tier, Section, Lens, The line (quoted), Why a partner arguing against the
    deal uses it, Fix; the figures that do not match (computed) first, then the flags. Then **Dropped,** one line
    each: the objection, its lens, and why it fell. Say how the lenses and the refute pass ran (as subagents, one
@@ -460,6 +459,7 @@ question a partner is likely to ask, never an error, and never a change to a ver
 | `conversions_bought_by_pre_money`     | deal check              | SAFE and note shares come out of the pre-round holders, so their stake falls by more          |
 | `discount_beat_cap`                   | deal check              | A discount gave a lower price than the cap                                                    |
 | `note_interest_converts`              | deal check              | Note interest converts too, so a note gets more than its principal's worth of shares          |
+| `consistent_beyond_rounding`          | deal check              | A stated percent or runway holds by the tolerance alone, not as the tool's figure rounded     |
 | `net_burn_not_positive`               | deal check              | Revenue covers the burn on those figures, so there is no net runway on them                   |
 | `current_burn_runway_longer`          | deal check              | Runway on today's burn is longer than on the planned burn                                     |
 | `dilution_above_band`                 | deal check              | The investors get more than the tool's dilution benchmark in one round (not a rule)           |

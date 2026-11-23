@@ -1,9 +1,9 @@
 """The labelled assumptions of a deal check, each with its source, merged with the nested round's or pool's rows.
 
 Only one rule here has a primary source read in full: post-money = pre-money + the raise, from Y Combinator's
-Post-Money Safe User Guide. The runway formula, the order valuations are read in, the tolerances and the two
-benchmark bands are marked unverified; each band is a common benchmark, not a rule, and an input the founder can
-change. A row appears only when the input uses it.
+Post-Money Safe User Guide. The runway formula, the order valuations are read in, the tolerances (and the rounding
+test beside them) and the two benchmark bands are marked unverified; each band is a common benchmark, not a rule, and
+an input the founder can change. A row appears only when the input uses it.
 """
 
 from __future__ import annotations
@@ -120,8 +120,14 @@ def _check_rows(inputs: DealCheckInput, checked: bool) -> list[EquityAssumption]
                 "tolerance",
                 f"{inputs.tolerance_points} points; {inputs.tolerance_percent}% relative",
                 "A stated percent within this many percentage points of the computed one, or a stated money or "
-                "months figure within this share of it, is consistent (decks round their figures).",
-                UNVERIFIED,
+                "months figure within this share of it, is consistent. So is a stated percent or runway that is the "
+                "computed figure rounded half away from zero to the places it is written with, whatever the "
+                "tolerance: people write figures rounded to the places they show, so a whole number holds what "
+                "rounds to it and a figure typed with one place holds what rounds to it at one place. The post-money "
+                "and the use-of-funds total are held to the tolerance alone: a round money figure typed in full "
+                "carries no places, and the total is a sum of the lines, not a figure typed as one. A flag names a "
+                "figure consistent by the tolerance alone, not a rounding of the computed one.",
+                f"{UNVERIFIED} (the rounding test is standard arithmetic)",
             )
         )
     rows.append(

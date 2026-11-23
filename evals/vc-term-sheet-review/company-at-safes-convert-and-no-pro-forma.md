@@ -44,11 +44,11 @@ for the pro forma cap table.
 ```
 
 ```text
-  Effective pre-money                                                  $27,708,333.33  (FD - U)·p: the pre-round holders' shares at the round price
-  After: SAFE 1                                                               7.2917%  shares/T
-  After: SAFE 2                                                               7.2917%  shares/T
-  Holder group's percent after: the calculator gives                         55.4167%  h·(share every pre-round share keeps)
-  Holder group's percent after: verdict                                      mismatch  within the tolerance is consistent
+  Effective pre-money                                                       $27,708,333.33  (FD - U)·p: the pre-round holders' shares at the round price
+  After: SAFE 1                                                                    7.2917%  shares/T
+  After: SAFE 2                                                                    7.2917%  shares/T
+  Holder group's percent after: the calculator gives                              55.4167%  h·(share every pre-round share keeps)
+  Holder group's percent after: verdict                                           mismatch  within the tolerance, or rounding to the deck's, is consistent
 ```
 
 ## Expected answer

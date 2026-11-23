@@ -42,10 +42,10 @@ What the calculator prints for the deck (excerpt):
   Net runway, planned burn                            24.17 months  (cash + I)/net burn
   Investors' percent: the deck says                       25.0000%  given
   Investors' percent: the calculator gives                25.0000%  the investor's cap-table share
-  Investors' percent: verdict                           consistent  within the tolerance is consistent
+  Investors' percent: verdict                           consistent  within the tolerance, or rounding to the deck's, is consistent
   Runway: the deck says                               24.00 months  given
   Runway: the calculator gives                        24.17 months  (cash + I)/net burn, planned (else current)
-  Runway: verdict                                       consistent  within the tolerance is consistent
+  Runway: verdict                                       consistent  within the tolerance, or rounding to the deck's, is consistent
   Overall verdict                                       consistent  mismatch if any check is; consistent if all are; not_checked with none
 ```
 
@@ -67,7 +67,7 @@ What the calculator prints for the one-pager (excerpt):
   Investors' percent: the deck says                       20.0000%  given
   Investors' percent: the calculator gives                25.0000%  the investor's cap-table share
   Investors' percent: difference                           5.0000%  computed - stated
-  Investors' percent: verdict                             mismatch  within the tolerance is consistent
+  Investors' percent: verdict                             mismatch  within the tolerance, or rounding to the deck's, is consistent
   Overall verdict                                         mismatch  mismatch if any check is; consistent if all are; not_checked with none
 ```
 

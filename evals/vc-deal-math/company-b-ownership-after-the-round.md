@@ -49,27 +49,27 @@ text.
 ## What the calculator prints (excerpt)
 
 ```text
-  Price per share (p)                                                       $2.314050  the round's price
-  Effective pre-money                                                  $22,214,876.03  (FD - U)·p: the pre-round holders' shares at the round price
-  After: existing holders                                                    55.5372%  (FD - U)/T
-  After: holder group                                                        52.0661%  h·kept
-  After: SAFE 1                                                               7.2314%  shares/T
-  After: SAFE 2                                                               7.2314%  shares/T
-  After: option pool                                                         10.0000%  (U + P)/T
-  After: investors                                                           20.0000%  N/T
-  Share of their stake every pre-round share keeps                           57.8512%  FD/T, or V/(V + I) with no share counts
-  Pre-money pays for: existing holders' shares                         $22,214,876.03  (FD - U)·p, to the cent so the parts add up to V
-  Pre-money pays for: unissued pool already there                         $925,619.83  U·p
-  Pre-money pays for: new pool                                          $3,074,380.17  P·p (pool in the pre-money)
-  Pre-money pays for: SAFE and note shares                              $5,785,123.97  converted shares·p
-  Pre-money pays for: total                                            $32,000,000.00  V
-  Post-money: verdict                                                      consistent  within the tolerance is consistent
-  Investors' percent: verdict                                              consistent  within the tolerance is consistent
-  Holder group's percent after: the deck says                                72.0000%  given
-  Holder group's percent after: the calculator gives                         52.0661%  h·(share every pre-round share keeps)
-  Holder group's percent after: difference                                  -19.9339%  computed - stated
-  Holder group's percent after: verdict                                      mismatch  within the tolerance is consistent
-  Overall verdict                                                            mismatch  mismatch if any check is; consistent if all are; not_checked with none
+  Price per share (p)                                                            $2.314050  the round's price
+  Effective pre-money                                                       $22,214,876.03  (FD - U)·p: the pre-round holders' shares at the round price
+  After: existing holders                                                         55.5372%  (FD - U)/T
+  After: holder group                                                             52.0661%  h·kept
+  After: SAFE 1                                                                    7.2314%  shares/T
+  After: SAFE 2                                                                    7.2314%  shares/T
+  After: option pool                                                              10.0000%  (U + P)/T
+  After: investors                                                                20.0000%  N/T
+  Share of their stake every pre-round share keeps                                57.8512%  FD/T, or V/(V + I) with no share counts
+  Pre-money pays for: existing holders' shares                              $22,214,876.03  (FD - U)·p, to the cent so the parts add up to V
+  Pre-money pays for: unissued pool already there                              $925,619.83  U·p
+  Pre-money pays for: new pool                                               $3,074,380.17  P·p (pool in the pre-money)
+  Pre-money pays for: SAFE and note shares                                   $5,785,123.97  converted shares·p
+  Pre-money pays for: total                                                 $32,000,000.00  V
+  Post-money: verdict                                                           consistent  within the tolerance is consistent
+  Investors' percent: verdict                                                   consistent  within the tolerance, or rounding to the deck's, is consistent
+  Holder group's percent after: the deck says                                     72.0000%  given
+  Holder group's percent after: the calculator gives                              52.0661%  h·(share every pre-round share keeps)
+  Holder group's percent after: difference                                       -19.9339%  computed - stated
+  Holder group's percent after: verdict                                           mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Overall verdict                                                                 mismatch  mismatch if any check is; consistent if all are; not_checked with none
 ```
 
 ## Expected answer

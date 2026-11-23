@@ -32,14 +32,14 @@ holds by the tolerance alone. Flags never change a verdict.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from decimal import Decimal
 from fractions import Fraction
 from typing import get_args
 
 from equity_calculator.assumptions_metrics_check import metrics_check_assumptions
-from equity_calculator.exact import HUNDRED, ONE, ZERO, fraction, from_percent, quantity
+from equity_calculator.exact import ONE, ZERO, fraction, from_percent, quantity
+from equity_calculator.rounding import rounds_to
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_deal_check import DealVerdict
 from equity_calculator.schemas.equity_metrics_check import (
@@ -57,8 +57,6 @@ __all__ = ["compute_metrics_check"]
 
 _MONTHS_PER_YEAR = 12
 _ONE_MONTH = 1
-_DECIMAL_BASE = 10
-_HALF = Fraction(1, 2)
 
 
 @dataclass(frozen=True)
@@ -193,29 +191,6 @@ def _work(inputs: MetricsCheckInput) -> _Worked:
     )
 
 
-def _typed_places(written: Decimal) -> int:
-    """The decimal places ``written`` is typed with: ``12`` none, ``12.40`` two, ``0.0`` one (a zero keeps its places,
-    ``WrittenDecimal``); an exponent form counts what it spells out (``1.2E+1`` none)."""
-    exponent = written.as_tuple().exponent
-    return max(0, -exponent) if isinstance(exponent, int) else 0
-
-
-def _round_half_away(value: Fraction, places: int) -> Fraction:
-    """``value`` rounded half away from zero to ``places`` decimal places, exactly (12.5 to 13, -2.5 to -3)."""
-    scale = _DECIMAL_BASE**places
-    whole = math.floor(abs(value) * scale + _HALF)
-    return Fraction(whole if value >= ZERO else -whole, scale)
-
-
-def _rounds_to(written: Decimal, unit: EquityUnit, computed: Fraction) -> bool | None:
-    """Whether ``written`` (percent points for a fraction) is ``computed`` rounded half away from zero to the places
-    ``written`` is typed with; none for money, whose round figures (ARR of $1.2M) say nothing about their places."""
-    if unit == "money":
-        return None
-    shown = computed * HUNDRED if unit == "fraction" else computed
-    return _round_half_away(shown, _typed_places(written)) == fraction(written)
-
-
 def _check(
     key: MetricsCheckKey,
     unit: EquityUnit,
@@ -229,7 +204,7 @@ def _check(
     to the places it is typed with (``within_rounding``)."""
     stated = from_percent(written) if unit == "fraction" else fraction(written)
     difference = computed - stated
-    rounds = _rounds_to(written, unit, computed)
+    rounds = rounds_to(written, unit, computed)
 
     return MetricsCheck(
         key=key,

@@ -38,7 +38,7 @@ Four calls, in this order: `equity_deal_check`, `equity_waterfall` once per exit
   Investors' percent: the deck says                       20.0000%  given
   Investors' percent: the calculator gives                25.0000%  the investor's cap-table share
   Investors' percent: difference                           5.0000%  computed - stated
-  Investors' percent: verdict                             mismatch  within the tolerance is consistent
+  Investors' percent: verdict                             mismatch  within the tolerance, or rounding to the deck's, is consistent
 ```
 
 ### Call 2: `equity_waterfall`, the $40,000,000 exit

@@ -46,12 +46,12 @@ forma's counts.
 ```
 
 ```text
-  SAFEs and notes                                                                   1  given
-  After: SAFE 1                                                               9.5890%  shares/T
-  Holder group's percent after: the calculator gives                         53.6986%  h·(share every pre-round share keeps)
-  Holder group's percent after: difference                                   -8.3014%  computed - stated
-  Holder group's percent after: verdict                                      mismatch  within the tolerance is consistent
-  A VC is likely to ask                               conversions_bought_by_pre_money  SAFE and note shares come out of the pre-round holders, not the new investor, so their stake falls by more than the percent sold; a VC reads the cap table this way
+  SAFEs and notes                                                                        1  given
+  After: SAFE 1                                                                    9.5890%  shares/T
+  Holder group's percent after: the calculator gives                              53.6986%  h·(share every pre-round share keeps)
+  Holder group's percent after: difference                                        -8.3014%  computed - stated
+  Holder group's percent after: verdict                                           mismatch  within the tolerance, or rounding to the deck's, is consistent
+  A VC is likely to ask                                    conversions_bought_by_pre_money  SAFE and note shares come out of the pre-round holders, not the new investor, so their stake falls by more than the percent sold; a VC reads the cap table this way
 ```
 
 ### Call 2: `equity_waterfall`, the $100,000,000 exit

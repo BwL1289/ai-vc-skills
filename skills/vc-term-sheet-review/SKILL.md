@@ -131,12 +131,13 @@ the labels given in parentheses.
    - `equity_deal_check` (from the command line, `equity_calculator deal_check`): the amount, the valuation with its
      label (a valuation with no label: call twice, once as `pre_money` and once as `post_money`), the pool target and
      its timing, every SAFE and note as `instruments`, the founders' shares as `holder_shares`, and every figure the
-     founder believes as `stated_investor_percent` or `stated_holder_percent`. Its `effective_pre_money`
-     ("Effective pre-money"), `holder_ownership_after` ("After: holder group"), `investor_ownership`, `checks`,
-     `flags` and `verdict` are the figures for the price, the founders' ownership and any belief that does not hold.
-     With two readings, show both side by side. Only a check that is a mismatch under every reading is the
-     calculator's mismatch; a mismatch under one reading only is not: it becomes one lawyer question, to have the
-     sheet say pre- or post-money, quoting both readings in the tool's values.
+     founder believes as `stated_investor_percent` or `stated_holder_percent`, as text with the document's own places
+     (one that is the tool's figure rounded to them is consistent). Its `effective_pre_money` ("Effective pre-money"),
+     `holder_ownership_after` ("After: holder group"), `investor_ownership`, `checks`, `flags` and `verdict` are the
+     figures for the price, the founders' ownership and any belief that does not hold. With two readings, show both side
+     by side. Only a check that is a mismatch under every reading is the calculator's mismatch; a mismatch under one
+     reading only is not: it becomes one lawyer question, to have the sheet say pre- or post-money, quoting both
+     readings in the tool's values.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
      which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask the
@@ -360,6 +361,7 @@ beside each). This is what each means for the founder: a question a later reader
 | `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold      |
 | `discount_beat_cap`                   | A discount gave a lower price than the cap, so a cap-only conversion would be wrong                             |
 | `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares                            |
+| `consistent_beyond_rounding`          | A stated percent or runway holds by the tolerance alone, not as the tool's figure rounded to its own places     |
 | `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on them                                     |
 | `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn                                                       |
 | `runway_below_band`                   | Planned runway is under the tool's runway benchmark (a common benchmark, not a rule)                            |

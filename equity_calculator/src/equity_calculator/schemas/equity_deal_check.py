@@ -22,6 +22,7 @@ from fractions import Fraction
 from typing import Literal
 
 from equity_calculator.schemas.equity_common import (
+    AS_WRITTEN,
     MODEL_CONFIG,
     ONE_HUNDRED,
     WHOLE_PERCENT,
@@ -30,6 +31,7 @@ from equity_calculator.schemas.equity_common import (
     EquityQuantity,
     PoolTiming,
     ShareCount,
+    WrittenDecimal,
     exactly_one,
 )
 from equity_calculator.schemas.equity_pool import PoolInput, PoolResult
@@ -68,7 +70,8 @@ DealCheckScenario = Literal["deal_check"]
 # top-up, the pool scenario) or ``round`` (SAFEs or notes converting, the round scenario).
 DealPath = Literal["plain", "pool", "round"]
 
-# One stated figure against the computed one: within the tolerance it is ``consistent``, else a ``mismatch``.
+# One stated figure against the computed one: within the tolerance it is ``consistent``, else a ``mismatch``; a stated
+# percent or runway is also ``consistent`` when it is the computed figure rounded to the places it is typed with.
 CheckVerdict = Literal["consistent", "mismatch"]
 
 # Which stated figure a check is about: the post-money, the investors' percent, the holder group's percent after the
@@ -80,7 +83,8 @@ CheckKey = Literal["post_money", "investor_percent", "holder_percent", "runway_m
 DealVerdict = Literal["consistent", "mismatch", "not_checked"]
 
 # Facts and questions a VC is likely to raise. They never change a verdict; their plain words are in
-# ``equity_calculator.layout_deal_check``.
+# ``equity_calculator.layout_deal_check``. ``consistent_beyond_rounding`` names a stated percent or runway consistent by
+# the tolerance alone, not as the computed figure rounded to the places the deck writes it with.
 DealFlag = Literal[
     "valuation_back_solved",
     "pool_in_pre_money_lowers_price",
@@ -89,6 +93,7 @@ DealFlag = Literal[
     "conversions_bought_by_pre_money",
     "discount_beat_cap",
     "note_interest_converts",
+    "consistent_beyond_rounding",
     "net_burn_not_positive",
     "current_burn_runway_longer",
     "runway_below_band",
@@ -114,6 +119,9 @@ _TWO = 2
 _FIVE = 5
 _ZERO = Fraction(0)
 _VALUE_ERROR_PREFIX = "Value error, "
+# The description each stated percent and the stated runway carry in the JSON schema (``AS_WRITTEN``).
+_PERCENT_AS_WRITTEN = "Percent points. " + AS_WRITTEN.format(examples='"20", "16.7"')
+_MONTHS_AS_WRITTEN = AS_WRITTEN.format(examples='"18", "18.0"')
 
 
 class FundsLine(BaseModel):
@@ -238,8 +246,9 @@ class DealCheckInput(BaseModel):
     and notes excluded; it is needed only to convert SAFEs and notes or to top up the pool. One group's stake before
     the round is ``holder_percent`` of FD or ``holder_shares`` of it; ``stated_holder_percent`` is the deck's figure
     for it after. Runway takes the planned and/or current monthly
-    gross burn, each with its revenue. The tolerances say how far a stated figure may sit from the computed one; the
-    two bands raise a benchmark question, never an error.
+    gross burn, each with its revenue. The tolerances say how far a stated figure may sit from the computed one; a
+    stated percent or runway that is the computed figure rounded to the places it is typed with holds even past them,
+    so it goes in with the places the deck writes. The two bands raise a benchmark question, never an error.
     """
 
     model_config = MODEL_CONFIG
@@ -248,7 +257,11 @@ class DealCheckInput(BaseModel):
     investment: BoundedDecimal = Field(gt=0)
     pre_money: BoundedDecimal | None = Field(default=None, gt=0)
     post_money: BoundedDecimal | None = Field(default=None, gt=0)
-    stated_investor_percent: BoundedDecimal | None = Field(default=None, gt=0, lt=WHOLE_PERCENT)
+    # The stated percents and runway are ``WrittenDecimal``, whose places the rounding test reads (above zero, so no
+    # zero's places to keep: the type and the description say how to send them).
+    stated_investor_percent: WrittenDecimal | None = Field(
+        default=None, gt=0, lt=WHOLE_PERCENT, description=_PERCENT_AS_WRITTEN
+    )
     fully_diluted_shares: ShareCount | None = Field(default=None, gt=0)
     unissued_pool_shares: ShareCount = Field(default=0, ge=0)
     unissued_pool_percent: BoundedDecimal | None = Field(default=None, ge=0, lt=WHOLE_PERCENT)
@@ -257,13 +270,15 @@ class DealCheckInput(BaseModel):
     instruments: tuple[Instrument, ...] = Field(default=(), max_length=MAX_INSTRUMENTS)
     holder_percent: BoundedDecimal | None = Field(default=None, gt=0, le=WHOLE_PERCENT)
     holder_shares: ShareCount | None = Field(default=None, gt=0)
-    stated_holder_percent: BoundedDecimal | None = Field(default=None, gt=0, lt=WHOLE_PERCENT)
+    stated_holder_percent: WrittenDecimal | None = Field(
+        default=None, gt=0, lt=WHOLE_PERCENT, description=_PERCENT_AS_WRITTEN
+    )
     cash_on_hand: BoundedDecimal = Field(default=Decimal(0), ge=0)
     planned_monthly_gross_burn: BoundedDecimal | None = Field(default=None, gt=0)
     planned_monthly_revenue: BoundedDecimal | None = Field(default=None, ge=0)
     current_monthly_gross_burn: BoundedDecimal | None = Field(default=None, gt=0)
     current_monthly_revenue: BoundedDecimal | None = Field(default=None, ge=0)
-    stated_runway_months: BoundedDecimal | None = Field(default=None, gt=0)
+    stated_runway_months: WrittenDecimal | None = Field(default=None, gt=0, description=_MONTHS_AS_WRITTEN)
     use_of_funds: tuple[FundsLine, ...] = Field(default=(), max_length=MAX_USE_OF_FUNDS_LINES)
     tolerance_points: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_POINTS, ge=0, lt=WHOLE_PERCENT)
     tolerance_percent: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_PERCENT, ge=0, lt=WHOLE_PERCENT)
@@ -347,7 +362,12 @@ class DealCheckInput(BaseModel):
 
 
 class DealCheck(BaseModel):
-    """One stated figure checked: what the deck says, what the calculator gives, computed - stated, the verdict."""
+    """One stated figure checked: what the deck says, what the calculator gives, computed - stated, the verdict.
+
+    ``within_rounding`` says whether a stated percent or runway is the computed figure rounded half away from zero to
+    the places it is typed with, which makes it consistent even past the tolerance; none for the post-money (money)
+    and for the use-of-funds total (a sum of lines, set against the raise or 100%, never a figure typed as one).
+    """
 
     model_config = MODEL_CONFIG
 
@@ -356,6 +376,7 @@ class DealCheck(BaseModel):
     computed: EquityQuantity
     difference: EquityQuantity
     verdict: CheckVerdict
+    within_rounding: bool | None = None
 
 
 class DealMoneyLine(BaseModel):

@@ -78,7 +78,16 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      there is no runway end and a stated runway is not checked).
    - Pool timing: if the term sheet or deck does not say, use the pre-money (the usual term sheet), say so, and offer
      to re-run with the pool in the post-money.
-3. **Call `equity_deal_check`** with every stated figure. Send money and percents as strings:
+   - In `equity_deal_check`, a stated percent or runway that is the tool's figure rounded to the places the deck
+     writes is consistent, past the tolerance or not, because people write figures rounded to the places they show (a
+     12-month runway against the tool's 12.40 months; 17% sold against 16.6667%, but not 20%); its row says so
+     ("rounds to the deck's"). Those places decide it, so pass `stated_investor_percent`, `stated_holder_percent` and
+     `stated_runway_months` as text with exactly the places the deck writes ("12", "12.0"). The post-money and the
+     use-of-funds total keep the tolerance alone, and so does `equity_runway_plan`'s stated runway. The verdict is the
+     tool's; `consistent_beyond_rounding` names a figure that holds by the tolerance alone, and goes to the answer as
+     the flag table says.
+3. **Call `equity_deal_check`** with every stated figure. Send money and percents as strings, each stated percent
+   and the runway with the deck's own places:
 
    ```json
    {
@@ -110,11 +119,12 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      Effective pre-money                                               $10,500,000.00  (FD - U)·p: the pre-round holders' shares at the round price
      After: holder group                                                     70.0000%  h·kept
      Pre-money pays for: new pool                                       $1,500,000.00  P·p (pool in the pre-money)
-     Investors' percent: verdict                                           consistent  within the tolerance is consistent
+     Investors' percent: verdict                                           consistent  within the tolerance, or rounding to the deck's, is consistent
      Runway: the deck says                                               24.00 months  given
      Runway: the calculator gives                                        18.89 months  (cash + I)/net burn, planned (else current)
      Runway: difference                                                  -5.11 months  computed - stated
-     Runway: verdict                                                         mismatch  within the tolerance is consistent
+     Runway: rounds to the deck's "24"                                             no  the computed figure, rounded half away from zero to the places the deck writes, is the deck's
+     Runway: verdict                                                         mismatch  within the tolerance, or rounding to the deck's, is consistent
      Overall verdict                                                         mismatch  mismatch if any check is; consistent if all are; not_checked with none
    ```
 
@@ -174,6 +184,7 @@ the two `runway_plan` flags). The text report prints the same meaning beside eac
 | `conversions_bought_by_pre_money`     | SAFE and note shares come out of the pre-round holders, so their stake falls by more than the percent sold.     | Show ownership with the SAFEs and notes converted, as a VC reads the cap table.                |
 | `discount_beat_cap`                   | A discount gave a lower price than the cap.                                                                     | Model that instrument at its discount price; a cap-only conversion in the deck would be wrong. |
 | `note_interest_converts`              | Note interest converts too, so a note gets more than its principal's worth of shares.                           | Count the interest in the cap table.                                                           |
+| `consistent_beyond_rounding`          | A stated percent or runway holds by the tolerance alone: it is not the tool's figure rounded to its own places. | Quote the tool's figure; a VC recomputing gets it.                                             |
 | `net_burn_not_positive`               | Revenue covers the burn on those figures, so there is no net runway on it.                                      | A runway claim is checked on the other burn's net runway; with none, it is not checked.        |
 | `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn.                                                      | Say which burn the deck's runway uses; a VC will check it against the planned spend.           |
 | `runway_below_band`                   | Planned net runway is under the runway benchmark (18 months by default).                                        | Be ready to say whether the raise reaches the next milestone (a common benchmark, not a rule). |

@@ -15,6 +15,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 from equity_calculator.exact import from_percent, quantity
+from equity_calculator.rounding import ROUNDING_HOW, ROUNDING_VERDICT_HOW, rounding_label
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_metrics_check import (
     MetricsCheck,
@@ -70,7 +71,6 @@ _PRIMED_HOW = {
 }
 _PRIMED_NOTE = "; E', C', X' the starting customers' own when given, else the period's total"
 _UNCHECKED_BURN_MULTIPLE = "none"
-_ROUNDING_HOW = "the computed figure, rounded half away from zero to the places the deck writes, is the deck's"
 
 
 def _months(count: int) -> str:
@@ -321,11 +321,7 @@ def _verdict_how(check: MetricsCheck, inputs: MetricsCheckInput) -> str:
     """How a checked figure's verdict is read (a percent, months or multiple also when it rounds to the deck's); a
     mismatch whose difference rounds to the tolerance says it is just over it, so the row never reads as a difference
     equal to the tolerance marked a mismatch."""
-    how = (
-        "within the tolerance is consistent"
-        if check.within_rounding is None
-        else "within the tolerance, or rounding to the deck's, is consistent"
-    )
+    how = "within the tolerance is consistent" if check.within_rounding is None else ROUNDING_VERDICT_HOW
     if check.verdict != "mismatch" or check.computed is None or check.difference is None:
         return how
     unit = check.stated.unit
@@ -389,8 +385,8 @@ def _check_lines(check: MetricsCheck, result: MetricsCheckResult) -> list[Line]:
         verdict_how = _verdict_how(check, inputs)
     typed = _typed(check, inputs)
     if check.within_rounding is not None and typed is not None:
-        label = f'{name}: rounds to the deck\'s "{typed:f}"'
-        lines.append(Line(f"{key}_rounding", label, (yes_no(check.within_rounding),), _ROUNDING_HOW))
+        label = rounding_label(name, typed)
+        lines.append(Line(f"{key}_rounding", label, (yes_no(check.within_rounding),), ROUNDING_HOW))
     lines.append(Line(f"{key}_verdict", f"{name}: verdict", (check.verdict,), verdict_how, verdict=True))
     return lines
 

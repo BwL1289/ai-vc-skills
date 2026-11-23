@@ -44,11 +44,11 @@ text.
   After: investors                                                        20.0000%  N/T
   Pre-money pays for: new pool                                       $1,500,000.00  P·p (pool in the pre-money)
   Net runway, planned burn                                            18.89 months  (cash + I)/net burn
-  Investors' percent: verdict                                           consistent  within the tolerance is consistent
+  Investors' percent: verdict                                           consistent  within the tolerance, or rounding to the deck's, is consistent
   Runway: the deck says                                               24.00 months  given
   Runway: the calculator gives                                        18.89 months  (cash + I)/net burn, planned (else current)
   Runway: difference                                                  -5.11 months  computed - stated
-  Runway: verdict                                                         mismatch  within the tolerance is consistent
+  Runway: verdict                                                         mismatch  within the tolerance, or rounding to the deck's, is consistent
   Overall verdict                                                         mismatch  mismatch if any check is; consistent if all are; not_checked with none
 ```
 

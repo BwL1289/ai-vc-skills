@@ -47,7 +47,7 @@ Read as pre-money:
   Pre-money as stated                               $24,000,000.00  given
   Investors' percent as stated                            25.0000%  given
   Investors' percent: the calculator gives                20.0000%  the investor's cap-table share
-  Investors' percent: verdict                             mismatch  within the tolerance is consistent
+  Investors' percent: verdict                             mismatch  within the tolerance, or rounding to the deck's, is consistent
   Overall verdict                                         mismatch  mismatch if any check is; consistent if all are; not_checked with none
 ```
 
@@ -58,7 +58,7 @@ Read as post-money:
   Post-money as stated                              $24,000,000.00  given
   Investors' percent as stated                            25.0000%  given
   Investors' percent: the calculator gives                25.0000%  the investor's cap-table share
-  Investors' percent: verdict                           consistent  within the tolerance is consistent
+  Investors' percent: verdict                           consistent  within the tolerance, or rounding to the deck's, is consistent
   Overall verdict                                       consistent  mismatch if any check is; consistent if all are; not_checked with none
 ```
 

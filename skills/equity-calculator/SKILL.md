@@ -171,19 +171,24 @@ page). Everything else is standard arithmetic, labelled `unverified` in the resu
 - **Deal check (unverified, except post = pre + raise from the YC user guide).** Post-money = V + I; the investor's
   stake is its cap-table row (I/(V + I) with the pool in the pre-money); a holder group keeps its pre-round share ×
   FD/T; effective pre-money = (FD - U) × price; runway = (cash + I) / (gross burn - revenue). A stated figure within
-  the tolerance (0.5 points for a percent, 2% for money or months, both inputs) is consistent. The dilution (25%) and
-  runway (18 months) bands are common benchmarks, not rules: they raise a question, never an error.
+  the tolerance (0.5 points for a percent, 2% for money or months, both inputs) is consistent, and so is a stated
+  percent or runway that is the computed figure rounded half away from zero to the places it is written with, past
+  the tolerance or not (people write figures rounded to the places they show: a 12-month runway against 12.40 holds,
+  "12.0" does not), so send `stated_investor_percent`, `stated_holder_percent` and `stated_runway_months` as text
+  with the deck's places; its row says whether it is that rounding, and the post-money and the use-of-funds total
+  keep the tolerance alone. `consistent_beyond_rounding` names a figure that holds by the tolerance alone. The
+  dilution (25%) and runway (18 months) bands are common benchmarks, not rules: they raise a question, never an error.
 - **Runway plan (the YC seed guide for the milestone idea and the runway band; the rest unverified).** Cash above the
   floor runs down by each phase's net burn (gross burn - revenue, flat within a phase); a raise lands whole after
   `lands_month` months. Runway is when that cash first goes below zero (none when revenue covers the burn first); a
   no-raise row is always worked. A milestone is covered when the runway reaches its month plus `months_to_raise`;
   the smallest raise for it is the peak cumulative net burn from the landing month to that target less the cash above
   the floor (never below zero), none when the cash runs out before the money lands. A downside or lean case is its
-  own phases or percents of the plan's. Stated runways and use-of-funds totals use deal_check's tolerances; a runway
-  stated from landing is not checked when the cash runs out before the money lands. The 18-month band is the top of
-  the guide's "raising for N months (usually 12-18)": a raise inside 12 to 18 is within that range, so the flag is a
-  question, never a shortfall or an error. Cash only: valuation and ownership stay with deal_check,
-  round and dilution.
+  own phases or percents of the plan's. Stated runways and use-of-funds totals use deal_check's tolerances (the
+  tolerance alone: no rounding test here); a runway stated from landing is not checked when the cash runs out before
+  the money lands. The 18-month band is the top of the guide's "raising for N months (usually 12-18)": a raise inside
+  12 to 18 is within that range, so the flag is a question, never a shortfall or an error. Cash only: valuation and
+  ownership stay with deal_check, round and dilution.
 - **Metrics check (a16z, Bessemer, Sacks and Skok for the definitions and the three benchmarks; the rest
   unverified).** All flows are for one period. With k = 12 for monthly recurring revenue (1 for annual): ARR at the
   end = k·(S + N + E - C - X), net new ARR = k·(N + E - C - X); the latest month's ARR = 12·(T - one-time - usage),

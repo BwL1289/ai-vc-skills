@@ -39,12 +39,12 @@ for digit, for the later round the founder names, and gives no sign or do-not-si
 ```
 
 ```text
-  Pre-money valuation (V)                                             $32,000,000.00  post-money - I (worked from it)
-  Post-money valuation                                                $40,000,000.00  V + I
-  Effective pre-money                                                 $28,000,000.00  (FD - U)·p: the pre-round holders' shares at the round price
-  After: holder group                                                       70.0000%  h·kept
-  Holder group's percent after: verdict                                   consistent  within the tolerance is consistent
-  A VC is likely to ask                               pool_in_pre_money_lowers_price  The new pool is paid for out of the pre-money, so the effective pre-money and the price per share are below the headline; a VC prices it this way
+  Pre-money valuation (V)                                                  $32,000,000.00  post-money - I (worked from it)
+  Post-money valuation                                                     $40,000,000.00  V + I
+  Effective pre-money                                                      $28,000,000.00  (FD - U)·p: the pre-round holders' shares at the round price
+  After: holder group                                                            70.0000%  h·kept
+  Holder group's percent after: verdict                                        consistent  within the tolerance, or rounding to the deck's, is consistent
+  A VC is likely to ask                                    pool_in_pre_money_lowers_price  The new pool is paid for out of the pre-money, so the effective pre-money and the price per share are below the headline; a VC prices it this way
 ```
 
 ### Call 2: `equity_pool`

@@ -57,14 +57,14 @@ Five calls, in this order: `equity_deal_check`, `equity_pool`, then `equity_wate
 ```
 
 ```text
-  Investors' share of the cap table                                         20.0000%  N/T
-  Effective pre-money                                                 $10,500,000.00  (FD - U)·p: the pre-round holders' shares at the round price
-  Holder group's percent after: the calculator gives                        58.9474%  h·(share every pre-round share keeps)
-  Holder group's percent after: verdict                                   consistent  within the tolerance is consistent
-  Runway: the calculator gives                                          22.67 months  (cash + I)/net burn, planned (else current)
-  Runway: verdict                                                         consistent  within the tolerance is consistent
-  A VC is likely to ask                               pool_in_pre_money_lowers_price  The new pool is paid for out of the pre-money, so the effective pre-money and the price per share are below the headline; a VC prices it this way
-  Overall verdict                                                         consistent  mismatch if any check is; consistent if all are; not_checked with none
+  Investors' share of the cap table                                              20.0000%  N/T
+  Effective pre-money                                                      $10,500,000.00  (FD - U)·p: the pre-round holders' shares at the round price
+  Holder group's percent after: the calculator gives                             58.9474%  h·(share every pre-round share keeps)
+  Holder group's percent after: verdict                                        consistent  within the tolerance, or rounding to the deck's, is consistent
+  Runway: the calculator gives                                               22.67 months  (cash + I)/net burn, planned (else current)
+  Runway: verdict                                                              consistent  within the tolerance, or rounding to the deck's, is consistent
+  A VC is likely to ask                                    pool_in_pre_money_lowers_price  The new pool is paid for out of the pre-money, so the effective pre-money and the price per share are below the headline; a VC prices it this way
+  Overall verdict                                                              consistent  mismatch if any check is; consistent if all are; not_checked with none
 ```
 
 ### Call 2: `equity_pool`

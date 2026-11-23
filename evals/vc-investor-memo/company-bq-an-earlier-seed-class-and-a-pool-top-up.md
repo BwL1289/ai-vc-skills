@@ -39,7 +39,7 @@ exit value, with `common_shares` 7500000 (the founder's issued common) and the S
 
 ```text
   Investors' share of the cap table                                       20.0000%  N/T
-  Investors' percent: verdict                                           consistent  within the tolerance is consistent
+  Investors' percent: verdict                                           consistent  within the tolerance, or rounding to the deck's, is consistent
 ```
 
 ### Call 2: `equity_pool`

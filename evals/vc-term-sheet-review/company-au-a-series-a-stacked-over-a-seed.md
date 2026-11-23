@@ -46,12 +46,12 @@ sheet; runs no baseline column; and gives no sign or do-not-sign verdict.
 ```
 
 ```text
-  Post-money valuation                                                $25,000,000.00  V + I
-  Effective pre-money                                                 $17,500,000.00  (FD - U)·p: the pre-round holders' shares at the round price
-  After: holder group                                                       56.0000%  h·kept
-  Holder group's percent after: the calculator gives                        56.0000%  h·(share every pre-round share keeps)
-  Holder group's percent after: verdict                                     mismatch  within the tolerance is consistent
-  A VC is likely to ask                               pool_in_pre_money_lowers_price  The new pool is paid for out of the pre-money, so the effective pre-money and the price per share are below the headline; a VC prices it this way
+  Post-money valuation                                                     $25,000,000.00  V + I
+  Effective pre-money                                                      $17,500,000.00  (FD - U)·p: the pre-round holders' shares at the round price
+  After: holder group                                                            56.0000%  h·kept
+  Holder group's percent after: the calculator gives                             56.0000%  h·(share every pre-round share keeps)
+  Holder group's percent after: verdict                                          mismatch  within the tolerance, or rounding to the deck's, is consistent
+  A VC is likely to ask                                    pool_in_pre_money_lowers_price  The new pool is paid for out of the pre-money, so the effective pre-money and the price per share are below the headline; a VC prices it this way
 ```
 
 ### Call 2: `equity_pool`
