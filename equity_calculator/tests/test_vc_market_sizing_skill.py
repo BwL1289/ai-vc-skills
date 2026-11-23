@@ -51,6 +51,8 @@ _EVALS = sorted((_ROOT / "evals" / "vc-market-sizing").glob("*.md"))
 _EVAL_COUNT = 4
 # The repository gives each made-up company its own letter; this skill's evals use AW to AZ.
 _EVAL_LETTERS = ("aw", "ax", "ay", "az")
+# The calls each calling eval makes: AW one; AX one, then one whole-company run for each fee the founder named.
+_EVAL_CALLS = {"aw": 1, "ax": 3}
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_market_sizing` call."
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
@@ -451,7 +453,7 @@ def test_each_eval_call_is_valid_and_its_excerpt_is_what_the_calculator_prints(p
     calls = _fences("json", text)
     excerpts = _fences("text", text)
 
-    assert calls and len(calls) == len(excerpts), path.name
+    assert len(calls) == len(excerpts) == _EVAL_CALLS[path.name.split("-")[1]], path.name
     for call, excerpt in zip(calls, excerpts, strict=True):
         printed = [line.rstrip() for line in _report(call).splitlines()]
         for line in excerpt.splitlines():
