@@ -34,7 +34,7 @@ the founder did not give. It always tells the founder to have a lawyer review th
     expect; explain its terms in plain words and send the founder to their lawyer.
   - The story and the say-and-avoid list for the next round: the vc-positioning skill. Claims in a deck: the
     vc-claims-check skill. The deck as a whole: the vc-deck-review skill (preview).
-  - Planned, not yet shipped: how much to raise and what it buys. Until it ships, say so.
+  - How much to raise and what it buys: the vc-round-sizing skill (preview).
 
 ## Inputs
 
