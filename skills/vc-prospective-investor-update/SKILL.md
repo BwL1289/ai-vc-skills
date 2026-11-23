@@ -31,8 +31,8 @@ adds a figure, customer, event or investor the founder did not give, and never l
   - The story and the say-and-avoid list for the raise itself: the vc-positioning skill.
   - How much to raise and which milestone it buys: the vc-round-sizing skill. This skill's runway call carries no raise
     and no milestone.
-  - Planned, not yet shipped: whether a metric's definition is the one investors expect (the vc-metrics-readiness
-    skill). Until it ships, say so. This skill keeps a definition the same over time without judging it.
+  - Whether a metric's definition is the one investors expect: the vc-metrics-readiness skill. This skill keeps a
+    definition the same over time without judging it.
 
 ## Inputs
 

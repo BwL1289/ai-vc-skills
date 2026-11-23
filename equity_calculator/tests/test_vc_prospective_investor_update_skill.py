@@ -64,8 +64,13 @@ _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
 _PROGRAM = "equity_calculator "
-_HANDOFF_SKILLS = ("vc-current-investor-update", "vc-claims-check", "vc-positioning", "vc-round-sizing")
-_PLANNED_SKILLS = ("vc-metrics-readiness",)
+_HANDOFF_SKILLS = (
+    "vc-current-investor-update",
+    "vc-claims-check",
+    "vc-positioning",
+    "vc-round-sizing",
+    "vc-metrics-readiness",
+)
 _PLANNED = "Planned, not yet shipped:"
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
@@ -277,19 +282,11 @@ def test_every_skill_it_hands_off_to_exists_and_points_back() -> None:
     assert "the vc-prospective-investor-update skill" in _unwrapped(_section("## When to use it", _SIBLING))
 
 
-def test_the_planned_skills_are_named_as_planned_until_their_folders_exist() -> None:
+def test_no_hand_off_is_left_planned_and_the_runway_call_stays_plain() -> None:
     handoff = _unwrapped(_section("## When to use it"))
-    planned = handoff[handoff.index(_PLANNED) :]
 
-    for name in _PLANNED_SKILLS:
-        assert f"(the {name} skill)" in planned, name
-        # When the folder lands, move the name out of the planned line into a hand-off and into _HANDOFF_SKILLS.
-        assert not (
-            _ROOT / "skills" / name
-        ).exists(), (
-            f"{name} has shipped: turn its planned line into a hand-off, add it to _HANDOFF_SKILLS, drop it here"
-        )
-    assert "Until it ships, say so" in planned
+    assert _PLANNED not in _TEXT
+    assert "keeps a definition the same over time without judging it" in handoff
     assert "This skill's runway call carries no raise and no milestone" in handoff
 
 
