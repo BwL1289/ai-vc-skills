@@ -4,7 +4,8 @@ The questions a partner is likely to ask in a meeting, by category. The vc-partn
 after the attack stage of its adversarial review, to word the questions its lenses kept, so no lens anchors on it. A
 question here enters the drill only when it is tied to a line of the founder's material quoted word for word and then
 passes the quote check and the refute pass; otherwise it becomes an open ask, or it is one of the standing prep
-questions. A planned due-diligence skill may reuse these questions.
+questions. The vc-diligence-questions skill reads the same file: the ID, Question, Probes, Stages, Grounding and
+Diligence columns and each category heading, so renaming one fails that skill's test.
 
 The list and its wording are this skill's own and unverified. A few topics, among them the round-so-far rows, came as
 ideas from the investor-persona prompts the skill's Sources credit, which cite no source for them.
@@ -19,7 +20,7 @@ ideas from the investor-persona prompts the skill's Sources credit, which cite n
 | Lenses    | The lenses that raise it, named as in the skill's lens table                                               |
 | Stages    | pre-seed, seed, Series A, later, or all                                                                    |
 | Grounding | The kind of founder line that makes it a drill question, or standing for a question every founder prepares |
-| Diligence | What a partner may ask to see afterwards, or none; read by the planned due-diligence skill                 |
+| Diligence | What a partner may ask to see afterwards, or none; read by the vc-diligence-questions skill                |
 
 Rules for every row: a question, never an answer; no figure, benchmark or bar, since what counts as enough varies by
 sector, region and year; no person or firm named. Competition rows read the market at four levels, and each one's

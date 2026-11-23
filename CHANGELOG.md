@@ -65,6 +65,18 @@ All notable changes to this repository. Dates are UTC.
   why-we-built-it-this-way lines, with which to show in the deck (at most three) and which to keep for the meeting. It
   invents no decisions, scores no taste and calls no calculator tool. `vc-positioning` now points to it. Four evals are
   in `evals/vc-taste-check/`.
+- The `vc-diligence-questions` skill, in preview: a founder prepares for a fund's due diligence after the first
+  meeting. One lens per area (team, market, product, traction and metrics, financials and cap table, legal) attacks the
+  founder's own lines, and a refute pass drops every question the material or a document on the founder's list already
+  answers. The questions that remain are ranked in three tiers (stops the process, slows it, minor), each with a draft
+  answer built only from the founder's material and its gaps as bracketed asks. An area prep list and a data-room
+  checklist scaled to the stage follow, each document marked Contradicted, Missing or Ready. The questions come from
+  `vc-partner-meeting`'s question bank, read in place and never copied (a test ties the two); the skill's own legal and
+  cap-table questions and the checklist sit in `skills/vc-diligence-questions/references/data-room.md`. The cap table
+  goes to `equity_deal_check` (`equity_round` for a SAFE or note raise), runway with no raise to `equity_runway_plan`,
+  and the cap table's own sums are quoted, not computed. No score, no investor voice, no legal opinion, and no invented
+  or backdated document. `vc-positioning` and `vc-partner-meeting` now point to it. Four evals are in
+  `evals/vc-diligence-questions/`.
 - The calculator's `runway_plan` scenario, also an MCP tool (`equity_runway_plan`), a command and a workbook sheet:
   how long each raise lasts on a founder's phased plan, a downside and a lean case, with a no-raise row (and its
   stated runway checked), milestones with time to raise the next round, the smallest raise per milestone and landing

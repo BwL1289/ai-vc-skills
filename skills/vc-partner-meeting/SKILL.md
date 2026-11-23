@@ -28,8 +28,8 @@ company, its round or its investors that the founder did not give.
   - The ask's arithmetic (valuation, percent sold, ownership after the round, the pool, runway, use of funds): the
     vc-deal-math skill, which calls `equity_deal_check`. New money on a SAFE or note: `equity_round` (the
     equity-calculator skill). A stake through later rounds: `equity_dilution`.
-  - Planned, not yet shipped: a ranked bank of due-diligence questions and a data-room checklist. It may reuse this
-    skill's question bank ([`references/question-bank.md`](references/question-bank.md)). Until it ships, say so.
+  - Diligence after the meeting, by area, with a data-room checklist: the vc-diligence-questions skill (preview), which
+    reads this skill's question bank ([`references/question-bank.md`](references/question-bank.md)).
 
 ## Inputs
 
