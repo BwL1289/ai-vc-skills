@@ -326,7 +326,8 @@ the founder's line the memo leaves out. The answer says these lenses are less in
 
 **The calculator's mismatches** do not go through the lenses or the refute pass. Each heads the ranked fix list
 under **figures that do not match (computed)**, quoting the memo's figure with the tool's value and difference. It is
-not refuted: the calculator computed it.
+not refuted: the calculator computed it. The one exception is a mismatch under only one reading of a valuation with no
+label, which becomes the fix "The round" gives.
 
 ### Check the quotes
 

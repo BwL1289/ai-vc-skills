@@ -3,7 +3,8 @@
 A test prompt for the `vc-investor-memo` skill. The company is made up. The answer states the expected behaviour; it is
 not a recorded run, and this eval has not been run in a live session. A run passes when it makes no tool call, asks for
 the round, the cap table and the exit values in one message, writes the ARR target as a plan with its date, keeps the
-risks section, and writes no recommendation.
+risks section, keeps the dissent objections to the $10 billion outcome and the ARR target, and writes no
+recommendation.
 
 ## Prompt
 
@@ -29,5 +30,5 @@ the case, each with what is being done and what shows it]`.
 - The memo is in the third person with no recommendation.
 - Dissent, Kept, each fixed by what the memo already carries: "a $10 billion company in the making" as an outcome with
   no stated basis (the exit-value pattern), fixed by `[the exit value on plan, and why]`; "we'll hit $10M ARR next
-  year" as a target written as a result, fixed by the plan wording above. A run that keeps these two, or drops them
-  with a reason, passes; nothing else is to be kept.
+  year" as a target written as a result, fixed by the plan wording above. A line that matches a pattern never answers
+  an objection, so both stay Kept; nothing else is to be kept.
