@@ -30,10 +30,10 @@ adds a figure, customer or event the founder did not give, and never leaves out 
   - A raise that closed in the period (ownership, the SAFE stack, the pool): the vc-deal-math skill, or the
     equity-calculator skill for one scenario on its own.
   - The story for the coming raise and the say-and-avoid list: the vc-positioning skill.
-  - Planned, not yet shipped: how much to raise next and which milestone it buys (the vc-round-sizing skill), and
-    the short update a founder sends prospective investors before a raise (the vc-prospective-investor-update
-    skill). Until each ships, say so. This skill's runway call carries no raise and no milestone, and it writes no
-    version for people who are not yet investors.
+  - How much to raise next and which milestone it buys: the vc-round-sizing skill (preview).
+  - Planned, not yet shipped: the short update a founder sends prospective investors before a raise (the
+    vc-prospective-investor-update skill). Until each ships, say so. This skill's runway call carries no raise and no
+    milestone, and it writes no version for people who are not yet investors.
 
 ## Inputs
 

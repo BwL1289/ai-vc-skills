@@ -46,7 +46,6 @@ _HANDOFF_SKILLS = (
     "vc-round-sizing",
     "vc-term-sheet-review",
     "vc-diligence-questions",
-    "vc-investor-update",
     "vc-current-investor-update",
 )
 _DESCRIPTION_LIMIT = 1024

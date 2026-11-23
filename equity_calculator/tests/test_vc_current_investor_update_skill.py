@@ -11,9 +11,9 @@ skill's authors read in full, and every pattern row cites one of them or says it
 evals/vc-current-investor-update/ has a prompt, an expected tool call and an expected answer, and every call is valid
 and every excerpt is lines of the report that call prints.
 
-Two skills it points to are planned, not yet shipped: sizing the next round (vc-round-sizing) and updates to
-prospective investors (vc-prospective-investor-update). A test checks that their folders do not exist yet, so the pull
-request that adds either one has to turn the planned line here into a hand-off.
+One skill it points to is planned, not yet shipped: updates to prospective investors
+(vc-prospective-investor-update). A test checks that its folder does not exist yet, so the pull request that adds it
+has to turn the planned line here into a hand-off.
 """
 
 from __future__ import annotations
@@ -52,8 +52,8 @@ _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
 _PROGRAM = "equity_calculator "
-_HANDOFF_SKILLS = ("vc-claims-check", "vc-deal-math", "equity-calculator", "vc-positioning")
-_PLANNED_SKILLS = ("vc-round-sizing", "vc-prospective-investor-update")
+_HANDOFF_SKILLS = ("vc-claims-check", "vc-deal-math", "equity-calculator", "vc-positioning", "vc-round-sizing")
+_PLANNED_SKILLS = ("vc-prospective-investor-update",)
 _PLANNED = "Planned, not yet shipped:"
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
