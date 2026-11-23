@@ -31,8 +31,8 @@ adds a figure, customer or event the founder did not give, and never leaves out 
     equity-calculator skill for one scenario on its own.
   - The story for the coming raise and the say-and-avoid list: the vc-positioning skill.
   - How much to raise next and which milestone it buys: the vc-round-sizing skill (preview).
-  - Planned, not yet shipped: the short update a founder sends prospective investors before a raise (the
-    vc-prospective-investor-update skill). Until each ships, say so. This skill's runway call carries no raise and no
+  - The short update a founder sends prospective investors before a raise, cut from this one when both go out in the
+    same period: the vc-prospective-investor-update skill (preview). This skill's runway call carries no raise and no
     milestone, and it writes no version for people who are not yet investors.
 
 ## Inputs
@@ -75,44 +75,29 @@ Keep the founder's words where they are clear. The Definitions block is this ski
 makes the next update's tie-out possible. A founder who asks to leave a section out, cash and runway included, hears
 once that the update keeps the same sections every time; the section stays, with bracketed asks for what is missing.
 
-## Metrics and their definitions
+## Metrics and tying out to the last update
 
-- **Same metrics, same definitions, every time.** A metric the last update reported stays in, whichever way it
-  moved. A new metric may be added; a dropped one is said to be dropped, with the reason.
-- **A changed definition is announced,** in the Metrics section and in Definitions: the old label and definition, the
-  new ones, and, for the period both cover, both values as the founder gives them. Never convert one into the other.
-- **Name each metric for what it is.** Bookings and letters of intent are not revenue; one-time fees are not
-  recurring revenue; GMV is not revenue; "active" needs a definition; churn and burn say gross or net.
-- **Per-period figures, with absolutes.** Not cumulative totals in place of a period's figure, and never a percent
-  change without the two figures it compares.
-- **Growth rates are quoted, never computed.** A growth rate the founder states is quoted with its method (month over
-  month, a simple average, compounded) and its period; with no method given, ask for it. Never work one out.
+The rules for metrics and their definitions, the six status words for tying each metric out to the last update, the
+Definitions block and the figures no tool here checks live in one file this skill keeps:
+[`references/metric-consistency.md`](references/metric-consistency.md). Read it before step 3. The
+vc-prospective-investor-update skill reads the same file, so the two updates keep their metrics the same way. In short:
+the same metrics with the same definitions every time; each metric set beside the last update's as stated, with one
+status, compared as written and never computed; every figure no tool computes quoted as stated, unchecked.
 
-## Tying out to the last update
+What the draft does for each status:
 
-Every metric and every figure is set beside the last update's, as stated. Each gets one status. No arithmetic: two
-figures are compared as written, and whether one is larger may be said, never by how much.
-
-| Status             | When                                                                                                                                         | What the draft does                                                                  |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Same               | The same metric, label, definition and form; every period both updates give has the same value                                               | Nothing; a new period's value sits beside the last one                               |
-| Restated           | The same metric, in the same form, for a period both updates give, with a different value                                                    | Says so beside the figure, with the reason (`[why it changed]`)                      |
-| Different form     | The two lines state the metric in different forms (MRR and ARR, a month and a quarter), between the two updates or in two lines of the draft | States one form, the last update's; asks for the figure, or how the two lines relate |
-| Changed definition | The label or definition differs from the last update's                                                                                       | Announces the change as the section above says                                       |
-| Dropped            | The last update reported it; this draft does not                                                                                             | Puts it back, or says it is dropped and why                                          |
-| New                | This draft reports it; the last update did not                                                                                               | Gives its definition                                                                 |
+- **Same:** nothing; a new period's value sits beside the last one.
+- **Restated:** says so beside the figure, with the reason (`[why it changed]`).
+- **Different form:** states one form, the last update's; asks for the figure, or how the two lines relate.
+- **Changed definition:** announces the change, as the rules file says.
+- **Dropped:** puts it back, or says it is dropped and why.
+- **New:** gives its definition.
 
 The last update's own promises are tied out too: each "next month" item, target or open lowlight in it gets a line in
 this update saying what happened, in the founder's words, or a bracketed ask.
 
 A first update has nothing to tie out: every metric is New, there are no promises to check, and its Definitions
 block is the one the next update ties out to.
-
-Figures no tool here computes stay quoted as stated with "not checked: no tool computes this": growth rates, churn,
-retention, recurring revenue built from a month (ARR), unit economics, and the change in cash between the two
-updates. For the cash, add the bracketed ask
-`[a one-line bridge from the last update's cash to this one's: net burn plus anything else that moved cash]`, since
-an investor holding both updates can make that comparison.
 
 ## Steps
 
@@ -361,7 +346,8 @@ tie-out statuses and the rows marked unverified are this skill's own judgment, u
 
 - Not investment, legal or tax advice. It does not say what a founder must disclose, or to whom.
 - It drafts and reviews only. It sends nothing, keeps no list of investors, and looks nothing up.
-- It writes for current investors only; an update for people who are not yet investors is out of scope.
+- It writes for current investors only; an update for people who are not yet investors goes to the
+  vc-prospective-investor-update skill.
 - It never invents, strengthens or hides a figure, customer, event or lowlight, in a draft or in a refute pass. A
   founder who asks to leave out bad news hears once why it costs trust; the draft keeps it.
 - No arithmetic outside the equity calculator's tools: no growth rates, deltas, cash bridges or conversions. Two

@@ -41,6 +41,7 @@ adds a fact about the company that the founder did not give.
   - Metrics and their definitions: the vc-metrics-readiness skill (preview).
   - The memo your champion writes for the partnership: the vc-investor-memo skill (preview).
   - Market size, bottom-up: the vc-market-sizing skill (preview).
+  - Keeping prospective investors updated before the raise: the vc-prospective-investor-update skill (preview).
 
 ## Inputs
 

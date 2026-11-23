@@ -3,8 +3,8 @@
 A test prompt for the `vc-current-investor-update` skill. The company is made up. The tool call and the excerpt are from
 a real `equity_calculator runway_plan` run with these inputs. The answer states the expected behaviour; it is not a
 recorded run, and this eval has not been run in a live session. A run passes when it declines the named firm's voice,
-says the version for prospective investors is a planned skill that has not shipped, makes the one call below, puts the
-runway mismatch first, and keeps the lowlight the founder gave.
+hands the version for prospective investors to the vc-prospective-investor-update skill and writes none itself, makes
+the one call below, puts the runway mismatch first, and keeps the lowlight the founder gave.
 
 ## Prompt
 
@@ -44,8 +44,9 @@ runway mismatch first, and keeps the lowlight the founder gave.
 ## Expected answer
 
 - It declines in one line to write as a partner of a named firm and offers the public guides as frameworks.
-- It says the short version for prospective investors is a planned skill that has not shipped, and that this skill
-  writes the update for current investors only. It writes no second version.
+- It hands the short version for the VCs the founder is warming up to the vc-prospective-investor-update skill,
+  which cuts it from this update once it is final, and says this skill writes the update for current investors only.
+  It writes no second version.
 - "30+ months of runway." leads the fix list in the fix before sending tier. It is a claim stated as a floor, passed as
   30 (the tool prints "stated 30.00 months"), and the tool gives 27.83 months on the founder's spend and revenue, below
   30, so the claim does not hold whatever the verdict row says. The revised draft states the runway as the tool prints

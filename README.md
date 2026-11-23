@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/BwL1289/ai-vc-skills/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/BwL1289/ai-vc-skills/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-3fb950"></a>
-  <a href="#skills"><img alt="Skills: 14" src="https://img.shields.io/badge/skills-14-C9470D"></a>
+  <a href="#skills"><img alt="Skills: 15" src="https://img.shields.io/badge/skills-15-C9470D"></a>
   <a href="#install"><img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-d97757"></a>
   <a href="docs/install.md"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-6e7681"></a>
   <img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-3776ab">
@@ -68,8 +68,9 @@ pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skill
 ```
 
 Add the server to the client's MCP settings, then load `skills/equity-calculator/`, `skills/vc-deal-math/`,
-`skills/vc-positioning/`, `skills/vc-claims-check/`, `skills/vc-deck-review/`, `skills/vc-partner-meeting/`, `skills/vc-taste-check/`, `skills/vc-round-sizing/`, `skills/vc-term-sheet-review/`, `skills/vc-diligence-questions/`, `skills/vc-current-investor-update/`, `skills/vc-metrics-readiness/`, `skills/vc-investor-memo/` and `skills/vc-market-sizing/` where the client reads skills.
+`skills/vc-positioning/`, `skills/vc-claims-check/`, `skills/vc-deck-review/`, `skills/vc-partner-meeting/`, `skills/vc-taste-check/`, `skills/vc-round-sizing/`, `skills/vc-term-sheet-review/`, `skills/vc-diligence-questions/`, `skills/vc-current-investor-update/`, `skills/vc-metrics-readiness/`, `skills/vc-investor-memo/`, `skills/vc-market-sizing/` and `skills/vc-prospective-investor-update/` where the client reads skills.
 `vc-diligence-questions` reads `vc-partner-meeting`'s question bank, so load both folders.
+`vc-prospective-investor-update` reads `vc-current-investor-update`'s metric rules file, so load both folders.
 Step by step for each client: [docs/install.md](docs/install.md).
 
 </details>
@@ -112,15 +113,16 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 | [`vc-metrics-readiness`](skills/vc-metrics-readiness/SKILL.md)             | For founders: checks your traction metrics before a VC does: ARR against run-rate, gross and net retention, logo and revenue churn, CAC payback, burn multiple; agreement across deck, model and update; which metrics your stage expects; a ranked fix list from an adversarial review. No score.                                                   | 🧪 Preview   |
 | [`vc-investor-memo`](skills/vc-investor-memo/SKILL.md)                     | For founders: drafts the internal investment memo your champion partner is likely to write for the partnership: the case in one shape, the round and the outcome case on the calculator from your own exit assumptions (no fund math), and a dissent pass that finds the holes first.                                                                | 🧪 Preview   |
 | [`vc-market-sizing`](skills/vc-market-sizing/SKILL.md)                     | For founders: builds your market size bottom-up (who buys, how many, what each pays, how many you can win), every assumption with your source, checked against the deck and any top-down figure, with sensitivity on the shakiest assumption and an adversarial review of inflation, a SOM with no path and double counting.                         | 🧪 Preview   |
-| More venture-style reviews                                                 | Term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                                                                                                                                           | 🗺️ Planned   |
+| [`vc-prospective-investor-update`](skills/vc-prospective-investor-update/SKILL.md) | For founders: writes or reviews the short update you send the investors you hope to raise from, so they see a line, not a dot: the same metrics and definitions every time, each earlier value side by side as stated, last update's promises tied out, one ask, runway from the calculator when you show it, and a reader pass that flags spin and moved goalposts. | 🧪 Preview   |
+| More venture-style reviews                                                         | Term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                                                                                                                                                           | 🗺️ Planned   |
 
-`vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-current-investor-update`, `vc-metrics-readiness`, `vc-investor-memo` and `vc-market-sizing` are in preview until they have been checked on
+`vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-current-investor-update`, `vc-metrics-readiness`, `vc-investor-memo`, `vc-market-sizing` and `vc-prospective-investor-update` are in preview until they have been checked on
 real decks and meetings. The calculator's arithmetic is tested; the reviews' wording may change. The `vc-positioning` and
 `vc-claims-check` evals were run in live Claude Code sessions on 2026-11-22, and each file holds an excerpt of its
 recorded answer with a verdict against its pass sentence: two passed, four passed in part and one failed. Pass means
 every clause of that sentence was met, Partial that exactly one was missed or met only in part, and Fail that two or
 more were missed. Two were run again after a skill fix, as their files say. One run each is a small sample. The
-`vc-deal-math`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-current-investor-update`, `vc-metrics-readiness`, `vc-investor-memo` and `vc-market-sizing` evals state the expected behaviour and have not yet been run in a live session.
+`vc-deal-math`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-current-investor-update`, `vc-metrics-readiness`, `vc-investor-memo`, `vc-market-sizing` and `vc-prospective-investor-update` evals state the expected behaviour and have not yet been run in a live session.
 
 The `equity-calculator` skill covers eleven scenarios:
 
@@ -171,6 +173,9 @@ Once the plugin is installed, ask in plain words:
 > The fund wants to start diligence: here is our deck, our cap table and the documents we have.
 > Write our October investor update: here is last month's update, this month's numbers and our cash and burn.
 > Write the investment memo for my champion: here is our deck, the round, the cap table and the exits we believe in.
+
+> Write this month's update for the VCs we're warming up: here is last month's update, this month's notes and our one
+> ask.
 
 ## How it works
 
@@ -235,6 +240,8 @@ The formulas, their sources, every flag and a worked example per scenario are in
       outcome case on the calculator and a dissent pass (preview)
 - [ ] `vc-market-sizing`: founders build their market size bottom-up from their own sources, every total from the
       calculator, with sensitivity and an adversarial review (preview)
+- [ ] `vc-prospective-investor-update`: founders keep the investors they hope to raise from updated before the raise,
+      so each sees a line of progress, not a single dot (preview)
 
 Want a skill that is not here? [Request it](https://github.com/BwL1289/ai-vc-skills/issues/new?template=skill_request.yml).
 

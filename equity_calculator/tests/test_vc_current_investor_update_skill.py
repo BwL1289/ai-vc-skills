@@ -4,16 +4,16 @@ The skill writes the update a founder sends their current investors. Every calcu
 MCP server serves, and it names one: ``equity_runway_plan``, called with no raise and no milestone. Its JSON example
 must be a valid call, its command must run and print every line of the excerpt after it, and the two must be the same
 check. Its flag table holds exactly the flags such a call can raise. A runway claim stated as a floor ("30+ months") is
-judged by the printed runway, not by the tool's two-sided verdict. The update's sections, the tie-out statuses and the
-reader pass's four lenses are fixed; in review mode the reader pass judges the founder's draft as given; the refute
+judged by the printed runway, not by the tool's two-sided verdict. The update's sections, the tie-out statuses (kept in
+references/metric-consistency.md, which the vc-prospective-investor-update skill reads too) and the reader pass's four
+lenses are fixed; in review mode the reader pass judges the founder's draft as given; the refute
 verdicts are word for word the repository's; the ranked fix list has three tiers and no score. Every source is one the
 skill's authors read in full, and every pattern row cites one of them or says it is unverified. Each eval in
 evals/vc-current-investor-update/ has a prompt, an expected tool call and an expected answer, and every call is valid
 and every excerpt is lines of the report that call prints.
 
-One skill it points to is planned, not yet shipped: updates to prospective investors
-(vc-prospective-investor-update). A test checks that its folder does not exist yet, so the pull request that adds it
-has to turn the planned line here into a hand-off.
+Every skill it points to has shipped: sizing the next round (vc-round-sizing) and updates to prospective investors
+(vc-prospective-investor-update) are hand-offs, and a test checks that no planned line is left.
 """
 
 from __future__ import annotations
@@ -35,6 +35,9 @@ from pydantic import ValidationError
 _ROOT = Path(__file__).resolve().parents[2]
 _SKILL = _ROOT / "skills" / "vc-current-investor-update" / "SKILL.md"
 _TEXT = _SKILL.read_text(encoding="utf-8")
+# The metric rules and status words, kept in this skill's folder and read in place by vc-prospective-investor-update.
+_RULES_LINK = "references/metric-consistency.md"
+_RULES = (_SKILL.parent / _RULES_LINK).read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-current-investor-update").glob("*.md"))
 _EVAL_COUNT = 5
@@ -52,8 +55,14 @@ _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
 _PROGRAM = "equity_calculator "
-_HANDOFF_SKILLS = ("vc-claims-check", "vc-deal-math", "equity-calculator", "vc-positioning", "vc-round-sizing")
-_PLANNED_SKILLS = ("vc-prospective-investor-update",)
+_HANDOFF_SKILLS = (
+    "vc-claims-check",
+    "vc-deal-math",
+    "equity-calculator",
+    "vc-positioning",
+    "vc-round-sizing",
+    "vc-prospective-investor-update",
+)
 _PLANNED = "Planned, not yet shipped:"
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
@@ -200,7 +209,8 @@ def test_the_frontmatter_names_the_skill_and_the_founders_questions() -> None:
         assert trigger in description, trigger
     for phrase in ("founder", "current investors", "adversarial reader pass", "runway_plan", "Never invents or hides"):
         assert phrase in description, phrase
-    # Updates to people who are not yet investors belong to a planned sibling skill, so no such phrasing triggers this.
+    # Updates to people who are not yet investors belong to vc-prospective-investor-update, so no such phrasing
+    # triggers this one.
     assert "prospective" not in description
     assert len(_TEXT.splitlines()) < _LINE_LIMIT
 
@@ -223,16 +233,12 @@ def test_every_skill_it_hands_off_to_exists_and_vc_positioning_points_to_it() ->
     assert "the vc-current-investor-update skill" in _unwrapped(_section("## When to use it", _POSITIONING))
 
 
-def test_the_planned_skills_are_named_as_planned_until_their_folders_exist() -> None:
+def test_no_skill_it_points_to_is_still_planned_and_prospect_updates_are_handed_off() -> None:
     handoff = _unwrapped(_section("## When to use it"))
-    planned = handoff[handoff.index(_PLANNED) :]
 
-    for name in _PLANNED_SKILLS:
-        assert f"(the {name} skill)" in planned, name
-        # When the folder lands, move the name out of the planned line into a hand-off and into _HANDOFF_SKILLS.
-        assert not (_ROOT / "skills" / name).exists(), name
-    assert "Until each ships, say so" in planned
-    assert "writes no version for people who are not yet investors" in planned
+    assert _PLANNED not in _TEXT
+    assert "cut from this one when both go out in the same period: the vc-prospective-investor-update skill" in handoff
+    assert "it writes no version for people who are not yet investors" in handoff
 
 
 def test_the_skill_writes_for_current_investors_only() -> None:
@@ -240,6 +246,7 @@ def test_the_skill_writes_for_current_investors_only() -> None:
 
     assert "Built for the founder's current investors" in _unwrapped(_section("## When to use it"))
     assert "It writes for current investors only" in limits
+    assert "goes to the vc-prospective-investor-update skill" in limits
     assert "prospect version" not in _TEXT.lower()
     assert "## Current and prospective investors" not in _TEXT
 
@@ -374,16 +381,27 @@ def test_the_update_shape_is_the_fixed_sections_each_with_a_read_source_or_ours(
 
 
 def test_the_tie_out_statuses_are_the_fixed_words_and_compare_as_stated() -> None:
-    tie_out = _unwrapped(_section("## Tying out to the last update"))
+    tie_out = _unwrapped(_section("## Metrics and tying out to the last update"))
+    rules = _unwrapped(_RULES)
+    what_the_draft_does = re.findall(
+        r"^- \*\*(.+?):\*\*", _section("## Metrics and tying out to the last update"), re.M
+    )
 
-    assert tuple(row[0] for row in _table("## Tying out to the last update")) == _STATUSES
-    assert "The same metric, in the same form, for a period both updates give" in tie_out
-    assert "whether one is larger may be said, never by how much" in tie_out
+    # The statuses and the rules live in the rules file; this skill keeps only what its draft does for each status.
+    assert f"[`{_RULES_LINK}`]({_RULES_LINK})" in _TEXT
+    assert tuple(row[0] for row in _table("## Metric statuses", _RULES)) == _STATUSES
+    assert tuple(what_the_draft_does) == _STATUSES
+    assert "The same metric, in the same form, for a period both updates give" in rules
+    assert "whether one is larger may be said, never by how much" in rules
     assert "The last update's own promises are tied out too" in tie_out
-    assert _NOT_CHECKED in tie_out
-    assert f"`{_CASH_BRIDGE}`" in tie_out
-    assert "Never convert one into the other" in _unwrapped(_section("## Metrics and their definitions"))
-    assert "Growth rates are quoted, never computed" in _unwrapped(_section("## Metrics and their definitions"))
+    assert _NOT_CHECKED in rules
+    assert f"`{_CASH_BRIDGE}`" in rules
+    assert "Never convert one into the other" in _unwrapped(_section("## Metrics and their definitions", _RULES))
+    assert "Growth rates are quoted, never computed" in _unwrapped(_section("## Metrics and their definitions", _RULES))
+    # No status row is copied into this skill: one home for the words.
+    for line in _RULES.splitlines():
+        if line.startswith("| ") and not line.startswith("| -"):
+            assert line not in _TEXT, line
 
 
 def test_the_lenses_are_the_four_and_name_no_person_or_firm() -> None:
@@ -425,7 +443,7 @@ def test_the_reader_pass_judges_the_founders_draft_as_given_in_review_mode() -> 
 def test_a_first_update_and_a_section_the_founder_wants_left_out_have_their_rules() -> None:
     assert '"this is the first one"' in _unwrapped(_section("## Inputs"))
     assert "A first update has nothing to tie out: every metric is New" in _unwrapped(
-        _section("## Tying out to the last update")
+        _section("## Metrics and tying out to the last update")
     )
     shape = _unwrapped(_section("## The update's shape"))
     assert "A founder who asks to leave a section out, cash and runway included" in shape
@@ -598,7 +616,8 @@ def test_one_eval_declines_a_named_firm_and_a_version_for_prospects() -> None:
 
     assert "Sequoia" in prompt and "VCs we're warming up" in prompt
     assert "declines in one line to write as a partner of a named firm" in answer
-    assert "a planned skill that has not shipped" in answer and "It writes no second version" in answer
+    assert "to the vc-prospective-investor-update skill" in answer and "It writes no second version" in answer
+    assert "planned skill" not in answer
     assert '"30+ months of runway." leads the fix list in the fix before sending tier' in answer
     assert str(call.stated_runway_months) == "30" and compute(call).verdict == "mismatch"
     assert "It is a claim stated as a floor, passed as 30" in answer
