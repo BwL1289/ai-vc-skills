@@ -138,13 +138,13 @@ def test_the_skill_asks_the_founders_basis_assumes_no_figure_and_points_to_the_r
         assert "`fully_diluted_shares` (SAFEs and notes left out: see below)" in rows[scenario].replace(
             "**", ""
         ), scenario
-    assert "ask which way the founder's does, and pass the tool its own basis" in text
+    assert "ask which way the user's does, and pass the tool its own basis" in text
     assert "never subtract the SAFE or note shares yourself" in text
     # Counts of customers and months are whole numbers, like share counts.
-    assert "so are customer counts and month counts" in text and "JSON integers, never strings" in text
+    assert "customer counts" in text and "month counts" in text and "JSON integers, never strings" in text
     # No figure is assumed: a default left in place is named as one.
-    assert "Never assume a figure" in text and "named as a default, never as the founder's figure" in text
-    assert "For `deal_check`, never assume one either" in text
+    assert "Never fill a gap with a figure the user did not give" in text and "never as an assumed figure" in text
+    assert "For `deal_check`, never assume one" in text
     for name in (
         "vc-deal-math",
         "vc-round-sizing",
