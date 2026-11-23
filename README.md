@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <b>Get your raise ready before a VC reads it: skeptical reviews of your deck, claims, metrics, round and term sheet, and exact equity math you can check by hand.</b>
+  <b>Get your raise ready before a VC sees it: skeptical reviews of your deck, claims, metrics, round and term sheet, and exact equity math you can check by hand.</b>
 </p>
 
 <p align="center">
@@ -36,18 +36,18 @@
   <sub>A real run. The prompt asks for five short lines, so the answer shortens the calculator's figures.</sub>
 </p>
 
-**AI VC skills** are agent skills that help a founder get a raise ready before a VC reads it. They check your deck's
+**AI VC skills** are agent skills that help a founder get a raise ready before a VC sees it. They check your deck's
 ask and its claims, review your deck, messaging, metrics, market size, round size, term sheet and investor updates,
 show the judgment behind what you built, rehearse your partner meeting, prepare you for diligence and draft the memo
-your champion partner is likely to write. In every review, skeptical passes raise the strongest objections a partner
-could make, then a refute pass drops each one that your own material answers or that rests on a fact you did not give.
-What is left is what you still need to fix.
+your champion partner is likely to write. In every review, skeptical passes raise the strongest objections to your
+material, then a refute pass drops each one that your own material answers or that rests on a fact you did not give.
+What is left is what you still need to fix, answer or take to your lawyer.
 
-Every number comes from an exact calculator or from your own material, never from the model's own arithmetic, and each
-calculated figure shows its formula, its source and its assumptions. The same calculator answers the equity questions
-founders get wrong (an investor's stake, a hire's grant, SAFEs converting in a round) in figures you can check by hand.
-An investor's view is only a lens the reviews apply: the skills never screen deals and never speak as a named investor
-or firm.
+Every figure about your company comes from an exact calculator or from your own material, never from the model's own
+arithmetic. The calculator's report says how each line was computed, and each result lists its assumptions and their
+sources. The same calculator answers the equity questions founders get wrong (an investor's stake, a hire's grant,
+SAFEs converting in a round) in figures you can check by hand. An investor's view is only a lens the reviews apply:
+the skills never screen deals and never speak as a named investor or firm.
 
 Works with Claude Code (as a plugin), Claude Desktop, Cursor and any client that speaks
 [MCP](https://modelcontextprotocol.io) or reads [Agent Skills](https://agentskills.io).
@@ -159,7 +159,7 @@ The `equity-calculator` skill covers eleven scenarios:
 
 Once the plugin is installed, ask in plain words.
 
-**Before you raise**
+**Your raise**
 
 > Review my deck before I send it to seed funds: here is each slide's text and our ask.
 
@@ -212,14 +212,14 @@ Once the plugin is installed, ask in plain words.
 
 ## How it works
 
-1. **You ask in plain words.** Paste the ask slide, the SAFE list, the one-liner or the whole deck. The skill lists
-   what you stated, word for word, and asks once for what is missing.
+1. **You ask in plain words.** Paste the ask slide, the SAFE list, the one-liner or the whole deck. The skill asks for
+   what is missing, by name, and a review quotes your own lines word for word.
 2. **The calculator does the math.** Every figure a skill works out comes from the exact equity calculator (its MCP
-   tools or its command), with its formula, its source and its assumptions. The model reads, asks and writes; it never
-   does the arithmetic.
+   tools or its command). Its report says how each line was computed, and each result lists its assumptions and their
+   sources. The model reads, asks and writes; it never does the arithmetic.
 3. **A review attacks, then refutes.** In every skill but `equity-calculator` and `vc-deal-math`, skeptical passes
-   raise the strongest objections a partner could make, and a refute pass drops any that your own material answers or
-   that rest on a fact you did not give.
+   raise the strongest objections, and a refute pass drops any that your own material answers or that rest on a fact
+   you did not give.
 
 The calculator's part, for the investor test:
 
