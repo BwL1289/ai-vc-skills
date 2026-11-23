@@ -21,6 +21,7 @@ company, its round or its investors that the founder did not give.
   partner meeting on Monday." "What will the partners ask?" "Debrief my answers."
 - A pasted pitch, deck outline or slide text, with the stage, the round and a note on who the founder is meeting.
 - Hand off:
+  - Metric definitions a partner will test: the vc-metrics-readiness skill (preview).
   - The story, the one-liner and the phrases to drop: the vc-positioning skill. Suggest it first when the pitch has
     no one-liner or no ask; a rehearsal of an unclear story drills the wrong things.
   - Each claim's evidence, and figures that disagree across documents: the vc-claims-check skill.
