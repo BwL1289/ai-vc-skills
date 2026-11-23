@@ -50,6 +50,7 @@ _HANDOFF_SKILLS = (
     "vc-metrics-readiness",
     "vc-investor-memo",
     "vc-market-sizing",
+    "vc-prospective-investor-update",
 )
 _DESCRIPTION_LIMIT = 1024
 _TRIGGERS = (

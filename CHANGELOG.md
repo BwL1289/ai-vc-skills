@@ -149,6 +149,17 @@ All notable changes to this repository. Dates are UTC.
   SOM with no path, double counting) attack the market story, a refute pass drops what the founder's material
   answers, and the survivors come back in three tiers, with the calculator's mismatches and flags first. It never
   looks up or invents a market figure, price or share. `vc-positioning` now points to it. Four evals are in `evals/vc-market-sizing/`.
+- The `vc-prospective-investor-update` skill, in preview: a founder drafts or reviews the short update they send the
+  investors they hope to raise from, in the months before the raise, so each reader sees a line rather than a single
+  point. The update keeps one fixed shape; a line table sets each metric's earlier values side by side as stated (up
+  to the last six updates, the first always shown, nothing computed); the last update's "By the next update" items are
+  tied out with their own statuses (Done, Partly done, Not done, Moved, No word, Not yet due); it keeps one ask, takes
+  investors only as names the founder supplies and keeps them out of the update. A runway the update shows goes to
+  `equity_runway_plan` with no raise and no milestone. A reader pass has four lenses (spin, moved goalposts, changed
+  definitions, unreported promises) and a refute pass. The metric rules and the six metric status words moved out of
+  `vc-current-investor-update` into `skills/vc-current-investor-update/references/metric-consistency.md`, which both
+  skills read; `vc-current-investor-update` and `vc-positioning` now point to the new skill. Four evals are in
+  `evals/vc-prospective-investor-update/`.
 
 ### Changed
 
