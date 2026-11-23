@@ -253,11 +253,12 @@ def _band_rows(inputs: MetricsCheckInput, used: frozenset[str], checked: bool) -
                 f"{inputs.tolerance_points:f} points; {inputs.tolerance_percent:f}% relative",
                 "A stated percent within this many percentage points of the computed one, or a stated money, months "
                 "or multiple figure within this share of it, is consistent. So is a stated percent, months or multiple "
-                "that is the computed figure rounded half away from zero to the places it is written with (12 months "
-                "against 12.40, 2% against 2.4%, but not 2% against 2.6%; 0.0 is one place), whatever the tolerance: "
-                "people write figures rounded to the places they show. Money is held to the share alone, since a "
-                "figure like $1.2M carries no places once typed as 1200000. A flag names a figure consistent by the "
-                "tolerance alone, not a rounding of the computed one.",
+                "that is the computed figure rounded half away from zero to the places it is written with, whatever "
+                "the tolerance: people write figures rounded to the places they show, so a whole number holds what "
+                "rounds to it and a figure typed with one place (a zero written with one included) holds what rounds "
+                "to it at one place. Money is held to the share alone, since a round money figure typed in full "
+                "carries no places. A flag names a figure consistent by the tolerance alone, not a rounding of the "
+                "computed one.",
                 f"{UNVERIFIED} (the rounding test is standard arithmetic)",
             )
         )

@@ -134,7 +134,8 @@ class MetricsCheckInput(BaseModel):
     movements, the period's totals) is in ``recurring_unit``. The ``cohort_*`` fields are the same three movements for
     the customers there at the start only; retention and revenue churn use them when given. Percent fields take
     percent points (``95`` is 95%). The tolerances say how far a stated figure may sit from the computed one
-    (``deal_check``'s defaults); the three bands raise a benchmark question, never an error.
+    (``deal_check``'s defaults); a stated percent, months or multiple that is the computed figure rounded to the places
+    it is typed with holds even past them. The three bands raise a benchmark question, never an error.
     """
 
     model_config = MODEL_CONFIG

@@ -906,8 +906,10 @@ today; `--stated-runway-months` is the runway stated with no raise.
 `metrics_check` needs `--period-months`, the one period every flow figure covers. Each part is the founder's own
 figure: recurring revenue in the unit `--recurring-unit` names (monthly by default), customers as whole numbers,
 and `--net-burn` positive when cash goes out (`--net-burn=-50000` for a cash-generative period, with `=` because
-argparse reads a lone negative number as a flag). Give only what the document shows; each stated figure is
-checked when its parts are there, and `--stated-churn-basis` (`logo`, `gross_revenue`, `net_revenue` or
+argparse reads a lone negative number as a flag). Give only what the document shows, each stated percent, months or
+multiple with the places the document writes (`--stated-cac-payback-months 12` for "12 months", not `12.0`), since a
+figure that is the computed one rounded to those places is consistent; each stated figure is checked when its parts
+are there, and `--stated-churn-basis` (`logo`, `gross_revenue`, `net_revenue` or
 `unlabelled`) says which churn the document means. A net revenue churn below zero goes in the same way:
 `--stated-churn-percent -3` reads as a number, but `-3%` needs the `=` form, `--stated-churn-percent=-3%`. A stated retention or churn figure is checked over
 `--period-months` and never annualised, so give the period the document's figure covers (1 for a monthly churn, 12
