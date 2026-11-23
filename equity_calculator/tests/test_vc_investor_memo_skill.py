@@ -63,8 +63,8 @@ _HANDOFF_SKILLS = (
     "vc-deal-math",
     "equity-calculator",
     "vc-positioning",
+    "vc-diligence-questions",
 )
-_PLANNED = "Planned, not yet shipped: the diligence questions and data-room checklist"
 _PROGRAM = "equity_calculator "
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
@@ -262,8 +262,7 @@ def test_every_skill_it_hands_off_to_exists_and_vc_positioning_points_to_it() ->
     for name in _HANDOFF_SKILLS:
         assert f"the {name} skill" in when, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
-    # The diligence skill is not on main yet: the line says so and names no folder the hand-off test would miss.
-    assert _PLANNED in when and "vc-diligence-questions" not in _TEXT
+    assert "Planned, not yet shipped" not in when
     assert "the vc-investor-memo skill" in _unwrapped(_section("## When to use it", _POSITIONING))
 
 
