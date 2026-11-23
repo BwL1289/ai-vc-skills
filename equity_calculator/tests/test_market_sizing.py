@@ -694,7 +694,7 @@ def test_a_unit_price_keeps_cents_and_the_places_it_needs(value: Fraction, round
         ("1E-15", "0.000000000000001"),
     ],
 )
-def test_a_typed_price_is_shown_exactly_with_every_place_it_was_typed_with(typed: str, shown: str) -> None:
+def test_a_typed_price_is_shown_exactly_never_rounded(typed: str, shown: str) -> None:
     """A price the founder typed is never rounded: the fewest places from 2 that show it exactly."""
     price = given_price(Decimal(typed))
 

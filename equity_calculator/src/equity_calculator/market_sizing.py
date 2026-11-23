@@ -21,8 +21,8 @@ Notation (``equity_calculator.schemas.equity_market_sizing``), per segment s, ev
 
 Money parts are rounded to the cent by largest remainder, and counts of customers to the hundredth the same way, so
 the segments add up to the rounded totals. A unit price the founder typed (given, a sensitivity base or value) is
-shown exactly, with every place it was typed with and at least to the cent: a $0.0075 usage price never prints as
-$0.01, nor a $0.00000125 one as $0.0000012. A break-even price, which is worked, is shown to the cent when that is
+shown exactly, to the cent at least, with no trailing zeros past it: a $0.0075 usage price never prints as $0.01,
+nor a $0.00000125 one as $0.0000012. A break-even price, which is worked, is shown to the cent when that is
 exact, else to as many places as it needs up to 6, and one under a hundred-thousandth of a dollar keeps two
 significant digits (up to 15 places, the input floor).
 """

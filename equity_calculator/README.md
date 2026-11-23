@@ -1052,8 +1052,8 @@ Inside, every number is a `Fraction`. Inputs arrive as `Decimal` (the models ref
 number to the limits above) and share counts as plain integers (a bool, a float or a numeric string is refused, never
 read as a count). The output carries both the exact fraction and a `Decimal` rounded half-even at a fixed number of
 places: 6 places for ratios and prices, 2 for money and months, 3 for shares. Three exceptions: a market's unit price
-the founder typed (a segment's price, a sensitivity base or value) is shown exactly, with every place it was typed
-with and at least to the cent ($400.00, $0.0075, $0.00000125, $0.3333333); a break-even price, which is worked, shows
+the founder typed (a segment's price, a sensitivity base or value) is shown exactly, to the cent at least, with no
+trailing zeros past it ($400.00, $0.0075, $0.00000125, $0.3333333); a break-even price, which is worked, shows
 the fewest places from 2 that give the same figure as 6 (a price under $0.00001 keeps two significant digits, up to 15
 places); and a runway plan's required raise is rounded up to the cent, so the amount shown always covers. Rounding is
 integer arithmetic. No step reads or sets the global decimal context, so a caller's `decimal.localcontext()` cannot

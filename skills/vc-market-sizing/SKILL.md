@@ -98,9 +98,9 @@ says. A turn that makes no call runs no review.
    `som_years` and a sensitivity row's `segment` as whole numbers, never strings. Always send `price_period_months`
    (1 for a monthly price, 12 for a yearly one): left out or null, the tool reads the price as yearly and raises
    `price_period_defaulted` (the result's echoed `inputs` show it as null, so a call built from them keeps the
-   flag). A price is quoted as the tool prints it: a typed price with every place it was typed with, at least to
-   the cent ($0.0075 a message, never $0.01); a break-even price rounded as printed. Company AW (made up), software
-   for vet clinics:
+   flag). A price is quoted as the tool prints it: a typed price exactly, to the cent at least, with no trailing
+   zeros past it ($0.0075 a message, never $0.01); a break-even price rounded as printed. Company AW (made up),
+   software for vet clinics:
 
    ```json
    {

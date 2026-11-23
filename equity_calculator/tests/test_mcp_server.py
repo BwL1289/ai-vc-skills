@@ -221,6 +221,21 @@ async def test_the_market_tools_echoed_inputs_fed_back_keep_the_price_period_fla
     assert again["segments"][0]["price_period_given"] is False
 
 
+async def test_the_metrics_tool_reads_a_zero_sent_as_text_with_its_places() -> None:
+    """A document's "0.0%" churn sent as the text "0.0" is one place: against 0.4% it is no rounding, and the echo
+    keeps "0.0", so a second call built from it gives the same row."""
+    server = mcp_server.build_server()
+    inputs = {"period_months": 1, "starting_recurring": "100000", "churned_recurring": "400"}
+    inputs |= {"stated_churn_percent": "0.0", "stated_churn_basis": "gross_revenue"}
+    first = json.loads(_text(await _call(server, "equity_metrics_check", {"inputs": inputs})))
+    again = json.loads(_text(await _call(server, "equity_metrics_check", {"inputs": first["inputs"]})))
+
+    assert first["inputs"]["stated_churn_percent"] == "0.0"
+    assert first["checks"][0]["within_rounding"] is False
+    assert "consistent_beyond_rounding" in first["flags"]
+    assert again["checks"] == first["checks"]
+
+
 async def test_the_investor_tool_answers_what_the_cli_prints_with_json() -> None:
     printed = await run(["investor", "--equity-percent", "7", "--outcome-multiplier", "1.10", "--json"])
     result = await _call(mcp_server.build_server(), "equity_investor", {"inputs": _SAMPLES["investor"]})
