@@ -25,6 +25,14 @@ work them out by hand, and do not round or re-derive what it returns.
 | Do our ARR, retention, churn, CAC payback and burn multiple match their parts before a VC checks them? | `metrics_check` | `equity_metrics_check` |
 | What are our TAM, SAM and SOM bottom-up, do they match the deck, and which assumption moves them most? | `market_sizing` | `equity_market_sizing` |
 
+A founder question with more to it than one scenario has a skill built for it, which runs these tools in order and
+reviews what they return:
+
+- A deck's ask (valuation, ownership, runway) checked end to end: the vc-deal-math skill.
+- A phased plan, and how much to raise to reach its milestones: the vc-round-sizing skill.
+- Traction metrics in a deck or an update: the vc-metrics-readiness skill.
+- A market slide: the vc-market-sizing skill.
+
 ## Running it
 
 **MCP tools** (`equity_calculator_mcp`). Each scenario tool takes one argument, `inputs`, an object with that
@@ -50,7 +58,14 @@ scenario's fields, and returns the same JSON text as `equity_calculator <scenari
 
 Send money, percents and multipliers as JSON strings (`"7"`, `"1.10"`, `"8000000"`): a JSON number with a decimal
 point arrives as a binary float and keeps only about 15 digits. Percents are percents (`"7"` is 7%). Share counts
-are whole numbers. `equity_workbook` exists only when the server was started with `--output-dir DIR`: it takes
+are whole numbers, and so are `metrics_check`'s customer counts (`customers_start`, `customers_lost`,
+`customers_new`, `customers_new_paid`) and its `period_months`: send them as numbers, never strings, or the call is
+refused.
+
+`fully_diluted_shares` (in `pool`, `round` and `deal_check`) counts every share before the round, granted options
+and the unissued pool included, and SAFEs and notes excluded: the tool converts those itself. Some cap tables count
+SAFEs and notes in their fully diluted total; ask which way the user's does. If it counts them, ask for the total
+without them and pass that; never subtract the SAFE or note shares yourself. `equity_workbook` exists only when the server was started with `--output-dir DIR`: it takes
 `inputs` with its `scenario` tag (`{"scenario": "round", ...}`) and a bare `file_name` ending in `.xlsx` with no control,
 format or surrogate character, and writes a new file in DIR; it never overwrites a file. An answer too large for a
 workbook cell (a value of 1e300 or more) is refused and no file is made. While saving, the Excel library also writes
@@ -71,8 +86,11 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
 
 ## Answering
 
-1. Pick the scenario, ask for any required input that is missing, and run it. State any value you had to assume.
-   For `runway_plan`, never assume one: the phases, the downside or lean percents, the milestones, the months to
+1. Pick the scenario, ask for every input the question needs that is missing, by name, and run it once they are in.
+   Never assume a figure. A tool default (a 48-month vesting schedule, the pool in the pre-money) is named in the
+   answer as the default it is, never presented as the user's figure. For `deal_check`, never assume one either: the
+   raise, the valuation and its label, the cap table, cash, burn and revenue are the user's own figures, so ask for
+   them. For `runway_plan`, never assume one: the phases, the downside or lean percents, the milestones, the months to
    raise, the landing months and the cash floor are the founder's own figures, so ask for them. With no months to
    raise, run without it and quote the `no_time_to_raise_given` flag. For `metrics_check`, every part is the founder's
    own figure for one period: never convert MRR to ARR, a quarter to a year or a percent to a count yourself (the tool
