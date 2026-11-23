@@ -19,6 +19,8 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
 - Hand off to the equity-calculator skill for a single question with no deck to check: an option pool alone
   (`equity_pool`), SAFE conversion detail (`equity_round`), a stake through later rounds (`equity_dilution`), vesting
   or an exit waterfall.
+- Hand off to the vc-round-sizing skill for how much to raise on a phased plan, raise now or wait, or which milestone
+  month a raise's cash reaches.
 
 ## Steps
 

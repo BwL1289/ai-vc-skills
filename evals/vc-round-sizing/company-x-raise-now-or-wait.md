@@ -1,8 +1,11 @@
 # Eval 2: Company X, raise now or wait six months
 
-A test prompt for the `vc-round-sizing` skill. The company is made up. Every tool call and excerpt is from a real `equity_calculator` run with these inputs. The answer states the expected behaviour; it is not a recorded run, and this eval has not been run in a live session. A run passes when it makes the three tool calls below (field order free, money and percents as strings),
-sets the two options side by side in tool values, labels the later valuation as the founder's assumption, lists what
-has to be true for waiting to work, and gives no recommendation.
+A test prompt for the `vc-round-sizing` skill. The company is made up. Every tool call and excerpt is from a real
+`equity_calculator` run with these inputs. The answer states the expected behaviour; it is not a recorded run, and this
+eval has not been run in a live session. A run passes when it makes the three tool calls below (field order free, money
+and percents as strings), sets the waiting option's `lands_month`, sets the two options side by side in tool values,
+labels the later valuation as the founder's assumption, lists what has to be true for waiting to work, runs the
+adversarial review after the computed results, and gives no recommendation.
 
 ## Prompt
 
@@ -99,6 +102,8 @@ The runway plan:
   Runway, downside, raise 2                                                   23.26 months  months until cash less the floor goes below zero
   Milestone 1 (month 18), plan, raise 1: verdict                                     short  covered when the runway reaches month 24
   Milestone 1 (month 18), plan, raise 2: verdict                                   covered  covered when the runway reaches month 24
+  Milestone 1 (month 18), downside, raise 1: slack                             0.55 months  runway - the milestone month
+  Milestone 1 (month 18), downside, raise 1: verdict                                 short  covered when the runway reaches month 24
   Milestone 1 (month 18), downside, raise 2: verdict                                 short  covered when the runway reaches month 24
   Required raise, milestone 1, plan, landing month 0                         $2,580,000.00  smallest raise keeping cash at or above the floor to month 24
   Required raise, milestone 1, plan, landing month 6                         $2,580,000.00  smallest raise keeping cash at or above the floor to month 24
@@ -125,7 +130,7 @@ The two deal checks, now then wait:
 ## Expected answer
 
 - Side by side. Now: 20.78 months on plan and 18.55 months in the downside, short of month 18 with time to raise on
-  both. Wait: 26.33 months on plan, covered, and 23.26 months in the downside, short. The cash does not run out before
+  both (0.55 months of slack in the downside). Wait: 26.33 months on plan, covered, and 23.26 months in the downside, short. The cash does not run out before
   the waiting option's money lands; $480,000.00 is left above the floor then (on plan).
 - The tool's required raise is $2,580,000.00 on plan and $3,156,000.00 in the downside, the same whether it lands
   now or after 6 months.
@@ -135,4 +140,8 @@ The two deal checks, now then wait:
   revenue through month 6, and the raise closing in month 6. Each is listed, none is judged likely or unlikely.
 - Flags: `milestone_short_on_plan` and `downside_short_where_plan_covers`, each in the tool's words. No
   `cash_out_before_raise_lands`.
+- Adversarial review: the calculator's short milestones first, not refuted; then the skeptic's kept attacks, each with
+  a founder line quoted word for word, for example "The milestone is month 18" under "A milestone with no number, date
+  or check"; then Dropped, one line each, including an attack under "No downside case", Dropped, answered, quoting
+  "Downside: revenue at 60% of plan". The answer says whether the skeptic ran as a subagent.
 - No recommendation to raise now or wait. It closes as not investment, legal or tax advice.

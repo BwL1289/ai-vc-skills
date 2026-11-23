@@ -1,7 +1,10 @@
 # Eval 3: Company Y, raising on a SAFE, with two runway claims
 
-A test prompt for the `vc-round-sizing` skill. The company is made up. Every tool call and excerpt is from a real `equity_calculator` run with these inputs. The answer states the expected behaviour; it is not a recorded run, and this eval has not been run in a live session. A run passes when it makes the one tool call below (field order free, money and percents as strings),
-checks both runway claims, the one with no raise and the deck's, puts both mismatches first without refuting them,
+A test prompt for the `vc-round-sizing` skill. The company is made up. Every tool call and excerpt is from a real
+`equity_calculator` run with these inputs. The answer states the expected behaviour; it is not a recorded run, and this
+eval has not been run in a live session. A run passes when it makes the one tool call below (field order free, money
+and percents as strings), checks both runway claims, the one with no raise and the deck's, puts both mismatches first
+without refuting them, runs the skeptic and refute pass after them, asks for a downside case without picking a percent,
 leaves the SAFE's share not computed, and makes no `equity_deal_check` call.
 
 ## Prompt
@@ -79,8 +82,13 @@ The "about 4 months" goes in the top-level `stated_runway_months`; the deck's 24
 - Both runway claims are mismatches, listed first and not refuted: with no raise, "about 4 months" (4.00 months as
   stated) against 3.20 months; with the SAFE, the deck's 24.00 months against 13.20 months, a difference of -10.80
   months.
-- The milestone is short: 1.20 months of slack past month 12; the tool covers it only when the runway reaches month 18. The
-  tool's required raise is $2,220,000.00; the answer quotes it and does not suggest raising it.
+- The milestone is short: 1.20 months of slack past month 12; the tool covers it only when the runway reaches month 18. The tool's required raise is $2,220,000.00; the answer quotes it and does not suggest raising it.
+- No downside was given, so the plan runs alone and the open asks ask for a downside case; the answer picks no
+  percent of its own.
+- Adversarial review, after the two computed mismatches: the skeptic's kept attacks, each with a founder line quoted
+  word for word, for example "the deck says this gives us 24 months" under "No downside case", or "The milestone is
+  month 12" under "A milestone with no number, date or check"; then Dropped, one line each. The answer says whether
+  the skeptic ran as a subagent.
 - The SAFE's share is "not computed: set at the next priced round". The answer offers `equity_round` once the founder
   names that round; it does not pass the SAFE to `equity_deal_check`.
 - Flags, one line each: `milestone_short_on_plan`, `start_raising_date_passed`, `runway_below_band` (a common

@@ -1,21 +1,26 @@
 # Eval 1: Company W, how much to raise, $3M or $4M
 
-A test prompt for the `vc-round-sizing` skill. The company is made up. Every tool call and excerpt is from a real `equity_calculator` run with these inputs. The answer states the expected behaviour; it is not a recorded run, and this eval has not been run in a live session. A run passes when it makes the five tool calls below (field order free, money and percents as strings),
-says which amount reaches the milestone on plan and in the downside with the tool's figures, quotes the dilution
-benchmark only as the tool prints it, gives no recommendation, and computes nothing in its own text.
+A test prompt for the `vc-round-sizing` skill. The company is made up. Every tool call and excerpt is from a real
+`equity_calculator` run with these inputs. The answer states the expected behaviour; it is not a recorded run, and this
+eval has not been run in a live session. A run passes when it makes the five tool calls below (field order free, money
+and percents as strings), says whose cash lasts to the milestone month on plan, in the downside and on the lean plan
+with the tool's figures, reads the lean plan for $3M only, leaves "$1M ARR" itself not checked, drops the attacks the
+founder's material answers, quotes the dilution benchmark only as the tool prints it, gives no recommendation, and
+computes nothing in its own text.
 
 ## Prompt
 
 > How much should we raise, $3M or $4M, at our $12M pre? We have $500k in the bank. Our plan: months 1-3 we spend
 > $120k a month with $10k of revenue, months 4-12 $220k with $25k, and from month 13 $300k with $60k. The milestone
 > for the A is "$1M ARR", by month 15, and we allow 6 months to raise the A after that. Downside: revenue comes in at
-> half of plan. The founders hold 85% today. We expect the A to sell 20% with a new 10% pool.
+> half of plan. If we only get $3M, we cut spend to 85% of plan. The founders hold 85% today. We expect the A to sell
+> 20% with a new 10% pool.
 
 ## Expected tool call
 
 Five calls, in this order.
 
-`equity_runway_plan`, once, with both amounts, both cases and the milestone:
+`equity_runway_plan`, once, with both amounts, the three cases and the milestone:
 
 ```json
 {
@@ -45,6 +50,10 @@ Five calls, in this order.
       {
         "name": "downside",
         "revenue_percent_of_plan": "50"
+      },
+      {
+        "name": "lean",
+        "gross_burn_percent_of_plan": "85"
       }
     ],
     "raises": [
@@ -130,20 +139,28 @@ Five calls, in this order.
 The runway plan:
 
 ```text
+  Plan, phase 3 (month 13 on): revenue a month                                  $60,000.00  given
+  Lean, phase 3 (month 13 on): gross burn a month                              $255,000.00  the plan's, scaled by the case's percent
   Runway, plan, no raise                                                       3.87 months  months until cash less the floor goes below zero
   Start raising by, plan, no raise                                            -2.13 months  runway - months to raise
   Runway, plan, raise 1                                                       17.90 months  months until cash less the floor goes below zero
   Runway, plan, raise 2                                                       22.06 months  months until cash less the floor goes below zero
   Runway, downside, raise 1                                                   16.77 months  months until cash less the floor goes below zero
   Runway, downside, raise 2                                                   20.47 months  months until cash less the floor goes below zero
+  Runway, lean, raise 1                                                       21.06 months  months until cash less the floor goes below zero
   Milestone 1 (month 15), plan, raise 1: slack                                 2.90 months  runway - the milestone month
   Milestone 1 (month 15), plan, raise 1: verdict                                     short  covered when the runway reaches month 21
   Milestone 1 (month 15), plan, raise 2: slack                                 7.06 months  runway - the milestone month
   Milestone 1 (month 15), plan, raise 2: verdict                                   covered  covered when the runway reaches month 21
+  Milestone 1 (month 15), downside, raise 1: slack                             1.77 months  runway - the milestone month
+  Milestone 1 (month 15), downside, raise 1: verdict                                 short  covered when the runway reaches month 21
   Milestone 1 (month 15), downside, raise 2: slack                             5.47 months  runway - the milestone month
   Milestone 1 (month 15), downside, raise 2: verdict                                 short  covered when the runway reaches month 21
+  Milestone 1 (month 15), lean, raise 1: slack                                 6.06 months  runway - the milestone month
+  Milestone 1 (month 15), lean, raise 1: verdict                                   covered  covered when the runway reaches month 21
   Required raise, milestone 1, plan, landing month 0                         $3,745,000.00  smallest raise keeping cash at or above the floor to month 21
   Required raise, milestone 1, downside, landing month 0                     $4,142,500.00  smallest raise keeping cash at or above the floor to month 21
+  Required raise, milestone 1, lean, landing month 0                         $2,989,000.00  smallest raise keeping cash at or above the floor to month 21
   Be ready to answer                                               milestone_short_on_plan  A raise does not reach a milestone, with the months to raise, on the plan itself
   Be ready to answer                                      downside_short_where_plan_covers  A raise reaches a milestone on the plan but not on the downside; be ready to say what happens if the plan is missed
   Be ready to answer                                             start_raising_date_passed  With no raise, the plan's runway less the months to raise is already at or past today: on the plan, raising the next round takes longer than the cash lasts
@@ -180,10 +197,18 @@ The two dilution runs, $3M then $4M:
 ## Expected answer
 
 - What each amount buys: $3M lasts 17.90 months on plan and 16.77 months in the downside, and is short of month 15
-  with time to raise on both (slack 2.90 months on plan; the tool covers it only when the runway reaches month 21).
-  $4M lasts 22.06 months on plan, covered with 7.06 months of slack, and 20.47 months in the downside, short.
-- The tool's required raise to reach month 15 with 6 months to raise is $3,745,000.00 on plan and $4,142,500.00 in
-  the downside. The answer quotes both and does not round them to a nicer number.
+  with time to raise on both (slack 2.90 months on plan and 1.77 months in the downside; the tool covers it only when
+  the runway reaches month 21, since slack counts from month 15). On the founder's lean plan, which is for $3M, it
+  lasts 21.06 months, covered with 6.06 months of slack. $4M lasts 22.06 months on plan, covered with 7.06 months of
+  slack, and 20.47 months in the downside, short. The lean rows the tool prints for $4M are left out, and the answer
+  says why: the lean plan is the founder's plan for $3M.
+- `milestone_short_on_plan` counts the plan case only: the answer quotes it beside $3M's covered lean verdict and does
+  not drop either.
+- A covered verdict says only that the cash lasts to month 15 plus 6 months to raise (the tool's `milestone_rule`
+  row). "$1M ARR" itself is quoted as stated, "not checked: no tool computes this", and the open asks ask for the
+  revenue a month the plan needs by month 15 for it. The answer does not convert ARR to a month by hand.
+- The tool's required raise to reach month 15 with 6 months to raise is $3,745,000.00 on plan, $4,142,500.00 in the
+  downside and $2,989,000.00 on the lean plan. The answer quotes them and does not round them to a nicer number.
 - The no-raise row comes first: 3.87 months, start raising by -2.13 months, with the `start_raising_date_passed` flag
   in the tool's words.
 - Ownership: $3M sells 20.0000% and leaves the founders 68.0000%; $4M sells 25.0000% and leaves 63.7500%. After the A
@@ -192,7 +217,12 @@ The two dilution runs, $3M then $4M:
   source unverified); 25.0000% is not above it, so no flag. No benchmark figure of the skill's own appears.
 - Flags, one line each: `milestone_short_on_plan`, `downside_short_where_plan_covers`, `start_raising_date_passed`,
   `runway_below_band` (a common benchmark, not a rule, quoting the tool's `runway_band` row).
-- The skeptic's kept attack quotes "$1M ARR" or the revenue path, with the pattern "Revenue in the plan rising with no
-  evidence named" (unverified); the calculator's short milestones head the review and are not refuted.
+- The calculator's short milestones head the review and are not refuted. The skeptic's strongest kept attack quotes
+  "$1M ARR" beside the plan's "from month 13 $300k with $60k", with the pattern "A revenue milestone with no monthly
+  figure" (unverified); an attack on the revenue path under "Revenue in the plan rising with no evidence named" may
+  also be kept.
+- Dropped, answered: an attack under "No downside case", quoting "Downside: revenue comes in at half of plan", and one
+  under "One amount only, no plan for a smaller raise", quoting "If we only get $3M, we cut spend to 85% of plan". The
+  material supplies what those patterns say is missing. The answer says whether the skeptic ran as a subagent.
 - No recommendation: it says what $4M buys on plan and not in the downside, and lists what would have to be true for
   either amount to work, in the founder's terms. It closes as not investment, legal or tax advice.

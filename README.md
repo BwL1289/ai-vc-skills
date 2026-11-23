@@ -104,7 +104,7 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 | [`vc-deck-review`](skills/vc-deck-review/SKILL.md)         | For founders: reads your deck the way a partner will before the meeting: ten dimensions marked by the evidence the deck shows, first- and last-slide rules, competition at four levels, a ranked fix list from an adversarial review, and which kind of investor the story fits. No score, no named firms.                            | 🧪 Preview   |
 | [`vc-partner-meeting`](skills/vc-partner-meeting/SKILL.md) | For founders: rehearses a partner meeting: the hardest questions your own material leaves open, asked one at a time or in one message, prep for what a partner checks around the meeting, and a debrief with a stronger answer per weak one, built only from what you said.                                                           | 🧪 Preview   |
 | [`vc-taste-check`](skills/vc-taste-check/SKILL.md)         | For founders: shows the judgment behind what you built (your product, brand and scope decisions and what you said no to), flags choices that read as generic, AI-sounding, copied or polished over, runs the same attack-and-refute review, and turns what survives into why-we-built-it-this-way lines for the deck and the meeting. | 🧪 Preview   |
-| [`vc-round-sizing`](skills/vc-round-sizing/SKILL.md)       | For founders: sizes your raise on your own plan: how long each amount lasts on plan and in a downside, which milestone it reaches with time to raise the next round, the smallest raise that gets there, and raise-now against wait side by side, every number from the calculator.                                                   | 🧪 Preview   |
+| [`vc-round-sizing`](skills/vc-round-sizing/SKILL.md)       | For founders: sizes your raise on your own plan: how long each amount lasts on plan and in a downside, which milestone month its cash reaches with time to raise the next round, the smallest raise that gets there, and raise-now against wait side by side, every number from the calculator or from your own plan.                 | 🧪 Preview   |
 | More venture-style reviews                                 | Term sheets and due-diligence questions: see your raise the way a VC will.                                                                                                                                                                                                                                                            | 🗺️ Planned   |
 
 `vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check` and `vc-round-sizing` are in preview until they have been checked on
@@ -204,8 +204,8 @@ The formulas, their sources, every flag and a worked example per scenario are in
       with a debrief (preview)
 - [ ] `vc-taste-check`: founders show the judgment behind their product decisions, stress-tested by an adversarial
       review (preview)
-- [ ] `vc-round-sizing`: founders size the raise on their own plan, with a downside case and the milestone each
-      amount buys (preview)
+- [ ] `vc-round-sizing`: founders size the raise on their own plan, with a downside case and the milestone month each
+      amount's cash reaches (preview)
 - [ ] A term-sheet review, clause by clause, with the exit waterfall computed
 - [ ] The due-diligence questions a VC is likely to ask, ranked by how much each answer moves their decision, so you
       can prepare

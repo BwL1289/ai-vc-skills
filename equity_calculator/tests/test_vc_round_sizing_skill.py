@@ -23,7 +23,14 @@ from equity_calculator.__main__ import _INPUT_MODELS, run
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity import ScenarioInput, ScenarioResult
-from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag, RunwayPlanInput, RunwayPlanResult
+from equity_calculator.schemas.equity_runway_plan import (
+    BurnCase,
+    CaseName,
+    RaiseOption,
+    RunwayPlanFlag,
+    RunwayPlanInput,
+    RunwayPlanResult,
+)
 from equity_calculator.text import render_sheet
 from tests.test_vc_claims_check_skill import _READ_SOURCES
 
@@ -31,6 +38,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 _SKILL = _ROOT / "skills" / "vc-round-sizing" / "SKILL.md"
 _TEXT = _SKILL.read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
+_DEAL_MATH = (_ROOT / "skills" / "vc-deal-math" / "SKILL.md").read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-round-sizing").glob("*.md"))
 _EVAL_COUNT = 4
 # The repository gives each made-up company its own letter; this skill's evals use W to Z.
@@ -70,6 +78,18 @@ _TABLE_ROW = re.compile(r"^\|(.+)\|$", re.MULTILINE)
 # Benchmark figures from public guides reach an answer only as the calculator's assumption rows print them.
 _FREE_BENCHMARKS = ("12 to 18", "12-18", "more than 25", "up to 20%", "a quarter of the company", "15k", "$15,000")
 _SAFE_SHARE = "not computed: set at the next priced round"
+_NOT_CHECKED = "not checked: no tool computes this"
+# The pattern rows that name something said: an attack on one stays Kept even when the material shows evidence. Every
+# other row names something missing, and a line of the material that supplies it answers the attack.
+_SAID_PATTERNS = (
+    "Runway that ends at the milestone month",
+    "Runway quoted on today's burn while the plan hires",
+    "A monthly revenue milestone above the plan's revenue a month then",
+    "Detailed multi-year financials at seed",
+    "A large share of the company sold in the round",
+)
+_MISSING_MARKERS = ("no ", "No ", "One amount only")
+_SKEPTIC_RAN = "whether the skeptic ran as a subagent"
 # A figure an eval's answer takes from the calculator: a percent or months with decimals, or money with cents.
 _PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|-?\d[\d,]*\.\d+ months|\$\d[\d,]*\.\d{2}")
 
@@ -167,6 +187,7 @@ def test_every_skill_it_hands_off_to_exists_and_vc_positioning_points_to_it() ->
         assert f"the {name} skill" in handoffs, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
     assert "the vc-round-sizing skill" in _unwrapped(_section("## When to use it", _POSITIONING))
+    assert "the vc-round-sizing skill" in _unwrapped(_section("## When to use it", _DEAL_MATH))
 
 
 def test_the_json_example_is_a_valid_runway_plan_call() -> None:
@@ -215,6 +236,31 @@ def test_the_steps_send_both_runway_claims_and_a_safe_to_the_right_place() -> No
     assert "`slack_months`" in steps and "`start_raising_by`" in steps and "never added or subtracted by hand" in steps
     assert "No recommendation." in steps
     assert "means what the vc-deal-math skill's flag table says" in steps
+    assert "never from the table's text" in steps
+    assert "a mismatch, or not checked" in steps and "the answer lists it as not checked" in steps
+
+
+def test_the_steps_name_the_landing_month_the_reserve_and_the_lean_case() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    answering = _unwrapped(_section("## Answering"))
+    fields = set(RunwayPlanInput.model_fields) | set(RaiseOption.model_fields) | set(BurnCase.model_fields)
+
+    for name in ("lands_month", "cash_floor", "gross_burn_percent_of_plan", "revenue_percent_of_plan"):
+        assert f"`{name}`" in steps and name in fields, name
+    assert "a third case named `lean`" in steps and "lean" in get_args(CaseName)
+    assert "read the lean rows only for the option the founder ties the plan to, and say so" in steps
+    assert "`milestone_short_on_plan` counts the plan case only" in answering
+    assert "`lands_month`" in _unwrapped(_section("## Steps")).split("6. **Raise now or wait**")[1]
+
+
+def test_a_milestone_verdict_says_only_that_the_cash_lasts() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "only that the cash lasts to the milestone month plus the months to raise" in steps
+    assert "a milestone is covered only when the slack is at least the months to raise" in steps
+    assert _NOT_CHECKED in steps and _NOT_CHECKED in answering
+    assert "never converted by hand" in steps and "`milestone_rule`" in answering
 
 
 def test_every_pattern_cites_a_read_source_the_calculator_or_says_unverified() -> None:
@@ -226,6 +272,11 @@ def test_every_pattern_cites_a_read_source_the_calculator_or_says_unverified() -
         assert source.startswith(_GUIDE) or "unverified" in source.lower(), pattern
     (dilution,) = (row for row in rows if "share of the company sold" in row[0])
     assert "`dilution_band` row of `equity_deal_check`" in dilution[-1]
+    # The guide calls "raising for N months" a great answer, so the doubt about it is never cited to the guide.
+    (months,) = (row for row in rows if "Raising for N months" in row[0])
+    assert months[-1].startswith("Unverified")
+    (financials,) = (row for row in rows if "Detailed multi-year financials" in row[0])
+    assert "this skill's own, unverified" in financials[-1]
 
 
 def test_sources_are_only_what_the_repository_has_read() -> None:
@@ -282,9 +333,23 @@ def test_the_refute_pass_has_the_three_verdicts_and_keeps_what_it_cannot_decide(
         assert verdict in refute, verdict
     assert "a subagent per attack" in refute and "do no arithmetic" in refute
     assert "is Kept, grounded even when the material shows evidence" in refute
+    assert "applies only while the material lacks that thing" in refute
+    assert "the attack is Dropped, answered, quoting that line" in refute
     assert "When you cannot decide, return Kept." in refute
     assert "invents nothing on the founder's behalf" in refute
     assert "word for word" in quotes and "as not grounded" in quotes
+
+
+def test_every_pattern_row_names_something_said_or_something_missing() -> None:
+    """A row the refute pass lists as something said keeps its attack; every other row is answered by the material."""
+    refute = _unwrapped(_section("### The refute pass"))
+    patterns = [row[0] for row in _table("### Patterns")]
+
+    for said in _SAID_PATTERNS:
+        assert said in patterns and f'"{said}"' in refute, said
+    for pattern in patterns:
+        if pattern not in _SAID_PATTERNS:
+            assert any(marker in pattern for marker in _MISSING_MARKERS), pattern
 
 
 def test_the_answer_leads_with_what_each_amount_buys_and_gives_no_recommendation() -> None:
@@ -367,6 +432,37 @@ def test_the_two_amounts_eval_runs_ownership_per_option_and_quotes_the_benchmark
     assert "No recommendation" in answer
 
 
+def test_the_two_amounts_eval_reads_the_lean_plan_for_the_smaller_raise_only() -> None:
+    text, prompt, answer = _eval("w")
+    plan = _calls(text)[0][1]
+
+    assert isinstance(plan, RunwayPlanInput)
+    assert [case.name for case in plan.cases] == ["plan", "downside", "lean"]
+    assert "If we only get $3M, we cut spend to 85% of plan" in prompt
+    assert (
+        "On the founder's lean plan, which is for $3M" in answer and "The lean rows the tool prints for $4M" in answer
+    )
+    assert "`milestone_short_on_plan` counts the plan case only" in answer
+
+
+def test_the_two_amounts_eval_leaves_the_arr_figure_unchecked_and_drops_what_the_material_answers() -> None:
+    _, prompt, answer = _eval("w")
+    answered = ("Downside: revenue comes in at half of plan", "If we only get $3M, we cut spend to 85% of plan")
+
+    assert f'"$1M ARR" itself is quoted as stated, "{_NOT_CHECKED}"' in answer
+    assert '"A revenue milestone with no monthly figure"' in answer
+    assert "Dropped, answered" in answer and '"No downside case"' in answer
+    for line in answered:
+        assert line in prompt and f'"{line}"' in answer, line
+
+
+@pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])
+def test_each_eval_with_a_call_runs_the_review_after_the_computed_results(path: Path) -> None:
+    answer = _unwrapped(_section("## Expected answer", path.read_text(encoding="utf-8")))
+
+    assert "Dropped" in answer and _SKEPTIC_RAN in answer
+
+
 def test_the_wait_eval_lands_the_later_raise_later_and_labels_its_valuation() -> None:
     text, prompt, answer = _eval("x")
     plan = _calls(text)[0][1]
@@ -386,6 +482,9 @@ def test_the_safe_eval_checks_both_runway_claims_and_makes_no_deal_check() -> No
     assert plan.stated_runway_months is not None and plan.raises[0].stated_runway_months is not None
     assert _SAFE_SHARE in answer and "`equity_round`" in answer
     assert "does not pass the SAFE to `equity_deal_check`" in answer
+    assert not any(case.name == "downside" for case in plan.cases)
+    assert "the open asks ask for a downside case" in answer and "picks no percent of its own" in answer
+    assert "Adversarial review, after the two computed mismatches" in answer
 
 
 def test_the_named_firm_eval_declines_the_voice_and_the_growth_rate() -> None:
