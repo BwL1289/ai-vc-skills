@@ -33,6 +33,7 @@ adds a fact about the company that the founder did not give.
   - A slide-by-slide deck review: the vc-deck-review skill (preview). Point the founder to it when they share a whole
     deck.
   - Rehearsing the partner meeting: the vc-partner-meeting skill (preview).
+  - The decisions behind the product and what was said no to: the vc-taste-check skill (preview).
 
 ## Inputs
 

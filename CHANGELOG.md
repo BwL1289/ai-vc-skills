@@ -57,6 +57,14 @@ All notable changes to this repository. Dates are UTC.
   note); runway with no raise is quoted, not computed. A question bank by category sits in
   `skills/vc-partner-meeting/references/`. `vc-positioning` now hands off to the new skill. Four evals are in
   `evals/vc-partner-meeting/`.
+- The `vc-taste-check` skill, in preview: a founder lists their key product, brand and scope decisions, including what
+  they said no to and why. Each decision is checked for clarity, usefulness and trust and flagged when it reads as
+  generic, AI-sounding, copied or taste-washed (polish over generic work). The same two-stage adversarial review as
+  `vc-positioning`, with lenses for scope discipline, distinctiveness, coherence of product, brand and story, customer
+  trust, and timing and angle, keeps only objections the founder's material does not answer. Surviving decisions become
+  why-we-built-it-this-way lines, with which to show in the deck (at most three) and which to keep for the meeting. It
+  invents no decisions, scores no taste and calls no calculator tool. `vc-positioning` now points to it. Four evals are
+  in `evals/vc-taste-check/`.
 
 ### Changed
 
