@@ -124,6 +124,14 @@ All notable changes to this repository. Dates are UTC.
   answers, and the survivors become a ranked fix list, with the calculator's mismatches first. It lists which metrics
   a fund at the founder's stage usually expects, never what values, and gives no score and no ready-or-not verdict.
   `vc-positioning` now points to it. Five evals are in `evals/vc-metrics-readiness/`.
+- The `vc-investor-memo` skill, in preview: a founder drafts, ahead of time, the internal investment memo their
+  champion partner is likely to write for the partnership, in ten fixed sections, in the third person and with no
+  recommendation. The round's figures go to `equity_deal_check` (or `equity_round` and `equity_runway_plan` for a SAFE
+  or note); the outcome case shows what the round's class is paid at the founder's own exit values (`equity_pool` for
+  whole share counts, one `equity_waterfall` call per exit) and its stake after the founder's assumed later rounds
+  (`equity_dilution`), labelled apart, with no fund size and no fund math. A dissent pass (five lenses, then a refute
+  pass with the founder's material) turns what survives into a ranked fix list, and a risk the founder cannot fix goes
+  into the memo's Top risks. `vc-positioning` now points to it. Four evals are in `evals/vc-investor-memo/`.
 
 ### Changed
 

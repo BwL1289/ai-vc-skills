@@ -48,6 +48,7 @@ _HANDOFF_SKILLS = (
     "vc-diligence-questions",
     "vc-current-investor-update",
     "vc-metrics-readiness",
+    "vc-investor-memo",
 )
 _DESCRIPTION_LIMIT = 1024
 _TRIGGERS = (
