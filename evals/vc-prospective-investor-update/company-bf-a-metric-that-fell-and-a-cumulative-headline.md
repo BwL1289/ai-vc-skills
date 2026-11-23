@@ -38,5 +38,6 @@ None: no `equity_runway_plan` call. The founder chose not to show runway, and th
 - Only October's update is given for a fourth update, so the line shows October and November and the open asks carry
   `[the first update and any other earlier updates, word for word, for the line]`. No names were given:
   `[the names this update goes to]` is in the open asks, and the skill adds none.
-- No cash and runway section. In draft mode the lenses ran after the draft, in the same agent, and the answer says they
-  are less independent than subagents; they find nothing beyond the open asks.
+- No cash and runway section. The answer says how the lenses ran: as subagents with a subagent tool; without one,
+  after the draft in one agent, with the note that they are less independent than subagents. A Spin note on the
+  cumulative highlight is minor at most, since the draft labels it cumulative and keeps the fallen metric beside it.

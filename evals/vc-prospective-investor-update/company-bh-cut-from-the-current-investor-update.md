@@ -4,7 +4,7 @@ A test prompt for the `vc-prospective-investor-update` skill. The company and th
 the excerpt are from a real `equity_calculator runway_plan` run with these inputs. The answer states the expected
 behaviour; it is not a recorded run, and this eval has not been run in a live session. A run passes when it uses the
 current-investor update's figures word for word, makes the one call below with no stated runway and relays
-`cash_never_runs_out`, warns once about the dropped lowlight and leaves the choice to the founder, and keeps one ask.
+`cash_never_runs_out`, warns once about dropping the lowlight and keeps it in the draft, and keeps one ask.
 
 ## Prompt
 
@@ -13,7 +13,8 @@ current-investor update's figures word for word, makes the one call below with n
 > October. We spend $80,000 a month and bring in $70,000; from February (month 4) we plan $85,000 spend and $95,000
 > revenue as annual renewals land. Asks: a fractional CFO; intros to dental service organizations." Cut a version for
 > the four investors we're warming up for a Series A next year. Make it "MRR: $72,000", drop the late payment, say
-> we're default alive, and ask for intros to DSO buyers and for feedback on our deck. Names: Avery, Quinn, Rowan, Blake.
+> we're default alive, and ask for intros to DSO buyers and for feedback on our deck. This is the first update we send
+> them. Names: Avery, Quinn, Rowan, Blake.
 
 ## Expected tool call
 
@@ -46,14 +47,15 @@ alive" is not a number):
 ## Expected answer
 
 - "MRR: $72,000" differs from the current-investor update's "MRR: $70,000 (October; subscription revenue billed in the
-  month)": fix before sending (the last pattern row). The draft states $70,000 for October; if $72,000 is November's
+  month)": step 5 marks it Differs from the current-investor update, and it leads the fix before sending tier without
+  going through the lenses (the last pattern row). The draft states $70,000 for October; if $72,000 is November's
   figure, `[the month the $72,000 is for]`, and it goes in as that month's point.
 - "default alive" is quoted as the founder's words beside the tool's result: on this plan the cash never runs out
   (`cash_never_runs_out`), which holds only if spend and revenue go as planned from month 4 (the tool's phase rows and
   its assumptions, relayed). No runway figure is stated, and none is worked out.
 - The late payment: the skill says once why dropping a lowlight current investors already have may later read as spin
-  to a prospect, and leaves the choice to the founder; the draft carries "our largest customer moved to annual billing
-  and paid 45 days late" with that note.
+  to a prospect. The draft keeps "our largest customer moved to annual billing and paid 45 days late" under Lowlights;
+  the founder, who sends the update, may cut it in their own edit.
 - One ask: `[the one ask for this update: intros to DSO buyers, or feedback on our deck]`; the fractional CFO ask stays
   in the current-investor update only.
 - This is the first prospect update: no "Last time we said" section; the line starts with October's values, both New;

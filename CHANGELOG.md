@@ -151,8 +151,8 @@ All notable changes to this repository. Dates are UTC.
   looks up or invents a market figure, price or share. `vc-positioning` now points to it. Four evals are in `evals/vc-market-sizing/`.
 - The `vc-prospective-investor-update` skill, in preview: a founder drafts or reviews the short update they send the
   investors they hope to raise from, in the months before the raise, so each reader sees a line rather than a single
-  point. The update keeps one fixed shape; a line table sets each metric's values from every earlier update side by
-  side as stated (the first update always shown, nothing computed); the last update's "By the next update" items are
+  point. The update keeps one fixed shape; a line table sets each metric's earlier values side by side as stated (up
+  to the last six updates, the first always shown, nothing computed); the last update's "By the next update" items are
   tied out with their own statuses (Done, Partly done, Not done, Moved, No word, Not yet due); it keeps one ask, takes
   investors only as names the founder supplies and keeps them out of the update. A runway the update shows goes to
   `equity_runway_plan` with no raise and no milestone. A reader pass has four lenses (spin, moved goalposts, changed

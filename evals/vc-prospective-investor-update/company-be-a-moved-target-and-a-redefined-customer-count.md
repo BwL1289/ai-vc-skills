@@ -4,21 +4,24 @@ A test prompt for the `vc-prospective-investor-update` skill. The company and th
 the excerpt are from a real `equity_calculator runway_plan` run with these inputs. The answer states the expected
 behaviour; it is not a recorded run, and this eval has not been run in a live session. A run passes when it marks the
 customer count Changed definition without comparing the two figures, keeps the moved MRR target and the unreported hire
-as findings, drops the definition objection by quoting the draft's own Definitions line, makes the one call below and
-states its runway as printed, and computes nothing in its own text.
+as findings, drops the definition objection by quoting the draft's own Definitions line, drops the moved enterprise
+target by quoting October's update, which already announced the move, makes the one call below and gives its printed
+runway under Numbers, and computes nothing in its own text.
 
 ## Prompt
 
 > Review my November update to the investors we're warming up for a seed next year. September's update said: "Paying
-> customers: 22. MRR: $41,000 (subscription revenue billed in the month). Target: $60,000 MRR by December. By the next
-> update: close the two warehouse pilots; hire a head of customer success." October's said: "Paying customers: 25. MRR:
-> $46,500. By the next update: convert both warehouse pilots to paid; ship the forecasting module." My November draft:
-> "Strong month. Customers (paying and pilots): 31. MRR: $49,000. Converted a warehouse pilot to paid. Shipped the
-> forecasting module. On track for $60,000 MRR in Q1. Cash: $1,800,000 at 30 November. Runway: 20 months. Ask:
-> introductions to operations leaders at third-party logistics firms. Definitions: MRR is subscription revenue billed in
-> the month." Notes: "Paying customers: 26. The second warehouse pilot extended to January; they want another month of
-> data. We spend $140,000 a month and bring in $49,000. Readers asked last month about our gross margin." Goes to: Alex
-> (seed fund), Morgan (angel), Sam (seed fund), Jordan (angel), Alex (seed fund).
+> customers: 22. MRR: $41,000 (subscription revenue billed in the month). Target: $60,000 MRR by December. Target: 8
+> enterprise accounts by December. By the next update: close the two warehouse pilots; hire a head of customer
+> success." That was our first update to them. October's said: "Paying customers: 25. MRR: $46,500. We moved the 8
+> enterprise accounts target to March: two buyers pushed their budget decisions into the new year. By the next update:
+> convert both warehouse pilots to paid; ship the forecasting module." My November draft: "Strong month. Customers
+> (paying and pilots): 31. MRR: $49,000. Converted a warehouse pilot to paid. Shipped the forecasting module. On track
+> for $60,000 MRR in Q1. On track for 8 enterprise accounts by March. Cash: $1,800,000 at 30 November. Runway: 20
+> months. Ask: introductions to operations leaders at third-party logistics firms. Definitions: MRR is subscription
+> revenue billed in the month." Notes: "Paying customers: 26. The second warehouse pilot extended to January; they want
+> another month of data. We spend $140,000 a month and bring in $49,000. Readers asked last month about our gross
+> margin." Goes to: Alex (seed fund), Morgan (angel), Sam (seed fund), Jordan (angel), Alex (seed fund).
 
 ## Expected tool call
 
@@ -66,6 +69,11 @@ states its runway as printed, and computes nothing in its own text.
   `[what happened with the head of customer success hire]`.
 - A Changed definitions objection that MRR has no definition is Dropped, answered, quoting "Definitions: MRR is
   subscription revenue billed in the month."
+- A Moved goalposts objection on "Target: 8 enterprise accounts by December." against "On track for 8 enterprise
+  accounts by March." is Dropped, answered, quoting October's update, the one sent after September's: "We moved the 8
+  enterprise accounts target to March: two buyers pushed their budget decisions into the new year." The draft states
+  what that line announced, so the founder is not told to name the move again. In the tie-out, October's March target
+  is Not yet due. The $60,000 MRR target, which no later update moved, stays Kept.
 - Spin: "Strong month." is Kept, worth fixing, and replaced by a plain summary of the founder's facts.
 - The readers' gross margin question is an Unreported promise objection, worth fixing, with
   `[gross margin, its definition and period]` in the open asks; no figure is supplied.

@@ -8,9 +8,9 @@ flags such a call can raise, and a runway claim stated as a floor ("30+ months")
 
 The metric rules and the six metric status words live in one file the vc-current-investor-update skill keeps,
 ``skills/vc-current-investor-update/references/metric-consistency.md``, which this skill reads in place. Three guards
-hold that read: the skill's fallback when the file is missing (never the rules from memory), a sentence in the install
-guide (left to the final sweep of this wave) and the coupling test below, which checks the link resolves, the status
-words this skill names are the file's, no line of the file is copied here, and the promise statuses live here only.
+hold that read: the skill's fallback when the file is missing (never the rules from memory), a sentence in
+docs/install.md (not yet added) and the coupling test below, which checks the link resolves, the status words this
+skill names are the file's, no line of the file is copied here, and the promise statuses live here only.
 
 The update's sections, the line table, the promise statuses, the names rule and the reader pass's four lenses are
 fixed; the refute verdicts are word for word the repository's; the ranked fix list has three tiers and no score. Every
@@ -88,6 +88,23 @@ _SECTIONS = (
 )
 _METRIC_STATUSES = ("Same", "Restated", "Different form", "Changed definition", "Dropped", "New")
 _PROMISE_STATUSES = ("Done", "Partly done", "Not done", "Moved", "No word", "Not yet due")
+# What the update does for each metric status: the shared file says when each applies, this skill what the update does.
+_STATUS_ACTIONS = {
+    "Same": "nothing more; this period's value sits beside the earlier ones",
+    "Restated": (
+        "the earlier update's cell stays as stated, and the restated value goes beside it, labelled restated, "
+        "with the reason (`[why it changed]`)"
+    ),
+    "Different form": (
+        "the line keeps the last update's form and asks for this period's figure in it, or how the two lines relate"
+    ),
+    "Changed definition": (
+        "the Definitions block shows both labels and both definitions; the two are never compared or converted"
+    ),
+    "Dropped": "the metric stays in the line, or the update says it is dropped and why",
+    "New": "a new row, with its definition in the Definitions block",
+}
+_DIFFERS = "Differs from the current-investor update"
 _LENSES = ("Spin", "Moved goalposts", "Changed definitions", "Unreported promise")
 _REFUTE_VERDICTS = ("**Dropped, answered:**", "**Dropped, not grounded:**", "**Kept:**")
 _TIERS = ("**fix before sending**", "**worth fixing**", "**minor**")
@@ -133,6 +150,10 @@ _MONTHS_TO_RAISE = range(31)
 _FLOOR = 30
 _FLOOR_ABOVE = ("4000000", "210000", "95000")
 _FLOOR_JUST_BELOW = ("2950000", "100000", "0")
+# An exact claim rounded down: the tool prints a mismatch, though the claim is below its runway and overstates nothing.
+_EXACT_BELOW = ("3000000", "200000", "92000", "27")
+# An eval answer that says this is the first update says so because its prompt does.
+_FIRST_UPDATE = re.compile(r"This is the first (?:prospect )?update")
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -263,7 +284,11 @@ def test_the_planned_skills_are_named_as_planned_until_their_folders_exist() -> 
     for name in _PLANNED_SKILLS:
         assert f"(the {name} skill)" in planned, name
         # When the folder lands, move the name out of the planned line into a hand-off and into _HANDOFF_SKILLS.
-        assert not (_ROOT / "skills" / name).exists(), name
+        assert not (
+            _ROOT / "skills" / name
+        ).exists(), (
+            f"{name} has shipped: turn its planned line into a hand-off, add it to _HANDOFF_SKILLS, drop it here"
+        )
     assert "Until it ships, say so" in planned
     assert "This skill's runway call carries no raise and no milestone" in handoff
 
@@ -334,9 +359,9 @@ async def test_the_command_and_the_json_example_are_the_same_check() -> None:
     )
 
 
-def _floor_call(cash: str, gross_burn: str, revenue: str) -> RunwayPlanResult:
+def _floor_call(cash: str, gross_burn: str, revenue: str, stated: str = str(_FLOOR)) -> RunwayPlanResult:
     phase = {"from_month": 1, "gross_burn": gross_burn, "revenue": revenue}
-    inputs = {"cash_on_hand": cash, "cases": [{"name": "plan", "phases": [phase]}], "stated_runway_months": str(_FLOOR)}
+    inputs = {"cash_on_hand": cash, "cases": [{"name": "plan", "phases": [phase]}], "stated_runway_months": stated}
     result = compute(RunwayPlanInput.model_validate(inputs))
     assert isinstance(result, RunwayPlanResult)
     return result
@@ -355,12 +380,42 @@ def test_a_claim_stated_as_a_floor_is_judged_by_the_printed_runway_not_the_verdi
         "A printed runway at or above the number keeps the claim",
         "it goes in no tier",
         "A printed runway below the number is a fix before sending, even when the verdict row says consistent",
-        "A mismatch on an exact claim is a figure to fix before sending",
+        "A mismatch on an exact claim is a figure to fix before sending, never softened, when the claim is above the "
+        "printed runway",
     ):
         assert rule in runway, rule
     assert "neither does a printed runway below a claim stated as a floor" in _unwrapped(
         _section("### Stage A: attack")
     )
+
+
+def test_an_exact_claim_below_the_printed_runway_is_minor_and_a_consistent_one_may_stay() -> None:
+    runway = _unwrapped(_section("## Runway"))
+    *plan, stated = _EXACT_BELOW
+    below = _floor_call(*plan, stated=stated)
+
+    # Rounded down, the claim overstates nothing, yet the tool's two-sided check calls it a mismatch.
+    assert below.verdict == "mismatch" and below.checks[0].computed.rounded > int(stated)
+    for rule in (
+        "A mismatch with the claim below the printed runway understates it",
+        "it goes in the minor tier at most",
+        "An exact claim the verdict row calls consistent may stay as the founder wrote it, and the Numbers section "
+        "gives the printed runway",
+    ):
+        assert rule in runway, rule
+    assert "A mismatch with the claim below the printed runway goes in the minor tier at most" in _unwrapped(
+        _section("### Stage A: attack")
+    )
+
+
+async def test_every_months_figure_in_the_runway_prose_is_one_the_command_prints() -> None:
+    (command,) = _fences("")
+    printed = await run(shlex.split(command)[1:])
+    figures = _PRINTED_FIGURE.findall(_unwrapped(_FENCE.sub("", _section("## Runway"))))
+
+    assert figures
+    for figure in figures:
+        assert figure in printed, figure
 
 
 def test_the_runway_is_optional_and_its_inputs_say_how_to_pass_what_the_tool_refuses() -> None:
@@ -373,6 +428,11 @@ def test_the_runway_is_optional_and_its_inputs_say_how_to_pass_what_the_tool_ref
         RunwayPlanInput.model_validate(late_start)
     with pytest.raises(ValidationError):
         RunwayPlanInput.model_validate({**json.loads(example)["inputs"], "months_to_raise": "6"})
+    for net_burn in ("0", "-5000"):
+        no_burn = json.loads(example)["inputs"]
+        no_burn["cases"][0]["phases"][0].update(gross_burn=net_burn, revenue="0")
+        with pytest.raises(ValidationError):
+            RunwayPlanInput.model_validate(no_burn)
     for rule in (
         "Whether an update to prospects shows runway is the founder's choice",
         "with no runway in it, this skill asks for no cash or burn",
@@ -381,6 +441,7 @@ def test_the_runway_is_optional_and_its_inputs_say_how_to_pass_what_the_tool_ref
         "a whole number, as a JSON integer, never a string",
         'A range ("4 to 6 months") is asked about once',
         "When the founder gives only net burn, ask for spend and revenue",
+        "A net burn of zero or less gets no call until spend and revenue are given",
         "When the founder gives cash collected rather than revenue, pass that and say so",
         "That figure is for the founder; it goes in the update only if they want it there",
         "No `raises` and no `milestones`",
@@ -439,6 +500,10 @@ def test_the_line_shows_every_earlier_value_as_stated_and_computes_nothing() -> 
         "the two are never compared or converted",
     ):
         assert rule in line, rule
+    # Every metric status says what the update does, in the shared file's order.
+    assert tuple(_STATUS_ACTIONS) == _METRIC_STATUSES
+    for status, action in _STATUS_ACTIONS.items():
+        assert f"**{status}:** {action}" in line, status
 
 
 def test_only_the_last_updates_promises_get_a_status_and_the_skill_never_decides_one() -> None:
@@ -447,6 +512,7 @@ def test_only_the_last_updates_promises_get_a_status_and_the_skill_never_decides
     for rule in (
         "The skill never decides that something was done",
         "It never ships",
+        "No word** is an item the founder's draft does not mention at all, even when the notes say what happened",
         "Only the last update's items get a status",
         "the reader pass's Unreported promise lens finds it",
         "not a forecast of metrics",
@@ -463,9 +529,13 @@ def test_the_names_are_the_founders_and_stay_out_of_the_update() -> None:
         "It never adds, suggests, ranks, scores or researches an investor or a firm, finds an email address",
         '"Goes to"',
         "any name that appears twice marked",
-        "No name on the list appears in the update itself",
+        "No name on the list appears in the update itself, except in a thanks the founder says that person agreed to",
+        "No other investor is named or hinted at either",
     ):
         assert rule in names, rule
+    assert "no investor named in the update, except in a thanks the founder says that person agreed to" in _unwrapped(
+        _section("## Steps")
+    )
     assert "**Goes to:**" in _section("## Answering")
     assert "never adds, ranks or researches one" in _unwrapped(_section("## Limits"))
 
@@ -522,6 +592,11 @@ def test_the_refute_pass_uses_only_the_founders_material() -> None:
         "**Dropped, answered:** a line of the draft given here, other than the objected line",
         "invents nothing on the founder's behalf",
         "is the objected line itself, does not drop the objection",
+        # An earlier disclosure to the same readers answers an objection about an earlier update, and only what it said.
+        "may also be answered by a later update sent to these same investors, after the one the objection quotes",
+        "quoting the line word for word with its update and date",
+        "It answers only what it said",
+        "in the draft or in such a later update",
     ):
         assert rule in brief, rule
     assert "word for word" in quotes and "dropped as not grounded" in quotes
@@ -536,9 +611,10 @@ def test_the_ranked_fix_list_has_the_three_tiers_and_no_score() -> None:
         assert tier in ranked, tier
     assert "The calculator's mismatches lead the first tier" in ranked
     assert (
-        "a Dropped or Restated metric status, or a No word promise status, with no line in the founder's draft"
-        in ranked
+        "a Dropped or Restated metric status, or a last-time item with no line in the founder's draft (No word, "
+        "whatever the notes say), goes in it too" in ranked
     )
+    assert "takes the lens names of any kept objection about the same line, and is not listed twice" in ranked
     assert "give no percentages and no score" in ranked
     assert _FIX_COLUMNS.search(answering) and "**Dropped,**" in answering
     assert _TIE_OUT_COLUMNS in answering
@@ -560,6 +636,8 @@ def test_every_pattern_row_cites_a_read_source_or_says_unverified() -> None:
     assert by_pattern["A metric from an earlier update missing now"][-1] == "Mercury guide (performance)"
     (target,) = (row for row in rows if row[0].startswith("A target written as a result"))
     assert target[-1] == "Mercury guide (next month); target as result unverified"
+    (adjectives,) = (row for row in rows if row[0].startswith("A summary of adjectives"))
+    assert adjectives[-1] == "Mercury guide (introduction); pattern and reason unverified"
     for pattern in ("Other investors named or hinted at", "A figure that differs from this period's update"):
         (row,) = (row for row in rows if row[0].startswith(pattern))
         assert row[-1] == "Unverified", pattern
@@ -575,6 +653,8 @@ def test_sources_are_the_read_set_and_no_one_is_named_outside_them() -> None:
     assert not _URL.search(_RULES)
     assert "frameworks, not voices" in sources and "this skill's own judgment, unverified" in sources
     assert "is about meeting potential investors early, not written updates, and is from 2010" in sources
+    assert "The metric rules and the Definitions block come from the shared rules file" in sources
+    assert "not re-read for this one, so here they are unverified" in sources
     for text in (_without_sources_and_source_cells(_TEXT), *answers):
         assert _names_a_person_or_firm(text) is None, _names_a_person_or_firm(text)
 
@@ -645,6 +725,13 @@ def test_one_eval_drops_an_objection_by_quoting_the_drafts_own_line_and_keeps_a_
     assert "Partly done" in answer and "is Done" in answer and "it gets no status" in answer
     assert '"Alex (seed fund)" marked as listed twice' in answer
     assert str(call.stated_runway_months) == "20" and compute(call).verdict == "consistent"
+    assert "gives its printed runway under Numbers" in _unwrapped(text) and "the stated 20 months stands" in answer
+    # A move an earlier update already announced to the same readers is answered by that update, not kept.
+    announced = "We moved the 8 enterprise accounts target to March"
+    moved = answer[answer.index('"Target: 8 enterprise accounts by December."') :]
+    assert announced in prompt and announced in moved
+    assert moved.index("is Dropped, answered, quoting October's update") < moved.index(announced)
+    assert "October's March target is Not yet due" in moved and "stays Kept" in moved
 
 
 def test_one_eval_keeps_a_fallen_metric_writes_a_slip_as_moved_and_keeps_one_ask() -> None:
@@ -683,6 +770,57 @@ def test_one_eval_is_cut_from_the_current_investor_update_with_no_stated_runway(
     assert call.stated_runway_months is None and len(call.cases[0].phases) == 2
     assert result.flags == ("cash_never_runs_out",) and result.verdict == "not_checked"
     assert '"MRR: $72,000" differs from the current-investor update' in answer
-    assert "leaves the choice to the founder" in answer
+    assert f"step 5 marks it {_DIFFERS}" in answer and "without going through the lenses" in answer
+    # The draft keeps the lowlight the founder asked to drop; the founder may cut it in their own edit.
+    assert "drop the late payment" in prompt
+    assert 'The draft keeps "our largest customer moved to annual billing and paid 45 days late"' in answer
+    assert "may cut it in their own edit" in answer and "leaves the choice" not in text
     assert "the fractional CFO ask stays in the current-investor update only" in answer
     assert "No runway figure is stated, and none is worked out" in answer
+
+
+def test_a_figure_that_differs_from_the_current_investor_update_is_checked_without_the_lenses() -> None:
+    steps = _unwrapped(_section("## Steps"))
+    attack = _unwrapped(_section("### Stage A: attack"))
+    ranked = _unwrapped(_section("### The ranked fix list"))
+    built = _unwrapped(_section("## Built from this period's current-investor update"))
+
+    assert "every figure and definition in this period's update to current investors, when given" in steps
+    assert "(in a draft, the notes or the request)" in steps
+    assert f"**Matches** or **{_DIFFERS}**" in steps and "This check is this skill's own, not a metric status" in steps
+    assert f"a figure that {_DIFFERS} or a kept finding requires" in steps
+    assert "every figure and definition this period's current-investor update also gives is word for word the same" in (
+        steps
+    )
+    # The lenses see that update, yet a difference does not wait for one of them to notice it.
+    assert "this period's update to current investors when given, and the draft" in attack
+    assert f"nor a figure or definition that {_DIFFERS} (step 5)" in attack
+    assert f"with every figure or definition that {_DIFFERS} (step 5)" in ranked
+    assert "leads the first tier of the fix list with the calculator's mismatches" in built
+    assert "is a finding for the reader pass" not in built
+    # Its own check, not a seventh metric status.
+    assert _DIFFERS not in _RULES
+
+
+def test_the_draft_keeps_every_lowlight_the_founder_gave() -> None:
+    built = _unwrapped(_section("## Built from this period's current-investor update"))
+    limits = _unwrapped(_section("## Limits"))
+
+    for rule in (
+        "hears once why a reader may later see it as spin, and the draft keeps the lowlight",
+        "the founder, who sends the update, may cut it in their own edit",
+        "A lowlight inside a section that may be left out (a departure under team matters) stays in",
+    ):
+        assert rule in built, rule
+    assert "let them decide" not in _TEXT
+    assert "hears once why it costs trust; the draft keeps it" in limits
+    assert "every lowlight the founder gave is in the draft" in _unwrapped(_section("## Steps"))
+
+
+@pytest.mark.parametrize("path", _EVALS, ids=[path.stem for path in _EVALS])
+def test_an_eval_answer_takes_a_first_update_only_from_its_prompt(path: Path) -> None:
+    """The skill asks for the earlier updates, never guesses there are none: a first update is the founder's word."""
+    _, prompt, answer = _eval(path.name.split("-")[1])
+
+    if _FIRST_UPDATE.search(answer):
+        assert "first update" in prompt, path.name

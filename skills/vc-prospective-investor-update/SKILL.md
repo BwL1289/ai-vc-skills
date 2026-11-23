@@ -1,17 +1,17 @@
 ---
 name: vc-prospective-investor-update
-description: Helps a founder write the short update they send to investors they hope to raise from, in the months before the raise, so each reader sees a line of progress and not a single dot. It keeps the same few metrics with the same definitions in every update, shows each metric's values from every earlier update as stated, ties the last update's promises to what happened, and makes one ask. Investors are only names the founder supplies; it looks nobody up and sends nothing. A runway figure, when the update shows one, goes to the calculator's runway_plan tool. A skeptical reader pass has independent lenses flag spin, moved goalposts, changed metric definitions and promises left unreported, and a refute pass drops what the founder's material answers. Use when a founder says write an update for the VCs we're warming up, draft my monthly update to prospective investors, keep investors warm before our raise, or review my prospect update. Never invents or hides numbers. Not investment or legal advice.
+description: Helps a founder write the short update they send to investors they hope to raise from, in the months before the raise, so each reader sees a line of progress and not a single dot. It keeps the same few metrics with the same definitions in every update, shows each metric's earlier values as stated, ties the last update's promises to what happened, and makes one ask. Investors are only names the founder supplies; it looks nobody up and sends nothing. A runway figure, when the update shows one, goes to the calculator's runway_plan tool. A skeptical reader pass has independent lenses flag spin, moved goalposts, changed metric definitions and promises left unreported, and a refute pass drops what the founder's material answers. Use when a founder says write an update for the VCs we're warming up, draft my monthly update to prospective investors, keep investors warm before our raise, or review my prospect update. Never invents or hides numbers. Not investment or legal advice.
 ---
 
 # VC prospective investor update
 
 Helps a founder keep in touch with the investors they hope to raise from, before the raise starts. A partner meeting a
-company once sees one point; a partner who has had a short update every month or quarter, with the same metrics and
-the same definitions each time, and who has seen last time's plans happen or not, sees a line. This skill drafts that
-update from the founder's own material, or reviews a draft they paste. It lays out each metric's values from every
-earlier update as the founder stated them, ties the last update's promises to what happened, keeps one ask, checks a
-runway claim with the equity calculator, and runs a skeptical reader pass that flags spin, moved goalposts, changed
-definitions and promises left unreported. Then a refute pass drops each flag the founder's own material answers.
+company once sees one point; a partner who has had a short update every month or quarter, with the same metrics and the
+same definitions each time, and who has seen last time's plans happen or not, sees a line. This skill drafts that update
+from the founder's own material, or reviews a draft they paste. It lays out each metric's earlier values as the founder
+stated them, ties the last update's promises to what happened, keeps one ask, checks a runway claim with the equity
+calculator, and runs a skeptical reader pass that flags spin, moved goalposts, changed definitions and promises left
+unreported. Then a refute pass drops each flag the founder's own material answers.
 
 The founder is always the user. The skill never plays an investor, never speaks as a named investor or firm, never
 adds a figure, customer, event or investor the founder did not give, and never looks anyone up.
@@ -73,7 +73,7 @@ Short, bullet points, the same sections in the same order every time, so a reade
 
 | Section                   | What it holds                                                                                                                | Source                                                                                             |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Where we are              | Two or three sentences: was the period good, bad or in between, and the one takeaway                                         | Mercury guide (introduction)                                                                       |
+| Where we are              | Two or three sentences: was the period good, bad or in between, and the key takeaways                                        | Mercury guide (introduction)                                                                       |
 | The line                  | The same few metrics every time, each with this period's value beside the values sent before (next section)                  | Mercury guide (performance); Suster post (lines, not dots); the table's layout is ours, unverified |
 | Last time we said         | Each thing the last update said would happen by now, and what did, in the founder's words, with its status                   | Suster post (what you plan to achieve by next time)                                                |
 | Highlights                | What went right, with the figure or name the founder gave                                                                    | Mercury guide; 500 Global guide                                                                    |
@@ -102,8 +102,16 @@ The section that makes the update a line and not a dot.
   figures. A growth rate the founder states goes in the cell as stated, with its method and period, or a bracketed ask
   for them.
 - **Status, against the last update,** in a column of the tie-out table in the answer, not in the update itself: one of
-  the shared file's six metric statuses. A Changed definition row shows both labels and both definitions in the
-  Definitions block; the two are never compared or converted.
+  the shared file's six metric statuses. What the update does for each:
+  - **Same:** nothing more; this period's value sits beside the earlier ones.
+  - **Restated:** the earlier update's cell stays as stated, and the restated value goes beside it, labelled restated,
+    with the reason (`[why it changed]`).
+  - **Different form:** the line keeps the last update's form and asks for this period's figure in it, or how the two
+    lines relate.
+  - **Changed definition:** the Definitions block shows both labels and both definitions; the two are never compared
+    or converted.
+  - **Dropped:** the metric stays in the line, or the update says it is dropped and why.
+  - **New:** a new row, with its definition in the Definitions block.
 - **A metric is never removed** because it went down. It stays, or the update says it is dropped and why.
 
 ## Last time we said
@@ -116,8 +124,8 @@ here, with one of six promise statuses and the founder's own words for what happ
 - **Moved** is a target that comes back with a later date, a lower figure, a narrower scope or a different metric than
   it was given. The update says so in words ("we said December; it is now March, because ..."), with the old and new
   target both quoted. A moved goalpost that the update does not name is a finding for the reader pass.
-- **No word** is an item the draft does not mention at all. It never ships: the line is written, or the item is said
-  to be dropped and why.
+- **No word** is an item the founder's draft does not mention at all, even when the notes say what happened. It never
+  ships: the line is written, from the notes or as a bracketed ask, or the item is said to be dropped and why.
 - **Not yet due** is an item whose date has not come; it carries over.
 
 Only the last update's items get a status. An item from an older update that the last one did not carry forward gets
@@ -134,8 +142,8 @@ The founder keeps the list of investors. This skill takes the names only, as the
 - It never adds, suggests, ranks, scores or researches an investor or a firm, finds an email address, or keeps the list
   between conversations.
 - It gives the list back at the end of the answer as "Goes to", unchanged, with any name that appears twice marked.
-- No name on the list appears in the update itself (no "three funds are already talking to us"). A thanks to a named
-  person goes in only if the founder says that person agreed.
+- No name on the list appears in the update itself, except in a thanks the founder says that person agreed to. No
+  other investor is named or hinted at either (the pattern row on other investors).
 
 ## Steps
 
@@ -147,24 +155,30 @@ as given, never the revised one: a line this skill adds at step 8 answers no obj
 draft written at step 8.
 
 1. **Quote first.** List, word for word with their update and section, every figure, target and "By the next update"
-   item in every earlier update, and every figure and event in this period's notes and any draft.
+   item in every earlier update, every figure and event in this period's notes and any draft, and every figure and
+   definition in this period's update to current investors, when given.
 2. **Ask for what is missing,** once, in one message (Inputs above).
 3. **Read the shared rules file** (above), or take its fallback.
 4. **Build the line:** the metric rows and the update columns, each cell as stated.
 5. **Tie out** each metric against the last update (metric statuses) and each item of "Last time we said" (promise
-   statuses).
+   statuses). When this period's update to current investors is given, also set each figure and definition the founder
+   gives for this update (in a draft, the notes or the request) beside that update's for the same metric and period,
+   compared as written: **Matches** or **Differs from the current-investor update**. This check is this skill's own,
+   not a metric status.
 6. **Runway,** only when the update shows one: call `equity_runway_plan` (next section).
 7. **Other figures:** quote each as stated, with "not checked: no tool computes this".
 8. **Draft or revise.** Draft mode: write the update in the shape above from the founder's material only, every gap a
-   bracketed ask. Review mode: keep the founder's draft and words; change only what a status, the calculator or a kept
-   finding requires. With more than one ask in the material, keep one and put the choice in the open asks
-   (`[the one ask for this update: A or B]`).
+   bracketed ask. Review mode: keep the founder's draft and words; change only what a status, the calculator, a figure
+   that Differs from the current-investor update or a kept finding requires. With more than one ask in the material,
+   keep one and put the choice in the open asks (`[the one ask for this update: A or B]`).
 9. **Run the reader pass** (below) on the draft it judges (the founder's draft as given in review mode): attack, check
    the quotes, refute, rank. Revise the draft for every kept finding, using only the founder's facts or a bracketed
    ask.
-10. **Check before answering.** Every figure is quoted as stated or comes from a tool; every metric an earlier update
-    reported is in the line or said to be dropped; every last-time item has a line; one ask; no investor named in the
-    update; no sentence speaks as an investor or names a firm as a voice; nothing is sent anywhere.
+10. **Check before answering.** Every figure is quoted as stated or comes from a tool; every lowlight the founder gave
+    is in the draft; every figure and definition this period's current-investor update also gives is word for word the
+    same as there; every metric an earlier update reported is in the line or said to be dropped; every last-time item
+    has a line; one ask; no investor named in the update, except in a thanks the founder says that person agreed to;
+    no sentence speaks as an investor or names a firm as a voice; nothing is sent anywhere.
 
 ## Runway
 
@@ -176,7 +190,9 @@ or burn. When the update shows a runway, it goes to `equity_runway_plan` (from t
 - One `plan` case: the first phase is today's monthly spend (`gross_burn`) and `revenue`, from month 1 (the month after
   the cash date); each planned change is another phase, from its month. When the founder gives cash collected rather
   than revenue, pass that and say so. When the founder gives only net burn, ask for spend and revenue; until then, pass
-  the net burn as `gross_burn` with `revenue` `"0"`, and label the line as net burn in the update.
+  the net burn as `gross_burn` with `revenue` `"0"`, and label the line as net burn in the update. A net burn of zero
+  or less gets no call until spend and revenue are given (the tool refuses a `gross_burn` of 0 or less); meanwhile
+  quote the founder's words, as for "default alive".
 - `stated_runway_months`: the runway the update states; a "30+ months" claim is passed as `"30"`. With no figure stated
   ("default alive", "profitable soon"), call without it and quote the founder's words beside the tool's result; never
   turn those words into a figure.
@@ -236,8 +252,11 @@ into the update.
 
 Read every row, the `flags` and the `assumptions` before answering. Use the printed values (23.64 months stays 23.64
 months, never "about two years"); never round again or recompute. A refusal is the answer for those inputs: relay its
-reason. A mismatch on an exact claim is a figure to fix before sending, never softened; a claim stated as a floor
-follows the rule above instead.
+reason. A mismatch on an exact claim is a figure to fix before sending, never softened, when the claim is above the
+printed runway. A mismatch with the claim below the printed runway understates it: the update may keep it or state the
+printed runway, and it goes in the minor tier at most. An exact claim the verdict row calls consistent may stay as the
+founder wrote it, and the Numbers section gives the printed runway. A claim stated as a floor follows the rule above
+instead.
 
 | Flag                        | What it means for the founder                                                         | What the update does                                                                                  |
 | --------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -268,9 +287,10 @@ Every lens gets the same brief, with its own name and test filled in:
 
 - You test one thing: the lens's name and what it tests. Write in the third person ("an investor who kept the last
   update is likely to notice ..."); you are not an investor and do not speak as one, named or not.
-- Read only the founder's material given here: the earlier updates, this period's notes and the draft. Bring in no
-  outside fact about the company, its market or its customers, and do no arithmetic. Saying that one stated figure is
-  larger than another, or one date later, is allowed; working out by how much is not.
+- Read only the founder's material given here: the earlier updates, this period's notes, this period's update to current
+  investors when given, and the draft. Bring in no outside fact about the company, its market or its customers, and do
+  no arithmetic. Saying that one stated figure is larger than another, or one date later, is allowed; working out by how
+  much is not.
 - Return at most three objections, strongest first. For each: the draft's line it is about (or, for something left
   out, the earlier update's or the notes' line the draft omits), quoted word for word with its place; why an investor
   is likely to read it as a reason to trust the line less; and how much it costs (fix before sending, worth fixing, or
@@ -287,8 +307,9 @@ In draft mode the same agent wrote the draft, so the lenses run after step 8, st
 answer says the lenses ran in one agent and are less independent than subagents.
 
 **The calculator's mismatches** do not go through the lenses or the refute pass, and neither does a printed runway
-below a claim stated as a floor. Each leads the first tier, quoting the update's figure with the tool's value as the
-reason.
+below a claim stated as a floor, nor a figure or definition that Differs from the current-investor update (step 5).
+Each leads the first tier, quoting the update's figure with the tool's value, or the current-investor update's line,
+as the reason. A mismatch with the claim below the printed runway goes in the minor tier at most, the same way.
 
 ### Check the quotes
 
@@ -321,17 +342,25 @@ The verdicts:
   outside fact.
 - **Kept:** neither holds. When the fix needs something the material does not contain, it becomes a bracketed ask.
 
-The refute pass invents nothing on the founder's behalf. An answering line that is not in the draft word for word, or is
-the objected line itself, does not drop the objection. In review mode the draft given here is the founder's, as given: a
-line this skill added at step 8 is not in it.
+An objection about an earlier update's target, item or definition may also be answered by a later update sent to these
+same investors, after the one the objection quotes: a line of it that already said the target moved, the item was
+dropped or done, or the definition changed. That is **Dropped, answered** too, quoting the line word for word with its
+update and date. It answers only what it said: when the draft states something other than what that line announced (it
+said March; the draft says June), the objection is Kept.
+
+The refute pass invents nothing on the founder's behalf. An answering line that is not, word for word, in the draft or
+in such a later update, or is the objected line itself, does not drop the objection. In review mode the draft given here
+is the founder's, as given: a line this skill added at step 8 is not in it.
 
 ### The ranked fix list
 
 Order the kept objections in three tiers: **fix before sending**, **worth fixing**, **minor**. The calculator's
-mismatches lead the first tier; a Dropped or Restated metric status, or a No word promise status, with no line in the
-founder's draft goes in it too, even though the revised draft adds its line. Within a tier, an objection raised by more
-than one lens comes first. The tier is a judgment: give no percentages and no score. Each entry: the section, the line
-quoted, why an investor is likely to read it that way in one or two plain sentences, and the change, using only the
+mismatches lead the first tier, with every figure or definition that Differs from the current-investor update (step 5);
+a Dropped or Restated metric status, or a last-time item with no line in the founder's draft (No word, whatever the
+notes say), goes in it too, even though the revised draft adds its line. An entry the tie-out put in the list takes the
+lens names of any kept objection about the same line, and is not listed twice. Within a tier, an objection raised by
+more than one lens comes first. The tier is a judgment: give no percentages and no score. Each entry: the section, the
+line quoted, why an investor is likely to read it that way in one or two plain sentences, and the change, using only the
 founder's facts or a bracketed ask. The draft is revised for every kept entry.
 
 ## Patterns that cost a prospect's trust
@@ -339,33 +368,37 @@ founder's facts or a bracketed ask. The draft is revised for every kept entry.
 Signals, not rules: a founder may have a reason. A row marked unverified has no public source behind it that this
 skill's authors read; say so when it is used.
 
-| Pattern                                                                   | Why an investor is likely to discount it                      | Fix                                                                      | Source                                                                               |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| A summary of adjectives ("great momentum") with no figure                 | Nothing to check, and it reads as hiding the facts            | Say whether the period was good, bad or in between, and the one takeaway | Mercury guide (introduction)                                                         |
-| Highlights and no lowlights                                               | Investors assume something is being hidden                    | The lowlights the founder gave, said plainly                             | Mercury guide (mistakes to avoid)                                                    |
-| Updates that stop, or a bad month skipped                                 | Silence is read as a warning that things are going badly      | Send on the same schedule, good or bad                                   | Mercury guide (mistakes to avoid); 500 Global guide (every month, good or bad)       |
-| A metric from an earlier update missing now                               | The picture over time stops being consistent and predictable  | Keep it in the line, or say it is dropped and why                        | Mercury guide (performance)                                                          |
-| A new metric that appears as an old one falls                             | Reads as changing the scoreboard                              | Keep the old metric beside the new one, with both definitions            | Unverified                                                                           |
-| A definition changed without notice                                       | The line breaks: two points that cannot be compared           | Announce it, with both labels and definitions                            | Unverified (the rule is in the shared rules file)                                    |
-| A target that comes back later, lower or narrower without saying so       | A moved goalpost, read as a miss being hidden                 | Name the move: the old target, the new one, and why                      | Unverified                                                                           |
-| An item from "By the next update" with no word now                        | The reader was told to expect it                              | One line on what happened, in the founder's words                        | Suster post (what you plan to achieve by next time); the gap is ours, unverified     |
-| A target written as a result, or a metric target with no date or no label | A promise that the next update will have to walk back         | Results as results; a target labelled as one, with its date              | Mercury guide (next month); target as result unverified                              |
-| Paragraphs of prose; an update that takes long to read                    | It goes unread                                                | Bullet points, short lines                                               | 500 Global guide (no paragraphs); Suster post (low-key and short); reason unverified |
-| More than one ask, or an ask with no who and no why                       | Nothing a reader can act on                                   | One ask: the kind of person or help, and why                             | Mercury guide (asks); one ask and specificity unverified                             |
-| Other investors named or hinted at ("several funds are already in")       | Reads as pressure, and may break a confidence                 | Leave other investors out                                                | Unverified                                                                           |
-| A figure that differs from this period's update to current investors      | A reader who later sees both finds two figures for one period | The same figure, word for word                                           | Unverified                                                                           |
+| Pattern                                                                   | Why an investor is likely to discount it                      | Fix                                                                       | Source                                                                                               |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| A summary of adjectives ("great momentum") with no figure                 | Nothing to check, and it reads as hiding the facts            | Say whether the period was good, bad or in between, and the key takeaways | Mercury guide (introduction); pattern and reason unverified                                          |
+| Highlights and no lowlights                                               | Investors assume something is being hidden                    | The lowlights the founder gave, said plainly                              | Mercury guide (mistakes to avoid)                                                                    |
+| Updates that stop, or a bad month skipped                                 | Silence is read as a warning that things are going badly      | Send on the same schedule, good or bad                                    | Mercury guide (mistakes to avoid); 500 Global guide (every month, good or bad)                       |
+| A metric from an earlier update missing now                               | The picture over time stops being consistent and predictable  | Keep it in the line, or say it is dropped and why                         | Mercury guide (performance)                                                                          |
+| A new metric that appears as an old one falls                             | Reads as changing the scoreboard                              | Keep the old metric beside the new one, with both definitions             | Unverified                                                                                           |
+| A definition changed without notice                                       | The line breaks: two points that cannot be compared           | Announce it, with both labels and definitions                             | Unverified (the rule is in the shared rules file)                                                    |
+| A target that comes back later, lower or narrower without saying so       | A moved goalpost, read as a miss being hidden                 | Name the move: the old target, the new one, and why                       | Unverified                                                                                           |
+| An item from "By the next update" with no word now                        | The reader was told to expect it                              | One line on what happened, in the founder's words                         | Suster post (what you plan to achieve by next time); the gap is ours, unverified                     |
+| A target written as a result, or a metric target with no date or no label | A promise that the next update will have to walk back         | Results as results; a target labelled as one, with its date               | Mercury guide (next month); target as result unverified                                              |
+| Paragraphs of prose; an update that takes long to read                    | It goes unread                                                | Bullet points, short lines                                                | 500 Global guide (no paragraphs); Suster post (low-key and short, about meetings); reason unverified |
+| More than one ask, or an ask with no who and no why                       | Nothing a reader can act on                                   | One ask: the kind of person or help, and why                              | Mercury guide (asks); one ask and specificity unverified                                             |
+| Other investors named or hinted at ("several funds are already in")       | Reads as pressure, and may break a confidence                 | Leave other investors out                                                 | Unverified                                                                                           |
+| A figure that differs from this period's update to current investors      | A reader who later sees both finds two figures for one period | The same figure, word for word                                            | Unverified                                                                                           |
 
 ## Built from this period's current-investor update
 
 When the founder also sends an update to current investors this period (the vc-current-investor-update skill), this
 update is cut from it, never written apart from it:
 
-- The same figures, word for word, and the same metric definitions. A figure that differs between the two is a finding
-  for the reader pass (the last pattern row). One `equity_runway_plan` call for this update when it shows a runway,
-  using that update's cash, spend and revenue.
+- The same figures, word for word, and the same metric definitions. Step 5 sets each figure and definition the founder
+  gives for this update beside that update's. One that differs, in a draft or in the founder's request, gives way to
+  that update's in the draft and leads the first tier of the fix list with the calculator's mismatches (the last
+  pattern row). One `equity_runway_plan` call for this update when it shows a runway, using that update's cash, spend
+  and revenue.
 - It may leave out whole sections the founder keeps for current investors (named customers who have not agreed to be
   named, team matters, the cap table, the asks meant for current investors). It does not drop a lowlight while keeping
-  the highlights; if the founder wants that, say once why a reader may later see it as spin, and let them decide.
+  the highlights: a founder who asks for that hears once why a reader may later see it as spin, and the draft keeps the
+  lowlight; the founder, who sends the update, may cut it in their own edit. A lowlight inside a section that may be
+  left out (a departure under team matters) stays in, under Lowlights.
 
 ## Answering
 
@@ -397,7 +430,9 @@ Review mode leads with what to fix; draft mode leads with the draft.
 These are frameworks, not voices: the post's author and the people the guides quote are not imitated. The Suster post
 is about meeting potential investors early, not written updates, and is from 2010; say so when a founder leans on it.
 The section names, the line table's layout, the one ask, the promise statuses, the rows marked unverified and the rules
-for an update cut from the current-investor one are this skill's own judgment, unverified. The two-stage reader pass
+for an update cut from the current-investor one are this skill's own judgment, unverified. The metric rules and the
+Definitions block come from the shared rules file, which is the vc-current-investor-update skill's: that skill's
+pattern table gives their sources, not re-read for this one, so here they are unverified. The two-stage reader pass
 (attack, then refute with the founder's own material) is this repository's own method.
 
 ## Limits
@@ -407,7 +442,8 @@ for an update cut from the current-investor one are this skill's own judgment, u
 - It drafts and reviews only. It sends nothing, schedules nothing, tracks no opens or replies, keeps no list between
   conversations, and looks nothing up. Investors are names the founder supplies; it never adds, ranks or researches one.
 - It never invents, strengthens or hides a figure, customer, event, target or lowlight, in a draft or in a refute pass.
-  A target is never written as a result.
+  A founder who asks to leave out bad news hears once why it costs trust; the draft keeps it, and the founder may cut it
+  in their own edit. A target is never written as a result.
 - No arithmetic outside the equity calculator's tools: no growth rates, changes, totals, conversions or charts. Stated
   figures are compared as written.
 - The runway is the founder's plan worked by the tool: flat spend and revenue within each phase, no fees, interest or
