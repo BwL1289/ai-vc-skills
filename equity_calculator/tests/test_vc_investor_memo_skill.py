@@ -731,7 +731,7 @@ def test_one_eval_keeps_an_objection_a_line_answers_only_in_part() -> None:
     assert "`[one specific achievement for each other founder, and their role]`" in kept
     assert "Dropped, answered by slide 6" not in answer
     assert "Its Fix cell says it is answered in part and quotes the slide 6 line with its place" in kept
-    # The run that graded Partial batched the refute pass; the eval now says which form passes.
+    # The recorded run batched the refute pass; the eval now says which form passes.
     assert "one subagent deciding several objections, even one at a time, does not pass" in answer
     assert "a pointer to the answer's Open asks does not pass" in answer
     assert "statement quoted word for word with its key" in answer

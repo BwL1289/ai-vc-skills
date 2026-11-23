@@ -1,14 +1,17 @@
 # Eval 2: Company AR, a 2x participating seed with terms the calculator does not model
 
 A test prompt for the `vc-term-sheet-review` skill. The company is made up. The tool calls and their excerpts are real
-calculator output for these inputs. "Expected answer" states the expected behaviour, and "Recorded answer" is an
-excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-23), graded Partial: it met this pass sentence, but ran the
-lenses and the refute pass in its own agent though it had a subagent tool. The skill and this eval were changed after
-that run (see "Recorded answer"). A run passes when it marks the valuation's label, the preference, participation,
-dividends, anti-dilution, board and redemption terms Differs or Not in the baseline with their sources, marks no term
-Missing (the founder has not said the text is the whole sheet), reports the founders' 75%
-as a mismatch, runs every exit under the sheet's terms and under the 1x non-participating baseline with no difference
-computed, quotes the not-modelled terms with the fixed string, and says nothing about whether to sign.
+calculator output for these inputs. "Expected answer" states the expected behaviour, and "Recorded answer" is an excerpt
+of a recorded run (Claude Code 2.1.330 on 2026-11-23). A run passes when it marks the valuation's label, the preference,
+participation, dividends, anti-dilution, board and redemption terms Differs or Not in the baseline with their sources,
+marks no term Missing (the founder has not said the text is the whole sheet), reports the founders' 75% as a mismatch,
+runs every exit under the sheet's terms and under the 1x non-participating baseline with no difference computed, quotes
+the not-modelled terms with the fixed string, and says nothing about whether to sign. The verdict is Pass when every
+clause of that sentence is met, Partial when exactly one clause is missed or met only in part, and Fail when two or more
+are missed; a shortfall against the other points of the expected answer is noted but does not change the verdict. The
+pass sentence has not changed since the run. The recorded run is a Pass with shortfalls, which its grader called partial
+overall: it ran the lenses and the refute pass in its own agent though it had a subagent tool. The skill and this eval
+were changed after that run (see "Recorded answer").
 
 ## Prompt
 
@@ -307,18 +310,19 @@ computed, quotes the not-modelled terms with the fixed string, and says nothing 
 Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository and no user settings. The
 answer is trimmed; [...] marks each cut.
 
-**Partial.** It met every clause of the pass sentence above: all ten calls with the expected arguments, every figure
-as the tool printed it, the marks with their sources, no term marked Missing, the 75% as a mismatch, both columns of
+**Pass, with shortfalls against the expected answer (its grader called the run partial overall).** It met every clause
+of the pass sentence above: the marks with their sources, no term marked Missing, the 75% as a mismatch, both columns of
 the exit table with no difference computed, the not-modelled terms with the fixed string, and nothing on whether to
-sign. It was graded Partial on two expected points: it ran the four lenses and the refute pass in its own agent
-although it had a subagent tool, and its preference mark did not cite a precedent point from the YC article that the
+sign; it also made all ten calls with the expected arguments and gave every figure as the tool printed it. Short of the
+expected answer: it ran the four lenses and the refute pass in its own agent although it had a subagent tool (the
+transcript holds no subagent call), and its preference mark did not cite a precedent point from the YC article that the
 skill never mentions (that point is no longer expected, since no one has read the article for it). It also quoted the
 pool's place in the option pool row (now accepted), counted "five of the seven lines" where its own table marks six,
 opened with a bare "no", asked about a three-year period the sheet never gave, and set the investors' 25% beside the
 $30M exit's remainder. Since this run the skill puts the subagent path first, asks for a refute verdict per objection,
 answers "is it standard?" from the marks table with no yes or no, takes every count from that table, keeps lawyer
-questions to the sheet's own periods, and explains participation with the waterfall's own fields. The eval has not
-been run again.
+questions to the sheet's own periods, and explains participation with the waterfall's own fields. The eval has not been
+run again.
 
 > This is a plain-words reading to prepare for your lawyer, not legal, tax or investment advice; whether to sign is your call with them.
 >

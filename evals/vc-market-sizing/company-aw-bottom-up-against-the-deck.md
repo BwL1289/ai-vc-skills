@@ -2,12 +2,16 @@
 
 A test prompt for the `vc-market-sizing` skill. The company is made up. The tool call and the excerpt are from a real
 `equity_calculator market_sizing` run with these inputs. "Expected answer" states the expected behaviour, and "Recorded
-answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-23), graded Partial: it met the pass sentence,
-but ran the refute pass as one subagent for all nine objections and kept the Path objection on the 900 clinics. The
-skill was changed after that run (see "Recorded answer"). A run passes when it makes the one tool call below (field
-order free, money and percents as strings), leads with the TAM mismatch, quotes the break-even values from the tool
-rather than working them out, names the 900 clinics as the shakiest assumption by the tool's swing, launches one
-refute subagent per objection when it has a subagent tool, and computes nothing in its own text.
+answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-23). A run passes when it makes the one tool
+call below (field order free, money and percents as strings), leads with the TAM mismatch, quotes the break-even values
+from the tool rather than working them out, names the 900 clinics as the shakiest assumption by the tool's swing,
+launches one refute subagent per objection when it has a subagent tool, and computes nothing in its own text. The
+verdict is Pass when every clause of that sentence is met, Partial when exactly one clause is missed or met only in
+part, and Fail when two or more are missed; a shortfall against the other points of the expected answer is noted but
+does not change the verdict. The recorded run is graded against the pass sentence this eval had then, which did not yet
+ask for one refute subagent per objection. It is a Pass against that sentence; its refute pass was one subagent for all
+nine objections, so against today's sentence it would be a Partial. The skill was changed after that run (see "Recorded
+answer").
 
 ## Prompt
 
@@ -161,22 +165,25 @@ are the founder's ranges for the two Estimates.
 
 ## Recorded answer
 
-Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository and no user settings. The
-answer is trimmed; [...] marks each cut.
+Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository and no user settings, when
+this eval's pass sentence did not yet ask for one refute subagent per objection. The answer is trimmed; [...] marks each
+cut.
 
-**Partial.** It made the one call with the expected inputs and computed nothing itself: the TAM mismatch came first,
-the break-even values sat beside the founder's high values with the rows' SOM highs, the 900 clinics were named the
-shakiest by their swing, the ledger marked each kind, and the three lenses ran as subagents launched together. It fell
-short in these places. The refute pass ran as one subagent for all nine objections. It kept the Path objection on the 900
-clinics and asked for capacity, never saying to put the channel on the slide, because the pattern's fix named
-"channel and capacity" and the skill had no rule for an objection answered in part. It gave no gross spend beside the
-deck's TAM and no Against the deck section. Its ask on the groups' share left out the number of groups. It did not say
-why the other rows were not the shakiest, named no lens on any survivor, and offered its own reason for the top-down
-gap. Since this run the skill makes the refute pass countable (N objections, N subagents, in one message) and checks
-it before answering, says what is missing is what the pattern names (a channel, here) with capacity a question, keeps
-an objection answered in part for the part left, always sets gross spend beside a stated TAM in its own section, fixes
-the three asks for a share-only SOM, adds a Horizon row per segment and a line on the rows not picked, names each
-survivor's lenses, and turns any reason for a top-down gap into a question. The eval has not been run again.
+**Pass, against the pass sentence this eval had then; it missed the one clause added since.** It made the one call with
+the expected inputs and computed nothing itself: the TAM mismatch came first, the break-even values sat beside the
+founder's high values with the rows' SOM highs, and the 900 clinics were named the shakiest by their swing; it also
+marked each kind in the ledger and ran the three lenses as subagents launched together. The clause added since was
+missed: the refute pass ran as one subagent for all nine objections, so against today's sentence the run would be a
+Partial. Short of the expected answer as well: it kept the Path objection on the 900 clinics and asked for capacity,
+never saying to put the channel on the slide, because the pattern's fix named "channel and capacity" and the skill had
+no rule for an objection answered in part. It gave no gross spend beside the deck's TAM and no Against the deck section.
+Its ask on the groups' share left out the number of groups. It did not say why the other rows were not the shakiest,
+named no lens on any survivor, and offered its own reason for the top-down gap. Since this run the skill makes the
+refute pass countable (N objections, N subagents, in one message) and checks it before answering, says what is missing
+is what the pattern names (a channel, here) with capacity a question, keeps an objection answered in part for the part
+left, always sets gross spend beside a stated TAM in its own section, fixes the three asks for a share-only SOM, adds a
+Horizon row per segment and a line on the rows not picked, names each survivor's lenses, and turns any reason for a
+top-down gap into a question. The eval has not been run again.
 
 > 3. **"we plan to win 10% of the groups we can serve"** The groups' SOM rests on a share, not a count (`som_as_percent_only`). Your only channel line names clinics, and the five-year horizon is stated for clinics and the plan, not for groups. Fix: `[the channel that reaches multi-site groups, how a group is won, and the year the 10% is reached]`.
 >

@@ -126,7 +126,8 @@ real decks and meetings. The calculator's arithmetic is tested; the reviews' wor
 `vc-claims-check` evals were run in live Claude Code sessions on 2026-11-22, and each file holds an excerpt of its
 recorded answer with a verdict against its pass sentence: two passed and five passed in part. Pass means every clause
 of that sentence was met, Partial that exactly one was missed or met only in part, and Fail that two or more were
-missed. Two were run again after a skill fix, as their files say. One run each is a small sample. On 2026-11-23 one
+missed. When a pass sentence changed after its run, the verdict counts the clauses it had then, and the file says
+which clauses changed. Two were run again after a skill fix, as their files say. One run each is a small sample. On 2026-11-23 one
 eval of every other review skill except `vc-deal-math` was run live too. An eval file whose first paragraph says a
 live run is recorded holds an excerpt of it with its verdict; every other eval, the `vc-deal-math` ones included,
 states the expected behaviour only.

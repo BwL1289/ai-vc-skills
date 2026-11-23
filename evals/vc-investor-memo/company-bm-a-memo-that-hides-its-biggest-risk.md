@@ -2,16 +2,19 @@
 
 A test prompt for the `vc-investor-memo` skill. The company is made up. The tool calls and the excerpts are from real
 `equity_calculator` runs with these inputs, on this repository's calculator. "Expected answer" states the expected
-behaviour, and "Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-23), graded Partial: it
-met the pass sentence this eval had then, but ran the refute pass as one subagent for all eight objections and
-paraphrased the `exit_is_shared_amount` statement. The skill and this pass sentence were changed after that run (see
-"Recorded answer"). A run passes when it makes the five calls below (field order free, money and percents as strings),
-states the round and the outcome case with the tools' values as printed, labels every exit value the founder's
-assumption, quotes the `exit_is_shared_amount` statement word for word under the outcome table, writes the customer
-concentration into Top risks, keeps the team objection for the other founders while quoting the deck for the CTO,
-gives the flag with its meaning in the fix list and in Numbers, lists the memo's Open questions in full, launches one
-refute subagent per objection when it has a subagent tool, and computes nothing in its own text. The other points under
-"Expected answer" are expected too; a run that misses one of them is graded Partial.
+behaviour, and "Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-23). A run passes when
+it makes the five calls below (field order free, money and percents as strings), states the round and the outcome case
+with the tools' values as printed, labels every exit value the founder's assumption, quotes the `exit_is_shared_amount`
+statement word for word under the outcome table, writes the customer concentration into Top risks, keeps the team
+objection for the other founders while quoting the deck for the CTO, gives the flag with its meaning in the fix list and
+in Numbers, lists the memo's Open questions in full, launches one refute subagent per objection when it has a subagent
+tool, and computes nothing in its own text. The verdict is Pass when every clause of that sentence is met, Partial when
+exactly one clause is missed or met only in part, and Fail when two or more are missed; a shortfall against the other
+points of the expected answer is noted but does not change the verdict. The recorded run is graded against the pass
+sentence this eval had then, which did not yet ask for the statement quoted word for word, the flag in the fix list and
+in Numbers, the Open questions in full or one refute subagent per objection. It is a Pass against that sentence; it
+missed all four of those clauses, so against today's sentence it would be a Fail. The skill and this pass sentence were
+changed after that run (see "Recorded answer").
 
 ## Prompt
 
@@ -201,22 +204,26 @@ Five calls, in this order: `equity_deal_check`, `equity_pool`, then `equity_wate
 
 ## Recorded answer
 
-Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository and no user settings. The
-answer is trimmed; [...] marks each cut.
+Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository and no user settings, when
+this eval's pass sentence did not yet ask for the statement quoted word for word, the flag in both places, the Open
+questions in full or one refute subagent per objection. The answer is trimmed; [...] marks each cut.
 
-**Partial.** It made the five calls with the expected arguments (plus today's burn and revenue, equal to the plan),
-used every figure as the tool printed it, labelled the exits the founders' assumptions with their reasons, called the
-terms the calculator's defaults, ranked the customer concentration first and wrote it into Top risks, kept "we move
-faster" as an intention, carried the slide 6 line with a bracket for the other founders, and quoted the MRR line with
-no growth rate. The five lenses ran as subagents launched together. It fell short in five places. The refute pass ran
-as one subagent deciding all eight objections. It paraphrased the `exit_is_shared_amount` statement in Numbers instead
-of quoting it under the table. It gave the flag only in Numbers, because the skill put flags in the fix list in one
-place and in Numbers in another. Its memo's Open questions pointed to the answer's list, which the champion would not
-receive. Its fix list turned the founder's 45% into "nearly half". Since this run the skill launches one refute
-subagent per objection in a single message, quotes the statement word for word with its key under the table, puts
-each flag in both places with its meaning from a flag table, lists the memo's Open questions in full, says in a Fix
-cell when an objection is answered in part, and leaves out today's burn and revenue when they equal the plan. The eval
-has not been run again.
+**Pass, against the pass sentence this eval had then; it missed the four clauses added since.** It made the five calls
+with the expected arguments (plus today's burn and revenue, equal to the plan), used every figure as the tool printed
+it, labelled the exits the founders' assumptions with their reasons, wrote the customer concentration into Top risks and
+ranked it first, carried the slide 6 line with a bracket for the other founders, and computed nothing in its own text;
+it also called the terms the calculator's defaults, kept "we move faster" as an intention and quoted the MRR line with
+no growth rate. The five lenses ran as subagents launched together. The four clauses added since were all missed, so
+against today's sentence the run would be a Fail. The refute pass ran as one subagent deciding all eight objections. It
+paraphrased the `exit_is_shared_amount` statement in Numbers instead of quoting it under the table. It gave the flag
+only in Numbers, because the skill put flags in the fix list in one place and in Numbers in another. Its memo's Open
+questions pointed to the answer's list, which the champion would not receive. Short of the expected answer as well: its
+fix list turned the founder's 45% into "nearly half", and its outcome table set the round's payout beside the amount
+invested, as the skill then said. Since this run the skill launches one refute subagent per objection in a single
+message, quotes the statement word for word with its key under the table, puts each flag in both places with its meaning
+from a flag table, lists the memo's Open questions in full, says in a Fix cell when an objection is answered in part,
+leaves out today's burn and revenue when they equal the plan, and keeps the amount invested out of the outcome table.
+The eval has not been run again.
 
 > **Biggest fixes**
 >

@@ -10,15 +10,40 @@ Two sentences are copied into several skills and must stay identical there:
   users "more than doubled", which neither the founder nor the calculator said. Every skill that writes rewrites,
   lines or update text for the founder carries the sentence, except the partner-meeting skill, whose own ban says
   the same in other words and is checked here too.
+
+Every eval that records a live run states the README's verdict rule in its first paragraph and opens its recording
+with a verdict under it: Pass when every clause of the pass sentence is met, Partial when exactly one is missed or met
+only in part, Fail when two or more are missed. Four recordings once carried an outside grader's word instead, one of
+them Partial beside "met every clause"; they are re-graded from their recorded answers.
 """
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
 
-_SKILLS = Path(__file__).resolve().parents[2] / "skills"
+_ROOT = Path(__file__).resolve().parents[2]
+_SKILLS = _ROOT / "skills"
+_RECORDED = "\n## Recorded answer\n"
+_RECORDED_EVALS = sorted(path for path in (_ROOT / "evals").glob("*/*.md") if _RECORDED in path.read_text(encoding="utf-8"))
+_VERDICT_RULE = (
+    "The verdict is Pass when every clause of that sentence is met, Partial when exactly one clause is missed or met"
+    " only in part, and Fail when two or more are missed"
+)
+_THEN = "graded against the pass sentence this eval had then"
+# The four recordings re-graded under the rule, each from its own recorded answer.
+_REGRADED = {
+    "company-ar-a-2x-participating-seed": "**Pass, with shortfalls against the expected answer",
+    "company-ac-a-cap-table-the-deck-misstates": "**Fail: two clauses missed.**",
+    "company-bm-a-memo-that-hides-its-biggest-risk": (
+        "**Pass, against the pass sentence this eval had then; it missed the four clauses added since.**"
+    ),
+    "company-aw-bottom-up-against-the-deck": (
+        "**Pass, against the pass sentence this eval had then; it missed the one clause added since.**"
+    ),
+}
 _PLAN_PHASES = (
     "On a SAFE or note raise, the `plan` case's phases are the founder's own figures: today's monthly spend and revenue"
     " as the first phase, from month 1, and each change the founder plans (more spend after the raise, say) as a later"
@@ -87,3 +112,34 @@ def test_founder_facing_text_never_works_out_how_two_founder_figures_compare(nam
 
 def test_the_partner_meeting_skill_keeps_its_own_ban_on_combining_two_founder_figures() -> None:
     assert _PARTNER_MEETING_BAN in _unwrapped("vc-partner-meeting")
+
+
+def _paragraphs(text: str) -> list[str]:
+    return [" ".join(line.strip() for line in block.splitlines()) for block in text.split("\n\n")]
+
+
+@pytest.mark.parametrize("path", _RECORDED_EVALS, ids=[path.stem for path in _RECORDED_EVALS])
+def test_a_recorded_eval_states_the_verdict_rule_and_opens_its_recording_with_a_verdict_under_it(path: Path) -> None:
+    text = path.read_text(encoding="utf-8")
+    first = _paragraphs(text.split("\n## ", 1)[0])[1]
+    header, verdict = _paragraphs(text.split(_RECORDED, 1)[1].strip("\n"))[:2]
+
+    assert _VERDICT_RULE in first
+    # An outside grader's word is not a verdict under the rule, and no other point of an eval can make a run Partial.
+    assert "graded Partial" not in first and "a run that misses one of them is graded Partial" not in text
+    assert re.match(r"\*\*(Pass|Partial|Fail)\b", verdict), verdict[:60]
+    if "met every clause" in verdict:
+        assert verdict.startswith("**Pass"), verdict[:60]
+    # A verdict counted on the pass sentence as it stood at the run says so, and says which clauses came after.
+    if _THEN in first:
+        assert "pass sentence this eval had then" in verdict or "Fail" in verdict
+        assert ", when this eval" in header
+
+
+def test_the_four_regraded_evals_carry_the_verdict_their_recorded_answers_give() -> None:
+    graded = {path.stem: path.read_text(encoding="utf-8") for path in _RECORDED_EVALS if path.stem in _REGRADED}
+
+    assert set(graded) == set(_REGRADED)
+    for stem, opening in _REGRADED.items():
+        verdict = _paragraphs(graded[stem].split(_RECORDED, 1)[1].strip("\n"))[1]
+        assert verdict.startswith(opening), stem

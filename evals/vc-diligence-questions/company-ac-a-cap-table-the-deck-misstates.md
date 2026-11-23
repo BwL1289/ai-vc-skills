@@ -2,14 +2,17 @@
 
 A test prompt for the `vc-diligence-questions` skill. The company is made up. The tool call and the excerpt are from a
 real `equity_calculator deal_check` run with these inputs. "Expected answer" states the expected behaviour, and
-"Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-23), graded Partial: it said what the
-deck's percents were made of, wrote a draft that claimed a corrected deck and a pro forma the founder never named, and
-explained the flags in its own words. The skill was changed after that run (see "Recorded answer"). A run passes when
-it makes the one tool call below (field order free, money and percents as strings, share counts as whole numbers),
-puts the founders' mismatch first among the ranked questions without refuting it, relays the two flag codes with their
-meanings from the skill's flag table, quotes the founders' percent today and the cap table's own sum as not checked,
-marks the cap table Contradicted in the data-room checklist, and computes nothing in its own text. A field passed at
-its default value (here `pool_timing`) may be left out.
+"Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-23). A run passes when it makes the
+one tool call below (field order free, money and percents as strings, share counts as whole numbers), puts the founders'
+mismatch first among the ranked questions without refuting it, relays the two flag codes with their meanings from the
+skill's flag table, quotes the founders' percent today and the cap table's own sum as not checked, marks the cap table
+Contradicted in the data-room checklist, and computes nothing in its own text. The verdict is Pass when every clause of
+that sentence is met, Partial when exactly one clause is missed or met only in part, and Fail when two or more are
+missed; a shortfall against the other points of the expected answer is noted but does not change the verdict. A field
+passed at its default value (here `pool_timing`) may be left out. The recorded run is graded against the pass sentence
+this eval had then, which asked for the two flag codes "in the tool's words" where it now asks for their meanings from
+the skill's flag table. It is a Fail: it explained the flags in its own words and said what the deck's percents were
+made of. It would be a Fail against today's sentence too. The skill was changed after that run (see "Recorded answer").
 
 ## Prompt
 
@@ -97,18 +100,21 @@ its default value (here `pool_timing`) may be left out.
 
 ## Recorded answer
 
-Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository and no user settings. The
-answer is trimmed; [...] marks each cut.
+Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository and no user settings, when
+this eval asked for the two flag codes "in the tool's words". The answer is trimmed; [...] marks each cut.
 
-**Partial.** It made the one call with the expected arguments, ran the six lenses as parallel subagents and then one
-refute subagent per lens question, led with the founders' mismatch without refuting it, showed the investors' percent
-as consistent, quoted "Founders own 75% today." as not checked and marked the cap table Contradicted. It fell short in
-four places. It said what the deck's two percents were made of, which is division done in its own head. Its draft for
-the mismatch said the deck had been corrected and a pro forma was in the data room, though the founder named neither.
-It explained the two flags in its own words, since over MCP the tool returned the codes alone. It marked three seed
-rows Missing because its own drafts named them. Since this run the skill forbids saying what a stated percent is made
-of, gives a mismatch's draft a fixed shape, carries a meaning for every flag code, and lists a seed row only when a
-draft names it as the row that settles the question, which this eval now accepts. The eval has not been run again.
+**Fail: two clauses missed.** It made the one call with the expected arguments, put the founders' mismatch first without
+refuting it, quoted "Founders own 75% today." and the cap table's own sum as not checked, and marked the cap table
+Contradicted; it also ran the six lenses as parallel subagents and then one refute subagent per lens question. It missed
+two clauses. It relayed the two flag codes with meanings in its own words, not the tool's, since over MCP the tool
+returned the codes alone. And it computed in its own text: it said what the deck's two percents were made of ("The 75%
+is founders' shares over the 8,000,000 fully diluted total"), which is division done in its own head. Against today's
+sentence the same two clauses are missed, the first because its meanings are not the skill's flag table's. Short of the
+expected answer as well: its draft for the mismatch said the deck had been corrected and a pro forma was in the data
+room, though the founder named neither, and it marked three seed rows Missing because its own drafts named them. Since
+this run the skill forbids saying what a stated percent is made of, gives a mismatch's draft a fixed shape, carries a
+meaning for every flag code, and lists a seed row only when a draft names it as the row that settles the question, which
+this eval now accepts. The eval has not been run again.
 
 > **Fix the deck before you open the data room.** "Founders keep 60% after the round." does not survive your own cap table: the calculator gives the founders 53.6170% after the round, 6.3830 points lower. The signed SAFE and the pool top-up both come out of the existing holders, and the 60% counts neither. [...]
 >
