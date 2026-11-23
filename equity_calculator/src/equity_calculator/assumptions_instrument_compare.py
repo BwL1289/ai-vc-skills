@@ -59,8 +59,9 @@ def _comparison_rows(inputs: InstrumentCompareInput) -> list[EquityAssumption]:
             "the same raise, next rounds and exits both ways",
             "Option A sells priced shares for the raise now; option B issues a note for the same amount now. Each "
             "next round's pre-money, amount, pool top-up and series terms, and each exit, are the same for both "
-            "options, as the founder gave them. The comparison shows both side by side and never says which to "
-            "take.",
+            "options, as the founder gave them. Each next round is an alternative for the one round after today, "
+            "worked from today's cap table; the next rounds are not one after another. The comparison shows both "
+            "side by side and never says which to take.",
             "method",
         ),
         _assumption(

@@ -645,7 +645,8 @@ and every exit from the waterfall code; nothing is worked a second way.
    interest rules above say it owes (principal plus interest, to the cent, or the principal alone when the interest is
    paid in cash). Its cap price is the cap over FD.
 3. **Each next round, the same for both.** The founder gives its pre-money, raise, any pool top-up and its series'
-   terms. A prices it on A's shares after today (exact, often fractional) with nothing left to convert. B prices it
+   terms. Each next round is an alternative for the one round after today, worked from today's cap table, never after
+   the one before. A prices it on A's shares after today (exact, often fractional) with nothing left to convert. B prices it
    on FD with the existing SAFEs and notes (each existing note that many months older) and its note converting at the
    lower of its cap price and its discount price (the round price × (1 - discount)); with neither it takes the round
    price.
@@ -1034,7 +1035,8 @@ every segment.
 
 `instrument_compare` needs today's founder shares, the raise, option A's pre-money and series terms, option B's
 interest rate, compounding and months until it converts, at least one `--next-round` (with none it is refused,
-`no_next_round_given`, as the note converts only at a next round) and at least one `--exit`. Every term is the
+`no_next_round_given`, as the note converts only at a next round) and at least one `--exit`. Each `--next-round` is
+an alternative for the one round after today, worked from today, never after the one before. Every term is the
 founder's own figure: `--priced-preference standard` (and `standard` in a `--next-round`) only when the founder says
 the terms are standard, 1x non-participating; otherwise give the multiple and participation. `--existing-series` takes
 `--class`'s terms, and `--existing-safe` and `--existing-note` take `--safe`'s and `--note`'s, an existing note with

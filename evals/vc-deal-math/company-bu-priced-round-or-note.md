@@ -86,8 +86,10 @@ A, option B and B - A, never says which option to take, and computes nothing in 
 
 ## Expected answer
 
-- It asks for nothing more: the founder gave both sets of terms, the next rounds and the exits, and said the terms are
+- It asks for nothing more: the founder gave both sets of terms, the next round and the exits, and said the terms are
   standard, so `{"standard": true}` goes in for each series. It assumes no maturity and says none was given.
+- It passes the two next rounds as alternatives for the one round after today ($6M at $27M pre, or $2M at $9M pre),
+  each worked from today, and says so: neither comes after the other.
 - Today: the founders own 64.0000% under the priced round and 80.0000% under the note, which has no shares until the
   next round (it will owe $2,100,000.00 then; its cap price is $0.600000 against the priced round's $0.800000).
 - Next round 1 ($6M at $27M pre): the note converts at its cap price, $0.600000, into 3,500,000 shares; the founders
@@ -98,7 +100,7 @@ A, option B and B - A, never says which option to take, and computes nothing in 
   founders end at 52.3636% (A) and 46.3636% (B), -6.0000% for B. At the exits the founders get $800,000.00 and
   $720,000.00 at $5M, $10,472,727.27 and $9,272,727.27 at $20M, and $52,363,636.36 and $46,363,636.36 at $100M. The
   round prices at $0.720000 for A, below A's $0.800000 today.
-- Each flag with the meaning the report prints: `cap_below_round_price_now`, `note_converts_at_cap`,
+- Each flag with its meaning in step 7's words: `cap_below_round_price_now`, `note_converts_at_cap`,
   `note_converts_at_discount`, `note_interest_converts`, `maturity_not_given` and
   `next_round_below_priced_round_price` (a down round for A's investors; any anti-dilution in their terms is not
   modelled).

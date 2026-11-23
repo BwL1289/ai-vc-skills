@@ -2,8 +2,9 @@
 
 A founder raising ``investment`` today can sell priced shares now (option A, the ``priced_*`` fields) or issue a
 convertible note now (option B, the ``note_*`` fields) that converts at the next priced round. Both options lead to
-the same next round, given as one or more scenarios (``next_rounds``: its pre-money, the amount it raises, any pool
-top-up and its series' terms), and the company is then sold for each of ``exit_amounts``. The result shows, side by
+the same next round, given as one or more alternatives for it (``next_rounds``: its pre-money, the amount it raises,
+any pool top-up and its series' terms), each worked from today's cap table and never after the one before, and the
+company is then sold for each of ``exit_amounts``. The result shows, side by
 side, who owns what right after today's financing, after each next round, and who gets what at each exit, with
 B - A for every holder group. It never says which option to take.
 

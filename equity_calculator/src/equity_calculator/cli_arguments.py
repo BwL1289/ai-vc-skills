@@ -689,8 +689,9 @@ def instrument_compare_arguments(parser: argparse.ArgumentParser) -> None:
         dest="next_rounds",
         metavar=_TERMS,
         help="The next priced round, the same for both options: 'pre-money=V investment=I [target-pool-percent=T] "
-        f"[pool-timing=pre_money|post_money]' and its series' terms, {_SERIES_HELP}. Repeat for each scenario "
-        "(at most 4); at least one is needed, as the note converts only there.",
+        f"[pool-timing=pre_money|post_money]' and its series' terms, {_SERIES_HELP}. Repeat for each alternative "
+        "(at most 4): each is worked from today, never after the one before. At least one is needed, as the note "
+        "converts only there.",
     )
     parser.add_argument(
         "--exit",

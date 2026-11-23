@@ -8,8 +8,8 @@ All notable changes to this repository. Dates are UTC.
 
 - The calculator's twelfth scenario, `instrument_compare` (MCP tool `equity_instrument_compare`, a command and a
   `Priced vs note` workbook sheet): a founder choosing between a priced round now and a convertible note now gives
-  both sets of terms, the next round or rounds and the exits, and gets ownership by holder group after today and after
-  each next round, and each group's payout at each exit, option A beside option B with B - A, worked through the
+  both sets of terms, the next round (up to four alternatives for it, each worked from today) and the exits, and gets
+  ownership by holder group after today and after each next round, and each group's payout at each exit, option A beside option B with B - A, worked through the
   round and waterfall code with every series' preference honoured. It never picks one; no next round is refused
   (`no_next_round_given`). The `vc-deal-math` skill routes that question to it (a new step 7 and a Company BU eval),
   and the `equity-calculator` skill lists it.

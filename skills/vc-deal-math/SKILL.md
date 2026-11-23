@@ -146,15 +146,26 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
    team and pool, existing investors with each series and each SAFE or note), the raise, the priced round's pre-money,
    any pool top-up and its liquidation terms, and the note's cap, discount, interest rate, simple or compounding
    interest and months until it converts. Pass `{"standard": true}` only when the founder says the terms are standard
-   (1x, non-participating); otherwise ask for the multiple and the participation. Ask too for the next priced round or
-   rounds the founder expects (pre-money, raise, any pool top-up, series terms) and one or more exit values, and never
-   assume one: with no next round the tool refuses (`no_next_round_given`), so ask for it rather than run. Call
-   `equity_instrument_compare` and show the side-by-side table with the tool's figures: ownership by group right after
-   today (the note outstanding, with no shares), after each next round, and each group's payout at each exit, under
-   option A, option B and B - A, the founders' lines first, then the flags with the meanings the report prints and the
-   assumptions the answer leans on. Never pick one for them or call one better: the table shows what each does on the
-   founder's own figures. Hand the legal terms (the note's maturity and what happens at it, the preference and
-   anti-dilution wording, the conversion mechanics) to their lawyer.
+   (1x, non-participating); otherwise ask for the multiple and the participation. Ask too for the next priced round
+   the founder expects (pre-money, raise, any pool top-up, series terms) and one or more exit values, and never
+   assume one: with no next round the tool refuses (`no_next_round_given`), so ask for it rather than run. Each
+   `next_rounds` entry is an alternative for that one round after today, worked from today's cap table, never after
+   the one before: a Series A and then a Series B is not modelled, so say so and pass only the round after today.
+   Call `equity_instrument_compare` and show the side-by-side table with the tool's figures: ownership by group right
+   after today (the note outstanding, with no shares), after each next round, and each group's payout at each exit,
+   under option A, option B and B - A, the founders' lines first, then the flags and the assumptions the answer leans
+   on. The MCP result gives flag codes only; relay each in these words: `cap_below_round_price_now` (the note's cap
+   price is below option A's price today, so at its cap the note buys shares for less than A's investors pay);
+   `note_converts_at_cap`, `note_converts_at_discount` and `note_converts_at_round_price` (the price the note took in
+   at least one next round: its cap price, its discount price, or the round price when neither gave a lower one);
+   `note_interest_converts` (the interest converts too, so the note gets shares for more than the raise);
+   `maturity_not_given` (no maturity was given, and what happens if the next round comes late is in the note's own
+   terms, not modelled); `converts_after_maturity` (the note matures before it converts, and what happens at maturity
+   is in the note's own terms, not modelled); `next_round_below_priced_round_price` (a next round prices below option
+   A's price today, a down round for A's investors, and any anti-dilution in their terms is not modelled). Never pick
+   one for them or call one better: the table shows what each does on the founder's own figures. Hand the legal terms
+   (the note's maturity and what happens at it, the preference and anti-dilution wording, the conversion mechanics)
+   to their lawyer.
 
 ## Answering
 

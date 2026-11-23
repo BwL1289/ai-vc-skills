@@ -24,6 +24,7 @@ from equity_calculator.__main__ import _INPUT_MODELS, run
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealFlag
+from equity_calculator.schemas.equity_instrument_compare import InstrumentFlag
 from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag
 from equity_calculator.text import render_sheet
 
@@ -59,6 +60,7 @@ _HANDOFF_SKILLS = (
 # A runway_plan call with no milestone, months to raise or landing month can raise only these three flags.
 _RUNWAY_FLAGS_WITHOUT_MILESTONES = ("runway_below_band", "cash_never_runs_out", "consistent_beyond_rounding")
 _NO_TOOL = "not checked: no tool computes this"
+_COMPARE_STEP = "7. **A founder who has not chosen between a priced round now and a convertible note now**"
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -251,5 +253,18 @@ def test_a_founder_choosing_between_a_priced_round_and_a_note_goes_to_the_compar
     assert "never assume one" in steps
     assert "Never pick one for them or call one better" in steps
     assert "to their lawyer" in steps
+    assert "entry is an alternative for that one round after today, worked from today's cap table" in steps
+    assert "a Series A and then a Series B is not modelled" in steps
+    assert "It passes the two next rounds as alternatives for the one round after today" in answer
     assert "It never picks an option or calls one better" in answer
     assert "It does not call `equity_deal_check`" in answer
+
+
+def test_the_comparison_step_carries_every_flag_s_meaning() -> None:
+    """The MCP result gives the comparison's flag codes only, so step 7 says what each one means, in words."""
+    step = _unwrapped(_TEXT.split(_COMPARE_STEP, 1)[1].split("\n## ", 1)[0])
+
+    assert "The MCP result gives flag codes only; relay each in these words" in step
+    for flag in get_args(InstrumentFlag):
+        assert f"`{flag}`" in step, flag
+    assert "the command line's report for `instrument_compare`" not in _TEXT
