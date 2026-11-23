@@ -585,17 +585,23 @@ def _today_arguments(parser: argparse.ArgumentParser) -> None:
     """A comparison's cap table today, by holder group."""
     parser.add_argument("--founder-shares", type=parse_whole, required=True, help="The founders' shares today.")
     parser.add_argument(
-        "--team-shares", type=parse_whole, help="The team's common and granted options today (default 0)."
+        "--team-shares",
+        type=parse_whole,
+        required=True,
+        help="The team's common and granted options today (0 for none).",
     )
-    parser.add_argument("--unissued-pool-shares", type=parse_whole, help="The unissued pool today (U, default 0).")
+    parser.add_argument(
+        "--unissued-pool-shares", type=parse_whole, required=True, help="The unissued pool today (U, 0 for none)."
+    )
     parser.add_argument(
         "--existing-series",
         type=parse_class,
         action="append",
         dest="existing_series",
         metavar=_TERMS,
-        help="An existing preferred series: 'shares=S invested=I [preference-multiple=M] [rank=K] "
-        "[participation=none|full|capped] [cap-multiple=C]'. Repeat for each (at most 6).",
+        help="An existing preferred series: 'shares=S invested=I preference-multiple=M "
+        "participation=none|full|capped [cap-multiple=C] [rank=K]' (the multiple and participation are that "
+        "series' own terms, always given; rank default 1). Repeat for each (at most 6).",
     )
     parser.add_argument(
         "--existing-safe",
@@ -611,8 +617,8 @@ def _today_arguments(parser: argparse.ArgumentParser) -> None:
         action="append",
         dest="existing_instruments",
         metavar=_TERMS,
-        help="An existing note, as --note takes it in a round, with months-outstanding=M as of today. "
-        "Repeat for each (at most 4 SAFEs and notes in all).",
+        help="An existing note, as --note takes it in a round, with months-outstanding=M as of today and "
+        "compounding=simple|annual|monthly always given. Repeat for each (at most 4 SAFEs and notes in all).",
     )
 
 

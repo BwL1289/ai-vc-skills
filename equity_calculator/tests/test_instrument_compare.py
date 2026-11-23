@@ -250,7 +250,7 @@ def test_existing_instruments_convert_today_in_a_and_at_the_next_round_in_b_as_t
         "months_outstanding": 6,
         "discount_percent": "20",
     }
-    series = {"shares": 1_000_000, "invested": "1000000"}
+    series = {"shares": 1_000_000, "invested": "1000000", "preference_multiple": "1", "participation": "none"}
     fields = _bu(existing_series=[series], existing_instruments=[safe, old_note], next_rounds=[_ROUND_ONE])
     result = instrument_compare(**fields)
     today = round_(
@@ -376,6 +376,77 @@ def test_an_existing_note_needs_months_and_fits_the_month_limit() -> None:
         InstrumentCompareInput.model_validate(_bu(existing_instruments=[old]))
 
 
+@pytest.mark.parametrize(
+    "series",
+    [
+        {"shares": 1_000_000, "invested": "3000000"},
+        {"shares": 1_000_000, "invested": "3000000", "preference_multiple": "1"},
+        {"shares": 1_000_000, "invested": "3000000", "participation": "none"},
+    ],
+)
+def test_an_existing_series_without_its_own_multiple_and_participation_is_refused(series: dict[str, object]) -> None:
+    """The waterfall's 1x non-participating default is never taken for an existing series: the founder gives both."""
+    with pytest.raises(ValidationError, match="gives preference_multiple and participation"):
+        InstrumentCompareInput.model_validate(_bu(existing_series=[series]))
+    given = {**series, "preference_multiple": "1", "participation": "none"}
+    InstrumentCompareInput.model_validate(_bu(existing_series=[given]))
+
+
+def test_an_existing_note_without_compounding_is_refused() -> None:
+    """The round's yearly-compounding default is never taken for an existing note: it is asked for, as B's is."""
+    note = {"kind": "note", "principal": "300000", "interest_rate_percent": "8", "months_outstanding": 6}
+    with pytest.raises(ValidationError, match="gives compounding"):
+        InstrumentCompareInput.model_validate(_bu(existing_instruments=[note]))
+    simple = instrument_compare(
+        **_bu(existing_instruments=[{**note, "compounding": "simple"}], next_rounds=[_ROUND_ONE])
+    )
+    assert simple.priced_conversions[_FIRST].converting_amount.exact == 312_000
+
+
+@pytest.mark.parametrize("field", ["team_shares", "unissued_pool_shares"])
+def test_the_team_s_shares_and_the_pool_are_required(field: str) -> None:
+    """Today's FD is built from the holder groups, so a group left out is refused rather than read as 0."""
+    without = {key: value for key, value in COMPARE_BU.items() if key != field}
+    with pytest.raises(ValidationError, match=rf"{field}\n\s+Field required"):
+        InstrumentCompareInput.model_validate(without)
+    InstrumentCompareInput.model_validate(_bu(**{field: 0}))
+
+
+def test_an_existing_mfn_safe_beside_a_note_with_a_cap_or_discount_is_flagged() -> None:
+    """The MFN SAFE converts on its given terms under both options; the flag and the assumption row say so."""
+    mfn = {"kind": "safe", "purchase_amount": "500000", "mfn": True}
+    flagged = instrument_compare(**_bu(existing_instruments=[mfn], next_rounds=[_ROUND_ONE]))
+    rule = next(row for row in flagged.assumptions if row.key == "existing_instruments_rule")
+
+    assert "existing_mfn_safe_beside_note" in flagged.flags
+    assert "An existing MFN SAFE converts on the terms given for it under both options" in rule.statement
+    discount_only = instrument_compare(
+        **_bu(existing_instruments=[mfn], note_valuation_cap=None, next_rounds=[_ROUND_ONE])
+    )
+    assert "existing_mfn_safe_beside_note" in discount_only.flags
+    plain_note = _bu(existing_instruments=[mfn], note_valuation_cap=None, note_discount_percent=None)
+    assert "existing_mfn_safe_beside_note" not in instrument_compare(**plain_note).flags
+    capped = {"kind": "safe", "purchase_amount": "500000", "valuation_cap": "10000000"}
+    assert "existing_mfn_safe_beside_note" not in instrument_compare(**_bu(existing_instruments=[capped])).flags
+
+
+@pytest.mark.parametrize(("invested", "flagged"), [("3000000", True), ("500000", False)])
+def test_option_a_s_price_below_what_an_existing_series_paid_is_flagged(invested: str, flagged: bool) -> None:
+    """FD 11M at an $8M pre-money prices A at 8/11 a share: below $3.00 a share (flagged), above $0.50 (not)."""
+    series = {"shares": 1_000_000, "invested": invested, "preference_multiple": "1", "participation": "none"}
+    result = instrument_compare(**_bu(existing_series=[series], next_rounds=[_ROUND_ONE]))
+
+    assert result.priced_price.exact == Fraction(8, 11)
+    assert ("priced_round_below_existing_series_price" in result.flags) is flagged
+
+
+def test_interest_paid_in_cash_is_flagged_only_when_there_is_interest() -> None:
+    cash = instrument_compare(**_bu(note_interest_paid_in_cash=True, next_rounds=[_ROUND_ONE]))
+    assert "note_interest_paid_in_cash" in cash.flags and "note_interest_converts" not in cash.flags
+    no_interest = _bu(note_interest_paid_in_cash=True, note_interest_rate_percent="0", next_rounds=[_ROUND_ONE])
+    assert "note_interest_paid_in_cash" not in instrument_compare(**no_interest).flags
+
+
 def test_capped_safes_owning_the_whole_company_are_refused() -> None:
     safes = [{"kind": "safe", "purchase_amount": "600000", "valuation_cap": "1000000"}] * 2
     with pytest.raises(ValidationError, match="own the whole company"):
@@ -385,7 +456,11 @@ def test_capped_safes_owning_the_whole_company_are_refused() -> None:
 @pytest.mark.parametrize(
     ("field", "item", "limit"),
     [
-        ("existing_series", {"shares": 1, "invested": "1"}, MAX_EXISTING_SERIES),
+        (
+            "existing_series",
+            {"shares": 1, "invested": "1", "preference_multiple": "1", "participation": "none"},
+            MAX_EXISTING_SERIES,
+        ),
         (
             "existing_instruments",
             {"kind": "safe", "purchase_amount": "1", "valuation_cap": "1000000"},

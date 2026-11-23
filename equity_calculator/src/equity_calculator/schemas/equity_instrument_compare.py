@@ -82,17 +82,24 @@ PoolAtExit = Literal["as_common", "left_out"]
 # Facts the comparison turns up. They never change a number and never say which option to take; their plain words are
 # in ``equity_calculator.layout_instrument_compare``. ``cap_below_round_price_now``: the note's cap price (cap / FD) is
 # below option A's price per share today. ``note_converts_at_*``: in at least one next round, the price the note took.
+# ``note_interest_paid_in_cash``: the note's interest is paid in cash at conversion, so it is in no payout line.
 # ``maturity_not_given`` / ``converts_after_maturity``: the note's maturity is unknown, or comes before the next round.
 # ``next_round_below_priced_round_price``: a next round prices below option A's round today (a down round for A).
+# ``priced_round_below_existing_series_price``: option A's round today prices below what an existing series paid per
+# share. ``existing_mfn_safe_beside_note``: an existing MFN SAFE converts on its given terms under both options,
+# although option B's note is a later instrument with a cap or discount.
 InstrumentFlag = Literal[
     "cap_below_round_price_now",
     "note_converts_at_cap",
     "note_converts_at_discount",
     "note_converts_at_round_price",
     "note_interest_converts",
+    "note_interest_paid_in_cash",
     "maturity_not_given",
     "converts_after_maturity",
     "next_round_below_priced_round_price",
+    "priced_round_below_existing_series_price",
+    "existing_mfn_safe_beside_note",
 ]
 
 # The list caps. With every existing series and instrument, an exit has 6 + 4 classes plus option A's two new series
@@ -193,8 +200,10 @@ class InstrumentCompareInput(BaseModel):
 
     scenario: InstrumentCompareScenario = "instrument_compare"
     founder_shares: ShareCount = Field(gt=0)
-    team_shares: ShareCount = Field(default=0, ge=0)
-    unissued_pool_shares: ShareCount = Field(default=0, ge=0)
+    # Required, 0 for none: today's fully diluted shares are built from the holder groups, so a group left out would
+    # lower them (and the note's cap price) without a word.
+    team_shares: ShareCount = Field(ge=0)
+    unissued_pool_shares: ShareCount = Field(ge=0)
     existing_series: tuple[PreferredClass, ...] = Field(default=(), max_length=MAX_EXISTING_SERIES)
     existing_instruments: tuple[Instrument, ...] = Field(default=(), max_length=MAX_EXISTING_INSTRUMENTS)
     investment: BoundedDecimal = Field(gt=0)
@@ -216,8 +225,9 @@ class InstrumentCompareInput(BaseModel):
 
     @model_validator(mode="after")
     def _comparison_can_run(self) -> InstrumentCompareInput:
-        """Refuse a comparison with no next round or no exit, an existing note it cannot move, or a round with no
-        price whatever happens (a pool target or capped SAFEs taking the whole company)."""
+        """Refuse a comparison with no next round or no exit, an existing series or note whose terms would be
+        assumed, an existing note it cannot move, or a round with no price whatever happens (a pool target or capped
+        SAFEs taking the whole company)."""
         if not self.next_rounds:
             raise ValueError(
                 "no_next_round_given: option B's note converts only at a next priced round, so give at least one "
@@ -227,6 +237,12 @@ class InstrumentCompareInput(BaseModel):
             raise ValueError(
                 "exit_amounts is empty: give at least one exit, what the company sells for after the next round"
             )
+        for item in self.existing_series:
+            if not {"preference_multiple", "participation"} <= item.model_fields_set:
+                raise ValueError(
+                    "an existing series in existing_series gives preference_multiple and participation (that "
+                    "series' own terms, from the founder): they are never assumed"
+                )
         for item in self.existing_instruments:
             if not isinstance(item, NoteTerms):
                 continue
@@ -239,6 +255,11 @@ class InstrumentCompareInput(BaseModel):
                 raise ValueError(
                     f"an existing note's months_outstanding plus note_months_to_conversion is over {MAX_NOTE_MONTHS} "
                     "months: option B converts it that much later"
+                )
+            if "compounding" not in item.model_fields_set:
+                raise ValueError(
+                    "an existing note in existing_instruments gives compounding (simple, annual or monthly), as "
+                    "option B's note does: it is never assumed"
                 )
         refuse_pool_too_large(
             self.priced_pre_money,

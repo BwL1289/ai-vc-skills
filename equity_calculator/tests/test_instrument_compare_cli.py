@@ -61,6 +61,11 @@ def _line(report: str, label: str) -> str:
     return next(line for line in report.splitlines() if line.strip().startswith(label))
 
 
+def _flags(report: str) -> dict[str, str]:
+    """Each printed flag's code and its whole line, trailing space dropped."""
+    return {line.split()[1]: line.rstrip() for line in report.splitlines() if line.startswith("  Flag ")}
+
+
 async def test_the_report_sets_a_beside_b_with_b_minus_a() -> None:
     report = await run(_COMPANY_BU)
 
@@ -186,6 +191,79 @@ async def test_option_a_s_terms_are_required(capsys: pytest.CaptureFixture[str])
     assert re.search(r"required: --priced-preference", capsys.readouterr().err)
 
 
+@pytest.mark.parametrize("flag", ["--team-shares", "--unissued-pool-shares"])
+async def test_the_team_s_shares_and_the_pool_are_required(flag: str, capsys: pytest.CaptureFixture[str]) -> None:
+    at = _COMPANY_BU.index(flag)
+    with pytest.raises(SystemExit) as caught:
+        await run([*_COMPANY_BU[:at], *_COMPANY_BU[at + 2 :]])
+
+    assert caught.value.code == _ARGPARSE_EXIT
+    assert re.search(rf"required: {flag}", capsys.readouterr().err)
+
+
+async def test_existing_terms_left_to_a_default_are_refused_naming_the_flag() -> None:
+    for argv, message in (
+        (
+            [*_COMPANY_BU, "--existing-series", "shares=1000000 invested=3000000"],
+            "an existing series in --existing-series gives preference-multiple and participation",
+        ),
+        (
+            [*_COMPANY_BU, "--existing-note", "300000 interest-rate-percent=8 months-outstanding=6"],
+            "an existing note in --existing-safe/--existing-note gives compounding (simple, annual or monthly)",
+        ),
+    ):
+        with pytest.raises(SystemExit) as caught:
+            await run(argv)
+        assert message in str(caught.value.code)
+
+
+async def test_interest_paid_in_cash_shows_the_principal_converting_and_the_cash_interest() -> None:
+    report = await run([*_COMPANY_BU, "--note-interest-paid-in-cash"])
+
+    assert "$2,000,000.00" in _line(report, "Note converting (principal)")
+    assert "$100,000.00" in _line(report, "Note interest paid in cash at conversion")
+    assert "Note owed when it converts" not in report
+    assert _flags(report)["note_interest_paid_in_cash"].endswith(
+        "that cash is in no payout line and option A pays none"
+    )
+
+
+async def test_a_discount_only_note_beside_an_mfn_safe_names_no_cap_and_no_safe_interest() -> None:
+    """With no cap there is one price, so nothing is "the lower"; a SAFE converts its purchase amount, no interest."""
+    argv = [*_TODAY, "--existing-safe", "500000 mfn", *_ROUNDS[:2], "--exit", "20000000"]
+    argv.remove("--note-valuation-cap")
+    argv.remove("$6,000,000")
+    report = await run(argv)
+
+    assert "none" in _line(report, "B: valuation cap (pre-money)")
+    converting = _line(report, "Next round 1: existing SAFE 1: amount converting").rstrip()
+    assert converting.endswith("the purchase amount") and "interest" not in converting
+    safe_price = _line(report, "Next round 1: existing SAFE 1: converts at").rstrip()
+    assert "$2.387500" in safe_price and safe_price.endswith(" the round price")
+    note_price = _line(report, "Next round 1: B's note: converts at").rstrip()
+    assert "$1.910000" in note_price and note_price.endswith(" its discount price")
+    flags = _flags(report)
+    assert flags["note_converts_at_discount"].endswith(
+        "In at least one next round the note converts at its discount price"
+    )
+    assert "existing_mfn_safe_beside_note" in flags
+
+
+async def test_a_post_money_pool_is_left_out_of_the_price_text() -> None:
+    """Under post-money timing the new pool is added after the round, so the price text leaves it out."""
+    post = "pre-money=27000000 investment=6000000 target-pool-percent=15 pool-timing=post_money standard"
+    argv = [*_TODAY, "--priced-target-pool-percent", "15", "--priced-pool-timing", "post_money", "--next-round", post]
+    report = await run([*argv, *_ROUNDS[2:], "--exit", "20000000"])
+
+    added = "; the new pool is added after the round"
+    today = _line(report, "Today: price per share").rstrip()
+    assert "$0.800000" in today and today.endswith(f" p = V/(FD + converted){added}")
+    first = _line(report, "Next round 1: price per share").rstrip()
+    assert first.endswith(f"p = V/(each option's shares + converted){added}")
+    second = _line(report, "Next round 2: price per share").rstrip()
+    assert second.endswith("p = V/(each option's shares + converted + new pool)")
+
+
 async def test_existing_holders_and_the_founder_s_own_terms_print_on_their_lines() -> None:
     """An existing series and SAFE, a capped participating series, a compounding note with no cap: each has its line."""
     argv = [
@@ -197,7 +275,7 @@ async def test_existing_holders_and_the_founder_s_own_terms_print_on_their_lines
         "--unissued-pool-shares",
         "1000000",
         "--existing-series",
-        "shares=1000000 invested=1000000",
+        "shares=1000000 invested=1000000 preference-multiple=1 participation=none",
         "--existing-safe",
         "500000 valuation-cap=10000000",
         "--investment",

@@ -242,10 +242,12 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "after today (B's note outstanding, no shares), after each next round, and each group's payout at each of "
         "exit_amounts after it through the exit waterfall with every series' preference honoured (converted shares "
         "take their round's series terms, a preference on the amount converted). A series' preference is the "
-        "founder's terms, or standard (1x, non-participating) only when the founder says standard. Flags (the note "
-        "on its cap or discount, a cap below today's price, interest converting, maturity not given or before "
-        "conversion, a next round below A's price) never pick an option. No next round is refused "
-        "(no_next_round_given). Every term is the founder's: never assume one.",
+        "founder's terms, or standard (1x, non-participating) only when the founder says standard; an existing "
+        "series gives its own preference_multiple and participation, and an existing note its compounding. Flags "
+        "(the note on its cap or discount, a cap below today's price, interest converting or paid in cash, maturity "
+        "not given or before conversion, a next round below A's price, A's price below an existing series', an "
+        "existing MFN SAFE beside the note) never pick an option. No next round is refused (no_next_round_given). "
+        "Every term is the founder's: never assume one.",
     ),
 }
 

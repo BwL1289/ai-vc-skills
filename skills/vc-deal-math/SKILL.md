@@ -143,8 +143,10 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
 7. **A founder who has not chosen between a priced round now and a convertible note now** goes to
    `equity_instrument_compare` (from the command line, `equity_calculator instrument_compare`), never to
    `deal_check`. Ask, by name and in one message, for both sets of terms: today's shares by holder group (founders,
-   team and pool, existing investors with each series and each SAFE or note), the raise, the priced round's pre-money,
-   any pool top-up and its liquidation terms, and the note's cap, discount, interest rate, simple or compounding
+   team and pool, existing investors: each existing series with its shares, amount invested, preference multiple,
+   participation and rank, each SAFE, and each existing note with its rate, simple or compounding interest and months
+   outstanding), the raise, the priced round's pre-money, any pool top-up and its liquidation terms,
+   and the note's cap, discount, interest rate, simple or compounding
    interest and months until it converts. Pass `{"standard": true}` only when the founder says the terms are standard
    (1x, non-participating); otherwise ask for the multiple and the participation. Ask too for the next priced round
    the founder expects (pre-money, raise, any pool top-up, series terms) and one or more exit values, and never
@@ -159,10 +161,16 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
    `note_converts_at_cap`, `note_converts_at_discount` and `note_converts_at_round_price` (the price the note took in
    at least one next round: its cap price, its discount price, or the round price when neither gave a lower one);
    `note_interest_converts` (the interest converts too, so the note gets shares for more than the raise);
+   `note_interest_paid_in_cash` (option B pays the note's interest in cash when it converts, so that cash is in no
+   payout line, and option A pays none);
    `maturity_not_given` (no maturity was given, and what happens if the next round comes late is in the note's own
    terms, not modelled); `converts_after_maturity` (the note matures before it converts, and what happens at maturity
    is in the note's own terms, not modelled); `next_round_below_priced_round_price` (a next round prices below option
-   A's price today, a down round for A's investors, and any anti-dilution in their terms is not modelled). Never pick
+   A's price today, a down round for A's investors, and any anti-dilution in their terms is not modelled);
+   `priced_round_below_existing_series_price` (option A's price today is below what an existing series paid per share,
+   a down round for that series, and any anti-dilution in its terms is not modelled; option B prices no round today);
+   `existing_mfn_safe_beside_note` (an existing MFN SAFE converts on the terms given for it under both options, and
+   whether it may take option B's note's cap or discount is in the SAFE's own terms, not modelled). Never pick
    one for them or call one better: the table shows what each does on the founder's own figures. Hand the legal terms
    (the note's maturity and what happens at it, the preference and anti-dilution wording, the conversion mechanics)
    to their lawyer.

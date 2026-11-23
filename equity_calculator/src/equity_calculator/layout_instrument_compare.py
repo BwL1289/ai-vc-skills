@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from equity_calculator.schemas.equity_common import EquityQuantity
+from equity_calculator.schemas.equity_common import EquityQuantity, PoolTiming
 from equity_calculator.schemas.equity_instrument_compare import (
     ExitComparison,
     GroupStake,
@@ -46,6 +46,7 @@ _GROUP_NAMES: dict[HolderGroup, str] = {
 _BASIS_NAMES = {"cap": "its cap price", "discount": "its discount price", "round_price": "the round price"}
 _PARTICIPATION_NAMES = {"none": "non-participating", "full": "full participation"}
 _SERIES_HOW = "given (standard: 1x, non-participating)"
+_OWED_HOW = "principal + interest, to the cent"
 
 
 def _participation_text(participation: Participation, cap_multiple: Decimal | None) -> str:
@@ -134,14 +135,13 @@ def _interest_text(result: InstrumentCompareResult) -> str:
 def _conversion_lines(prefix: str, name: str, row: ConversionRow, in_note: bool) -> list[Line]:
     """One SAFE or note converting: what converts, the price it took (and why) and its shares, in B's or A's column."""
     place = _note if in_note else _priced
+    # A SAFE converts its purchase amount; with no cap there is one price only, so nothing for it to be the lower of.
+    converting_how = "plus interest unless paid in cash" if row.kind == "note" else "the purchase amount"
+    basis = _BASIS_NAMES[row.basis]
+    price_how = basis if row.cap_price is None else f"{basis}, the lower"
     return [
-        place(
-            f"{prefix}_converting",
-            f"{name}: amount converting",
-            row.converting_amount,
-            "plus interest unless paid in cash",
-        ),
-        place(f"{prefix}_price", f"{name}: converts at", row.conversion_price, f"{_BASIS_NAMES[row.basis]}, the lower"),
+        place(f"{prefix}_converting", f"{name}: amount converting", row.converting_amount, converting_how),
+        place(f"{prefix}_price", f"{name}: converts at", row.conversion_price, price_how),
         place(f"{prefix}_shares", f"{name}: shares", row.shares, "amount converting / price"),
     ]
 
@@ -164,10 +164,35 @@ def _stake_lines(prefix: str, label: str, stakes: tuple[GroupStake, ...]) -> lis
     ]
 
 
+def _note_owed_lines(result: InstrumentCompareResult) -> list[Line]:
+    """What option B's note converts when it does: principal + interest, or (interest paid in cash) the principal,
+    with the cash interest on its own line."""
+    stub = "; approximate stub" if result.note_interest_approximate else ""
+    if not result.inputs.note_interest_paid_in_cash:
+        return [_note("note_owed", "Note owed when it converts", result.note_owed_at_conversion, f"{_OWED_HOW}{stub}")]
+    return [
+        _note("note_converting", "Note converting (principal)", result.note_principal, "the interest is paid in cash"),
+        _note(
+            "note_interest_cash",
+            "Note interest paid in cash at conversion",
+            result.note_interest_at_conversion,
+            f"interest, to the cent{stub}",
+        ),
+    ]
+
+
+def _price_how(timing: PoolTiming, shares: str) -> str:
+    """How a round's price was worked: the new pool in the price (pre-money timing) or added after the round."""
+    if timing == "post_money":
+        return f"p = V/({shares} + converted); the new pool is added after the round"
+    return f"p = V/({shares} + converted + new pool)"
+
+
 def _today_lines(result: InstrumentCompareResult) -> list[Line]:
     """Option A's round today, option B's note outstanding, and who owns what right after."""
+    price_how = _price_how(result.inputs.priced_pool_timing, "FD")
     lines = [
-        _priced("today_price", "Today: price per share", result.priced_price, "p = V/(FD + converted + new pool)"),
+        _priced("today_price", "Today: price per share", result.priced_price, price_how),
         Line(
             "today_new_pool",
             "Today: new pool shares",
@@ -188,12 +213,7 @@ def _today_lines(result: InstrumentCompareResult) -> list[Line]:
             "every share after today (B: FD)",
         ),
         _note("note_principal", "Today: note outstanding (principal)", result.note_principal, "the raise"),
-        _note(
-            "note_owed",
-            "Note owed when it converts",
-            result.note_owed_at_conversion,
-            "principal + interest, to the cent" + ("; approximate stub" if result.note_interest_approximate else ""),
-        ),
+        *_note_owed_lines(result),
     ]
     if result.note_cap_price is not None:
         lines.append(_note("note_cap_price", "Note's cap price", result.note_cap_price, "cap / FD"))
@@ -236,7 +256,7 @@ def _round_lines(terms: NextRound, comparison: NextRoundComparison) -> list[Line
             f"{prefix}_price",
             f"{label}price per share",
             (comparison.priced_price, comparison.note_price, _EMPTY),
-            "p = V/(each option's shares + converted + new pool)",
+            _price_how(terms.pool_timing, "each option's shares"),
         ),
     ]
     for row in comparison.existing_conversions:
@@ -275,11 +295,13 @@ def _flag_words(flag: InstrumentFlag, result: InstrumentCompareResult) -> str:
         "cap_below_round_price_now": "The note's cap price is below option A's price per share today: at its cap "
         "the note buys shares for less than option A's investors pay today",
         "note_converts_at_cap": "In at least one next round the note converts at its cap price",
-        "note_converts_at_discount": "In at least one next round the note converts at its discount price, which is "
-        "below its cap price there",
+        "note_converts_at_discount": "In at least one next round the note converts at its discount price"
+        + ("" if inputs.note_valuation_cap is None else ", which is below its cap price there"),
         "note_converts_at_round_price": "In at least one next round the note converts at the round price: no cap or "
         "discount gave a lower one",
         "note_interest_converts": "The note's interest converts too, so it gets shares for more than the raise",
+        "note_interest_paid_in_cash": "Option B pays the note's interest in cash when it converts; that cash is in "
+        "no payout line and option A pays none",
         "maturity_not_given": "No maturity was given for the note: what happens if the next round comes late is in "
         "the note's own terms, not modelled here",
         "converts_after_maturity": f"The note matures ({inputs.note_maturity_months} months) before it converts "
@@ -287,6 +309,12 @@ def _flag_words(flag: InstrumentFlag, result: InstrumentCompareResult) -> str:
         "modelled here",
         "next_round_below_priced_round_price": "A next round prices below option A's price today, a down round for "
         "option A's investors: any anti-dilution adjustment in their terms is not modelled here",
+        "priced_round_below_existing_series_price": "Option A's price today is below what an existing series paid "
+        "per share (its amount invested over its shares), a down round for that series: any anti-dilution "
+        "adjustment in its terms is not modelled here. Option B prices no round today",
+        "existing_mfn_safe_beside_note": "An existing MFN SAFE is converted on the terms given for it under both "
+        "options. Option B's note is a later instrument with a cap or discount; whether the SAFE may take those "
+        "terms is in the SAFE's own terms, not modelled here",
     }
     return words[flag]
 

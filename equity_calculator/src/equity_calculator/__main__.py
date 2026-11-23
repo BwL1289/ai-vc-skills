@@ -45,7 +45,7 @@ convertible note now.
     equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
         [--population N] [--annual-revenue-today R] [--som-years Y] [--som-target T] [--stated-tam X]
         [--stated-sam X] [--stated-som X] [--tolerance-percent Q]
-    equity_calculator instrument_compare --founder-shares F [--team-shares T] [--unissued-pool-shares U]
+    equity_calculator instrument_compare --founder-shares F --team-shares T --unissued-pool-shares U
         [--existing-series "TERMS"]... [--existing-safe "TERMS" | --existing-note "TERMS"]... --investment I
         --priced-pre-money V [--priced-target-pool-percent T] [--priced-pool-timing pre_money|post_money]
         --priced-preference "TERMS" [--note-valuation-cap K] [--note-discount-percent D]

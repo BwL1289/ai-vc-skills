@@ -347,15 +347,22 @@ def _flags(
     """The flags that hold, in the order ``InstrumentFlag`` lists them."""
     bases = {comparison.note_conversion.basis for comparison in rounds}
     maturity = inputs.note_maturity_months
+    note_has_terms = inputs.note_valuation_cap is not None or inputs.note_discount_percent is not None
+    mfn_safe = any(isinstance(item, SafeTerms) and item.mfn for item in inputs.existing_instruments)
     holds: dict[InstrumentFlag, bool] = {
         "cap_below_round_price_now": note_cap is not None and note_cap < price_now,
         "note_converts_at_cap": "cap" in bases,
         "note_converts_at_discount": "discount" in bases,
         "note_converts_at_round_price": "round_price" in bases,
         "note_interest_converts": accrued > ZERO and not inputs.note_interest_paid_in_cash,
+        "note_interest_paid_in_cash": accrued > ZERO and inputs.note_interest_paid_in_cash,
         "maturity_not_given": maturity is None,
         "converts_after_maturity": maturity is not None and inputs.note_months_to_conversion > maturity,
         "next_round_below_priced_round_price": any(comparison.priced_price.exact < price_now for comparison in rounds),
+        "priced_round_below_existing_series_price": any(
+            price_now < fraction(item.invested) / fraction(item.shares) for item in inputs.existing_series
+        ),
+        "existing_mfn_safe_beside_note": mfn_safe and note_has_terms,
     }
     return tuple(flag for flag in get_args(InstrumentFlag) if holds[flag])
 

@@ -103,7 +103,9 @@ def _comparison_rows(inputs: InstrumentCompareInput) -> list[EquityAssumption]:
             "existing_instruments_rule",
             "convert at the first priced round",
             "Existing SAFEs and notes convert at the first priced round: today's in option A, the next round in "
-            "option B, an existing note accruing for the months until then.",
+            "option B, an existing note accruing for the months until then. An existing MFN SAFE converts on the "
+            "terms given for it under both options: option B's note is a later instrument, and whether the SAFE may "
+            "take the note's cap or discount is in the SAFE's own terms, not modelled here.",
             f"{UNVERIFIED} (each instrument's own terms decide)",
         ),
     ]
@@ -124,8 +126,8 @@ def _series_rows(inputs: InstrumentCompareInput) -> list[EquityAssumption]:
         _assumption(
             "series_rank",
             "rank 1 when not given",
-            "A new series with no rank given is rank 1: it shares its preference pro rata with every other rank-1 "
-            "class, the existing series included.",
+            "A series, new or existing, with no rank given is rank 1: it shares its preference pro rata with every "
+            "other rank-1 class.",
             "method",
         ),
     ]

@@ -660,9 +660,14 @@ and every exit from the waterfall code; nothing is worked a second way.
    by a cent from the difference of the two rounded payouts.
 6. **Flags**, never a pick: `cap_below_round_price_now` (the note's cap price is below A's price today),
    `note_converts_at_cap`, `note_converts_at_discount`, `note_converts_at_round_price` (the price the note took in
-   at least one next round), `note_interest_converts`, `maturity_not_given`, `converts_after_maturity` (the maturity
-   comes before the months to conversion: only compared, never modelled) and `next_round_below_priced_round_price`
-   (a down round for A's investors; no anti-dilution is applied).
+   at least one next round), `note_interest_converts`, `note_interest_paid_in_cash` (B pays the interest in cash at
+   conversion: it is in no payout line, and A pays none), `maturity_not_given`, `converts_after_maturity` (the
+   maturity comes before the months to conversion: only compared, never modelled),
+   `next_round_below_priced_round_price` (a down round for A's investors; no anti-dilution is applied),
+   `priced_round_below_existing_series_price` (A's price today is below what an existing series paid per share, its
+   amount invested over its shares: a down round for that series; no anti-dilution is applied) and
+   `existing_mfn_safe_beside_note` (an existing MFN SAFE converts on the terms given for it under both options; whether
+   it may take B's note's cap or discount is in the SAFE's own terms, not modelled).
 
 No next round is refused (`no_next_round_given`: the note converts only at one), and so is a comparison with no
 exit. An exit before the next round, while the note is outstanding, is not modelled.
@@ -987,7 +992,7 @@ equity_calculator metrics_check --period-months P [--recurring-unit monthly|annu
 equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
     [--population N] [--annual-revenue-today R] [--som-years Y] [--som-target T] [--stated-tam A]
     [--stated-sam A] [--stated-som A] [--tolerance-percent Q]
-equity_calculator instrument_compare --founder-shares F [--team-shares T] [--unissued-pool-shares U]
+equity_calculator instrument_compare --founder-shares F --team-shares T --unissued-pool-shares U
     [--existing-series "TERMS"]... [--existing-safe "TERMS" | --existing-note "TERMS"]... --investment I
     --priced-pre-money V [--priced-target-pool-percent T] [--priced-pool-timing pre_money|post_money]
     --priced-preference "TERMS" [--note-valuation-cap K] [--note-discount-percent D]
@@ -1033,15 +1038,18 @@ thousands). `--population` is the population the segments are drawn from, to cat
 `--som-target` is the annual revenue the plan needs from this market; `--stated-som` and `--som-target` need a SOM in
 every segment.
 
-`instrument_compare` needs today's founder shares, the raise, option A's pre-money and series terms, option B's
+`instrument_compare` needs today's founder shares, the team's shares and the unissued pool (`0` for none: today's
+fully diluted shares are built from them), the raise, option A's pre-money and series terms, option B's
 interest rate, compounding and months until it converts, at least one `--next-round` (with none it is refused,
 `no_next_round_given`, as the note converts only at a next round) and at least one `--exit`. Each `--next-round` is
 an alternative for the one round after today, worked from today, never after the one before. Every term is the
 founder's own figure: `--priced-preference standard` (and `standard` in a `--next-round`) only when the founder says
 the terms are standard, 1x non-participating; otherwise give the multiple and participation. `--existing-series` takes
-`--class`'s terms, and `--existing-safe` and `--existing-note` take `--safe`'s and `--note`'s, an existing note with
-`months-outstanding=` as of today (dates are refused). `--note-maturity-months` is only compared with the months to
-conversion; nothing at maturity is modelled. `--pool-at-exit left_out` gives the pool nothing at an exit.
+`--class`'s terms with `preference-multiple=` and `participation=` always given (that series' own terms; rank is 1
+unless given), and `--existing-safe` and `--existing-note` take `--safe`'s and `--note`'s, an existing note with
+`months-outstanding=` as of today (dates are refused) and `compounding=` always given. `--note-maturity-months` is
+only compared with the months to conversion; nothing at maturity is modelled. `--pool-at-exit left_out` gives the pool
+nothing at an exit.
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
 `--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure or sensitivity
