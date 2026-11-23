@@ -1,12 +1,15 @@
 # Eval 1: Company AC, a cap table the deck misstates
 
 A test prompt for the `vc-diligence-questions` skill. The company is made up. The tool call and the excerpt are from a
-real `equity_calculator deal_check` run with these inputs. The answer states the expected behaviour; it is not a
-recorded run, and this eval has not been run in a live session. A run passes when it makes the one tool call below
-(field order free, money and percents as strings, share counts as whole numbers), puts the founders' mismatch first
-among the ranked questions without refuting it, relays the two flag codes in the tool's words, quotes the founders'
-percent today and the cap table's own sum as not checked, marks the cap table Contradicted in the data-room checklist,
-and computes nothing in its own text. A field passed at its default value (here `pool_timing`) may be left out.
+real `equity_calculator deal_check` run with these inputs. "Expected answer" states the expected behaviour, and
+"Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.330 on 2026-11-23), graded Partial: it said what the
+deck's percents were made of, wrote a draft that claimed a corrected deck and a pro forma the founder never named, and
+explained the flags in its own words. The skill was changed after that run (see "Recorded answer"). A run passes when
+it makes the one tool call below (field order free, money and percents as strings, share counts as whole numbers),
+puts the founders' mismatch first among the ranked questions without refuting it, relays the two flag codes with their
+meanings from the skill's flag table, quotes the founders' percent today and the cap table's own sum as not checked,
+marks the cap table Contradicted in the data-room checklist, and computes nothing in its own text. A field passed at
+its default value (here `pool_timing`) may be left out.
 
 ## Prompt
 
@@ -64,22 +67,74 @@ and computes nothing in its own text. A field passed at its default value (here 
 
 ## Expected answer
 
-- The founders' mismatch leads the ranked list as stops the process, in Financials and cap table, and is not put
-  through the refute pass: "Founders keep 60% after the round." (the tool prints 60.0000%, given) against the tool's
-  53.6170%, a difference of -6.3830%. The `conversions_bought_by_pre_money` and `pool_in_pre_money_lowers_price`
-  codes are relayed in the tool's words as the reasons a partner is likely to give. The draft answer uses only the
-  tool's figure, asks the founder to correct the deck line, and brackets
-  `[the pro forma cap table after the round, from your lawyer]`.
+- The founders' mismatch heads the ranked list, ahead of the tiers and with no tier, in Financials and cap table, and
+  is not put through the refute pass: "Founders keep 60% after the round." (the tool prints 60.0000%, given) against
+  the tool's 53.6170%, a difference of -6.3830%. The `conversions_bought_by_pre_money` and
+  `pool_in_pre_money_lowers_price` codes are relayed with their meanings from the skill's flag table (over MCP the
+  tool returns the codes alone) as the reasons a partner is likely to give. The draft answer uses only the tool's
+  figure, then asks for `[the corrected deck line]` and `[the pro forma cap table after the round, from your lawyer]`;
+  it never says the deck was corrected or that a pro forma is in the data room.
 - "Founders own 75% today." is quoted and marked "not checked: no tool adds up a cap table"; so is whether the four
-  holder rows add up to the fully diluted total. No division or sum of shares appears.
-- The investors' percent is consistent (20.0000%) and is not raised.
+  holder rows add up to the fully diluted total. No sentence says what the deck's 75% or 60% is made of or how the
+  deck reached it; where a question needs that, the draft asks
+  `[how the deck's figure was worked out, and on what basis]`. No division or sum of shares appears.
+- The investors' percent is consistent (20.0000%). A lens question on it that survives the refute pass is minor at
+  most, and its draft quotes the tool's value and the assumption row it rests on, never stating the assumption as what
+  the term sheet says.
 - Step 2 asks nothing about the fully diluted basis, since the prompt states the SAFE is not counted.
 - Data room: the cap table (FIN-D2) is Contradicted (the deck against the tool); the signed SAFE and the term sheet
   (FIN-D3) and the incorporation documents (LEG-D1) are Ready as named, with the note that a partner will open them;
   the work assignments (LEG-D2), the founders' stock agreements (LEG-D3) and the disputes list (LEG-D4) are Missing,
   each with a bracketed ask, and so are the founder bios (TEAM-D1), the product walkthrough (PROD-D1) and the
-  executive summary (FIN-D1). These are the core set, the pre-seed rows. No document on the list and no kept question
-  points to a seed row, so the seed rows are named once, in one line, as "if asked", and none is marked Missing; no
-  Series A row is listed.
+  executive summary (FIN-D1). These are the core set, the pre-seed rows. No document on the list points to a seed row.
+  A seed row is listed only when a kept question's draft names it as the row that settles that question (a question
+  on the 800,000 granted options may name the option plan, FIN-D8, and the approvals, LEG-D5), and then it is Missing
+  with its bracketed ask; every other seed row is named once, in one line, as "if asked", each by its ID, never as
+  Missing; no Series A row is listed.
 - The area prep list for Financials and cap table cites CAP-1 to CAP-4 by ID; for Legal, LEGAL-2 to LEGAL-5.
-- No arithmetic in its own text beyond the tool's values; no score and no readiness percentage.
+- No arithmetic in its own text beyond the tool's values; no score and no readiness percentage. The answer closes with
+  the skill's fixed closing sentence.
+
+## Recorded answer
+
+Recorded with Claude Code 2.1.330 on 2026-11-23, with the plugin loaded from this repository and no user settings. The
+answer is trimmed; [...] marks each cut.
+
+**Partial.** It made the one call with the expected arguments, ran the six lenses as parallel subagents and then one
+refute subagent per lens question, led with the founders' mismatch without refuting it, showed the investors' percent
+as consistent, quoted "Founders own 75% today." as not checked and marked the cap table Contradicted. It fell short in
+four places. It said what the deck's two percents were made of, which is division done in its own head. Its draft for
+the mismatch said the deck had been corrected and a pro forma was in the data room, though the founder named neither.
+It explained the two flags in its own words, since over MCP the tool returned the codes alone. It marked three seed
+rows Missing because its own drafts named them. Since this run the skill forbids saying what a stated percent is made
+of, gives a mismatch's draft a fixed shape, carries a meaning for every flag code, and lists a seed row only when a
+draft names it as the row that settles the question, which this eval now accepts. The eval has not been run again.
+
+> **Fix the deck before you open the data room.** "Founders keep 60% after the round." does not survive your own cap table: the calculator gives the founders 53.6170% after the round, 6.3830 points lower. The signed SAFE and the pool top-up both come out of the existing holders, and the 60% counts neither. [...]
+>
+> ## Ranked questions
+>
+> | #   | Tier              | Area                            | Your line                            | The question                                                                 | What settles it                                                                                   |
+> | --- | ----------------- | ------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+> | 1   | Stops the process | Financials and cap table; Legal | "Founders keep 60% after the round." | What does the cap table look like after this round? (ASK-7)                  | A pro forma cap table with the SAFE converted and the pool topped up, and the deck line corrected |
+> | 2   | Slows it          | Financials and cap table; Legal | "Founders own 75% today."            | On what basis is "today" stated, and why does it leave out the SAFE? (CAP-1) | The cap table with its basis stated and a SAFE row; the deck line relabelled                      |
+>
+> [...]
+>
+> ## Draft answers
+>
+> Bracketed items are facts only you can supply.
+>
+> 1. **After-round ownership.** "Our deck's 60% was wrong and we have corrected it. With the $500k SAFE converting at its $8M post-money cap and the pool topped up to 10% in the pre-money, the founders hold 53.6170% after the round. New investors hold 20.0000%, the SAFE holder 4.7660% and the pool 10.0000%. The pro forma is in the data room." Data room: FIN-D2.
+> 2. **75% today.** "The 75% is founders' shares over the 8,000,000 fully diluted total, which leaves the SAFE out. [State the figure with the SAFE counted, or relabel the line 'before SAFE conversion'.]" Data room: FIN-D2.
+>
+> [...]
+>
+> | LEG-D5 Approvals for every share, option and SAFE | Records behind each row | Missing | [board and stockholder approvals] |
+> | FIN-D8 Option plan and grant list | Options granted and promised | Missing | [the plan and the list] |
+> | MKT-D1 Source of the buyer count | Who buys and how many | Missing | [the count and its source] |
+>
+> [...]
+>
+> - **Flag `pool_in_pre_money_lowers_price`:** the new pool is made inside the pre-money valuation, before the round. Of the $12M, $561,702.13 pays for the new pool and $938,297.87 for the existing unissued pool.
+> - **Flag `conversions_bought_by_pre_money`:** the pre-money buys every converted SAFE share; $714,893.62 of the $12M pays for the SAFE's shares.

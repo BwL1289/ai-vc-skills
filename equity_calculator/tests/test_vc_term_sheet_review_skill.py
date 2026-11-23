@@ -9,6 +9,8 @@ the calculator and before the marks, and a refute pass in which a line that diff
 objection. The Sources are exactly the pages read in full for this skill, with no survey figure. Each eval in
 evals/vc-term-sheet-review/ has a prompt, its expected calls and an expected answer; each call is valid and its excerpt
 is lines of the report that call prints, and every figure an answer takes from the calculator is one it printed.
+The deal check's flags come back as bare codes over MCP, so the skill carries a meaning for every code. An eval run in
+a live session records an excerpt of that run under "Recorded answer"; the others say they have not been run.
 """
 
 from __future__ import annotations
@@ -16,12 +18,13 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, get_args
 
 import pytest
 from equity_calculator.__main__ import _INPUT_MODELS
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
+from equity_calculator.schemas.equity_deal_check import DealFlag
 from equity_calculator.text import render_sheet
 from pydantic import ValidationError
 
@@ -45,7 +48,20 @@ _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
 _SERVED = {f"{_TOOL_PREFIX}{scenario}" for scenario in _INPUT_MODELS} | {_WORKBOOK_TOOL}
-_HANDOFF_SKILLS = ("vc-deal-math", "equity-calculator", "vc-positioning", "vc-claims-check", "vc-deck-review")
+_HANDOFF_SKILLS = (
+    "vc-deal-math",
+    "equity-calculator",
+    "vc-positioning",
+    "vc-claims-check",
+    "vc-deck-review",
+    "vc-round-sizing",
+    "vc-diligence-questions",
+)
+# Evals run in a live session: each records an excerpt of the run, blockquoted, under "## Recorded answer".
+_RECORDED = ("ar",)
+_NOT_RUN_LIVE = "has not been run in a live session"
+_RECORDED_HEADING = "\n## Recorded answer\n"
+_ONE_PER_SUBAGENT = "launch one subagent per objection in a single message; never put two objections in one subagent"
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
 _TRIGGERS = (
@@ -250,6 +266,9 @@ def test_every_skill_it_hands_off_to_exists_and_vc_positioning_points_to_it() ->
     assert "the vc-term-sheet-review skill" in _unwrapped(_section("## When to use it", _POSITIONING))
     # A verdict request is answered with the review, never with a verdict.
     assert '"Should we take this term sheet?": run the review' in handoffs
+    # "Standard" is answered from the marks table, never with a yes or a no.
+    assert '"Is this term sheet standard?": never answer yes or no' in handoffs
+    assert '"standard" here means only that baseline' in handoffs
 
 
 def test_the_terms_table_rows_are_fixed_and_each_cites_a_listed_source() -> None:
@@ -301,6 +320,17 @@ def test_the_round_goes_to_the_calculator_on_the_tools_own_basis() -> None:
     # The calculator's fully diluted count leaves SAFEs and notes out; the founder's cap table may not.
     assert "SAFEs and notes excluded" in steps
     assert "ask which way the founder's does, and pass the tool its own basis" in steps
+    assert "`[fully diluted shares before the round, SAFEs and notes left out]`" in steps
+    assert "never subtract the SAFE or note shares yourself" in steps
+    # A valuation with no label is the calculator's mismatch only under every reading.
+    assert "Only a check that is a mismatch under every reading is the calculator's mismatch" in steps
+    assert "it becomes one lawyer question, to have the sheet say pre- or post-money" in steps
+    # Participation is explained from the waterfall's own fields, never against the round's ownership percent.
+    assert "Explain participation only with the row's own fields" in steps
+    assert "Never set the round's ownership percent beside the waterfall's `residual`" in steps
+    # Counts and periods are figures too.
+    assert "a count of terms is a figure too, taken from the marks table or left out" in steps
+    assert "lawyer questions use only the periods and amounts the sheet or the founder gave" in steps
     assert "`equity_pool`, only when no SAFE or note converts" in steps and "`whole_shares`" in steps
     assert "passed on, never subtracted by hand" in steps
     assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
@@ -389,8 +419,15 @@ def test_the_attack_stage_runs_independent_lenses_named_by_what_they_test() -> N
     ):
         assert rule in attack, rule
     # A lens that sees the answering line must still raise the objection, or the refute pass has nothing to drop.
-    assert "Do not judge whether another line of the sheet answers an objection: raise it anyway" in attack
+    assert (
+        "Do not judge whether another line of the sheet answers an objection: raise it anyway, however short the "
+        "material; the refute pass decides." in attack
+    )
     assert "rather than a weak objection" not in attack
+    assert "run the lenses as parallel subagents, however short the material, all launched in one message" in attack
+    # With a subagent tool the lenses run as subagents; the one-agent order is the fallback, stated second.
+    subagents_first = "With a subagent tool (in Claude Code, the Agent or Task tool), step 6 spawns the four lens"
+    assert subagents_first in steps and steps.index(subagents_first) < steps.index("Without a subagent tool, take")
     # The lenses need the tool output, so they run after the calculator steps and before any mark exists.
     assert "after step 5 and before step 2 (no mark exists yet)" in attack
     order = "take the steps in this order: 1, 3, 4, 5, then Stage A of the adversarial review"
@@ -404,7 +441,7 @@ def test_the_refute_stage_has_the_shared_verdicts() -> None:
 
     for verdict in _REFUTE_VERDICTS:
         assert verdict in brief, verdict
-    assert "one subagent per objection" in handoff and "the baseline column of the terms table" in handoff
+    assert _ONE_PER_SUBAGENT in handoff and "the baseline column of the terms table" in handoff
     assert 'everything from "The refute brief:" to the end of this stage' in handoff
     for rule in (
         "you argue neither side",
@@ -427,8 +464,16 @@ def test_the_tiers_never_read_as_a_verdict() -> None:
     for tier in _TIERS:
         assert tier in ranked, tier
     assert "never a recommendation" in ranked and "no percentages, no score" in ranked
-    assert "The calculator's mismatches lead the first tier" in ranked
+    assert "The calculator's mismatches head the list, ahead of the tiers" in ranked and "with no tier" in ranked
+    assert "lead the first tier" not in _TEXT
+    stage_a = _unwrapped(_section("### Stage A: attack"))
+    assert "It carries no tier" in stage_a and "and not refuted" in stage_a
+    assert "A question to label the valuation (a mismatch under one reading only) is not a calculator" in stage_a
     assert "less independent than separate subagents" in answering
+    assert "**Refute verdicts:** one line for every objection that reached the refute pass" in answering
+    assert "the answer gives a refute verdict for every objection that reached the refute pass" in _unwrapped(
+        _section("## Steps")
+    )
     assert "not legal, tax or investment advice" in answering
     assert "have a lawyer who works on startup and venture financings review the sheet" in answering
 
@@ -454,7 +499,35 @@ def test_there_is_one_eval_per_worked_company_and_each_has_its_parts() -> None:
         positions = [text.find(f"\n{heading}\n") for heading in _EVAL_HEADINGS]
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
-        assert "made up" in text and "has not been run in a live session" in text, path.name
+        assert "made up" in text, path.name
+        recorded = path.name.split("-")[1] in _RECORDED
+        assert (_RECORDED_HEADING in text) == recorded, path.name
+        assert (_NOT_RUN_LIVE in text) != recorded, path.name
+
+
+@pytest.mark.parametrize("letter", _RECORDED)
+def test_a_recorded_run_is_a_blockquoted_excerpt_after_the_expected_answer(letter: str) -> None:
+    """The recorded answer is the run's own text, quoted, so no heading or fence in it is read as the eval's own."""
+    text, _, _ = _eval(letter)
+    header = _unwrapped(text.split("\n## Prompt\n", 1)[0])
+    recorded = text.split(_RECORDED_HEADING, 1)[1]
+    lines = [line for line in recorded.splitlines() if line.strip()]
+    quoted = [line for line in lines if line.startswith(">")]
+
+    assert text.index("\n## Expected answer\n") < text.index(_RECORDED_HEADING)
+    assert "is an excerpt of a recorded run (Claude Code" in header
+    assert "Recorded with Claude Code" in recorded and quoted
+    assert all(line.startswith(">") for line in lines[lines.index(quoted[0]) :])
+    assert not any(line.startswith(("#", "```")) for line in lines)
+
+
+def test_every_deal_check_flag_code_has_a_meaning_in_the_skill() -> None:
+    """Over MCP the tool returns bare codes, so the skill must say what each one means, in the tool's order."""
+    rows = [row[0].strip("`") for row in _table("## Flags")]
+
+    assert rows == list(get_args(DealFlag))
+    assert "vc-deal-math's flag table" not in _TEXT
+    assert "each flag as its code with its meaning from the flag table below" in _unwrapped(_section("## Answering"))
 
 
 def test_the_no_call_eval_carries_no_call_or_excerpt() -> None:
@@ -509,7 +582,10 @@ def test_one_eval_runs_the_baseline_beside_the_sheet() -> None:
         base_rest = {key: value for key, value in base_class.items() if key not in baseline}
         assert sheet_rest == base_rest and sheet_class != base_class
     assert _NOT_MODELLED_STRING in answer and "not folded into the 2x" in answer
-    assert "the calculator gives 65.0000%" in answer and "It leads the first tier" in answer
+    assert "the calculator gives 65.0000%" in answer and "It heads the list, ahead of the tiers, with no tier" in answer
+    # The YC article's precedent point is not in the skill, so no run is asked for it.
+    assert "precedent" not in answer
+    assert "one refute subagent per objection" in answer
     assert "What does the 2x participating preference pay common at our low exit?" in answer
 
 
@@ -591,4 +667,5 @@ def test_one_eval_runs_no_waterfall_without_whole_shares() -> None:
     assert tools == ["equity_deal_check"]
     assert f'"{_NOT_RUN}"' in answer and "is not estimated" in answer
     assert "fully diluted shares leave the SAFEs out" in answer
+    assert "never subtracts the SAFE shares itself" in answer
     assert "55.4167%" in answer

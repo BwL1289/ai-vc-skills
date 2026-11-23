@@ -37,6 +37,12 @@ and never adds a figure, customer or fact the founder did not give. It takes no 
   - The ask's arithmetic in full (ownership after the round, the pool, the SAFE stack, runway): the vc-deal-math
     skill, whose steps this skill follows. One equity question on its own: the equity-calculator skill.
   - The one-liner, the story and the say-and-avoid list: the vc-positioning skill.
+  - The traction section's ARR, retention, churn, CAC payback and burn multiple, checked against their parts: the
+    vc-metrics-readiness skill (preview).
+  - The market section's size, built bottom-up from buyers and price: the vc-market-sizing skill (preview).
+  - How much to raise and what each amount reaches: the vc-round-sizing skill (preview).
+  - The term sheet, once one arrives, line by line against a standard baseline: the vc-term-sheet-review skill
+    (preview).
 
 ## Inputs
 
@@ -97,11 +103,17 @@ Rules for the text:
   spin. Each risk the founder's material shows (a lost customer, a slipped launch, one customer making up most of
   revenue, a platform that could add the feature) is in it, whether or not the founder listed it, in the founder's
   words. A mitigation is what is being done and what shows it; a hope is labelled as a plan.
-- **Growth rates, market sizes, retention and unit economics** are quoted as stated, with "not checked: no tool
-  computes this"; never computed, converted or rounded.
+- **Metrics and market size.** This skill computes neither. ARR, retention, churn, CAC payback and burn multiple are
+  checked against their parts by the vc-metrics-readiness skill, and a market size is built bottom-up by the
+  vc-market-sizing skill; here they are quoted as stated, with that skill named. Growth rates and LTV are quoted as
+  stated, with "not checked: no tool computes this". None is computed, converted or rounded.
+- **Figures as stated, everywhere.** In the memo, the fix list and the biggest fixes, a figure is quoted as the founder
+  states it (45%), never restated in words ("nearly half", "most").
 
 ## Steps
 
+With a subagent tool (in Claude Code, the Agent or Task tool), step 7 runs the five lenses as subagents launched in one
+message, however short the material, then one refute subagent per objection, as "How to run the lenses" says.
 Without a subagent tool, run Stage A of the dissent pass first, before step 1, on the founder's material (and the
 memo draft, in review mode), as "How to run the lenses" says; step 7 then starts at the draft checks there (draft
 mode) or at the quote check (review mode).
@@ -126,7 +138,9 @@ mode) or at the quote check (review mode).
    assumption; no fund size, fund share, multiple on invested or return rate appears; no sentence recommends, speaks
    as an investor, names a firm as a voice or claims to know a firm's process; every surviving objection quotes a line
    that is in the material word for word; every risk the founder's material shows is in Top risks; every Summary point
-   is a fact from a section below.
+   is a fact from a section below; the `exit_is_shared_amount` statement is quoted word for word, with its key,
+   directly under the outcome table; the memo's Open questions lists its bracketed asks in full; no figure is restated
+   in words.
 
 ## The round
 
@@ -138,24 +152,31 @@ The round's figures are checked once, as the vc-deal-math skill describes:
   `stated_holder_percent`), each SAFE or note converting in this round as `instruments` (its terms as the founder
   gives them; left out, the founders' percent comes out too high), cash, burn and revenue as planned
   (`planned_monthly_gross_burn`, `planned_monthly_revenue`) and today's (`current_monthly_gross_burn`,
-  `current_monthly_revenue`) when the founder gives a different figure for today, the runway claim and the
+  `current_monthly_revenue`) only when the founder gives a different figure for today, the runway claim and the
   use-of-funds lines. One call per document that states the round differently. A valuation with no label: call twice,
   once as `pre_money`, once as `post_money`, and show both readings side by side, as vc-deal-math step 4 does. A
   mismatch that appears under only one reading is not listed as a computed mismatch: its fix is "say whether the
   valuation is pre- or post-money", with both readings quoted.
 - **A SAFE or note:** not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round`, with the
   next priced round the founder expects, labelled the founder's assumption in the memo. `equity_round` compares no
-  stated figure, so quote its values beside the memo's, without a verdict. The runway claim on a SAFE or note raise
-  goes to `equity_runway_plan` with the raise as cash only (`raises: [{"amount", "stated_runway_months"}]`).
+  stated figure, so quote its values beside the memo's, without a verdict. The runway claim and the use-of-funds lines
+  on a SAFE or note raise go to `equity_runway_plan` with the raise as cash only
+  (`raises: [{"amount", "stated_runway_months", "use_of_funds": [{"percent"}]}]`).
+- **Runway with no raise** (what happens if the round does not close), on any instrument: `equity_runway_plan`, whose
+  no-raise row is the figure, with the memo's stated no-raise runway as the top-level `stated_runway_months`. With no
+  cash on hand or no burn given, ask for them; make no runway call until they are in.
 - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
   included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask which
-  way the founder's does, and pass the tool its own basis.
+  way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask for the total
+  without them, `[fully diluted shares before the round, SAFEs and notes left out]`, and leave the cap-table fields
+  out of the call until it comes; never subtract the SAFE or note shares yourself.
 - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of its
   `rounded` value two places to the right, keeping every digit (0.200000 is 20.0000%). That is notation, not a
   calculation; never round it.
-- Each code in `flags` goes into the fix list as a question a partner is likely to ask, in the words the tool prints
-  beside it. The benchmark flags (`dilution_above_band`, `runway_below_band`) are common benchmarks, not rules: say
-  so and quote the tool's assumption row.
+- Each code in `flags` goes into the fix list, after the computed mismatches and with no tier, as a question a partner
+  is likely to ask, and into Numbers. Over MCP a flag comes back as a bare code: give it with its meaning from this
+  skill's flag table ("Flags"). The benchmark flags (`dilution_above_band`, `runway_below_band`) are common
+  benchmarks, not rules: say so and quote the tool's assumption row with the source that row gives.
 
 Part of what `equity_deal_check` prints for Company BM (made up: $3,000,000 at a $12,000,000 pre-money, a pool topped
 up to 10% in the pre-money, founders with 8,000,000 of 10,000,000 shares, and the memo's "founders keep 59%" and
@@ -274,8 +295,9 @@ Part of what it prints for Company BM at the founder's plan exit of $150,000,000
 ```
 
 The class's payout is not its cap-table percent times the exit: the unissued pool takes no part in a sale (step 3),
-so the shares that do take part split the exit among fewer shares. Quote the `exit_is_shared_amount` assumption row
-beside the table, so no reader takes it for a mismatch.
+so the shares that do take part split the exit among fewer shares. Directly under the outcome table, quote the
+waterfall's `exit_is_shared_amount` statement word for word, in quotation marks, with its key, so no reader takes the
+payout for a mismatch: `exit_is_shared_amount`: "The exit amount is what the shareholders share: no debt, fees, escrow, accrued dividends or option exercise cash is taken out first, and common_shares counts every common share that takes part (exercised options included; unexercised options take nothing)."
 
 ## Dissent pass (adversarial review)
 
@@ -308,12 +330,13 @@ Every lens gets the same brief, with its own name and test filled in:
   partner arguing against the deal is likely to use it; and how much it hurts (sinks the case, weakens it, or minor).
 - A reason you cannot tie to a line of the memo or the material is not an objection. List it apart as a gap, worded as
   a question to the founder.
-- Do not judge whether another line answers an objection: raise it anyway, and the refute pass decides. A line that
+- Do not judge whether another line answers an objection: raise it anyway, however short the material; the refute
+  pass decides. A line that
   carries its own answer (a risk stated with what is being done and what shows it) is not objected to for lacking
   that answer. Return "nothing found" only when no line gives this lens an objection worth the partnership's time.
 
 **How to run the lenses.** With a subagent tool (in Claude Code, the Agent or Task tool), run the lenses as parallel
-subagents. Give each one only the memo, the founder's material and its lens brief: not this skill's other sections,
+subagents, however short the material, all launched in one message. Give each one only the memo, the founder's material and its lens brief: not this skill's other sections,
 not the tool results, not another lens's output. Without one, run Stage A first, before step 1, on the founder's
 material (and the founder's memo draft in review mode): run the lenses one after another, write each lens's objections
 down in full before reading the next lens's brief, and never revise an earlier list. In draft mode without subagents
@@ -327,7 +350,8 @@ the founder's line the memo leaves out. The answer says these lenses are less in
 **The calculator's mismatches** do not go through the lenses or the refute pass. Each heads the ranked fix list
 under **figures that do not match (computed)**, quoting the memo's figure with the tool's value and difference. It is
 not refuted: the calculator computed it. The one exception is a mismatch under only one reading of a valuation with no
-label, which becomes the fix "The round" gives.
+label, which becomes the fix "The round" gives. A runway mismatch with the claim below the computed runway
+understates it: the memo may keep it or state the computed runway, and it goes in the minor tier at most.
 
 ### Check the quotes
 
@@ -337,9 +361,10 @@ objection about the same line, merge them and keep both lens names. Gaps go to t
 
 ### Stage B: refute
 
-Each objection gets its own refute pass. With a subagent tool, run one subagent per objection, given the founder's
-material, the memo, that one objection, the Pattern column of the table below and everything from "The refute brief:"
-to the end of this stage, and nothing else; without one, decide the objections one at a time against the same brief.
+Each objection gets its own refute pass. With a subagent tool, launch one subagent per objection in a single message;
+never put two objections in one subagent. Give each the founder's material, the memo, that one objection, the Pattern
+column of the table below and everything from "The refute brief:" to the end of this stage, and nothing else.
+Without one, decide the objections one at a time against the same brief.
 
 The refute brief:
 
@@ -381,11 +406,12 @@ does not drop the objection, and neither does one that is the objected line itse
 
 Order the kept objections in three tiers, most damaging first: **sinks the case**, **weakens it**, **minor**. The
 calculator's mismatches head the list, ahead of the tiers, under **figures that do not match (computed)**, with no
-tier. Within a tier, an objection raised by more than one lens comes first. The tier is a judgment, not a probability:
+tier; the flags follow them, also with no tier, as questions a partner is likely to ask. Within a tier, an objection raised by more than one lens comes first. The tier is a judgment, not a probability:
 give no percentages and no score. Each entry is one fix: the section, the line quoted word for word, why a partner
 arguing against the deal is likely to use it in one or two plain sentences, and the change, using only the founder's
-facts or a bracketed ask. A kept objection the founder cannot fix before the meeting goes into the memo's Top risks,
-in the founder's words, and into Open questions.
+facts or a bracketed ask. A Kept objection answered in part says so in its Fix cell: it quotes the answering line
+with its place and names the part left as the bracketed ask. A kept objection the founder cannot fix before the
+meeting goes into the memo's Top risks, in the founder's words, and into Open questions.
 
 ## Answering
 
@@ -394,19 +420,50 @@ Lead with the biggest fixes, then the memo, then the full fix list.
 1. **The biggest fixes,** at most three, one line each: the top of the ranked fix list.
 2. **The memo,** ready to hand to the champion, in the shape above, revised for every kept objection, every gap a
    bracketed ask, every exit value labelled the founder's assumption, and one line at its head: "Drafted by the
-   founders from their own material; figures from the equity calculator; not the firm's format."
+   founders from their own material; figures from the equity calculator; not the firm's format." The memo is handed
+   on alone, so its Open questions section lists its own bracketed asks in full and never points to the answer's
+   Open asks.
 3. **Ranked fix list,** as a table: Rank, Tier, Section, Lens, The line (quoted), Why a partner arguing against the
-   deal uses it, Fix; the figures that do not match (computed) first. Then **Dropped,** one line each: the objection,
-   its lens, and why it fell. Say whether the lenses ran as subagents.
-4. **Numbers:** each tool call's verdict and the rows the memo uses, as printed; the flags as questions a partner is
-   likely to ask; the outcome table (Exit value, the founder's reason, The round's payout, Invested, Converts?); the
-   stake after the founder's assumed later rounds; the assumption rows the figures lean on; every other figure quoted
-   as stated with "not checked: no tool computes this".
+   deal uses it, Fix; the figures that do not match (computed) first, then the flags. Then **Dropped,** one line
+   each: the objection, its lens, and why it fell. Say how the lenses and the refute pass ran (as subagents, one
+   refute subagent per objection).
+4. **Numbers:** each tool call's verdict and the rows the memo uses, as printed; each flag as its code with its
+   meaning from the flag table; the outcome table (Exit value, the founder's reason, The round's payout, Invested,
+   Converts?) with the `exit_is_shared_amount` statement quoted under it; the stake after the founder's assumed later
+   rounds; the assumption rows the figures lean on; metrics and market sizes quoted as stated, with the skill that
+   checks them named; growth rates, LTV and every other figure quoted as stated with "not checked: no tool computes
+   this".
 5. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
 6. **Sources:** the guides used, with links, and which points are this skill's own judgment.
 7. **Close:** this is not investment, legal or tax advice; the champion decides what to use and writes the firm's
    own memo; customers named in it should have agreed to be named; a lawyer should look at anything sent to people
    who are not yet investors.
+
+## Flags
+
+A tool's `flags` holds codes only; over MCP no sentence comes with them. This is what each means for the founder: a
+question a partner is likely to ask, never an error, and never a change to a verdict.
+
+| Flag                                  | Tool                    | What it means for the founder                                                                 |
+| ------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------------- |
+| `valuation_back_solved`               | deal check              | No valuation was given, so the post-money was worked from the raise and the percent           |
+| `pool_in_pre_money_lowers_price`      | deal check              | The new pool is paid for out of the pre-money, so the effective pre-money and price are lower |
+| `pool_in_post_money_dilutes_investor` | deal check              | The pool is counted after the money, so the investor gets less than raise / post-money        |
+| `pool_already_large_enough`           | deal check              | The unissued pool already meets the target, so no new pool shares are needed                  |
+| `conversions_bought_by_pre_money`     | deal check              | SAFE and note shares come out of the pre-round holders, so their stake falls by more          |
+| `discount_beat_cap`                   | deal check              | A discount gave a lower price than the cap                                                    |
+| `note_interest_converts`              | deal check              | Note interest converts too, so a note gets more than its principal's worth of shares          |
+| `net_burn_not_positive`               | deal check              | Revenue covers the burn on those figures, so there is no net runway on them                   |
+| `current_burn_runway_longer`          | deal check              | Runway on today's burn is longer than on the planned burn                                     |
+| `dilution_above_band`                 | deal check              | The investors get more than the tool's dilution benchmark in one round (not a rule)           |
+| `runway_below_band`                   | deal check, runway plan | Planned runway is under the tool's runway benchmark (not a rule)                              |
+| `cash_never_runs_out`                 | runway plan             | Revenue covers the spend before the cash runs out, so that runway has no end                  |
+| `cash_out_before_raise_lands`         | runway plan             | The cash goes below the floor before a later raise lands                                      |
+| `milestone_short_on_plan`             | runway plan             | A raise does not reach a milestone, even on the plan                                          |
+| `downside_short_where_plan_covers`    | runway plan             | A raise reaches a milestone on the plan but not on the downside                               |
+| `covered_without_raise`               | runway plan             | The cash already reaches a milestone with no raise                                            |
+| `start_raising_date_passed`           | runway plan             | With the months to raise given, the date to start raising is already at or past today         |
+| `no_time_to_raise_given`              | runway plan             | Milestones were checked at their own month, with no time left to raise the next round         |
 
 ## Sources
 
@@ -428,7 +485,8 @@ review (attack, then refute with the founder's own material) is this repository'
   memo format or decision process, and does no investor research.
 - No fund math: no fund size, no share of a fund, no multiple on invested, no return rate, no "returns the fund".
 - It never invents or strengthens traction, customers, team credentials, risks' mitigations or exit values.
-- No arithmetic outside the equity calculator's tools. Growth rates, market sizes, retention and unit economics are
-  quoted; a later round's payout at an exit is not checked.
+- No arithmetic outside the equity calculator's tools. Metrics and market sizes are quoted here and checked by the
+  vc-metrics-readiness and vc-market-sizing skills; growth rates and LTV are quoted; a later round's payout at an exit
+  is not checked.
 - The dissent pass predicts likely objections from the memo's text; a real partnership may raise others.
 - It works from the founder's material and sends nothing anywhere.

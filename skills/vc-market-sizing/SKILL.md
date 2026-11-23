@@ -26,6 +26,9 @@ looks up a market figure, and never adds a count, price, share, adoption rate or
   - The story, the one-liner and the say-and-avoid list: the vc-positioning skill.
   - The ask's arithmetic (valuation, ownership, runway): the vc-deal-math skill. One scenario on its own: the
     equity-calculator skill.
+  - Traction metrics beside the market (ARR, retention, churn, CAC payback, burn multiple): the vc-metrics-readiness
+    skill (preview).
+  - How much to raise and what each amount reaches: the vc-round-sizing skill (preview).
 
 ## Inputs
 
@@ -50,7 +53,9 @@ A missing input becomes a named gap, written as a bracketed ask: `[the channel t
 ## The assumption ledger
 
 Every input is one row: Segment, Assumption, Value (quoted as the founder states it), Founder's source, Kind. The
-kind is the first that applies, in this order: **Own data**, then **Named third party**, then **Estimate**.
+kind is the first that applies, in this order: **Own data**, then **Named third party**, then **Estimate**. Each
+segment with a SOM has its own Horizon row: `<N> years (founder's)` when the founder gave that segment a year, or
+`<N> years (the call's one horizon; the founder gave none for this segment)`, with the ask step 3 gives.
 
 | Kind              | When                                                                                                              |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -63,6 +68,8 @@ an Estimate. It never describes a source the founder did not name.
 
 ## Steps
 
+With a subagent tool (in Claude Code, the Agent or Task tool), step 8 runs the three lenses as subagents launched in
+one message, however short the material, then one refute subagent per objection, as "How to run the lenses" says.
 Without a subagent tool, run the three lenses (Adversarial review) in the turn that makes the call, before the ledger
 and the call, on all the founder's material so far (every message, not only the first), as "How to run the lenses"
 says. A turn that makes no call runs no review.
@@ -197,10 +204,14 @@ says. A turn that makes no call runs no review.
    that kind has a sensitivity row, name none: the ask for its low and high values stands. When that kind's rows all
    swing by $0.00 or have no swing, name none and say why: the field does not move that segment's SOM
    (`does_not_move`), or no SOM is totalled (`som_not_given`). A shared assumption's rows move one segment each: when
-   one is named, say so, and point to the whole-company runs for the company as a whole.
+   one is named, say so, and point to the whole-company runs for the company as a whole. Then, in one line, give each
+   other sensitivity row's kind and swing and why it was not picked: a stronger kind (an Own data price is never a
+   candidate while an Estimate is in play), or a smaller swing.
 8. **Run the adversarial review** (below).
 9. **Check before answering.** Every figure is quoted as stated or comes from a tool result; every objection quotes a
-   founder line word for word; no market fact, source or competitor is brought in; nothing speaks as an investor.
+   founder line word for word; no market fact, source or competitor is brought in; nothing speaks as an investor; with
+   a subagent tool, the number of refute subagents equals the number of objections that passed the quote check, each
+   given exactly one; no reason for a top-down gap is offered except as a question.
 
 Tool values: use each value's `rounded` with its unit; never round again or recompute. A `fraction` value is shown as
 a percent by moving its decimal point two places right, keeping every digit (0.580000 is 58.0000%); a change of
@@ -231,12 +242,12 @@ Every lens gets the same brief, with its own name and test filled in:
 - Return at most three objections, strongest first. For each: the founder's line, quoted word for word with its
   place; why a partner is likely to doubt it; and how much it hurts (ends the meeting, weakens it, or minor).
 - A doubt you cannot tie to a line the founder wrote is not an objection: list it apart as a question to the founder.
-- Do not judge whether another line of the material answers an objection: raise it anyway, and the refute pass
-  decides. Return "nothing found" only when no line of the material gives this lens an objection worth a partner's
+- Do not judge whether another line of the material answers an objection: raise it anyway, however short the
+  material; the refute pass decides. Return "nothing found" only when no line of the material gives this lens an objection worth a partner's
   time.
 
 **How to run the lenses.** With a subagent tool (in Claude Code, the Agent or Task tool), run the three lenses as
-parallel subagents, each given only the founder's material, its brief and the Pattern column below: never the tool's
+parallel subagents, however short the material, all launched in one message, each given only the founder's material, its brief and the Pattern column below: never the tool's
 result. Without one, run them in the turn that makes the call, before the call, one after another, on all the
 founder's material so far (every message, not only the first), writing each lens's objections down in full before
 reading the next brief, and never revising them after the tool results are in. A turn that makes no call runs no
@@ -244,7 +255,9 @@ review. Lenses run that way are less independent than subagents; say in the answ
 
 **Computed findings do not go through the lenses or the refute pass.** Each check mismatch and each flag is a
 computed fact, added to the survivors as is, quoting the founder's line it bears on with the tool's values as the
-reason. A mismatch on a stated TAM, SAM or SOM leads the first tier; the flags take the tier the Flags table gives.
+reason. A mismatch on a stated TAM, SAM or SOM heads the list, ahead of the tiers, with no tier: how much a gap hurts
+depends on its size, which the founder weighs. A stated figure below the tool's understates it: the founder may keep
+it or state the tool's figure, and it goes in the minor tier at most. The flags take the tier the Flags table gives.
 A lens objection on the same line as a flag joins the flag's entry, keeping the lens name.
 
 ### Check the quotes
@@ -254,8 +267,11 @@ Merge two lenses' objections on the same line, keeping both names. Questions go 
 
 ### Stage B: refute
 
-Each objection gets its own pass: with a subagent tool, one subagent per objection, given only the founder's
-material, that objection, the Pattern column below and the brief; without one, one at a time against the same brief.
+Each objection gets its own pass. With a subagent tool, N objections after the quote check means N subagents: launch
+one subagent per objection in a single message; never put two objections in one subagent. Give each only the
+founder's material, that objection, the Pattern and Fix columns of the Patterns table, and everything from "The refute
+brief:" to the end of this stage (the verdicts and the rule on what is missing included), and add no rule of your own.
+Without one, decide them one at a time against the same brief.
 
 The refute brief:
 
@@ -274,6 +290,12 @@ The verdicts:
 - **Dropped, not grounded:** the quoted line does not say what the objection claims, or the objection rests on an
   outside fact about the market.
 - **Kept:** neither holds. What the founder would need becomes a bracketed ask.
+
+What is missing is what the objection's pattern names in its Fix column, nothing more. A line that supplies all of it
+drops the objection as answered; anything else the lens asked for (closes per rep, a hiring plan) goes to the open
+asks as a question and does not keep it. A line that supplies only part of it (a channel but no year) does not drop
+it: the objection is Kept for the part left, the answering line is quoted with the advice to put it on the market
+slide, and the part left becomes the bracketed ask.
 
 The pass invents nothing on the founder's behalf: no figure, source, customer or channel. After the passes, an
 answering line that is not in the material word for word does not drop the objection, and neither does one that is the
@@ -298,15 +320,15 @@ Signals, not rules. A row marked unverified has no public source this skill's au
 | A price no customer pays yet                                                      | Inflation | Use what customers pay today, or show the pricing test                                   | Unverified                                                                                                                                                     |
 | A market size with no publisher or year, or figures from different years mixed    | Inflation | Name the publisher, year and definition, or drop it                                      | Unverified                                                                                                                                                     |
 | A SOM given only as a share, with no customers, channel or year                   | Path      | The customers you plan to win, by when, and through which channel                        | Unverified                                                                                                                                                     |
-| A SOM many times today's customers with nothing named to get there                | Path      | The channel and capacity behind the tool's new customers a year                          | Unverified                                                                                                                                                     |
+| A SOM many times today's customers with nothing named to get there                | Path      | Name the channel behind the tool's new customers a year; its capacity is a question      | Unverified                                                                                                                                                     |
 | Segments that overlap, or add up to more than the population they come from       | Overlap   | Cut the segments so no buyer is in two; give the population                              | Unverified                                                                                                                                                     |
 | The same buyer counted per seat and per company, or both sides of one marketplace | Overlap   | Count each buyer once, at the level that pays                                            | Unverified                                                                                                                                                     |
 | A bottom-up figure above the top-down figure it is compared with                  | Overlap   | Find the double count, or show why the definitions differ                                | Unverified                                                                                                                                                     |
 
 ## Flags
 
-The result's `flags` holds codes only; the report prints each with its plain words. A flag is a question to prepare
-for and never changes a verdict.
+The result's `flags` holds codes only; over MCP no sentence comes with them (the command line prints one beside each),
+so this table is what each means. A flag is a question to prepare for and never changes a verdict.
 
 | Flag                         | What it means for the founder                                                                  | Tier             |
 | ---------------------------- | ---------------------------------------------------------------------------------------------- | ---------------- |
@@ -322,25 +344,30 @@ for and never changes a verdict.
 | `som_below_target`           | The SOM is below the revenue your own plan needs from this market                              | weakens it       |
 | `som_target_out_of_reach`    | No sensitivity row you gave reaches your plan's revenue at a value its segment can take        | minor            |
 
-The tiers are this skill's own ranking (unverified). A survivor from the lenses can still outrank a flag.
+The tiers are this skill's own ranking (unverified). A survivor from the lenses can still outrank a flag. The fix for
+`som_as_percent_only` is always the three asks `[the number of <buyers> you plan to win]`,
+`[the channel that reaches them]` and `[the year you expect to win them]`, with the segment's buyers named.
 
 ## Answering
 
 Lead with what a partner will doubt first, then the numbers.
 
-1. **Doubted first:** the computed findings (mismatches, then flags by tier), then the kept objections in their
-   tiers, each with the line quoted, why, and the fix. Then **Dropped,** one line each with why it fell. Say whether
-   the lenses ran as subagents.
+1. **Doubted first:** the computed findings (mismatches with no tier, then flags by tier), then the kept objections in
+   their tiers, each with the line quoted, its lens or lenses in brackets after the quote ("(Path)", "(Inflation,
+   Overlap)"), why, and the fix. Then **Dropped,** one line each with why it fell. Say whether the lenses ran as
+   subagents, and give the number of refute subagents run.
 2. **The market:** a table per segment and in total: Customers, Gross spend, TAM, SAM, SOM, Share of TAM, SOM
    customers / today, New customers a year. Tool values only. Each whole-company run's totals follow, labelled with
    its value.
-3. **Against the deck:** each stated TAM, SAM or SOM, the tool's figure, the difference and the verdict. A stated TAM
-   equal to the tool's gross spend is shown beside it, both quoted.
-4. **Against the top-down figure:** the tool's share and difference, as a cross-check, never as the market size;
-   with no share given, say it is against the whole figure.
+3. **Against the deck,** its own section: each stated TAM, SAM or SOM, the tool's figure, the difference and the
+   verdict. Beside a stated TAM, always give the tool's total gross spend, both quoted, and say whether the gap could
+   be a gross-spend count: with no take rate the two figures are the same, so it cannot.
+4. **Against the top-down figure:** the tool's share and difference only, as a cross-check, never as the market size;
+   with no share given, say it is against the whole figure. Any reason for the gap is a question to the founder under
+   Open asks, never a statement.
 5. **The shakiest assumption:** the ledger row, its kind, its swing, and its value at the SOM target beside the
    founder's high value (or the tool's `met_without_it` with its `som_low` beside the target, `does_not_move` or
-   `out_of_range`), quoted; or none, with why.
+   `out_of_range`), quoted; or none, with why. Then the one line on each other row's kind and swing (step 7).
 6. **The ledger:** every assumption with its source and kind.
 7. **Assumptions** the tool's result lists, quoted with their sources.
 8. **Open asks:** every bracketed gap, every sensitivity row left out, and every question from the lenses, in one
