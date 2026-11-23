@@ -242,9 +242,9 @@ sheet; runs no baseline column; and gives no sign or do-not-sign verdict.
   sheet, so protective provisions, drag-along and the investor rights (pro rata, first refusal, co-sale, information)
   are Missing, each a lawyer question.
 - Price: the founders' shares are priced at the effective pre-money, $17,500,000.00, against the $20,000,000.00
-  pre-money (the `pool_in_pre_money_lowers_price` flag in plain words). The 60% is a mismatch: the calculator gives
-  56.0000%. It leads the first tier, because the founders' own figure for the round is wrong, not as a prediction
-  about a later deal.
+  pre-money (the `pool_in_pre_money_lowers_price` flag, with its meaning from the skill's flag table). The 60% is a
+  mismatch: the calculator gives 56.0000%. It heads the list, ahead of the tiers, with no tier, because the founders'
+  own figure for the round is wrong, not as a prediction about a later deal.
 - The pool what-if, from `equity_pool`'s other table: with the pool counted after the money and the $20,000,000.00
   pre-money held fixed, the price would be $1.818182 and the post-money $25,757,574.55, not the $25,000,000.00 the
   round gives, and the investor would hold 19.4118%; a lawyer question, not advice.

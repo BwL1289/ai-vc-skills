@@ -54,11 +54,11 @@ for the pro forma cap table.
 ## Expected answer
 
 - The 70% is a mismatch (55.4167%), explained by the pool and both SAFEs being paid for out of the pre-money (the
-  `conversions_bought_by_pre_money` and `pool_in_pre_money_lowers_price` flags in plain words); it leads the first
-  tier. Each SAFE ends at 7.2917%.
+  `conversions_bought_by_pre_money` and `pool_in_pre_money_lowers_price` flags, each with its meaning from the skill's
+  flag table); it heads the list, ahead of the tiers, with no tier. Each SAFE ends at 7.2917%.
 - It asks whether the founder's 10,000,000 fully diluted shares leave the SAFEs out, as the tool's count does (every
   share before the round, the unissued pool included and SAFEs and notes excluded), and says the call stands only on
-  that basis.
+  that basis; if they count the SAFEs, it asks for the total without them and never subtracts the SAFE shares itself.
 - No `equity_pool` call (SAFEs convert) and no `equity_waterfall` call: "not run: the waterfall needs whole share
   counts; send the pro forma cap table". The $25M sale is not estimated.
 - Amount and valuation Differs on the label (the sheet's pre-money against the template's post-money, with the pool's
