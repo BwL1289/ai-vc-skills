@@ -6,9 +6,10 @@ period the founder names (``period_months``): the recurring revenue at the start
 (new, expansion, contraction, churned), the latest month's revenue and how much of it is one-time or usage, the
 customers at the start, lost and won, the sales and marketing spend, the gross margin, the net burn, and the largest
 customer's revenue with the period's revenue. It works each metric exactly and returns each stated figure as
-``consistent`` or a ``mismatch``, with flags that name the likely cause of a mismatch (a run-rate called ARR, new
-customers counted in net retention, a payback on revenue rather than gross margin, a burn multiple on new rather than
-net new ARR) and three benchmark questions, never errors.
+``consistent``, a ``mismatch``, or ``not_checked`` (a stated burn multiple when no multiple can be worked), with
+flags that name the likely cause of a mismatch (a run-rate called ARR, new customers counted in net retention, a
+payback on revenue rather than gross margin, a burn multiple on new rather than net new ARR) and three benchmark
+questions, never errors.
 
 No valuation, instrument, runway or burn projection: those stay with ``deal_check``, ``round`` and ``runway_plan``.
 This module reuses ``equity_deal_check``'s verdict words and default tolerances, so no cycle.
@@ -28,13 +29,9 @@ from equity_calculator.schemas.equity_common import (
     BoundedDecimal,
     EquityAssumption,
     EquityQuantity,
+    WrittenDecimal,
 )
-from equity_calculator.schemas.equity_deal_check import (
-    DEFAULT_TOLERANCE_PERCENT,
-    DEFAULT_TOLERANCE_POINTS,
-    CheckVerdict,
-    DealVerdict,
-)
+from equity_calculator.schemas.equity_deal_check import DEFAULT_TOLERANCE_PERCENT, DEFAULT_TOLERANCE_POINTS, DealVerdict
 from pydantic import BaseModel, Field, model_validator
 
 __all__ = [
@@ -79,10 +76,13 @@ MetricsCheckKey = Literal["arr", "nrr", "grr", "churn", "cac", "cac_payback", "b
 ArrBasis = Literal["movement", "month"]
 
 # Facts and questions a VC is likely to raise. They never change a verdict; their plain words are in
-# ``equity_calculator.layout_metrics_check``. The four ``stated_*`` flags are set only beside a mismatch, when the
-# stated figure agrees with the named wrong definition instead, so each names the likely cause of that mismatch.
+# ``equity_calculator.layout_metrics_check``. The four ``stated_*`` flags are set only beside a mismatch (the burn
+# multiple's also beside a figure left unchecked), when the stated figure agrees with the named wrong definition
+# instead, so each names the likely cause. The two rounding flags compare a stated percent, months or multiple with
+# the computed figure rounded to the places the document writes it with.
 MetricsFlag = Literal[
     "stated_arr_matches_run_rate",
+    "arr_movement_and_month_disagree",
     "run_rate_includes_non_recurring",
     "stated_nrr_includes_new",
     "expansion_hides_churn",
@@ -91,6 +91,8 @@ MetricsFlag = Literal[
     "payback_not_margin_adjusted",
     "stated_payback_not_margin_adjusted",
     "stated_burn_multiple_uses_new_not_net_arr",
+    "consistent_beyond_rounding",
+    "mismatch_within_rounding",
     "burn_multiple_not_defined",
     "no_net_burn",
     "payback_above_band",
@@ -161,14 +163,21 @@ class MetricsCheckInput(BaseModel):
     largest_customer_revenue: BoundedDecimal | None = Field(default=None, ge=0)
     period_revenue: BoundedDecimal | None = Field(default=None, gt=0)
     stated_arr: BoundedDecimal | None = Field(default=None, gt=0)
-    stated_nrr_percent: BoundedDecimal | None = Field(default=None, ge=0)
-    stated_grr_percent: BoundedDecimal | None = Field(default=None, ge=0, le=WHOLE_PERCENT)
-    stated_churn_percent: BoundedDecimal | None = Field(default=None, ge=0, le=WHOLE_PERCENT)
+    # The stated percent, months and multiple fields are ``WrittenDecimal``: a zero keeps the places it is written with
+    # ("0.0" is one place), which the rounding test reads.
+    stated_nrr_percent: WrittenDecimal | None = Field(default=None, ge=0)
+    # Above 100% is accepted, never refused: gross retention leaves expansion out, so it is checked like any figure,
+    # and comes back a mismatch unless it is within the tolerance of the computed figure.
+    stated_grr_percent: WrittenDecimal | None = Field(default=None, ge=0)
+    # Below 0 only as net revenue churn (expansion above the revenue lost); ``_churn_rules`` refuses it otherwise.
+    stated_churn_percent: WrittenDecimal | None = Field(default=None, le=WHOLE_PERCENT)
     stated_churn_basis: StatedChurnBasis = "unlabelled"
     stated_cac: BoundedDecimal | None = Field(default=None, gt=0)
-    stated_cac_payback_months: BoundedDecimal | None = Field(default=None, gt=0)
-    stated_burn_multiple: BoundedDecimal | None = Field(default=None, gt=0)
-    stated_concentration_percent: BoundedDecimal | None = Field(default=None, ge=0, le=WHOLE_PERCENT)
+    stated_cac_payback_months: WrittenDecimal | None = Field(default=None, gt=0)
+    # 0x is accepted (a company at break-even, which the source says the multiple approaches); with no multiple to
+    # work it is not checked.
+    stated_burn_multiple: WrittenDecimal | None = Field(default=None, ge=0)
+    stated_concentration_percent: WrittenDecimal | None = Field(default=None, ge=0, le=WHOLE_PERCENT)
     tolerance_points: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_POINTS, ge=0, lt=WHOLE_PERCENT)
     tolerance_percent: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_PERCENT, ge=0, lt=WHOLE_PERCENT)
     customer_segment: CustomerSegment | None = None
@@ -265,7 +274,10 @@ class MetricsCheckInput(BaseModel):
             if self.customers_start is None:
                 raise ValueError("customers_lost needs customers_start")
             if self.customers_lost > self.customers_start:
-                raise ValueError("customers_lost is above customers_start: a period cannot lose more customers")
+                raise ValueError(
+                    "customers_lost is above customers_start: give only the customers lost among those there at the "
+                    "start of the period; customers won and lost inside the period are left out of logo churn"
+                )
         if self.customers_new_paid is not None:
             if self.customers_new is None:
                 raise ValueError("customers_new_paid needs customers_new (every new customer, paid channels included)")
@@ -326,6 +338,11 @@ class MetricsCheckInput(BaseModel):
                 raise ValueError("stated_churn_basis needs stated_churn_percent")
             return
 
+        if self.stated_churn_percent < 0 and not (basis in ("net_revenue", "unlabelled") and self.has_revenue_churn()):
+            raise ValueError(
+                "stated_churn_percent is below 0, which only net revenue churn can be (expansion above the revenue "
+                "lost): give stated_churn_basis net_revenue (or none) with starting_recurring above 0"
+            )
         if basis == "logo" and not self.has_logo_churn():
             raise ValueError("stated_churn_percent on a logo basis needs customers_start above 0 and customers_lost")
         if basis in ("gross_revenue", "net_revenue") and not self.has_revenue_churn():
@@ -351,6 +368,10 @@ class MetricsCheck(BaseModel):
     """One stated figure checked: what the document says, what the calculator gives, computed - stated, the verdict.
 
     ``basis`` names the churn basis a churn row is checked on (an unlabelled churn gets one row per basis).
+    ``computed`` and ``difference`` are none, and the verdict ``not_checked``, when the parts give no figure to check
+    against (a stated burn multiple with net burn or net new ARR at or below zero). ``within_rounding`` says whether
+    the stated percent, months or multiple is the computed figure rounded to the places it is written with (within
+    half its last place); none for money and for a figure not checked.
     """
 
     model_config = MODEL_CONFIG
@@ -358,9 +379,10 @@ class MetricsCheck(BaseModel):
     key: MetricsCheckKey
     basis: ChurnBasis | None = None
     stated: EquityQuantity
-    computed: EquityQuantity
-    difference: EquityQuantity
-    verdict: CheckVerdict
+    computed: EquityQuantity | None = None
+    difference: EquityQuantity | None = None
+    verdict: DealVerdict
+    within_rounding: bool | None = None
 
 
 class MetricsCheckResult(BaseModel):

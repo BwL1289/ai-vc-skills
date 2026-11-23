@@ -109,8 +109,8 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
      Milestone 1 (month 15), plan, raise 2: verdict                                   covered  covered when the runway reaches month 21
      Milestone 1 (month 15), downside, raise 1: verdict                                 short  covered when the runway reaches month 21
      Milestone 1 (month 15), downside, raise 2: verdict                                 short  covered when the runway reaches month 21
-     Required raise, milestone 1, plan, landing month 0                         $3,745,000.00  smallest raise keeping cash at or above the floor to month 21
-     Required raise, milestone 1, downside, landing month 0                     $4,142,500.00  smallest raise keeping cash at or above the floor to month 21
+     Required raise, milestone 1, plan, landing month 0                         $3,745,000.00  smallest raise keeping cash at or above the floor to month 21 (rounded up to the cent)
+     Required raise, milestone 1, downside, landing month 0                     $4,142,500.00  smallest raise keeping cash at or above the floor to month 21 (rounded up to the cent)
    ```
 
    $4M's cash lasts to month 15 with six months to raise on plan, but not in the downside; $3M's lasts on neither.
@@ -276,7 +276,7 @@ never an error, and never changes a verdict.
 | `cash_never_runs_out`              | On that case, revenue covers spend before the cash goes, so there is no runway end. | Say so; a partner will check the revenue that makes it true.                   |
 | `cash_out_before_raise_lands`      | Waiting runs the cash below the floor before the money arrives.                     | That option needs bridge money or an earlier close; show it.                   |
 | `milestone_short_on_plan`          | An amount does not reach a milestone, with time to raise, even on plan.             | See the tool's required raise, move the milestone, or name a lean plan.        |
-| `downside_short_where_plan_covers` | The plan reaches the milestone; the founder's downside does not.                    | Be ready to say what you would cut, and when you would know.                   |
+| `downside_short_where_plan_covers` | The plan reaches the milestone; the downside does not, with the same raise or none. | Be ready to say what you would cut, and when you would know.                   |
 | `covered_without_raise`            | Cash on hand already reaches a milestone on some case.                              | Say what the raise buys beyond it.                                             |
 | `start_raising_date_passed`        | On cash alone, raising should already have started, given the months to raise.      | Say when the raise started or will close; quote this meaning, not advice.      |
 | `no_time_to_raise_given`           | Milestones were checked at their bare month, with no time to raise after them.      | Give the months you allow, and re-run.                                         |

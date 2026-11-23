@@ -103,8 +103,11 @@ says. A turn that makes no call runs no review.
 5. **Call `equity_market_sizing` once,** with every segment, top-down figure, sensitivity row and stated figure; the
    only other calls are the whole-company runs below. Send money and percents as strings, and `price_period_months`,
    `som_years` and a sensitivity row's `segment` as whole numbers, never strings. Always send `price_period_months`
-   (1 for a monthly price, 12 for a yearly one): left out, the tool reads the price as yearly and raises
-   `price_period_defaulted`. Company AW (made up), software for vet clinics:
+   (1 for a monthly price, 12 for a yearly one): left out or null, the tool reads the price as yearly and raises
+   `price_period_defaulted` (the result's echoed `inputs` show it as null, so a call built from them keeps the
+   flag). A price is quoted as the tool prints it: a typed price exactly, to the cent at least, with no trailing
+   zeros past it ($0.0075 a message, never $0.01); a break-even price rounded as printed. Company AW (made up),
+   software for vet clinics:
 
    ```json
    {
@@ -164,7 +167,7 @@ says. A turn that makes no call runs no review.
      TAM: difference                                                          $-12,000,000.00  computed - stated
      TAM: verdict                                                                    mismatch  within the tolerance is consistent
      Sensitivity 1: SOM swing                                                   $2,160,000.00  SOM high - SOM low
-     Sensitivity 1: segment 1 price at SOM = $8,000,000.00                            $640.74  base × (target - other segments' SOM) / this segment's SOM
+     Sensitivity 1: segment 1 price at SOM = $8,000,000.00                        $640.740741  base × (target - other segments' SOM) / this segment's SOM
      Sensitivity 2: SOM swing                                                   $2,880,000.00  SOM high - SOM low
      Sensitivity 2: segment 1 customers to win at SOM = $8,000,000.00                1,441.67  base × (target - other segments' SOM) / this segment's SOM
      Sensitivity 3: SOM swing                                                   $1,080,000.00  SOM high - SOM low
@@ -380,10 +383,12 @@ Lead with what a partner will doubt first, then the numbers.
 
 - Y Combinator, "How to Pitch Your Company" (Michael Seibel), read in full:
   https://www.ycombinator.com/library/4b-how-to-pitch-your-company
-  Question 2, "How big is the market?": estimate "the number of customers that would want your product and
-  approximate how much you could charge them"; "I prefer the bottom up method because it helps you avoid a common top
-  down pitfall, which is not narrowing down the customer enough"; the activity tracker example and its two-year
-  lifecycle.
+  Question 2, "How big is the market?": for "creating a new product or space (like Slack)", estimate "the number of
+  customers that would want your product and approximate how much you could charge them"; the activity tracker
+  example and its two-year lifecycle; and its own bottom-up, a different build, "With bottom up you figure out where
+  comparable products are sold, how many of them are sold, and what % of those sales you could take", which it
+  prefers to top-down: "I prefer the bottom up method because it helps you avoid a common top down pitfall, which is
+  not narrowing down the customer enough". Calling customers times price bottom-up is common usage, unverified.
 - Y Combinator, "A guide to seed fundraising" (Geoff Ralston), read in full:
   https://www.ycombinator.com/library/4A-a-guide-to-seed-fundraising
   Its DON'T list ("Use ridiculous / silly market size numbers without clear justification") and its glossary (TAM is

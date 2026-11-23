@@ -105,8 +105,8 @@ are the founder's ranges for the two Estimates.
   TAM: verdict                                                                    mismatch  within the tolerance is consistent
   Sensitivity 1: SOM high                                                    $6,480,000.00  highest SOM over the values and the base
   Sensitivity 1: SOM swing                                                   $2,160,000.00  SOM high - SOM low
-  Sensitivity 1: segment 1 price at SOM = $8,000,000.00                            $640.74  base × (target - other segments' SOM) / this segment's SOM
-  Sensitivity 1: segment 1 price at TAM = $840,000,000.00                        $3,788.89  base × (target - other segments' TAM) / this segment's TAM; a cross-check with the top-down figure, not a target
+  Sensitivity 1: segment 1 price at SOM = $8,000,000.00                        $640.740741  base × (target - other segments' SOM) / this segment's SOM
+  Sensitivity 1: segment 1 price at TAM = $840,000,000.00                    $3,788.888889  base × (target - other segments' TAM) / this segment's TAM; a cross-check with the top-down figure, not a target
   Sensitivity 2: SOM high                                                    $6,840,000.00  highest SOM over the values and the base
   Sensitivity 2: SOM swing                                                   $2,880,000.00  SOM high - SOM low
   Sensitivity 2: segment 1 customers to win at SOM = $8,000,000.00                1,441.67  base × (target - other segments' SOM) / this segment's SOM
@@ -126,7 +126,7 @@ are the founder's ranges for the two Estimates.
   count. The fix is to put the tool's figure on the slide or show `[the inputs behind the $120M]`.
 - `som_below_target` (weakens it): the SOM is $5,400,000.00 against the plan's $8,000,000.00. The answer quotes the
   tool's break-even values, each with the rest at base and each beside the founder's own high value: a clinic price
-  of $640.74 a month against a high of $500, or 1,441.67 clinics against a high of 1,200, or a 34.0741% share of the
+  of $640.740741 a month against a high of $500, or 1,441.67 clinics against a high of 1,200, or a 34.0741% share of the
   groups it can serve against a high of 15%. Each is above the founder's high value, so even at the founder's own
   best case no single assumption reaches the plan: the rows' SOM highs are $6,480,000.00, $6,840,000.00 and
   $5,940,000.00. Each is what the plan would need from that one assumption, never a recommendation or a figure to aim
@@ -147,9 +147,9 @@ are the founder's ranges for the two Estimates.
   founder's high of 1,200. The clinic price is Own data; its swing, $2,160,000.00, is reported but is not a candidate.
   Both reasons are given in one line.
 - **Against the top-down figure:** the bottom-up TAM is 12.8571% of the comparable part of the report's figure, a
-  difference of $-732,000,000.00, given as a cross-check, never as the market size. The $3,788.89 price at the top-down
-  figure is a cross-check only and is never offered as a price to aim for. No reason for the gap is offered; any is a
-  question under Open asks.
+  difference of $-732,000,000.00, given as a cross-check, never as the market size. The $3,788.888889 price at the top-down
+  figure is a cross-check only and is never offered as a price to aim for. No reason for the gap is
+  offered; any is a question under Open asks.
 - **The ledger** marks the counts, the prices and the 60% and 50% as Own data (a list the founder holds, what
   customers pay today), the 900 and the 10% as Estimates, and the 2025 report as an Estimate until it has a publisher:
   `[the report's publisher and its definition]`. The founder gave five years for the 900 clinics and for the plan,

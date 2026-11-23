@@ -15,6 +15,7 @@ from decimal import Decimal
 from fractions import Fraction
 
 from equity_calculator.schemas.equity import EquityQuantity, EquityUnit
+from equity_calculator.schemas.equity_common import MIN_ADJUSTED_EXPONENT
 
 # Decimal places each unit is rounded to for display. A fraction is shown as a percent, so 6 places of the
 # fraction are 4 places of the percent (7.5269%); multipliers and share prices keep 6 places (1.075269x,
@@ -36,6 +37,11 @@ HUNDRED = Fraction(100)
 _CENTS_PER_DOLLAR = 100
 _DECIMAL_BASE = 10
 _MONEY_PLACES = DISPLAY_PLACES["money"]
+# A unit price is shown to the cent at least, to the ``price`` unit's 6 places when it needs them, and to at most 15
+# (the smallest decimal input is 1e-15).
+_CENT_PLACES = 2
+_PRICE_PLACES = DISPLAY_PLACES["price"]
+_FINEST_PLACES = -MIN_ADJUSTED_EXPONENT
 
 
 def fraction(value: Decimal | int) -> Fraction:
@@ -91,3 +97,27 @@ def money_split(parts: Sequence[Fraction]) -> tuple[EquityQuantity, ...]:
         )
         for part, part_cents in zip(parts, cents, strict=True)
     )
+
+
+def given_price(value: Decimal) -> EquityQuantity:
+    """A unit price as the founder typed it, never rounded: the fewest places from 2 that show it exactly ($400.00,
+    $0.0075, $0.00000125, $0.3333333). A typed decimal has a last place, so some count of places is exact."""
+    exact = fraction(value)
+    exponent = value.as_tuple().exponent
+    most = max(_CENT_PLACES, -exponent if isinstance(exponent, int) else _CENT_PLACES)
+    fewest = next(
+        (count for count in range(_CENT_PLACES, most + 1) if Fraction(round_to_places(exact, count)) == exact), most
+    )
+    return EquityQuantity(unit="price", exact=exact, rounded=round_to_places(exact, fewest))
+
+
+def price_quantity(value: Fraction) -> EquityQuantity:
+    """A computed unit price (a break-even), exact, and rounded to the fewest places from 2 that show it as 6 places
+    would ($400.00, $0.0075, $640.740741); a price under 1e-5 dollars keeps places until two significant digits show,
+    up to 15. A price the founder typed is ``given_price``'s, never rounded."""
+    places = _PRICE_PLACES
+    while places < _FINEST_PLACES and ZERO < abs(value) < Fraction(1, _DECIMAL_BASE ** (places - 1)):
+        places += 1
+    shown = round_to_places(value, places)
+    fewest = next(count for count in range(_CENT_PLACES, places + 1) if round_to_places(value, count) == shown)
+    return EquityQuantity(unit="price", exact=value, rounded=round_to_places(value, fewest))

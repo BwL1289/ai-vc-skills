@@ -4,7 +4,8 @@ A test prompt for the `vc-metrics-readiness` skill. The company is made up. The 
 real `equity_calculator metrics_check` run with these inputs. The answer states the expected behaviour; it is not a
 recorded run, and this eval has not been run in a live session. A run passes when it makes the one 3-month call below
 with the starting customers' movements in the `cohort_*` fields, leaves the payback out of it, marks the churn
-Contradicted because no basis row is consistent, and gives the burn multiple no check row.
+Contradicted because no basis row is consistent, and treats the burn multiple's `not_checked` row as Needs a source,
+never as a mismatch.
 
 ## Prompt
 
@@ -48,21 +49,24 @@ refuse the whole call for it.
 
 ```text
   Net new ARR                                                $-72,000.00  k·(N + E - C - X)
-  Gross revenue retention (3 months)                            90.0000%  (S - C - X)/S
-  Net revenue retention (3 months)                              91.5000%  (S + E - C - X)/S
-  Gross revenue churn (3 months)                                10.0000%  (C + X)/S
-  Net revenue churn (3 months)                                   8.5000%  (C + X - E)/S
+  Gross revenue retention (3 months)                            90.0000%  (S - C' - X')/S; E', C', X' the starting customers' own when given, else the period's total
+  Net revenue retention (3 months)                              91.5000%  (S + E' - C' - X')/S; E', C', X' the starting customers' own when given, else the period's total
+  Gross revenue churn (3 months)                                10.0000%  (C' + X')/S; E', C', X' the starting customers' own when given, else the period's total
+  Net revenue churn (3 months)                                   8.5000%  (C' + X' - E')/S; E', C', X' the starting customers' own when given, else the period's total
   Logo churn (3 months)                                          6.0000%  customers lost / at the start
   Churn (logo): the deck says                                    4.0000%  given
   Churn (logo): the calculator gives                             6.0000%  customers lost / customers at the start
   Churn (logo): verdict                                         mismatch  within the tolerance is consistent
-  Churn (gross revenue): the calculator gives                   10.0000%  (C + X)/S
+  Churn (gross revenue): the calculator gives                   10.0000%  (C' + X')/S; E', C', X' the starting customers' own when given, else the period's total
   Churn (gross revenue): verdict                                mismatch  within the tolerance is consistent
-  Churn (net revenue): the calculator gives                      8.5000%  (C + X - E)/S
+  Churn (net revenue): the calculator gives                      8.5000%  (C' + X' - E')/S; E', C', X' the starting customers' own when given, else the period's total
   Churn (net revenue): verdict                                  mismatch  within the tolerance is consistent
+  Burn multiple: the deck says                                 1.800000x  given
+  Burn multiple: the calculator gives                               none  no multiple: net burn or net new ARR is zero or below
+  Burn multiple: verdict                                     not_checked  nothing to check it against, so the overall verdict cannot be consistent
   A VC is likely to ask                           churn_basis_unlabelled  The churn figure names no basis, so it was checked on every basis these figures give; label it logo, gross revenue or net revenue churn
-  A VC is likely to ask                        burn_multiple_not_defined  Net new ARR is zero or below in the period, so there is no burn multiple; a stated multiple is not checked
-  Overall verdict                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); not_checked with none
+  A VC is likely to ask                        burn_multiple_not_defined  Net new ARR is zero or below in the period, so there is no burn multiple; a stated multiple is not checked, and the overall verdict cannot be consistent
+  Overall verdict                                               mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
 ```
 
 ## Expected answer
@@ -72,13 +76,15 @@ refuse the whole call for it.
   leads the ranked fix list with no tier, the founder weighing the gap, and its fix asks `[how the model works this
 figure, unrounded]`. `churn_basis_unlabelled` is relayed: name the basis, and show logo and gross revenue churn
   beside net. Each row is relayed as "the update says", not the report's "the deck says".
-- "Burn multiple for Q3: 1.8x." gets no check row: net new ARR is $-72,000.00, and `burn_multiple_not_defined` says
-  there is no multiple to check. The fix is the Flags table's: drop the multiple and show net burn and the ARR
-  movement. It is Needs a source, with `[how the 1.8x is worked: which burn and which ARR movement]`.
+- "Burn multiple for Q3: 1.8x." gets a `not_checked` row, the calculator giving none: net new ARR is $-72,000.00,
+  and `burn_multiple_not_defined` says there is no multiple to check. It is not a calculator mismatch, and no
+  `stated_burn_multiple_uses_new_not_net_arr` flag is beside it (the update's 1.8x is not the 3.500000x on new ARR
+  only). The fix is the Flags table's: drop the multiple and show net burn and the ARR movement. It is Needs a source,
+  with `[how the 1.8x is worked: which burn and which ARR movement]`.
 - "CAC payback: 8 months." is Needs a source, left out of the call: `[sales and marketing spend in Q3 and what it
 includes]` and `[gross margin in Q3]`. The answer says it can be checked once those are given.
 - The starting customers' movements were given, so the `cohort_rule` row reads "the starting customers' own
-  movements", and the tool's retention values (gross 90.0000%, net 91.5000% over the 3 months) may be shown as the
+  expansion, contraction and churn", the report prints the primed formulas, and the tool's retention values (gross 90.0000%, net 91.5000% over the 3 months) may be shown as the
   figures for the slide, with the period beside them.
 - Stage expectations (Series A, recurring revenue): the churn, the payback and the burn multiple are Present (quoted).
   ARR and its movement, gross and net revenue retention and logo churn are Missing, on no line of the update; the

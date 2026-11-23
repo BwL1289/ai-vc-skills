@@ -190,6 +190,18 @@ All notable changes to this repository. Dates are UTC.
   credits a post its authors never read; and hand-offs, runway and metrics checks now that the tools exist, the refute
   pass, and the site and install guide. Two evals were renamed to companies BS and BT, so no company letter is used
   twice.
+- Calculator fixes from an independent recheck of `market_sizing`, `runway_plan` and `metrics_check`. A market's unit
+  price prints as a price, to the cent when exact and with the places it needs otherwise ($0.0075, never $0.01), and
+  a price period left out comes back null, so a result's echoed inputs fed back keep `price_period_defaulted`; the
+  YC citation now says the customers-times-price build is YC's method for a new product or space. A runway plan's
+  required raise is rounded up to the cent, and the downside flag says it counts the no-raise row. In a metrics check,
+  a stated burn multiple with no multiple to work comes back `not_checked`, which keeps the overall verdict off
+  consistent; each percent, months or multiple row says whether the stated figure is the computed one rounded to its
+  own places, with two flags where that and the tolerance disagree (`consistent_beyond_rounding`,
+  `mismatch_within_rounding`) and the tolerances unchanged; a net revenue churn below zero, a gross retention above
+  100% and a 0x multiple are checked rather than refused; `arr_movement_and_month_disagree` names an ARR movement and
+  a latest month that disagree; the payback benchmark applies to a revenue-only payback already past it; and the
+  report prints primed formulas once a starting-customers figure is given.
 
 ## 2026-11-21
 

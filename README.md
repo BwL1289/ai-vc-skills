@@ -322,8 +322,9 @@ MIT, see [LICENSE](LICENSE). The calculator implements:
   ["SaaS Metrics 2.0"](https://www.forentrepreneurs.com/saas-metrics-2/): the definitions and benchmarks
   `metrics_check` quotes.
 - Y Combinator, ["How to Pitch Your Company"](https://www.ycombinator.com/library/4b-how-to-pitch-your-company): a
-  market built bottom-up from customers and what they pay, preferred to top-down, in `market_sizing`; the seed guide's
-  glossary gives TAM as revenue.
+  market built from customers and what they pay, its method for a new product or space, in `market_sizing`; its own
+  bottom-up (comparable products' sales) is what it prefers to top-down, and calling customers times price bottom-up
+  is common usage, unverified; the seed guide's glossary gives TAM as revenue.
 
 Everything else (option pools, notes, preferred stock, the finer vesting terms) is standard arithmetic, marked
 `unverified` in each result's assumptions. This is a calculator, not investment, legal or tax advice.

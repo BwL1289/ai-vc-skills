@@ -38,6 +38,8 @@ NUMBER_FORMATS: dict[EquityUnit, str] = {
     "count": "#,##0.00",
 }
 
+_PRICE_FORMAT_PLACES = 6
+
 _GREEN = "C6EFCE"
 _AMBER = "FFEB9C"
 _RED = "FFC7CE"
@@ -99,6 +101,15 @@ def _line_formula(template: str, column: int, rows_by_key: dict[str, int]) -> st
     return "=" + template.format_map({key: f"{letter}{row}" for key, row in rows_by_key.items()})
 
 
+def _number_format(value: EquityQuantity) -> str:
+    """The cell format of ``value``: its unit's, except a unit price rounded past the format's 6 places (a market's
+    sub-millionth usage price) shows every place it was rounded to."""
+    places = -int(value.rounded.as_tuple().exponent)
+    if value.unit == "price" and places > _PRICE_FORMAT_PLACES:
+        return f'"$"#,##0.{"0" * places}'
+    return NUMBER_FORMATS[value.unit]
+
+
 def _colour_verdict(sheet: Worksheet, coordinate: str) -> None:
     """Conditional fills on a verdict cell, one rule per verdict text."""
     for verdict, colour in VERDICT_FILLS.items():
@@ -125,7 +136,7 @@ def _write_line(sheet: Worksheet, row: int, line: Line, rows_by_key: dict[str, i
 
         cell = sheet.cell(row=row, column=column, value=written)
         if isinstance(value, EquityQuantity):
-            cell.number_format = NUMBER_FORMATS[value.unit]
+            cell.number_format = _number_format(value)
         if line.verdict:
             _colour_verdict(sheet, cell.coordinate)
 

@@ -461,7 +461,11 @@ def metrics_check_arguments(parser: argparse.ArgumentParser) -> None:
         ("--stated-arr", parse_decimal, "The ARR the document states, in dollars."),
         ("--stated-nrr-percent", parse_percent, "The net revenue retention it states, in percent."),
         ("--stated-grr-percent", parse_percent, "The gross revenue retention it states, in percent."),
-        ("--stated-churn-percent", parse_percent, "The churn it states, in percent."),
+        (
+            "--stated-churn-percent",
+            parse_percent,
+            "The churn it states, in percent (below 0 only as net revenue churn).",
+        ),
     )
     for flag, reader, words in stated:
         parser.add_argument(flag, type=reader, help=words)

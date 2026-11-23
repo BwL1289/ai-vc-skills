@@ -142,8 +142,18 @@ parts]`.
      the tool's paid CAC row with "not checked: the tool checks blended CAC only", and compare neither by eye.
    - Net burn goes into a call only when that call's document states a burn multiple, or the founder's stage row
      expects one. A stated burn alone is quoted: the tool checks no stated burn.
-   - A stated burn multiple when net new ARR or net burn is zero or below gets no check row: it is not checked, and
-     the flag (`burn_multiple_not_defined` or `no_net_burn`) says why.
+   - A stated burn multiple when net new ARR or net burn is zero or below gets a `not_checked` row with no computed
+     figure, and the flag (`burn_multiple_not_defined` or `no_net_burn`) says why; the overall verdict is then never
+     consistent. It is not a calculator mismatch: it is Will be discounted under the pattern table's row for a burn
+     multiple on new ARR when `stated_burn_multiple_uses_new_not_net_arr` is beside it, and Needs a source with
+     `[net burn and net new ARR for a period where both are above zero]` otherwise.
+   - Each percent, months or multiple row also says whether the stated figure is the computed one rounded to its own
+     places ("rounds to the deck's"); a stated zero keeps its places, so a document's `0.0%` is passed as the text
+     "0.0". The verdict stays the tool's; `consistent_beyond_rounding` and `mismatch_within_rounding` name a row where
+     the two disagree, and go to the answer as the Flags table says.
+   - A net revenue churn below zero (expansion above the revenue lost) is passed as stated, with
+     `stated_churn_basis` `net_revenue` or left unlabelled; a gross retention above 100% is passed too, and comes back
+     a mismatch unless it is within the tolerance of the computed figure.
    - A stated figure whose parts the founder did not give is left out of the call, because the tool refuses the whole
      call for it: mark it Needs a source with a bracketed ask for the missing parts, and make the call with the rest.
      A refusal that comes anyway is relayed with the parts it names.
@@ -251,7 +261,8 @@ value and difference, with the flag that explains it, when one does, as the reas
 hurts depends on its size, which the founder weighs. A stated figure less flattering than the tool's value (an ARR or
 retention below it; a churn, CAC, payback, burn multiple or concentration above it) understates: it goes in the minor
 tier at most. One that no flag explains as another definition may be the founder's rounding, so its fix asks
-`[how the model works this figure, unrounded]`. An unlabelled churn with one consistent basis row is not a mismatch
+`[how the model works this figure, unrounded]`; with `mismatch_within_rounding` beside it, say the stated figure is the
+tool's rounded to its own places. A `not_checked` row is not a mismatch (step 4). An unlabelled churn with one consistent basis row is not a mismatch
 (step 4).
 
 ### Check the quotes
@@ -307,22 +318,25 @@ sentences, and the change to make, using only the founder's facts, a tool value 
 The tool's `flags` holds codes only; this table is what each one means for the founder. A flag is a question to be
 ready for, never an error.
 
-| Flag                                        | What it means for the founder                                                               | What to change or prepare                                                     |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `stated_arr_matches_run_rate`               | The stated ARR agrees with 12 times the month's total revenue, not with recurring revenue   | Call it a run-rate, or restate ARR from recurring revenue                     |
-| `run_rate_includes_non_recurring`           | The month has one-time or usage revenue, so run-rate and ARR differ                         | Show both, each named                                                         |
-| `stated_nrr_includes_new`                   | The stated net retention agrees with ending over starting revenue, new customers counted in | Restate net retention on the starting customers                               |
-| `expansion_hides_churn`                     | Net revenue churn is zero or below while gross revenue churn is above zero                  | Show gross revenue churn beside net                                           |
-| `churn_basis_unlabelled`                    | The stated churn names no basis; the tool checked it against each                           | Name the basis on the slide                                                   |
-| `blended_cac_only`                          | No paid-channel split was given                                                             | Be ready with paid CAC                                                        |
-| `payback_not_margin_adjusted`               | No gross margin was given, so payback is on revenue only                                    | Give gross margin; a partner works payback on margin                          |
-| `stated_payback_not_margin_adjusted`        | The stated payback agrees with the revenue payback, not the margin one                      | Restate it on gross margin                                                    |
-| `stated_burn_multiple_uses_new_not_net_arr` | The stated multiple agrees with net burn over new ARR, churn left out                       | Restate it on net new ARR                                                     |
-| `burn_multiple_not_defined`                 | Net new ARR is zero or below in the period                                                  | Drop the multiple; show net burn and the ARR movement                         |
-| `no_net_burn`                               | Net burn is zero or below in the period                                                     | Say the company is not burning cash in that period                            |
-| `payback_above_band`                        | Payback on gross margin is at or above the tool's benchmark for the segment                 | Be ready to say why; quote the tool's assumption row, a benchmark, not a rule |
-| `burn_multiple_above_band`                  | The multiple is at or above the tool's benchmark                                            | Be ready to say why; quote the tool's assumption row, a benchmark, not a rule |
-| `net_revenue_churn_above_band`              | One month's net revenue churn is above the tool's benchmark                                 | Be ready to say why; quote the tool's assumption row, a benchmark, not a rule |
+| Flag                                        | What it means for the founder                                                                                                                                | What to change or prepare                                                     |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `stated_arr_matches_run_rate`               | The stated ARR agrees with 12 times the month's total revenue, not with recurring revenue                                                                    | Call it a run-rate, or restate ARR from recurring revenue                     |
+| `arr_movement_and_month_disagree`           | The ARR movement's ending ARR and the latest month's ARR differ by more than the tolerance                                                                   | Say which figure the slide shows and why the two differ                       |
+| `run_rate_includes_non_recurring`           | The month has one-time or usage revenue, so run-rate and ARR differ                                                                                          | Show both, each named                                                         |
+| `stated_nrr_includes_new`                   | The stated net retention agrees with ending over starting revenue, which counts customers who were not there at the start                                    | Restate net retention on the starting customers                               |
+| `expansion_hides_churn`                     | Net revenue churn is zero or below while gross revenue churn is above zero                                                                                   | Show gross revenue churn beside net                                           |
+| `churn_basis_unlabelled`                    | The stated churn names no basis; the tool checked it against each (a churn below zero only as net revenue churn)                                             | Name the basis on the slide                                                   |
+| `blended_cac_only`                          | No paid-channel split was given                                                                                                                              | Be ready with paid CAC                                                        |
+| `payback_not_margin_adjusted`               | No gross margin was given, so payback is on revenue only                                                                                                     | Give gross margin; a partner works payback on margin                          |
+| `stated_payback_not_margin_adjusted`        | The stated payback agrees with the revenue payback, not the margin one                                                                                       | Restate it on gross margin                                                    |
+| `stated_burn_multiple_uses_new_not_net_arr` | The stated multiple agrees with net burn over new ARR, churn left out (also beside a multiple the tool cannot work)                                          | Restate it on net new ARR                                                     |
+| `consistent_beyond_rounding`                | The stated figure is within the tool's tolerance but is not the tool's figure rounded to its own places                                                      | Quote the tool's figure; a partner recomputing gets it                        |
+| `mismatch_within_rounding`                  | The stated figure is past the tool's tolerance but is the tool's figure rounded to its own places                                                            | Give the figure with more places                                              |
+| `burn_multiple_not_defined`                 | Net new ARR is zero or below in the period                                                                                                                   | Drop the multiple; show net burn and the ARR movement                         |
+| `no_net_burn`                               | Net burn is zero or below in the period                                                                                                                      | Say the company is not burning cash in that period                            |
+| `payback_above_band`                        | Payback on gross margin is at or above the tool's benchmark for the segment (with no margin given, the revenue payback already is, so the margin one is too) | Be ready to say why; quote the tool's assumption row, a benchmark, not a rule |
+| `burn_multiple_above_band`                  | The multiple is at or above the tool's benchmark                                                                                                             | Be ready to say why; quote the tool's assumption row, a benchmark, not a rule |
+| `net_revenue_churn_above_band`              | One month's net revenue churn is above the tool's benchmark                                                                                                  | Be ready to say why; quote the tool's assumption row, a benchmark, not a rule |
 
 The three benchmark flags are common benchmarks, not rules: say so, and quote the source and date the tool's
 assumption row gives, never a figure from memory.

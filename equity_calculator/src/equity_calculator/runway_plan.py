@@ -22,13 +22,14 @@ more (``equity_calculator.funds``); flags name what to be ready to answer and ne
 
 from __future__ import annotations
 
+import math
 from collections.abc import Iterator
 from dataclasses import dataclass
 from decimal import Decimal
 from fractions import Fraction
 
 from equity_calculator.assumptions_runway_plan import runway_plan_assumptions
-from equity_calculator.exact import ZERO, fraction, from_percent, quantity
+from equity_calculator.exact import ZERO, fraction, from_percent, quantity, round_to_places
 from equity_calculator.funds import work_use_of_funds
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_deal_check import DealVerdict
@@ -52,6 +53,8 @@ from equity_calculator.schemas.equity_runway_plan import (
 __all__ = ["Phase", "compute_runway_plan", "cumulative_burn", "required_raise", "runway"]
 
 _NO_RAISE = 0
+_CENTS = 100
+_MONEY_PLACES = 2
 _PLAN: CaseName = "plan"
 _DOWNSIDE: CaseName = "downside"
 
@@ -177,6 +180,15 @@ def _case_row(name: CaseName, phases: tuple[Phase, ...]) -> RunwayCase:
     return RunwayCase(name=name, phases=tuple(rows))
 
 
+def _covering(amount: Fraction | None) -> EquityQuantity | None:
+    """A required raise, exact, with its display rounded up to the next cent (never half-even), so raising the amount
+    shown always reaches the milestone."""
+    if amount is None:
+        return None
+    cents = math.ceil(amount * _CENTS)
+    return EquityQuantity(unit="money", exact=amount, rounded=round_to_places(Fraction(cents, _CENTS), _MONEY_PLACES))
+
+
 def _optional(unit: EquityUnit, value: Fraction | None) -> EquityQuantity | None:
     return None if value is None else quantity(unit, value)
 
@@ -258,7 +270,7 @@ def _required_rows(
                     month=month,
                     lands_month=lands,
                     target_month=target,
-                    amount=_optional("money", amount),
+                    amount=_covering(amount),
                 )
             )
     return rows

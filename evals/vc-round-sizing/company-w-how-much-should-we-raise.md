@@ -160,11 +160,11 @@ The runway plan:
   Milestone 1 (month 15), downside, raise 2: verdict                                 short  covered when the runway reaches month 21
   Milestone 1 (month 15), lean, raise 1: slack                                 6.06 months  runway - the milestone month
   Milestone 1 (month 15), lean, raise 1: verdict                                   covered  covered when the runway reaches month 21
-  Required raise, milestone 1, plan, landing month 0                         $3,745,000.00  smallest raise keeping cash at or above the floor to month 21
-  Required raise, milestone 1, downside, landing month 0                     $4,142,500.00  smallest raise keeping cash at or above the floor to month 21
-  Required raise, milestone 1, lean, landing month 0                         $2,989,000.00  smallest raise keeping cash at or above the floor to month 21
+  Required raise, milestone 1, plan, landing month 0                         $3,745,000.00  smallest raise keeping cash at or above the floor to month 21 (rounded up to the cent)
+  Required raise, milestone 1, downside, landing month 0                     $4,142,500.00  smallest raise keeping cash at or above the floor to month 21 (rounded up to the cent)
+  Required raise, milestone 1, lean, landing month 0                         $2,989,000.00  smallest raise keeping cash at or above the floor to month 21 (rounded up to the cent)
   Be ready to answer                                               milestone_short_on_plan  A raise does not reach a milestone, with the months to raise, on the plan itself
-  Be ready to answer                                      downside_short_where_plan_covers  A raise reaches a milestone on the plan but not on the downside; be ready to say what happens if the plan is missed
+  Be ready to answer                                      downside_short_where_plan_covers  The cash reaches a milestone on the plan but not on the downside, with the same raise or with none; be ready to say what happens if the plan is missed
   Be ready to answer                                             start_raising_date_passed  With no raise, the plan's runway less the months to raise is already at or past today: on the plan, raising the next round takes longer than the cash lasts
   Be ready to answer                                                     runway_below_band  A raise lasts under 18 months on the plan; be ready to say which milestone it reaches (a common benchmark, not a rule)
   Overall verdict                                                              not_checked  mismatch if any check is; consistent if all are; not_checked with none

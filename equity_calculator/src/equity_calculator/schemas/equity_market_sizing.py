@@ -83,7 +83,8 @@ CompareTo = Literal["tam", "sam"]
 # (the target is reached with the field at its base: the other segments alone reach it, or, for the plan's SOM target,
 # the base SOM is already at or above it), ``does_not_move`` (the field is not a factor of that total) or
 # ``out_of_range`` (the value is returned, but the segment would be refused with it: a percent above 100, say, or a
-# number outside the size every decimal input has).
+# number outside the size every decimal input has). ``does_not_move`` is tested first: a field that is no factor of
+# the total is reported so even when the target is already met.
 BreakEvenReach = Literal["value", "met_without_it", "does_not_move", "out_of_range"]
 
 # Facts and questions a VC is likely to raise. They never change a verdict; their plain words are in
@@ -123,15 +124,16 @@ class MarketSegment(BaseModel):
     ``take_rate_percent`` the share of the spend the company keeps (100 unless it is a marketplace or a payments
     business); ``serviceable_percent`` the share of the customers the product can serve and reach today. SOM is
     ``obtainable_customers`` (preferred) or ``obtainable_percent`` of the serviceable customers, never both.
-    ``price_period_months`` left out reads the price as a yearly one (12) and is flagged ``price_period_defaulted``:
-    send 1 for a monthly price.
+    ``price_period_months`` left out (or null) reads the price as a yearly one (12) and is flagged
+    ``price_period_defaulted``: send 1 for a monthly price. "Not given" is the value none, never an absent key, so a
+    result's echoed ``inputs`` fed back keep the flag (``period_months`` is the months the arithmetic uses).
     """
 
     model_config = MODEL_CONFIG
 
     customers: BoundedDecimal = Field(gt=0)
     price: BoundedDecimal = Field(gt=0)
-    price_period_months: int = Field(default=_MONTHS_PER_YEAR, strict=True, ge=1, le=MAX_PRICE_PERIOD_MONTHS)
+    price_period_months: int | None = Field(default=None, strict=True, ge=1, le=MAX_PRICE_PERIOD_MONTHS)
     units_per_customer: BoundedDecimal = Field(default=Decimal(1), gt=0)
     take_rate_percent: BoundedDecimal = Field(default=Decimal(WHOLE_PERCENT), gt=0, le=WHOLE_PERCENT)
     serviceable_percent: BoundedDecimal = Field(default=Decimal(WHOLE_PERCENT), gt=0, le=WHOLE_PERCENT)
@@ -152,6 +154,14 @@ class MarketSegment(BaseModel):
                 "obtainable_customers is above the serviceable customers (customers × serviceable_percent / 100)"
             )
         return self
+
+    def period_months(self) -> int:
+        """The months the price covers: ``price_period_months``, or 12 (a yearly price) when it was not given."""
+        return _MONTHS_PER_YEAR if self.price_period_months is None else self.price_period_months
+
+    def period_given(self) -> bool:
+        """Whether the founder gave the months the price covers (not given, the price is read as a yearly one)."""
+        return self.price_period_months is not None
 
     def serviceable_count(self) -> Fraction:
         """The customers the product can serve today: customers × serviceable_percent / 100, exactly."""
@@ -256,7 +266,7 @@ class SegmentRow(BaseModel):
 
     ``som_customers`` and ``som`` are none with no SOM; ``som_multiple_of_today`` is none with no SOM or no customers
     today (or none of them); ``new_customers_per_year`` is none without ``som_years``, customers today or a SOM.
-    ``price_period_given`` is false when the segment left ``price_period_months`` out (the yearly default was used).
+    ``price_period_given`` is false when the segment gave no ``price_period_months`` (the yearly default was used).
     """
 
     model_config = MODEL_CONFIG
