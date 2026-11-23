@@ -25,6 +25,7 @@ from equity_calculator.schemas.equity_common import (
 )
 from equity_calculator.schemas.equity_deal_check import DealCheckInput, DealCheckResult
 from equity_calculator.schemas.equity_dilution import DilutionInput, DilutionResult
+from equity_calculator.schemas.equity_market_sizing import MarketSizingInput, MarketSizingResult
 from equity_calculator.schemas.equity_metrics_check import MetricsCheckInput, MetricsCheckResult
 from equity_calculator.schemas.equity_round import RoundInput, RoundResult
 from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput, RunwayPlanResult
@@ -367,3 +368,73 @@ METRICS_AN_MODEL: dict[str, object] = {**METRICS_AN_PARTS, "stated_cac_payback_m
 def metrics_check(**fields: object) -> MetricsCheckResult:
     """The metrics check for ``fields`` (a ``MetricsCheckInput``'s fields)."""
     return compute(MetricsCheckInput.model_validate(fields))
+
+
+# Made-up markets, worked by exact fractions in test_market_sizing.py.
+# Company AW, vet-clinic software: 18,000 independent clinics at $400 a month, 60% on the systems it integrates with,
+# 900 to win, 45 today; 400 multi-site groups, 15 locations each at $300 a location a month, 50% serviceable, 10% of
+# them to win, 2 today. An analyst's $2.1B, 40% of it matching; 5 years; the plan needs $8M a year from this market;
+# $216k revenue today; the deck says a $120M TAM. Its own ranges: price $300 to $500, clinics to win 600 to 1,200, the
+# groups' share 5% to 15%.
+MARKET_AW: dict[str, object] = {
+    "segments": [
+        {
+            "customers": "18000",
+            "price": "400",
+            "price_period_months": 1,
+            "serviceable_percent": "60",
+            "obtainable_customers": "900",
+            "customers_today": "45",
+        },
+        {
+            "customers": "400",
+            "price": "300",
+            "price_period_months": 1,
+            "units_per_customer": "15",
+            "serviceable_percent": "50",
+            "obtainable_percent": "10",
+            "customers_today": "2",
+        },
+    ],
+    "top_down": [{"amount": "2100000000", "comparable_percent": "40"}],
+    "sensitivity": [
+        {"field": "price", "segment": 1, "values": ["300", "500"]},
+        {"field": "obtainable_customers", "segment": 1, "values": ["600", "1200"]},
+        {"field": "obtainable_percent", "segment": 2, "values": ["5", "15"]},
+    ],
+    "annual_revenue_today": "216000",
+    "som_years": 5,
+    "som_target": "8000000",
+    "stated_tam": "120000000",
+}
+# Company AX, a pool-cleaning marketplace keeping a 15% fee: 4,000,000 Sun Belt pools at $1,800 a year, 25%
+# serviceable, 2% to win, 3,000 today; 2,500,000 Texas and Florida pools (inside the Sun Belt, so counted twice), 30%
+# serviceable, 2% to win; 5,200,000 pools in all; an analyst's $1.1B; the deck says $11.7B; the fee at 10% or 20%.
+MARKET_AX: dict[str, object] = {
+    "segments": [
+        {
+            "customers": "4000000",
+            "price": "1800",
+            "take_rate_percent": "15",
+            "serviceable_percent": "25",
+            "obtainable_percent": "2",
+            "customers_today": "3000",
+        },
+        {
+            "customers": "2500000",
+            "price": "1800",
+            "take_rate_percent": "15",
+            "serviceable_percent": "30",
+            "obtainable_percent": "2",
+        },
+    ],
+    "top_down": [{"amount": "1100000000"}],
+    "sensitivity": [{"field": "take_rate_percent", "segment": 1, "values": ["10", "20"]}],
+    "population": "5200000",
+    "stated_tam": "11700000000",
+}
+
+
+def market_sizing(**fields: object) -> MarketSizingResult:
+    """The market size for ``fields`` (a ``MarketSizingInput``'s fields)."""
+    return compute(MarketSizingInput.model_validate(fields))

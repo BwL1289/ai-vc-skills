@@ -26,6 +26,7 @@ from equity_calculator.schemas.equity import (
 )
 from equity_calculator.schemas.equity_deal_check import DealCheckInput
 from equity_calculator.schemas.equity_dilution import DilutionInput
+from equity_calculator.schemas.equity_market_sizing import MarketSizingInput
 from equity_calculator.schemas.equity_metrics_check import MetricsCheckInput
 from equity_calculator.schemas.equity_round import RoundInput
 from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput
@@ -232,6 +233,45 @@ _EXAMPLES: tuple[ScenarioInput, ...] = (
             "customer_segment": "mid_market",
         }
     ),
+    # A market size with every part: odd prices and periods, units, take rates, both SOM forms, customers today, two
+    # top-down figures (one against SAM), a sensitivity row per kind of field, a population and every stated figure.
+    MarketSizingInput.model_validate(
+        {
+            "segments": [
+                {
+                    "customers": "12345",
+                    "price": "333.33",
+                    "price_period_months": 7,
+                    "units_per_customer": "3",
+                    "take_rate_percent": "12.5",
+                    "serviceable_percent": "37",
+                    "obtainable_customers": "1001",
+                    "customers_today": "17",
+                },
+                {
+                    "customers": "678.5",
+                    "price": "1999",
+                    "price_period_months": 24,
+                    "serviceable_percent": "83",
+                    "obtainable_percent": "6.6",
+                    "customers_today": "0",
+                },
+            ],
+            "top_down": [{"amount": "98765432", "comparable_percent": "33"}, {"amount": "1e7", "compare_to": "sam"}],
+            "sensitivity": [
+                {"field": "price", "segment": 1, "values": ["111.11", "777"]},
+                {"field": "obtainable_percent", "segment": 2, "values": ["1.1", "9.9"]},
+                {"field": "customers", "segment": 2, "values": ["500"]},
+            ],
+            "population": "13000",
+            "annual_revenue_today": "123456.78",
+            "som_years": 3,
+            "som_target": "2000000",
+            "stated_tam": "70000000",
+            "stated_sam": "26000000",
+            "stated_som": "2500000",
+        }
+    ),
 )
 _EXAMPLE_IDS = [
     "investor",
@@ -245,6 +285,7 @@ _EXAMPLE_IDS = [
     "deal-check-from-post-money",
     "runway-plan-with-a-late-raise",
     "metrics-check-with-every-part",
+    "market-sizing-with-every-part",
 ]
 
 
@@ -268,8 +309,16 @@ def test_round_to_places_is_half_even_with_fixed_places(value: Fraction, places:
 
 
 def test_each_unit_rounds_to_its_display_places() -> None:
-    """Fractions, multipliers and prices keep 6 places, money 2, shares 3, months 2."""
-    assert DISPLAY_PLACES == {"fraction": 6, "multiplier": 6, "money": 2, "price": 6, "shares": 3, "months": 2}
+    """Fractions, multipliers and prices keep 6 places, money 2, shares 3, months 2, counts of customers 2."""
+    assert DISPLAY_PLACES == {
+        "fraction": 6,
+        "multiplier": 6,
+        "money": 2,
+        "price": 6,
+        "shares": 3,
+        "months": 2,
+        "count": 2,
+    }
     for unit, places in DISPLAY_PLACES.items():
         assert quantity(unit, Fraction(1, 3)).rounded.as_tuple().exponent == -places
 

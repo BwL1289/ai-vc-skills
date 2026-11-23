@@ -20,12 +20,14 @@ from equity_calculator.schemas.equity import EquityAssumption
 from openpyxl import load_workbook
 from tests.support import (
     DEAL_A,
+    MARKET_AX,
     METRICS_AN_DECK,
     POOL_EXAMPLE,
     RUNWAY_Y,
     deal_check,
     employee,
     investor,
+    market_sizing,
     metrics_check,
     pool,
     runway_plan,
@@ -106,6 +108,24 @@ _METRICS_AN = [
     "--stated-cac-payback-months",
     "7.2",
 ]
+# Company AX (tests.support.MARKET_AX) as flags: two segments with a take rate, a top-down figure, a population, a
+# sensitivity row and a stated TAM.
+_MARKET_AX = [
+    "market_sizing",
+    "--segment",
+    "customers=4000000 price=1800 take-rate-percent=15 serviceable-percent=25 obtainable-percent=2 "
+    "customers-today=3000",
+    "--segment",
+    "customers=2500000 price=1800 take-rate-percent=15 serviceable-percent=30 obtainable-percent=2",
+    "--top-down",
+    "amount=1100000000",
+    "--sensitivity",
+    "field=take-rate-percent segment=1 values=10/20",
+    "--population",
+    "5200000",
+    "--stated-tam",
+    "11700000000",
+]
 _EMPLOYEE = [
     "employee",
     "--gain-percent",
@@ -180,8 +200,9 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
         (_DEAL_A, deal_check(**DEAL_A).assumptions),
         (_RUNWAY_Y, runway_plan(**RUNWAY_Y).assumptions),
         (_METRICS_AN, metrics_check(**METRICS_AN_DECK).assumptions),
+        (_MARKET_AX, market_sizing(**MARKET_AX).assumptions),
     ],
-    ids=["investor", "employee", "pool", "deal_check", "runway_plan", "metrics_check"],
+    ids=["investor", "employee", "pool", "deal_check", "runway_plan", "metrics_check", "market_sizing"],
 )
 async def test_every_assumption_prints_with_its_setting_statement_and_source(
     argv: list[str], assumptions: tuple[EquityAssumption, ...]

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 from fractions import Fraction
-from typing import Any, get_args
+from typing import Any, get_args, get_origin
 
 import pytest
 from equity_calculator.__main__ import run
@@ -42,11 +42,19 @@ def _models(annotation: object) -> list[type[BaseModel]]:
 
 
 def _input_fields(wanted: type) -> list[tuple[str, TypeAdapter[Any]]]:
-    """Each input field that holds a ``wanted`` value, as a validator for that field alone (its bounds included)."""
+    """Each input field that holds a ``wanted`` value, as a validator for that field alone (its bounds included).
+
+    A field that is a list of values (a market size's sensitivity values) is checked item by item: a probe sent to the
+    list itself would be refused as not a list, which says nothing about the bound on each value.
+    """
     fields = []
     for model in dict.fromkeys(_models(EquityInput)):
         for name, field in model.model_fields.items():
-            if _mentions(field.annotation, wanted):
+            if not _mentions(field.annotation, wanted):
+                continue
+            if get_origin(field.annotation) in (tuple, list):
+                fields.append((f"{model.__name__}.{name}[]", TypeAdapter(get_args(field.annotation)[0])))
+            else:
                 fields.append((f"{model.__name__}.{name}", TypeAdapter(field.rebuild_annotation())))
 
     return fields

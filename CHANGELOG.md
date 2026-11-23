@@ -132,6 +132,13 @@ All notable changes to this repository. Dates are UTC.
   (`equity_dilution`), labelled apart, with no fund size and no fund math. A dissent pass (five lenses, then a refute
   pass with the founder's material) turns what survives into a ranked fix list, and a risk the founder cannot fix goes
   into the memo's Top risks. `vc-positioning` now points to it. Four evals are in `evals/vc-investor-memo/`.
+- The calculator's `market_sizing` scenario, also an MCP tool (`equity_market_sizing`), a command and a workbook
+  sheet: a founder's market built bottom-up from their own segments (customers, price and the months it covers,
+  units, take rate, serviceable share and the customers to win), giving TAM, SAM and SOM per segment and in total,
+  the deck's stated figures returned as consistent or a mismatch, top-down figures as a cross-check only, and
+  sensitivity rows with the exact value at which SOM reaches the plan's target. Flags name what a VC is likely to
+  ask (double counting, SAM equal to TAM, a SOM given only as a percent or below the target). A new `count` unit
+  prints customer counts. It quotes Y Combinator's "How to Pitch Your Company" and its seed guide's glossary.
 
 ### Changed
 

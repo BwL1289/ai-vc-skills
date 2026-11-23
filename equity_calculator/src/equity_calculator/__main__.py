@@ -1,7 +1,7 @@
 # Command-line interface: stdout is the report.
 """``equity_calculator`` — an equity question: PG's two tests, the option pool, a round, dilution, vesting, an exit,
-a fundraising ask checked before a VC reads it, how long a raise lasts on a founder's plan, or a founder's traction
-metrics checked against their parts.
+a fundraising ask checked before a VC reads it, how long a raise lasts on a founder's plan, a founder's traction
+metrics checked against their parts, or a founder's market size built bottom-up.
 
     equity_calculator investor (--equity-percent N | --pre-money V --investment I)
         (--outcome-multiplier M | --growth-percent G) [--holder-percent H]
@@ -41,6 +41,9 @@ metrics checked against their parts.
         [--stated-cac-payback-months M] [--stated-burn-multiple X] [--stated-concentration-percent C]
         [--tolerance-points P] [--tolerance-percent Q] [--customer-segment smb|mid_market|enterprise]
         [--payback-band-months B] [--burn-multiple-band X] [--net-revenue-churn-band-percent C]
+    equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
+        [--population N] [--annual-revenue-today R] [--som-years Y] [--som-target T] [--stated-tam X]
+        [--stated-sam X] [--stated-som X] [--tolerance-percent Q]
 
 Every scenario also takes ``--json`` (print the whole result model, exact fractions included, instead of the
 report) and ``--xlsx PATH`` (also write the formatted workbook to PATH; the report then names it). The report is
@@ -53,10 +56,10 @@ as ``COLUMNS`` to wrap the help, none of which changes a number); its one output
 any folders on its path that do not exist yet; while saving, the Excel library also writes and deletes a short-lived
 file in the system's temporary folder (``TMPDIR`` if set), so that folder must be writable. The number readers are
 ``equity_calculator.cli_numbers``; each scenario's flags are ``equity_calculator.cli_arguments``; a ``--safe``,
-``--note``, ``--round``, ``--class``, ``--use-of-funds``, ``--phase``, ``--raise`` or ``--raise-use-of-funds`` is one
-argument of terms (``equity_calculator.cli_instruments``); a runway plan's flags become its cases and raises in
-``equity_calculator.cli_runway_plan``. A refusal names the flag, or a repeated flag's item as ``--note #2`` (the
-second instrument in the order given) and its term.
+``--note``, ``--round``, ``--class``, ``--use-of-funds``, ``--phase``, ``--raise``, ``--raise-use-of-funds``,
+``--segment``, ``--top-down`` or ``--sensitivity`` is one argument of terms (``equity_calculator.cli_instruments``); a
+runway plan's flags become its cases and raises in ``equity_calculator.cli_runway_plan``. A refusal names the flag,
+or a repeated flag's item as ``--note #2`` (the second instrument in the order given) and its term.
 """
 
 from __future__ import annotations
@@ -74,6 +77,7 @@ from equity_calculator.cli_arguments import (
     dilution_arguments,
     employee_arguments,
     investor_arguments,
+    market_sizing_arguments,
     metrics_check_arguments,
     pool_arguments,
     round_arguments,
@@ -91,6 +95,7 @@ from equity_calculator.schemas.equity import (
     DilutionInput,
     EmployeeInput,
     InvestorInput,
+    MarketSizingInput,
     MetricsCheckInput,
     PoolInput,
     RoundInput,
@@ -117,6 +122,7 @@ _INPUT_MODELS: dict[str, type[ScenarioInput]] = {
     "deal_check": DealCheckInput,
     "runway_plan": RunwayPlanInput,
     "metrics_check": MetricsCheckInput,
+    "market_sizing": MarketSizingInput,
 }
 # A scenario whose flags do not map one to one onto its model's fields: the fields they make, and where each came from.
 _SHAPES: dict[str, Callable[[dict[str, Any]], tuple[dict[str, object], Places]]] = {"runway_plan": runway_plan_fields}
@@ -163,6 +169,12 @@ def _build_parser() -> argparse.ArgumentParser:
             "metrics_check",
             "Check your traction metrics before a VC does: ARR, retention, churn, CAC payback, burn multiple",
             metrics_check_arguments,
+        ),
+        (
+            "market_sizing",
+            "Build your market size bottom-up before a VC does: TAM, SAM and SOM per segment, the deck's figures "
+            "checked, and the ranges that move it",
+            market_sizing_arguments,
         ),
     )
     for name, summary, add_arguments in scenarios_help:

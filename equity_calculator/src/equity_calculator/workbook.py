@@ -35,6 +35,7 @@ NUMBER_FORMATS: dict[EquityUnit, str] = {
     "shares": "#,##0",
     "multiplier": '0.0000"x"',
     "months": '0.00" months"',
+    "count": "#,##0.00",
 }
 
 _GREEN = "C6EFCE"
