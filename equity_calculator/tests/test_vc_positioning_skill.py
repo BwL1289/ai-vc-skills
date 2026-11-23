@@ -408,7 +408,10 @@ def test_the_prep_session_credits_no_unread_source_and_is_marked_unverified() ->
     for unread in ("Stebbings", "20VC", "LinkedIn", "did not fetch", "the post that inspired it"):
         assert unread not in _TEXT, unread
     assert "The prep session has no public source read and is marked unverified." in intro
-    assert "is marked unverified; no person or post is credited for it" in sources
+    assert (
+        "The prep session has no public source read and is marked unverified; no person or post is credited for it."
+        in sources
+    )
     assert "plus the prep session (unverified: no public source read)" in limits
 
 

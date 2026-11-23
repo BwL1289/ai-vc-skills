@@ -183,13 +183,13 @@ All notable changes to this repository. Dates are UTC.
   each recorded in its eval with a verdict under the README's rule. Fixes from them: every skill that passes a fully
   diluted share count now asks whether that count includes SAFEs and notes, since one that does gives the founders a
   wrong ownership figure; a calculator mismatch heads the list with no tier rather than being ranked "ends the meeting",
-  and only a runway claim below the computed runway counts as understated; each skill carries the meaning of every
-  calculator flag, since a tool call returns bare codes; one shared sentence says which monthly spend goes into the
-  runway of a SAFE or note raise, and another forbids working out how two of the founder's figures relate ("more than
-  doubled"); the memo's outcome table no longer sets a payout beside the amount invested; `vc-positioning` no longer
-  credits a post its authors never read; and hand-offs, runway and metrics checks now that the tools exist, the refute
-  pass, and the site and install guide. Two evals were renamed to companies BS and BT, so no company letter is used
-  twice.
+  and only a runway claim below the computed runway counts as understated; each skill that reads the calculator's flags
+  carries the meaning of every flag code, since a tool call returns bare codes; one shared sentence says which monthly
+  spend goes into the runway of a SAFE or note raise, and another forbids working out how two of the founder's figures
+  relate ("more than doubled"); the memo's outcome table no longer sets a payout beside the amount invested;
+  `vc-positioning` no longer credits a post its authors never read; and hand-offs, runway and metrics checks now that
+  the tools exist, the refute pass, and the site and install guide. Two evals were renamed to companies BS and BT, so no
+  company letter is used twice.
 - Calculator fixes from an independent recheck of `market_sizing`, `runway_plan` and `metrics_check`. A market's unit
   price prints as a price, to the cent when exact and with the places it needs otherwise ($0.0075, never $0.01), and
   a price period left out comes back null, so a result's echoed inputs fed back keep `price_period_defaulted`; the

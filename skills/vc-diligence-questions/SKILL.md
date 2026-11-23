@@ -159,13 +159,16 @@ the bank or the checklist; step 3 then starts at the quote check.
    this skill's own question table, when one asks the same thing, and cite its ID; otherwise keep the lens's
    wording. Then build the area prep list and the data-room checklist (the sections after the review).
 5. **Draft an answer** to each kept question (the section "Draft answers").
-6. **Check before answering.** Every kept question quotes a line that is in the founder's material word for word;
-   every draft answer uses only facts from the material or a tool result and marks each gap as a bracketed ask; every
-   figure is quoted as stated or comes from a tool; no sentence says what a quoted percent is built from or how a
-   document's figure was reached; no draft says a fix was made or a document exists that the founder did not name;
-   every bracketed ask names a document or a fact and nothing more (no length or format the founder did not give);
-   every checklist status rests on the document list or a quoted line; no document is described that the founder did
-   not name; no sentence speaks as an investor, imitates a named person or firm, or gives a score.
+6. **Check before answering.** Every kept question quotes a line that is in the founder's material word for word; every
+   draft answer uses only facts from the material or a tool result and marks each gap as a bracketed ask; every figure
+   is quoted as stated or comes from a tool; no sentence says what a quoted percent is built from or how a document's
+   figure was reached; no draft says a fix was made or a document exists that the founder did not name; every bracketed
+   ask names a document or a fact and nothing more (no length or format the founder did not give); every checklist
+   status rests on the document list or a quoted line; no document is described that the founder did not name; no
+   sentence speaks as an investor, imitates a named person or firm, or gives a score. Never work out how two of the
+   founder's figures relate (a difference, a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a
+   line or a table cell unless the founder's material states it or a tool returned it; quote both figures as stated
+   instead ("from 2,000 to 4,500", never "more than doubled").
 
 ## Adversarial review
 

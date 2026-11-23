@@ -8,8 +8,8 @@ Two sentences are copied into several skills and must stay identical there:
   raise's runway to that tool carries the sentence.
 - No working out how two of the founder's figures relate in founder-facing text: a live positioning run wrote that
   users "more than doubled", which neither the founder nor the calculator said. Every skill that writes rewrites,
-  lines or update text for the founder carries the sentence, except the partner-meeting skill, whose own ban says
-  the same in other words and is checked here too.
+  lines, draft answers or update text for the founder carries the sentence, except the partner-meeting skill, whose
+  own ban says the same in other words and is checked here too.
 
 Every eval that records a live run states the README's verdict rule in its first paragraph and opens its recording
 with a verdict under it: Pass when every clause of the pass sentence is met, Partial when exactly one is missed or met
@@ -78,6 +78,7 @@ _FOUNDER_TEXT_SKILLS = (
     "vc-prospective-investor-update",
     "vc-current-investor-update",
     "vc-investor-memo",
+    "vc-diligence-questions",
 )
 _PARTNER_MEETING_BAN = 'never a difference, sum or ratio of two figures the founder gave ("from $80k to $120k a month"'
 
