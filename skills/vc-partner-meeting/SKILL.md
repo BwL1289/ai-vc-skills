@@ -155,7 +155,8 @@ becomes an open ask, or it is one of the standing prep questions.
 
 **The calculator's mismatches and flags** from step 3 do not go through the lenses. Each mismatch row is added to the
 kept questions as ends the meeting, quoting the figure as the founder states it, with the tool's value as the reason;
-each flag is added as weakens it, in the tool's words. Neither is refuted: the calculator computed it.
+each flag is added as weakens it, in the tool's words. Neither goes through the quote check or the refute pass: the
+calculator computed it, and its quote is the tool's row.
 
 ### Check the quotes
 
@@ -244,7 +245,8 @@ firm would invest, pass or score the company.
 
 1. **The hardest three,** one line each: the top kept questions, and whether the founder's answer held up.
 2. **Adversarial review:**
-   - **Kept,** ranked, as a table: Rank, Tier, Lens, The founder's line (quoted), The question, Bracketed ask.
+   - **Kept,** ranked, as a table: Rank, Tier, Lens, The founder's line (quoted; the tool's row for a mismatch or
+     flag), The question, Bracketed ask.
    - **Dropped,** one line each: the question, its lens, and why it fell (answered, quoting the founder's line to
      lead with, or not grounded), so the founder sees it was tested. The answered ones are the quick-rehearsal list.
    - When the lenses ran one after another in one agent, with no subagent tool, say so: they are less independent

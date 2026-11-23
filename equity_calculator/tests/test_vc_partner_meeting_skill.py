@@ -248,7 +248,7 @@ def test_the_calculators_rows_open_their_tiers_ahead_of_questions_from_more_than
     assert "the calculator's rows come first, in the order the tool reports them, ahead of everything else" in rank
     assert "mismatches open ends the meeting, flags open weakens it" in rank
     assert rank.index("the calculator's rows come first") < rank.index("raised by more than one lens")
-    assert "Neither is refuted" in mismatches
+    assert "Neither goes through the quote check or the refute pass" in mismatches
 
 
 def test_one_message_mode_debriefs_every_pasted_answer_even_one_no_lens_kept() -> None:
