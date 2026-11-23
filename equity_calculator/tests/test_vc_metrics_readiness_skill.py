@@ -6,9 +6,10 @@ quoted, each citing a source the repository has read or saying it is unverified.
 vc-claims-check's words in its order. The Flags table explains every flag the tool can raise, and benchmark figures
 appear only through the tool's assumption rows. The adversarial review keeps both stages: lenses named by what they
 test (never by a person or firm) that do no arithmetic, a refute pass that uses only the founder's material, and a
-ranked fix list in tiers with no score. Each eval in evals/vc-metrics-readiness/ has a prompt, an expected tool call
-and an expected answer; an eval with ``equity_metrics_check`` calls pairs each call with an excerpt that is lines of
-the report that call prints.
+ranked fix list that puts the calculator's mismatches ahead of its tiers and gives no score. Each eval in
+evals/vc-metrics-readiness/ has a prompt, an expected tool call and an expected answer; an eval with
+``equity_metrics_check`` calls pairs each call with an excerpt that is lines of the report that call prints, and an
+eval with a recorded run also carries its excerpt and verdict.
 """
 
 from __future__ import annotations
@@ -34,8 +35,9 @@ _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(enco
 _CLAIMS_CHECK = (_ROOT / "skills" / "vc-claims-check" / "SKILL.md").read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-metrics-readiness").glob("*.md"))
 _EVAL_COUNT = 5
-# The repository gives each made-up company its own letter; this skill's evals use AM to AP and AU.
-_EVAL_LETTERS = ("am", "an", "ao", "ap", "au")
+# The repository gives each made-up company its own letter; this skill's evals use AM to AP and BT (sorted by file
+# name, so BT comes last).
+_EVAL_LETTERS = ("am", "an", "ao", "ap", "bt")
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_metrics_check` call."
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
@@ -53,6 +55,9 @@ _HANDOFF_SKILLS = (
     "equity-calculator",
     "vc-deck-review",
     "vc-market-sizing",
+    "vc-round-sizing",
+    "vc-current-investor-update",
+    "vc-prospective-investor-update",
 )
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
@@ -131,6 +136,9 @@ _DOUBLE_QUOTED = re.compile(r'"([^"]+)"')
 # A figure an eval's answer takes from the calculator: a percent or months with decimals, money with cents, or a
 # multiple with the six places the report prints.
 _PRINTED_FIGURE = re.compile(r"-?\d[\d,]*\.\d+%|\d[\d,]*\.\d+ months|\$-?\d[\d,]*\.\d{2}|\d+\.\d{6}x")
+# A recorded run's verdict line, in the shape the repository's recorded evals use.
+_RECORDED = "## Recorded answer"
+_VERDICT_LINE = re.compile(r"^\*\*(?:Pass|Partial|Fail)\b[^*]*\*\*", re.MULTILINE)
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -258,6 +266,13 @@ def test_the_definitions_table_has_the_fixed_metrics_each_computed_or_quoted_wit
         assert _cites_only_used_sources(source), metric
     assert "not checked: no tool computes this" in _unwrapped(_section("## Definitions"))
     assert "not checked: no tool computes this" in _unwrapped(_section("## Steps"))
+    by_metric = {row[0]: row for row in rows}
+    # Bessemer is cited for gross against net only; the tool's row marks the new-customer rule as its own judgment.
+    nrr_source = by_metric["Net revenue retention"][4]
+    assert nrr_source.startswith("Bessemer (gross against net)")
+    assert "leaving new customers out, and counting them in as the mistake: ours, unverified" in nrr_source
+    # The burn row points to step 4, which routes each runway to the tool that checks it.
+    assert by_metric["Net and gross burn"][3] == "Quoted (runway: step 4)"
 
 
 def test_the_verdicts_are_claims_checks_words_in_its_order() -> None:
@@ -310,7 +325,10 @@ def test_the_model_converts_nothing_and_the_calculator_does_every_ratio() -> Non
     for rule in (
         "never convert",
         "The tool converts MRR to ARR; the model never does",
-        "0.95 is 95%, 0.875 is 87.5%",
+        # A live run trimmed the tool's digits and abbreviated money; the notation keeps every digit the report prints.
+        "0.950000 is 95.0000%, 0.875000 is 87.5000%",
+        "A multiple keeps its six decimals (7.500000x) and money its cents ($1,200,000.00), never abbreviated ($1.2M)",
+        "customer counts and `period_months` as whole numbers, never strings",
         "a change of notation, not a calculation; never round it",
         "One call per document's version of the figures",
         "never prorate",
@@ -339,6 +357,20 @@ def test_the_model_converts_nothing_and_the_calculator_does_every_ratio() -> Non
         # The report's fixed label is renamed to the call's document when a row is relayed.
         'name that call\'s document instead ("the model says", "the update says")',
         "relay the flag as answered and quote that line",
+        # A live run set the deck's own multiple against the band the tool raised only for its computed one.
+        "A benchmark flag is relayed for the tool value it was raised on only",
+        "a stated figure is never set against the benchmark by eye",
+    ):
+        assert rule in steps, rule
+    # Each figure goes to the tool or skill that checks it; growth rates and LTV have none.
+    for rule in (
+        "go to `equity_deal_check` as the vc-deal-math skill says",
+        "A runway with no raise, a runway on a SAFE or note raise and that raise's use-of-funds lines go to "
+        "`equity_runway_plan`",
+        "as the vc-round-sizing skill calls it; with no cash or burn given, ask for them",
+        "A market size goes to `equity_market_sizing` as the vc-market-sizing skill says",
+        'Growth rates, LTV and every other metric the table marks quoted: quote as stated with "not checked: no tool '
+        'computes this"',
     ):
         assert rule in steps, rule
     assert "No arithmetic outside the equity calculator's tools" in _unwrapped(_section("## Limits"))
@@ -365,6 +397,8 @@ def test_the_attack_stage_runs_independent_lenses_named_by_what_they_test() -> N
     assert "do not go through the lenses" in attack
     # A lens that sees the answering line must still raise the objection, or the refute pass has nothing to drop.
     assert "Do not judge whether another line of the material answers an objection: raise it anyway" in brief
+    assert "Never turn an objection into a gap because another line may answer it" in brief
+    assert "run the lenses as parallel subagents, however short the material" in attack
     assert "rather than a weak objection" not in attack
 
 
@@ -374,6 +408,10 @@ def test_without_a_subagent_tool_the_lenses_run_before_step_1_and_the_answer_say
 
     assert note in steps and steps.index(note) < steps.index("1. **List every metric word for word,**")
     assert "less independent than separate subagents" in _unwrapped(_section("## Answering"))
+    # A live run had the Task tool and still ran the lenses in the main agent: Steps open with the subagent path.
+    subagents = "With a subagent tool (the Agent or Task tool), run the five lenses as subagents (Stage A)"
+    assert subagents in steps and steps.index(subagents) < steps.index(note)
+    assert "the fallback below is only for a session without that tool" in steps
 
 
 def test_the_refute_stage_uses_only_the_founders_material_and_says_why_each_objection_fell() -> None:
@@ -385,6 +423,8 @@ def test_the_refute_stage_uses_only_the_founders_material_and_says_why_each_obje
         assert verdict in brief, verdict
     assert not _names_a_person_or_firm(brief)
     assert "one subagent per objection" in handoff
+    assert "launch one subagent per objection in a single message" in handoff
+    assert "never put two objections in one subagent, and never judge them in the main agent instead" in handoff
     # The refute pass is handed claims-check's pattern list, so the column must exist there under that name.
     assert "the Pattern column of this skill's pattern table and of vc-claims-check's discount table" in handoff
     assert "| Pattern" in _section("## Discount patterns", _CLAIMS_CHECK)
@@ -409,11 +449,17 @@ def test_calculator_mismatches_lead_the_list_and_there_is_no_score() -> None:
 
     for tier in _TIERS:
         assert tier in ranked, tier
-    assert "The calculator's mismatches lead the list" in ranked
+    # The pack's one rule for a computed mismatch: ahead of the tiers, with no tier; an understated figure is minor.
+    assert "The calculator's mismatches lead the list ahead of the tiers, with no tier" in ranked
+    assert "except an understated figure, which is minor at most" in ranked
     attack = _unwrapped(_section("### Stage A: attack"))
-    # Only a mismatch a definition flag explains ends the meeting; any other is untiered and may be rounding.
-    assert "One that a `stated_*` flag explains (the document used another definition) is ends the meeting" in attack
-    assert "One that no `stated_*` flag explains carries no tier" in attack
+    assert "added to the ranked fix list ahead of the tiers" in attack
+    assert "It carries no tier: how much a gap hurts depends on its size, which the founder weighs" in attack
+    # Which way flatters depends on the metric: a lower churn, CAC, payback or multiple flatters.
+    assert (
+        "A stated figure less flattering than the tool's value (an ARR or retention below it; a churn, CAC, payback, "
+        "burn multiple or concentration above it) understates: it goes in the minor tier at most"
+    ) in attack
     assert "`[how the model works this figure, unrounded]`" in attack
     assert "merges into that mismatch's entry and keeps the lens name" in _unwrapped(_section("### Check the quotes"))
     assert "no percentages and no score" in ranked
@@ -422,6 +468,17 @@ def test_calculator_mismatches_lead_the_list_and_there_is_no_score() -> None:
     )
     assert answering.index("**The biggest fixes,**") < answering.index("**Ranked fix list,**")
     assert _FIX_COLUMNS.search(answering) and "**Dropped,**" in answering
+    # A live run left out the lens results, relayed flags as statements, skipped `cohort_rule` and credited a source
+    # the tool's row does not give.
+    for rule in (
+        'Then each lens with what it returned, "nothing found" included, and how many refute subagents ran',
+        "each flag as the question a partner is likely to ask",
+        "the source and date the tool's row gives, never a source from the Definitions table",
+        "When no `cohort_*` fields were passed, name the `cohort_rule` row and its setting",
+        "A Missing row carries its bracketed ask in the same row",
+        "a metric whose parts were given is Missing with the fix: show it with the tool's values",
+    ):
+        assert rule in answering, rule
     assert not _SCORE.search(_TEXT)
     limits = _unwrapped(_section("## Limits"))
     assert 'no "ready" or "not ready"' in limits and 'no "raise now or wait"' in limits
@@ -462,7 +519,17 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
         positions = [text.find(f"\n{heading}\n") for heading in _EVAL_HEADINGS]
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
-        assert "made up" in text and "has not been run in a live session" in text, path.name
+        assert "made up" in text, path.name
+        if _RECORDED not in text:
+            assert "has not been run in a live session" in text, path.name
+            continue
+        # A recorded run: the intro says so, the excerpt follows the expected answer, and it opens with its verdict
+        # and what changed since.
+        assert text.index(f"\n{_RECORDED}\n") > positions[-1], path.name
+        assert '"Recorded answer" is an excerpt of a recorded run' in _unwrapped(text.split("\n## ", 1)[0]), path.name
+        recorded = _section(_RECORDED, text)
+        assert _VERDICT_LINE.search(recorded) and "Since this run" in _unwrapped(recorded), path.name
+        assert _fences("json", recorded) == [] and _fences("text", recorded) == [], path.name
 
 
 def test_the_no_call_evals_carry_no_call_or_excerpt() -> None:
@@ -517,10 +584,15 @@ def test_one_eval_leads_with_three_mismatches_and_the_flag_that_explains_each() 
     assert [check.verdict for check in result.checks] == ["mismatch"] * 3
     for flag in ("stated_arr_matches_run_rate", "stated_nrr_includes_new", "stated_burn_multiple_uses_new_not_net_arr"):
         assert flag in result.flags and f"`{flag}`" in answer, flag
-    assert "lead the ranked fix list as ends the meeting" in answer and "All three metrics are Contradicted" in answer
+    assert "lead the ranked fix list ahead of the tiers, with no tier" in answer
+    assert "All three metrics are Contradicted" in answer
     # Twelve months with no starting-customer movements: the cohort rule applies and the answer asks for them.
     assert "`cohort_rule`" in answer and "alone]`" in answer
     assert "a benchmark, not a rule" in answer and "No score" in answer
+    # The live run is recorded: the lenses ran in the main agent, so one clause of the pass sentence was missed.
+    assert "the deck's 6.25x is never set against the benchmark" in answer and "has a Lens column" in answer
+    assert "runs the five lenses as subagents" in _unwrapped(path.read_text(encoding="utf-8").split("\n## ", 1)[0])
+    assert "**Partial: one clause missed.**" in _section(_RECORDED, path.read_text(encoding="utf-8"))
 
 
 def test_a_three_document_eval_runs_one_call_per_document_with_only_its_figures() -> None:
@@ -577,10 +649,10 @@ def test_one_eval_declines_a_score_a_verdict_and_a_named_firm() -> None:
 
 
 def test_one_eval_takes_the_edge_paths_cohort_movements_no_multiple_and_a_left_out_figure() -> None:
-    (path,) = (path for path in _CALL_EVALS if path.name.startswith("company-au-"))
+    (path,) = (path for path in _CALL_EVALS if path.name.startswith("company-bt-"))
     (call,) = _calls(path)
     result = _result(call)
-    _, answer = _eval("au")
+    _, answer = _eval("bt")
 
     # The starting customers' own movements go in, so the cohort rule names them.
     assert {"cohort_expansion_recurring", "cohort_contraction_recurring", "cohort_churned_recurring"} <= set(call)

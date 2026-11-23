@@ -31,6 +31,8 @@ adds a figure, customer or event the founder did not give, and never leaves out 
     equity-calculator skill for one scenario on its own.
   - The story for the coming raise and the say-and-avoid list: the vc-positioning skill.
   - How much to raise next and which milestone it buys: the vc-round-sizing skill (preview).
+  - Whether a metric's definition is the one investors expect, and ARR, retention, churn, CAC payback or burn multiple
+    checked from their parts: the vc-metrics-readiness skill (preview).
   - The short update a founder sends prospective investors before a raise, cut from this one when both go out in the
     same period: the vc-prospective-investor-update skill (preview). This skill's runway call carries no raise and no
     milestone, and it writes no version for people who are not yet investors.
@@ -94,15 +96,19 @@ What the draft does for each status:
 - **New:** gives its definition.
 
 The last update's own promises are tied out too: each "next month" item, target or open lowlight in it gets a line in
-this update saying what happened, in the founder's words, or a bracketed ask.
+this update saying what happened, in the founder's words, or a bracketed ask. Its status in the tie-out table follows
+the founder's notes, never this skill's judgment: Done, Partly done, Not done, Moved (back with a later date, a lower
+figure or a narrower scope) or No word (the founder's draft does not mention it). The runway row's status is the
+calculator's verdict word, or the floor rule's result (Runway).
 
 A first update has nothing to tie out: every metric is New, there are no promises to check, and its Definitions
 block is the one the next update ties out to.
 
 ## Steps
 
-In review mode without a subagent tool, run Stage A of the reader pass first, before step 1, as "How to run the
-lenses" says; step 8 then starts at the quote check.
+With a subagent tool (the Agent or Task tool), the reader pass runs as subagents, however short the material: one per
+lens, then one per objection. In review mode without a subagent tool, run Stage A of the reader pass first, before step
+1, as "How to run the lenses" says; step 8 then starts at the quote check.
 
 The reader pass judges the draft before this skill changes it. In review mode, both its stages read the founder's
 draft as given, never the revised one: a line this skill adds at step 7 answers no objection. In draft mode, they read
@@ -113,12 +119,16 @@ the draft written at step 7.
 2. **Ask for what is missing,** once, in one message (Inputs above).
 3. **Build the metric list** in the last update's order: name, definition, form, period, the last update's value,
    this period's value.
-4. **Tie out** each metric and each promise (the section above).
+4. **Tie out** each metric and each promise (the section above), and the runway claim against the runway the last
+   update gave, compared as written (Runway).
 5. **Runway:** call `equity_runway_plan` (next section).
-6. **Other figures:** quote each as stated, with "not checked: no tool computes this".
+6. **Other figures:** quote each as stated, with its line from the rules file's "Not checked here": ARR, retention,
+   churn, CAC payback and burn multiple go to the vc-metrics-readiness skill; the rest are "not checked: no tool
+   computes this".
 7. **Draft or revise.** Draft mode: write the update in the shape above from the founder's material only, every gap a
-   bracketed ask. Review mode: keep the founder's draft and words; change only what a status, the calculator or a kept
-   finding requires.
+   bracketed ask; the period is labelled as the founder gives it (`[year]` when no year is given). Review mode: keep the
+   founder's draft and words; change only what a status, the calculator or a kept finding requires. Either way, a
+   definition or lowlight the founder did not give is a bracketed ask (`[runway definition]`), never this skill's words.
 8. **Run the reader pass** (below) on the draft it judges (the founder's draft as given in review mode): attack,
    check the quotes, refute, rank. Revise the draft for every kept finding, using only the founder's facts or a
    bracketed ask.
@@ -135,7 +145,9 @@ founder's plan with no raise:
 - One `plan` case: the first phase is today's monthly spend (`gross_burn`) and `revenue`, from month 1 (the month
   after the cash date); each planned change is another phase, from its month. When the founder gives cash collected
   rather than revenue, pass that and say so. When the founder gives only net burn, ask for spend and revenue; until
-  then, pass the net burn as `gross_burn` with `revenue` `"0"`, and label the line as net burn in the update.
+  then, pass the net burn as `gross_burn` with `revenue` `"0"`, and label the line as net burn in the update. A net
+  burn of zero or less gets no call until spend and revenue are given (the tool refuses a `gross_burn` of 0 or less);
+  meanwhile quote the founder's words.
 - `stated_runway_months`: the runway the update states, when it states one; a "30+ months" claim is passed as
   `"30"`. With no claim, call without it and put the tool's runway in the update.
 - `months_to_raise`, only when the founder gives how long the next raise will take: a whole number, as a JSON integer,
@@ -192,8 +204,16 @@ the plan's runway, and today's, each as the tool prints it.
 
 Read every row, the `flags` and the `assumptions` before answering. Use the printed values (12.79 months stays 12.79
 months, never "about 13"); never round again or recompute. A refusal is the answer for those inputs: relay its reason.
-A mismatch on an exact claim is a figure to fix before sending, not one to soften; a claim stated as a floor follows
-the rule above instead.
+A mismatch on an exact claim is a figure to fix before sending, never softened, when the claim is above the printed
+runway: the draft states the printed runway. A mismatch with the claim below the printed runway understates it: the
+update may keep it or state the printed runway, and it goes in the minor tier at most. An exact claim the verdict row
+calls consistent may stay as the founder wrote it, and the Numbers section gives the printed runway. A claim stated as a
+floor follows the rule above instead.
+
+**The same runway two updates running.** When the runway the update states is the figure the last update gave, the
+runway's entry in the ranked fix list names the pattern "The same runway figure two updates running" (Patterns that
+cost trust) and says it is unverified: the mismatch's entry, or, when the claim holds, its own entry in the worth fixing
+tier, whose fix is the printed runway.
 
 | Flag                        | What it means for the founder                                                         | What the update does                                                    |
 | --------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
@@ -225,24 +245,28 @@ Every lens gets the same brief, with its own name and test filled in:
   update is likely to notice ..."); you are not an investor and do not speak as one, named or not.
 - Read only the founder's material given here: the last update, this period's notes, and the draft. Bring in no
   outside fact about the company, its market or its customers, and do no arithmetic. Saying that one stated figure is
-  larger than another is allowed; working out by how much is not.
+  larger than another is allowed; working out by how much is not. Figures under different labels or definitions are
+  never set side by side, not even as larger or smaller: say only that the label or definition changed.
 - Return at most three objections, strongest first. For each: the draft's line it is about (or, for something left
   out, the material's line the draft omits), quoted word for word with its place; why an investor is likely to read
   it as a reason to trust the founder less; and how much it costs (fix before sending, worth fixing, or minor).
 - A reason you cannot tie to a line of the material is not an objection. List it apart as a question to the founder.
+  Never turn an objection into a question because another line may answer it.
 - Do not judge whether another line of the draft answers an objection: raise it anyway, and the refute pass decides.
   Return "nothing found" only when no line of the material gives this lens an objection worth an investor's time.
 
 **How to run the lenses.** With a subagent tool (in Claude Code, the Agent or Task tool), run the four lenses as
-parallel subagents, each given only the founder's material, the draft it judges (Steps) and its lens brief: not this
-skill's other sections, not the tie-out table, not another lens's output. Without one, in review mode run the lenses
-before step 1, one after another, writing each lens's objections down in full before reading the next brief. In draft
-mode the same agent wrote the draft, so the lenses run after step 7, still one after another. Either way the answer says
-the lenses ran in one agent and are less independent than subagents.
+parallel subagents, however short the material, each given only the founder's material, the draft it judges (Steps) and
+its lens brief: not this skill's other sections, not the tie-out table, not another lens's output. Without one, in
+review mode run the lenses before step 1, one after another, writing each lens's objections down in full before reading
+the next brief. In draft mode the same agent wrote the draft, so the lenses run after step 7, still one after another.
+Either way the answer says the lenses ran in one agent and are less independent than subagents.
 
 **The calculator's mismatches** do not go through the lenses or the refute pass, and neither does a printed runway
-below a claim stated as a floor. Each leads the first tier, quoting the update's figure with the tool's value as the
-reason.
+below a claim stated as a floor. A mismatch is added to the ranked fix list ahead of the tiers, quoting the update's
+figure with the tool's value as the reason. It carries no tier: how much a gap hurts depends on its size, which the
+founder weighs. One with the claim below the printed runway goes in the minor tier at most. A printed runway below a
+claim stated as a floor leads the first tier, quoting the update's figure with the tool's value.
 
 ### Check the quotes
 
@@ -252,16 +276,18 @@ objection about the same line merge, keeping both lens names. Questions go to th
 
 ### Stage B: refute
 
-Each objection gets its own refute pass. With a subagent tool, run one subagent per objection, given the founder's
-material, the draft, that one objection, the Pattern column of the table below, and everything from "The refute
-brief:" to the end of this stage, and nothing else; without one, decide the objections one at a time against the same
-brief.
+Each objection gets its own refute pass. With a subagent tool, launch one subagent per objection in a single message,
+so they run in parallel; never put two objections in one subagent, and never judge them in the main agent instead. Give
+each the founder's material, the draft, that one objection, the Pattern column of the table below, and everything from
+"The refute brief:" to the end of this stage, and nothing else. Without a subagent tool, decide the objections one at a
+time against the same brief.
 
 The refute brief:
 
 - You decide whether the founder's material answers one objection; you argue neither side. Write in the third
   person; you are not an investor and do not speak as one, named or not.
-- Use only the founder's material and the draft given here. Bring in no outside fact, and do no arithmetic.
+- Use only the founder's material and the draft given here. Bring in no outside fact, and do no arithmetic. Figures
+  under different labels or definitions are never compared, not even as larger or smaller.
 - How an investor is likely to read a line is not an outside fact: judge whether the material answers that reading.
 - A line that matches a pattern in the list you were given never answers an objection.
 - Return one verdict from the three below, quoting the founder's line word for word where it needs one. When you
@@ -282,12 +308,14 @@ line this skill added at step 7 is not in it.
 ### The ranked fix list
 
 Order the kept objections in three tiers: **fix before sending**, **worth fixing**, **minor**. The calculator's
-mismatches lead the first tier; a Restated or Dropped status with no word in the draft goes in it too. So does a "next
-month" item, target or open lowlight from the last update with no word in the founder's draft (review mode), even though
-the revised draft adds its line. Within a tier, an objection raised by more than one lens comes first. The tier is a
-judgment: give no percentages and no score. Each entry: the section, the line quoted, why an investor is likely to read
-it that way in one or two plain sentences, and the change, using only the founder's facts or a bracketed ask. The draft
-is revised for every kept entry.
+mismatches lead the list ahead of the tiers, with no tier, though a mismatch with the claim below the printed runway is
+minor at most (Runway). The first tier opens with a printed runway below a claim stated as a floor; a Restated or
+Dropped status with no word in the draft goes in it too. So does a "next month" item, target or open lowlight from the
+last update with no word in the founder's draft (review mode), even though the revised draft adds its line. Within a
+tier, an objection raised by more than one lens comes first. The tier is a judgment: give no percentages and no score.
+Each entry: the section, the line quoted, why an investor is likely to read it that way in one or two plain sentences
+(figures under different definitions never set side by side), and the change, using only the founder's facts or a
+bracketed ask. The draft is revised for every kept entry.
 
 ## Patterns that cost trust
 
@@ -314,15 +342,17 @@ skill's authors read; say so when it is used.
 
 ## Answering
 
-Review mode leads with what to fix; draft mode leads with the draft.
+Review mode leads with what to fix; draft mode leads with the draft, with no status line or headline before it.
 
 1. **The draft or the revised draft,** in the shape above, ready to copy, every gap a bracketed ask. In review mode,
    first **the biggest fixes,** at most three, one line each.
 2. **Reader pass:** the ranked fix list as a table (Rank, Tier, Section, Lens, The line (quoted), Why an investor
-   reads it that way, Fix), then **Dropped,** one line each with why it fell. Say whether the lenses ran as subagents.
-3. **Tie-out table:** Metric or item, Period, The last update said (quoted), This update says (quoted), Status.
+   reads it that way, Fix), then **Dropped,** one line each with why it fell. Say whether the lenses ran as subagents,
+   and how many refute subagents ran.
+3. **Tie-out table:** Metric or item, Period, The last update said (quoted), This update says (quoted), Status. One row
+   for each metric, each item of the last update and the runway, each with one status.
 4. **Numbers:** each `equity_runway_plan` call's verdict and runway rows in the tool's values, with its flags and the
-   assumptions it leans on; then each other figure quoted with "not checked: no tool computes this".
+   assumptions it leans on; then each other figure quoted with its "Not checked here" line from the rules file.
 5. **Open asks:** every bracketed gap and every lens question in one list, to answer in one sitting.
 6. **Sources:** the guides used, with links, and which points are this skill's own, unverified.
 7. **Close:** this is not investment, legal or tax advice; the founder sends the update; customers named should have

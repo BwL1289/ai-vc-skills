@@ -13,14 +13,14 @@ docs/install.md (not yet added) and the coupling test below, which checks the li
 skill names are the file's, no line of the file is copied here, and the promise statuses live here only.
 
 The update's sections, the line table, the promise statuses, the names rule and the reader pass's four lenses are
-fixed; the refute verdicts are word for word the repository's; the ranked fix list has three tiers and no score. Every
-source is one the skill's authors read in full, and every pattern row cites one of them or says it is unverified. Each
-eval in evals/vc-prospective-investor-update/ has a prompt, an expected tool call and an expected answer, every call is
-valid and every excerpt is lines of the report that call prints.
+fixed; the refute verdicts are word for word the repository's; the ranked fix list puts the calculator's mismatches
+ahead of three tiers and gives no score. Every source is one the skill's authors read in full, and every pattern row
+cites one of them or says it is unverified. Each eval in evals/vc-prospective-investor-update/ has a prompt, an expected
+tool call and an expected answer, every call is valid and every excerpt is lines of the report that call prints; an eval
+with a recorded run also carries its excerpt and verdict.
 
-One skill it points to is planned, not yet shipped: whether a metric's definition is the expected one
-(vc-metrics-readiness). A test checks that its folder does not exist yet, so the pull request that adds it, or rebases
-this one onto it, has to turn the planned line into a hand-off.
+Every skill it points to has shipped, whether a metric's definition is the expected one (vc-metrics-readiness)
+included, and a test checks that no planned line is left.
 """
 
 from __future__ import annotations
@@ -143,6 +143,9 @@ _FIX_COLUMNS = re.compile(r"Rank, Tier, Section, Lens, The line \(quoted\), Why 
 _TIE_OUT_COLUMNS = "Metric or item, Period, The last update said (quoted), This update says (quoted), Status"
 _SCORE = re.compile(r"/\s*100\b|out of 100", re.IGNORECASE)
 _DOUBLE_QUOTED = re.compile(r'"([^"]+)"')
+# A recorded run's verdict line, in the shape the repository's recorded evals use.
+_RECORDED = "## Recorded answer"
+_VERDICT_LINE = re.compile(r"^\*\*(?:Pass|Partial|Fail)\b[^*]*\*\*", re.MULTILINE)
 # Strings an eval's answer quotes that are the skill's own section names, not lines of the founder's material.
 _SKILL_MARKS = {"Last time we said", "By the next update"}
 # A figure an eval's answer takes from the calculator: months with decimals.
@@ -553,9 +556,14 @@ def test_the_lenses_are_the_four_and_name_no_person_or_firm() -> None:
         'Return "nothing found" only when',
         "less independent than subagents",
         "do not go through the lenses or the refute pass",
+        "run the four lenses as parallel subagents, however short the material",
+        # A live run set two customer counts under different definitions side by side as larger and smaller.
+        "Figures under different labels or definitions are never set side by side, not even as larger or smaller",
+        "Never turn an objection into a question because another line may answer it",
     ):
         assert rule in attack, rule
     assert "rather than a weak objection" not in attack
+    assert "the reader pass runs as subagents, however short the material" in _unwrapped(_section("## Steps"))
 
 
 def test_the_reader_pass_judges_the_founders_draft_as_given_in_review_mode() -> None:
@@ -580,9 +588,13 @@ def test_the_refute_pass_uses_only_the_founders_material() -> None:
         assert verdict in brief, verdict
     assert "one subagent per objection" in handoff and "the Pattern column of the table below" in handoff
     assert 'everything from "The refute brief:" to the end of this stage' in handoff
+    # A live run gave six objections to one refute subagent.
+    assert "launch one subagent per objection in a single message" in handoff
+    assert "never put two objections in one subagent, and never judge them in the main agent instead" in handoff
     for rule in (
         "you argue neither side",
         "Bring in no outside fact, and do no arithmetic",
+        "Figures under different labels or definitions are never compared",
         "How an investor is likely to read a line is not an outside fact",
         "never answers an objection",
         "When you cannot decide, return Kept",
@@ -606,7 +618,11 @@ def test_the_ranked_fix_list_has_the_three_tiers_and_no_score() -> None:
 
     for tier in _TIERS:
         assert tier in ranked, tier
-    assert "The calculator's mismatches lead the first tier" in ranked
+    # The pack's one rule for a computed mismatch: ahead of the tiers, with no tier; an understated claim is minor.
+    assert "The calculator's mismatches lead the list ahead of the tiers, with no tier" in ranked
+    assert "The first tier opens with a printed runway below a claim stated as a floor" in ranked
+    assert "It carries no tier: how much a gap hurts depends on its size" in _unwrapped(_section("### Stage A: attack"))
+    assert "figures under different definitions never set side by side" in ranked
     assert (
         "a Dropped or Restated metric status, or a last-time item with no line in the founder's draft (No word, "
         "whatever the notes say), goes in it too" in ranked
@@ -618,6 +634,10 @@ def test_the_ranked_fix_list_has_the_three_tiers_and_no_score() -> None:
     assert _TIE_OUT_COLUMNS in answering
     assert "not investment, legal or tax advice" in answering
     assert "a lawyer should look at an update that mentions a coming raise" in answering
+    assert "and how many refute subagents ran" in answering
+    # A live run gave statuses to an older update's items and two statuses to one metric.
+    assert "Rows only for each metric and each item of the last update, each with one status" in answering
+    assert "an older update's item or target appears only in the reader pass, with no status" in answering
     assert not _SCORE.search(_TEXT)
 
 
@@ -665,7 +685,17 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
         positions = [text.find(f"\n{heading}\n") for heading in _EVAL_HEADINGS]
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
-        assert "made up" in text and "has not been run in a live session" in text, path.name
+        assert "made up" in text, path.name
+        if _RECORDED not in text:
+            assert "has not been run in a live session" in text, path.name
+            continue
+        # A recorded run: the intro says so, the excerpt follows the expected answer, and it opens with its verdict
+        # and what changed since.
+        assert text.index(f"\n{_RECORDED}\n") > positions[-1], path.name
+        assert '"Recorded answer" is an excerpt of a recorded run' in _unwrapped(text.split("\n## ", 1)[0]), path.name
+        recorded = _section(_RECORDED, text)
+        assert _VERDICT_LINE.search(recorded) and "Since this run" in _unwrapped(recorded), path.name
+        assert _fences("json", recorded) == [] and _fences("text", recorded) == [], path.name
 
 
 def test_the_no_call_eval_carries_no_call_or_excerpt() -> None:
@@ -730,6 +760,11 @@ def test_one_eval_drops_an_objection_by_quoting_the_drafts_own_line_and_keeps_a_
     assert announced in prompt and announced in moved
     assert moved.index("is Dropped, answered, quoting October's update") < moved.index(announced)
     assert "October's March target is Not yet due" in moved and "stays Kept" in moved
+    # No lens may raise those two objections, so the eval asks for each Dropped entry only when one does.
+    assert answer.count("if a lens raises it, is Dropped, answered") == 2 and "It is never Kept" in answer
+    assert "the tier is a judgment" in answer and "one refute subagent per objection" in answer
+    assert "not even as larger or smaller" in answer
+    assert _VERDICT_LINE.search(_section(_RECORDED, text))
 
 
 def test_one_eval_keeps_a_fallen_metric_writes_a_slip_as_moved_and_keeps_one_ask() -> None:
@@ -794,7 +829,7 @@ def test_a_figure_that_differs_from_the_current_investor_update_is_checked_witho
     assert "this period's update to current investors when given, and the draft" in attack
     assert f"nor a figure or definition that {_DIFFERS} (step 5)" in attack
     assert f"with every figure or definition that {_DIFFERS} (step 5)" in ranked
-    assert "leads the first tier of the fix list with the calculator's mismatches" in built
+    assert "leads the first tier of the fix list, right after the calculator's mismatches" in built
     assert "is a finding for the reader pass" not in built
     # Its own check, not a seventh metric status.
     assert _DIFFERS not in _RULES
