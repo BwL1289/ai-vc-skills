@@ -307,10 +307,11 @@ def test_the_answer_says_when_the_refute_pass_ran_per_lens(name: str) -> None:
 def test_the_lean_paragraph_stands_alone_and_is_wrapped_like_the_rest(name: str) -> None:
     """A line cap is a stand-in for size, so it is never met by joining a new paragraph onto an old line."""
     raw = (_SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
-    paragraph = raw.split(_LEAN_PARAGRAPH, 1)[1].split("\n\n", 1)[0]
+    # The paragraph as written, its first line whole: the marker and the rest of that line are measured together.
+    paragraph = _LEAN_PARAGRAPH.lstrip("\n") + raw.split(_LEAN_PARAGRAPH, 1)[1].split("\n\n", 1)[0]
 
     assert _LEAN_PARAGRAPH in raw
-    assert all(len(line) <= _LINE_WIDTH for line in (_LEAN_PARAGRAPH.strip(), *paragraph.splitlines())), name
+    assert all(len(line) <= _LINE_WIDTH for line in paragraph.splitlines()), name
 
 
 @pytest.mark.parametrize("name", _NO_LEAN_SKILLS)
