@@ -8,7 +8,9 @@ source kinds are fixed words with an order, and the shakiest assumption is picke
 review keeps both stages: three lenses named by what they test (never by a person or firm) that do no arithmetic, a
 refute pass with the fixed verdicts that invents nothing, and computed findings that skip both. Each eval in
 evals/vc-market-sizing/ has a prompt, an expected tool call and an expected answer; an eval with an
-``equity_market_sizing`` call carries a valid call and an excerpt that is lines of the report that call prints.
+``equity_market_sizing`` call carries each call valid (the main call, then any whole-company run) and, for each, an
+excerpt that is lines of the report that call prints. The skill states the tool's list limits from the schema, which
+rows to keep when there are more, and which fields cannot move a SOM given as a count, as the tool works them.
 """
 
 from __future__ import annotations
@@ -22,8 +24,20 @@ from typing import get_args
 import pytest
 from equity_calculator.__main__ import _INPUT_MODELS, run
 from equity_calculator.layout import sheet_for
+from equity_calculator.market_sizing import _MOVES_SOM_BY_COUNT
 from equity_calculator.scenarios import compute
-from equity_calculator.schemas.equity_market_sizing import MarketSizingFlag, MarketSizingInput
+from equity_calculator.schemas.equity_market_sizing import (
+    _OBTAINABLE,
+    MAX_SEGMENTS,
+    MAX_SENSITIVITIES,
+    MAX_SENSITIVITY_VALUES,
+    MAX_TOP_DOWN,
+    BreakEvenReach,
+    MarketSizingFlag,
+    MarketSizingInput,
+    MarketSizingResult,
+    SegmentField,
+)
 from equity_calculator.text import render_sheet
 from tests.test_vc_claims_check_skill import _READ_SOURCES
 
@@ -147,6 +161,12 @@ def _report(call: str) -> str:
     return render_sheet(sheet_for(compute(MarketSizingInput.model_validate(json.loads(call)["inputs"]))))
 
 
+def _worked(inputs: dict[str, object]) -> MarketSizingResult:
+    result = compute(MarketSizingInput.model_validate(inputs))
+    assert isinstance(result, MarketSizingResult)
+    return result
+
+
 def test_the_frontmatter_names_the_skill_and_the_founders_questions() -> None:
     fields = _frontmatter()
     description = fields["description"]
@@ -245,6 +265,83 @@ def test_the_shakiest_assumption_is_picked_from_tool_values() -> None:
     assert "gets one row per segment" in steps and "no single row is quoted as the whole company's case" in steps
     # The break-even against a top-down figure is the tool's cross-check, never a value to aim for.
     assert "never offer it as a price, a count or a share to aim for" in steps
+    # A break-even at the plan's SOM is never a recommendation either: it sits beside the founder's own high value.
+    assert "never a recommendation either: quote it beside the founder's own low and high values" in steps
+    assert "even at the founder's own best case, that assumption alone does not reach the plan" in steps
+    # A row that cannot move the SOM is never the shakiest, and with no swing at all none is named.
+    assert "whose sensitivity row has a `som_swing` above $0.00" in steps
+    assert "When that kind's rows all swing by $0.00 or have no swing, name none and say why" in steps
+    assert "When the reach is `met_without_it`, also quote its `som_low` beside the target" in steps
+
+
+def test_a_shared_assumption_asked_about_as_a_whole_gets_whole_company_runs() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "the only other calls are the whole-company runs below" in steps
+    assert "make one more call for each value they give" in steps
+    assert "with that value in every segment that shares the assumption and no sensitivity rows" in steps
+    assert "Its flags, checks and top-down share are not new findings" in steps
+    assert "A refusal or tool error is the answer for those inputs: relay its reason" in steps
+
+
+def test_a_top_down_figure_with_no_share_is_said_to_be_compared_in_full() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "A top-down figure sent with no `comparable_percent` is compared in full" in steps
+    assert "`[the share of the figure that matches your definition]`" in steps
+    assert "with no share given, say it is against the whole figure" in _unwrapped(_section("## Answering"))
+
+
+def test_the_answer_names_every_break_even_outcome_and_how_the_lenses_ran() -> None:
+    answering = _unwrapped(_section("## Answering"))
+
+    for reach in get_args(BreakEvenReach):
+        if reach != "value":
+            assert f"`{reach}`" in answering, reach
+    assert "Say whether the lenses ran as subagents" in answering
+    assert "every sensitivity row left out" in answering
+
+
+def test_the_skill_states_the_tools_list_limits_and_which_rows_to_keep() -> None:
+    steps = _unwrapped(_section("## Steps"))
+
+    assert (
+        f"at most {MAX_SEGMENTS} segments, {MAX_TOP_DOWN} top-down figures and {MAX_SENSITIVITIES} sensitivity rows "
+        f"of at most {MAX_SENSITIVITY_VALUES} values each"
+    ) in steps
+    assert (
+        f"When the rows above come to more than {MAX_SENSITIVITIES}, keep them in this order: the Estimate rows"
+        in steps
+    )
+    assert "Name every row left out in the answer" in steps
+    assert "as whole numbers, never strings" in steps
+
+
+def test_the_fields_the_skill_says_cannot_move_a_count_som_are_the_tools() -> None:
+    """Where a SOM is a count of customers, the fields the skill names as not moving it are the tool's: each swings
+    the SOM by nothing and never reaches the plan, and a segment with no SOM leaves every row with no swing."""
+    steps = _unwrapped(_section("## Steps"))
+    fields = set(get_args(SegmentField))
+    still = sorted(fields - _MOVES_SOM_BY_COUNT - set(_OBTAINABLE))
+    segment = {
+        "customers": "1000",
+        "price": "1000",
+        "price_period_months": 12,
+        "serviceable_percent": "50",
+        "obtainable_customers": "100",
+    }
+
+    assert " and ".join(f"`{name}`" for name in still) + " do not move the SOM" in steps
+    for name in still:
+        row = {"field": name, "segment": 1, "values": ["30", "80"] if name.endswith("percent") else ["800", "900"]}
+        result = _worked({"segments": [segment], "sensitivity": [row], "som_target": "200000"})
+        (worked,) = result.sensitivity
+        assert worked.som_swing is not None and worked.som_swing.exact == 0, name
+        assert worked.at_som_target is not None and worked.at_som_target.reach == "does_not_move", name
+    no_som = {key: value for key, value in segment.items() if key != "obtainable_customers"}
+    price_row = {"field": "price", "segment": 1, "values": ["800", "1200"]}
+    (worked,) = _worked({"segments": [segment, no_som], "sensitivity": [price_row]}).sensitivity
+    assert worked.som_swing is None
 
 
 def test_the_three_lenses_are_named_by_what_they_test() -> None:
@@ -256,6 +353,13 @@ def test_the_three_lenses_are_named_by_what_they_test() -> None:
         assert not _names_a_person_or_firm(lens), lens
     assert "quoted word for word" in attack and "do no arithmetic" in attack
     assert "one after another" in attack and "less independent than subagents" in attack
+    # Without subagents the lenses still wait for the inputs: they run in the turn that makes the call, on everything.
+    lead = _unwrapped(_section("## Steps").split("\n1. ", 1)[0])
+    for text in (attack, lead):
+        assert "in the turn that makes the call" in text and "A turn that makes no call runs no review" in text
+        assert "on all the founder's material so far (every message, not only the first)" in text
+    assert "before step 1" not in _TEXT
+    assert "stop after the ask, run neither the review nor the call" in _unwrapped(_section("## Steps"))
     assert "never the tool's result" in attack
     assert "you are not an investor and do not speak as one, named or not" in attack
     # A lens that sees the answering line must still raise the objection, or the refute pass has nothing to drop.
@@ -342,23 +446,23 @@ def test_the_no_call_evals_carry_no_call_or_excerpt() -> None:
 
 @pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])
 def test_each_eval_call_is_valid_and_its_excerpt_is_what_the_calculator_prints(path: Path) -> None:
-    """An eval's figures are pasted from the calculator: its excerpt must be lines of the report for its call."""
+    """An eval's figures are pasted from the calculator: each call's excerpt must be lines of the report for it."""
     text = path.read_text(encoding="utf-8")
-    (call,) = _fences("json", text)
-    (excerpt,) = _fences("text", text)
+    calls = _fences("json", text)
+    excerpts = _fences("text", text)
 
-    printed = [line.rstrip() for line in _report(call).splitlines()]
-
-    for line in excerpt.splitlines():
-        assert line in printed, line
+    assert calls and len(calls) == len(excerpts), path.name
+    for call, excerpt in zip(calls, excerpts, strict=True):
+        printed = [line.rstrip() for line in _report(call).splitlines()]
+        for line in excerpt.splitlines():
+            assert line in printed, line
 
 
 @pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])
 def test_each_figure_an_eval_answer_takes_from_the_calculator_is_what_it_prints(path: Path) -> None:
     """A money figure with cents, a percent, a multiple or a count with decimals in the answer is in the report."""
     text = path.read_text(encoding="utf-8")
-    (call,) = _fences("json", text)
-    report = _report(call)
+    report = "\n".join(_report(call) for call in _fences("json", text))
     figures = _PRINTED_FIGURE.findall(_unwrapped(_section("## Expected answer", text)))
 
     assert figures
@@ -373,6 +477,9 @@ def test_eval_aw_leads_with_the_mismatch_and_quotes_the_break_even_values() -> N
     assert slide in prompt and slide in answer
     assert "the TAM mismatch leads the first tier" in answer
     assert "It works none of them out itself" in answer
+    assert "even at the founder's own best case no single assumption reaches the plan" in answer
+    assert "never a recommendation or a figure to aim for" in answer
+    assert "`[the year you expect to win the groups]`" in answer
     assert "**The shakiest assumption** is segment 1's 900 clinics" in answer
     assert "is reported but is not a candidate" in answer
     objected, answering = answer.split("**Dropped, answered**", 1)
@@ -394,6 +501,17 @@ def test_eval_ax_sets_the_deck_beside_the_gross_spend_and_keeps_the_overlap() ->
     # The fee is shared by both segments: one row each, and neither is quoted as the whole company's fee.
     assert "Neither row is quoted as the whole company's fee" in answer
     assert "brings in no fact about pools" in answer
+    # The founder asked about the fee as a whole: one whole-company run per fee, their totals quoted, nothing worked.
+    (path,) = (path for path in _EVALS if path.name.startswith("company-ax-"))
+    calls = [json.loads(call)["inputs"] for call in _fences("json", path.read_text(encoding="utf-8"))]
+    assert len(calls) == 3 and all("sensitivity" not in call for call in calls[1:])
+    assert [{segment["take_rate_percent"] for segment in call["segments"]} for call in calls[1:]] == [{"10"}, {"20"}]
+    assert "$6,300,000.00" in answer and "$12,600,000.00" in answer
+    assert "no difference between the two runs is worked out" in answer
+    # No comparable share was given: the answer says the tool compared the whole figure and asks for the share.
+    assert all("comparable_percent" not in figure for figure in calls[0]["top_down"])
+    assert "`[the share of the $1.1B that matches your Sun Belt definition]`" in answer
+    assert "`[the pools you serve today in Texas and Florida]`" in answer
 
 
 def test_eval_ay_names_the_pattern_and_works_out_no_share() -> None:
@@ -403,6 +521,7 @@ def test_eval_ay_names_the_pattern_and_works_out_no_share() -> None:
     assert "a market size from an analyst figure only" in answer
     assert "not narrowing down the customer enough" in answer
     assert "It works out no share of the $50B" in answer
+    assert "the review and the call run once those inputs are in, runs no review in this turn" in answer
     assert "$500" not in answer and "500 million" not in answer.lower()
 
 

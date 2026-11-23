@@ -24,4 +24,5 @@ None: no `equity_market_sizing` call. There is no segment yet: no buyer, count o
   what each pays and the months the price covers; the share it can serve today; the customers it plans to win, by
   when, with customers today and the channel; and the report's publisher, year and definition, so the $50B can be
   used as a cross-check.
-- It says the review and the call run once those inputs are in, and closes with not investment, legal or tax advice.
+- It says the review and the call run once those inputs are in, runs no review in this turn, and closes with not
+  investment, legal or tax advice.

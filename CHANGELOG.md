@@ -143,11 +143,12 @@ All notable changes to this repository. Dates are UTC.
   who buys, how many there are, what each pays, which of them the product can serve today and how many the founder
   plans to win by when, records each assumption with the founder's source and kind (own data, named third party or
   estimate), and works TAM, SAM and SOM per segment with `equity_market_sizing`, which also checks the deck's stated
-  figures, sets any top-down figure beside it as a cross-check, and reruns it on the founder's own low and high values;
-  the shakiest assumption is the estimate whose range moves the SOM most. Three lenses (inflation, a SOM with no path,
-  double counting) attack the market story, a refute pass drops what the founder's material answers, and the
-  survivors come back in three tiers, with the calculator's mismatches and flags first. It never looks up or invents a
-  market figure, price or share. `vc-positioning` now points to it. Four evals are in `evals/vc-market-sizing/`.
+  figures, sets any top-down figure beside it as a cross-check, and reruns it on the founder's own low and high values
+  (for a fee or price the segments share, also for the whole company); the shakiest assumption is the row of the
+  weakest source kind whose range moves the SOM most, or none when that kind has no range. Three lenses (inflation, a
+  SOM with no path, double counting) attack the market story, a refute pass drops what the founder's material
+  answers, and the survivors come back in three tiers, with the calculator's mismatches and flags first. It never
+  looks up or invents a market figure, price or share. `vc-positioning` now points to it. Four evals are in `evals/vc-market-sizing/`.
 
 ### Changed
 

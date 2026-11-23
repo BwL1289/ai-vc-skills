@@ -1,6 +1,6 @@
 ---
 name: vc-market-sizing
-description: Helps a founder build a market size a VC will believe, bottom-up from the founder's own evidence. It asks who buys, how many there are, what each pays, which of them the product can serve today and how many the founder plans to win by when, records each assumption with the founder's source, and works TAM, SAM and SOM per segment exactly with the calculator's market_sizing tool, which also checks the deck's stated figures, compares the result with any top-down figure, and reruns it on the founder's low and high values for the shakiest assumptions. An adversarial review has three lenses attack the market story as partners do (an inflated TAM, a SOM with no path, double counting) and a refute pass keep only what the founder's material grounds. Use when a founder asks how big is our market, help me size our market, build our TAM SAM SOM, is our TAM credible, bottom-up or top-down, or pastes a market slide or a 1% of the market line. Never looks up or invents a market figure, price or share. Not investment advice.
+description: Helps a founder build a market size a VC can check, bottom-up from the founder's own evidence. It asks who buys, how many there are, what each pays, which of them the product can serve today and how many the founder plans to win by when, records each assumption with the founder's source, and works TAM, SAM and SOM per segment exactly with the calculator's market_sizing tool, which also checks the deck's stated figures, compares the result with any top-down figure, and reruns it on the founder's low and high values for the shakiest assumptions. An adversarial review has three lenses attack the market story as partners do (an inflated TAM, a SOM with no path, double counting), and a refute pass keeps only what the founder's material grounds. Use when a founder asks how big is our market, help me size our market, build our TAM SAM SOM, is our TAM credible, bottom-up or top-down, or pastes a market slide or a 1% of the market line. Never looks up or invents a market figure, price or share. Not investment advice.
 ---
 
 # VC market sizing
@@ -22,7 +22,7 @@ looks up a market figure, and never adds a count, price, share, adoption rate or
 - A pasted market slide, an analyst figure ("$40B by 2030"), or a "we only need 1% of the market" line.
 - Hand off:
   - Every claim in the materials checked, market size among them, with no sizing asked for: the vc-claims-check skill.
-  - The deck as a whole, slide by slide: the vc-deck-review skill (preview). Its Market dimension can point back here.
+  - The deck as a whole, slide by slide: the vc-deck-review skill (preview).
   - The story, the one-liner and the say-and-avoid list: the vc-positioning skill.
   - The ask's arithmetic (valuation, ownership, runway): the vc-deal-math skill. One scenario on its own: the
     equity-calculator skill.
@@ -63,23 +63,41 @@ an Estimate. It never describes a source the founder did not name.
 
 ## Steps
 
-Without a subagent tool, run the three lenses (Adversarial review) first, before step 1, as "How to run the lenses"
-says.
+Without a subagent tool, run the three lenses (Adversarial review) in the turn that makes the call, before the ledger
+and the call, on all the founder's material so far (every message, not only the first), as "How to run the lenses"
+says. A turn that makes no call runs no review.
 
 1. **Quote first.** List every market line in the founder's material word for word, with its place (slide, page):
    sizes, counts, prices, shares, "1% of", sources.
 2. **A top-down-only size.** If the material has only an analyst figure or a share of one, say it matches the first
-   pattern below, and ask for the bottom-up inputs. Make no call until there is at least one segment.
-3. **Ask for what is missing** (Inputs), in one message. For each Estimate row (at most three), and for any
-   assumption the founder asks about ("what if our price is lower?"), also ask for a low and a high value: the
-   founder's numbers, never a percentage the skill picks. When the founder gives none, the call still runs and that
-   Estimate stays a bracketed ask for its range. An assumption shared by several segments (one fee, one price) gets
-   one row per segment: the tool moves one segment at a time, so no single row is quoted as the whole company's case.
+   pattern below, and ask for the bottom-up inputs. Make no call until there is at least one segment: stop after the
+   ask, run neither the review nor the call, and wait for the founder's answers.
+3. **Ask for what is missing** (Inputs), in one message. With at least one segment in, the call runs on what is there
+   and each missing input stays a bracketed ask in the answer. For each Estimate row on a figure that moves its
+   segment's SOM (at most three), and for any assumption the founder asks about ("what if our price is lower?"), also
+   ask for a low and a high value: the founder's numbers, never a percentage the skill picks. The tool varies seven
+   segment fields: `customers`, `price`, `units_per_customer`, `take_rate_percent`, `serviceable_percent`,
+   `obtainable_percent` and `obtainable_customers`. Where a segment's SOM is a count of customers, its `customers` and
+   `serviceable_percent` do not move the SOM; where a segment has no SOM, none of its fields does. An Estimate on any
+   other figure (a top-down figure, the horizon, the population, customers today) gets an ask for its source, never
+   for a range. When the founder gives none, the call still runs and that Estimate stays a bracketed ask for its
+   range. An assumption shared by several segments (one fee, one price) gets one row per segment: the tool moves one
+   segment at a time, so no single row is quoted as the whole company's case. One horizon (`som_years`) covers every
+   segment: when the founder gave a year for some segments only, the ledger says so and the answer asks
+   `[the year you expect to win that segment's customers]`.
+
+   **What one call takes:** at most 8 segments, 3 top-down figures and 6 sensitivity rows of at most 4 values each.
+   When the rows above come to more than 6, keep them in this order: the Estimate rows first, then the rows for an
+   assumption of one segment the founder asked about, then a shared assumption's rows, segment by segment. Name every
+   row left out in the answer; its range stays a bracketed ask, and a shared assumption the founder asked about is
+   still answered by the whole-company runs in step 5.
+
 4. **Build the ledger.**
-5. **Call `equity_market_sizing` once,** with every segment, top-down figure, sensitivity row and stated figure. Send
-   money and percents as strings. Always send `price_period_months` (1 for a monthly price, 12 for a yearly one):
-   left out, the tool reads the price as yearly and raises `price_period_defaulted`. Company AW (made up), software
-   for vet clinics:
+5. **Call `equity_market_sizing` once,** with every segment, top-down figure, sensitivity row and stated figure; the
+   only other calls are the whole-company runs below. Send money and percents as strings, and `price_period_months`,
+   `som_years` and a sensitivity row's `segment` as whole numbers, never strings. Always send `price_period_months`
+   (1 for a monthly price, 12 for a yearly one): left out, the tool reads the price as yearly and raises
+   `price_period_defaulted`. Company AW (made up), software for vet clinics:
 
    ```json
    {
@@ -143,20 +161,43 @@ says.
      Sensitivity 2: SOM swing                                                   $2,880,000.00  SOM high - SOM low
      Sensitivity 2: segment 1 customers to win at SOM = $8,000,000.00                1,441.67  base × (target - other segments' SOM) / this segment's SOM
      Sensitivity 3: SOM swing                                                   $1,080,000.00  SOM high - SOM low
+     A VC is likely to ask                                                som_as_percent_only  A SOM is given as a share of the serviceable customers, not as a count of customers; a VC is likely to ask for the customers, the channel and the year behind it
      A VC is likely to ask                                                   som_below_target  The SOM total is below the revenue the plan needs from this market; a VC is likely to ask where the rest comes from
    ```
 
    The deck's $120M TAM does not match the $108,000,000.00 its own inputs give, the SOM is below what the plan needs,
-   and the founder's 900 clinics, an Estimate, swing the SOM most.
+   the groups' SOM rests on a share (`som_as_percent_only`), and of the three rows the 900 clinics (an Estimate in
+   eval AW's ledger) swing the SOM most.
+
+   **The whole-company case.** When the founder asks about an assumption shared by several segments as a whole ("what
+   if our fee is 10% or 20%?"), make one more call for each value they give: the same inputs, with that value in every
+   segment that shares the assumption and no sensitivity rows. Quote only that run's Total TAM, SAM and SOM, as the
+   whole-company case at that value: tool values, not arithmetic. Its flags, checks and top-down share are not new
+   findings, and no difference between two runs is worked out by hand.
+
+   A refusal or tool error is the answer for those inputs: relay its reason, fix what it names (a list over the limits
+   in step 3, a whole number sent as a string) and call again. Never work the figures by hand instead.
 
 6. **Read the result:** per segment and in total, gross spend, TAM, SAM and SOM (money and customers), each segment's
    share of TAM, the path per segment (`som_multiple_of_today`, `new_customers_per_year`), the top-down rows, the
    checks, the flags, and each sensitivity row's swing and break-even values. A break-even value against the top-down
-   figure is a cross-check, never a target: never offer it as a price, a count or a share to aim for.
-7. **Name the shakiest assumption:** among the ledger rows of the weakest kind present that have a sensitivity row,
-   the one with the largest `som_swing` in the result (the swing runs over the founder's values and the base). Quote
-   its swing and its value at the SOM target. That is a comparison of tool values, not a calculation. When no row of
-   that kind has a sensitivity row, name none: the ask for its low and high values stands.
+   figure is a cross-check, never a target: never offer it as a price, a count or a share to aim for. A value at the
+   SOM target is what the plan would need from that one field with the rest at base, never a recommendation either:
+   quote it beside the founder's own low and high values, and when it is above their high value, say so with the
+   row's SOM high beside the target: even at the founder's own best case, that assumption alone does not reach the
+   plan. A top-down figure sent with no `comparable_percent` is compared in full: the tool reads the share that
+   matches the founder's definition as 100% and prints it as given. Say the founder gave no share, so the bottom-up
+   share and the difference are against the whole figure, and keep
+   `[the share of the figure that matches your definition]` as an open ask.
+7. **Name the shakiest assumption:** among the ledger rows of the weakest kind present whose sensitivity row has a
+   `som_swing` above $0.00, the one with the largest `som_swing` in the result (the swing runs over the founder's
+   values and the base). Quote its swing and its value at the SOM target beside the founder's high value, as step 6
+   says. When the reach is `met_without_it`, also quote its `som_low` beside the target, so the founder sees whether
+   their own low value still reaches the plan. That is a comparison of tool values, not a calculation. When no row of
+   that kind has a sensitivity row, name none: the ask for its low and high values stands. When that kind's rows all
+   swing by $0.00 or have no swing, name none and say why: the field does not move that segment's SOM
+   (`does_not_move`), or no SOM is totalled (`som_not_given`). A shared assumption's rows move one segment each: when
+   one is named, say so, and point to the whole-company runs for the company as a whole.
 8. **Run the adversarial review** (below).
 9. **Check before answering.** Every figure is quoted as stated or comes from a tool result; every objection quotes a
    founder line word for word; no market fact, source or competitor is brought in; nothing speaks as an investor.
@@ -196,13 +237,15 @@ Every lens gets the same brief, with its own name and test filled in:
 
 **How to run the lenses.** With a subagent tool (in Claude Code, the Agent or Task tool), run the three lenses as
 parallel subagents, each given only the founder's material, its brief and the Pattern column below: never the tool's
-result. Without one, run them first, before step 1, one after another, writing each lens's objections down in full
-before reading the next brief, and never revising them after the tool results are in. Lenses run that way are less
-independent than subagents; say in the answer which way they ran.
+result. Without one, run them in the turn that makes the call, before the call, one after another, on all the
+founder's material so far (every message, not only the first), writing each lens's objections down in full before
+reading the next brief, and never revising them after the tool results are in. A turn that makes no call runs no
+review. Lenses run that way are less independent than subagents; say in the answer which way they ran.
 
 **Computed findings do not go through the lenses or the refute pass.** Each check mismatch and each flag is a
 computed fact, added to the survivors as is, quoting the founder's line it bears on with the tool's values as the
 reason. A mismatch on a stated TAM, SAM or SOM leads the first tier; the flags take the tier the Flags table gives.
+A lens objection on the same line as a flag joins the flag's entry, keeping the lens name.
 
 ### Check the quotes
 
@@ -289,15 +332,19 @@ Lead with what a partner will doubt first, then the numbers.
    tiers, each with the line quoted, why, and the fix. Then **Dropped,** one line each with why it fell. Say whether
    the lenses ran as subagents.
 2. **The market:** a table per segment and in total: Customers, Gross spend, TAM, SAM, SOM, Share of TAM, SOM
-   customers / today, New customers a year. Tool values only.
+   customers / today, New customers a year. Tool values only. Each whole-company run's totals follow, labelled with
+   its value.
 3. **Against the deck:** each stated TAM, SAM or SOM, the tool's figure, the difference and the verdict. A stated TAM
    equal to the tool's gross spend is shown beside it, both quoted.
-4. **Against the top-down figure:** the tool's share and difference, as a cross-check, never as the market size.
-5. **The shakiest assumption:** the ledger row, its kind, its swing, and its value at the SOM target (or the tool's
-   `met_without_it`, `does_not_move` or `out_of_range`), quoted.
+4. **Against the top-down figure:** the tool's share and difference, as a cross-check, never as the market size;
+   with no share given, say it is against the whole figure.
+5. **The shakiest assumption:** the ledger row, its kind, its swing, and its value at the SOM target beside the
+   founder's high value (or the tool's `met_without_it` with its `som_low` beside the target, `does_not_move` or
+   `out_of_range`), quoted; or none, with why.
 6. **The ledger:** every assumption with its source and kind.
 7. **Assumptions** the tool's result lists, quoted with their sources.
-8. **Open asks:** every bracketed gap and every question from the lenses, in one list.
+8. **Open asks:** every bracketed gap, every sensitivity row left out, and every question from the lenses, in one
+   list.
 9. **Sources,** and which points rest on an unverified source.
 10. **Close:** this is not investment, legal or tax advice; the market size is only as good as the founder's
     sources, and a partner will ask to see them.
