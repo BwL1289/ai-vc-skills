@@ -82,7 +82,9 @@ that explains each, computes nothing in its own text, and gives no score.
   `[upsells, downgrades and cancellations of the customers you had 12 months ago, alone]`.
 - `burn_multiple_above_band` is relayed as a question a partner is likely to ask, with the source and date the
   tool's assumption row gives (Sacks, 2020), said to be a benchmark, not a rule; no other benchmark figure appears.
-- Stage expectations (Series A, recurring revenue): logo churn, CAC and payback, gross margin and concentration are
-  Missing, each a bracketed ask.
+- Stage expectations (Series A, recurring revenue): ARR, net revenue retention and the burn multiple are Present
+  (slide 6). ARR's movement and gross revenue retention are on no document; the founder gave the parts, so the fix is
+  to show them with the tool's values (gross revenue retention 87.5000% over the 12 months). Logo churn, CAC and
+  payback, gross margin and concentration are Missing, each a bracketed ask.
 - No score, no "ready" or "not ready", no firm named; nothing is computed, converted or rounded in the answer's own
   text.

@@ -321,6 +321,8 @@ def test_the_attack_stage_runs_independent_lenses_named_by_what_they_test() -> N
     assert not _names_a_person_or_firm(brief)
     assert "quoted word for word with its document and place" in attack
     assert "only the founder's material, the Definitions table and its lens brief" in attack
+    # A subagent lens gets no other section, so the stage-fit lens is handed the table it tests against.
+    assert "Stage fit" in lenses and "the Stage fit lens also gets the Stage expectations table" in attack
     assert "not the tool's output" in attack
     assert "one after another" in attack and "less independent than subagents" in attack
     assert "do no arithmetic" in brief

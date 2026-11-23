@@ -41,7 +41,8 @@ Ask once, in one message, for whatever is missing, by name. Never guess.
    (ARR) figures; for a period longer than a month, the expansion, contraction and churn of the starting customers
    alone; the latest month's total revenue and its one-time (setup, services, hardware) and usage parts.
 3. For the same period: customers at the start, customers lost, customers won and how many came through paid
-   channels; sales and marketing spend and what it includes; gross margin and what is in cost of revenue; net burn.
+   channels; sales and marketing spend and what it includes; gross margin and what is in cost of revenue; net burn;
+   the largest customer's revenue and the total revenue in the same period.
 4. The stage of the raise, the business model (subscription, usage, marketplace, transactions, hardware,
    pre-revenue) and the customer segment (small business, mid-market, enterprise), in the founder's words.
 5. Optional: the evidence behind each figure (a billing export, a dashboard, a bank statement).
@@ -203,8 +204,9 @@ Every lens gets the same brief, with its own name and test filled in, and the De
   time.
 
 **How to run the lenses.** With a subagent tool (in Claude Code, the Agent or Task tool), run the lenses as parallel
-subagents. Give each one only the founder's material, the Definitions table and its lens brief: not this skill's other
-sections, not the tool's output, not another lens's objections. Without a subagent tool, run Stage A first, before
+subagents. Give each one only the founder's material, the Definitions table and its lens brief (the Stage fit lens also
+gets the Stage expectations table, since it tests against it): not this skill's other sections, not the tool's output,
+not another lens's objections. Without a subagent tool, run Stage A first, before
 step 1: run the lenses one after another, write each lens's objections down in full before reading the next lens's
 brief, and never revise an earlier list. Lenses run this way are less independent than subagents, and the same agent
 then judges them in Stage B, so the answer says so.
