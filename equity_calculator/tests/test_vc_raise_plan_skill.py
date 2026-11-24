@@ -46,9 +46,13 @@ _TRIGGERS = (
 )
 _CRITERIA = ("stage", "cheque size", "lead or follow", "sector", "portfolio conflicts", "warm path")
 # Hand-offs to skills in this pack; each must exist.
-_HANDOFF_SKILLS = ("vc-round-sizing", "vc-diligence-questions", "equity-calculator")
-# Hand-offs to skills built alongside this one, named only: their folders arrive with their own change.
-_NAMED_HANDOFFS = ("vc-intro-email", "vc-pass-debrief")
+_HANDOFF_SKILLS = (
+    "vc-round-sizing",
+    "vc-diligence-questions",
+    "equity-calculator",
+    "vc-intro-email",
+    "vc-pass-debrief",
+)
 # Preview skills are marked "(preview)" where another skill hands off to them, as the rest of the pack does.
 _PREVIEW_HANDOFFS = (
     "the vc-round-sizing skill (preview)",
@@ -170,8 +174,6 @@ def test_every_skill_it_hands_off_to_is_named_and_preview_ones_are_marked() -> N
     for name in _HANDOFF_SKILLS:
         assert name in handoffs, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
-    for name in _NAMED_HANDOFFS:
-        assert name in handoffs, name
     for handoff in _PREVIEW_HANDOFFS:
         assert handoff in handoffs, handoff
     # The tracker's next steps hand an intro email and a pass to the skills built for them.

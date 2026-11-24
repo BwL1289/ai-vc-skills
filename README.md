@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/BwL1289/ai-vc-skills/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/BwL1289/ai-vc-skills/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-3fb950"></a>
-  <a href="#skills"><img alt="Skills: 15" src="https://img.shields.io/badge/skills-15-C9470D"></a>
+  <a href="#skills"><img alt="Skills: 20" src="https://img.shields.io/badge/skills-20-C9470D"></a>
   <a href="#install"><img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-d97757"></a>
   <a href="docs/install.md"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-6e7681"></a>
   <img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-3776ab">
@@ -38,8 +38,10 @@
 
 **AI VC skills** are agent skills that help a founder get a raise ready before a VC sees it. They check your deck's
 ask and its claims, review your deck, messaging, metrics, market size, round size, term sheet and investor updates,
-show the judgment behind what you built, rehearse your partner meeting, prepare you for diligence and draft the memo
-your champion partner is likely to write. In every review, skeptical passes raise the strongest objections to your
+show the judgment behind what you built, build your competition map, plan your raise from your own investor list, draft
+the emails that open investor conversations, learn from the passes you get, size the option pool your hiring plan
+needs, rehearse your partner meeting, prepare you for diligence and draft the memo your champion partner is likely to
+write. In every review, skeptical passes raise the strongest objections to your
 material, then a refute pass drops each one that your own material answers or that rests on a fact you did not give.
 What is left is what you still need to fix, answer or take to your lawyer.
 
@@ -80,7 +82,7 @@ pip install "equity_calculator[mcp] @ git+https://github.com/BwL1289/ai-vc-skill
 ```
 
 Add the server to the client's MCP settings, then load `skills/equity-calculator/`, `skills/vc-deal-math/`,
-`skills/vc-positioning/`, `skills/vc-claims-check/`, `skills/vc-deck-review/`, `skills/vc-partner-meeting/`, `skills/vc-taste-check/`, `skills/vc-round-sizing/`, `skills/vc-term-sheet-review/`, `skills/vc-diligence-questions/`, `skills/vc-current-investor-update/`, `skills/vc-metrics-readiness/`, `skills/vc-investor-memo/`, `skills/vc-market-sizing/` and `skills/vc-prospective-investor-update/` where the client reads skills.
+`skills/vc-positioning/`, `skills/vc-claims-check/`, `skills/vc-deck-review/`, `skills/vc-partner-meeting/`, `skills/vc-taste-check/`, `skills/vc-round-sizing/`, `skills/vc-term-sheet-review/`, `skills/vc-diligence-questions/`, `skills/vc-current-investor-update/`, `skills/vc-metrics-readiness/`, `skills/vc-investor-memo/`, `skills/vc-market-sizing/`, `skills/vc-prospective-investor-update/`, `skills/vc-competitive-landscape/`, `skills/vc-raise-plan/`, `skills/vc-intro-email/`, `skills/vc-pass-debrief/` and `skills/vc-option-pool-plan/` where the client reads skills.
 `vc-diligence-questions` reads `vc-partner-meeting`'s question bank, so load both folders.
 `vc-prospective-investor-update` reads `vc-current-investor-update`'s metric rules file, so load both folders.
 Step by step for each client: [docs/install.md](docs/install.md).
@@ -109,25 +111,30 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 
 ## Skills
 
-| Skill                                                                              | What it does                                                                                                                                                                                                                                                                                                                                                         | Status       |
-| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| [`equity-calculator`](skills/equity-calculator/SKILL.md)                           | Twelve equity scenarios worked exactly: the investor test, a hire's grant, the option-pool shuffle, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls, a check of a raise's numbers, how long a raise lasts on a plan, a check of traction metrics, a market size built bottom-up, and a priced round now set beside a convertible note now.     | ✅ Available |
-| [`vc-deal-math`](skills/vc-deal-math/SKILL.md)                                     | For founders: checks your own deck's ask before a VC does (valuation, ownership after the round, the pool top-up, the SAFE stack, runway, use of funds), every number from the calculator.                                                                                                                                                                           | 🧪 Preview   |
-| [`vc-positioning`](skills/vc-positioning/SKILL.md)                                 | For founders: tightens your raise's messaging before you go out, with an adversarial review (skeptical lenses attack it, then a judge drops what your own material already answers), a say-and-avoid list and a prep script for a session with an existing investor.                                                                                                 | 🧪 Preview   |
-| [`vc-claims-check`](skills/vc-claims-check/SKILL.md)                               | For founders: checks every claim in your deck, one-pager and narrative before a VC does (a source you can show, figures that agree, patterns a VC discounts), with a skeptic that picks what a partner checks first and a refute pass that keeps only grounded attacks.                                                                                              | 🧪 Preview   |
-| [`vc-deck-review`](skills/vc-deck-review/SKILL.md)                                 | For founders: reads your deck the way a partner will before the meeting: ten dimensions marked by the evidence the deck shows, first- and last-slide rules, competition at four levels, a ranked fix list from an adversarial review, and which kind of investor the story fits. No score, no named firms.                                                           | 🧪 Preview   |
-| [`vc-partner-meeting`](skills/vc-partner-meeting/SKILL.md)                         | For founders: rehearses a partner meeting: the hardest questions your own material leaves open, asked one at a time or in one message, prep for what a partner checks around the meeting, and a debrief with a stronger answer per weak one, built only from what you said.                                                                                          | 🧪 Preview   |
-| [`vc-taste-check`](skills/vc-taste-check/SKILL.md)                                 | For founders: shows the judgment behind what you built (your product, brand and scope decisions and what you said no to), flags choices that read as generic, AI-sounding, copied or polished over, runs the same attack-and-refute review, and turns what survives into why-we-built-it-this-way lines for the deck and the meeting.                                | 🧪 Preview   |
-| [`vc-round-sizing`](skills/vc-round-sizing/SKILL.md)                               | For founders: sizes your raise on your own plan: how long each amount lasts on plan and in a downside, which milestone month its cash reaches with time to raise the next round, the smallest raise that gets there, and raise-now against wait side by side, every number from the calculator or from your own plan.                                                | 🧪 Preview   |
-| [`vc-term-sheet-review`](skills/vc-term-sheet-review/SKILL.md)                     | For founders: reads a term sheet you were offered in plain words, marks each term against YC's standard and clean Series A term sheet, runs the round and an exit waterfall at low and high exits on the calculator, and ends with questions for your lawyer. Never says whether to sign.                                                                            | 🧪 Preview   |
-| [`vc-diligence-questions`](skills/vc-diligence-questions/SKILL.md)                 | For founders: prepares you for a fund's due diligence after the first meeting: the questions your own material leaves open, by area, ranked by how much each answer moves the decision, with draft answers from your own material and a data-room checklist scaled to your stage.                                                                                    | 🧪 Preview   |
-| [`vc-current-investor-update`](skills/vc-current-investor-update/SKILL.md)         | For founders: writes or reviews your monthly or quarterly update to your current investors so it builds trust before the next raise: the same metrics and definitions every time, lowlights told straight, every figure and promise tied out to the last update, runway from the calculator, and a reader pass that flags spin and missing bad news.                 | 🧪 Preview   |
-| [`vc-metrics-readiness`](skills/vc-metrics-readiness/SKILL.md)                     | For founders: checks your traction metrics before a VC does: ARR against run-rate, gross and net retention, logo and revenue churn, CAC payback, burn multiple; agreement across deck, model and update; which metrics your stage expects; a ranked fix list from an adversarial review. No score.                                                                   | 🧪 Preview   |
-| [`vc-investor-memo`](skills/vc-investor-memo/SKILL.md)                             | For founders: drafts the internal investment memo your champion partner is likely to write for the partnership: the case in one shape, the round and the outcome case on the calculator from your own exit assumptions (no fund math), and a dissent pass that finds the holes first.                                                                                | 🧪 Preview   |
-| [`vc-market-sizing`](skills/vc-market-sizing/SKILL.md)                             | For founders: builds your market size bottom-up (who buys, how many, what each pays, how many you can win), every assumption with your source, checked against the deck and any top-down figure, with sensitivity on the shakiest assumption and an adversarial review of inflation, a SOM with no path and double counting.                                         | 🧪 Preview   |
-| [`vc-prospective-investor-update`](skills/vc-prospective-investor-update/SKILL.md) | For founders: writes or reviews the short update you send the investors you hope to raise from, so they see a line, not a dot: the same metrics and definitions every time, each earlier value side by side as stated, last update's promises tied out, one ask, runway from the calculator when you show it, and a reader pass that flags spin and moved goalposts. | 🧪 Preview   |
+| Skill                                                                              | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Status       |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| [`equity-calculator`](skills/equity-calculator/SKILL.md)                           | Fourteen equity scenarios worked exactly: the investor test, a hire's grant, the option-pool shuffle, SAFEs and notes in a priced round, dilution, vesting, exit waterfalls, a check of a raise's numbers, how long a raise lasts on a plan, a check of traction metrics, a market size built bottom-up, a priced round now set beside a convertible note now, the pool a hiring plan needs beside a term sheet's ask, and what is left of a round with the term sheets a funnel is expected to give. | ✅ Available |
+| [`vc-deal-math`](skills/vc-deal-math/SKILL.md)                                     | For founders: checks your own deck's ask before a VC does (valuation, ownership after the round, the pool top-up, the SAFE stack, runway, use of funds), every number from the calculator.                                                                                                                                                                                                                                                                                                            | 🧪 Preview   |
+| [`vc-positioning`](skills/vc-positioning/SKILL.md)                                 | For founders: tightens your raise's messaging before you go out, with an adversarial review (skeptical lenses attack it, then a judge drops what your own material already answers), a say-and-avoid list and a prep script for a session with an existing investor.                                                                                                                                                                                                                                  | 🧪 Preview   |
+| [`vc-claims-check`](skills/vc-claims-check/SKILL.md)                               | For founders: checks every claim in your deck, one-pager and narrative before a VC does (a source you can show, figures that agree, patterns a VC discounts), with a skeptic that picks what a partner checks first and a refute pass that keeps only grounded attacks.                                                                                                                                                                                                                               | 🧪 Preview   |
+| [`vc-deck-review`](skills/vc-deck-review/SKILL.md)                                 | For founders: reads your deck the way a partner will before the meeting: ten dimensions marked by the evidence the deck shows, first- and last-slide rules, competition at four levels, a ranked fix list from an adversarial review, and which kind of investor the story fits. No score, no named firms.                                                                                                                                                                                            | 🧪 Preview   |
+| [`vc-partner-meeting`](skills/vc-partner-meeting/SKILL.md)                         | For founders: rehearses a partner meeting: the hardest questions your own material leaves open, asked one at a time or in one message, prep for what a partner checks around the meeting, and a debrief with a stronger answer per weak one, built only from what you said.                                                                                                                                                                                                                           | 🧪 Preview   |
+| [`vc-taste-check`](skills/vc-taste-check/SKILL.md)                                 | For founders: shows the judgment behind what you built (your product, brand and scope decisions and what you said no to), flags choices that read as generic, AI-sounding, copied or polished over, runs the same attack-and-refute review, and turns what survives into why-we-built-it-this-way lines for the deck and the meeting.                                                                                                                                                                 | 🧪 Preview   |
+| [`vc-round-sizing`](skills/vc-round-sizing/SKILL.md)                               | For founders: sizes your raise on your own plan: how long each amount lasts on plan and in a downside, which milestone month its cash reaches with time to raise the next round, the smallest raise that gets there, and raise-now against wait side by side, every number from the calculator or from your own plan.                                                                                                                                                                                 | 🧪 Preview   |
+| [`vc-term-sheet-review`](skills/vc-term-sheet-review/SKILL.md)                     | For founders: reads a term sheet you were offered in plain words, marks each term against YC's standard and clean Series A term sheet, runs the round and an exit waterfall at low and high exits on the calculator, and ends with questions for your lawyer. Never says whether to sign.                                                                                                                                                                                                             | 🧪 Preview   |
+| [`vc-diligence-questions`](skills/vc-diligence-questions/SKILL.md)                 | For founders: prepares you for a fund's due diligence after the first meeting: the questions your own material leaves open, by area, ranked by how much each answer moves the decision, with draft answers from your own material and a data-room checklist scaled to your stage.                                                                                                                                                                                                                     | 🧪 Preview   |
+| [`vc-current-investor-update`](skills/vc-current-investor-update/SKILL.md)         | For founders: writes or reviews your monthly or quarterly update to your current investors so it builds trust before the next raise: the same metrics and definitions every time, lowlights told straight, every figure and promise tied out to the last update, runway from the calculator, and a reader pass that flags spin and missing bad news.                                                                                                                                                  | 🧪 Preview   |
+| [`vc-metrics-readiness`](skills/vc-metrics-readiness/SKILL.md)                     | For founders: checks your traction metrics before a VC does: ARR against run-rate, gross and net retention, logo and revenue churn, CAC payback, burn multiple; agreement across deck, model and update; which metrics your stage expects; a ranked fix list from an adversarial review. No score.                                                                                                                                                                                                    | 🧪 Preview   |
+| [`vc-investor-memo`](skills/vc-investor-memo/SKILL.md)                             | For founders: drafts the internal investment memo your champion partner is likely to write for the partnership: the case in one shape, the round and the outcome case on the calculator from your own exit assumptions (no fund math), and a dissent pass that finds the holes first.                                                                                                                                                                                                                 | 🧪 Preview   |
+| [`vc-market-sizing`](skills/vc-market-sizing/SKILL.md)                             | For founders: builds your market size bottom-up (who buys, how many, what each pays, how many you can win), every assumption with your source, checked against the deck and any top-down figure, with sensitivity on the shakiest assumption and an adversarial review of inflation, a SOM with no path and double counting.                                                                                                                                                                          | 🧪 Preview   |
+| [`vc-prospective-investor-update`](skills/vc-prospective-investor-update/SKILL.md) | For founders: writes or reviews the short update you send the investors you hope to raise from, so they see a line, not a dot: the same metrics and definitions every time, each earlier value side by side as stated, last update's promises tied out, one ask, runway from the calculator when you show it, and a reader pass that flags spin and moved goalposts.                                                                                                                                  | 🧪 Preview   |
+| [`vc-competitive-landscape`](skills/vc-competitive-landscape/SKILL.md)             | For founders: builds your competition map and slide before a VC builds one about you: the competitors you name at four levels (direct, indirect, adjacent, and substitutes, doing nothing included), three to five buying axes with their anchors stated first and every placement yours, a why-customers-pick-us line per competitor, the answer to "what if the big platform builds this?", and an adversarial review. Looks nothing up.                                                            | 🧪 Preview   |
+| [`vc-raise-plan`](skills/vc-raise-plan/SKILL.md)                                   | For founders: plans your raise from your own investor list: tiers it by your own criteria, each attribute with your source, batches first meetings so they land within a few weeks of each other, dates the plan from the start-raising month and keeps a tracker, with what is left of the round and the term sheets your funnel is expected to give from the calculator. Names no firm, sends nothing.                                                                                              | 🧪 Preview   |
+| [`vc-intro-email`](skills/vc-intro-email/SKILL.md)                                 | For founders: writes the emails that open investor conversations from your own material: a forwardable intro blurb with a note asking your contact for the intro, a cold email and two follow-ups, each short with one ask and every figure as you gave it, and a reader pass that flags hype words, claims with no source and figures that disagree. Sends nothing, looks nobody up.                                                                                                                 | 🧪 Preview   |
+| [`vc-pass-debrief`](skills/vc-pass-debrief/SKILL.md)                               | For founders: learns from the passes VCs send: each pass quoted word for word and grouped by the reason given, common readings labelled unverified (never what the investor meant), each reason mapped to its fix or skill, every come-back-when condition beside your own figure, and a short reply per pass that keeps the door open. Sends nothing.                                                                                                                                                | 🧪 Preview   |
+| [`vc-option-pool-plan`](skills/vc-option-pool-plan/SKILL.md)                       | For founders: sizes the option pool your own hiring plan needs until the next round and sets it beside the pool a term sheet asks for: the price per share, the effective pre-money, your ownership and the pool left at the next round, both ways on the calculator, with one evidence line for the pool conversation. Never says which pool to accept.                                                                                                                                              | 🧪 Preview   |
 
-`vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-current-investor-update`, `vc-metrics-readiness`, `vc-investor-memo`, `vc-market-sizing` and `vc-prospective-investor-update` are in preview until they have been checked on
+`vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-current-investor-update`, `vc-metrics-readiness`, `vc-investor-memo`, `vc-market-sizing`, `vc-prospective-investor-update`, `vc-competitive-landscape`, `vc-raise-plan`, `vc-intro-email`, `vc-pass-debrief` and `vc-option-pool-plan` are in preview until they have been checked on
 real decks and meetings. The calculator's arithmetic is tested; the reviews' wording may change. The `vc-positioning` and
 `vc-claims-check` evals were run in live Claude Code sessions on 2026-11-22, and each file holds an excerpt of its
 recorded answer with a verdict against its pass sentence: two passed and five passed in part. Pass means every clause
@@ -135,26 +142,29 @@ of that sentence was met, Partial that exactly one was missed or met only in par
 missed. When a pass sentence changed after its run, the verdict counts the clauses it had then, and the file says
 which clauses changed and how the run reads against today's sentence.
 Two were run again after a skill fix, as their files say. One run each is a small sample. On 2026-11-23 one
-eval of every other review skill except `vc-deal-math` was run live too. An eval file whose first paragraph says a
-live run is recorded holds an excerpt of it with its verdict; every other eval, the `vc-deal-math` ones included,
-states the expected behaviour only.
+eval of every other review skill then in the pack except `vc-deal-math` was run live too; the five skills added on
+2026-11-24 (`vc-competitive-landscape`, `vc-raise-plan`, `vc-intro-email`, `vc-pass-debrief` and `vc-option-pool-plan`)
+have not been run live yet. An eval file whose first paragraph says a live run is recorded holds an excerpt of it with
+its verdict; every other eval, the `vc-deal-math` ones and the new five's included, states the expected behaviour only.
 
-The `equity-calculator` skill covers twelve scenarios:
+The `equity-calculator` skill covers fourteen scenarios:
 
-| Scenario             | The question it answers                                                                                                       |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `investor`           | An investor wants n of the company. Is the deal worth it? (Paul Graham's equity equation)                                     |
-| `employee`           | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                            |
-| `pool`               | A round asks for a bigger option pool. What is the real price per share, and who owns what afterwards?                        |
-| `round`              | A priced round converts post-money SAFEs and convertible notes. At what price, and who owns what afterwards?                  |
-| `dilution`           | A holder owns h of the company. What is left after a series of rounds?                                                        |
-| `vesting`            | How much of a grant has vested at a given month, and what is it worth above the strike?                                       |
-| `waterfall`          | The company is sold. Who gets what, with preferences paid by rank and each preferred class free to convert?                   |
-| `deal_check`         | Do a raise's valuation, percent sold, ownership after the round and runway agree, as a VC will check them?                    |
-| `runway_plan`        | How long does each raise last on a phased plan and a downside, which milestones does it reach, and how much is needed?        |
-| `metrics_check`      | Do the ARR, retention, churn, CAC payback and burn multiple a deck states match their parts?                                  |
-| `market_sizing`      | What are a market's TAM, SAM and SOM built bottom-up, and which assumption moves them most?                                   |
-| `instrument_compare` | A priced round now or a convertible note now: who owns what after the next round, and who gets what at an exit, side by side? |
+| Scenario             | The question it answers                                                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `investor`           | An investor wants n of the company. Is the deal worth it? (Paul Graham's equity equation)                                                  |
+| `employee`           | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                         |
+| `pool`               | A round asks for a bigger option pool. What is the real price per share, and who owns what afterwards?                                     |
+| `round`              | A priced round converts post-money SAFEs and convertible notes. At what price, and who owns what afterwards?                               |
+| `dilution`           | A holder owns h of the company. What is left after a series of rounds?                                                                     |
+| `vesting`            | How much of a grant has vested at a given month, and what is it worth above the strike?                                                    |
+| `waterfall`          | The company is sold. Who gets what, with preferences paid by rank and each preferred class free to convert?                                |
+| `deal_check`         | Do a raise's valuation, percent sold, ownership after the round and runway agree, as a VC will check them?                                 |
+| `runway_plan`        | How long does each raise last on a phased plan and a downside, which milestones does it reach, and how much is needed?                     |
+| `metrics_check`      | Do the ARR, retention, churn, CAC payback and burn multiple a deck states match their parts?                                               |
+| `market_sizing`      | What are a market's TAM, SAM and SOM built bottom-up, and which assumption moves them most?                                                |
+| `instrument_compare` | A priced round now or a convertible note now: who owns what after the next round, and who gets what at an exit, side by side?              |
+| `pool_plan`          | A term sheet asks for an option pool. How big a pool does the hiring plan to the next round need, and what does each pool cost?            |
+| `raise_pipeline`     | How much of the round is left after the lead, firm commitments and pro rata, how many term sheets does the funnel give, and when to start? |
 
 ## What you can ask
 
@@ -195,6 +205,18 @@ Once the plugin is installed, ask in plain words.
 > Write this month's update for the VCs we're warming up: here is last month's update, this month's notes and our one
 > ask.
 
+> Build our competition slide: here are the competitors we meet in deals, what each does and where we heard it.
+
+> Plan our raise: here is our investor list with each fund's stage, cheque size and warm path, the lead's cheque, our
+> commitments and our own rates from first meeting to term sheet.
+
+> Write an intro blurb my contact can forward to a seed fund, and a cold email for the funds we have no intro to:
+> here is our deck and our metrics.
+
+> Three VCs passed this week: here are their emails. What do they say, and how do I reply?
+
+> The term sheet asks for a 15% pool. Here is our hiring plan until the Series A: how big a pool do we need?
+
 **Equity math**
 
 > An investor wants 7% and says the deal makes the company 10% more valuable. Should we take it?
@@ -218,9 +240,10 @@ Once the plugin is installed, ask in plain words.
 2. **The calculator does the math.** Every figure a skill works out comes from the exact equity calculator (its MCP
    tools or its command). Its report says how each line was computed, and each result lists its assumptions and their
    sources. The model reads, asks and writes; it never does the arithmetic.
-3. **A review attacks, then refutes.** In every skill but `equity-calculator` and `vc-deal-math`, skeptical passes
-   raise the strongest objections, and a refute pass drops any that your own material answers or that rest on a fact
-   you did not give.
+3. **A review attacks, then refutes.** In every review (each skill but `equity-calculator`, `vc-deal-math` and the four
+   that plan or draft: `vc-raise-plan`, `vc-intro-email`, `vc-pass-debrief` and `vc-option-pool-plan`), skeptical
+   passes raise the strongest objections, and a refute pass drops any that your own material answers or that rest on a
+   fact you did not give. `vc-intro-email`'s reader pass flags hype, unsourced claims and figures that disagree.
 
 The calculator's part, for the investor test:
 
@@ -260,7 +283,7 @@ The formulas, their sources, every flag and a worked example per scenario are in
 
 ## Roadmap
 
-- [x] `equity-calculator`: twelve scenarios, command, workbook, MCP server, Python package
+- [x] `equity-calculator`: fourteen scenarios, command, workbook, MCP server, Python package
 - [x] Claude Code plugin and marketplace
 - [ ] `vc-deal-math`: founders check their own deck's numbers with the calculator (preview)
 - [ ] `vc-positioning`: founders tighten their raise's messaging, stress-tested by an adversarial review, and prep it
@@ -289,6 +312,16 @@ The formulas, their sources, every flag and a worked example per scenario are in
       calculator, with sensitivity and an adversarial review (preview)
 - [ ] `vc-prospective-investor-update`: founders keep the investors they hope to raise from updated before the raise,
       so each sees a line of progress, not a single dot (preview)
+- [ ] `vc-competitive-landscape`: founders build their competition map and slide at four levels on their own axes,
+      with an adversarial review (preview)
+- [ ] `vc-raise-plan`: founders tier their own investor list, batch first meetings and see what is left of the round
+      on the calculator (preview)
+- [ ] `vc-intro-email`: founders draft a forwardable intro blurb, a cold email and two follow-ups from their own
+      material (preview)
+- [ ] `vc-pass-debrief`: founders read the passes they get, map each reason to a fix and reply to keep the door open
+      (preview)
+- [ ] `vc-option-pool-plan`: founders size the pool their hiring plan needs beside the pool a term sheet asks for, on
+      the calculator (preview)
 
 Want a skill that is not here? [Request it](https://github.com/BwL1289/ai-vc-skills/issues/new?template=skill_request.yml).
 

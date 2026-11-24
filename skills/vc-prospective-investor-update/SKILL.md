@@ -34,6 +34,8 @@ adds a figure, customer, event or investor the founder did not give, and never l
     and no milestone.
   - Whether a metric's definition is the one investors expect: the vc-metrics-readiness skill. This skill keeps a
     definition the same over time without judging it.
+  - The first email to an investor (an intro blurb, a cold email, follow-ups): the vc-intro-email skill (preview).
+  - A fund that passed and said when to come back, read and answered: the vc-pass-debrief skill (preview).
 
 ## Inputs
 

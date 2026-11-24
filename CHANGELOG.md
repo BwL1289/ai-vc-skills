@@ -6,6 +6,46 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- Plugin version 0.3.0, so an installed copy picks up the five new skills and the calculator's two new scenarios;
+  the README, the website, the plugin and marketplace descriptions and AGENTS.md list them, and the existing skills
+  hand the topics they own to them.
+- The calculator's thirteenth scenario, `pool_plan` (MCP tool `equity_pool_plan`, a command and a `Pool plan` workbook
+  sheet): the option pool a founder's hiring plan needs until the next round beside the pool a term sheet asks for,
+  both created in the pre-money and worked by the option-pool shuffle's own code, with the price per share, the
+  effective pre-money, who owns what and the pool left ungranted at the next round side by side and requested - plan
+  for each. Grants come in shares or as percents of the post-round shares, never a mix; it never picks a pool.
+- The calculator's fourteenth scenario, `raise_pipeline` (MCP tool `equity_raise_pipeline`, a command and a
+  `Raise pipeline` workbook sheet): what is left of a round after the lead's cheque, the firm commitments and pro rata
+  (soft commitments shown, never counted), the term sheets the founder's funnel is expected to give on the founder's
+  own stage rates (a benchmark rate only with its source, and flagged), the targets needed, and the start-raising month
+  from the runway plan's own row. It flags a lead cheque, pro rata or a funnel left out, and names no investor.
+- The `vc-competitive-landscape` skill, in preview: a founder builds the competition map and slide before a VC builds
+  one about them. The competitors the founder names, each fact with its source, are placed at four levels (direct,
+  indirect, adjacent, and substitutes, doing nothing included); three to five axes come with 1-to-5 anchors stated up
+  front and the founder places every company; it writes the substitutes story, a why-customers-pick-us line per
+  competitor and the answer to "what if the big platform builds this?", drafts the slide as a table and a 2x2, and
+  runs an adversarial review with a refute pass. It looks nothing up. Four evals are in
+  `evals/vc-competitive-landscape/`.
+- The `vc-raise-plan` skill, in preview: a founder plans the raise from their own investor list. It tiers the list by
+  the founder's own criteria, each attribute with its source or marked unverified, batches first meetings so they land
+  within a few weeks of each other, dates the plan from the start-raising month and keeps a tracker table, with the
+  room left, the expected term sheets and the targets needed from `equity_raise_pipeline`. It never looks anyone up,
+  never names a firm as a fit and sends nothing. Four evals are in `evals/vc-raise-plan/`.
+- The `vc-intro-email` skill, in preview: a founder drafts the emails that open investor conversations from their own
+  material: a forwardable intro blurb with a note asking the connector for the intro, a cold email and two follow-ups,
+  each short with one ask and every figure quoted as the founder gave it. A reader pass flags hype words, claims with
+  no source and figures that disagree, and hands them to `vc-claims-check`. It looks nobody up and sends nothing. Four
+  evals are in `evals/vc-intro-email/`.
+- The `vc-pass-debrief` skill, in preview: a founder learns from the passes VCs send. Each pass is quoted word for word
+  and grouped by the reason given, common readings of each phrase are labelled unverified (never what the investor
+  meant), each reason maps to its fix or the skill that works on it, every come-back-when condition sits beside the
+  founder's own figure, and a short reply per pass keeps the door open and asks for at most one referral. It sends
+  nothing and keeps no list. Four evals are in `evals/vc-pass-debrief/`.
+- The `vc-option-pool-plan` skill, in preview: a founder sizes the pool their own hiring plan needs until the next
+  round and sets it beside the pool a term sheet asks for, both ways on `equity_pool_plan`: the price per share, the
+  effective pre-money, the founders' ownership and the pool left at the next round, with one evidence line for the
+  pool conversation built only from the founder's plan. It never says which pool to accept. Four evals are in
+  `evals/vc-option-pool-plan/`.
 - `vc-deck-review` is out of preview after its first run on a real deck, whose founder adopted most of its fix list;
   plugin version 0.2.7.
 - A `vc-deal-math` eval (Company BW, unrecorded) for a SAFE raise whose planned rise has its start month but no

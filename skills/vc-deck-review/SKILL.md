@@ -31,6 +31,8 @@ names a firm the deck fits, gives no score, and never adds a fact about the comp
   - The ask's arithmetic in full (ownership after the round, the pool, the SAFE stack, runway): the vc-deal-math
     skill, whose steps this skill follows. One equity question with no deck: the equity-calculator skill.
   - The market slide, built bottom-up from who buys, how many and what each pays: the vc-market-sizing skill (preview).
+  - The competition slide itself, built as a map at four levels on the founder's own axes, with the substitutes story
+    and the answer to "what if the big platform builds this?": the vc-competitive-landscape skill (preview).
   - How much to raise and what it reaches: the vc-round-sizing skill (preview).
   - Rehearsing the partner meeting once the deck is ready: the vc-partner-meeting skill (preview).
   - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview).
@@ -125,7 +127,8 @@ For each level, quote the deck's line word for word or mark the level missing; w
 quote it and say "implied", never paraphrase it. The skill names no competitor itself: a missing level
 becomes a bracketed ask (`[the tool your buyer already uses that could add this]`). "No competitors" goes to the
 vc-claims-check discount patterns. A chart that puts the company alone in the best corner shows a position, not why
-customers pick it; ask for the reason (unverified).
+customers pick it; ask for the reason (unverified). A founder who wants the competition slide rebuilt, not only
+checked, goes to the vc-competitive-landscape skill (preview).
 
 ## Steps
 

@@ -42,6 +42,9 @@ adds a fact about the company that the founder did not give.
   - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview).
   - Market size, bottom-up: the vc-market-sizing skill (preview).
   - Keeping prospective investors updated before the raise: the vc-prospective-investor-update skill (preview).
+  - The competition map and slide: the vc-competitive-landscape skill (preview).
+  - The intro emails themselves (a forwardable blurb, a cold email, follow-ups): the vc-intro-email skill (preview).
+  - Passes investors have already sent, read and answered: the vc-pass-debrief skill (preview).
 
 ## Inputs
 

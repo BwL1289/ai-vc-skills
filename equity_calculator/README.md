@@ -14,10 +14,11 @@ arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with 
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
 [`skills/equity-calculator/`](../skills/equity-calculator/SKILL.md), at the repository root, tells an assistant when and
-how to use it. The fourteen founder reviews in the root README's [skills table](../README.md#skills), all in preview,
-take every figure they work out from these scenarios; four were built around one: `deal_check` for `vc-deal-math`,
-`runway_plan` for `vc-round-sizing`, `metrics_check` for `vc-metrics-readiness` and `market_sizing` for
-`vc-market-sizing`.
+how to use it. The nineteen founder skills in the root README's [skills table](../README.md#skills), all but
+`vc-deck-review` in preview, take every figure they work out from these scenarios; six were built around one:
+`deal_check` for `vc-deal-math`, `runway_plan` for `vc-round-sizing`, `metrics_check` for `vc-metrics-readiness`,
+`market_sizing` for `vc-market-sizing`, `pool_plan` for `vc-option-pool-plan` and `raise_pipeline` for
+`vc-raise-plan`.
 
 Built from the original `equity_equation` script this repository started with (it is in the git history, at
 [`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/ai-vc-skills/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation))
@@ -159,8 +160,8 @@ sources, and to quote the labelled assumptions with every answer. In Claude Code
 `equity-calculator`, in its name and folder: the Agent Skills format allows only lowercase letters, digits and
 hyphens in a skill's name, and the folder must carry the same name.
 
-The other skills, the founder reviews, are listed in the root README's [skills table](../README.md#skills), each in
-preview until it has been checked on real decks and meetings.
+The other skills, for founders, are listed in the root README's [skills table](../README.md#skills), each in
+preview until it has been checked on real decks and meetings (`vc-deck-review` has been).
 
 ## Sources
 
