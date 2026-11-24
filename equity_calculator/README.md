@@ -1205,8 +1205,10 @@ compounds exactly under either stub rule.
 
 Verdicts, checks and flags use the exact values, never the rounded ones shown. So a line can look as if it contradicts
 the verdict beside it: a runway of 17.996 months prints as 18.00 months beside a flag for a raise lasting under 18,
-and a difference of 0.50004 points prints as 0.5000% beside a 0.5-point tolerance and the verdict mismatch. The exact
-fraction of each is in the JSON.
+and a difference of 0.50004 points prints as 0.5000% beside a 0.5-point tolerance and the verdict mismatch. A deck that
+copies a figure printed from an exact half (a runway of 12.125 months, printed 12.13) is consistent, and its difference
+line prints -0.01 months beside two equal figures: the exact difference, -0.005 months, is half a hundredth, rounded
+away from zero like every figure. The exact fraction of each is in the JSON.
 
 Each number shown is its own exact value rounded once. So rounded parts can miss a rounded total by one in the last
 place shown: in the report, a thousandth of a share or 0.0001% beside a total line. The pool's and the round's value

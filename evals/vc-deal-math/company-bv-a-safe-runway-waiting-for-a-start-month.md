@@ -4,7 +4,8 @@ A test prompt for the `vc-deal-math` skill. The company is made up. The answer s
 a recorded run, and this eval has not been run in a live session. The founder plans more spend after a raise on a SAFE
 and gives its amount but not the month it starts, so the plan cannot be run yet. A run passes when it makes no
 `equity_runway_plan` or `equity_deal_check` call, gives no runway figure, marks the runway line "not checked: waiting
-for [the month the planned spend starts]", asks for that month by name, and computes nothing in its own text.
+for [the month the planned spend starts]", asks for that month by name, still offers `equity_round` for the SAFE's
+ownership, and computes nothing in its own text.
 
 ## Prompt
 
@@ -31,4 +32,7 @@ month 1, or with today's $60,000 alone, the plan would give a runway the founder
 - It never assumes the month (month 1, the month the round closes, "right after the raise"), and never sends the
   $95,000 as the only phase or today's $60,000 alone.
 - It makes no `equity_deal_check` call and says why: that tool works the new money as a priced equity round.
+- The ownership offer does not wait for the month: it still offers `equity_round` (the equity-calculator skill) with
+  the SAFE as an instrument, asks for the next priced round the founder expects (its size, its pre-money and any pool
+  target), and says the figures depend on that round.
 - It is not advice on whether to raise on a SAFE or how much to raise.

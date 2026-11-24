@@ -320,8 +320,27 @@ def test_round_to_places_is_half_away_from_zero_with_fixed_places(value: Fractio
 
 @pytest.mark.parametrize(
     "value",
-    [Fraction(97, 8), Fraction(-97, 8), Fraction(1, 2), Fraction(-1, 2), Fraction(5, 10**7), Fraction(-5, 10**7)],
-    ids=["12.125", "minus-12.125", "0.5", "minus-0.5", "a-half-at-the-seventh-place", "minus-that"],
+    [
+        Fraction(97, 8),
+        Fraction(-97, 8),
+        Fraction(1, 2),
+        Fraction(-1, 2),
+        Fraction(5, 10**7),
+        Fraction(-5, 10**7),
+        # Shares print 3 places, so only a half at the fourth tells their rule apart: 0.001 shares, never 0.000.
+        Fraction(5, 10**4),
+        Fraction(-5, 10**4),
+    ],
+    ids=[
+        "12.125",
+        "minus-12.125",
+        "0.5",
+        "minus-0.5",
+        "a-half-at-the-seventh-place",
+        "minus-that",
+        "a-half-at-the-fourth-place",
+        "minus-a-half-at-the-fourth-place",
+    ],
 )
 @pytest.mark.parametrize("unit", sorted(DISPLAY_PLACES))
 def test_every_printed_figure_is_what_the_rounding_test_rounds_to(unit: EquityUnit, value: Fraction) -> None:

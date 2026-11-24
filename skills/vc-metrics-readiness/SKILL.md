@@ -183,11 +183,12 @@ parts]`.
      given, ask for them. On a SAFE or note raise, the `plan` case's phases are the founder's own figures: today's
      monthly spend and revenue as the first phase, from month 1, and each change the founder plans (more spend after the
      raise, say) as a later phase from the month the founder names, each asked for by name when missing
-     (`[planned monthly spend and revenue, from which month]`), never assumed. Until a planned change's start month and
-     its monthly spend are both given, make no runway call and give no runway figure; mark the runway line "not checked:
-     waiting for [the month the planned spend starts]" while the month is missing, or "not checked: waiting for [the
-     planned monthly spend from that month]" while only the spend is missing. No deal term, runway or use-of-funds line
-     goes to this tool, `equity_metrics_check`.
+     (`[planned monthly spend and revenue, from which month]`), never assumed. Until a planned change's start month, its
+     monthly spend and its monthly revenue are all given, make no runway call and give no runway figure; mark the runway
+     line "not checked: waiting for [the month the planned spend starts]" while the month is missing, "not checked:
+     waiting for [the planned monthly spend from that month]" while the month is given and the spend is missing, or "not
+     checked: waiting for [the planned monthly revenue from that month]" while only the revenue is missing. No deal
+     term, runway or use-of-funds line goes to this tool, `equity_metrics_check`.
    - A market size goes to `equity_market_sizing` as the vc-market-sizing skill says, never to this tool.
    - Growth rates, LTV and every other metric the table marks quoted: quote as stated with "not checked: no tool
      computes this", and never compute, convert or round one.

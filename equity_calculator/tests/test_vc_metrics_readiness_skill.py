@@ -372,8 +372,11 @@ def test_the_model_converts_nothing_and_the_calculator_does_every_ratio() -> Non
         "A market size goes to `equity_market_sizing` as the vc-market-sizing skill says",
         'Growth rates, LTV and every other metric the table marks quoted: quote as stated with "not checked: no tool '
         'computes this"',
+        "No deal term, runway or use-of-funds line goes to this tool, `equity_metrics_check`.",
     ):
         assert rule in steps, rule
+    # The old wording left unclear what "None" meant.
+    assert "None goes to this tool." not in steps
     assert "No arithmetic outside the equity calculator's tools" in _unwrapped(_section("## Limits"))
 
 

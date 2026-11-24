@@ -76,15 +76,17 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      founder's own figures: today's monthly spend and revenue as the first phase, from month 1, and each change the
      founder plans (more spend after the raise, say) as a later phase from the month the founder names, each asked for
      by name when missing (`[planned monthly spend and revenue, from which month]`), never assumed. Until a planned
-     change's start month and its monthly spend are both given, make no runway call and give no runway figure; mark the
-     runway line "not checked: waiting for [the month the planned spend starts]" while the month is missing, or "not
-     checked: waiting for [the planned monthly spend from that month]" while only the spend is missing. With no cash or
-     burn given, ask for them by name (`[cash on hand, monthly spend and revenue]`) and make no call until they are
-     given. A mismatch row is quoted with the tool's value, as `deal_check`'s are. With no milestone, months to raise or
-     landing month passed, three flags can come back: `runway_below_band` (on the plan the raise lasts under the runway
-     benchmark, 18 months by default; a common benchmark, not a rule), `cash_never_runs_out` (revenue covers the spend
-     before the cash runs out, so there is no runway end and a stated runway is not checked) and
-     `consistent_beyond_rounding` (a stated runway holds by the tolerance alone, as the flag table's row says).
+     change's start month, its monthly spend and its monthly revenue are all given, make no runway call and give no
+     runway figure; mark the runway line "not checked: waiting for [the month the planned spend starts]" while the month
+     is missing, "not checked: waiting for [the planned monthly spend from that month]" while the month is given and the
+     spend is missing, or "not checked: waiting for [the planned monthly revenue from that month]" while only the
+     revenue is missing. With no cash or burn given, ask for them by name (`[cash on hand, monthly spend and revenue]`)
+     and make no call until they are given. A mismatch row is quoted with the tool's value, as `deal_check`'s are. With
+     no milestone, months to raise or landing month passed, three flags can come back: `runway_below_band` (on the plan
+     the raise lasts under the runway benchmark, 18 months by default; a common benchmark, not a rule),
+     `cash_never_runs_out` (revenue covers the spend before the cash runs out, so there is no runway end and a stated
+     runway is not checked) and `consistent_beyond_rounding` (a stated runway holds by the tolerance alone, as the flag
+     table's row says).
    - Pool timing: if the term sheet or deck does not say, use the pre-money (the usual term sheet), say so, and offer
      to re-run with the pool in the post-money.
    - In `equity_deal_check` and `equity_runway_plan`, a stated percent or runway that is the tool's figure rounded to
