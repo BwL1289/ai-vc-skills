@@ -5,7 +5,7 @@
 Each scenario is one tool, ``equity_<scenario>`` (``equity_investor``, ``equity_employee``, ``equity_pool``,
 ``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``,
 ``equity_runway_plan``, ``equity_metrics_check``, ``equity_market_sizing``, ``equity_instrument_compare``,
-``equity_pool_plan``). A tool takes one argument, ``inputs``: that scenario's input model
+``equity_pool_plan``, ``equity_raise_pipeline``). A tool takes one argument, ``inputs``: that scenario's input model
 (``equity_calculator.schemas``). It returns exactly the text ``equity_calculator <scenario> --json`` prints: the
 result model as JSON, exact fractions and labelled assumptions included. An input the model refuses, or one it accepts
 that has no answer (``equity_calculator.errors``), comes back as a tool error that says why. The arithmetic runs on
@@ -63,6 +63,7 @@ from equity_calculator.schemas.equity import (
     MetricsCheckInput,
     PoolInput,
     PoolPlanInput,
+    RaisePipelineInput,
     RoundInput,
     RunwayPlanInput,
     ScenarioInput,
@@ -268,6 +269,24 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "hire given is refused (no_hiring_plan_given). Every count, month and grant is the founder's: never assume "
         "one.",
     ),
+    "raise_pipeline": (
+        RaisePipelineInput,
+        "Raise pipeline: allocation left, expected term sheets, start-raising month (never whom to pitch)",
+        "A founder's round worked from their own figures: round_size (R), any lead_cheque (L), commitments (each "
+        "{amount, kind}: kind soft or firm as the founder marks it, refused when missing: commitment_kind_missing) and "
+        "pro_rata (existing investors' amounts). The allocation left is R - L - firm - pro rata; soft commitments are "
+        "shown on their own, never counted. Flags: oversubscribed (L + firm alone exceed R), pro_rata_exceeds_left "
+        "(those fit, the pro rata does not), fully_allocated. stages, in order, each {name, investors (today, each "
+        "counted once at the furthest stage reached), rate_percent (the founder's own rate to the next stage, from "
+        "the last to a term sheet; refused when missing: stage_rate_missing), rate_basis own or benchmark (a "
+        "benchmark needs benchmark_source)}, with term_sheets_wanted W: expected term sheets E = the sum of each "
+        "stage's investors times the product of the rates from it on (an expectation from the founder's rates, not "
+        "a forecast), targets needed = ceiling(W / the product of every rate), more targets needed = ceiling((W - E) "
+        "/ it), and per stage the count needed there. With runway (cash_on_hand, any cash_floor, phases as "
+        "equity_runway_plan takes them, months_to_raise), the runway plan works the plan with no raise and gives "
+        "start_raising_by (its runway less months_to_raise). Investors are never named: amounts and counts only. "
+        "Every amount, count and rate is the founder's: never assume or look one up.",
+    ),
 }
 
 _INSTRUCTIONS = (
@@ -283,7 +302,9 @@ _INSTRUCTIONS = (
     "equity_instrument_compare (a priced round now beside a convertible note now: ownership after today and after "
     "each next round, and each exit's payouts, side by side, never a pick), equity_pool_plan (the option pool a "
     "founder's hiring plan needs to the next round beside the pool a term sheet asks for, side by side, never a "
-    "pick). Pass the "
+    "pick), equity_raise_pipeline (a founder's round: the allocation left after the lead, firm commitments and pro "
+    "rata, the term sheets their funnel is expected to give on their own rates, the targets needed, and when to "
+    "start raising). Pass the "
     "scenario's fields in `inputs`; give money and percents as JSON strings to keep every digit. Quote the result's "
     "numbers and its labelled assumptions; never round them further without saying so. A value whose unit is "
     "fraction is a share of the whole: show it as a percent by moving the decimal point of its rounded value two "
@@ -455,7 +476,7 @@ def build_server(output_dir: Path | None = None) -> FastMCP:
                 f"existing file, a link or an answer too large for a workbook is refused. `inputs` is any "
                 f'scenario\'s input with its `scenario` tag set ("investor", "employee", "pool", "round", "dilution", '
                 f'"vesting", "waterfall", "deal_check", "runway_plan", "metrics_check", "market_sizing", '
-                f'"instrument_compare" or "pool_plan"). Returns '
+                f'"instrument_compare", "pool_plan" or "raise_pipeline"). Returns '
                 f"the path written. {_DIGITS_ADVICE}"
             ),
             annotations=ToolAnnotations(

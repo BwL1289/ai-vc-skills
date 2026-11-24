@@ -41,6 +41,7 @@ from equity_calculator.schemas.equity_pool import (
     PoolScenario,
 )
 from equity_calculator.schemas.equity_pool_plan import PoolPlanInput, PoolPlanResult
+from equity_calculator.schemas.equity_raise_pipeline import RaisePipelineInput, RaisePipelineResult
 from equity_calculator.schemas.equity_round import RoundInput, RoundResult
 from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput, RunwayPlanResult
 from equity_calculator.schemas.equity_vesting import VestingInput, VestingResult
@@ -81,6 +82,8 @@ __all__ = [
     "PoolResult",
     "PoolScenario",
     "PoolTiming",
+    "RaisePipelineInput",
+    "RaisePipelineResult",
     "RoundInput",
     "RoundResult",
     "RunwayPlanInput",
@@ -249,6 +252,7 @@ ScenarioInput = (
     | MarketSizingInput
     | InstrumentCompareInput
     | PoolPlanInput
+    | RaisePipelineInput
 )
 ScenarioResult = (
     InvestorResult
@@ -264,6 +268,7 @@ ScenarioResult = (
     | MarketSizingResult
     | InstrumentCompareResult
     | PoolPlanResult
+    | RaisePipelineResult
 )
 
 EquityInput = Annotated[ScenarioInput, Field(discriminator="scenario")]

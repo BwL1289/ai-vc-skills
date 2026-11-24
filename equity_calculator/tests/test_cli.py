@@ -25,6 +25,7 @@ from tests.support import (
     METRICS_AN_DECK,
     POOL_EXAMPLE,
     POOL_PLAN_CP,
+    RAISE_PIPELINE_RA,
     RUNWAY_Y,
     deal_check,
     employee,
@@ -34,6 +35,7 @@ from tests.support import (
     metrics_check,
     pool,
     pool_plan,
+    raise_pipeline,
     runway_plan,
 )
 
@@ -196,6 +198,36 @@ _POOL_PLAN_CP = [
     "--hire",
     "VP engineering: start-month=24 grant-shares=500000",
 ]
+# Company RA (tests.support.RAISE_PIPELINE_RA) as flags: the round, the commitments, the funnel and the runway.
+_RAISE_PIPELINE_RA = [
+    "raise_pipeline",
+    "--round-size",
+    "$4,000,000",
+    "--lead-cheque",
+    "2,500,000",
+    "--commitment",
+    "500000 kind=firm",
+    "--commitment",
+    "250000 kind=soft",
+    "--commitment",
+    "250000 kind=soft",
+    "--pro-rata",
+    "400000",
+    "--stage",
+    "Intro asked: investors=40 rate-percent=50",
+    "--stage",
+    "First meeting: investors=10 rate-percent=30%",
+    "--stage",
+    "Partner meeting: investors=2 rate-percent=25",
+    "--term-sheets-wanted",
+    "3",
+    "--cash-on-hand",
+    "1,200,000",
+    "--phase",
+    "from-month=1 gross-burn=150000 revenue=30000",
+    "--months-to-raise",
+    "6",
+]
 _EMPLOYEE = [
     "employee",
     "--gain-percent",
@@ -273,6 +305,7 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
         (_MARKET_AX, market_sizing(**MARKET_AX).assumptions),
         (_COMPARE_BU, instrument_compare(**COMPARE_BU).assumptions),
         (_POOL_PLAN_CP, pool_plan(**POOL_PLAN_CP).assumptions),
+        (_RAISE_PIPELINE_RA, raise_pipeline(**RAISE_PIPELINE_RA).assumptions),
     ],
     ids=[
         "investor",
@@ -284,6 +317,7 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
         "market_sizing",
         "instrument_compare",
         "pool_plan",
+        "raise_pipeline",
     ],
 )
 async def test_every_assumption_prints_with_its_setting_statement_and_source(

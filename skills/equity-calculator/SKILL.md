@@ -1,11 +1,11 @@
 ---
 name: equity-calculator
-description: Exact startup equity arithmetic with the equity_calculator command or MCP tools. Use when someone asks if a fundraise or a stake is worth it (Paul Graham's equity equation), how much equity a hire is worth or what to offer them, how big an option pool to add and its effect on price (the option-pool shuffle), how SAFEs or convertible notes convert in a priced round (caps, discounts, MFN, interest), how a stake dilutes over several rounds, how many shares have vested by a month (cliff, termination, acceleration), or who gets what at an exit (liquidation preferences, participation, caps). deal_check checks a raise's valuation, percent sold, ownership and runway before a VC; runway_plan shows how long each raise lasts and which milestones it reaches; metrics_check checks ARR, retention, churn, CAC payback, burn multiple; market_sizing builds TAM, SAM and SOM bottom-up; instrument_compare sets a priced round beside a note; pool_plan sizes a pool from a hiring plan. Run it instead of doing arithmetic by hand.
+description: Exact startup equity arithmetic with the equity_calculator command or MCP tools. Use when someone asks if a fundraise or a stake is worth it (Paul Graham's equity equation), how much equity to offer a hire, how big an option pool to add (the option-pool shuffle), how SAFEs or convertible notes convert in a priced round (caps, discounts, MFN, interest), how a stake dilutes over several rounds, how many shares have vested (cliff, termination, acceleration), or who gets what at an exit (liquidation preferences, participation, caps). deal_check checks a raise's valuation, percent sold, ownership and runway; runway_plan shows how long each raise lasts and which milestones it reaches; metrics_check checks ARR, retention, churn, CAC payback, burn multiple; market_sizing builds TAM, SAM and SOM bottom-up; instrument_compare sets a priced round beside a note; pool_plan sizes a pool from a hiring plan; raise_pipeline works the room left in a round and a funnel's term sheets. Run it instead of doing arithmetic by hand.
 ---
 
 # Equity calculator
 
-The calculator works thirteen scenarios exactly (rational arithmetic, no floating point) and returns every value, the
+The calculator works fourteen scenarios exactly (rational arithmetic, no floating point) and returns every value, the
 exact fractions, and the assumptions each result rests on, each with its source. Use it for the numbers; do not
 work them out by hand, and do not round or re-derive what it returns.
 
@@ -26,13 +26,15 @@ work them out by hand, and do not round or re-derive what it returns.
 | What are our TAM, SAM and SOM bottom-up, do they match the deck, and which assumption moves them most?          | `market_sizing`      | `equity_market_sizing`      |
 | A priced round now or a convertible note now: who owns what after the next round, and who gets what at an exit? | `instrument_compare` | `equity_instrument_compare` |
 | What pool does our hiring plan to the next round need, beside the pool the term sheet asks for?                 | `pool_plan`          | `equity_pool_plan`          |
+| How much of the round is left, how many term sheets does our funnel give on our rates, when do we start?        | `raise_pipeline`     | `equity_raise_pipeline`     |
 
 A founder's question about a whole raise goes to the review built for it, which runs these tools and explains what
 they return: a deck's ask, ownership after the round and runway to the vc-deal-math skill; how much to raise on a
 phased plan to the vc-round-sizing skill; traction metrics to the vc-metrics-readiness skill; a market slide to the
 vc-market-sizing skill; a term sheet to the vc-term-sheet-review skill; an update to current investors to the
-vc-current-investor-update skill; a hiring plan against a term sheet's pool ask to the vc-option-pool-plan skill. This
-skill answers one scenario on its own.
+vc-current-investor-update skill; a hiring plan against a term sheet's pool ask to the vc-option-pool-plan skill; whom
+to pitch, in what order, and whether the pipeline fills the round to the vc-raise-plan skill. This skill answers one
+scenario on its own.
 
 ## Running it
 
@@ -58,13 +60,15 @@ scenario's fields, and returns the same JSON text as `equity_calculator <scenari
 | market_sizing      | **`segments`**: a list of up to 8 `{"customers", "price", "price_period_months" (1 to 120, the months the price covers; left out or null it is read as 12 and flagged), "units_per_customer", "take_rate_percent", "serviceable_percent", "obtainable_percent"` or `"obtainable_customers"` (the SOM, at most one), `"customers_today"}`; `top_down`: a list of up to 3 `{"amount", "comparable_percent", "compare_to"` (`tam` or `sam`)`}`; `sensitivity`: a list of up to 6 `{"field"` (`customers`, `price`, `units_per_customer`, `take_rate_percent`, `serviceable_percent`, `obtainable_percent`, `obtainable_customers`), `"segment"` (1 is the first), `"values"` (1 to 4)`}`; `population`, `annual_revenue_today`, `som_years` (1 to 20), `som_target`; what the deck states: `stated_tam`, `stated_sam`, `stated_som`; `tolerance_percent`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | instrument_compare | **`founder_shares`**, **`team_shares`** and **`unissued_pool_shares`** (`0` for none), `existing_series` (a list of the same `{"shares", "invested", "preference_multiple", "rank", "participation", "cap_multiple"}` objects as waterfall, each with its own `"preference_multiple"` and `"participation"` always given), `existing_instruments` (the same `{"kind": "safe", "purchase_amount", "valuation_cap", "discount_percent", "mfn"}` and `{"kind": "note", "principal", "interest_rate_percent", "months_outstanding", "compounding", "stub_rule", "valuation_cap", "discount_percent", "interest_paid_in_cash"}` objects as round; a note gives `"months_outstanding"` as of today and its `"compounding"`, never `"issue_date"`, `"conversion_date"` or `"day_count"`); **`investment`**; option A: **`priced_pre_money`**, `priced_target_pool_percent`, `priced_pool_timing`, **`priced_preference`** (`{"standard": true}` only when the founder says standard, else `{"preference_multiple", "participation"` (`none`, `full`, `capped`), `"cap_multiple"}`, either with `"rank"`); option B: `note_valuation_cap`, `note_discount_percent`, **`note_interest_rate_percent`**, **`note_compounding`** (`simple`, `annual`, `monthly`), `note_stub_rule`, **`note_months_to_conversion`**, `note_maturity_months`, `note_interest_paid_in_cash`; **`next_rounds`**: up to 4 alternatives for the one round after today, each worked from today, `{"pre_money", "investment", "target_pool_percent", "pool_timing", "preference"}` (`preference` as `priced_preference`); **`exit_amounts`**: up to 6; `pool_at_exit` (`as_common` or `left_out`) |
 | pool_plan          | **`fully_diluted_shares`**, **`unissued_pool_shares`** (`0` for none), `founder_shares` (the founders' own shares among them, for their ownership line), **`pre_money`**, **`investment`**, **`requested_pool_percent`** (the term sheet's pool after the round, created in the pre-money), **`next_round_month`** (1 to 120), **`hires`**: up to 40 `{"role", "start_month" (0 to 120), "grant_shares"` or `"grant_percent"}` (a percent of the post-round fully diluted shares; every hire the same way, never some of each)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| raise_pipeline     | **`round_size`**, `lead_cheque`, `commitments`: up to 40 `{"amount", "kind"}` (`soft` or `firm`, as the founder marks it; soft ones never counted), `pro_rata`: up to 20 amounts, `stages`: up to 8, in order, `{"name", "investors"` (today, each counted once at the furthest stage reached), `"rate_percent"` (the founder's own rate to the next stage; from the last, to a term sheet), `"rate_basis"` (`own` or `benchmark`), `"benchmark_source"}` (needed with `benchmark`), with `term_sheets_wanted`; `runway`: `{"cash_on_hand", "cash_floor", "phases"` (a list of `{"from_month", "gross_burn", "revenue"}`, as runway_plan takes them), `"months_to_raise"}`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 Send money, percents and multipliers as JSON strings (`"7"`, `"1.10"`, `"8000000"`): a JSON number with a decimal
 point arrives as a binary float and keeps only about 15 digits. Percents are percents (`"7"` is 7%). Share counts,
 customer counts (`customers_start`, `customers_lost`, `customers_new`, `customers_new_paid`) and month counts
 (`period_months`, `price_period_months`, `from_month`, `lands_month`, `months_to_raise`, `milestones`, `som_years`,
 `note_months_to_conversion`, `note_maturity_months`, a hire's `start_month`, `next_round_month`, and a sensitivity
-row's `segment`) are whole numbers, sent as JSON integers, never strings; a string is refused.
+row's `segment`) and the counts of a funnel (a stage's `investors`, `term_sheets_wanted`) are whole numbers, sent as
+JSON integers, never strings; a string is refused.
 
 `fully_diluted_shares` (in `round` and `deal_check`) counts every share before the round, granted options and the
 unissued pool included, and leaves SAFEs and notes out: the tool converts them itself. Some cap tables count SAFEs
@@ -121,7 +125,12 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
    Show A, B and B - A as the tool gives them and never say which option to take. For `pool_plan`, never assume one:
    the share counts, the round, the requested pool, the next round's month and every hire's start month and grant are
    the founder's own figures, so ask for them; with no hire the tool refuses (`no_hiring_plan_given`). Show the plan,
-   the requested pool and requested - plan as the tool gives them and never say which pool to accept.
+   the requested pool and requested - plan as the tool gives them and never say which pool to accept. For
+   `raise_pipeline`, never assume one: the round, the lead's cheque, each commitment and whether it is soft or firm,
+   the pro rata amounts, each stage's investors and rate, the term sheets wanted, and the cash, burn and months to
+   raise are the founder's own figures, so ask for them; a stage with no rate or a commitment with no kind is refused
+   (`stage_rate_missing`, `commitment_kind_missing`), and a benchmark rate goes in only with the founder's source.
+   The expected term sheets are an expectation from the founder's rates, never a forecast.
 2. Give the headline numbers as the tool prints them (the `rounded` value with its unit, or the exact fraction when
    precision matters). Do not round them again or recompute them. A value whose unit is `fraction` is a share of the
    whole: show it as a percent by moving the decimal point of its `rounded` value two places to the right, keeping
@@ -134,7 +143,8 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
 5. A result's `flags` are codes. The command line's report prints each one's meaning beside it; the MCP result does
    not. Relay a flag with its meaning from the table of the skill built on that tool: vc-deal-math for `deal_check`,
    vc-round-sizing for `runway_plan`, vc-metrics-readiness for `metrics_check`, vc-market-sizing for
-   `market_sizing`, vc-deal-math's step 7 for `instrument_compare`, and vc-option-pool-plan for `pool_plan`. A flag
+   `market_sizing`, vc-deal-math's step 7 for `instrument_compare`, vc-option-pool-plan for `pool_plan`, and
+   vc-raise-plan for `raise_pipeline`. A flag
    is a question to be ready for, never an error.
 6. The calculator works the arithmetic of the terms given. It does not read a term sheet or a cap table file, and it
    is not legal, tax or investment advice: say so when the question needs either.
@@ -259,5 +269,6 @@ most 50 SAFEs and notes and 20 use-of-funds lines, and a runway plan at most 3 c
 use-of-funds lines each), 10 milestones, months up to 600 and 60 months to raise; a metrics check covers one
 period of 1 to 36 months; a market size takes at most 8 segments, 3 top-down figures and 6 sensitivity rows of
 up to 4 values each; a comparison takes at most 6 existing series, 4 existing SAFEs and notes, 4 next rounds and 6
-exits. Anything past a
+exits; a raise pipeline at most 40 commitments, 20 pro rata amounts and 8 stages of up to 10,000 investors each, and
+100 term sheets wanted. Anything past a
 limit is refused with a message naming the field.

@@ -40,6 +40,7 @@ and the option-pool shuffle.
 | `market_sizing`      | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?                                                      |
 | `instrument_compare` | A founder choosing between a priced round now and a convertible note now: who owns what after today and after each next round, and who gets what at each exit, A beside B with B - A, never a pick?                         |
 | `pool_plan`          | A term sheet asks for an option pool. How big a pool does the founder's hiring plan to the next round need, and what does each pool do to the price, the effective pre-money and who owns what, side by side, never a pick? |
+| `raise_pipeline`     | A founder planning a raise: how much of the round is left after the lead, the firm commitments and pro rata, how many term sheets the funnel is expected to give on the founder's own rates, and when to start raising?     |
 
 ## Install
 
@@ -107,10 +108,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 `equity_calculator_mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
 instead of doing the arithmetic itself.
 
-| Tool                                                                                                                                                                                                                                                                     | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing`, `equity_instrument_compare`, `equity_pool_plan` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
-| `equity_workbook`                                                                                                                                                                                                                                                        | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
+| Tool                                                                                                                                                                                                                                                                                              | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing`, `equity_instrument_compare`, `equity_pool_plan`, `equity_raise_pipeline` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
+| `equity_workbook`                                                                                                                                                                                                                                                                                 | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
 error that says why. The SDK checks the arguments itself and passes the validation library's text through
@@ -711,6 +712,45 @@ round's month is left out: the next round's own pool would cover it), `plan_fits
 `requested_below_plan`. No hire is refused (`no_hiring_plan_given`), and so are percents of the counted hires adding
 up to V/(V + I) or more, which leave no positive price.
 
+### Raise pipeline (unverified arithmetic; the start-raising month is the runway plan's)
+
+A founder's round, the commitments and pro rata against it, and the founder's own funnel of investors. Every amount,
+count and rate is the founder's; nothing is assumed or looked up, and no investor is named.
+
+| Symbol | Meaning                                                                                 |
+| ------ | --------------------------------------------------------------------------------------- |
+| R      | the round size                                                                          |
+| L      | the lead's cheque (0 when none is given)                                                |
+| F, S   | the firm and the soft commitments, each as the founder marks it                         |
+| P      | every pro rata amount, counted in full                                                  |
+| n_k    | the investors at stage k today, each counted once, at the furthest stage it has reached |
+| r_k    | the founder's rate from stage k to the next (from the last stage, to a term sheet)      |
+| W      | the term sheets the founder wants                                                       |
+
+**Allocation.** The room after the lead and the firm commitments is R - L - F and the allocation left is
+R - L - F - P. S is summed and shown on its own line, never counted. Below zero, one cause is named:
+`oversubscribed` when L + F > R (the lead and the firm commitments alone are over the round), else
+`pro_rata_exceeds_left` when L + F ≤ R < L + F + P; `fully_allocated` when the allocation left is exactly zero.
+
+**Funnel.** With q*k = r_k·r*(k+1)···r*last, the rate to a term sheet from stage k, the conversion is q_1 and the
+expected term sheets are E = Σ n_k·q_k: walked stage by stage, e_1 = n_1, e_k = n_k + e*(k-1)·r\_(k-1), and
+E = e_last·r_last. With every investor at the first stage, E = n_1·q_1, the targets times the product of the rates.
+E is an expectation from the founder's own rates (each investor moving on independently), not a forecast. The targets
+needed from an empty funnel are T = ceiling(W/q_1), the more needed beyond today's M = ceiling((W - E)/q_1), floored
+at 0, and the investors needed at stage k ceiling(W/q_k). A stage with no rate is refused (`stage_rate_missing`); a
+benchmark rate goes in only with the founder's source (`rate_basis: benchmark`, `benchmark_source`), and is flagged.
+
+**Timing.** With cash, the phases and the months to raise, the start-raising month is the `runway_plan` scenario's own
+row for the plan with no raise: its runway less the months to raise, in months from today. Its flags
+`cash_never_runs_out` and `start_raising_date_passed` come through. Cash and phases with no months to raise are
+refused (`no_months_to_raise_given`).
+
+Flags, never a pick: `no_lead_cheque_given`, `soft_commitments_not_counted`, `oversubscribed`,
+`pro_rata_exceeds_left`, `fully_allocated`, `no_funnel_given`, `benchmark_rates_given`, `funnel_short_of_wanted`
+(E < W), `no_runway_given`, `cash_never_runs_out` and `start_raising_date_passed`. A commitment not marked soft or firm
+is refused (`commitment_kind_missing`), and so are term sheets wanted with no funnel (`no_funnel_given`) and a funnel
+with no term sheets wanted (`no_term_sheet_count_given`).
+
 </details>
 
 ## Worked examples
@@ -1017,6 +1057,39 @@ exactly) at $13/9 a share, so the effective pre-money falls from $13,846,153.85 
 (11,000,000/13 exactly), and the founders hold 50.5556% instead of 53.8462% (91/180 against 7/13). At the next round
 676,923.077 of the requested pool is still ungranted. The report never says which pool to accept.
 
+**A raise pipeline (Company RA, made up).** A $4,000,000 round with a $2,500,000 lead cheque, $500,000 of firm and
+$500,000 of soft commitments and one $400,000 pro rata. The founder's funnel: 40 investors with an intro asked (half
+reach a first meeting, on the founder's own rate), 10 at a first meeting (30% go on to a partner meeting) and 2 at a
+partner meeting (25% give a term sheet); the founder wants 3 term sheets. $1,200,000 in the bank burning $150,000 a
+month on $30,000 of revenue, and 6 months allowed to raise:
+
+```
+equity_calculator raise_pipeline --round-size 4,000,000 --lead-cheque 2,500,000 --commitment "500000 kind=firm" \
+    --commitment "250000 kind=soft" --commitment "250000 kind=soft" --pro-rata 400000 \
+    --stage "Intro asked: investors=40 rate-percent=50" --stage "First meeting: investors=10 rate-percent=30" \
+    --stage "Partner meeting: investors=2 rate-percent=25" --term-sheets-wanted 3 --cash-on-hand 1,200,000 \
+    --phase "from-month=1 gross-burn=150000 revenue=30000" --months-to-raise 6
+  Soft commitments, never counted (S)                                        $500,000.00  the soft commitments, shown on their own
+  Room after the lead and the firm commitments                             $1,000,000.00  R - L - F
+  Allocation left                                                            $600,000.00  R - L - F - P; below 0, more is counted than the round holds
+  Stage 3, Partner meeting: needed here for 3 term sheets                             12  ceiling(W / the rate to a term sheet from here)
+  Conversion, first stage to a term sheet                                        3.7500%  the product of every rate
+  Expected term sheets from today's funnel (E)                                      2.75  the sum of each stage's investors × its rate to a term sheet; an expectation from the founder's rates, not a forecast
+  First-stage targets needed, from an empty funnel                                    80  ceiling(W / the conversion)
+  More first-stage targets needed beyond today's funnel                                7  ceiling((W - E) / the conversion); 0 when E >= W
+  Runway with no raise (the runway plan's)                                  10.00 months  months until cash less the floor goes below zero, on the plan
+  Start raising by (the runway plan's)                                       4.00 months  runway with no raise - months to raise, in months from today
+  Flag                                                      soft_commitments_not_counted  At least one commitment is soft: soft commitments are shown on their own line and never counted against the round
+  Flag                                                            funnel_short_of_wanted  On the founder's rates, today's funnel is expected to give fewer than the 3 term sheets wanted: see the more targets needed line
+```
+
+The lead and the firm commitment leave $1,000,000 of room, and the pro rata takes $400,000 of it: $600,000 is left to
+allocate. The soft $500,000 is shown and never counted. The conversion is 1/2 × 3/10 × 1/4 = 3/80, and today's funnel
+is expected to give E = 40 × 3/80 + 10 × 3/40 + 2 × 1/4 = 11/4 = 2.75 term sheets on those rates, short of 3: from an
+empty funnel 3 term sheets need 80 first-stage targets, and today's funnel needs 7 more. The cash lasts 10 months
+($1,200,000 / $120,000) with no raise, so with 6 months to raise the founder starts by month 4. The report never says
+whom to pitch.
+
 ## Using it
 
 ```
@@ -1070,6 +1143,9 @@ equity_calculator instrument_compare --founder-shares F --team-shares T --unissu
     --next-round "TERMS"... --exit E... [--pool-at-exit as_common|left_out]
 equity_calculator pool_plan --fully-diluted-shares FD --unissued-pool-shares U [--founder-shares F]
     --pre-money V --investment I --requested-pool-percent T --next-round-month M --hire "ROLE: TERMS"...
+equity_calculator raise_pipeline --round-size R [--lead-cheque L] [--commitment "AMOUNT kind=soft|firm"]...
+    [--pro-rata A]... [--stage "NAME: TERMS"]... [--term-sheets-wanted W] [--cash-on-hand C [--cash-floor F]
+    --phase "TERMS"... --months-to-raise M]
 ```
 
 `deal_check` needs `--investment` and at least one of `--pre-money`, `--post-money` and `--stated-investor-percent`.
@@ -1129,6 +1205,15 @@ least one `--hire` (with none it is refused, `no_hiring_plan_given`). Each `--hi
 colon, then its terms. Every grant is given the same way, all in shares or all as percents of the post-round fully
 diluted shares; a hire starting after `--next-round-month` is shown and left out. `--founder-shares`, when given, adds
 the founders' ownership line. Every figure is the founder's own.
+
+`raise_pipeline` needs the round size. Each `--commitment` is an amount and `kind=soft` or `kind=firm`, as the founder
+marks it (with no kind it is refused, `commitment_kind_missing`); each `--pro-rata` is one existing investor's amount.
+Each `--stage` is the stage's name in the founder's words (the same characters as a hire's role, plus `:`), a colon,
+then `investors=N` (whole investors at that stage today) and `rate-percent=P` (the founder's rate to the next stage;
+from the last stage, to a term sheet), in the funnel's order; `rate-basis=benchmark benchmark-source=TEXT` marks a
+rate the founder took from a benchmark, the source running to the end of the stage. `--term-sheets-wanted` goes with
+the stages. `--cash-on-hand`, `--cash-floor`, each `--phase` (the same terms as `runway_plan`'s) and
+`--months-to-raise` give the start-raising month. Every figure is the founder's own.
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
 `--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure, sensitivity
@@ -1205,7 +1290,9 @@ months, and its customer counts are whole numbers below 1e16. A market size take
 figures and 6 sensitivity rows of 1 to 4 values each; a price covers at most 120 months and the SOM horizon is 1 to
 20 years. A comparison takes at most 6 existing series, 4 existing SAFEs and notes, 4 next rounds and 6 exits; its
 note converts within 600 months, an existing note's months plus those included. A pool plan takes at most 40 hires,
-each starting within 120 months, and its next round comes within the same.
+each starting within 120 months, and its next round comes within the same. A raise pipeline takes at most 40
+commitments, 20 pro rata amounts and 8 stages of at most 10,000 investors each, and at most 100 term sheets wanted;
+its runway takes the runway plan's limits.
 A note runs at most 600 months, or at most 18,262 days (about 50 years) between its dates; a vesting schedule, its
 cliff and every month asked about are at most 600 months. These limits keep every exact step small: the largest
 inputs compute in well under a second, and a value like `1e999999999` is refused at once instead of tying up the
@@ -1222,7 +1309,8 @@ tools do not check it.
 ## The Excel workbook
 
 There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` for the round, `Dilution`, `Vesting`,
-`Waterfall`, `Deal check`, `Runway plan`, `Metrics check`, `Market sizing`, `Priced vs note` or `Pool plan`):
+`Waterfall`, `Deal check`, `Runway plan`, `Metrics check`, `Market sizing`, `Priced vs note`, `Pool plan` or
+`Raise pipeline`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
@@ -1470,6 +1558,19 @@ these:
 | `grant_unit`        | every grant in shares, or every grant as a percent of the post-round fully diluted shares           | each `--hire`'s grant                                   | unverified                                |
 | `share_rounding`    | exact fractions of shares                                                                           | fixed                                                   | unverified                                |
 | `difference`        | requested - plan of the exact values, rounded once; neither column is a recommendation              | fixed                                                   | display convention                        |
+
+The `raise_pipeline` scenario has these rows, each only when its input is given, and with cash and burn the runway
+plan's own rows (`runway_rule`, `phase_rule`, ...) word for word after them:
+
+| Key                    | Default                                                                     | How to change it                       | Source                                    |
+| ---------------------- | --------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------------- |
+| `allocation_rule`      | left = R - L - firm - pro rata; a soft commitment shown, never counted      | each `--commitment`'s `kind=`          | unverified (standard arithmetic)          |
+| `pro_rata_rule`        | each pro rata amount counted in full                                        | `--pro-rata`                           | unverified (a planning convention)        |
+| `stage_counting`       | each investor counted once, at the furthest stage it has reached            | fixed                                  | unverified (a modelling choice)           |
+| `expected_term_sheets` | E = Σ investors × the rate to a term sheet from their stage; not a forecast | fixed                                  | unverified (expected values)              |
+| `rate_basis`           | every rate the founder's own                                                | `rate-basis=benchmark` with its source | the founder                               |
+| `targets_needed`       | each count needed rounded up to whole investors                             | fixed                                  | unverified (standard arithmetic)          |
+| `start_raising_rule`   | the runway plan's runway with no raise less the months to raise             | `--months-to-raise`                    | unverified (the runway plan's arithmetic) |
 
 </details>
 
