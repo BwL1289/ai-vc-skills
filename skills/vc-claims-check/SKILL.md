@@ -104,11 +104,11 @@ claims list; step 7 then runs only the quote check and the refute pass.
    - Projections are Figures too: check that each is labelled as a plan with its period, and quote it as stated.
 5. **Deal terms go to the calculator.** The raise, valuation and its label, percent sold, pool, founders' percent after
    the round, outstanding SAFEs and notes, cash, burn, revenue, runway claim (not on a phased plan: below) and
-   use-of-funds lines are checked with `equity_deal_check` (command-line fallback: `equity_calculator deal_check`), or
-   `equity_runway_plan` as below, following the vc-deal-math skill's steps: ask for what is missing, send money and
-   percents as strings (a stated percent or runway with the document's own places, since one that is the tool's figure
-   rounded to them is consistent, in `equity_deal_check` and `equity_runway_plan` alike; the post-money and the
-   use-of-funds total keep the tolerance alone), and call twice for a valuation with no label.
+   use-of-funds lines are checked with `equity_deal_check` (command-line fallback, after a search for the tool by name:
+   `equity_calculator deal_check`), or `equity_runway_plan` as below, following the vc-deal-math skill's steps: ask for
+   what is missing, send money and percents as strings (a stated percent or runway with the document's own places, since
+   one that is the tool's figure rounded to them is consistent, in `equity_deal_check` and `equity_runway_plan` alike;
+   the post-money and the use-of-funds total keep the tolerance alone), and call twice for a valuation with no label.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
      which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask for the

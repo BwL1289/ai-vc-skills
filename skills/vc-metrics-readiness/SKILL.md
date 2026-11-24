@@ -130,8 +130,9 @@ lenses do not anchor on the tool's output; step 7 then starts at the quote check
    the calculator, each in a call for its own period (step 4), when the founder gives the parts; otherwise mark the
    metric Needs a source and ask for one figure, in one form, with its period.
 4. **The calculator.** Pass the founder's parts and every stated figure the tool can check from them to
-   `equity_metrics_check` (command-line fallback: `equity_calculator metrics_check`), money and percents as strings,
-   customer counts and `period_months` as whole numbers, never strings:
+   `equity_metrics_check` (command-line fallback, after a search for the tool by name:
+   `equity_calculator metrics_check`), money and percents as strings, customer counts and `period_months` as whole
+   numbers, never strings:
    - **One call per document's version of the figures,** each with only that document's stated figures. Never match a
      figure against a tool value by eye across documents.
    - The report labels every stated figure "the deck says", whatever the call's document. When relaying a check row,

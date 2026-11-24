@@ -116,12 +116,12 @@ the bank or the checklist; step 3 then starts at the quote check.
 1. **Intake.** Ask for the missing inputs in one message. Label the material as it arrives.
 2. **The cap table and the ask go to the calculator.** Follow the vc-deal-math skill's steps; use only the tools'
    values.
-   - A priced round: `equity_deal_check` (command-line fallback: `equity_calculator deal_check`), money and percents
-     as strings (a stated percent or runway with the document's own places), with `fully_diluted_shares`,
-     `unissued_pool_shares`, `target_pool_percent` and `pool_timing`, every SAFE and note as `instruments`, and each
-     ownership figure a document states: the investors' percent as `stated_investor_percent`, the founders' percent
-     after the round as `stated_holder_percent` with the founders' shares today as `holder_shares`. One call per
-     document's version of the ask. Never divide the shares yourself.
+   - A priced round: `equity_deal_check` (command-line fallback, after a search for the tool by name:
+     `equity_calculator deal_check`), money and percents as strings (a stated percent or runway with the document's own
+     places), with `fully_diluted_shares`, `unissued_pool_shares`, `target_pool_percent` and `pool_timing`, every SAFE
+     and note as `instruments`, and each ownership figure a document states: the investors' percent as
+     `stated_investor_percent`, the founders' percent after the round as `stated_holder_percent` with the founders'
+     shares today as `holder_shares`. One call per document's version of the ask. Never divide the shares yourself.
    - A valuation with no label: call twice, once as `pre_money`, once as `post_money`, as vc-deal-math step 4 does.
      Only a check that is a mismatch under every reading is the calculator's mismatch. A mismatch under one reading
      only is not: it becomes one question, to label the valuation pre- or post-money, quoting both readings in the

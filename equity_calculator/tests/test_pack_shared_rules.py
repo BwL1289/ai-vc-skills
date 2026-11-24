@@ -61,8 +61,8 @@ These sentences are copied into several skills and must stay identical there:
 - The MCP tool first. Those runs, finding no tool, ran the command line the skill printed beside the call. Every
   command line a skill prints follows its MCP call and is labelled, word for word, as the fallback for a session
   without the tool, after a search for it by name (the calculator skill labels its examples in its own words); a
-  pointer in a sentence calls it the "command-line fallback", and the calculator skill's description names the MCP
-  tools first.
+  pointer in a sentence calls it the "command-line fallback, after a search for the tool by name", so a skill that
+  prints no command line still says to search first, and the calculator skill's description names the MCP tools first.
 - A worked example that cannot pass for the founder's result. The option-pool and raise-plan skills' worked examples
   used their evals' exact inputs, so a run that quoted them gave the eval's right figures with no tool run. Both now
   use made-up inputs no eval uses, with fresh calculator output. Six older worked examples still share an eval's
@@ -329,10 +329,8 @@ _NO_TOOL = (
     "When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no"
     " figure in that tool's place: none worked by hand and none from a worked example, a made-up company's result."
 )
-# Every tool the calculator's MCP server registers: a skill that names one in backticks calls the calculator.
-_CALCULATOR_TOOLS = re.compile(
-    r"`(?:" + "|".join(f"equity_{scenario}" for scenario in _SCENARIOS) + r"|equity_workbook)`"
-)
+# Every tool the calculator's MCP server registers, and its command: a skill that names either calls the calculator.
+_CALCULATOR_TOOLS = re.compile(r"\bequity_(?:" + "|".join(_SCENARIOS) + r"|workbook)\b|\bequity_calculator [a-z_<]")
 # The label before every command line a skill prints, which comes after the MCP call it repeats.
 _CLI_FALLBACK = (
     "Only when the tool is not in the session (search for it by name first), the same call from the command line"
@@ -343,8 +341,10 @@ _HUB_CLI_FALLBACK = (
     " first)."
 )
 # A command named in a sentence rather than printed as a call.
-_INLINE_CLI = re.compile(r"\(([^()`]*)`equity_calculator [a-z_]+`\)")
-_INLINE_FALLBACK = "command-line fallback: "
+_INLINE_CLI = re.compile(r"`equity_calculator [^`]*`")
+# A line of a fenced block that runs the command, with or without a shell prompt.
+_CLI_LINE = re.compile(r"\s*(?:\$ )?equity_calculator ")
+_INLINE_FALLBACK = "command-line fallback, after a search for the tool by name: "
 # A fenced block, its indent captured so it can be taken off each line.
 _FENCE = re.compile(r"^( *)```([a-z]*)\n(.*?)^\1```$", re.MULTILINE | re.DOTALL)
 # The skills (or the skill whose reference page it is) whose worked call still uses one eval's exact inputs. A run with
@@ -751,7 +751,7 @@ def test_without_the_calculator_a_skill_gives_no_figure_in_its_place(name: str) 
     limits = _section(name, "## Limits")
 
     assert _NO_TOOL in limits
-    assert "none worked by hand and none from a worked example" in _NO_TOOL
+    assert _unwrapped(name).count("When neither") == 1
 
 
 def test_the_template_carries_the_no_tool_sentence_and_puts_the_mcp_tool_first() -> None:
@@ -761,14 +761,15 @@ def test_the_template_carries_the_no_tool_sentence_and_puts_the_mcp_tool_first()
     assert "the MCP tool first, the command line only as the fallback" in template
 
 
-def _cli_fences(text: str) -> list[tuple[int, str]]:
-    """Each command-line block in ``text``: where it starts and its first line."""
+def _cli_fences(text: str) -> list[tuple[int, str, str | None]]:
+    """Each block in ``text`` that runs the command: where it starts, its first line and the tag of the block before."""
     found = []
-    for match in _FENCE.finditer(text):
-        indent, tag, body = match.groups()
-        first = body.splitlines()[0].removeprefix(indent) if body else ""
-        if tag == "" and first.startswith("equity_calculator "):
-            found.append((match.start(), first))
+    fences = list(_FENCE.finditer(text))
+    for at, match in enumerate(fences):
+        indent, _, body = match.groups()
+        lines = [line.removeprefix(indent) for line in body.splitlines()]
+        if any(_CLI_LINE.match(line) for line in lines):
+            found.append((match.start(), lines[0], fences[at - 1].group(2) if at else None))
     return found
 
 
@@ -777,11 +778,11 @@ def test_every_command_line_a_skill_prints_follows_its_mcp_call_and_is_labelled_
     checked = 0
     for path in _SKILL_PAGES:
         text = path.read_text(encoding="utf-8")
-        for start, first in _cli_fences(text):
+        for start, first, previous in _cli_fences(text):
             before = text[:start]
             label = " ".join(line.strip() for line in before.rstrip().rsplit("\n\n", 1)[-1].splitlines())
             where = f"{path.relative_to(_ROOT)}: {first[:50]}"
-            assert "```json" in before, where
+            assert previous == "json", where
             if path.parent.name == "equity-calculator":
                 assert label.startswith(_HUB_CLI_FALLBACK), where
             else:
@@ -793,12 +794,15 @@ def test_every_command_line_a_skill_prints_follows_its_mcp_call_and_is_labelled_
 
 def test_a_command_named_in_a_sentence_is_the_command_line_fallback() -> None:
     for path in _SKILL_PAGES:
-        text = " ".join(line.strip() for line in path.read_text(encoding="utf-8").splitlines())
+        prose = _FENCE.sub("", path.read_text(encoding="utf-8"))
+        text = " ".join(line.strip() for line in prose.splitlines())
         where = str(path.relative_to(_ROOT))
 
         assert "from the command line," not in text, where
         for match in _INLINE_CLI.finditer(text):
-            assert match.group(1) == _INLINE_FALLBACK, (where, match.group(0))
+            before = text[: match.start()]
+            named_as_the_fallback = before.endswith((_INLINE_FALLBACK, f"{_CLI_FALLBACK} with "))
+            assert named_as_the_fallback or match.group(0).endswith((" --help`", " --json`")), (where, match.group(0))
 
 
 def test_the_calculator_skill_names_its_mcp_tools_before_its_command() -> None:

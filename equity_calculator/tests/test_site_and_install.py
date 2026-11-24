@@ -6,10 +6,11 @@ output, so every line each one shows must appear in what its command prints toda
 install to load every folder under skills/ and repeats the README's two load-both-folders lines, because two skills
 read a file in another skill's folder. The plugin and marketplace descriptions promise no skill as still to come.
 
-The plugin starts the calculator's server with uvx from the package's own folder, and uv reused its cached build while
-the package's pyproject.toml stayed the same: with the package at 0.1.0 through every plugin release, a live run met an
-old server with eight tools. So the package carries the plugin's version, the marketplace's too, and uv's cache keys
-name the package's source, so an edited module rebuilds the server between releases.
+The plugin starts the calculator's server with uvx from the package's own folder, and uv reused its cached build of
+that folder while the package's pyproject.toml stayed the same: with the package at 0.1.0 through every plugin release,
+a live run that loaded the plugin from one folder updated in place met an old server with eight tools. So the package
+carries the plugin's version, the marketplace's too, and uv's cache keys name the package's source, so an edited or
+added module rebuilds the server between releases.
 """
 
 from __future__ import annotations
@@ -167,7 +168,8 @@ def test_the_plugin_starts_the_server_from_the_package_whose_version_it_carries(
 
     assert server["command"] == "uvx"
     assert server["args"] == ["--from", "${CLAUDE_PLUGIN_ROOT}/equity_calculator[mcp]", "equity_calculator_mcp"]
-    assert _PACKAGE == _ROOT / "equity_calculator" / "pyproject.toml"
+    folder = server["args"][1].removeprefix("${CLAUDE_PLUGIN_ROOT}/").removesuffix("[mcp]")
+    assert _ROOT / folder / "pyproject.toml" == _PACKAGE
 
 
 def test_an_edited_module_rebuilds_the_server_before_a_release() -> None:

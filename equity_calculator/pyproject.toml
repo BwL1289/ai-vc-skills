@@ -5,8 +5,9 @@ build-backend = "hatchling.build"
 [project]
 name = "equity_calculator"
 # The plugin's version, always: .claude-plugin/plugin.json and marketplace.json carry the same one, and a release bumps
-# all three (CONTRIBUTING.md, "Releasing"). The plugin starts this package with uvx, which reused its cached build while
-# this file stayed the same: at one version for every release, a plugin update could keep serving an old server.
+# all three (CONTRIBUTING.md, "Releasing"). The plugin starts this package with uvx, which reuses its cached build of a
+# folder while the files in its cache keys stay the same: with this file unchanged from release to release, a plugin
+# loaded from one folder that is updated in place kept serving an old server.
 version = "0.3.5"
 description = "Exact startup equity arithmetic: Paul Graham's equity equation, the option-pool shuffle, priced rounds with SAFEs and notes, dilution, vesting, exit waterfalls, and a founder's check of their own raise. CLI, Excel workbook and MCP server."
 readme = "README.md"
@@ -38,8 +39,9 @@ equity_calculator_mcp = "equity_calculator.mcp_server:main"
 packages = ["src/equity_calculator"]
 
 [tool.uv]
-# uv rebuilds this package when a file listed here changes: this file, as by default, and every module under src, so
-# an edited module rebuilds the server even before a release bumps the version.
+# uv rebuilds this package when a file listed here changes or a new one matches: this file, as by default, and every
+# module under src, so an edited or added module rebuilds the server even before a release bumps the version. A module
+# that is only deleted does not rebuild it until another listed file changes.
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*.py" }]
 
 [tool.ruff]

@@ -151,8 +151,8 @@ the draft written at step 7.
 
 ## Runway
 
-The runway claim goes to `equity_runway_plan` (command-line fallback: `equity_calculator runway_plan`), as the
-founder's plan with no raise:
+The runway claim goes to `equity_runway_plan` (command-line fallback, after a search for the tool by name:
+`equity_calculator runway_plan`), as the founder's plan with no raise:
 
 - `cash_on_hand`: cash at the update's date. Money as strings.
 - One `plan` case: the first phase is today's monthly spend (`gross_burn`) and `revenue`, from month 1 (the month

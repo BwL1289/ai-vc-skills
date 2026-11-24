@@ -158,6 +158,20 @@ async def test_the_command_runs_and_prints_every_line_of_the_excerpt() -> None:
         assert line in printed, line
 
 
+def test_the_sentence_after_the_excerpt_quotes_the_excerpts_own_figures() -> None:
+    """The worked example's summary and its notation example are typed by hand: each figure must be one printed."""
+    (excerpt,) = _fences("text")
+    summary = _TEXT.split(excerpt.splitlines()[-1], 1)[1].split("```", 1)[1].strip().split("\n\n", 1)[0]
+    figures = re.findall(r"\$?\d[\d,]*\.\d+%?", summary)
+    notation = re.search(r"\((0\.\d+) is (\d+\.\d+%)\)", _TEXT)
+
+    assert len(figures) >= 3
+    for figure in figures:
+        assert figure in excerpt, figure
+    assert notation is not None and notation.group(2) in excerpt
+    assert notation.group(1) == f"0.0{notation.group(2).replace('.', '').rstrip('%')}"
+
+
 async def test_the_command_and_the_json_example_are_the_same_call() -> None:
     (example,) = _fences("json")
     (command,) = _fences("")

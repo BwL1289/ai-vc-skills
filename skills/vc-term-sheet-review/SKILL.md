@@ -139,16 +139,16 @@ the labels given in parentheses.
    baseline, and made a lawyer question; say the explanation is this skill's own reading, unverified.
 3. **The round's arithmetic.** Send money and percents as strings; one call per figure, never a figure from one tool
    matched by eye against another.
-   - `equity_deal_check` (command-line fallback: `equity_calculator deal_check`): the amount, the valuation with its
-     label (a valuation with no label: call twice, once as `pre_money` and once as `post_money`), the pool target and
-     its timing, every SAFE and note as `instruments`, the founders' shares as `holder_shares`, and every figure the
-     founder believes as `stated_investor_percent` or `stated_holder_percent`, as text with the document's own places
-     (one that is the tool's figure rounded to them is consistent). Its `effective_pre_money` ("Effective pre-money"),
-     `holder_ownership_after` ("After: holder group"), `investor_ownership`, `checks`, `flags` and `verdict` are the
-     figures for the price, the founders' ownership and any belief that does not hold. With two readings, show both side
-     by side. Only a check that is a mismatch under every reading is the calculator's mismatch; a mismatch under one
-     reading only is not: it becomes one lawyer question, to have the sheet say pre- or post-money, quoting both
-     readings in the tool's values.
+   - `equity_deal_check` (command-line fallback, after a search for the tool by name: `equity_calculator deal_check`):
+     the amount, the valuation with its label (a valuation with no label: call twice, once as `pre_money` and once as
+     `post_money`), the pool target and its timing, every SAFE and note as `instruments`, the founders' shares as
+     `holder_shares`, and every figure the founder believes as `stated_investor_percent` or `stated_holder_percent`, as
+     text with the document's own places (one that is the tool's figure rounded to them is consistent). Its
+     `effective_pre_money` ("Effective pre-money"), `holder_ownership_after` ("After: holder group"),
+     `investor_ownership`, `checks`, `flags` and `verdict` are the figures for the price, the founders' ownership and
+     any belief that does not hold. With two readings, show both side by side. Only a check that is a mismatch under
+     every reading is the calculator's mismatch; a mismatch under one reading only is not: it becomes one lawyer
+     question, to have the sheet say pre- or post-money, quoting both readings in the tool's values.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
      which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask the

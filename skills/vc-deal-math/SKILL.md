@@ -73,13 +73,14 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      issued shares only, say), ask for the share counts.
    - A runway claim needs cash on hand and the planned monthly spend and revenue after the raise. Ask for today's
      spend and revenue too: decks often quote runway on today's burn, and a VC will check it against the plan.
-   - **Runway with no raise, or on a SAFE or note raise,** goes to `equity_runway_plan` (command-line fallback:
-     `equity_calculator runway_plan`), never to `deal_check`, which needs a priced round. It takes the raise as cash
-     and needs no valuation: `cash_on_hand`; one `plan` case whose first phase is today's monthly spend and revenue,
-     `{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}`; the new SAFE or note
-     in `raises`, its use-of-funds lines included,
-     `{"amount": "...", "stated_runway_months": "...", "use_of_funds": [{"percent": "..."}]}`; and a runway stated
-     with no raise as the top-level `stated_runway_months`. On a SAFE or note raise, the `plan` case's phases are the
+   - **Runway with no raise, or on a SAFE or note raise,** goes to `equity_runway_plan` (command-line fallback, after a
+     search for the tool by name: `equity_calculator runway_plan`), never to `deal_check`, which needs a priced round.
+     It takes the raise as cash and needs no valuation: `cash_on_hand`; one `plan` case whose first phase is today's
+     monthly spend and revenue,
+     `{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}`; the new SAFE or note in
+     `raises`, its use-of-funds lines included,
+     `{"amount": "...", "stated_runway_months": "...", "use_of_funds": [{"percent": "..."}]}`; and a runway stated with
+     no raise as the top-level `stated_runway_months`. On a SAFE or note raise, the `plan` case's phases are the
      founder's own figures: today's monthly spend and revenue as the first phase, from month 1, and each change the
      founder plans (more spend after the raise, say) as a later phase from the month the founder names, each asked for
      by name when missing (`[planned monthly spend and revenue, from which month]`), never assumed. Until a planned
@@ -168,15 +169,15 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
    re-running `equity_deal_check`; the next round's effect with `equity_dilution`; a full exit split with
    `equity_waterfall`.
 7. **A founder who has not chosen between a priced round now and a convertible note now** goes to
-   `equity_instrument_compare` (command-line fallback: `equity_calculator instrument_compare`), never to
-   `deal_check`. Ask, by name and in one message, for both sets of terms: today's shares by holder group (founders,
-   team and pool, existing investors: each existing series with its shares, amount invested, preference multiple,
-   participation and rank, each SAFE, and each existing note with its rate, simple or compounding interest and months
-   outstanding), the raise, the priced round's pre-money, any pool top-up and its liquidation terms, and the note's
-   cap (none is fine: an uncapped note runs), discount, interest rate, simple or compounding interest and maturity.
-   Pass `{"standard": true}` only when the founder says the terms are standard (1x, non-participating); otherwise ask
-   for the multiple and the participation. Ask too whether the founder expects a next priced round, and never assume
-   one either way:
+   `equity_instrument_compare` (command-line fallback, after a search for the tool by name:
+   `equity_calculator instrument_compare`), never to `deal_check`. Ask, by name and in one message, for both sets of
+   terms: today's shares by holder group (founders, team and pool, existing investors: each existing series with its
+   shares, amount invested, preference multiple, participation and rank, each SAFE, and each existing note with its
+   rate, simple or compounding interest and months outstanding), the raise, the priced round's pre-money, any pool
+   top-up and its liquidation terms, and the note's cap (none is fine: an uncapped note runs), discount, interest rate,
+   simple or compounding interest and maturity. Pass `{"standard": true}` only when the founder says the terms are
+   standard (1x, non-participating); otherwise ask for the multiple and the participation. Ask too whether the founder
+   expects a next priced round, and never assume one either way:
 
    - **A next round expected:** ask for it (pre-money, raise, any pool top-up, series terms), the months until the
      note converts there and one or more exit values. Each `next_rounds` entry is an alternative for that one round
