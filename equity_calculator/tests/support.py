@@ -468,6 +468,27 @@ COMPARE_BU: dict[str, object] = {
 }
 
 
+# Company DX (made up): a founder who hopes today's raise is the only one and offers no cap. The note has a 20%
+# discount, 6% simple interest, a 24-month maturity at which it converts at a $5M valuation, and 2x its principal at a
+# sale.
+COMPARE_DX: dict[str, object] = {
+    "founder_shares": 9_000_000,
+    "team_shares": 500_000,
+    "unissued_pool_shares": 500_000,
+    "investment": "1500000",
+    "priced_pre_money": "6000000",
+    "priced_preference": {"standard": True},
+    "note_discount_percent": "20",
+    "note_interest_rate_percent": "6",
+    "note_compounding": "simple",
+    "note_owed_months": [12, 24],
+    "note_maturity_months": 24,
+    "note_maturity_conversion_valuation": "5000000",
+    "note_change_of_control_multiple": "2",
+    "exit_amounts": ["3000000", "10000000", "40000000"],
+}
+
+
 def instrument_compare(**fields: object) -> InstrumentCompareResult:
     """The priced-round-or-note comparison for ``fields`` (an ``InstrumentCompareInput``'s fields)."""
     return compute(InstrumentCompareInput.model_validate(fields))

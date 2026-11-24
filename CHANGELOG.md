@@ -6,6 +6,13 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- `instrument_compare` runs with no next round, for a founder who hopes today's raise is the only one (mode
+  `no_next_round`, flag `no_next_round_given`, in place of the refusal): ownership today with the note unconverted,
+  what the note owes at each month named, the note at its maturity (the repayment, and a conversion only at a valuation
+  or price the founder gives), and each exit as a sale before any priced round, option A through the waterfall and
+  option B on the note's own change-of-control term (a multiple of its principal, or conversion at its cap). A sale
+  with no such term, or with existing SAFEs or notes outstanding, gives option B as not worked with the reason; an
+  uncapped note works in both modes. `vc-deal-math` step 7 asks for those terms and a Company DX eval runs the mode.
 - `vc-deck-review` is out of preview after its first run on a real deck, whose founder adopted most of its fix list;
   plugin version 0.2.7.
 - A `vc-deal-math` eval (Company BW, unrecorded) for a SAFE raise whose planned rise has its start month but no

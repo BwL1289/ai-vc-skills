@@ -1,7 +1,8 @@
 """``equity_calculator instrument_compare``: the report, ``--json``, the Priced vs note sheet read back, refusals.
 
 No DB, no network: ``run`` is awaited in process. The only files written are workbooks under pytest's temporary
-directory. The worked values are Company BU from ``test_instrument_compare.py``.
+directory. The worked values are Company BU from ``test_instrument_compare.py`` and, with no next round, Company DX
+from ``test_instrument_compare_no_round.py``.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ from equity_calculator.layout import sheet_for
 from equity_calculator.schemas.equity_instrument_compare import InstrumentFlag
 from equity_calculator.workbook import save_workbook
 from openpyxl import load_workbook
-from tests.support import COMPARE_BU, instrument_compare
+from tests.support import COMPARE_BU, COMPARE_DX, instrument_compare
 
 _ARGPARSE_EXIT = 2
 _COLUMNS = ("Priced round now (A)", "Note now (B)", "B - A")
@@ -55,6 +56,44 @@ _ROUNDS = [
 ]
 _EXITS = ["--exit", "5000000", "--exit", "$20,000,000", "--exit", "100000000"]
 _COMPANY_BU = [*_TODAY, *_ROUNDS, *_EXITS]
+# Company DX: no next round, a note with no cap.
+_COMPANY_DX = [
+    "instrument_compare",
+    "--founder-shares",
+    "9,000,000",
+    "--team-shares",
+    "500,000",
+    "--unissued-pool-shares",
+    "500,000",
+    "--investment",
+    "$1,500,000",
+    "--priced-pre-money",
+    "$6,000,000",
+    "--priced-preference",
+    "standard",
+    "--note-discount-percent",
+    "20",
+    "--note-interest-rate-percent",
+    "6",
+    "--note-compounding",
+    "simple",
+    "--note-owed-month",
+    "12",
+    "--note-owed-month",
+    "24",
+    "--note-maturity-months",
+    "24",
+    "--note-maturity-conversion-valuation",
+    "$5,000,000",
+    "--note-change-of-control-multiple",
+    "2",
+    "--exit",
+    "3,000,000",
+    "--exit",
+    "10,000,000",
+    "--exit",
+    "40,000,000",
+]
 
 
 def _line(report: str, label: str) -> str:
@@ -142,7 +181,11 @@ def test_the_workbook_saves_every_line(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     ("argv", "message"),
     [
-        ([*_TODAY, *_EXITS], "no_next_round_given: option B's note converts only at a next priced round"),
+        ([*_TODAY, *_EXITS], "no_next_round_given: --note-months-to-conversion is the months until the note"),
+        (
+            [*_TODAY, *_ROUNDS, *_EXITS, "--note-change-of-control-multiple", "2"],
+            "--note-change-of-control-multiple: a term of a note with no next round",
+        ),
         ([*_TODAY, *_ROUNDS], "--exit is empty: give at least one exit"),
         (
             [*_TODAY, *_EXITS, "--next-round", "investment=1000000 standard"],
@@ -311,3 +354,87 @@ async def test_existing_holders_and_the_founder_s_own_terms_print_on_their_lines
     assert "approximate stub" in _line(report, "Note owed when it converts")
     assert "Note's cap price" not in report
     assert "Next round 1: existing investors" in report
+
+
+async def test_with_no_next_round_the_report_says_so_and_shows_the_note_at_maturity_and_each_sale() -> None:
+    report = await run(_COMPANY_DX)
+
+    assert report.splitlines()[0].startswith("A priced round now (A) beside a convertible note now (B), with no next")
+    mode = _line(report, "Mode")
+    assert "no next round" in mode and "the note is never converted at a priced round here" in mode
+    assert "no next round" in _line(report, "B: months until it converts")
+    assert "2x the principal" in _line(report, "B: at a sale before any round")
+    assert "$1,590,000.00" in _line(report, "Note owed at month 12")
+    assert "$1,680,000.00" in _line(report, "At maturity (month 24): note owed")
+    assert "$0.500000" in _line(report, "At maturity (month 24): converts at")
+    founders = _line(report, "At maturity (month 24): founders")
+    assert "72.0000%" in founders and "67.3653%" in founders and "-4.6347%" in founders
+    assert "$3,000,000.00" in _line(report, "At a sale: note's claim")
+    sale = _line(report, "Sale before any round, $3,000,000.00: founders")
+    assert "$1,350,000.00" in sale and "$0.00" in sale and "$-1,350,000.00" in sale
+    forty = _line(report, "Sale before any round, $40,000,000.00: founders")
+    assert "$28,800,000.00" in forty and "$33,300,000.00" in forty and "$4,500,000.00" in forty
+    assert "Note owed when it converts" not in report and "Next round" not in report
+    flags = _flags(report)
+    assert list(flags)[0] == "no_next_round_given"
+    assert flags["discount_unused_without_round"].endswith("it changes no figure here")
+
+
+async def test_the_no_next_round_report_never_picks_an_option() -> None:
+    for argv in (_COMPANY_DX, [*_TODAY[:-2], *_EXITS]):
+        lines = (await run(argv)).lower().split("\nassumptions:\n")[0]
+        for word in ("better", "worse", "recommend", "should", "choose", "pick", "we suggest"):
+            assert re.search(rf"\b{word}\b", lines) is None, word
+
+
+async def test_a_sale_option_b_cannot_be_worked_for_says_why_on_its_row() -> None:
+    """No change-of-control term for a capped note: A is paid, B is "not worked", and the reason is on the row."""
+    report = await run([*_TODAY[:-2], *_EXITS])
+
+    founders = _line(report, "Sale before any round, $20,000,000.00: founders")
+    assert "$12,800,000.00" in founders and "not worked" in founders
+    reason = _line(report, "Sale before any round, $20,000,000.00: option B").rstrip()
+    assert reason.endswith(
+        "option B is not worked at this sale: no change-of-control term was given for the note, and what it is paid "
+        "at a sale before any priced round is in its own terms (a multiple of its principal, or conversion at its "
+        "cap), so give that term"
+    )
+    assert _flags(report)["maturity_not_given"].endswith(
+        "whether it is repaid or converts are in the note's own terms, not shown here"
+    )
+    assert "change_of_control_not_given" in _flags(report)
+
+
+async def test_with_no_next_round_the_command_line_and_the_model_give_the_same_result(tmp_path: Path) -> None:
+    printed = json.loads(await run([*_COMPANY_DX, "--json"]))
+
+    assert printed == json.loads(instrument_compare(**COMPARE_DX).model_dump_json())
+    assert printed["mode"] == "no_next_round"
+    target = tmp_path / "only-round.xlsx"
+    await run([*_COMPANY_DX, "--xlsx", str(target)])
+    labels = [row[0] for row in load_workbook(target)["Priced vs note"].iter_rows(values_only=True)]
+    assert "At maturity (month 24): founders" in labels
+    sheet = sheet_for(instrument_compare(**COMPARE_DX))
+    assert all(len(line.values) == len(_COLUMNS) for line in sheet.lines)
+    assert len({line.key for line in sheet.lines}) == len(sheet.lines)
+
+
+@pytest.mark.parametrize(
+    ("extra", "message"),
+    [
+        (
+            ["--note-change-of-control-at-cap"],
+            "give one change-of-control term, --note-change-of-control-multiple or --note-change-of-control-at-cap",
+        ),
+        (["--note-months-to-conversion", "12"], "no_next_round_given: --note-months-to-conversion"),
+        (
+            ["--note-maturity-conversion-price", "0.5"],
+            "give --note-maturity-conversion-valuation or --note-maturity-conversion-price, not both",
+        ),
+    ],
+)
+async def test_no_next_round_refusals_name_flags(extra: list[str], message: str) -> None:
+    with pytest.raises(SystemExit) as caught:
+        await run([*_COMPANY_DX, *extra])
+
+    assert message in str(caught.value.code)

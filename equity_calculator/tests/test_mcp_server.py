@@ -24,6 +24,7 @@ from equity_calculator.scenarios import compute
 from openpyxl import load_workbook
 from tests.support import (
     COMPARE_BU,
+    COMPARE_DX,
     DEAL_B,
     DILUTION_ROUNDS,
     MARKET_AW,
@@ -195,18 +196,36 @@ async def test_each_tool_returns_the_scenario_result_as_json(scenario: str) -> N
 
 
 async def test_the_comparison_tool_schema_names_both_options_the_next_rounds_and_the_exits() -> None:
-    """The tool's input schema carries every field of both options; a missing next round is a tool error saying so."""
+    """The tool's input schema carries every field of both options and of the no-next-round mode; with no next round
+    the tool runs that mode, and a conversion month given with no next round is a tool error naming it."""
     tools = await _tools(mcp_server.build_server())
     tool = next(tool for tool in tools if tool.name == "equity_instrument_compare")
     schema = json.dumps(tool.inputSchema)
 
-    for field in ("priced_pre_money", "priced_preference", "note_valuation_cap", "next_rounds", "exit_amounts"):
+    fields = (
+        "priced_pre_money",
+        "priced_preference",
+        "note_valuation_cap",
+        "next_rounds",
+        "exit_amounts",
+        "note_owed_months",
+        "note_maturity_conversion_valuation",
+        "note_change_of_control_multiple",
+        "note_change_of_control_at_cap",
+        "note_months_to_exit",
+    )
+    for field in fields:
         assert f'"{field}"' in schema, field
     assert "never a pick" in (tool.title or "")
+    assert "mode no_next_round" in (tool.description or "")
     without = {key: value for key, value in COMPARE_BU.items() if key != "next_rounds"}
     refused = await _call(mcp_server.build_server(), "equity_instrument_compare", {"inputs": without})
     assert refused.isError is True
-    assert "no_next_round_given" in _text(refused)
+    assert "no_next_round_given: note_months_to_conversion" in _text(refused)
+    only_round = await _call(mcp_server.build_server(), "equity_instrument_compare", {"inputs": COMPARE_DX})
+    assert only_round.isError is False
+    assert _text(only_round) == _expected("instrument_compare", COMPARE_DX)
+    assert json.loads(_text(only_round))["mode"] == "no_next_round"
 
 
 @pytest.mark.parametrize(("segment", "flagged"), [({}, True), ({"price_period_months": 12}, False)])

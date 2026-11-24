@@ -246,7 +246,15 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "series gives its own preference_multiple and participation, and an existing note its compounding. Flags "
         "(the note on its cap or discount, a cap below today's price, interest converting or paid in cash, maturity "
         "not given or before conversion, a next round below A's price, A's price below an existing series', an "
-        "existing MFN SAFE beside the note) never pick an option. No next round is refused (no_next_round_given). "
+        "existing MFN SAFE beside the note) never pick an option. With no next_rounds (the founder hopes this is the "
+        "only round) it runs in mode no_next_round (flag no_next_round_given) and leaves note_months_to_conversion "
+        "out: ownership right after today with the note unconverted and what it owes at each note_owed_months; the "
+        "note at note_maturity_months, its repayment and, only with a note_maturity_conversion_valuation (over "
+        "today's fully diluted shares) or note_maturity_conversion_price, its conversion and ownership then; each "
+        "exit as a sale before any priced round, A through the waterfall and B's note paid its own change-of-control "
+        "term first (note_change_of_control_multiple of the principal, or note_change_of_control_at_cap with "
+        "note_months_to_exit). A sale with no such term, or with existing SAFEs or notes outstanding under B, gives "
+        "B as not worked with note_refusal and its reason in words. Those terms are refused with a next round. "
         "Every term is the founder's: never assume one.",
     ),
 }

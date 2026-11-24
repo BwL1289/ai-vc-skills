@@ -50,8 +50,10 @@ convertible note now.
         --priced-pre-money V [--priced-target-pool-percent T] [--priced-pool-timing pre_money|post_money]
         --priced-preference "TERMS" [--note-valuation-cap K] [--note-discount-percent D]
         --note-interest-rate-percent R --note-compounding simple|annual|monthly [--note-stub-rule RULE]
-        --note-months-to-conversion M [--note-maturity-months M] [--note-interest-paid-in-cash]
-        (--next-round "TERMS")... (--exit E)... [--pool-at-exit as_common|left_out]
+        [--note-maturity-months M] [--note-interest-paid-in-cash] [--note-owed-month M]...
+        [--note-months-to-conversion M (--next-round "TERMS")... | [--note-maturity-conversion-valuation V |
+        --note-maturity-conversion-price P] [--note-change-of-control-multiple X | --note-change-of-control-at-cap]
+        [--note-months-to-exit M]] (--exit E)... [--pool-at-exit as_common|left_out]
 
 Every scenario also takes ``--json`` (print the whole result model, exact fractions included, instead of the
 report) and ``--xlsx PATH`` (also write the formatted workbook to PATH; the report then names it). The report is
@@ -191,7 +193,8 @@ def _build_parser() -> argparse.ArgumentParser:
         (
             "instrument_compare",
             "A priced round now beside a convertible note now: who owns what after today and after each next "
-            "round, and who gets what at each exit, B - A; never a recommendation",
+            "round (or, with none, the note at its maturity), and who gets what at each exit, B - A; never a "
+            "recommendation",
             instrument_compare_arguments,
         ),
     )

@@ -669,8 +669,34 @@ and every exit from the waterfall code; nothing is worked a second way.
    `existing_mfn_safe_beside_note` (an existing MFN SAFE converts on the terms given for it under both options; whether
    it may take B's note's cap or discount is in the SAFE's own terms, not modelled).
 
-No next round is refused (`no_next_round_given`: the note converts only at one), and so is a comparison with no
-exit. An exit before the next round, while the note is outstanding, is not modelled.
+A comparison with no exit is refused. With a next round, every exit follows it; a sale before it, while the note is
+outstanding, is worked only with no next round given.
+
+**With no next round** (the founder hopes today's raise is the only one), the comparison says so (mode
+`no_next_round`, flag `no_next_round_given`) and the note never converts at a priced round. Leave
+`--next-round` and `--note-months-to-conversion` out (the months are refused with no round to convert at); the terms
+below are the note's own, each asked for, never assumed, and each refused with a next round:
+
+1. **Today**, as above: A's ownership after its round, B's with the note unconverted, and what the note owes
+   (principal plus interest, to the cent) at each month in `--note-owed-month`.
+2. **At maturity** (`--note-maturity-months`), the repayment: what the note owes then. With a conversion valuation
+   (`--note-maturity-conversion-valuation`, taken over FD as the cap is) or a price a share
+   (`--note-maturity-conversion-price`) from the founder, it also converts what it owes (the principal alone when the
+   interest is paid in cash) at that price, beside A right after today; with neither, only what it owes is shown, as
+   whether it converts is in its own terms (`maturity_conversion_not_given`).
+3. **Each exit is a sale before any priced round.** A's sale is the waterfall over A's cap table after today. B's
+   note is paid its change-of-control term: a multiple of its principal (`--note-change-of-control-multiple`, the
+   principal alone), paid before any share and never more than the sale, with the rest to the shares; or, converting
+   at its cap (`--note-change-of-control-at-cap`, with `--note-months-to-exit`), what it owes then at the cap price
+   into common shares. B is not worked at a sale, and the row says why, when no term is given
+   (`no_change_of_control_term`, or `uncapped_no_change_of_control_term` when the note has no cap to convert at) or
+   when existing SAFEs or notes are still outstanding under B (`existing_instruments_outstanding`). A multiple with
+   interest added, or the greater of two terms, is not modelled.
+4. **Flags** of this mode: `no_next_round_given`, `discount_unused_without_round` (the discount comes off a priced
+   round's price, so it changes no figure), `maturity_conversion_not_given`, `change_of_control_not_given`,
+   `existing_instruments_outstanding` (they hold no shares under B, and B is not worked at a sale) and
+   `exit_after_maturity` (the sales come after the note matures; B's sale lines take it as still outstanding), beside
+   `cap_below_round_price_now`, `note_interest_converts`, `note_interest_paid_in_cash` and `maturity_not_given`.
 
 </details>
 
@@ -948,6 +974,49 @@ founders nothing: the preferences ($8M in A, $8.1M in B) take it all. At $20M th
 $8,296,296.29 in B ($8,296,296.30 on its own; the cent goes elsewhere by largest remainder), $663,703.70 less; at
 $100M everyone converts and the payouts follow ownership. The report never says which to take.
 
+**A priced round now or a note now, with no next round (Company DX, made up).** 9,000,000 founder shares, 500,000 for
+the team and a 500,000-share unissued pool, raising $1,500,000; the founder hopes it is the only round. Option A prices
+it at a $6,000,000 pre-money on standard terms (the founder said so). Option B is a note with no cap, a 20% discount and
+6% simple interest, maturing in 24 months: then it is repaid or converts at a $5,000,000 valuation, and at a sale
+before that it is paid 2x its principal. The founder asks what it owes at 12 and 24 months, and about a sale for $3M,
+$10M or $40M:
+
+```
+equity_calculator instrument_compare --founder-shares 9,000,000 --team-shares 500,000 \
+    --unissued-pool-shares 500,000 --investment 1,500,000 --priced-pre-money 6,000,000 --priced-preference standard \
+    --note-discount-percent 20 --note-interest-rate-percent 6 --note-compounding simple \
+    --note-owed-month 12 --note-owed-month 24 --note-maturity-months 24 \
+    --note-maturity-conversion-valuation 5,000,000 --note-change-of-control-multiple 2 \
+    --exit 3,000,000 --exit 10,000,000 --exit 40,000,000
+  Mode                                                                     no next round     no next round                  no next round given: the note is never converted at a priced round here; ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
+  Today: price per share                                                       $0.600000                                    p = V/(FD + converted + new pool)
+  Note owed at month 12                                                                      $1,590,000.00                  principal + interest, to the cent
+  Note owed at month 24                                                                      $1,680,000.00                  principal + interest, to the cent
+  Today: founders                                                               72.0000%          90.0000%        18.0000%  group's shares / total shares
+  At maturity (month 24): note owed                                                          $1,680,000.00                  principal + interest, to the cent; repaid if its terms say so
+  At maturity (month 24): converts at                                                            $0.500000                  the maturity valuation / FD
+  At maturity (month 24): note's shares                                                          3,360,000                  amount converting / price
+  At maturity (month 24): founders                                              72.0000%          67.3653%        -4.6347%  group's shares / total shares (A: right after today)
+  At a sale: note's claim                                                                    $3,000,000.00                  the multiple x the principal, paid before any share, up to the sale
+  Sale before any round, $3,000,000.00: founders                           $1,350,000.00             $0.00  $-1,350,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $3,000,000.00: new money                          $1,500,000.00     $3,000,000.00   $1,500,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $10,000,000.00: founders                          $7,200,000.00     $6,300,000.00    $-900,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $10,000,000.00: new money                         $2,000,000.00     $3,000,000.00   $1,000,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $40,000,000.00: founders                         $28,800,000.00    $33,300,000.00   $4,500,000.00  the waterfall, every preference honoured; B's note on its own term
+  Flag                                                               no_next_round_given                                    No next round was given, so the note never converts at a priced round here: the comparison shows ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
+  Flag                                                            note_interest_converts                                    The note's interest converts too, so it gets shares for more than the raise
+  Flag                                                     discount_unused_without_round                                    The note's discount comes off a priced round's price, and no next round is given: it changes no figure here
+```
+
+With no next round the note never converts at a priced round, and the report says so on its first line. Right after
+today the founders hold 72% in A and 90% in B. The note owes $1,680,000.00 at its maturity: the repayment, or, at the
+$5M valuation over today's 10,000,000 shares ($0.50 a share), 3,360,000 shares, leaving the founders 67.3653% against
+72% in A (-387/8350 exactly). At a sale before any priced round the note is owed 2x its $1.5M principal, $3M, before
+any share: at $3M it takes the whole sale and the founders get nothing in B against $1,350,000.00 in A (A's $1.5M
+preference stays, as converting would pay its 20% only $600,000); at $10M they get $6,300,000.00 against
+$7,200,000.00; at $40M $33,300,000.00 against $28,800,000.00, as the claim is fixed while A's investors convert to 20%.
+The discount, which comes off a priced round's price, changes nothing here. The report never says which to take.
+
 ## Using it
 
 ```
@@ -997,8 +1066,10 @@ equity_calculator instrument_compare --founder-shares F --team-shares T --unissu
     --priced-pre-money V [--priced-target-pool-percent T] [--priced-pool-timing pre_money|post_money]
     --priced-preference "TERMS" [--note-valuation-cap K] [--note-discount-percent D]
     --note-interest-rate-percent R --note-compounding simple|annual|monthly [--note-stub-rule RULE]
-    --note-months-to-conversion M [--note-maturity-months M] [--note-interest-paid-in-cash]
-    --next-round "TERMS"... --exit E... [--pool-at-exit as_common|left_out]
+    [--note-maturity-months M] [--note-interest-paid-in-cash] [--note-owed-month M]...
+    [--note-months-to-conversion M --next-round "TERMS"... | [--note-maturity-conversion-valuation V |
+    --note-maturity-conversion-price P] [--note-change-of-control-multiple X | --note-change-of-control-at-cap]
+    [--note-months-to-exit M]] --exit E... [--pool-at-exit as_common|left_out]
 ```
 
 `deal_check` needs `--investment` and at least one of `--pre-money`, `--post-money` and `--stated-investor-percent`.
@@ -1040,16 +1111,22 @@ every segment.
 
 `instrument_compare` needs today's founder shares, the team's shares and the unissued pool (`0` for none: today's
 fully diluted shares are built from them), the raise, option A's pre-money and series terms, option B's
-interest rate, compounding and months until it converts, at least one `--next-round` (with none it is refused,
-`no_next_round_given`, as the note converts only at a next round) and at least one `--exit`. Each `--next-round` is
-an alternative for the one round after today, worked from today, never after the one before. Every term is the
+interest rate and compounding, and at least one `--exit`. With one or more `--next-round` it also needs
+`--note-months-to-conversion`, the months until the note converts there. Each `--next-round` is
+an alternative for the one round after today, worked from today, never after the one before. With none, the
+comparison runs with no next round and says so (`no_next_round_given`): `--note-months-to-conversion` is refused, and
+the note's own maturity and sale terms come in instead (`--note-maturity-conversion-valuation` or
+`--note-maturity-conversion-price`, `--note-change-of-control-multiple` or `--note-change-of-control-at-cap` with
+`--note-months-to-exit`), each refused with a next round. `--note-owed-month` (up to 6) shows what the note owes at
+that month in either mode. Every term is the
 founder's own figure: `--priced-preference standard` (and `standard` in a `--next-round`) only when the founder says
 the terms are standard, 1x non-participating; otherwise give the multiple and participation. `--existing-series` takes
 `--class`'s terms with `preference-multiple=` and `participation=` always given (that series' own terms; rank is 1
 unless given), and `--existing-safe` and `--existing-note` take `--safe`'s and `--note`'s, an existing note with
-`months-outstanding=` as of today (dates are refused) and `compounding=` always given. `--note-maturity-months` is
-only compared with the months to conversion; nothing at maturity is modelled. `--pool-at-exit left_out` gives the pool
-nothing at an exit.
+`months-outstanding=` as of today (dates are refused) and `compounding=` always given. With a next round,
+`--note-maturity-months` is only compared with the months to conversion and nothing at maturity is modelled; with none,
+it is when the note is repaid or converts on the terms given. `--pool-at-exit left_out` gives the pool nothing at an
+exit.
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
 `--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure or sensitivity
@@ -1376,6 +1453,16 @@ these (`standard_preference` only when a series is given as standard):
 | `pool_at_exit`              | the pool takes part as common                                                               | `--pool-at-exit left_out`                         | method                                      |
 | `money_split`               | largest remainder within each option                                                        | fixed                                             | display convention                          |
 | `difference_rounding`       | B - A of the exact values, rounded once                                                     | fixed                                             | display convention                          |
+
+With no next round, `note_price_rule` and `exit_after_next_round` are left out; `comparison_rule`,
+`note_outstanding_today`, `note_interest_terms`, `maturity_rule`, `existing_instruments_rule` and `series_terms` say
+what that mode does instead, and these are added (`note_discount_rule` only when a discount is given):
+
+| Key                     | Default                                                                                                              | How to change it                                                                                     | Source                                   |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `maturity_rule`         | at maturity the repayment, and a conversion only at the founder's valuation (over FD) or price                       | `--note-maturity-months`, `--note-maturity-conversion-valuation`, `--note-maturity-conversion-price` | unverified (the note's own terms decide) |
+| `exit_before_any_round` | every exit is a sale before any priced round; B's note paid its multiple of principal first, or converted at its cap | `--note-change-of-control-multiple`, `--note-change-of-control-at-cap`                               | unverified (the note's own terms decide) |
+| `note_discount_rule`    | the discount comes off a priced round's price, so it changes no figure here                                          | fixed                                                                                                | unverified (notes have no standard form) |
 
 </details>
 
