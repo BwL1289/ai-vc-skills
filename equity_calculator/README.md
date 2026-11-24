@@ -680,15 +680,21 @@ unissued pool, warrants), holder lines numbered in order, each in one class, and
 checks the arithmetic of those figures against each other; whether any share was validly issued is for the company's
 lawyer, and the report says what to ask.
 
-1. **Totals.** A class's shares are its stated shares, else its holder lines' sum; with both, the lines are checked
-   against the stated shares (equal or a mismatch) and the stated shares are used. The fully diluted shares FD are
+1. **Totals.** A class's shares are its stated shares, else its holder lines' sum. With both, the founder says
+   whether the lines are every holder of the class (`holder-lines=complete|partial`, required then, never assumed):
+   complete lines are checked against the stated shares (equal or a mismatch), partial ones leave the rest printed
+   as shares in no line (never an "everyone else" line of its own) and are checked only when they add up to more;
+   the stated shares are used either way. The fully diluted shares FD are
    every class added up: each preferred share counts as one common share, each warrant share as exercised, and the
    unissued pool is included (Altman measures grants as "what percentage of the fully-diluted shares"). The
    outstanding stock O is common plus preferred. SAFEs and notes hold no shares until they convert, so they are in
    neither.
 2. **Shares.** Each class and holder line holds shares/FD, and each common or preferred one shares/O, exactly. The
    founders' share is the founder lines over FD; the departed holders' share (vested shares held by people who have
-   left, sometimes called dead equity) is the departed lines over FD.
+   left, sometimes called dead equity) is the departed lines over FD. A line may carry both marks and then counts in
+   each. When a class's holder lines add up to more than its stated shares, the founders' and departed holders'
+   shares, the preview's lines for them and the founders' path rest on a total that does not hold those lines, so
+   they are left out and flagged.
 3. **Stated figures.** `--stated-percent-basis` says what the table's percents are a share of (FD or O); it is
    required with any stated percent and never assumed. A stated percent is consistent when it is the computed share
    rounded half away from zero to the places it is written with (the deal check's rounding test), or within
@@ -702,14 +708,19 @@ lawyer, and the report says what to ask.
    common class's) against FD, every share of which would be common once converted or exercised.
 5. **Instruments.** Each SAFE and note is listed with its amount, cap and discount, and their amounts are totalled.
    `--preview` converts them at the next round the founder gives (its pre-money and raise, any pool top-up), through
-   the round scenario above on FD and the unissued pool, and reads every line back as a share of the shares after it.
-   No price is ever assumed: with no `--preview` nothing converts.
-6. **Founders' path.** Each `--planned-round` (the dilution scenario's terms) keeps 1 - n - p of the founders' share
-   of FD; it converts no SAFE or note, and says so.
-7. **Flags**, never a ruling: `percents_do_not_sum` (a column cannot be roundings of shares that add up to 100%),
+   the round scenario above on FD and the unissued pool, and reads every line back as a share of the shares after it,
+   with the round's own lines for the pool target, its timing and the new pool shares, and for what each instrument
+   converts (a note's accrued interest included). No price is ever assumed: with no `--preview` nothing converts.
+6. **Founders' path.** Each `--planned-round` (the dilution scenario's terms) keeps 1 - n - p of the founders'
+   share. With a `--preview` the path starts from the founders' share after it (its SAFEs and notes converted), so the
+   planned rounds are the rounds after the preview and must not repeat it (it would be counted twice); without one it
+   starts from their share of FD today and converts no SAFE or note, and says so.
+7. **Flags**, never a ruling: `holder_lines_exceed_class` (a class's lines add up to more than its stated shares),
+   `percents_do_not_sum` (a column cannot be roundings of shares that add up to 100%),
    `consistent_beyond_rounding` (a percent holds by the tolerance alone), `over_authorised` (a class past its
    authorised shares, or the plan past its reserve), `common_authorised_below_fully_diluted`,
-   `unconverted_instruments_present`, `departed_holders_share` and `path_leaves_out_instruments`. Each one's words
+   `unconverted_instruments_present`, `departed_holders_share` and `path_leaves_out_instruments` (a path from today
+   with SAFEs or notes outstanding and no preview). Each one's words
    name the question, and the ones only a lawyer can settle say to ask the company's lawyer.
 
 </details>
@@ -1022,10 +1033,10 @@ equity_calculator cap_table_check --share-class "kind=common authorised-shares=8
   Percent column, line by line: what rounding explains                                                  0.0350%  half the last place of each
   Percent column, line by line: verdict                                                                mismatch  a gap within what rounding explains, plus the tolerance for each, is consistent
   Flag                                                                                      percents_do_not_sum  The stated percents cannot all be roundings of shares that add up to 100%: a line is missing, counted twice, or on another basis; find it before the table goes to an investor
-  Flag                                                                                          over_authorised  A class has issued more shares than the authorised figure given, or the option plan has granted and reserved more than its reserve; ask the company's lawyer whether the charter or the plan was amended, as shares past the authorised number may not be validly issued
+  Flag                                                                                          over_authorised  A class has issued more shares than the authorised figure given, or the option plan has granted and reserved more than its reserve; ask the company's lawyer whether the charter or the plan was amended to cover them
   Flag                                                                    common_authorised_below_fully_diluted  Authorised common is below the fully diluted shares, all of which would be common once converted or exercised; ask the company's lawyer whether the charter reserves enough common
   Flag                                                                          unconverted_instruments_present  SAFEs or notes are outstanding and hold no shares yet, so every percent here falls when they convert; list them for investors, and ask the company's lawyer to confirm their terms
-  Flag                                                                                   departed_holders_share  People who have left hold shares (the departed holders' line above); investors often ask about it, and the company's lawyer can say whether any repurchase right or unvested shares were handled
+  Flag                                                                                   departed_holders_share  People who have left hold shares (the lines marked departed); investors often ask about it, and the company's lawyer can say whether any repurchase right or unvested shares were handled
   Overall verdict                                                                                      mismatch  mismatch if any check is; consistent if all are; not_checked with none
 ```
 
@@ -1145,13 +1156,14 @@ only compared with the months to conversion; nothing at maturity is modelled. `-
 nothing at an exit.
 
 `cap_table_check` needs at least one `--share-class`, in the table's order (the first is class 1), each with its
-`kind` and, unless its `--holder` lines give them, its `shares`. Each `--holder` names its class by number and is
-marked `founder` or `departed` (vested shares held by someone who has left) as the founder says; the unissued pool
-has no holder lines. A stated percent needs `--stated-percent-basis`, never assumed, and on `outstanding` only common
+`kind` and, unless its `--holder` lines give them, its `shares`; a class with both takes `holder-lines=complete` or
+`holder-lines=partial` as the founder says. Each `--holder` names its class by number and is marked `founder` or
+`departed` (vested shares held by someone who has left) as the founder says, or both (it then counts in the founders'
+share, the path and the departed holders' share); the unissued pool has no holder lines. A stated percent needs `--stated-percent-basis`, never assumed, and on `outstanding` only common
 and preferred lines carry one. Give each stated percent with the places the table writes (`stated-percent=45.00` for
 "45.00%"). `--safe` and `--note` take `round`'s terms and are listed, never counted; `--preview` converts them at the
 next round the founder gives, and needs at least one; `--planned-round` takes `dilution`'s `--round` terms and needs a
-`founder` line. `authorised-shares` is for common and preferred only; the plan's reserve is `--option-plan-reserve`.
+`founder` line, and with a `--preview` gives only the rounds after it. `authorised-shares` is for common and preferred only; the plan's reserve is `--option-plan-reserve`.
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
 `--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure or sensitivity
@@ -1488,18 +1500,18 @@ The `cap_table_check` scenario adds these (`preferred_as_converted` only with a 
 only with warrants, the rest only when the input uses them, `legal_validity` always), then the nested round's and
 dilution's own rows that it does not already list:
 
-| Key                      | Default                                                 | How to change it                              | Source                                                      |
-| ------------------------ | ------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------- |
-| `fully_diluted_basis`    | every class, the unissued pool included                 | fixed                                         | unverified; Altman's fully-diluted measure                  |
-| `class_shares`           | a class's stated shares, else its holder lines' sum     | `shares=`                                     | method                                                      |
-| `preferred_as_converted` | one common share per preferred share                    | fixed                                         | unverified (the charter decides; a question for the lawyer) |
-| `warrants_as_exercised`  | one share per warrant share                             | fixed                                         | unverified (the warrant decides; a question for the lawyer) |
-| `outstanding_basis`      | common and preferred only                               | `--stated-percent-basis`                      | unverified (the founder named the basis)                    |
-| `tolerance`              | 0 points beyond rounding                                | `--tolerance-points`                          | unverified (the rounding test is standard arithmetic)       |
-| `authorised_shares`      | the founder's authorised figures, class by class        | `authorised-shares=`, `--option-plan-reserve` | unverified (the charter decides; a question for the lawyer) |
-| `instruments_outside`    | SAFEs and notes are not in FD until they convert        | `--preview`                                   | unverified                                                  |
-| `founder_path`           | the founders' share of FD times each round's share kept | `--planned-round`                             | unverified                                                  |
-| `legal_validity`         | not checked                                             | fixed                                         | method                                                      |
+| Key                      | Default                                                         | How to change it                              | Source                                                      |
+| ------------------------ | --------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------- |
+| `fully_diluted_basis`    | every class, the unissued pool included                         | fixed                                         | unverified; Altman's fully-diluted measure                  |
+| `class_shares`           | a class's stated shares, else its holder lines' sum             | `shares=`, `holder-lines=`                    | method                                                      |
+| `preferred_as_converted` | one common share per preferred share                            | fixed                                         | unverified (the charter decides; a question for the lawyer) |
+| `warrants_as_exercised`  | one share per warrant share                                     | fixed                                         | unverified (the warrant decides; a question for the lawyer) |
+| `outstanding_basis`      | common and preferred only                                       | `--stated-percent-basis`                      | unverified (the founder named the basis)                    |
+| `tolerance`              | 0 points beyond rounding                                        | `--tolerance-points`                          | unverified (the rounding test is standard arithmetic)       |
+| `authorised_shares`      | the founder's authorised figures, class by class                | `authorised-shares=`, `--option-plan-reserve` | unverified (the charter decides; a question for the lawyer) |
+| `instruments_outside`    | SAFEs and notes are not in FD until they convert                | `--preview`                                   | unverified                                                  |
+| `founder_path`           | the founders' share, from the preview or today, times each kept | `--planned-round`, `--preview`                | unverified                                                  |
+| `legal_validity`         | not checked                                                     | fixed                                         | method                                                      |
 
 </details>
 

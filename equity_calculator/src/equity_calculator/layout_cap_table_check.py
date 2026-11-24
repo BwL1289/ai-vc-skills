@@ -1,13 +1,14 @@
 """A cap table check's report lines (the ``Cap table check`` sheet): the table as given, its tie-outs, the checks.
 
 One value column. The table as given comes first (each class, then each holder line), then each class worked (its
-shares, its share of the fully diluted shares and of the outstanding stock, its authorised shares and what is left),
-the fully diluted total (a live ``=SUM`` of the class lines) and the outstanding stock, each holder line's share, the
-founders' share and the departed holders' share, the option plan's and authorised common's headroom, the SAFEs and
-notes outstanding (with their live total), each stated figure checked (stated, computed, difference, for a percent
-whether the figure as typed is a rounding of the computed one, verdict), the conversion preview and the founders'
-path when given, the flags in plain words, and the overall verdict. Values only: no line carries a live formula
-beyond the ``=SUM`` totals.
+shares, the shares in none of partial holder lines, its share of the fully diluted shares and of the outstanding
+stock, its authorised shares and what is left), the fully diluted total (a live ``=SUM`` of the class lines) and the
+outstanding stock, each holder line's share, the founders' share and the departed holders' share, the option plan's
+and authorised common's headroom, the SAFEs and notes outstanding (with their live total), each stated figure checked
+(stated, computed, difference, for a percent whether the figure as typed is a rounding of the computed one, verdict),
+the conversion preview (the round's own lines for its pool and for what each instrument converts,
+``equity_calculator.layout_round``) and the founders' path when given, the flags in plain words, and the overall
+verdict. Values only: no line carries a live formula beyond the ``=SUM`` totals.
 """
 
 from __future__ import annotations
@@ -15,6 +16,8 @@ from __future__ import annotations
 from decimal import Decimal
 
 from equity_calculator.exact import fraction, quantity
+from equity_calculator.layout_round import converting_lines, new_pool_line, pool_met_line, pool_target_lines
+from equity_calculator.rounding import rounding_how, rounding_label, rounding_verdict_how
 from equity_calculator.schemas.equity_cap_table_check import (
     CapCheck,
     CapTableCheckInput,
@@ -23,7 +26,7 @@ from equity_calculator.schemas.equity_cap_table_check import (
     ShareClassKind,
 )
 from equity_calculator.schemas.equity_common import EquityQuantity
-from equity_calculator.schemas.equity_round import SafeTerms
+from equity_calculator.schemas.equity_round import instrument_amount
 from equity_calculator.sheet_parts import GIVEN, Line, Sheet, given, given_percent, yes_no
 
 _TITLE = "Cap table check"
@@ -40,9 +43,11 @@ _INSTRUMENT_NAMES = {"safe": "SAFE", "note": "Note"}
 _BASIS_NAMES = {"fully_diluted": "of the fully diluted shares", "outstanding": "of the outstanding stock"}
 _TOTAL_NAMES = {"class_percent_total": "Classes' percents", "line_percent_total": "Percent column, line by line"}
 # The rounding test's words (``equity_calculator.rounding``), said of the table rather than a deck.
-_ROUNDING_HOW = "the computed figure, rounded half away from zero to the places the table writes, is the table's"
-_ROUNDING_VERDICT_HOW = "within the tolerance, or rounding to the table's, is consistent"
+_DOCUMENT = "table"
 _TOTAL_VERDICT_HOW = "a gap within what rounding explains, plus the tolerance for each, is consistent"
+# The preview's keys start with this, beside the instruments section's own (the round's lines it reuses included).
+_PREVIEW = "preview_"
+_PATH_AFTER_PREVIEW = "Founders' path: after the next round (the preview)"
 
 
 def _class_name(index: int, kind: ShareClassKind) -> str:
@@ -60,6 +65,10 @@ def _shares(value: int) -> EquityQuantity:
 def _flag_words(flag: CapTableFlag) -> str:
     """What a flag means for the founder, in plain words, and the question it raises (for the lawyer where legal)."""
     words: dict[CapTableFlag, str] = {
+        "holder_lines_exceed_class": "A class's holder lines add up to more than its stated shares, so the holder "
+        "lines' percents rest on a total that does not hold them; the founders' and departed holders' shares, the "
+        "preview's lines for them and the founders' path are left out until the lines or the class's shares are "
+        "corrected",
         "percents_do_not_sum": "The stated percents cannot all be roundings of shares that add up to 100%: a line is "
         "missing, counted twice, or on another basis; find it before the table goes to an investor",
         "consistent_beyond_rounding": "A stated figure is consistent only by the tolerance: it is not the computed "
@@ -67,18 +76,16 @@ def _flag_words(flag: CapTableFlag) -> str:
         "the calculator's",
         "over_authorised": "A class has issued more shares than the authorised figure given, or the option plan has "
         "granted and reserved more than its reserve; ask the company's lawyer whether the charter or the plan was "
-        "amended, as shares past the authorised number may not be validly issued",
+        "amended to cover them",
         "common_authorised_below_fully_diluted": "Authorised common is below the fully diluted shares, all of which "
         "would be common once converted or exercised; ask the company's lawyer whether the charter reserves enough "
         "common",
         "unconverted_instruments_present": "SAFEs or notes are outstanding and hold no shares yet, so every percent "
         "here falls when they convert; list them for investors, and ask the company's lawyer to confirm their terms",
-        "departed_holders_share": "People who have left hold shares (the departed holders' line above); investors "
-        "often ask about it, and the company's lawyer can say whether any repurchase right or unvested shares were "
-        "handled",
-        "path_leaves_out_instruments": "The founders' path through the planned rounds converts no SAFE or note, so "
-        "it shows more than the founders would keep once they convert; the conversion preview shows one round with "
-        "them",
+        "departed_holders_share": "People who have left hold shares (the lines marked departed); investors often "
+        "ask about it, and the company's lawyer can say whether any repurchase right or unvested shares were handled",
+        "path_leaves_out_instruments": "The founders' path starts today and converts no SAFE or note, so it shows "
+        "more than the founders would keep once they convert; give the next round as a preview to convert them",
     }
     return words[flag]
 
@@ -101,6 +108,9 @@ def _given_lines(inputs: CapTableCheckInput, checked: bool) -> list[Line]:
         if item.stated_percent is not None:
             stated = given_percent(item.stated_percent)
             lines.append(Line(f"given_class_{index}_percent", f"{name}: percent as stated", (stated,), GIVEN))
+        if item.holder_lines is not None:
+            listed = (item.holder_lines,)
+            lines.append(Line(f"given_class_{index}_holder_lines", f"{name}: its holder lines are", listed, GIVEN))
     for index, holder in enumerate(inputs.holders, start=1):
         name = _holder_name(index, holder.share_class, inputs.classes[holder.share_class - 1].kind)
         marks = [word for word, on in (("founder", holder.founder), ("departed", holder.departed)) if on]
@@ -137,6 +147,10 @@ def _class_lines(result: CapTableCheckResult) -> list[Line]:
         keys.append(f"{key}_shares")
         if row.holder_shares is not None and result.inputs.classes[row.index - 1].shares is not None:
             lines.append(Line(f"{key}_holder_shares", f"{name}: its holder lines", (row.holder_shares,), "added up"))
+        if row.unlisted_shares is not None:
+            unlisted = row.unlisted_shares
+            how = "shares - its holder lines (a partial list)"
+            lines.append(Line(f"{key}_unlisted", f"{name}: in no holder line", (unlisted,), how))
         lines.append(Line(f"{key}_fd", f"{name}: of fully diluted", (row.fully_diluted_fraction,), "shares/FD"))
         if row.outstanding_fraction is not None:
             lines.append(Line(f"{key}_out", f"{name}: of outstanding", (row.outstanding_fraction,), "shares/O"))
@@ -204,8 +218,7 @@ def _instrument_lines(result: CapTableCheckResult) -> list[Line]:
     for index, item in enumerate(result.inputs.instruments, start=1):
         name = f"{_INSTRUMENT_NAMES[item.kind]} {index}"
         key = f"instrument_{index}"
-        amount = item.purchase_amount if isinstance(item, SafeTerms) else item.principal
-        label = "purchase amount" if isinstance(item, SafeTerms) else "principal"
+        amount, label = instrument_amount(item)
         lines.append(Line(f"{key}_amount", f"{name}: {label}", (given("money", amount),), GIVEN))
         keys.append(f"{key}_amount")
         if item.valuation_cap is not None:
@@ -265,15 +278,15 @@ def _check_lines(check: CapCheck, inputs: CapTableCheckInput) -> list[Line]:
     ]
     typed = _typed(check, inputs)
     if check.within_rounding is not None and typed is not None:
-        label = f'{name}: rounds to the table\'s "{typed:f}"'
-        lines.append(Line(f"{key}_rounding", label, (yes_no(check.within_rounding),), _ROUNDING_HOW))
+        label = rounding_label(name, typed, _DOCUMENT)
+        lines.append(Line(f"{key}_rounding", label, (yes_no(check.within_rounding),), rounding_how(_DOCUMENT)))
     if check.rounding_allowance is not None and check.within_rounding is not None:
         allowance = check.rounding_allowance
         lines += [
             Line(f"{key}_allowance", f"{name}: what rounding explains", (allowance,), "half the last place of each"),
             Line(f"{key}_rounding", f"{name}: gap within it", (yes_no(check.within_rounding),), "|difference| ≤ it"),
         ]
-    how = "consistent only when equal" if check.within_rounding is None else _ROUNDING_VERDICT_HOW
+    how = "consistent only when equal" if check.within_rounding is None else rounding_verdict_how(_DOCUMENT)
     if check.rounding_allowance is not None:
         how = _TOTAL_VERDICT_HOW
     lines.append(Line(f"{key}_verdict", f"{name}: verdict", (check.verdict,), how, verdict=True))
@@ -282,21 +295,22 @@ def _check_lines(check: CapCheck, inputs: CapTableCheckInput) -> list[Line]:
 
 
 def _preview_lines(result: CapTableCheckResult) -> list[Line]:
-    """The SAFEs and notes converted in the founder's next round: the price, then every line after it."""
+    """The SAFEs and notes converted in the founder's next round: its terms and pool, the price, then every line after
+    it, each instrument with what it converts (a note's interest included) so its shares multiply out."""
     preview = result.preview
     if preview is None:
         return []
 
-    terms = result.inputs.conversion_preview
-    lines = []
-    if terms is not None:
-        lines += [
-            Line("preview_pre_money", "Next round: pre-money", (given("money", terms.pre_money),), GIVEN),
-            Line("preview_investment", "Next round: raise", (given("money", terms.investment),), GIVEN),
-        ]
-    lines += [
+    terms = preview.round.inputs
+    conversions = {row.index: row for row in preview.round.conversions}
+    lines = [
+        Line("preview_pre_money", "Next round: pre-money", (given("money", terms.pre_money),), GIVEN),
+        Line("preview_investment", "Next round: raise", (given("money", terms.investment),), GIVEN),
+        *pool_target_lines(terms, _PREVIEW),
         Line("preview_price", "Next round: price per share", (preview.price_per_share,), "the round scenario's price"),
         Line("preview_kept", "Next round: share every share today keeps", (preview.stake_kept,), "FD/T"),
+        new_pool_line(preview.round, _PREVIEW),
+        pool_met_line(preview.round, _PREVIEW),
     ]
     for row in preview.classes:
         name = _class_name(row.index, row.kind)
@@ -305,6 +319,7 @@ def _preview_lines(result: CapTableCheckResult) -> list[Line]:
     for row in preview.instruments:
         name = f"{_INSTRUMENT_NAMES[row.kind]} {row.index}"
         lines += [
+            *converting_lines(conversions[row.index], _PREVIEW),
             Line(f"preview_{row.kind}_{row.index}_price", f"{name}: converts at", (row.conversion_price,), row.basis),
             Line(f"preview_{row.kind}_{row.index}_shares", f"{name}: shares", (row.shares,), "amount converting/price"),
             Line(f"preview_{row.kind}_{row.index}_after", f"After: {name}", (row.fraction_after,), "shares/T"),
@@ -319,18 +334,23 @@ def _preview_lines(result: CapTableCheckResult) -> list[Line]:
 
 
 def _path_lines(result: CapTableCheckResult) -> list[Line]:
-    """The founders' share today, after each planned round, and at the end."""
+    """The founders' share where the path starts (today, or after the preview's round), after each planned round,
+    and at the end."""
     path = result.founder_path
     if path is None:
         return []
 
-    lines = [Line("path_start", "Founders' path: today", (path.start,), "founder lines' shares/FD")]
-    for index, (stake, row) in enumerate(zip(path.stakes, path.dilution.rows, strict=True), start=1):
-        lines.append(
-            Line(f"path_kept_{index}", f"Founders' path: round {index} keeps", (row.kept,), "1 - n - p"),
-        )
+    if path.starts_from == "conversion_preview":
+        start = Line("path_start", _PATH_AFTER_PREVIEW, (path.start,), "the preview's founders' lines (shares/T)")
+        final_how = "after the preview × every kept"
+    else:
+        start = Line("path_start", "Founders' path: today", (path.start,), "founder lines' shares/FD")
+        final_how = "today × every kept"
+    lines = [start]
+    for index, (stake, kept) in enumerate(zip(path.stakes, path.kept, strict=True), start=1):
+        lines.append(Line(f"path_kept_{index}", f"Founders' path: round {index} keeps", (kept,), "1 - n - p"))
         lines.append(Line(f"path_after_{index}", f"Founders' path: after round {index}", (stake,), "before × kept"))
-    lines.append(Line("path_final", "Founders' path: after the last round", (path.final,), "today × every kept"))
+    lines.append(Line("path_final", "Founders' path: after the last round", (path.final,), final_how))
 
     return lines
 

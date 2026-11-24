@@ -498,10 +498,11 @@ CAP_TABLE_CQ: dict[str, object] = {
     "instruments": [{"kind": "safe", "purchase_amount": "1000000", "valuation_cap": "12000000"}],
 }
 
-# Company CR, made up: two founders' common (5,000,000 and 3,000,000) and a departed co-founder's 500,000, 1,000,000
-# options granted and a 500,000 unissued pool (10,000,000 fully diluted), two SAFEs ($1,000,000 at a $10,000,000 cap;
-# $500,000 at an $8,000,000 cap and a 20% discount), the founder's next round ($4,000,000 at an $18,000,000
-# pre-money) and two planned rounds (20% sold with a 5% new pool, then 20% sold).
+# Company CR, made up: two founders' common (5,000,000 and 3,000,000) and a departed co-founder's 500,000 (marked
+# departed only: the founder counts just the two of them as founders), 1,000,000 options granted and a 500,000
+# unissued pool (10,000,000 fully diluted), two SAFEs ($1,000,000 at a $10,000,000 cap; $500,000 at an $8,000,000 cap
+# and a 20% discount), the founder's next round ($4,000,000 at an $18,000,000 pre-money) and the two rounds planned
+# after it (20% sold with a 5% new pool, then 20% sold).
 CAP_TABLE_CR: dict[str, object] = {
     "classes": [
         {"kind": "common"},
@@ -521,6 +522,34 @@ CAP_TABLE_CR: dict[str, object] = {
     "conversion_preview": {"pre_money": "18000000", "investment": "4000000"},
     "planned_rounds": [{"investor_percent": "20", "pool_percent": "5"}, {"investor_percent": "20"}],
 }
+# Company CR as the command takes it.
+CAP_TABLE_CR_ARGV = [
+    "cap_table_check",
+    "--share-class",
+    "kind=common",
+    "--share-class",
+    "kind=options_granted shares=1,000,000",
+    "--share-class",
+    "kind=options_unissued shares=500,000",
+    "--holder",
+    "share-class=1 shares=5,000,000 stated-percent=50 founder",
+    "--holder",
+    "share-class=1 shares=3,000,000 stated-percent=30 founder",
+    "--holder",
+    "share-class=1 shares=500,000 stated-percent=5 departed",
+    "--stated-percent-basis",
+    "fully_diluted",
+    "--safe",
+    "1,000,000 valuation-cap=10,000,000",
+    "--safe",
+    "500,000 valuation-cap=8,000,000 discount-percent=20",
+    "--preview",
+    "pre-money=18,000,000 investment=4,000,000",
+    "--planned-round",
+    "investor-percent=20 pool-percent=5",
+    "--planned-round",
+    "investor-percent=20",
+]
 
 
 def cap_table_check(**fields: object) -> CapTableCheckResult:

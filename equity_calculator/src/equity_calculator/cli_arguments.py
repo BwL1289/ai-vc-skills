@@ -730,8 +730,10 @@ def cap_table_check_arguments(parser: argparse.ArgumentParser) -> None:
         required=True,
         metavar=_TERMS,
         help="One class: 'kind=common|preferred|options_granted|options_unissued|warrants [shares=S] "
-        "[authorised-shares=A] [stated-percent=P]'; shares may be left to its holder lines. Repeat for each class, "
-        "in the table's order (the first is class 1).",
+        "[authorised-shares=A] [stated-percent=P] [holder-lines=complete|partial]'; shares may be left to its holder "
+        "lines. With both shares and --holder lines, holder-lines says whether the lines are every holder of the "
+        "class (complete: checked against shares) or only some (partial); it is required then, never assumed. "
+        "Repeat for each class, in the table's order (the first is class 1).",
     )
     parser.add_argument(
         "--holder",
@@ -740,7 +742,8 @@ def cap_table_check_arguments(parser: argparse.ArgumentParser) -> None:
         dest="holders",
         metavar=_TERMS,
         help="One holder line: 'share-class=K shares=S [stated-percent=P] [founder] [departed]', K the class's number; "
-        "departed marks shares held by someone who has left. Repeat for each line.",
+        "departed marks shares held by someone who has left. A line with both marks counts in the founders' share, "
+        "the founders' path and the departed holders' share. Repeat for each line.",
     )
     parser.add_argument(
         "--stated-fully-diluted-shares", type=parse_whole, help="The table's own fully diluted total, to check."
@@ -770,7 +773,9 @@ def cap_table_check_arguments(parser: argparse.ArgumentParser) -> None:
         dest="planned_rounds",
         metavar=_TERMS,
         help="One planned round for the founders' path, as --round takes it in dilution: '(investor-percent=N | "
-        "pre-money=V investment=I) [pool-percent=P]'. Repeat for each round, in order.",
+        "pre-money=V investment=I) [pool-percent=P]'. Repeat for each round, in order. With --preview the path "
+        "starts after the preview's round, so these are the rounds after it: never repeat the preview here (it "
+        "would be counted twice).",
     )
     parser.add_argument(
         "--tolerance-points",

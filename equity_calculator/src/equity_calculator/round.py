@@ -21,7 +21,7 @@ from equity_calculator.schemas.equity_round import (
     RoundHolder,
     RoundInput,
     RoundResult,
-    SafeTerms,
+    instrument_amount,
 )
 
 __all__ = ["compute_round", "conversion_row"]
@@ -52,12 +52,12 @@ def conversion_row(item: Convertible, on_cap: bool, priced: Priced, fully_dilute
     other = other_price(item, priced)
     price = cap if on_cap and cap is not None else other
     terms = item.terms
-    principal = fraction(terms.purchase_amount if isinstance(terms, SafeTerms) else terms.principal)
+    amount, _ = instrument_amount(terms)
 
     return ConversionRow(
         index=item.index,
         kind=item.terms.kind,
-        amount=quantity("money", principal),
+        amount=quantity("money", fraction(amount)),
         accrued_interest=None if item.interest is None else quantity("money", item.interest.accrued),
         interest_approximate=item.interest is not None and item.interest.approximate,
         converting_amount=quantity("money", item.converting),

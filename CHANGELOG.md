@@ -10,9 +10,11 @@ All notable changes to this repository. Dates are UTC.
   `Cap table check` workbook sheet): a founder's cap table by class and holder line added up to the fully diluted
   shares, each class's and holder's exact percent set beside the percent the table states (rounding-aware, as in
   `deal_check`), each percent column against 100%, issued against authorised shares, the SAFEs and notes outstanding,
-  and the departed holders' share; on the founder's own next round it previews the conversions through `round`, and
-  on their planned rounds it follows the founders through `dilution`. It never rules on legal validity: its flags name
-  the questions for the company's lawyer. The new `vc-cap-table-check` skill (preview, four evals) runs it.
+  and the departed holders' share. A class that gives both its shares and holder lines says whether the lines are
+  every holder of it (`holder_lines`), never assumed. On the founder's own next round it previews the conversions
+  through `round`, and on their planned rounds it follows the founders through `dilution`, from their share after
+  that preview when there is one. It never rules on legal validity: its flags name the questions for the company's
+  lawyer. The new `vc-cap-table-check` skill (preview, four evals) runs it.
 - `vc-deck-review` is out of preview after its first run on a real deck, whose founder adopted most of its fix list;
   plugin version 0.2.7.
 - A `vc-deal-math` eval (Company BW, unrecorded) for a SAFE raise whose planned rise has its start month but no

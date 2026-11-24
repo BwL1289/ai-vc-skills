@@ -17,7 +17,7 @@ from equity_calculator.layout import sheet_for
 from equity_calculator.schemas.equity_cap_table_check import CapTableFlag
 from equity_calculator.workbook import save_workbook
 from openpyxl import load_workbook
-from tests.support import CAP_TABLE_CQ, CAP_TABLE_CR, cap_table_check
+from tests.support import CAP_TABLE_CQ, CAP_TABLE_CR, CAP_TABLE_CR_ARGV, cap_table_check
 
 _ARGPARSE_EXIT = 2
 _COMPANY_CQ = [
@@ -47,32 +47,24 @@ _COMPANY_CQ = [
     "--safe",
     "$1,000,000 valuation-cap=$12,000,000",
 ]
-_COMPANY_CR = [
+_COMPANY_CR = CAP_TABLE_CR_ARGV
+# A note and a SAFE converted at a round whose pool target is counted in the post-money.
+_NOTE_PREVIEW = [
     "cap_table_check",
     "--share-class",
     "kind=common",
     "--share-class",
-    "kind=options_granted shares=1,000,000",
-    "--share-class",
     "kind=options_unissued shares=500,000",
     "--holder",
-    "share-class=1 shares=5,000,000 stated-percent=50 founder",
+    "share-class=1 shares=6,000,000 founder",
     "--holder",
-    "share-class=1 shares=3,000,000 stated-percent=30 founder",
-    "--holder",
-    "share-class=1 shares=500,000 stated-percent=5 departed",
-    "--stated-percent-basis",
-    "fully_diluted",
+    "share-class=1 shares=2,000,000",
+    "--note",
+    "500,000 interest-rate-percent=8 months-outstanding=12 compounding=simple valuation-cap=5,000,000",
     "--safe",
     "1,000,000 valuation-cap=10,000,000",
-    "--safe",
-    "500,000 valuation-cap=8,000,000 discount-percent=20",
     "--preview",
-    "pre-money=18,000,000 investment=4,000,000",
-    "--planned-round",
-    "investor-percent=20 pool-percent=5",
-    "--planned-round",
-    "investor-percent=20",
+    "pre-money=20,000,000 investment=5,000,000 target-pool-percent=10 pool-timing=post_money",
 ]
 
 
@@ -110,6 +102,11 @@ async def test_the_report_never_rules_on_legal_validity() -> None:
     assert "legal_validity = not checked" in report
     for ruling in ("is valid", "is invalid", "is legal", "is illegal", "validly issued."):
         assert ruling not in report, ruling
+    # The words "validly issued" stay in the legal_validity row, which says it is not checked; never beside a flag.
+    flags = [line for line in report.splitlines() if line.startswith("  flag ")]
+    assert flags and not [line for line in flags if "validly issued" in line]
+    over = next(line for line in flags if " over_authorised " in line)
+    assert over.endswith("whether the charter or the plan was amended to cover them")
 
 
 async def test_the_command_line_and_the_model_give_the_same_result() -> None:
@@ -126,9 +123,40 @@ async def test_company_cr_s_preview_and_path_print_after_the_checks() -> None:
     assert printed == json.loads(cap_table_check(**CAP_TABLE_CR).model_dump_json())
     assert "$1.507500" in _line(report, "Next round: price per share")
     assert "54.8182%" in _line(report, "After: founders' lines")
-    assert "48.0000%" in _line(report, "Founders' path: after the last round")
+    assert "54.8182%" in _line(report, "Founders' path: after the next round (the preview)")
+    assert "32.8909%" in _line(report, "Founders' path: after the last round")
+    assert "Founders' path: today" not in report and "path_leaves_out_instruments" not in report
     lines = report.splitlines()
     assert lines.index(_line(report, "Next round: pre-money")) > lines.index(_line(report, "Holder line 3 (class 1"))
+
+
+async def test_a_note_s_preview_prints_its_interest_and_the_round_s_pool_so_its_shares_multiply_out() -> None:
+    report = await run(_NOTE_PREVIEW)
+
+    assert "10.0000%" in _line(report, "Target pool after the round (t)")
+    assert "post-money" in _line(report, "Pool counted in the")
+    assert "$40,000.00" in _line(report, "Note 1: accrued interest")
+    assert "$540,000.00" in _line(report, "Note 1: amount converting (a)")
+    assert "$0.588235" in _line(report, "Note 1: converts at")
+    assert "918,000" in _line(report, "Note 1: shares")
+    assert "no" in _line(report, "Unissued pool already meets the target")
+    assert _line(report, "New pool shares (P)").split()[4] != "0"
+
+
+async def test_partial_holder_lines_print_the_shares_in_no_line_and_no_check() -> None:
+    report = await run(
+        [
+            "cap_table_check",
+            "--share-class",
+            "kind=common shares=8,000,000 holder-lines=partial",
+            "--holder",
+            "share-class=1 shares=6,000,000 founder",
+        ]
+    )
+
+    assert "partial" in _line(report, "Class 1 (common): its holder lines are")
+    assert "2,000,000" in _line(report, "Class 1 (common): in no holder line")
+    assert "not_checked" in _line(report, "Overall verdict")
 
 
 async def test_xlsx_writes_the_cap_table_check_sheet_with_a_live_total(tmp_path: Path) -> None:
@@ -189,6 +217,22 @@ def test_the_workbook_saves_every_line(tmp_path: Path) -> None:
             ["cap_table_check", "--share-class", "kind=common", "--holder", "share-class=1 shares=0"],
             "--holder #1 shares: Input should be greater than 0",
         ),
+        (
+            [
+                "cap_table_check",
+                "--share-class",
+                "kind=options_unissued shares=10",
+                "--safe",
+                "100 valuation-cap=1000",
+                "--preview",
+                "pre-money=8000000 investment=2000000",
+            ],
+            "--preview needs a class that holds shares besides the unissued pool",
+        ),
+        (
+            ["cap_table_check", "--share-class", "kind=common shares=10", "--holder", "share-class=1 shares=5"],
+            "--share-class item 1 gives both shares and holder lines: say with holder-lines whether",
+        ),
     ],
 )
 async def test_refusals_name_flags_never_model_fields(argv: list[str], message: str) -> None:
@@ -197,7 +241,8 @@ async def test_refusals_name_flags_never_model_fields(argv: list[str], message: 
 
     text = str(caught.value.code)
     assert message.replace("Value error, ", "") in text
-    for field in ("stated_percent_basis", "conversion_preview", "planned_rounds", "share_class"):
+    banned = ("stated_percent_basis", "conversion_preview", "planned_rounds", "share_class", "holder_lines")
+    for field in (*banned, "unissued_pool_shares", "fully_diluted_shares"):
         assert field not in text, field
 
 
@@ -210,6 +255,7 @@ async def test_refusals_name_flags_never_model_fields(argv: list[str], message: 
         (["cap_table_check", "--share-class", "kind=common shares=1.5"], "whole number of shares"),
         (["cap_table_check", "--share-class", "kind=common kind=common"], "given twice"),
         (["cap_table_check", "--share-class", "kind=common", "--stated-percent-basis", "issued"], "invalid choice"),
+        (["cap_table_check", "--share-class", "kind=common holder-lines=some"], "must be one of complete, partial"),
         (["cap_table_check"], "required: --share-class"),
     ],
 )

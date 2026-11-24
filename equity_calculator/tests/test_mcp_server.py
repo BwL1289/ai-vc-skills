@@ -211,6 +211,22 @@ async def test_the_comparison_tool_schema_names_both_options_the_next_rounds_and
     assert "no_next_round_given" in _text(refused)
 
 
+async def test_the_cap_table_tool_schema_names_its_fields_and_a_percent_with_no_basis_is_a_tool_error() -> None:
+    """The tool's input schema carries the table's fields; a stated percent sent with no basis is refused naming it."""
+    tools = await _tools(mcp_server.build_server())
+    tool = next(tool for tool in tools if tool.name == "equity_cap_table_check")
+    schema = json.dumps(tool.inputSchema)
+
+    fields = ("classes", "holders", "holder_lines", "stated_percent_basis", "conversion_preview", "planned_rounds")
+    for field in fields:
+        assert f'"{field}"' in schema, field
+    assert "must not repeat it" in (tool.description or "")
+    without = {key: value for key, value in CAP_TABLE_CQ.items() if key != "stated_percent_basis"}
+    refused = await _call(mcp_server.build_server(), "equity_cap_table_check", {"inputs": without})
+    assert refused.isError is True
+    assert "stated_percent_basis" in _text(refused)
+
+
 @pytest.mark.parametrize(("segment", "flagged"), [({}, True), ({"price_period_months": 12}, False)])
 async def test_the_market_tool_flags_a_price_period_left_out(segment: dict[str, object], flagged: bool) -> None:
     """The tool reads a left-out price period as the yearly default and says so; an explicit 12 is the founder's."""

@@ -258,8 +258,11 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "have a kind (common, preferred, options_granted, options_unissued for the unissued pool, warrants), shares "
         "(or left to their holder lines), any authorised_shares (common and preferred only) and stated_percent; "
         "holders (up to 100, numbered in order) each sit in share_class (1 is the first class) with shares, any "
-        "stated_percent, and the founder and departed marks. A class's shares are its stated shares, else its holder "
-        "lines' sum (both given: the lines are checked against it). FD = every class added up (preferred one to one, "
+        "stated_percent, and the founder and departed marks (a line with both counts in the founders' share, the "
+        "path and the departed holders' share). A class's shares are its stated shares, else its holder lines' sum; "
+        "a class giving both needs holder_lines, the founder's word on whether the lines are every holder of it "
+        "(complete: checked against its shares) or only some (partial: the rest shown as in no line), never "
+        "assumed. FD = every class added up (preferred one to one, "
         "warrants as exercised, the unissued pool included, SAFEs and notes left out); O = common + preferred. Each "
         "class and holder line comes back as shares/FD and, for stock, shares/O. Each stated_percent is checked "
         "against the basis stated_percent_basis names (fully_diluted or outstanding: required with any stated "
@@ -272,10 +275,12 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "with their amount; conversion_preview (pre_money, investment, any target_pool_percent and pool_timing, the "
         "founder's next round, never assumed) converts them through the round scenario and reads every line back "
         "after it. Departed holders' share of FD, the founders' share, and with planned_rounds (the dilution "
-        "scenario's rounds) the founders' path. Flags (percents that cannot sum to 100%, over authorised, authorised "
-        "common below FD, unconverted instruments, departed holders' shares, a path without the instruments) are "
-        "questions, some for the company's lawyer, never a ruling on legal validity. Every figure is the founder's: "
-        "never assume one.",
+        "scenario's rounds) the founders' path: from today, or, with conversion_preview, from the founders' share "
+        "after it, so planned_rounds are then the rounds AFTER the preview and must not repeat it (it would be "
+        "counted twice). Flags (holder lines past their class's shares, percents that cannot sum to 100%, a figure "
+        "consistent only by the tolerance, over authorised, authorised common below FD, unconverted instruments, "
+        "departed holders' shares, a path from today without the instruments) are questions, some for the company's "
+        "lawyer, never a ruling on legal validity. Every figure is the founder's: never assume one.",
     ),
 }
 

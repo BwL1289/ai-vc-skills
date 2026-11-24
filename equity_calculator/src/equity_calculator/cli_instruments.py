@@ -24,6 +24,7 @@ A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a n
     --priced-preference "preference-multiple=1 participation=none rank=1"
     --next-round "pre-money=27000000 investment=6000000 target-pool-percent=10 standard"
     --share-class "kind=preferred shares=2000000 authorised-shares=2000000 stated-percent=20"   (a cap table's class)
+    --share-class "kind=common shares=8000000 holder-lines=partial"   (its --holder lines are only some of its holders)
     --holder "share-class=1 shares=4000000 stated-percent=40 founder"   (a holder line; also the bare flag departed)
     --preview "pre-money=20000000 investment=5000000"   (the next round a cap table check converts its SAFEs at)
 
@@ -43,7 +44,7 @@ from datetime import date
 from typing import get_args
 
 from equity_calculator.cli_numbers import parse_decimal, parse_months, parse_percent, parse_rank, parse_whole
-from equity_calculator.schemas.equity_cap_table_check import ShareClassKind
+from equity_calculator.schemas.equity_cap_table_check import HolderLines, ShareClassKind
 from equity_calculator.schemas.equity_common import MAX_NUMBER_TEXT, PoolTiming
 from equity_calculator.schemas.equity_market_sizing import PERCENT_FIELDS, CompareTo, SegmentField
 from equity_calculator.schemas.equity_round import DayCount, NoteCompounding, StubRule
@@ -190,28 +191,25 @@ def _sensitivity_field(raw: str) -> object:
     return raw.replace("-", "_")
 
 
-def _segment_number(raw: str) -> object:
-    """A segment's number in a ``--sensitivity`` row: a whole number, 1 for the first ``--segment``."""
-    try:
-        return int(raw)
-    except ValueError:
-        raise argparse.ArgumentTypeError(
-            f"must be a segment's number (1 for the first --segment), got {raw!r}"
-        ) from None
+def _item_number(item: str, flag: str) -> _Reader:
+    """A reader of another flag's item by its number: a whole number, 1 for the first ``flag`` (a sensitivity row's
+    segment, a holder line's class)."""
+
+    def read(raw: str) -> object:
+        try:
+            return int(raw)
+        except ValueError:
+            message = f"must be a {item}'s number (1 for the first {flag}), got {raw!r}"
+            raise argparse.ArgumentTypeError(message) from None
+
+    return read
 
 
-_SENSITIVITY_TERMS: dict[str, _Reader] = {"field": _sensitivity_field, "segment": _segment_number, _VALUES: str}
-
-
-def _class_number(raw: str) -> object:
-    """A holder line's class: a whole number, 1 for the first ``--share-class``."""
-    try:
-        return int(raw)
-    except ValueError:
-        raise argparse.ArgumentTypeError(
-            f"must be a class's number (1 for the first --share-class), got {raw!r}"
-        ) from None
-
+_SENSITIVITY_TERMS: dict[str, _Reader] = {
+    "field": _sensitivity_field,
+    "segment": _item_number("segment", "--segment"),
+    _VALUES: str,
+}
 
 # A cap table's class and holder line; a stated percent keeps the places it is typed with, as every stated figure does.
 _CAP_CLASS_TERMS: dict[str, _Reader] = {
@@ -219,9 +217,10 @@ _CAP_CLASS_TERMS: dict[str, _Reader] = {
     "shares": parse_whole,
     "authorised_shares": parse_whole,
     "stated_percent": parse_percent,
+    "holder_lines": _choice(get_args(HolderLines)),
 }
 _HOLDER_TERMS: dict[str, _Reader] = {
-    "share_class": _class_number,
+    "share_class": _item_number("class", "--share-class"),
     "shares": parse_whole,
     "stated_percent": parse_percent,
 }
@@ -317,7 +316,8 @@ def parse_next_round(raw: str) -> dict[str, object]:
 
 def parse_cap_class(raw: str) -> dict[str, object]:
     """argparse type for a cap table check's ``--share-class``: ``kind=common|preferred|options_granted|``
-    ``options_unissued|warrants [shares=S] [authorised-shares=A] [stated-percent=P]``."""
+    ``options_unissued|warrants [shares=S] [authorised-shares=A] [stated-percent=P]``
+    ``[holder-lines=complete|partial]``."""
     return _named_terms(_checked_length(raw).split(), {}, _CAP_CLASS_TERMS, ())
 
 

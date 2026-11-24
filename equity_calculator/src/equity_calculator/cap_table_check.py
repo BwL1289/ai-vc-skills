@@ -4,8 +4,9 @@ Every class's shares (its stated total, else its holder lines' sum) add up to th
 preferred add up to the outstanding stock O. Each class and holder line holds shares/FD (and shares/O when it is
 stock), exactly. Each figure the table states becomes one check:
 
-- the table's fully diluted total against FD, and a class's total against its holder lines: share counts, consistent
-  only when equal;
+- the table's fully diluted total against FD, and a class's total against its holder lines when the founder says
+  they are every holder of it (``holder_lines`` complete), or when they add up to more than it: share counts,
+  consistent only when equal;
 - a class's or holder line's stated percent against its share on the basis the founder names: consistent when it is
   the computed figure rounded half away from zero to the places it is typed with (``equity_calculator.rounding``), or
   within ``tolerance_points`` (0 by default);
@@ -16,7 +17,10 @@ stock), exactly. Each figure the table states becomes one check:
 Issued shares are set against each class's authorised shares, the option plan's granted and unissued options against
 its reserve, and authorised common against FD. SAFEs and notes are listed, never counted; ``conversion_preview``
 converts them with ``compute_round`` at the next round the founder gives, and ``planned_rounds`` takes the founders'
-share of FD through ``compute_dilution``. Flags never change the verdict; no line rules on legal validity.
+share through ``compute_dilution``: from today's share of FD, or, with a preview, from their share after it. When a
+class's holder lines add up to more than its stated shares, the founders' and departed holders' shares and the path
+rest on a total that does not hold those lines, so they are left out and flagged. Flags never change the verdict; no
+line rules on legal validity.
 """
 
 from __future__ import annotations
@@ -27,9 +31,9 @@ from fractions import Fraction
 
 from equity_calculator.assumptions_cap_table_check import cap_table_check_assumptions
 from equity_calculator.dilution import compute_dilution
-from equity_calculator.exact import ONE, ZERO, fraction, from_percent, quantity
+from equity_calculator.exact import HUNDRED, ONE, ZERO, fraction, from_percent, quantity
 from equity_calculator.round import compute_round
-from equity_calculator.rounding import rounds_to, typed_places
+from equity_calculator.rounding import half_unit, rounds_to
 from equity_calculator.schemas.equity_cap_table_check import (
     STOCK_KINDS,
     CapCheck,
@@ -44,20 +48,20 @@ from equity_calculator.schemas.equity_cap_table_check import (
     CapTableFlag,
     CommonReserve,
     FounderPath,
+    PathStart,
     PlanReserve,
+    ShareClass,
     ShareClassKind,
     class_totals,
     preview_input,
 )
-from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
+from equity_calculator.schemas.equity_common import EquityAssumption, EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_deal_check import DealVerdict
 from equity_calculator.schemas.equity_dilution import DilutionInput
-from equity_calculator.schemas.equity_round import RoundInput, SafeTerms
+from equity_calculator.schemas.equity_round import RoundInput, instrument_amount
 
 __all__ = ["compute_cap_table_check"]
 
-_DECIMAL_BASE = 10
-_HALF = Fraction(1, 2)
 _WHOLE_STAKE = Decimal(100)
 
 
@@ -70,12 +74,23 @@ def _optional(unit: EquityUnit, value: Fraction | None) -> EquityQuantity | None
     return None if value is None else quantity(unit, value)
 
 
+def _unlisted(item: ShareClass, total: int, held: int | None) -> EquityQuantity | None:
+    """A class's shares in none of its holder lines: only where the founder says the lines are some of its holders
+    and they stay within its shares."""
+    if item.holder_lines != "partial" or held is None or held > total:
+        return None
+
+    return quantity("shares", fraction(total - held))
+
+
 def _class_rows(inputs: CapTableCheckInput, totals: Sequence[int], outstanding: int) -> tuple[CapClassRow, ...]:
-    """Each class: its shares, its holder lines' sum, its shares of FD and of O, and its authorised shares."""
+    """Each class: its shares, its holder lines' sum (and the shares in none of partial lines), its shares of FD and
+    of O, and its authorised shares."""
     fully_diluted = fraction(sum(totals))
     rows = []
     for number, (item, total) in enumerate(zip(inputs.classes, totals, strict=True), start=1):
         lines = [holder.shares for holder in inputs.holders if holder.share_class == number]
+        held = sum(lines) if lines else None
         stock = item.kind in STOCK_KINDS and outstanding > 0
         authorised = item.authorised_shares
         rows.append(
@@ -83,7 +98,8 @@ def _class_rows(inputs: CapTableCheckInput, totals: Sequence[int], outstanding: 
                 index=number,
                 kind=item.kind,
                 shares=quantity("shares", fraction(total)),
-                holder_shares=quantity("shares", fraction(sum(lines))) if lines else None,
+                holder_shares=None if held is None else quantity("shares", fraction(held)),
+                unlisted_shares=_unlisted(item, total, held),
                 fully_diluted_fraction=quantity("fraction", fraction(total) / fully_diluted),
                 outstanding_fraction=quantity("fraction", fraction(total) / outstanding) if stock else None,
                 authorised_shares=None if authorised is None else quantity("shares", fraction(authorised)),
@@ -146,16 +162,12 @@ def _percent_check(key: CapCheckKey, index: int, written: Decimal, computed: Fra
     )
 
 
-def _half_unit(written: Decimal) -> Fraction:
-    """Half a unit in the last place ``written`` is typed with, as a fraction of the whole (``12.50``: 0.005 points)."""
-    return _HALF / _DECIMAL_BASE ** typed_places(written) / 100
-
-
 def _total_check(key: CapCheckKey, written: Sequence[Decimal], tolerance: Fraction) -> CapCheck:
     """The stated percents' total against 100%: consistent within what their rounding explains, plus the tolerance
     for each."""
     stated = sum((from_percent(value) for value in written), ZERO)
-    allowance = sum((_half_unit(value) for value in written), ZERO)
+    # Each percent's half unit in its last place, in points, as a fraction of the whole (12.50: 0.005 points).
+    allowance = sum((half_unit(value) / HUNDRED for value in written), ZERO)
     gap = abs(ONE - stated)
     return CapCheck(
         key=key,
@@ -178,13 +190,14 @@ def _fraction_on_basis(row: CapClassRow | CapHolderRow, inputs: CapTableCheckInp
 
 def _line_percents(inputs: CapTableCheckInput, on_basis: Sequence[int]) -> list[Decimal] | None:
     """The table's percent column read line by line: each class's holder lines' stated percents where every one of
-    them states one, else the class's own; ``None`` when a class has neither, or when no holder line's percent is used
-    (the class total covers that)."""
+    them states one and they are not a partial list, else the class's own; ``None`` when a class has neither, or when
+    no holder line's percent is used (the class total covers that)."""
     written: list[Decimal] = []
     used_holder = False
     for number in on_basis:
         lines = [holder.stated_percent for holder in inputs.holders if holder.share_class == number]
-        if lines and all(value is not None for value in lines):
+        partial = inputs.classes[number - 1].holder_lines == "partial"
+        if lines and not partial and all(value is not None for value in lines):
             written.extend(value for value in lines if value is not None)
             used_holder = True
             continue
@@ -208,7 +221,8 @@ def _checks(
     for item, row in zip(inputs.classes, classes, strict=True):
         if item.shares is not None and row.holder_shares is not None:
             computed = int(row.holder_shares.exact)
-            checks.append(_share_check("class_shares", row.index, item.shares, computed))
+            if item.holder_lines == "complete" or computed > item.shares:
+                checks.append(_share_check("class_shares", row.index, item.shares, computed))
     on_basis = [row.index for item, row in zip(inputs.classes, classes, strict=True) if _on_basis(item.kind, inputs)]
     for number in on_basis:
         written = inputs.classes[number - 1].stated_percent
@@ -263,15 +277,26 @@ def _common_reserve(inputs: CapTableCheckInput, fully_diluted: int) -> CommonRes
     )
 
 
-def _preview(inputs: CapTableCheckInput, nested: RoundInput, classes: Sequence[CapClassRow]) -> CapPreview:
-    """The instruments converted in the founder's next round, read back as the cap table's lines after it."""
+def _marked_shares(inputs: CapTableCheckInput) -> tuple[Fraction, Fraction]:
+    """The founder lines' shares and the departed lines' shares; a line with both marks counts in each."""
+    founders = sum((fraction(holder.shares) for holder in inputs.holders if holder.founder), ZERO)
+    departed = sum((fraction(holder.shares) for holder in inputs.holders if holder.departed), ZERO)
+    return founders, departed
+
+
+def _lines_exceed_a_class(classes: Sequence[CapClassRow]) -> bool:
+    """Whether a class's holder lines add up to more than its shares (only a stated total can be exceeded)."""
+    return any(row.holder_shares is not None and row.holder_shares.exact > row.shares.exact for row in classes)
+
+
+def _preview(nested: RoundInput, classes: Sequence[CapClassRow], founders: Fraction, departed: Fraction) -> CapPreview:
+    """The instruments converted in the founder's next round, read back as the cap table's lines after it; the
+    founders' and departed holders' lines only for shares given (zero when they are left out)."""
     result = compute_round(nested)
     total = result.total_shares.exact
     pool = next(row.ownership for row in result.rows if row.holder == "option_pool")
     investors = next(row.ownership for row in result.rows if row.holder == "investor")
     owned = {row.instrument: row.ownership for row in result.rows if row.instrument is not None}
-    founders = sum((fraction(holder.shares) for holder in inputs.holders if holder.founder), ZERO)
-    departed = sum((fraction(holder.shares) for holder in inputs.holders if holder.departed), ZERO)
 
     return CapPreview(
         price_per_share=result.price_per_share,
@@ -305,8 +330,12 @@ def _preview(inputs: CapTableCheckInput, nested: RoundInput, classes: Sequence[C
     )
 
 
-def _founder_path(inputs: CapTableCheckInput, start: Fraction) -> FounderPath:
-    """The founders' share through the planned rounds: the dilution scenario's share kept per round, times today's."""
+def _founder_path(
+    inputs: CapTableCheckInput, start: Fraction, starts_from: PathStart
+) -> tuple[FounderPath, tuple[EquityAssumption, ...]]:
+    """The founders' share through the planned rounds, from ``start``: the dilution scenario's share kept per round,
+    run on a whole stake so only its kept and post-money figures are read (its stakes are not the founders'); and the
+    dilution scenario's assumptions."""
     dilution = compute_dilution(DilutionInput(holder_percent=_WHOLE_STAKE, rounds=inputs.planned_rounds))
     stakes = []
     stake = start
@@ -314,12 +343,15 @@ def _founder_path(inputs: CapTableCheckInput, start: Fraction) -> FounderPath:
         stake *= row.kept.exact
         stakes.append(quantity("fraction", stake))
 
-    return FounderPath(
+    path = FounderPath(
         start=quantity("fraction", start),
+        starts_from=starts_from,
+        kept=tuple(row.kept for row in dilution.rows),
+        post_money=tuple(row.post_money for row in dilution.rows),
         stakes=tuple(stakes),
         final=quantity("fraction", stake),
-        dilution=dilution,
     )
+    return path, dilution.assumptions
 
 
 def _flags(
@@ -329,9 +361,12 @@ def _flags(
     plan: PlanReserve | None,
     common: CommonReserve | None,
     departed: Fraction,
+    exceeded: bool,
 ) -> tuple[CapTableFlag, ...]:
     """Every flag that holds, in ``CapTableFlag``'s order."""
     flags: list[CapTableFlag] = []
+    if exceeded:
+        flags.append("holder_lines_exceed_class")
     totals = ("class_percent_total", "line_percent_total")
     if any(check.key in totals and check.verdict == "mismatch" for check in checks):
         flags.append("percents_do_not_sum")
@@ -346,7 +381,8 @@ def _flags(
         flags.append("unconverted_instruments_present")
     if departed > ZERO:
         flags.append("departed_holders_share")
-    if inputs.instruments and inputs.planned_rounds:
+    # With a preview the path starts after it, its SAFEs and notes converted; with lines past a class there is none.
+    if inputs.instruments and inputs.planned_rounds and inputs.conversion_preview is None and not exceeded:
         flags.append("path_leaves_out_instruments")
 
     return tuple(flags)
@@ -365,18 +401,13 @@ def _instruments_amount(inputs: CapTableCheckInput) -> Fraction | None:
     if not inputs.instruments:
         return None
 
-    return sum(
-        (
-            fraction(item.purchase_amount if isinstance(item, SafeTerms) else item.principal)
-            for item in inputs.instruments
-        ),
-        ZERO,
-    )
+    return sum((fraction(instrument_amount(item)[0]) for item in inputs.instruments), ZERO)
 
 
 def compute_cap_table_check(inputs: CapTableCheckInput) -> CapTableCheckResult:
     """The cap table checked exactly: totals, each line's share, each stated figure's verdict, authorised shares, the
-    instruments, the departed holders' share, and the founder's preview and path when given.
+    instruments, the departed holders' share, and the founder's preview and path when given (the path from the
+    founders' share after the preview when there is one, from today's when not).
 
     Raises ``RoundHasNoPrice`` or ``ConversionDidNotSettle`` (``equity_calculator.errors``) when the preview round has
     no answer.
@@ -387,19 +418,24 @@ def compute_cap_table_check(inputs: CapTableCheckInput) -> CapTableCheckResult:
     classes = _class_rows(inputs, totals, outstanding)
     holders = _holder_rows(inputs, fully_diluted, outstanding)
     checks = tuple(_checks(inputs, fully_diluted, classes, holders))
-    founders = sum((fraction(holder.shares) for holder in inputs.holders if holder.founder), ZERO)
-    departed = sum((fraction(holder.shares) for holder in inputs.holders if holder.departed), ZERO)
-    has_founders = any(holder.founder for holder in inputs.holders)
+    founders, departed = _marked_shares(inputs)
+    # Lines past their class's shares sit on a total that does not hold them: no founders' or departed share then.
+    exceeded = _lines_exceed_a_class(classes)
+    shown_founders = ZERO if exceeded else founders
+    shown_departed = ZERO if exceeded else departed
     plan = _plan_reserve(inputs, totals)
     common = _common_reserve(inputs, fully_diluted)
     nested = preview_input(inputs)
-    start = founders / fully_diluted
-    preview = None if nested is None else _preview(inputs, nested, classes)
-    path = _founder_path(inputs, start) if inputs.planned_rounds else None
-    nested_rows = (
-        *(() if preview is None else preview.round.assumptions),
-        *(() if path is None else path.dilution.assumptions),
-    )
+    preview = None if nested is None else _preview(nested, classes, shown_founders, shown_departed)
+    path: FounderPath | None = None
+    path_rows: tuple[EquityAssumption, ...] = ()
+    if inputs.planned_rounds and not exceeded:
+        after = None if preview is None else preview.founders_after
+        if after is None:
+            path, path_rows = _founder_path(inputs, founders / fully_diluted, "today")
+        else:
+            path, path_rows = _founder_path(inputs, after.exact, "conversion_preview")
+    nested_rows = (*(() if preview is None else preview.round.assumptions), *path_rows)
 
     return CapTableCheckResult(
         inputs=inputs,
@@ -407,15 +443,17 @@ def compute_cap_table_check(inputs: CapTableCheckInput) -> CapTableCheckResult:
         holders=holders,
         fully_diluted_shares=quantity("shares", fraction(fully_diluted)),
         outstanding_shares=quantity("shares", fraction(outstanding)),
-        founders_fraction=quantity("fraction", start) if has_founders else None,
-        departed_fraction=quantity("fraction", departed / fully_diluted) if departed > ZERO else None,
+        founders_fraction=_optional("fraction", shown_founders / fully_diluted if shown_founders > ZERO else None),
+        departed_fraction=_optional("fraction", shown_departed / fully_diluted if shown_departed > ZERO else None),
         plan_reserve=plan,
         common_reserve=common,
         instruments_amount=_optional("money", _instruments_amount(inputs)),
         checks=checks,
-        flags=_flags(inputs, classes, checks, plan, common, departed),
+        flags=_flags(inputs, classes, checks, plan, common, departed, exceeded),
         verdict=_verdict(checks),
         preview=preview,
         founder_path=path,
-        assumptions=cap_table_check_assumptions(inputs, bool(checks), nested_rows),
+        assumptions=cap_table_check_assumptions(
+            inputs, bool(checks), nested_rows, None if path is None else path.starts_from
+        ),
     )

@@ -7,13 +7,16 @@ holder's exact share, sets every percent the table states beside it (consistent 
 rounded to the places it is typed with), compares issued with authorised shares, lists the unconverted instruments
 and the share held by people who have left, and, on the founder's own figures, converts the instruments in a preview
 of the next priced round (the ``round`` scenario) and follows the founders through their planned rounds (the
-``dilution`` scenario). It never rules on whether a share was validly issued: what the arithmetic cannot settle is a
+``dilution`` scenario): from today, or, with a preview, from their share after it, the planned rounds then being the
+rounds after the preview. It never rules on whether a share was validly issued: what the arithmetic cannot settle is a
 flag, a question for the company's lawyer.
 
 Classes are numbered in the order given (1 is the first) and holder lines likewise; neither carries a name. A class's
-shares are its stated total, or the sum of its holder lines when no total is given; with both, the lines are checked
-against the total. Preferred counts one common share per preferred share and a warrant one share per warrant share;
-SAFEs and notes stay out of the fully diluted shares until they convert.
+shares are its stated total, or the sum of its holder lines when no total is given. With both, the founder says
+whether the lines are every holder of the class (``holder_lines``, never assumed): complete lines are checked against
+the total, partial ones leave the rest shown as shares in no line. Preferred counts one common share per preferred
+share and a warrant one share per warrant share; SAFEs and notes stay out of the fully diluted shares until they
+convert.
 
 Like ``equity_deal_check``, this module reuses other scenarios' models (``equity_round``'s instruments and checks,
 ``equity_dilution``'s round, the deal check's verdict words), which import no scenario of their own, so no cycle.
@@ -38,7 +41,7 @@ from equity_calculator.schemas.equity_common import (
     WrittenDecimal,
 )
 from equity_calculator.schemas.equity_deal_check import CheckVerdict, DealVerdict
-from equity_calculator.schemas.equity_dilution import MAX_ROUNDS, DilutionResult, DilutionRound
+from equity_calculator.schemas.equity_dilution import MAX_ROUNDS, DilutionRound
 from equity_calculator.schemas.equity_round import (
     MAX_INSTRUMENTS,
     Instrument,
@@ -68,6 +71,8 @@ __all__ = [
     "CommonReserve",
     "FounderPath",
     "Holder",
+    "HolderLines",
+    "PathStart",
     "PercentBasis",
     "PlanReserve",
     "PreviewRound",
@@ -88,6 +93,13 @@ ShareClassKind = Literal["common", "preferred", "options_granted", "options_unis
 STOCK_KINDS: tuple[ShareClassKind, ...] = ("common", "preferred")
 OPTION_KINDS: tuple[ShareClassKind, ...] = ("options_granted", "options_unissued")
 
+# Whether a class's holder lines are every holder of it (``complete``) or only some (``partial``), for a class that
+# gives both its shares and holder lines; the founder says which.
+HolderLines = Literal["complete", "partial"]
+
+# Where the founders' path starts: their share today, or their share after the conversion preview's round.
+PathStart = Literal["today", "conversion_preview"]
+
 # What a stated percent is a share of: every fully diluted share, or the issued stock only (common and preferred), on
 # which an option or a warrant has no percent.
 PercentBasis = Literal["fully_diluted", "outstanding"]
@@ -106,15 +118,19 @@ CapCheckKey = Literal[
 ]
 
 # What the check turns up beyond the checks. They never change the verdict; their plain words are in
-# ``equity_calculator.layout_cap_table_check``. ``percents_do_not_sum``: a column of stated percents (the classes', or
-# the table's line by line) cannot all be roundings of shares that add up to 100%. ``consistent_beyond_rounding``: a
-# stated figure holds by the tolerance alone. ``over_authorised``: a class issued more than its authorised shares, or
-# the option plan granted and reserved more than its reserve. ``common_authorised_below_fully_diluted``: authorised
-# common is below the fully diluted shares, every one of which would be common once converted or exercised.
+# ``equity_calculator.layout_cap_table_check``. ``holder_lines_exceed_class``: a class's holder lines add up to more
+# than its stated shares, so the holder lines' shares sit on a total that does not hold them, and the founders' and
+# departed holders' shares, the preview's lines for them and the founders' path are left out.
+# ``percents_do_not_sum``: a column of stated percents (the classes', or the table's line by line) cannot all be
+# roundings of shares that add up to 100%. ``consistent_beyond_rounding``: a stated figure holds by the tolerance
+# alone. ``over_authorised``: a class issued more than its authorised shares, or the option plan granted and reserved
+# more than its reserve. ``common_authorised_below_fully_diluted``: authorised common is below the fully diluted
+# shares, every one of which would be common once converted or exercised.
 # ``unconverted_instruments_present``: SAFEs or notes are outstanding, outside the fully diluted shares.
-# ``departed_holders_share``: people who have left hold shares. ``path_leaves_out_instruments``: the founders' path
-# through the planned rounds converts no SAFE or note.
+# ``departed_holders_share``: people who have left hold shares. ``path_leaves_out_instruments``: SAFEs or notes are
+# outstanding and no conversion preview is given, so the founders' path starts today and converts none of them.
 CapTableFlag = Literal[
+    "holder_lines_exceed_class",
     "percents_do_not_sum",
     "consistent_beyond_rounding",
     "over_authorised",
@@ -136,7 +152,12 @@ ClassNumber = Annotated[int, Field(strict=True, ge=1, le=MAX_CLASSES)]
 
 class ShareClass(BaseModel):
     """One class of the cap table: its kind, its shares as the table states them (optional when holder lines give
-    them), the shares it may issue (common and preferred only) and the percent the table states for it."""
+    them), the shares it may issue (common and preferred only) and the percent the table states for it.
+
+    ``holder_lines`` is for a class that gives both its shares and holder lines, and required then: ``complete`` when
+    the lines are every holder of the class (they are checked against its shares), ``partial`` when they are only
+    some (the rest is shown as shares in no line, never a line of its own).
+    """
 
     model_config = MODEL_CONFIG
 
@@ -144,6 +165,7 @@ class ShareClass(BaseModel):
     shares: ShareCount | None = Field(default=None, ge=0)
     authorised_shares: ShareCount | None = Field(default=None, gt=0)
     stated_percent: WrittenDecimal | None = Field(default=None, ge=0, le=WHOLE_PERCENT, description=_PERCENT_AS_WRITTEN)
+    holder_lines: HolderLines | None = None
 
     @model_validator(mode="after")
     def _authorised_only_for_stock(self) -> ShareClass:
@@ -160,7 +182,8 @@ class ShareClass(BaseModel):
 class Holder(BaseModel):
     """One holder's line: the class it sits in (``share_class``, 1 for the first class), its shares, the percent the
     table states for it, whether it is a founder's, and whether it is held by someone who has left (vested shares
-    they keep)."""
+    they keep). A line may carry both marks (a co-founder who has left, when the founder counts those shares as the
+    founders'): it then counts in the founders' share, the founders' path and the departed holders' share."""
 
     model_config = MODEL_CONFIG
 
@@ -240,8 +263,9 @@ class CapTableCheckInput(BaseModel):
     ``option_plan_reserve`` is the plan's authorised reserve, set against its granted and unissued options.
     ``instruments`` are the SAFEs and notes outstanding (the round's terms); ``conversion_preview`` converts them at
     the next round the founder gives, and ``planned_rounds`` follows the founders' holder lines through the rounds
-    the founder plans. ``tolerance_points`` (default 0) is how far a stated percent may sit from the computed one
-    beyond rounding to its own places.
+    the founder plans: from today, or, with a preview, from the founders' share after it. With a preview the planned
+    rounds are the rounds AFTER it, so they must not repeat it (it would be counted twice). ``tolerance_points``
+    (default 0) is how far a stated percent may sit from the computed one beyond rounding to its own places.
     """
 
     model_config = MODEL_CONFIG
@@ -276,13 +300,16 @@ class CapTableCheckInput(BaseModel):
             if not self.instruments:
                 raise ValueError("conversion_preview needs at least one SAFE or note in instruments (it converts them)")
             refuse_caps_over_whole(self.instruments)
+            if unissued_pool(self) >= fully_diluted:
+                raise ValueError("conversion_preview needs a class that holds shares besides the unissued pool")
             preview_input(self)
 
         return self
 
     def _class_rules(self) -> None:
-        """Refuse a holder line in a class not given or in the unissued pool, or a class with neither shares nor a
-        holder line."""
+        """Refuse a holder line in a class not given or in the unissued pool, a class with neither shares nor a
+        holder line, and a class with both that does not say whether its lines are every holder of it (or says so
+        without both)."""
         held = {holder.share_class for holder in self.holders}
         for number, holder in enumerate(self.holders, start=1):
             if holder.share_class > len(self.classes):
@@ -298,6 +325,17 @@ class CapTableCheckInput(BaseModel):
         for number, item in enumerate(self.classes, start=1):
             if item.shares is None and number not in held:
                 raise ValueError(f"classes item {number} gives neither shares nor a holder line in it")
+            both = item.shares is not None and number in held
+            if both and item.holder_lines is None:
+                raise ValueError(
+                    f"classes item {number} gives both shares and holder lines: say with holder_lines whether its "
+                    "lines are every holder of the class (complete) or only some (partial)"
+                )
+            if not both and item.holder_lines is not None:
+                raise ValueError(
+                    f"classes item {number} gives holder_lines, which is only for a class with both shares and "
+                    "holder lines: leave it off"
+                )
 
     def _percent_rules(self) -> None:
         """Refuse a stated percent with no basis, a basis with no stated percent, a stated percent on an option or
@@ -326,8 +364,9 @@ class CapTableCheckInput(BaseModel):
 
 
 class CapClassRow(BaseModel):
-    """One class worked: its shares, its holder lines' sum, its share of the fully diluted shares and (common and
-    preferred only) of the outstanding stock, and its authorised shares with what is left (below 0 when over)."""
+    """One class worked: its shares, its holder lines' sum (and, for partial lines within its shares, the shares in no
+    line), its share of the fully diluted shares and (common and preferred only) of the outstanding stock, and its
+    authorised shares with what is left (below 0 when over)."""
 
     model_config = MODEL_CONFIG
 
@@ -335,6 +374,7 @@ class CapClassRow(BaseModel):
     kind: ShareClassKind
     shares: EquityQuantity
     holder_shares: EquityQuantity | None = None
+    unlisted_shares: EquityQuantity | None = None
     fully_diluted_fraction: EquityQuantity
     outstanding_fraction: EquityQuantity | None = None
     authorised_shares: EquityQuantity | None = None
@@ -444,16 +484,22 @@ class CapPreview(BaseModel):
 
 
 class FounderPath(BaseModel):
-    """The founders' share through the planned rounds: today's (their holder lines over the fully diluted shares),
-    after each round, and after the last. ``dilution`` is the ``dilution`` scenario run on a 100% stake, so its rows
-    are each round's share kept; the founders' stakes are today's share times those."""
+    """The founders' share through the planned rounds: where it starts, after each round, and after the last.
+
+    ``starts_from`` is ``today`` (their holder lines over the fully diluted shares) or ``conversion_preview`` (their
+    share after the preview's round, its SAFEs and notes converted); the planned rounds follow it. ``kept`` is each
+    round's share kept, 1 - n - p, as the ``dilution`` scenario works it, and ``post_money`` each round's V + I where it
+    is given as amounts (none where it is given as a percent); each stake is the one before times the round's kept.
+    """
 
     model_config = MODEL_CONFIG
 
     start: EquityQuantity
+    starts_from: PathStart
+    kept: tuple[EquityQuantity, ...]
+    post_money: tuple[EquityQuantity | None, ...]
     stakes: tuple[EquityQuantity, ...]
     final: EquityQuantity
-    dilution: DilutionResult
 
 
 class CapTableCheckResult(BaseModel):

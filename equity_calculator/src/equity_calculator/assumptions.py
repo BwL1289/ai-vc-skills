@@ -13,6 +13,10 @@ from equity_calculator.schemas.equity import EmployeeInput, EquityAssumption, In
 PG_SOURCE = 'Paul Graham, "The Equity Equation", paulgraham.com/equity.html (July 2007)'
 ALTMAN_SOURCE = 'Sam Altman, "Employee Equity", blog.samaltman.com/employee-equity (18 Apr 2014)'
 UNVERIFIED = "unverified"
+# The fully diluted measure's source: Altman measures a grant against every fully diluted share.
+ALTMAN_FULLY_DILUTED_SOURCE = (
+    f'{UNVERIFIED}; {ALTMAN_SOURCE} measures grants as "what percentage of the fully-diluted shares"'
+)
 
 
 def _assumption(key: str, setting: str, statement: str, source: str) -> EquityAssumption:
@@ -128,7 +132,7 @@ def pool_assumptions(inputs: PoolInput) -> tuple[EquityAssumption, ...]:
             "fully diluted",
             "The price per share divides the pre-money valuation by every pre-round share, the unissued pool "
             "included (and, pool pre-money, the new pool shares too).",
-            f'{UNVERIFIED}; {ALTMAN_SOURCE} measures grants as "what percentage of the fully-diluted shares"',
+            ALTMAN_FULLY_DILUTED_SOURCE,
         ),
         _assumption(
             "share_rounding",

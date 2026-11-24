@@ -19,12 +19,15 @@ from equity_calculator.__main__ import main, run
 from equity_calculator.schemas.equity import EquityAssumption
 from openpyxl import load_workbook
 from tests.support import (
+    CAP_TABLE_CR,
+    CAP_TABLE_CR_ARGV,
     COMPARE_BU,
     DEAL_A,
     MARKET_AX,
     METRICS_AN_DECK,
     POOL_EXAMPLE,
     RUNWAY_Y,
+    cap_table_check,
     deal_check,
     employee,
     instrument_compare,
@@ -240,6 +243,7 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
         (_METRICS_AN, metrics_check(**METRICS_AN_DECK).assumptions),
         (_MARKET_AX, market_sizing(**MARKET_AX).assumptions),
         (_COMPARE_BU, instrument_compare(**COMPARE_BU).assumptions),
+        (CAP_TABLE_CR_ARGV, cap_table_check(**CAP_TABLE_CR).assumptions),
     ],
     ids=[
         "investor",
@@ -250,6 +254,7 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
         "metrics_check",
         "market_sizing",
         "instrument_compare",
+        "cap_table_check",
     ],
 )
 async def test_every_assumption_prints_with_its_setting_statement_and_source(
