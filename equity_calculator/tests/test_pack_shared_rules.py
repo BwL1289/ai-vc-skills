@@ -53,6 +53,20 @@ These sentences are copied into several skills and must stay identical there:
   skill with an intake (an Inputs section, the deal-math and cap-table steps that ask, the calculator skill's first
   step) now says, word for word, to go on with what was given, keep waiting any call or step that waits for an input,
   invent nothing, list each ask in brackets under one heading, and keep a live drill for the founder.
+- A session where the calculator does not run. Live runs met an old build of the calculator's server, with no
+  ``equity_pool_plan`` or ``equity_cap_table_check``, and a shell that refused the command line: one quoted the
+  option-pool skill's worked example as the founder's result, and another added up a cap table by hand. Every skill
+  that names a calculator tool now says in its Limits, word for word, to say so and give no figure in the tool's
+  place, none worked by hand and none from a worked example; the template carries the sentence for a new skill.
+- The MCP tool first. Those runs, finding no tool, ran the command line the skill printed beside the call. Every
+  command line a skill prints follows its MCP call and is labelled, word for word, as the fallback for a session
+  without the tool, after a search for it by name (the calculator skill labels its examples in its own words); a
+  pointer in a sentence calls it the "command-line fallback", and the calculator skill's description names the MCP
+  tools first.
+- A worked example that cannot pass for the founder's result. The option-pool and raise-plan skills' worked examples
+  used their evals' exact inputs, so a run that quoted them gave the eval's right figures with no tool run. Both now
+  use made-up inputs no eval uses, with fresh calculator output. Six older worked examples still share an eval's
+  inputs and are listed here; one that is changed comes off the list, and a new one cannot join it.
 
 A refute pass checks its answering line as the quote check does, spacing and line breaks aside: a line that wraps in
 the founder's file is still the founder's line, and a line that is not there does not drop the item.
@@ -67,10 +81,12 @@ paragraph and its recording, names the clauses that changed, and says how the ru
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from pathlib import Path
 
 import pytest
+from equity_calculator.mcp_server import _SCENARIOS
 
 _ROOT = Path(__file__).resolve().parents[2]
 _SKILLS = _ROOT / "skills"
@@ -308,6 +324,40 @@ _NOT_BLIND = {
     "vc-deck-review": "without consulting the dimension table or any mark",
     "vc-positioning": "without consulting the dimension table, the phrase table or any dimension mark",
 }
+# What a skill that calls the calculator says when neither the tool nor its command line runs, in its Limits.
+_NO_TOOL = (
+    "When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no"
+    " figure in that tool's place: none worked by hand and none from a worked example, a made-up company's result."
+)
+# Every tool the calculator's MCP server registers: a skill that names one in backticks calls the calculator.
+_CALCULATOR_TOOLS = re.compile(
+    r"`(?:" + "|".join(f"equity_{scenario}" for scenario in _SCENARIOS) + r"|equity_workbook)`"
+)
+# The label before every command line a skill prints, which comes after the MCP call it repeats.
+_CLI_FALLBACK = (
+    "Only when the tool is not in the session (search for it by name first), the same call from the command line"
+)
+# The calculator skill's own label, before its command-line examples, which follow its MCP tools.
+_HUB_CLI_FALLBACK = (
+    "**Command line** (`equity_calculator`), only when the MCP tools are not in the session (search for them by name"
+    " first)."
+)
+# A command named in a sentence rather than printed as a call.
+_INLINE_CLI = re.compile(r"\(([^()`]*)`equity_calculator [a-z_]+`\)")
+_INLINE_FALLBACK = "command-line fallback: "
+# A fenced block, its indent captured so it can be taken off each line.
+_FENCE = re.compile(r"^( *)```([a-z]*)\n(.*?)^\1```$", re.MULTILINE | re.DOTALL)
+# The skills (or the skill whose reference page it is) whose worked call still uses one eval's exact inputs. A run with
+# no tool could quote such an example and match the eval's answer; each comes off this list once its example changes.
+_EXAMPLE_ON_EVAL_INPUTS = {
+    "vc-cap-table-check",
+    "vc-current-investor-update",
+    "vc-deal-math",
+    "vc-investor-memo",
+    "vc-market-sizing",
+    "vc-prospective-investor-update",
+}
+_SKILL_PAGES = sorted([*_SKILLS.glob("*/SKILL.md"), *_SKILLS.glob("*/references/*.md")])
 _UNREAD = (
     "This agent has already read this skill, its tables included, so lenses run this way are not blind to them: they"
     " are less independent than subagents, and the same agent then judges them in Stage B, so the answer says so."
@@ -680,3 +730,109 @@ def test_the_deal_math_hub_leaves_a_phased_plans_runway_claim_out_of_the_deal_ch
     steps = _section("vc-deal-math", "## Steps")
 
     assert "its runway at one flat burn is a quick check: leave the runway claim out of that call" in steps
+
+
+def _calculator_skills() -> set[str]:
+    """The skills that name a tool the calculator's MCP server registers."""
+    return {path.parent.name for path in _SKILLS.glob("*/SKILL.md") if _CALCULATOR_TOOLS.search(path.read_text())}
+
+
+def test_the_skills_that_say_what_to_do_without_the_calculator_are_every_skill_that_calls_it() -> None:
+    """A new skill that names a calculator tool joins the list, and so gets the sentence."""
+    carrying = {path.parent.name for path in _SKILLS.glob("*/SKILL.md") if _NO_TOOL in _unwrapped(path.parent.name)}
+
+    assert carrying == _calculator_skills()
+    assert "vc-option-pool-plan" in carrying and "vc-raise-plan" in carrying and "equity-calculator" in carrying
+
+
+@pytest.mark.parametrize("name", sorted(_calculator_skills()))
+def test_without_the_calculator_a_skill_gives_no_figure_in_its_place(name: str) -> None:
+    """A live run with no tool quoted a worked example's figures as the founder's, and another worked one by hand."""
+    limits = _section(name, "## Limits")
+
+    assert _NO_TOOL in limits
+    assert "none worked by hand and none from a worked example" in _NO_TOOL
+
+
+def test_the_template_carries_the_no_tool_sentence_and_puts_the_mcp_tool_first() -> None:
+    template = " ".join(line.strip() for line in (_ROOT / "template" / "SKILL.md").read_text().splitlines())
+
+    assert _NO_TOOL in template
+    assert "the MCP tool first, the command line only as the fallback" in template
+
+
+def _cli_fences(text: str) -> list[tuple[int, str]]:
+    """Each command-line block in ``text``: where it starts and its first line."""
+    found = []
+    for match in _FENCE.finditer(text):
+        indent, tag, body = match.groups()
+        first = body.splitlines()[0].removeprefix(indent) if body else ""
+        if tag == "" and first.startswith("equity_calculator "):
+            found.append((match.start(), first))
+    return found
+
+
+def test_every_command_line_a_skill_prints_follows_its_mcp_call_and_is_labelled_the_fallback() -> None:
+    """Live runs that found no tool ran the printed command line instead; it is the fallback, after a tool search."""
+    checked = 0
+    for path in _SKILL_PAGES:
+        text = path.read_text(encoding="utf-8")
+        for start, first in _cli_fences(text):
+            before = text[:start]
+            label = " ".join(line.strip() for line in before.rstrip().rsplit("\n\n", 1)[-1].splitlines())
+            where = f"{path.relative_to(_ROOT)}: {first[:50]}"
+            assert "```json" in before, where
+            if path.parent.name == "equity-calculator":
+                assert label.startswith(_HUB_CLI_FALLBACK), where
+            else:
+                assert label.startswith(_CLI_FALLBACK), where
+            checked += 1
+
+    assert checked >= 10
+
+
+def test_a_command_named_in_a_sentence_is_the_command_line_fallback() -> None:
+    for path in _SKILL_PAGES:
+        text = " ".join(line.strip() for line in path.read_text(encoding="utf-8").splitlines())
+        where = str(path.relative_to(_ROOT))
+
+        assert "from the command line," not in text, where
+        for match in _INLINE_CLI.finditer(text):
+            assert match.group(1) == _INLINE_FALLBACK, (where, match.group(0))
+
+
+def test_the_calculator_skill_names_its_mcp_tools_before_its_command() -> None:
+    text = (_SKILLS / "equity-calculator" / "SKILL.md").read_text(encoding="utf-8")
+    description = re.search(r"^description: (.*)$", text, re.MULTILINE)
+    assert description is not None
+
+    assert "command or MCP tools" not in description.group(1)
+    assert description.group(1).index("MCP tools") < description.group(1).index("command")
+    running = _section("equity-calculator", "## Running it")
+    assert running.index("**MCP tools**") < running.index("**Command line**")
+    assert "search for the scenario's tool by name" in running
+
+
+def _call_inputs(text: str) -> list[object]:
+    """The ``inputs`` of every JSON call fenced in ``text``."""
+    calls = []
+    for match in _FENCE.finditer(text):
+        indent, tag, body = match.groups()
+        if tag == "json":
+            parsed = json.loads("\n".join(line.removeprefix(indent) for line in body.splitlines()))
+            if isinstance(parsed, dict) and "inputs" in parsed:
+                calls.append(parsed["inputs"])
+    return calls
+
+
+def test_a_worked_example_never_uses_an_evals_inputs_beyond_the_ones_listed() -> None:
+    """A live run with no tool quoted the option-pool skill's worked example, which held its eval's exact inputs."""
+    evals = [inputs for path in sorted((_ROOT / "evals").glob("*/*.md")) for inputs in _call_inputs(path.read_text())]
+    shared = {
+        path.relative_to(_SKILLS).parts[0]
+        for path in _SKILL_PAGES
+        if any(inputs in evals for inputs in _call_inputs(path.read_text(encoding="utf-8")))
+    }
+
+    assert evals and shared == _EXAMPLE_ON_EVAL_INPUTS
+    assert not {"vc-option-pool-plan", "vc-raise-plan"} & shared

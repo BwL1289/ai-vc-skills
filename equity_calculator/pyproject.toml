@@ -4,7 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "equity_calculator"
-version = "0.1.0"
+# The plugin's version, always: .claude-plugin/plugin.json and marketplace.json carry the same one, and a release bumps
+# all three (CONTRIBUTING.md, "Releasing"). The plugin starts this package with uvx, which reused its cached build while
+# this file stayed the same: at one version for every release, a plugin update could keep serving an old server.
+version = "0.3.5"
 description = "Exact startup equity arithmetic: Paul Graham's equity equation, the option-pool shuffle, priced rounds with SAFEs and notes, dilution, vesting, exit waterfalls, and a founder's check of their own raise. CLI, Excel workbook and MCP server."
 readme = "README.md"
 license = "MIT"
@@ -33,6 +36,11 @@ equity_calculator_mcp = "equity_calculator.mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/equity_calculator"]
+
+[tool.uv]
+# uv rebuilds this package when a file listed here changes: this file, as by default, and every module under src, so
+# an edited module rebuilds the server even before a release bumps the version.
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*.py" }]
 
 [tool.ruff]
 line-length = 120

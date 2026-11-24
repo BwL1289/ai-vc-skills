@@ -92,56 +92,77 @@ offer.
    ```json
    {
      "inputs": {
-       "round_size": "4000000",
-       "lead_cheque": "2500000",
+       "round_size": "6000000",
+       "lead_cheque": "3500000",
        "commitments": [
-         { "amount": "500000", "kind": "firm" },
-         { "amount": "250000", "kind": "soft" },
-         { "amount": "250000", "kind": "soft" }
+         {
+           "amount": "750000",
+           "kind": "firm"
+         },
+         {
+           "amount": "400000",
+           "kind": "soft"
+         }
        ],
-       "pro_rata": ["400000"],
+       "pro_rata": ["600000"],
        "stages": [
-         { "name": "Intro asked", "investors": 40, "rate_percent": "50" },
-         { "name": "First meeting", "investors": 10, "rate_percent": "30" },
-         { "name": "Partner meeting", "investors": 2, "rate_percent": "25" }
+         {
+           "name": "Intro asked",
+           "investors": 30,
+           "rate_percent": "40"
+         },
+         {
+           "name": "First meeting",
+           "investors": 12,
+           "rate_percent": "35"
+         },
+         {
+           "name": "Partner meeting",
+           "investors": 3,
+           "rate_percent": "30"
+         }
        ],
-       "term_sheets_wanted": 3,
+       "term_sheets_wanted": 4,
        "runway": {
-         "cash_on_hand": "1200000",
+         "cash_on_hand": "1920000",
          "phases": [
-           { "from_month": 1, "gross_burn": "150000", "revenue": "30000" }
+           {
+             "from_month": 1,
+             "gross_burn": "210000",
+             "revenue": "50000"
+           }
          ],
-         "months_to_raise": 6
+         "months_to_raise": 5
        }
      }
    }
    ```
 
-   The same call from the command line:
+   Only when the tool is not in the session (search for it by name first), the same call from the command line:
 
    ```
-   equity_calculator raise_pipeline --round-size 4000000 --lead-cheque 2500000 --commitment "500000 kind=firm" --commitment "250000 kind=soft" --commitment "250000 kind=soft" --pro-rata 400000 --stage "Intro asked: investors=40 rate-percent=50" --stage "First meeting: investors=10 rate-percent=30" --stage "Partner meeting: investors=2 rate-percent=25" --term-sheets-wanted 3 --cash-on-hand 1200000 --phase "from-month=1 gross-burn=150000 revenue=30000" --months-to-raise 6
+   equity_calculator raise_pipeline --round-size 6000000 --lead-cheque 3500000 --commitment "750000 kind=firm" --commitment "400000 kind=soft" --pro-rata 600000 --stage "Intro asked: investors=30 rate-percent=40" --stage "First meeting: investors=12 rate-percent=35" --stage "Partner meeting: investors=3 rate-percent=30" --term-sheets-wanted 4 --cash-on-hand 1920000 --phase "from-month=1 gross-burn=210000 revenue=50000" --months-to-raise 5
    ```
 
-   Part of what it prints (Company RA, made up: a $4M round with a $2.5M lead, $500k firm and $500k soft, $400k of
-   pro rata, 40 intro asks, 10 first meetings and 2 partner meetings on the founder's rates, 3 term sheets wanted):
+   Part of what it prints (Company RW, made up: a $6M round with a $3.5M lead, $750k firm and $400k soft, $600k of
+   pro rata, 30 intro asks, 12 first meetings and 3 partner meetings on the founder's rates, 4 term sheets wanted):
 
    ```text
-     Soft commitments, never counted (S)                                        $500,000.00  the soft commitments, shown on their own
-     Room after the lead and the firm commitments                             $1,000,000.00  R - L - F; the value when run, not a live formula
-     Allocation left                                                            $600,000.00  R - L - F - P; below 0, more is counted than the round holds; the value when run, not a live formula
-     Conversion, first stage to a term sheet                                        3.7500%  the product of every rate
-     Expected term sheets from today's funnel (E)                                      2.75  the sum of each stage's investors × its rate to a term sheet; an expectation from the founder's rates, not a forecast
-     First-stage targets needed, from an empty funnel                                    80  ceiling(W / the conversion)
-     More first-stage targets needed beyond today's funnel                                7  ceiling((W - E) / the conversion); 0 when E >= W
-     Start raising by (the runway plan's)                                       4.00 months  runway with no raise - months to raise, in months from today
+     Soft commitments, never counted (S)                                        $400,000.00  the soft commitments, shown on their own
+     Room after the lead and the firm commitments                             $1,750,000.00  R - L - F; the value when run, not a live formula
+     Allocation left                                                          $1,150,000.00  R - L - F - P; below 0, more is counted than the round holds; the value when run, not a live formula
+     Conversion, first stage to a term sheet                                        4.2000%  the product of every rate
+     Expected term sheets from today's funnel (E)                                      3.42  the sum of each stage's investors × its rate to a term sheet; an expectation from the founder's rates, not a forecast
+     First-stage targets needed, from an empty funnel                                    96  ceiling(W / the conversion)
+     More first-stage targets needed beyond today's funnel                               14  ceiling((W - E) / the conversion); 0 when E >= W
+     Start raising by (the runway plan's)                                       7.00 months  runway with no raise - months to raise, in months from today
      Flag                                                      soft_commitments_not_counted  At least one commitment is soft: soft commitments are shown on their own line and never counted against the round
-     Flag                                                            funnel_short_of_wanted  On the founder's rates, today's funnel is expected to give fewer than the 3 term sheets wanted: see the more targets needed line
+     Flag                                                            funnel_short_of_wanted  On the founder's rates, today's funnel is expected to give fewer than the 4 term sheets wanted: see the more targets needed line
    ```
 
-   $600,000.00 of the round is left to allocate, the soft $500,000.00 never counted; on the founder's rates today's
-   funnel is expected to give 2.75 term sheets, and 7 more first-stage targets are needed for 3. The runway plan says
-   to start raising by month 4.
+   $1,150,000.00 of the round is left to allocate, the soft $400,000.00 never counted; on the founder's rates today's
+   funnel is expected to give 3.42 term sheets, and 14 more first-stage targets are needed for 4. The runway plan says
+   to start raising by month 7.
 
 5. **Read the result before answering**: `allocation` (the totals, the room and the allocation left), `funnel` (each
    stage's row, the conversion, `expected_term_sheets`, `targets_needed`, `more_targets_needed`), `timing`
@@ -155,14 +176,14 @@ offer.
    ask for the months to raise).
 6. **Plan the batches** from the tiers, the founder's batch inputs and the printed start-raising month. The window
    for first meetings opens at the start-raising month as printed (`start_raising_by`), and its weeks are numbered
-   from there (month 4, week 1): no calendar date is worked out. That month is the latest start on the founder's plan,
+   from there (month 7, week 1): no calendar date is worked out. That month is the latest start on the founder's plan,
    so say so: a founder who names an earlier month opens the window there, labelled as the founder's, with the printed
    month quoted beside it. Outside the two flags at the end of this step, never propose an earlier start of your own
-   ("I recommend now, not month 4"): until the founder names a month, every week keeps the printed month's label.
+   ("I recommend now, not month 7"): until the founder names a month, every week keeps the printed month's label.
    Place the tiered investors in the founder's tier
    order into the window's weeks, never more in one week than the founder's first meetings a week, so the first
    meetings land within the founder's window. Each batch's intro asks go out the founder's lead time before its week,
-   written as that lead time ("2 weeks before month 4, week 1"). An investor who does not fit in the window is listed
+   written as that lead time ("2 weeks before month 7, week 1"). An investor who does not fit in the window is listed
    as outside it; the founder decides what to do (a later batch, a wider window, more meetings a week). When
    `start_raising_date_passed` holds, say the plan is already late on the founder's own figures, place the first week
    as this week, and offer the vc-round-sizing skill for the raise and the runway. When
@@ -201,7 +222,7 @@ same meaning beside each flag; the MCP result does not. None says which investor
 Lead with the coverage, then the tiers, then the batches and the tracker. Use the tool's printed values (`rounded`
 with its unit, or the exact fraction when precision matters); never round again or recompute. A value whose unit is
 `fraction` is a share of the whole: show it as a percent by moving the decimal point of its `rounded` value two
-places to the right, keeping every digit (0.037500 is 3.7500%), which is what the command line's report prints. That is
+places to the right, keeping every digit (0.042000 is 4.2000%), which is what the command line's report prints. That is
 a change of notation, not a calculation.
 
 1. **Coverage:** the allocation left and the room after the lead and the firm commitments, the soft commitments
@@ -231,8 +252,8 @@ a change of notation, not a calculation.
   a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a line or a table cell unless the founder's
   material states it or a tool returned it; quote both figures as stated instead ("from 2,000 to 4,500", never "more
   than doubled"). The allocation left, the expected term sheets and the targets needed come from the tool only.
-- When neither `equity_raise_pipeline` nor its command line runs in the session, say so and give no figure in its
-  place: never one from the worked example in step 4, which is one made-up company's result, not the founder's.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - Every amount, count, rate and month is the founder's. It supplies no typical conversion rate, cheque size or time to
   raise, and quotes no benchmark unless the founder gives one with its source: none is applied.
 - The expected term sheets are an expectation from the founder's own rates, not a forecast: the term sheets that

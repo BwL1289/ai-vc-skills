@@ -441,7 +441,10 @@ def test_every_flag_the_calculator_raises_is_relayed_and_a_benchmark_band_is_nev
     # The runway plan's band row cites a guide and the deal check's does not, so the skill quotes whichever source the
     # row gives rather than calling every band unverified.
     assert "with the source that row gives, as a common benchmark" in steps and "never as a bar" in steps
-    assert "its meaning from the calculator flags table" in answering and "with the source that row gives" in answering
+    # The answer's Numbers are laid out as the flags file says, so the skill stays under its line cap.
+    numbers = _unwrapped(_section("## Numbers in the answer", flags))
+    assert '"Numbers in the answer"' in answering and _FLAGS_LINK in answering
+    assert "its meaning from the tables below" in numbers and "with the source that row gives" in numbers
     assert "`unverified` source" not in _TEXT
     # Each question keeps to what the tool's own sentence says, never a motive or a doubt the tool does not raise.
     meanings = dict(re.findall(r"^\| `([a-z_]+)` +\| (.+?) +\|$", flags, re.MULTILINE))

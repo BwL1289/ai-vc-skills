@@ -130,7 +130,7 @@ lenses do not anchor on the tool's output; step 7 then starts at the quote check
    the calculator, each in a call for its own period (step 4), when the founder gives the parts; otherwise mark the
    metric Needs a source and ask for one figure, in one form, with its period.
 4. **The calculator.** Pass the founder's parts and every stated figure the tool can check from them to
-   `equity_metrics_check` (from the command line, `equity_calculator metrics_check`), money and percents as strings,
+   `equity_metrics_check` (command-line fallback: `equity_calculator metrics_check`), money and percents as strings,
    customer counts and `period_months` as whole numbers, never strings:
    - **One call per document's version of the figures,** each with only that document's stated figures. Never match a
      figure against a tool value by eye across documents.
@@ -477,6 +477,8 @@ the founder's own material) is this repository's own method.
 - No arithmetic outside the equity calculator's tools: no MRR-to-ARR conversion, sum, ratio or growth rate by hand.
   Growth rates are quoted, not computed; LTV, LTV/CAC, the Rule of 40 and the magic number come from the tool, on
   the founder's parts, with no benchmark.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - Benchmarks appear only as the tool's assumption rows, with their sources and dates; they vary by sector, segment and
   year.
 - It sees no billing system, ledger or bank data and verifies no evidence; a partner will ask to see it.

@@ -168,7 +168,7 @@ says. A turn that makes no call runs no review.
    }
    ```
 
-   The same call from the command line:
+   Only when the tool is not in the session (search for it by name first), the same call from the command line:
 
    ```
    equity_calculator market_sizing --segment "customers=18000 price=400 price-period-months=1 serviceable-percent=60 obtainable-customers=900 customers-today=45" --segment "customers=400 price=300 price-period-months=1 units-per-customer=15 serviceable-percent=50 obtainable-percent=10 customers-today=2" --top-down "amount=2100000000 comparable-percent=40" --sensitivity "field=price segment=1 values=300/500" --sensitivity "field=obtainable-customers segment=1 values=600/1200" --sensitivity "field=obtainable-percent segment=2 values=5/15" --annual-revenue-today 324000 --som-years 5 --som-target 8000000 --stated-tam 120000000
@@ -458,6 +458,8 @@ every row marked unverified are this skill's own.
 - It never turns a top-down figure into a market size, never works out "1% of" anything, and never suggests widening
   the market to make a number bigger.
 - No arithmetic outside the equity calculator's tools; no compound growth rate; no fund or exit math.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - It never role-plays or speaks as a named investor, firm or author, and gives no score.
 - Each figure is one year of revenue at today's prices: no growth, churn or price change. Say so beside the results.
 - The review predicts what a partner is likely to doubt; a real partner may doubt other things.

@@ -148,7 +148,7 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
    (compared as stated, never converted) and the discount patterns. Set each claim's verdict by that skill's order,
    without its skeptic: this skill's lenses do the attacking. The claims table feeds the marks in step 6.
 4. **The ask.** The deal terms are checked once, in claims-check step 5, which follows the vc-deal-math skill:
-   - A priced round: `equity_deal_check` (from the command line, `equity_calculator deal_check`), money and percents as
+   - A priced round: `equity_deal_check` (command-line fallback: `equity_calculator deal_check`), money and percents as
      strings (a stated percent or runway with the deck's own places, since one that is the tool's figure rounded to them
      is consistent), every stated figure, use-of-funds lines included, and the runway claim (not on a phased plan:
      below); one call per document's version of the ask. A valuation with no label: call twice, once as `pre_money`,
@@ -443,6 +443,8 @@ two-stage review (attack, then refute with the founder's own material) is this r
 - It never invents or strengthens traction, customers, partners, credentials or figures, in a fix or in a refute pass.
 - No arithmetic outside the equity calculator's tools. Growth rates are quoted; metrics (LTV, the Rule of 40 and the
   magic number included) and market sizes are checked by the vc-metrics-readiness and vc-market-sizing skills.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - It reads text. It does not judge visual design, and reads no figure off a chart the founder did not state.
 - The review predicts likely objections from the deck's text; a real partner may raise others.
 - It works from the founder's material and sends nothing anywhere.

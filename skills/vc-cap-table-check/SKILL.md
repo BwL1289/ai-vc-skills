@@ -138,7 +138,8 @@ rules on whether a share, a grant or a transfer is legally valid.
    }
    ```
 
-   The same check from the command line (`equity_calculator cap_table_check --help` lists every flag):
+   Only when the tool is not in the session (search for it by name first), the same call from the command line
+   (`equity_calculator cap_table_check --help` lists every flag):
 
    ```
    equity_calculator cap_table_check --share-class "kind=common authorised-shares=8000000" --share-class "kind=preferred shares=1000000 authorised-shares=1000000 stated-percent=10.00" --share-class "kind=options_granted shares=500000 stated-percent=5.00" --share-class "kind=options_unissued shares=250000 stated-percent=2.50" --share-class "kind=warrants shares=100000 stated-percent=1.00" --holder "share-class=1 shares=4500000 stated-percent=45.00 founder" --holder "share-class=1 shares=3500000 stated-percent=35.00 founder" --holder "share-class=1 shares=250000 stated-percent=2.50 departed" --stated-fully-diluted-shares 10000000 --stated-percent-basis fully_diluted --option-plan-reserve 750000 --safe "1000000 valuation-cap=12000000"
@@ -236,6 +237,8 @@ ask the ones the flags and the table call for, and never answer them yourself:
   the founder's figures relate (a difference, a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a
   line or a table cell unless the founder's material states it or a tool returned it; quote both figures as stated
   instead ("from 2,000 to 4,500", never "more than doubled").
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - It never says whether a share, a grant, a vesting schedule or a transfer is legally valid, and never says whether to
   accept a term or a request: the tool flags the questions, and the company's lawyer answers them.
 - It checks the arithmetic of the figures the founder gives, pasted or in a file the agent can read in this session. It

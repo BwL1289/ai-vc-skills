@@ -104,7 +104,7 @@ claims list; step 7 then runs only the quote check and the refute pass.
    - Projections are Figures too: check that each is labelled as a plan with its period, and quote it as stated.
 5. **Deal terms go to the calculator.** The raise, valuation and its label, percent sold, pool, founders' percent after
    the round, outstanding SAFEs and notes, cash, burn, revenue, runway claim (not on a phased plan: below) and
-   use-of-funds lines are checked with `equity_deal_check` (from the command line, `equity_calculator deal_check`), or
+   use-of-funds lines are checked with `equity_deal_check` (command-line fallback: `equity_calculator deal_check`), or
    `equity_runway_plan` as below, following the vc-deal-math skill's steps: ask for what is missing, send money and
    percents as strings (a stated percent or runway with the document's own places, since one that is the tool's figure
    rounded to them is consistent, in `equity_deal_check` and `equity_runway_plan` alike; the post-money and the
@@ -318,5 +318,7 @@ attacks) is this skill's own method.
 - No arithmetic outside the equity calculator's tools. Figures are compared as stated, never converted. Metrics and
   market sizes (LTV, LTV/CAC, the Rule of 40 and the magic number among the metrics) are checked by the
   vc-metrics-readiness and vc-market-sizing skills; growth rates by no tool.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - The adversarial review predicts which claims a partner is likely to check first; a real partner may check others.
 - It works from the founder's text and sends nothing anywhere.

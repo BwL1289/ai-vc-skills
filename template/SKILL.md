@@ -15,7 +15,8 @@ One paragraph: the job this skill does, and the tool or method it uses to do it 
 ## Steps
 
 1. What to read or ask for first.
-2. Which tool to call, with which inputs. Every number comes from a tool or from the document, never from memory.
+2. Which tool to call, with which inputs: the MCP tool first, the command line only as the fallback. Every number
+   comes from a tool or from the document, never from memory.
 3. How to check the result before answering.
 
 ## Answering
@@ -26,3 +27,5 @@ One paragraph: the job this skill does, and the tool or method it uses to do it 
 ## Limits
 
 - What the skill does not cover, and that its output is not investment, legal or tax advice.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.

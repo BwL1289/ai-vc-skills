@@ -116,7 +116,7 @@ the bank or the checklist; step 3 then starts at the quote check.
 1. **Intake.** Ask for the missing inputs in one message. Label the material as it arrives.
 2. **The cap table and the ask go to the calculator.** Follow the vc-deal-math skill's steps; use only the tools'
    values.
-   - A priced round: `equity_deal_check` (from the command line, `equity_calculator deal_check`), money and percents
+   - A priced round: `equity_deal_check` (command-line fallback: `equity_calculator deal_check`), money and percents
      as strings (a stated percent or runway with the document's own places), with `fully_diluted_shares`,
      `unissued_pool_shares`, `target_pool_percent` and `pool_timing`, every SAFE and note as `instruments`, and each
      ownership figure a document states: the investors' percent as `stated_investor_percent`, the founders' percent
@@ -454,5 +454,7 @@ unverified. The question bank is the vc-partner-meeting skill's own list, also u
 - No investor research: no look-ups of funds, partners or their diligence lists, and no outreach.
 - No arithmetic outside the equity calculator's tools. The cap table's own sums and today's percents are quoted, not
   computed.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - It works from the founder's text and document list, opens no folder of files, uploads nothing and sends nothing
   anywhere.

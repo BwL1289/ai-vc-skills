@@ -139,7 +139,7 @@ the labels given in parentheses.
    baseline, and made a lawyer question; say the explanation is this skill's own reading, unverified.
 3. **The round's arithmetic.** Send money and percents as strings; one call per figure, never a figure from one tool
    matched by eye against another.
-   - `equity_deal_check` (from the command line, `equity_calculator deal_check`): the amount, the valuation with its
+   - `equity_deal_check` (command-line fallback: `equity_calculator deal_check`): the amount, the valuation with its
      label (a valuation with no label: call twice, once as `pre_money` and once as `post_money`), the pool target and
      its timing, every SAFE and note as `instruments`, the founders' shares as `holder_shares`, and every figure the
      founder believes as `stated_investor_percent` or `stated_holder_percent`, as text with the document's own places
@@ -427,6 +427,8 @@ repository's own method.
   counter-offer; it says how a term differs from a cited baseline and what to ask a lawyer.
 - No number of its own: every figure is quoted from the sheet or comes from a tool. No market-survey percentages, no
   "most deals", no exit value or breakpoint it worked out.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - Not modelled by any tool here: cumulative dividends, anti-dilution, redemption, pay-to-play, warrants, conversion
   thresholds, carve-outs, credit for time served on founder vesting, and debt or fees ahead of shareholders in a
   sale. They are explained and quoted, never estimated.

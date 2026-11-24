@@ -196,10 +196,13 @@ def test_the_limits_keep_the_founder_as_the_user() -> None:
     assert "it quotes no benchmark pool size: none is applied" in limits
     assert "It never role-plays or speaks as a named investor or firm, and never names a firm as a fit" in limits
     assert "looks nothing up, and sends nothing anywhere" in limits
-    # A live run with no tool built the plan and difference columns from the worked example's figures.
-    no_tool = "When neither `equity_pool_plan` nor its command line runs in the session, say so and give no figure"
+    # A live run with no tool built the plan and difference columns from the worked example's figures: the pack's shared
+    # sentence (test_pack_shared_rules) rules out a figure worked by hand or taken from a worked example.
+    no_tool = (
+        "When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give"
+    )
     assert no_tool in limits
-    assert "never one from the worked example in step 3" in limits
+    assert "none worked by hand and none from a worked example, a made-up company's result." in limits
 
 
 def test_there_are_four_evals_one_per_made_up_company() -> None:

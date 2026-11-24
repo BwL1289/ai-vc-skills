@@ -76,59 +76,71 @@ the founder gives one as a row of its own, with the founder's own figure.
    ```json
    {
      "inputs": {
-       "fully_diluted_shares": 10000000,
-       "unissued_pool_shares": 1000000,
-       "founder_shares": 7000000,
-       "pre_money": "16000000",
-       "investment": "4000000",
-       "requested_pool_percent": "15",
-       "next_round_month": 18,
+       "fully_diluted_shares": 12000000,
+       "unissued_pool_shares": 600000,
+       "founder_shares": 8400000,
+       "pre_money": "24000000",
+       "investment": "6000000",
+       "requested_pool_percent": "12",
+       "next_round_month": 20,
        "hires": [
          {
-           "role": "Founding engineer",
-           "start_month": 1,
-           "grant_shares": 400000
+           "role": "Founding designer",
+           "start_month": 2,
+           "grant_shares": 300000
          },
          {
-           "role": "Senior engineer",
-           "start_month": 4,
-           "grant_shares": 250000
+           "role": "Staff engineer",
+           "start_month": 5,
+           "grant_shares": 280000
          },
          {
-           "role": "Senior engineer",
-           "start_month": 6,
-           "grant_shares": 250000
+           "role": "Staff engineer",
+           "start_month": 8,
+           "grant_shares": 280000
          },
-         { "role": "Head of sales", "start_month": 9, "grant_shares": 350000 },
-         { "role": "Designer", "start_month": 12, "grant_shares": 150000 },
-         { "role": "VP engineering", "start_month": 24, "grant_shares": 500000 }
+         {
+           "role": "Head of growth",
+           "start_month": 11,
+           "grant_shares": 320000
+         },
+         {
+           "role": "Data scientist",
+           "start_month": 15,
+           "grant_shares": 200000
+         },
+         {
+           "role": "CFO",
+           "start_month": 26,
+           "grant_shares": 450000
+         }
        ]
      }
    }
    ```
 
-   The same call from the command line:
+   Only when the tool is not in the session (search for it by name first), the same call from the command line:
 
    ```
-   equity_calculator pool_plan --fully-diluted-shares 10000000 --unissued-pool-shares 1000000 --founder-shares 7000000 --pre-money 16000000 --investment 4000000 --requested-pool-percent 15 --next-round-month 18 --hire "Founding engineer: start-month=1 grant-shares=400000" --hire "Senior engineer: start-month=4 grant-shares=250000" --hire "Senior engineer: start-month=6 grant-shares=250000" --hire "Head of sales: start-month=9 grant-shares=350000" --hire "Designer: start-month=12 grant-shares=150000" --hire "VP engineering: start-month=24 grant-shares=500000"
+   equity_calculator pool_plan --fully-diluted-shares 12000000 --unissued-pool-shares 600000 --founder-shares 8400000 --pre-money 24000000 --investment 6000000 --requested-pool-percent 12 --next-round-month 20 --hire "Founding designer: start-month=2 grant-shares=300000" --hire "Staff engineer: start-month=5 grant-shares=280000" --hire "Staff engineer: start-month=8 grant-shares=280000" --hire "Head of growth: start-month=11 grant-shares=320000" --hire "Data scientist: start-month=15 grant-shares=200000" --hire "CFO: start-month=26 grant-shares=450000"
    ```
 
-   Part of what it prints (Company CP, made up: $4M at a $16M pre-money with a 15% pool asked for, five hires before
-   the next round in month 18 and a sixth in month 24):
+   Part of what it prints (Company PW, made up: $6M at a $24M pre-money with a 12% pool asked for, five hires before
+   the next round in month 20 and a sixth in month 26):
 
    ```text
-     Target pool after the round (t)                                10.7692%                    15.0000%           4.2308%  plan: G·V/((V + I)(FD - U + G)), the pool holding exactly G; requested: given
-     New pool shares (P)                                             400,000               1,076,923.077       676,923.077  (t·FD - (1 - r)U)/(1 - r - t), 0 when not positive: the pool scenario's
-     Price per share (p)                                           $1.538462                   $1.444444        $-0.094017  V/(FD + P)
-     Ownership: founders                                            53.8462%                    50.5556%          -3.2906%  F / T (founders are among the existing holders)
-     Pool left ungranted at the next round                                 0                 676,923.077       676,923.077  U + P - the counted grants' shares; below 0, the pool runs short before the next round
-     Effective pre-money                                      $13,846,153.85              $13,000,000.00      $-846,153.85  (FD - U)·p: the holders' shares at the round price
-     Flag                                     hires_after_next_round_ignored                                                1 hire starts after month 18 and is left out of the plan: the next round's own pool would cover it
+     Target pool after the round (t)                                 8.6385%                    12.0000%           3.3615%  plan: G·V/((V + I)(FD - U + G)), the pool holding exactly G; requested: given
+     New pool shares (P)                                             780,000               1,411,764.706       631,764.706  (t·FD - (1 - r)U)/(1 - r - t), 0 when not positive: the pool scenario's
+     Price per share (p)                                           $1.877934                   $1.789474        $-0.088461  V/(FD + P)
+     Ownership: founders                                            52.5822%                    50.1053%          -2.4769%  F / T (founders are among the existing holders)
+     Pool left ungranted at the next round                                 0                 631,764.706       631,764.706  U + P - the counted grants' shares; below 0, the pool runs short before the next round
+     Effective pre-money                                      $21,408,450.70              $20,400,000.00    $-1,008,450.70  (FD - U)·p: the holders' shares at the round price
+     Flag                                     hires_after_next_round_ignored                                                1 hire starts after month 20 and is left out of the plan: the next round's own pool would cover it
      Flag                                               requested_above_plan                                                The requested pool is larger than the plan's: the difference column shows what the larger pool does to the price, the effective pre-money and who owns what
    ```
 
-   The plan's five hires take a 10.7692% pool after the round; the 15% asked for sets the effective pre-money (the
-   existing holders' shares at the round price) at $13,000,000.00 rather than $13,846,153.85, and leaves 676,923.077
+   The plan's five hires take an 8.6385% pool after the round; the 12% asked for sets the effective pre-money (the
+   existing holders' shares at the round price) at $20,400,000.00 rather than $21,408,450.70, and leaves 631,764.706
    shares ungranted when the next round comes.
 
 4. **Read the result before answering**: both columns' `cap_table`, `target_pool`, `grant_shares`,
@@ -173,7 +185,7 @@ same meaning beside each flag; the MCP result does not. None says which pool to 
 Lead with the side-by-side, then the hires, then the evidence line. Use the tool's printed values (`rounded` with its
 unit, or the exact fraction when precision matters); never round again or recompute. A value whose unit is `fraction`
 is a share of the whole: show it as a percent by moving the decimal point of its `rounded` value two places to the
-right, keeping every digit (0.107692 is 10.7692%), which is what the command line's report prints. That is a change of
+right, keeping every digit (0.086385 is 8.6385%), which is what the command line's report prints. That is a change of
 notation, not a calculation.
 
 1. **Side by side:** a table with "Plan: hires to the next round", "Term sheet: requested pool" and "Requested -
@@ -199,8 +211,8 @@ notation, not a calculation.
   a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a line or a table cell unless the founder's
   material states it or a tool returned it; quote both figures as stated instead ("from 2,000 to 4,500", never "more
   than doubled"). The requested pool less the plan's comes from the tool's difference column only.
-- When neither `equity_pool_plan` nor its command line runs in the session, say so and give no figure in its place:
-  never one from the worked example in step 3, which is one made-up company's result, not the founder's.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - Every grant, start month and share count is the founder's. It never supplies a typical grant, a typical pool size
   or a buffer, and it quotes no benchmark pool size: none is applied.
 - It never role-plays or speaks as a named investor or firm, and never names a firm as a fit. Asked to "be" the

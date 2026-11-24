@@ -46,6 +46,17 @@ claude plugin validate .
 
 CI runs the validator, the pre-commit hooks and pytest on every pull request.
 
+## Releasing
+
+Every release bumps three versions together, to the same number: `version` in
+[`.claude-plugin/plugin.json`](.claude-plugin/plugin.json), `metadata.version` in
+[`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json), and `version` in
+[`equity_calculator/pyproject.toml`](equity_calculator/pyproject.toml); a test fails when they differ. The plugin starts
+the calculator's server with `uvx` from that package, and uv reuses its cached build until the package's
+`pyproject.toml` changes, so a release that left the package's version alone could leave an installed plugin serving an
+old server without the newest tools. The package's uv cache keys also name its modules, so an edited module rebuilds
+the server during development, before any release. Add the release's lines to [CHANGELOG.md](CHANGELOG.md) as well.
+
 ## Quality checklist for a skill
 
 - [ ] The founder is the user: the skill answers a founder's question, and an investor's view appears only as a lens

@@ -249,10 +249,13 @@ def test_the_limits_keep_the_founder_as_the_user() -> None:
     assert "an expectation from the founder's own rates, not a forecast" in limits
     assert "It never role-plays or speaks as a named investor or firm, and never names a firm as a fit" in limits
     assert "looks nothing up, and sends nothing anywhere" in limits
-    # A live run with no tool quoted the worked example's figures as the calculator's output for the founder.
-    no_tool = "When neither `equity_raise_pipeline` nor its command line runs in the session, say so and give no figure"
+    # A live run with no tool quoted the worked example's figures as the calculator's output for the founder: the pack's
+    # shared sentence (test_pack_shared_rules) rules out a figure worked by hand or taken from a worked example.
+    no_tool = (
+        "When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give"
+    )
     assert no_tool in limits
-    assert "never one from the worked example in step 4" in limits
+    assert "none worked by hand and none from a worked example, a made-up company's result." in limits
 
 
 def test_there_are_four_evals_one_per_made_up_company() -> None:

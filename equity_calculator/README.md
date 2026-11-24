@@ -155,8 +155,8 @@ path to it: it is in the `bin` folder of the environment it was installed into (
 ## Agent skill
 
 [`skills/equity-calculator/SKILL.md`](../skills/equity-calculator/SKILL.md), at the repository root, is an agent skill: it tells an assistant
-which scenario answers which question, how to run it with the command or the MCP tools, the formulas and their
-sources, and to quote the labelled assumptions with every answer. In Claude Code, copy the folder to
+which scenario answers which question, how to run it with the MCP tools (the command is the fallback), the formulas
+and their sources, and to quote the labelled assumptions with every answer. In Claude Code, copy the folder to
 `~/.claude/skills/` (every project) or to a project's `.claude/skills/`. The skill alone keeps a hyphen,
 `equity-calculator`, in its name and folder: the Agent Skills format allows only lowercase letters, digits and
 hyphens in a skill's name, and the folder must carry the same name.

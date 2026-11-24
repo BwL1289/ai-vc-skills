@@ -304,10 +304,8 @@ The full shape is in [`references/debrief.md`](references/debrief.md); read it b
      and say the founder may ask for the full pass.
 3. **Debrief,** question by question, as above.
 4. **Standing prep:** each standing question with the drafted answer or its bracketed ask.
-5. **Numbers:** each tool's verdict with each mismatch row in the tool's values (the runway with no new money, and on
-   a SAFE or note raise the runway claim and use-of-funds lines, from `equity_runway_plan`); each flag, one line, with
-   its meaning from the calculator flags table and a benchmark flag's band quoted from its assumption row with the
-   source that row gives; every other figure quoted as stated.
+5. **Numbers:** each tool's verdict, mismatch rows and flags, and the runway from `equity_runway_plan`, laid out as
+   "Numbers in the answer" in [`references/calculator-flags.md`](references/calculator-flags.md) says.
 6. **What a yes would need,** as a list of bracketed asks.
 7. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
 8. **Sources:** the frameworks used, with links, and which points rest on an unverified source.
@@ -346,4 +344,6 @@ founder's own material) is shared with the vc-positioning skill.
   says what they know.
 - No arithmetic outside the equity calculator's tools, in any part of the answer; runway with no raise comes from
   `equity_runway_plan`.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - It works from the founder's text and sends nothing anywhere.

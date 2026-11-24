@@ -487,6 +487,8 @@ unverified; no person or post is credited for it.
 - No arithmetic outside the equity calculator's tools. Growth rates are quoted, not computed; metrics (LTV, the Rule
   of 40 and the magic number included) and market sizes are checked by the vc-metrics-readiness and vc-market-sizing
   skills.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - The phrase table holds common signals from public guides, not rules; they vary by stage, sector, region and
   investor. One row ("conservative projections") has no public source read and is marked unverified.
 - It works from the founder's text and sends nothing anywhere.
