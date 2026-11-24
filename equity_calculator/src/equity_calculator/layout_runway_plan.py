@@ -17,6 +17,7 @@ from decimal import Decimal
 from equity_calculator.rounding import ROUNDING_HOW, ROUNDING_VERDICT_HOW, rounding_label
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_runway_plan import (
+    BurnCase,
     MilestoneRow,
     OptionFunds,
     OptionRunway,
@@ -27,7 +28,7 @@ from equity_calculator.schemas.equity_runway_plan import (
     RunwayPlanFlag,
     RunwayPlanResult,
 )
-from equity_calculator.sheet_parts import GIVEN, Line, Sheet, given, given_percent, yes_no
+from equity_calculator.sheet_parts import GIVEN, Line, Sheet, given, given_how, given_percent, yes_no
 
 _TITLE = "Runway plan"
 _HEADING = "How long each raise lasts on the founder's plan and cases, and which milestones it reaches"
@@ -155,9 +156,20 @@ def _phase_months(phase: PhaseRow) -> str:
     return f"months {phase.from_month}-{phase.to_month}"
 
 
-def _case_lines(case: RunwayCase, derived: bool) -> list[Line]:
+def _revenue_how(phase: PhaseRow, given_case: BurnCase, number: int, how: str) -> str:
+    """How phase ``number``'s revenue a month reads: the run-rate's, the plan's scaled by the case's percent, or as
+    given, where a revenue left out is worked as none and says so, as the raise pipeline's does (a stated 0 stays
+    given)."""
+    if phase.revenue_run_rate is not None:
+        return _RUN_RATE_HOW
+    if not given_case.phases:
+        return how
+    return given_how(given_case.phases[number - 1].revenue)
+
+
+def _case_lines(case: RunwayCase, given_case: BurnCase) -> list[Line]:
     """One case's phases as worked: gross burn, revenue and net burn a month for each."""
-    how = "the plan's, scaled by the case's percent" if derived else GIVEN
+    how = GIVEN if given_case.phases else "the plan's, scaled by the case's percent"
     lines = []
     for number, phase in enumerate(case.phases, start=1):
         name = f"{case.name.capitalize()}, phase {number} ({_phase_months(phase)})"
@@ -165,7 +177,7 @@ def _case_lines(case: RunwayCase, derived: bool) -> list[Line]:
         lines.append(Line(f"{key}_gross", f"{name}: gross burn a month", (phase.gross_burn,), how))
         if phase.revenue_run_rate is not None:
             lines.append(Line(f"{key}_run_rate", f"{name}: revenue run-rate, a year", (phase.revenue_run_rate,), how))
-        revenue_how = how if phase.revenue_run_rate is None else _RUN_RATE_HOW
+        revenue_how = _revenue_how(phase, given_case, number, how)
         lines += [
             Line(f"{key}_revenue", f"{name}: revenue a month", (phase.revenue,), revenue_how),
             Line(f"{key}_net", f"{name}: net burn a month", (phase.net_burn,), "gross burn - revenue"),
@@ -294,7 +306,7 @@ def runway_plan_sheet(result: RunwayPlanResult) -> Sheet:
     """The runway plan's lines: the inputs, the cases, runway, milestones, required raises, funds, checks, flags."""
     lines = _given_lines(result)
     for case, given_case in zip(result.cases, result.inputs.cases, strict=True):
-        lines += _case_lines(case, derived=not given_case.phases)
+        lines += _case_lines(case, given_case)
     for row in result.runway:
         lines += _runway_lines(row)
     for milestone in result.milestones:

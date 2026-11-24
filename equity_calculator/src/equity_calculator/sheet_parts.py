@@ -16,6 +16,8 @@ from equity_calculator.exact import fraction, from_percent, quantity
 from equity_calculator.schemas.equity_common import EquityAssumption, EquityQuantity, EquityUnit
 
 GIVEN = "given"
+# The how of an optional input left out (``None``), worked as none; a stated 0 stays ``given``.
+NOT_GIVEN = "not given: read as none"
 _YES = "yes"
 _NO = "no"
 
@@ -54,6 +56,11 @@ class Sheet:
 def given(unit: EquityUnit, value: Decimal) -> EquityQuantity:
     """An input shown as given: ``value`` as a quantity of ``unit``."""
     return quantity(unit, fraction(value))
+
+
+def given_how(value: object) -> str:
+    """How an optional input reads: ``given``, or ``not given: read as none`` when it was left out (``None``)."""
+    return NOT_GIVEN if value is None else GIVEN
 
 
 def given_percent(value: Decimal) -> EquityQuantity:

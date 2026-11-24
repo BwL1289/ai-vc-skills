@@ -282,15 +282,15 @@ ask the partner, so it is drafted here and never put to the founder in the drill
 ## The debrief
 
 Each question asked, in the drill's order, then, in one-message mode, each other pasted answer ("your question" in place
-of a lens for one only the founder asked), gets the founder's answer quoted, what was weak or "held up", and a stronger
-answer built only from the founder's material and tool results, every gap a bracketed ask; then what a yes would need,
-as bracketed asks by tier, never a prediction: never say a partner or a firm would invest, pass or score the company.
-The full shape is in [`references/debrief.md`](references/debrief.md); read it before writing the debrief.
+of a lens for one only the founder asked), gets the founder's answer quoted, what was weak, "held up" or "Draft taken",
+and a stronger answer built only from the founder's material and tool results, every gap a bracketed ask; then what a
+yes would need, as bracketed asks by tier, never a prediction: never say a partner or a firm would invest, pass or score
+the company. The full shape is in [`references/debrief.md`](references/debrief.md); read it before writing the debrief.
 
 ## Answering
 
 1. **The hardest three,** one line each, in the third person ("A partner is likely to ask ..."): the top kept
-   questions, and whether the founder's answer held up.
+   questions, and whether the founder's answer held up, or "Draft taken" where the founder took the skill's draft.
 2. **Adversarial review:**
    - **Kept,** ranked, as a table: Rank, Tier, Lens, The founder's line (quoted; the tool's row for a mismatch or
      flag), What a partner is likely to ask (third person), Bracketed ask. The calculator's rows are marked "from

@@ -6,6 +6,8 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- Plugin version 0.3.8 (the plugin's, the marketplace's and the `equity_calculator` package's), so an installed copy
+  picks up the `runway_plan` report fix and the `vc-partner-meeting` "Draft taken" label, listed under Changed.
 - Plugin version 0.3.7 (the plugin's, the marketplace's and the `equity_calculator` package's), so an installed copy
   picks up the `vc-partner-meeting` fixes from its first live drill, listed under Changed.
 - Live runs of four more evals on plugin 0.3.5 (Claude Code 2.1.331), each recorded in its eval with an excerpt and a
@@ -297,6 +299,18 @@ All notable changes to this repository. Dates are UTC.
 
 ### Changed
 
+- `runway_plan`'s report says "not given: read as none" beside a phase's revenue a month that was left out, in the
+  plan or in a downside or lean case given its own phases, where it printed "$0.00 given" as if the founder had stated
+  0; a revenue given as 0 still reads "given", and the runway is the same either way. The words and the test of a null
+  in the echoed inputs are `raise_pipeline`'s, now one shared constant beside "given", so a result fed back from its
+  JSON keeps the difference. A case given as percents of the plan keeps "the plan's, scaled by the case's percent". No
+  README or eval excerpt printed the old line; the calculator README's `runway_plan` usage now describes the new one.
+- `vc-partner-meeting`'s debrief has a named label for an answer that is the skill's draft the founder took: "Draft
+  taken: rehearse it in your own words before the meeting.", in place of what was weak or "held up". The draft is
+  quoted as the skill's text with no answer label and gets no weak notes and no stronger answer; an answer the founder
+  also gave in their own words is debriefed as usual. `references/debrief.md` defines it beside "held up",
+  `references/drill.md` names it after its rule on taken drafts, and the skill's debrief summary and its hardest three
+  carry it, with SKILL.md still at 349 lines; a new test pins all four.
 - `vc-partner-meeting` takes five rules from its first live drill, each pinned in its test. The first three
   questions, and every one in the ends-the-meeting tier, are answered in the founder's own words before any draft is
   shown, even when the founder asks for a draft on every question (with a one-click draft on every question, a founder

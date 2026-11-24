@@ -15,7 +15,7 @@ skill's first live drill and are this skill's own, unverified.
   answer or a skip. A draft is built as a stronger answer is: only from the founder's material and tool results, every
   gap a bracketed ask, no figure worked out by hand. A draft the founder takes is the skill's text, not the founder's
   answer: it adds nothing to the founder's material, and the debrief says the draft was taken, never that the answer
-  held up.
+  held up. The debrief labels it "Draft taken", with the step [debrief.md](debrief.md) gives it.
 - **A follow-up.** Ask at most one follow-up per question, only when the answer leaves out the specific thing the
   question asked for, and quote the part of the answer it follows. Word it in the founder's everyday words, never this
   skill's terms (a lens, a tier, a kept question) or investors' jargon (an "ICP", a "wedge"): a plain question, then
