@@ -156,6 +156,7 @@ _FOUNDER_TEXT_SKILLS = (
     "vc-current-investor-update",
     "vc-investor-memo",
     "vc-diligence-questions",
+    "vc-option-pool-plan",
 )
 _PARTNER_MEETING_BAN = 'never a difference, sum or ratio of two figures the founder gave ("from $80k to $120k a month"'
 # The lean refute pass, with {noun} filled by what the skill's lenses raise: an objection, or a question.
@@ -206,6 +207,7 @@ _READ_THE_FILE_SKILLS = (
     "vc-investor-memo",
     "vc-market-sizing",
     "vc-metrics-readiness",
+    "vc-option-pool-plan",
     "vc-partner-meeting",
     "vc-positioning",
     "vc-prospective-investor-update",

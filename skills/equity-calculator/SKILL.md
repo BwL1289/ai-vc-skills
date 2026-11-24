@@ -31,7 +31,8 @@ A founder's question about a whole raise goes to the review built for it, which 
 they return: a deck's ask, ownership after the round and runway to the vc-deal-math skill; how much to raise on a
 phased plan to the vc-round-sizing skill; traction metrics to the vc-metrics-readiness skill; a market slide to the
 vc-market-sizing skill; a term sheet to the vc-term-sheet-review skill; an update to current investors to the
-vc-current-investor-update skill. This skill answers one scenario on its own.
+vc-current-investor-update skill; a hiring plan against a term sheet's pool ask to the vc-option-pool-plan skill. This
+skill answers one scenario on its own.
 
 ## Running it
 
@@ -133,8 +134,8 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
 5. A result's `flags` are codes. The command line's report prints each one's meaning beside it; the MCP result does
    not. Relay a flag with its meaning from the table of the skill built on that tool: vc-deal-math for `deal_check`,
    vc-round-sizing for `runway_plan`, vc-metrics-readiness for `metrics_check`, vc-market-sizing for
-   `market_sizing`, and vc-deal-math's step 7 for `instrument_compare`. A flag is a question to be ready for, never
-   an error.
+   `market_sizing`, vc-deal-math's step 7 for `instrument_compare`, and vc-option-pool-plan for `pool_plan`. A flag
+   is a question to be ready for, never an error.
 6. The calculator works the arithmetic of the terms given. It does not read a term sheet or a cap table file, and it
    is not legal, tax or investment advice: say so when the question needs either.
 
