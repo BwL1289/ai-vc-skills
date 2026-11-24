@@ -30,6 +30,8 @@ looks anything up, and never adds evidence, figures or facts the founder did not
   - A raise on a SAFE or note: `equity_round`, as vc-deal-math step 2 says (the equity-calculator skill), and its
     runway and use of funds `equity_runway_plan`.
   - The story, the one-liner and the say-and-avoid list: the vc-positioning skill.
+  - The competition map and slide, built from the founder's own competitors: the vc-competitive-landscape skill
+    (preview).
 
 ## Inputs
 

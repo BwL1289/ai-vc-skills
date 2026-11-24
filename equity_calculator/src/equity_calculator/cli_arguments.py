@@ -1,5 +1,5 @@
 """Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check|``
-``runway_plan|metrics_check|market_sizing|instrument_compare``).
+``runway_plan|metrics_check|market_sizing|instrument_compare|pool_plan|raise_pipeline``).
 
 The number readers are ``cli_numbers``; a repeated flag's one-argument terms are ``cli_instruments``.
 """
@@ -11,7 +11,9 @@ from typing import get_args
 
 from equity_calculator.cli_instruments import (
     parse_class,
+    parse_commitment,
     parse_funds_line,
+    parse_hire,
     parse_next_round,
     parse_note,
     parse_phase,
@@ -22,9 +24,11 @@ from equity_calculator.cli_instruments import (
     parse_segment,
     parse_sensitivity,
     parse_series,
+    parse_stage,
     parse_top_down,
 )
 from equity_calculator.cli_numbers import (
+    parse_count,
     parse_customers,
     parse_decimal,
     parse_months,
@@ -712,4 +716,100 @@ def instrument_compare_arguments(parser: argparse.ArgumentParser) -> None:
         "--pool-at-exit",
         choices=get_args(PoolAtExit),
         help="as_common (default: the pool counted as exercised, as in the ownership lines) or left_out.",
+    )
+
+
+def pool_plan_arguments(parser: argparse.ArgumentParser) -> None:
+    """A pool sized from the hiring plan beside the term sheet's: today's shares, the round, the requested pool, the
+    next round's month and one ``--hire`` per planned hire."""
+    parser.add_argument(
+        "--fully-diluted-shares",
+        type=parse_whole,
+        required=True,
+        help="Every pre-round share, granted options and the unissued pool included (FD).",
+    )
+    parser.add_argument(
+        "--unissued-pool-shares", type=parse_whole, required=True, help="The unissued pool today (U, 0 for none)."
+    )
+    parser.add_argument(
+        "--founder-shares", type=parse_whole, help="The founders' own shares among FD, for their ownership line."
+    )
+    parser.add_argument("--pre-money", type=parse_decimal, required=True, help="The term sheet's pre-money (V).")
+    parser.add_argument("--investment", type=parse_decimal, required=True, help="The round's new money (I).")
+    parser.add_argument(
+        "--requested-pool-percent",
+        type=parse_percent,
+        required=True,
+        help="The term sheet's pool: the unissued pool after the round, in percent, created in the pre-money.",
+    )
+    parser.add_argument(
+        "--next-round-month",
+        type=parse_months,
+        required=True,
+        help="When the next round is expected, in whole months from today; hires starting after it are left out.",
+    )
+    parser.add_argument(
+        "--hire",
+        type=parse_hire,
+        action="append",
+        dest="hires",
+        metavar='"ROLE: TERMS"',
+        help="A planned hire: 'ROLE: start-month=M (grant-shares=S | grant-percent=P)', the grant in shares or as a "
+        "percent of the post-round fully diluted shares, every hire the same way. Repeat for each (at most 40).",
+    )
+
+
+def raise_pipeline_arguments(parser: argparse.ArgumentParser) -> None:
+    """A raise pipeline's flags: the round, the lead, each commitment and pro rata amount, the funnel's stages and the
+    term sheets wanted, and (all four together, or none) the cash and burn for the start-raising month."""
+    parser.add_argument("--round-size", type=parse_decimal, required=True, help="The round's size in dollars (R).")
+    parser.add_argument("--lead-cheque", type=parse_decimal, help="The lead's cheque in dollars (L), when planned.")
+    parser.add_argument(
+        "--commitment",
+        type=parse_commitment,
+        action="append",
+        dest="commitments",
+        metavar=_TERMS,
+        help="A commitment other than the lead's: 'AMOUNT kind=soft|firm', as the founder marks it; soft ones are "
+        "shown on their own and never counted. Repeat for each (at most 40).",
+    )
+    parser.add_argument(
+        "--pro-rata",
+        type=parse_decimal,
+        action="append",
+        dest="pro_rata",
+        metavar="AMOUNT",
+        help="An existing investor's pro rata amount in dollars, counted in full. Repeat for each (at most 20).",
+    )
+    parser.add_argument(
+        "--stage",
+        type=parse_stage,
+        action="append",
+        dest="stages",
+        metavar='"NAME: TERMS"',
+        help="A funnel stage, in order: 'NAME: investors=N rate-percent=P [rate-basis=own|benchmark] "
+        "[benchmark-source=TEXT]', N the investors at it today (each counted once, at the furthest stage reached) "
+        "and P the founder's own rate from it to the next (from the last, to a term sheet); a benchmark needs its "
+        "source, last. Repeat for each stage (at most 8).",
+    )
+    parser.add_argument(
+        "--term-sheets-wanted", type=parse_count, help="The term sheets the founder wants (W), with the stages."
+    )
+    parser.add_argument("--cash-on-hand", type=parse_decimal, help="Cash in the bank today, for the runway.")
+    parser.add_argument(
+        "--cash-floor", type=parse_decimal, help="Cash kept in the bank that the plan never spends (default 0)."
+    )
+    parser.add_argument(
+        "--phase",
+        type=parse_phase,
+        action="append",
+        dest="runway_phases",
+        metavar=_TERMS,
+        help=f"One phase of the plan: {_PHASE_TERMS}, the runway plan's own; the first starts at month 1. Repeat "
+        "for each phase, in order.",
+    )
+    parser.add_argument(
+        "--months-to-raise",
+        type=parse_months,
+        help="Months the founder allows to raise; the start-raising month is the runway less these.",
     )

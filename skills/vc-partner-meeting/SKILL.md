@@ -35,6 +35,9 @@ company, its round or its investors that the founder did not give.
   - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview).
   - Diligence after the meeting, by area, with a data-room checklist: the vc-diligence-questions skill (preview), which
     reads this skill's question bank ([`references/question-bank.md`](references/question-bank.md)).
+  - The emails that get the meeting (a forwardable intro blurb, a cold email, follow-ups): the vc-intro-email skill
+    (preview).
+  - A pass after the meeting, read and answered: the vc-pass-debrief skill (preview).
 
 ## Inputs
 

@@ -147,6 +147,7 @@ _SAFE_RUNWAY_SKILLS = (
     "vc-positioning",
 )
 _FOUNDER_TEXT_SKILLS = (
+    "vc-competitive-landscape",
     "vc-positioning",
     "vc-deck-review",
     "vc-claims-check",
@@ -156,6 +157,10 @@ _FOUNDER_TEXT_SKILLS = (
     "vc-current-investor-update",
     "vc-investor-memo",
     "vc-diligence-questions",
+    "vc-option-pool-plan",
+    "vc-raise-plan",
+    "vc-pass-debrief",
+    "vc-intro-email",
 )
 _PARTNER_MEETING_BAN = 'never a difference, sum or ratio of two figures the founder gave ("from $80k to $120k a month"'
 # The lean refute pass, with {noun} filled by what the skill's lenses raise: an objection, or a question.
@@ -177,6 +182,7 @@ _LEAN_ANSWER = (
 _LEAN_PARAGRAPH = "\n\n**Lean mode,** the one exception:"
 _LINE_WIDTH = 120
 _LEAN_REFUTE_SKILLS = {
+    "vc-competitive-landscape": "objection",
     "vc-current-investor-update": "objection",
     "vc-deck-review": "objection",
     "vc-diligence-questions": "question",
@@ -200,15 +206,20 @@ _READ_THE_FILE = (
 )
 _READ_THE_FILE_SKILLS = (
     "vc-claims-check",
+    "vc-competitive-landscape",
     "vc-current-investor-update",
     "vc-deck-review",
     "vc-diligence-questions",
+    "vc-intro-email",
     "vc-investor-memo",
     "vc-market-sizing",
     "vc-metrics-readiness",
+    "vc-option-pool-plan",
     "vc-partner-meeting",
+    "vc-pass-debrief",
     "vc-positioning",
     "vc-prospective-investor-update",
+    "vc-raise-plan",
     "vc-round-sizing",
     "vc-taste-check",
     "vc-term-sheet-review",
@@ -216,7 +227,7 @@ _READ_THE_FILE_SKILLS = (
 _FILE_TOO = "Any of these may come as a file the agent can read in this session."
 # The one paste bullet that names its file in its own words, inside its list of what may be pasted.
 _FILE_TOO_OWN_WORDING = {"vc-term-sheet-review": "or a term sheet file the agent can read in this session"}
-_PASTE_BULLETS = 10
+_PASTE_BULLETS = 13
 # How a refute pass checks the line it says answers an item: as the quote check does, spacing and line breaks aside,
 # through to what such a line does not do.
 _ANSWER_SPACING = re.compile(
