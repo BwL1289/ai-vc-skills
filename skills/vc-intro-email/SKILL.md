@@ -62,7 +62,9 @@ stop.
 
 ## The drafts
 
-Each draft is short, in the founder's voice, with one ask, and reads on its own.
+Each draft is short, in the founder's voice, with one ask, and reads on its own. Draft the pieces the founder asks for,
+or all five when none is named; the note to the connector goes with the blurb; with no connector named, leave out the
+note and the blurb and say so in one line.
 
 - **The note to the connector:** a few lines asking whether they would introduce the founder, saying why this investor
   in the founder's words, and asking them to check with the investor first that the intro is welcome (a common
@@ -112,16 +114,19 @@ unverified.
 | A long email, paragraphs of context, an attachment not asked for                                  | It goes unread                                    | At most five short sentences; a link only if the founder gives one      |
 | A request for an NDA or for feedback on the whole deck                                            | A request a stranger is unlikely to grant         | Ask for the meeting                                                     |
 
-Every flag on a claim's source or on figures that disagree is handed to the vc-claims-check skill, with the line and
-the documents it appears in. The drafts are revised for every other flag.
+Every flag revises the drafts: a hype word or a claim with no source gives way to what the founder's material shows or
+to a bracketed ask, and a figure that disagrees stays out. Every flag on a claim's source or on figures that disagree
+is handed to the vc-claims-check skill as well, with the line and the documents it appears in; this skill names that
+check and does not run it here.
 
 ## Personal data
 
 - The investor and the connector are names the founder supplies, written as the founder writes them. The skill adds
   no name, title, firm, email address, phone number or link, and looks no one up: no search for an address, a
   portfolio, a post or a profile.
-- Each draft's address line is `[the investor's email, from you]` unless the founder pasted the address; a pasted
-  address is used only in that draft's address line.
+- The cold email's and each follow-up's address line is `[the investor's email, from you]`, and the note to the
+  connector's is `[the connector's email, from you]`, unless the founder pasted the address; a pasted address is used
+  only in that draft's address line. The forwardable blurb has no address line: the connector forwards it.
 - A detail about the investor or the connector goes into a draft only when the founder gives it and it is the
   founder's own reason for writing; the connector is named only with the founder's say-so.
 - It keeps nothing between conversations.
@@ -130,8 +135,8 @@ the documents it appears in. The drafts are revised for every other flag.
 
 1. **Read the material** and list each figure word for word with the document it comes from; put every figure that
    appears in two documents side by side, as stated.
-2. **Draft the note to the connector and the blurb, the cold email and the two follow-ups** (The drafts), every
-   figure as the founder gave it (Figures as the founder gave them), every gap a bracketed ask.
+2. **Draft the pieces asked for** (The drafts): the note to the connector and the blurb, the cold email and the two
+   follow-ups, every figure as the founder gave it (Figures as the founder gave them), every gap a bracketed ask.
 3. **Run the reader pass** (Reader pass) and revise the drafts; hand every source and disagreement flag to the
    vc-claims-check skill.
 4. **Check before answering.** Every fact in a draft appears in the founder's material; every figure is quoted as the
@@ -146,8 +151,8 @@ the documents it appears in. The drafts are revised for every other flag.
 
 Lead with the drafts, then the flags.
 
-1. **The drafts,** ready to copy: the note to the connector with the forwardable blurb under it, the cold email with
-   its subject line, follow-up 1 and follow-up 2, every gap a bracketed ask.
+1. **The drafts,** those asked for, ready to copy: the note to the connector with the forwardable blurb under it, the
+   cold email with its subject line, follow-up 1 and follow-up 2, every gap a bracketed ask.
 2. **Reader pass:** each flag with the line quoted, its pattern, what an investor is likely to read in it and the fix;
    those handed to the vc-claims-check skill marked so.
 3. **Figures used:** each figure in the drafts, as stated, with the document it comes from; each figure that disagrees
@@ -168,7 +173,7 @@ advice but unverified.
 - Not investment, legal or tax advice. It does not say whom to write to, whether to raise, or what to raise.
 - No investor research: it names no investor to write to, looks up no investor, firm, portfolio, post or contact
   detail, and keeps no list between conversations.
-- It drafts and sends nothing: no email, sequence, schedule or tracker entry.
+- It drafts only. It sends nothing: no email, sequence, schedule or tracker entry.
 - It never invents or strengthens a figure, customer, credential or fact, and never rounds, converts or combines a
   figure.
 - It never role-plays or writes in the voice of a named investor, firm or author; asked to, it declines in one line

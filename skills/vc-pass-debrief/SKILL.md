@@ -64,22 +64,24 @@ one message, and stop.
 
 ## The reason groups
 
-Each reason a pass gives goes into one group; a pass that gives two reasons goes into two. The groups are this skill's
-own, unverified.
+Each reason a pass gives goes into one group; a pass that gives two reasons goes into two; a reason no other row covers
+goes to Other, as stated, never to the nearest group. The groups are this skill's own, unverified.
 
-| Group              | Phrases it covers (examples)                                                                   | Where the fix lives                                                                |
-| ------------------ | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Traction           | "more traction", "want to see more revenue", "the numbers are early"                           | The vc-metrics-readiness skill, and the founder's own plan for the metric          |
-| Market             | "not sure the market is big enough", "feels niche"                                             | The vc-market-sizing skill                                                         |
-| Team and story     | "not convinced on the team", "couldn't see the vision", "not clear what you do"                | The vc-positioning skill                                                           |
-| Deck and materials | A slide named, "the deck didn't land"                                                          | The vc-deck-review skill                                                           |
-| Competition        | "crowded space", "worried a bigger company builds this"                                        | The vc-competitive-landscape skill                                                 |
-| Belief in a claim  | A figure or claim questioned, "not sure the numbers hold up"                                   | The vc-claims-check skill                                                          |
-| Round and terms    | "the round is too big", "the valuation", "the use of funds"                                    | The vc-round-sizing skill; the ask's arithmetic, the vc-deal-math skill            |
-| Product            | "feels like a feature", "not differentiated enough"                                            | The vc-taste-check skill; the vc-competitive-landscape skill when a rival is named |
-| Stage or timing    | "too early for us", "come back when ..."                                                       | The come-back list; the vc-prospective-investor-update skill                       |
-| Fund fit           | "outside our thesis", "we don't lead seed rounds", "a portfolio conflict", "too small a check" | Nothing to fix in the company: it is a fact about the fund, not the business       |
-| No reason given    | "we'll pass for now", "not a fit at this time"                                                 | Nothing to fix: the pass gives nothing to work on                                  |
+| Group                  | Phrases it covers (examples)                                                                   | Where the fix lives                                                                      |
+| ---------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Traction               | "more traction", "want to see more revenue", "the numbers are early"                           | The vc-metrics-readiness skill, and the founder's own plan for the metric                |
+| Market                 | "not sure the market is big enough", "feels niche"                                             | The vc-market-sizing skill                                                               |
+| Team and story         | "not convinced on the team", "couldn't see the vision", "not clear what you do"                | The vc-positioning skill                                                                 |
+| Deck and materials     | A slide named, "the deck didn't land"                                                          | The vc-deck-review skill                                                                 |
+| Competition            | "crowded space", "worried a bigger company builds this"                                        | The vc-competitive-landscape skill                                                       |
+| Belief in a claim      | A figure or claim questioned, "not sure the numbers hold up"                                   | The vc-claims-check skill                                                                |
+| Round and terms        | "the round is too big", "the valuation", "the use of funds"                                    | The vc-round-sizing skill; the ask's arithmetic, the vc-deal-math skill                  |
+| Product                | "feels like a feature", "not differentiated enough"                                            | The vc-taste-check skill; the vc-competitive-landscape skill when a rival is named       |
+| Stage or timing        | "too early for us", "come back when ..."                                                       | The come-back list; the vc-prospective-investor-update skill                             |
+| Answers in the meeting | "left with open questions on ...", "couldn't get clear answers on ..."                         | The vc-partner-meeting skill                                                             |
+| Other, as stated       | A reason no other row covers (a regulatory risk, the business model, the cap table)            | No skill named: quote it and ask `[what would answer this, in your view]`                |
+| Fund fit               | "outside our thesis", "we don't lead seed rounds", "a portfolio conflict", "too small a check" | Nothing to fix in the company: as stated, the reason is about the fund, not the business |
+| No reason given        | "we'll pass for now", "not a fit at this time"                                                 | Nothing to fix: the pass gives nothing to work on                                        |
 
 - **Group by the words, never by a guess.** A pass that says only "not a fit at this time" goes to No reason given,
   never to the reason the founder suspects or the agent would guess.
@@ -106,9 +108,11 @@ fact, none says what the investor thinks or felt, and none adds a reason the pas
 | "Not sure the market is big enough"            | The market as shown looked small for this fund; the market slide did not show who buys, how many and what each pays |
 | "Crowded space"                                | The fund has seen many companies doing this; the material did not show why customers pick this one                  |
 | "Not convinced on the team"                    | The material did not show why these founders fit this problem; a polite no                                          |
-| "Outside our thesis", "a portfolio conflict"   | A fact about the fund, as stated                                                                                    |
+| "Left with open questions on ..."              | The answers in the meeting did not settle the point named; the material did not cover it                            |
+| "Outside our thesis", "a portfolio conflict"   | As stated, a reason about the fund; the text does not show whether it is the whole reason                           |
 | "Love what you're building, but ..."           | The words after "but" are the reason; the praise is the polite opening                                              |
 | "Not a fit at this time", "we'll pass for now" | No reason given; any reading would be a guess, so give none                                                         |
+| A reason under Other, as stated                | The material did not settle the point the pass names; any reading beyond that would be a guess, so give none        |
 
 ## What to fix
 
@@ -203,7 +207,7 @@ unverified.
 - It never says what an investor really meant or thinks: every reading is a common reading, labelled unverified.
 - No investor research: it looks no one up, names no fund or person to try next, ranks no investor, and keeps no list
   between conversations.
-- It drafts and sends nothing: no email, invite or tracker entry.
+- It drafts only. It sends nothing: no email, invite or tracker entry.
 - It never invents a reason, figure, customer or event, and never argues with a pass on the founder's behalf.
 - It never role-plays or speaks as a named investor, firm or author; asked to, it declines in one line and writes in
   the founder's voice.

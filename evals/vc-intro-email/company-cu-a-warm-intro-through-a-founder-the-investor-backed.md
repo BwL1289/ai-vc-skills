@@ -30,4 +30,6 @@ None: no calculator call. The skill names no calculator tool and does no arithme
   nothing is looked up.
 - Each draft has one ask, the 30-minute call. The first follow-up brings one new fact or a bracketed ask for one; the
   second gives an easy way to say no and offers occasional updates. No interval between them is suggested.
-- Each address line is `[the investor's email, from you]`. No other investor is named or hinted at, and nothing is sent.
+- The cold email's and the follow-ups' address lines are `[the investor's email, from you]`, the note to Sam's is
+  `[the connector's email, from you]`, and the blurb has none. No other investor is named or hinted at, and nothing is
+  sent.

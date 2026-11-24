@@ -27,5 +27,5 @@ None: no calculator call. The skill names no calculator tool and does no arithme
   the product does in plain words or hold a bracketed ask for it.
 - "$2,000 average monthly contract" is quoted as stated; no total revenue is worked out from it and a customer count.
 - The line about two other funds is left out and flagged as pressure that may break a confidence.
-- The cold email says how Theo and Priya met, in the founder's words, and has one ask. Nothing about Priya or Larchmont
-  Seed is added or looked up, each address line is `[the investor's email, from you]`, and nothing is sent.
+- The cold email says how Theo and Priya met, in the founder's words, and has one ask. Nothing about Priya or Fund L is
+  added or looked up, each address line is `[the investor's email, from you]`, and nothing is sent.

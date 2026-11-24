@@ -69,6 +69,11 @@ _DOUBLE_QUOTED = re.compile(r'"([^"]+)"')
 _DIGITS = re.compile(r"\d+")
 _EVAL_TITLE = re.compile(r"\A# Eval (\d+): ")
 _ADDRESS_LINE = "`[the investor's email, from you]`"
+_CONNECTOR_LINE = "`[the connector's email, from you]`"
+# A made-up fund, product or company label, or a brand-like fund name: an answer may name only those its prompt names.
+_LABELLED = re.compile(
+    r"\b[A-Z][a-z]+ (?:Seed|Capital|Ventures|Partners|Fund)\b" r"|\b(?:Fund|Product|Suite|Company) [A-Z]{1,2}\b"
+)
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -145,6 +150,7 @@ def test_every_skill_it_hands_off_to_exists_and_the_brief_s_hand_offs_are_there(
     for name in _OTHER_HANDOFFS:
         assert f"the {name} skill" in when, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
+    assert "the vc-pass-debrief skill (preview)" in when
 
 
 def test_it_names_no_calculator_tool_and_cites_no_source() -> None:
@@ -165,6 +171,8 @@ def test_it_drafts_the_five_pieces_each_with_one_ask() -> None:
     for draft in _DRAFTS:
         assert draft in drafts, draft
     assert "Each draft is short, in the founder's voice, with one ask" in drafts
+    assert "with no connector named, leave out the note and the blurb" in drafts
+    assert "the note to the connector goes with the blurb" in drafts
     assert "asking them to check with the investor first that the intro is welcome" in drafts
     assert "so the connector can forward it unchanged" in drafts
     assert "at most five short sentences" in drafts
@@ -193,6 +201,8 @@ def test_the_reader_pass_flags_hype_unsourced_claims_and_disagreeing_figures_for
     assert "Other investors named or hinted at" in patterns
     assert len(to_claims) >= 2
     assert "is handed to the vc-claims-check skill" in reader
+    assert "Every flag revises the drafts" in reader
+    assert "this skill names that check and does not run it here" in reader
     assert "Every row is this skill's own judgment, unverified" in reader
 
 
@@ -202,11 +212,25 @@ def test_it_looks_no_one_up_and_adds_no_personal_data() -> None:
     intro = _unwrapped(_TEXT.split("\n## ", 1)[0])
 
     assert "adds no name, title, firm, email address, phone number or link, and looks no one up" in personal
-    assert _ADDRESS_LINE in personal
+    assert _ADDRESS_LINE in personal and _CONNECTOR_LINE in personal
+    assert "The forwardable blurb has no address line: the connector forwards it" in personal
     assert "the connector is named only with the founder's say-so" in personal
     assert "It keeps nothing between conversations" in personal
     assert "never names an investor to write to, never looks up an investor" in intro
-    assert "It drafts and sends nothing" in limits
+    assert "It drafts only. It sends nothing" in limits
+
+
+def test_it_never_speaks_as_an_investor_or_takes_a_named_voice() -> None:
+    intro = _unwrapped(_TEXT.split("\n## ", 1)[0])
+    limits = _unwrapped(_section("## Limits"))
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "The founder is always the user" in intro
+    assert (
+        "never plays an investor, never speaks as a named investor or firm, never writes in a named person's voice"
+    ) in intro
+    assert "never role-plays or writes in the voice of a named investor, firm or author" in limits
+    assert "no sentence speaks as an investor or imitates a named person" in steps
 
 
 def test_with_no_material_it_writes_no_email() -> None:
@@ -273,6 +297,18 @@ def test_every_eval_that_drafts_leaves_the_address_line_for_the_founder() -> Non
     assert drafting
     for path in drafting:
         assert _ADDRESS_LINE in _eval_parts(path)[1], path.name
+
+
+def test_no_eval_answer_names_a_company_fund_or_product_its_prompt_does_not() -> None:
+    for path in _EVALS:
+        prompt, answer = _eval_parts(path)
+        assert set(_LABELLED.findall(answer)) <= set(_LABELLED.findall(prompt)), path.name
+
+
+def test_the_note_to_the_connector_is_addressed_to_the_connector() -> None:
+    (path,) = (path for path in _EVALS if "can introduce me" in _eval_parts(path)[0])
+
+    assert _CONNECTOR_LINE in _eval_parts(path)[1]
 
 
 def test_one_eval_writes_no_multiple_and_quotes_both_figures() -> None:

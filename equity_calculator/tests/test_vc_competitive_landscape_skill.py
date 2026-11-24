@@ -81,6 +81,10 @@ _DIGITS = re.compile(r"\d+")
 _SCALE = {"1", "2", "3", "4", "5"}
 _EVAL_TITLE = re.compile(r"\A# Eval (\d+): ")
 _RAISE_IT_ANYWAY = "raise it anyway, however short the material, and the refute pass decides"
+# A made-up fund, product or company label, or a brand-like fund name: an answer may name only those its prompt names.
+_LABELLED = re.compile(
+    r"\b[A-Z][a-z]+ (?:Seed|Capital|Ventures|Partners|Fund)\b" r"|\b(?:Fund|Product|Suite|Company) [A-Z]{1,2}\b"
+)
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -206,6 +210,7 @@ def test_it_names_no_competitor_and_adds_no_fact_about_any_company() -> None:
     assert "no correction of the founder's facts from what it knows" in facts
     assert "never offer a competitor's name to fill in" in inputs
     assert "With no competitor named at all, name none" in inputs
+    assert "flag any line that matches a pattern below" in inputs and "run no review" in inputs
     assert "names no competitor or platform the founder did not name, looks nothing up" in limits
 
 
@@ -241,9 +246,16 @@ def test_no_two_by_two_or_slide_is_drawn_until_the_founder_has_placed() -> None:
     assert "Until the founder has placed their own company and at least one competitor on both axes" in axes
     assert "draw no 2x2 and draft no slide" in axes
     assert 'is listed under it as "not placed", and its placements stay among the open asks' in axes
-    assert "The adversarial review runs once, on the full draft, when the placements come back" in axes
+    assert (
+        "The adversarial review runs once, on the founder's material with the placements in it, when the placements"
+        " come back"
+    ) in axes
     assert "stop as Axes says" in steps
+    assert "With any company not placed" not in steps
+    assert 'a company still unplaced after that is listed as "not placed" and stops nothing' in steps
+    assert "Until the founder's own company and at least one competitor are placed on both 2x2 axes, do step 5" in steps
     assert '"waiting for your placements"' in answering
+    assert "until the founder's own company and one competitor are placed on both 2x2 axes" in answering
     assert "No total, average or rank column" in answering
 
 
@@ -272,6 +284,7 @@ def test_the_lines_and_the_slide_use_only_the_founders_facts() -> None:
     assert "Draw it as a text grid" in slide and "split by the halves" in slide
     assert 'listed under the grid as "not placed", never drawn' in slide
     assert "never the two that put the company alone in a corner" in slide
+    assert "with placements on three or more axes and no pick from the founder, draw it on the two offered" in slide
     assert "Every figure is quoted as stated" in substitutes
 
 
@@ -299,6 +312,8 @@ def test_the_attack_stage_runs_independent_lenses_named_by_what_they_test() -> N
     assert "not even about a competitor or platform you have heard of" in attack
     assert _RAISE_IT_ANYWAY in attack
     assert "as parallel subagents, however short the material" in attack
+    # The lenses attack the founder's material, never a draft: the intro says the same as the review does.
+    assert "lenses then attack the draft" not in _unwrapped(_TEXT)
 
 
 def test_the_refute_stage_uses_only_the_founders_material_and_says_why_each_objection_fell() -> None:
@@ -359,6 +374,7 @@ def test_it_never_speaks_as_an_investor_or_names_a_firm_that_fits() -> None:
 
     assert "never speaks as a named investor or firm" in intro and "never names a firm the map fits" in intro
     assert "never names a firm the map fits" in limits and "offers the lenses instead" in limits
+    assert "declines in one line" in limits
     assert "sends nothing anywhere" in limits
 
 
@@ -391,6 +407,12 @@ def test_every_quote_in_an_eval_answer_is_in_its_prompt() -> None:
         prompt, answer = _eval_parts(path)
         for quoted in _DOUBLE_QUOTED.findall(answer):
             assert quoted in prompt, (path.name, quoted)
+
+
+def test_no_eval_answer_names_a_company_fund_or_product_its_prompt_does_not() -> None:
+    for path in _EVALS:
+        prompt, answer = _eval_parts(path)
+        assert set(_LABELLED.findall(answer)) <= set(_LABELLED.findall(prompt)), path.name
 
 
 def test_no_eval_answer_carries_a_figure_its_prompt_does_not() -> None:

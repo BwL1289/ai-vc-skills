@@ -11,7 +11,8 @@ or marked unverified. It places each competitor at one of four levels with the p
 buyers choose on with their anchors stated before anything is placed, and leaves every placement to the founder. From
 the founder's own material it writes the substitutes story, a "why customers pick us" line per competitor and the
 answer to "what if the big platform builds this?", and drafts the competition slide as a table and a 2x2. Independent
-lenses then attack the draft, and a refute pass drops every objection the founder's material answers.
+lenses then attack the founder's material behind the map, and a refute pass drops every objection that material
+answers.
 
 The founder is always the user. The skill never plays an investor, never speaks as a named investor or firm, never
 names a firm the map fits, never names a competitor or a platform itself, never adds a fact about a competitor that the
@@ -59,8 +60,8 @@ you already read.
 7. **Axes the founder already uses,** if any, each with what its ends mean, and the founder's placements on them.
 
 A missing input does not stop the work. It becomes a named ask in the answer, never a plausible competitor, fact or
-placement. With no competitor named at all, name none: list the four levels as open asks, propose no axes, draft no
-slide, ask for the inputs in one message, and stop.
+placement. With no competitor named at all, name none: flag any line that matches a pattern below, list the four levels
+as open asks, propose no axes, draft no slide, run no review, ask for the inputs in one message, and stop.
 
 ## The four levels
 
@@ -123,9 +124,9 @@ source, or "unverified"). The skill:
 Until the founder has placed their own company and at least one competitor on both axes chosen for the 2x2, draw no
 2x2 and draft no slide. Give the levels, the axes with their anchors and halves, and the empty placement table; draft
 the substitutes story, the "why customers pick us" lines and the platform-risk answer; ask for the placements and every
-other open input in one message; and stop. The adversarial review runs once, on the full draft, when the placements
-come back. Once the 2x2 can be drawn, a company still missing a placement on either of its axes is listed under it as
-"not placed", and its placements stay among the open asks.
+other open input in one message; and stop. The adversarial review runs once, on the founder's material with the
+placements in it, when the placements come back. Once the 2x2 can be drawn, a company still missing a placement on
+either of its axes is listed under it as "not placed", and its placements stay among the open asks.
 
 ## The substitutes story
 
@@ -167,11 +168,13 @@ A draft in the founder's words, for the founder to edit:
 - **Table:** one row per competitor, grouped by level, substitutes included: Level, Competitor (as the founder names
   it), The problem it solves, Why customers pick us. Only the founder's facts; an unverified fact carries its label or
   stays off.
-- **2x2:** the two axes the founder picks. Offer the two with the strongest buyer evidence, quoting it, never the two
-  that put the company alone in a corner. Draw it as a text grid, the first axis across and the second up, split by the
-  halves: each company in the quadrant its two placements give, a company with a 3 on either axis listed on the line
-  between quadrants, and each quadrant labelled with the anchors' words. A company missing a placement on either axis
-  is listed under the grid as "not placed", never drawn.
+- **2x2:** the two axes the founder picks; a founder who places companies on two axes only has picked those two. Offer
+  the two with the strongest buyer evidence, quoting it, never the two that put the company alone in a corner; with
+  placements on three or more axes and no pick from the founder, draw it on the two offered and say the founder may
+  pick another pair. Draw it as a text grid, the first axis across and the second up, split by the halves: each company
+  in the quadrant its two placements give, a company with a 3 on either axis listed on the line between quadrants, and
+  each quadrant labelled with the anchors' words. A company missing a placement on either axis is listed under the grid
+  as "not placed", never drawn.
 - **Speaker note:** the platform-risk answer, for the question a partner is likely to ask.
 
 ## Patterns a partner is likely to discount
@@ -203,8 +206,9 @@ In the turn the review runs, without a subagent tool, run Stage A of the adversa
    solves. Each empty level becomes a bracketed ask.
 3. **Axes.** Check the founder's axes and propose the rest (Axes), each with its buyer-evidence line, its anchors and
    its halves.
-4. **Placements.** Record the founder's placements as given, each with its evidence; never fill a cell. With any
-   company not placed on the two 2x2 axes, stop as Axes says.
+4. **Placements.** Record the founder's placements as given, each with its evidence; never fill a cell. Until the
+   founder's own company and at least one competitor are placed on both 2x2 axes, do step 5, then stop as Axes says; a
+   company still unplaced after that is listed as "not placed" and stops nothing.
 5. **Draft the substitutes story, the "why customers pick us" lines and the platform-risk answer** from the founder's
    material, every gap a bracketed ask.
 6. **Draft the slide** (The competition slide).
@@ -356,8 +360,9 @@ Lead with what to fix, then the map and the drafts.
 6. **The substitutes story.**
 7. **Why customers pick us:** one line per competitor and per substitute.
 8. **The platform-risk answer:** its three parts.
-9. **The competition slide:** the headline, the table and the 2x2 grid with its "not placed" list; while placements
-   are missing, "waiting for your placements" in place of the 2x2 and the slide.
+9. **The competition slide:** the headline, the table and the 2x2 grid with its "not placed" list; until the founder's
+   own company and one competitor are placed on both 2x2 axes, "waiting for your placements" in place of the 2x2 and
+   the slide.
 10. **Patterns:** each line quoted, its pattern, what a partner is likely to hear, the fix.
 11. **Open asks:** every bracketed gap, every lens gap and every placement still to give, in one list.
 12. **Close:** this is not investment, legal or tax advice. The competitor facts are the founder's, to check before
@@ -380,7 +385,7 @@ is that skill's own.
 - It places no company on an axis, adds no placements into a score, and ranks no one.
 - It never predicts what a named company will do; the platform answer is the founder's view, labelled as such.
 - It never role-plays or speaks as a named investor, firm or author, and never names a firm the map fits. Asked to,
-  it offers the lenses instead and keeps the founder as the user.
+  it declines in one line, offers the lenses instead and keeps the founder as the user.
 - No arithmetic and no calculator tool; figures are quoted as stated.
 - The review predicts what a partner is likely to push on; a real partner may know a competitor the founder did not
   name.

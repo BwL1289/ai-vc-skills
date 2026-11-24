@@ -18,7 +18,7 @@ None: no calculator call. The skill names no calculator tool and does no arithme
 ## Expected answer
 
 - "We have a portfolio company that overlaps with you, so we have to step aside." goes under Fund fit, marked nothing to
-  fix in the company: it is a fact about the fund.
+  fix in the company: as stated, the reason is about the fund.
 - "We'll pass for now. Best of luck with the round." goes under No reason given. No reason is guessed and no reading is
   offered beyond saying that any reading would be a guess.
 - It names no fund or person to try next and looks nothing up. A reply may ask the investor for at most one referral, if

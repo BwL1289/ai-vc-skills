@@ -63,6 +63,8 @@ _GROUPS = (
     "Round and terms",
     "Product",
     "Stage or timing",
+    "Answers in the meeting",
+    "Other, as stated",
     "Fund fit",
     "No reason given",
 )
@@ -86,6 +88,12 @@ _DIGITS = re.compile(r"\d+")
 _EVAL_TITLE = re.compile(r"\A# Eval (\d+): ")
 # Names the skill must never take a voice from: it writes in the founder's voice only.
 _PEOPLE_AND_FIRMS = ("sequoia", "a16z", "andreessen", "y combinator", "graham", "stebbings", "20vc")
+# The hand-offs to skills out of preview carry no suffix; every other hand-off says "(preview)".
+_NOT_PREVIEW = ("vc-deck-review", "vc-deal-math")
+# A made-up fund, product or company label, or a brand-like fund name: an answer may name only those its prompt names.
+_LABELLED = re.compile(
+    r"\b[A-Z][a-z]+ (?:Seed|Capital|Ventures|Partners|Fund)\b" r"|\b(?:Fund|Product|Suite|Company) [A-Z]{1,2}\b"
+)
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -154,7 +162,8 @@ def test_every_skill_it_hands_off_to_exists() -> None:
     when = _unwrapped(_section("## When to use it"))
 
     for name in _HANDOFF_SKILLS:
-        assert f"the {name} skill" in when, name
+        suffix = "" if name in _NOT_PREVIEW else " (preview)"
+        assert f"the {name} skill{suffix}" in when, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
 
 
@@ -179,8 +188,13 @@ def test_the_reason_groups_are_the_fixed_words_and_map_to_their_skills() -> None
     for group, skill in _MAPPINGS.items():
         assert f"The {skill} skill" in fixes[group], group
     assert fixes["Competition"].startswith("The vc-competitive-landscape skill")
+    assert fixes["Answers in the meeting"].startswith("The vc-partner-meeting skill")
+    assert fixes["Other, as stated"].startswith("No skill named")
     for group in ("Fund fit", "No reason given"):
         assert fixes[group].startswith("Nothing to fix"), group
+    # A fund's stated reason is the pass's words, never a fact the skill can know.
+    assert "as stated, the reason is about the fund" in fixes["Fund fit"]
+    assert "fact about the fund" not in _unwrapped(_TEXT)
 
 
 def test_passes_are_grouped_by_their_words_never_by_a_guess() -> None:
@@ -190,6 +204,7 @@ def test_passes_are_grouped_by_their_words_never_by_a_guess() -> None:
     assert "never to the reason the founder suspects or the agent would guess" in groups
     assert '**"Too early" is read both ways.**' in groups
     assert "**Fund fit and No reason given map to no fix.**" in groups
+    assert "never to the nearest group" in groups
     assert "give no percentage, share or rate" in groups
 
 
@@ -238,6 +253,18 @@ def test_it_adds_no_contact_detail_and_names_no_fund_to_try() -> None:
     assert "It keeps nothing between conversations" in personal
     assert "never names an investor or firm to try next" in intro
     assert "names no fund or person to try next" in limits
+    assert "It drafts only. It sends nothing" in limits
+
+
+def test_it_never_speaks_as_an_investor_or_takes_a_named_voice() -> None:
+    intro = _unwrapped(_TEXT.split("\n## ", 1)[0])
+    limits = _unwrapped(_section("## Limits"))
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "The founder is always the user" in intro
+    assert "never plays an investor, never speaks as a named investor or firm" in intro
+    assert "never role-plays or speaks as a named investor, firm or author" in limits
+    assert "no sentence speaks as an investor or imitates a named person" in steps
 
 
 def test_a_pass_with_no_words_gets_no_reading_and_no_reply() -> None:
@@ -288,6 +315,12 @@ def test_every_quote_in_an_eval_answer_is_in_its_prompt() -> None:
         prompt, answer = _eval_parts(path)
         for quoted in _DOUBLE_QUOTED.findall(answer):
             assert quoted in prompt, (path.name, quoted)
+
+
+def test_no_eval_answer_names_a_company_fund_or_product_its_prompt_does_not() -> None:
+    for path in _EVALS:
+        prompt, answer = _eval_parts(path)
+        assert set(_LABELLED.findall(answer)) <= set(_LABELLED.findall(prompt)), path.name
 
 
 def test_no_eval_answer_carries_a_figure_its_prompt_does_not() -> None:
