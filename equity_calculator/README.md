@@ -680,31 +680,35 @@ The pool a term sheet asks for, t_req, beside the pool the founder's hiring plan
 both created in the pre-money and both worked by the option-pool shuffle's own code (the pool in the pre-money,
 above), so no formula of the shuffle is worked a second way.
 
-| Symbol | Meaning                                                                                                     |
-| ------ | ----------------------------------------------------------------------------------------------------------- |
-| FD, U  | every share before the round, the unissued pool U included                                                  |
-| V, I   | pre-money valuation, investment                                                                             |
-| G      | the grants of the hires starting on or before the next round's month, in shares                             |
-| t_plan | the pool the plan needs: the unissued pool after the round, as a share of every post-round share, holding G |
-| t_req  | the term sheet's requested pool, the same measure                                                           |
+| Symbol | Meaning                                                                                                  |
+| ------ | -------------------------------------------------------------------------------------------------------- |
+| FD, U  | every share before the round, the unissued pool U included                                               |
+| V, I   | pre-money valuation, investment                                                                          |
+| G      | the grants of the hires starting on or before the next round's month, in shares                          |
+| t_plan | the plan's target: the share of every post-round share that G takes on the plan column's own cap table   |
+| t_req  | the term sheet's requested pool: the unissued pool after the round, as a share of every post-round share |
 
 With the pool in the pre-money, the shuffle's new pool P gives a price p = V/(FD + P) and a total of
-T = (FD + P)·(V + I)/V shares, so the pool after the round is t = (U + P)·V/((FD + P)(V + I)). The plan's pool holds
-exactly the grants, U + P = G, so P = G - U and FD + P = FD - U + G:
+T = (FD + P)·(V + I)/V shares, so the pool after the round is t = (U + P)·V/((FD + P)(V + I)). t_plan is the grants'
+share of the plan column's own total, G/T. When the grants do not fit in today's pool (G > U), the plan's pool holds
+exactly them, U + P = G, so P = G - U and FD + P = FD - U + G; when they fit (G ≤ U), P = 0 and FD + P = FD:
 
-- **grants in shares**: t_plan = G·V/((V + I)(FD - U + G)). Put back into the shuffle's
-  P = (t·FD - (1 - r)·U)/(1 - r - t) with r = I/(V + I), it gives P = G - U again; the tests check that on exact
-  fractions and on seeded random inputs.
+- **grants in shares**: t_plan = G·V/((V + I)(FD - U + G)) with a top-up, and G·V/((V + I)·FD) when the grants fit
+  in today's pool. Put back into the shuffle's P = (t·FD - (1 - r)·U)/(1 - r - t) with r = I/(V + I), the first gives
+  P = G - U again, and the second a needed P that is not positive (t·FD = G·(1 - r) ≤ U·(1 - r)), so P = 0. The tests
+  check that on exact fractions and on seeded random inputs, and that the same plan given in shares and as percents
+  of the same total gives the same t_plan.
 - **grants as percents of the post-round fully diluted shares**: t_plan is their sum, and each column's grants take
   that sum of its own total T. A plan that gives some grants in shares and some as percents is refused
   (`grants_mixed_units`): a percent of shares not yet priced cannot be added to a count of shares.
 
 When the grants fit in today's pool (G ≤ U), the shuffle's needed new pool is not positive, so P = 0, p = V/FD and
-today's pool is kept whole (`plan_fits_current_pool`); the plan's pool is then not cut below U. Each column then gives
-the shuffle's table: P, p, the investor's shares N = I/p, T, who owns what (the founders too, F/T, when
-`--founder-shares` is given), the pool left ungranted at the next round (U + P less the grants' shares, negative when
-the pool runs short before it) and the effective pre-money (FD - U)·p = V - t(V + I). Every difference is
-requested - plan of the exact values, rounded once.
+today's pool is kept whole (`plan_fits_current_pool`); the plan's pool is then not cut below U, and the pool after the
+round (the option pool's ownership line) is today's pool's share, not t_plan. Each column then gives the shuffle's
+table: P, p, the investor's shares N = I/p, T, who owns what (the founders too, F/T, when `--founder-shares` is
+given), the pool left ungranted at the next round (U + P less the grants' shares, negative when the pool runs short
+before it) and the effective pre-money (FD - U)·p, which is V - t(V + I) when the column tops the pool up (P > 0) and
+(FD - U)·V/FD when it does not. Every difference is requested - plan of the exact values, rounded once.
 
 Flags, never a pick: `no_hires_before_next_round`, `hires_after_next_round_ignored` (a hire starting after the next
 round's month is left out: the next round's own pool would cover it), `plan_fits_current_pool`,

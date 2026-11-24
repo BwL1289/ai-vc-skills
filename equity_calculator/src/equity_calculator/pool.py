@@ -13,7 +13,8 @@ Either way N = I/p and T = FD + P + N; the existing holders keep FD - U shares, 
 pre-money is what the existing holders' shares are worth at the round price, (FD - U)·p.
 
 The core reads a ``PoolTerms``: a ``PoolInput``, or the same terms with an exact target that no decimal holds (a pool
-plan's, G·V/((V + I)(FD - U + G))), which ``pool_in_pre_money`` works the same way (``equity_calculator.pool_plan``).
+plan's, G·V/((V + I)(FD + max(G - U, 0)))), which ``pool_in_pre_money`` works the same way
+(``equity_calculator.pool_plan``).
 """
 
 from __future__ import annotations
@@ -32,8 +33,9 @@ from equity_calculator.schemas.equity_common import ShareRounding
 class PoolTerms(Protocol):
     """What working the shuffle reads: a ``PoolInput``, or the same terms with an exact target in percent points.
 
-    A pool plan's target, the pool that holds exactly a hiring plan's grants, is a fraction that a decimal field often
-    cannot hold (G·V/((V + I)(FD - U + G))), so it comes as a ``Fraction`` (``equity_calculator.pool_plan``).
+    A pool plan's target, a hiring plan's grants' share of the post-round shares, is a fraction that a decimal field
+    often cannot hold (G·V/((V + I)(FD + max(G - U, 0)))), so it comes as a ``Fraction``
+    (``equity_calculator.pool_plan``).
     """
 
     @property

@@ -92,7 +92,9 @@ def test_the_requested_column_is_the_pool_scenario_s_own_pre_money_table() -> No
 
 
 def test_a_plan_that_fits_today_s_pool_tops_up_nothing_and_keeps_the_pool_whole() -> None:
-    """G = 1,400,000 <= U = 1,500,000: P = 0, p = V/FD = 8/5, and 100,000 of today's pool is left at the next round."""
+    """G = 1,400,000 <= U = 1,500,000: P = 0, p = V/FD = 8/5, and 100,000 of today's pool is left at the next round.
+    t_plan is the grants' share of the plan column's own total: G·V/((V + I)·FD) = 1,400,000 × 16,000,000/(20,000,000 ×
+    10,000,000) = 14/125, which is G/T = 1,400,000/12,500,000."""
     result = pool_plan(**_with(unissued_pool_shares=1_500_000, founder_shares=None))
     plan = result.plan
 
@@ -100,7 +102,8 @@ def test_a_plan_that_fits_today_s_pool_tops_up_nothing_and_keeps_the_pool_whole(
     assert plan.cap_table.price_per_share.exact == Fraction(8, 5)
     assert plan.cap_table.pool_already_large_enough
     assert plan.pool_left_at_next_round.exact == 100_000
-    assert plan.target_pool.exact == Fraction(56, 495)
+    assert plan.target_pool.exact == Fraction(14, 125)
+    assert plan.target_pool.exact == plan.grant_shares.exact / plan.cap_table.total_shares.exact
     assert "plan_fits_current_pool" in result.flags
     assert plan.founders_ownership is None and result.requested_minus_plan.founders_ownership is None
 
@@ -125,6 +128,41 @@ def test_grants_as_percents_set_the_plan_s_pool_to_their_sum_and_fill_it_exactly
     assert plan.grant_shares.exact == Fraction(19_000_000, 18)
     assert plan.pool_left_at_next_round.exact == 0
     assert result.requested.grant_shares.exact == Fraction(2, 25) * result.requested.cap_table.total_shares.exact
+
+
+@pytest.mark.parametrize(
+    ("unissued", "shares", "percent", "requested", "side"),
+    [
+        (1_500_000, 562_500, "4.5", "4.7", "requested_above_plan"),
+        (1_500_000, 562_500, "4.5", "4.3", "requested_below_plan"),
+        (200_000, 1_400_000, "10", "12", "requested_above_plan"),
+    ],
+    ids=["fits-ask-above", "fits-ask-below", "tops-up"],
+)
+def test_the_same_plan_in_shares_and_as_percents_gives_the_same_plan_target(
+    unissued: int, shares: int, percent: str, requested: str, side: str
+) -> None:
+    """The same grants given as shares or as their percent of the plan column's total give one t_plan, one cap table
+    and one flag, whether they fit today's pool (562,500 of T = 12,500,000 is 4.5%) or need a top-up (1,400,000 of
+    T = 14,000,000 is 10%, with P = 1,200,000). The requested column is not compared beyond its target: there, grants
+    as percents take their percent of that column's own total, by design."""
+    terms = {
+        "fully_diluted_shares": 10_000_000,
+        "unissued_pool_shares": unissued,
+        "pre_money": "12000000",
+        "investment": "3000000",
+        "requested_pool_percent": requested,
+        "next_round_month": 15,
+    }
+    by_shares = pool_plan(**terms, hires=[{"role": "Engineer", "start_month": 2, "grant_shares": shares}])
+    by_percent = pool_plan(**terms, hires=[{"role": "Engineer", "start_month": 2, "grant_percent": percent}])
+
+    assert by_shares.plan.target_pool.exact == by_percent.plan.target_pool.exact == Fraction(percent) / 100
+    assert by_shares.plan.cap_table == by_percent.plan.cap_table
+    assert by_shares.plan.grant_shares.exact == by_percent.plan.grant_shares.exact == shares
+    assert by_shares.requested_minus_plan.target_pool == by_percent.requested_minus_plan.target_pool
+    assert by_shares.flags == by_percent.flags
+    assert side in by_shares.flags
 
 
 def test_a_hire_starting_in_the_next_round_s_month_counts_and_one_after_it_does_not() -> None:
@@ -164,8 +202,8 @@ def test_a_requested_pool_below_the_plan_runs_short_before_the_next_round() -> N
 
 @pytest.mark.parametrize(("percent", "side"), [("11", "requested_below_plan"), ("11.5", "requested_above_plan")])
 def test_when_today_s_pool_holds_the_plan_an_ask_it_also_meets_moves_nothing(percent: str, side: str) -> None:
-    """U = 1,500,000 holds the 1,400,000 shares of grants (t_plan = 56/495, about 11.31%), and 11% or 11.5% is met by
-    today's pool too: no top-up either way, the same price, and 100,000 shares left in both columns."""
+    """U = 1,500,000 holds the 1,400,000 shares of grants (t_plan = 14/125, 11.2%), and 11% or 11.5% is met by today's
+    pool too: no top-up either way, the same price, and 100,000 shares left in both columns."""
     result = pool_plan(**_with(unissued_pool_shares=1_500_000, requested_pool_percent=percent))
 
     assert result.flags == (
@@ -218,7 +256,8 @@ def test_the_assumptions_name_the_plan_s_conventions_and_reuse_the_pool_s() -> N
 
 def test_seeded_plans_size_the_pool_to_exactly_the_grants_and_reuse_the_pool_code() -> None:
     """For random plans, the plan's pool after the round is exactly G when G > U (P = G - U, nothing left), today's
-    pool when G <= U (P = 0), and the requested column is always ``compute_pool``'s pre-money table."""
+    pool when G <= U (P = 0), t_plan is always the grants' share of the plan column's own total, and the requested
+    column is always ``compute_pool``'s pre-money table."""
     rng = random.Random(_SEED)
     for _ in range(_RANDOM_CASES):
         fully_diluted = rng.randrange(1_000_000, 50_000_000)
@@ -244,6 +283,7 @@ def test_seeded_plans_size_the_pool_to_exactly_the_grants_and_reuse_the_pool_cod
         grants = sum(hire["grant_shares"] for hire in hires if int(str(hire["start_month"])) <= next_round)
         plan = result.plan.cap_table
 
+        assert result.plan.target_pool.exact == Fraction(grants) / plan.total_shares.exact
         if grants > unissued:
             assert plan.new_pool_shares.exact == grants - unissued
             assert result.plan.pool_left_at_next_round.exact == 0

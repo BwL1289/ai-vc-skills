@@ -32,6 +32,9 @@ _TARGET_HOW = {
     "shares": "plan: G·V/((V + I)(FD - U + G)), the pool holding exactly G; requested: given",
     "percent": "plan: the counted grants' percents added up; requested: given",
 }
+# Grants in shares that fit in today's pool: no top-up, so the plan column has FD shares before the round and t_plan is
+# the grants' share of its total, G/T.
+_TARGET_HOW_SHARES_FIT = "plan: G·V/((V + I)·FD), the grants' share with today's pool kept whole; requested: given"
 _GRANTS_HOW = {
     "shares": "G: the counted grants added up",
     "percent": "the counted grants' percents of this column's T",
@@ -119,6 +122,7 @@ def _round_lines(result: PoolPlanResult) -> list[Line]:
     ) -> tuple[EquityQuantity | str, ...]:
         return (plan_value, requested_value, _EMPTY if diff is None else diff)
 
+    fits = unit == "shares" and plan_table.pool_already_large_enough
     lines = [
         Line(
             "grant_shares",
@@ -130,7 +134,7 @@ def _round_lines(result: PoolPlanResult) -> list[Line]:
             "target_pool",
             "Target pool after the round (t)",
             pair(plan.target_pool, requested.target_pool, difference.target_pool),
-            _TARGET_HOW[unit],
+            _TARGET_HOW_SHARES_FIT if fits else _TARGET_HOW[unit],
         ),
         Line("investor_fraction", "Investment's share of V + I (r)", _both(result.investor_fraction), "I/(V + I)"),
         Line(

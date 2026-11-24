@@ -7,12 +7,12 @@ description: Helps a founder size the option pool their own hiring plan needs un
 
 Helps a founder answer the pool ask in a term sheet with their own hiring plan. A term sheet often asks for an option
 pool of some percent of the shares after the round, created in the pre-money, so the existing holders (the founders
-among them) pay for it and the effective pre-money falls below the headline. The founder's plan says how much of a pool the hires until the next round
-actually take. The `equity_pool_plan` tool works the round both ways, exactly: at the pool the plan needs and at the
-pool requested, with the requested column less the plan's for every figure. The founder sees what the ask costs in
-their own numbers and walks into the conversation with one line of evidence built from their plan. A VC's view is
-only a lens here: a partner is likely to ask how the pool was sized, and the plan is the founder's answer. The skill
-never says which pool to accept.
+among them) pay for it and the effective pre-money falls below the headline. The founder's plan says how much of a
+pool the hires until the next round actually take. The `equity_pool_plan` tool works the round both ways, exactly: at
+the pool the plan needs and at the pool requested, with the requested column less the plan's for every figure. The
+founder sees what the ask costs in their own numbers and walks into the conversation with one line of evidence built
+from their plan. A VC's view is only a lens here: a partner is likely to ask how the pool was sized, and the plan is
+the founder's answer. The skill never says which pool to accept.
 
 ## When to use it
 

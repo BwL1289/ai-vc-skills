@@ -4,16 +4,20 @@ With FD fully diluted shares before the round (the unissued pool U included), pr
 scenario's target t is the unissued pool after the round as a share of every post-round share, the new pool P created
 in the pre-money: price p = V/(FD + P) and total T = (FD + P)(V + I)/V, so t = (U + P)·V/((FD + P)(V + I)).
 
-The plan's pool holds exactly the grants G of the hires starting on or before the next round's month (U + P = G, so
-P = G - U):
+t_plan is the share of every post-round share that the grants G of the hires starting on or before the next round's
+month take on the plan column's own cap table. When they do not fit in today's pool (G > U), the plan's pool holds
+exactly them (U + P = G, so P = G - U); when they fit (G <= U), there is no top-up (P = 0) and today's pool is kept
+whole, so the plan column has FD shares before the round:
 
-- grants in shares: t_plan = G·V/((V + I)(FD - U + G));
+- grants in shares: t_plan = G·V/((V + I)(FD - U + G)) with a top-up, G·V/((V + I)·FD) when the grants fit in today's
+  pool; both are G·V/((V + I)(FD + max(G - U, 0))), the grants over the plan column's total T;
 - grants as percents of the post-round fully diluted shares: t_plan is their sum.
 
-Both columns are the pool scenario's own pre-money table (``pool.pool_in_pre_money``), at t_plan and at the requested
-percent: no formula of the shuffle is worked a second way here. When the grants fit in today's pool (G <= U, or a sum
-of percents at most U's share with no top-up), the shuffle's own clamp gives P = 0: no top-up, and today's pool is
-kept whole. Every difference is the requested column less the plan's, exact, rounded once.
+The same plan given in shares or as percents of the same total therefore gives the same t_plan. Both columns are the
+pool scenario's own pre-money table (``pool.pool_in_pre_money``), at t_plan and at the requested percent: no formula of
+the shuffle is worked a second way here. When the grants fit in today's pool (G <= U, or a sum of percents at most U's
+share with no top-up), the shuffle's own clamp gives P = 0 (t_plan·FD·(V + I)/V = G <= U). Every difference is the
+requested column less the plan's, exact, rounded once.
 """
 
 from __future__ import annotations
@@ -66,14 +70,16 @@ def _grants(counted: tuple[PlannedHire, ...], unit: GrantUnit) -> Fraction:
 
 
 def _plan_target(inputs: PoolPlanInput, counted: tuple[PlannedHire, ...], unit: GrantUnit) -> Fraction:
-    """t_plan: the pool after the round, of every post-round share, that holds exactly the counted grants."""
+    """t_plan: the counted grants' share of every post-round share on the plan column's own cap table; with a top-up,
+    that is the pool after the round, which holds exactly them."""
     grants = _grants(counted, unit)
     if unit == "percent":
         return grants
 
     pre_money = fraction(inputs.pre_money)
-    held = inputs.fully_diluted_shares - inputs.unissued_pool_shares
-    return grants * pre_money / ((pre_money + fraction(inputs.investment)) * (held + grants))
+    # The plan column's shares before the round: FD - U + G with a top-up (U + P = G), FD when the grants fit (P = 0).
+    before_round = inputs.fully_diluted_shares + max(grants - inputs.unissued_pool_shares, ZERO)
+    return grants * pre_money / ((pre_money + fraction(inputs.investment)) * before_round)
 
 
 def _side(

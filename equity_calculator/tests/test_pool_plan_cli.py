@@ -124,8 +124,8 @@ async def test_a_pool_that_tops_up_or_runs_short_says_so(percent: str, flag: str
 async def test_when_today_s_pool_holds_the_plan_the_flags_say_nothing_runs_short_or_moves(
     percent: str, flag: str, words: str, never: str
 ) -> None:
-    """With U = 1,500,000 the plan's 1,400,000 shares of grants fit today's pool (t_plan = 56/495, about 11.31%), and
-    an 11% or 11.5% ask is met by it too: no top-up either way, so neither flag claims a shortfall or a price move."""
+    """With U = 1,500,000 the plan's 1,400,000 shares of grants fit today's pool (t_plan = 14/125, 11.2%), and an 11%
+    or 11.5% ask is met by it too: no top-up either way, so neither flag claims a shortfall or a price move."""
     argv = [*_COMPANY_CP, "--unissued-pool-shares", "1,500,000", "--requested-pool-percent", percent]
     report = await run(argv)
     flags = _flag_lines(report)
@@ -133,6 +133,10 @@ async def test_when_today_s_pool_holds_the_plan_the_flags_say_nothing_runs_short
     assert words in flags[flag] and never not in flags[flag]
     assert "plan_fits_current_pool" in flags and "requested_met_by_current_pool" in flags
     assert "100,000" in _line(report, "Pool left ungranted at the next round")
+    # The plan's target is the grants' share with today's pool kept whole, so its line names that formula, not the
+    # top-up's.
+    target = _line(report, "Target pool after the round (t)")
+    assert "11.2000%" in target and "G·V/((V + I)·FD)" in target and "FD - U + G" not in target
 
 
 async def test_the_command_line_and_the_model_give_the_same_result() -> None:
