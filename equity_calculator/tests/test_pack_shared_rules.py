@@ -158,6 +158,7 @@ _FOUNDER_TEXT_SKILLS = (
     "vc-investor-memo",
     "vc-diligence-questions",
     "vc-pass-debrief",
+    "vc-intro-email",
 )
 _PARTNER_MEETING_BAN = 'never a difference, sum or ratio of two figures the founder gave ("from $80k to $120k a month"'
 # The lean refute pass, with {noun} filled by what the skill's lenses raise: an objection, or a question.
@@ -207,6 +208,7 @@ _READ_THE_FILE_SKILLS = (
     "vc-current-investor-update",
     "vc-deck-review",
     "vc-diligence-questions",
+    "vc-intro-email",
     "vc-investor-memo",
     "vc-market-sizing",
     "vc-metrics-readiness",
@@ -221,7 +223,7 @@ _READ_THE_FILE_SKILLS = (
 _FILE_TOO = "Any of these may come as a file the agent can read in this session."
 # The one paste bullet that names its file in its own words, inside its list of what may be pasted.
 _FILE_TOO_OWN_WORDING = {"vc-term-sheet-review": "or a term sheet file the agent can read in this session"}
-_PASTE_BULLETS = 12
+_PASTE_BULLETS = 13
 # How a refute pass checks the line it says answers an item: as the quote check does, spacing and line breaks aside,
 # through to what such a line does not do.
 _ANSWER_SPACING = re.compile(
