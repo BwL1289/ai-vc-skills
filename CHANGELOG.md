@@ -10,9 +10,9 @@ All notable changes to this repository. Dates are UTC.
   margin / the churn the founder names, the gross margin flagged when no contribution margin is given, a churn at or
   below zero refused), LTV/CAC on blended CAC, the Rule of 40 from the founder's own growth and margin percents with
   the margin's basis named, and the magic number on revenue (4 × the quarter's change / the prior quarter's sales and
-  marketing spend) or on ARR, and checks a deck's stated figures for each; five new flags name an LTV on gross
-  margin, a stated LTV on revenue alone, an unnamed Rule of 40 margin, a stated Rule of 40 on gross margin and a
-  stated magic number without its 4. No benchmark is set for any of them. `vc-metrics-readiness` (and the skills that
+  marketing spend) or on ARR, and checks a deck's stated figures for each; seven new flags name an LTV on gross
+  margin, a contribution margin above the gross margin, a stated LTV on revenue alone or on gross margin, an unnamed
+  Rule of 40 margin, a stated Rule of 40 on gross margin and a stated magic number without its 4. No benchmark is set for any of them. `vc-metrics-readiness` (and the skills that
   quoted LTV as unchecked) now send these to the tool, with a Company DL eval (unrecorded).
 - `vc-deck-review` is out of preview after its first run on a real deck, whose founder adopted most of its fix list;
   plugin version 0.2.7.

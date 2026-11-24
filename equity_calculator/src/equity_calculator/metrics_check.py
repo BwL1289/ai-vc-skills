@@ -21,7 +21,9 @@ customers' own movements when given, else the totals.
   (P months, u = 12/k: 1 for a monthly unit, 12 for an annual one), m the contribution margin when given, else the gross
   margin, c the period's churn on ``ltv_churn_basis`` (gross revenue churn unless the founder picks net revenue or logo
   churn; the validator refuses a churn at or below 0). LTV/CAC = LTV / blended CAC. On revenue alone (no m), each is
-  worked only beside its stated figure, to test whether that figure left the margin out.
+  worked only beside its stated figure, to test whether that figure left the margin out; on the gross margin g, LTV
+  a·(P/u)·g / c is worked beside a stated LTV when m is the contribution margin and g is given, to test whether the
+  stated figure used the gross margin instead.
 - Rule of 40 = the founder's revenue growth percent + their profit margin percent, as given (the basis named or not).
 - Magic number, on revenue: 4·(Q - Q') / M', Q and Q' the latest and the prior quarter's revenue, M' the prior
   quarter's sales and marketing spend; on ARR: (A - A') / M', the two quarters' ending ARR, no 4. Without the 4 it is
@@ -34,7 +36,7 @@ the edge included) or when it is the computed figure rounded half away from zero
 (``12`` against 12.40, ``2`` against 2.4%; ``0.0`` is one place): people write figures rounded to the places they
 show. Money (ARR, CAC, LTV) is consistent within ``tolerance_percent`` only, since a figure like $1.2M carries no
 places once typed as 1200000. A stated burn multiple with no multiple to work is ``not_checked``, and the overall
-verdict is then ``not_checked`` unless a figure is a mismatch, never ``consistent``. The seven ``stated_*`` cause flags
+verdict is then ``not_checked`` unless a figure is a mismatch, never ``consistent``. The eight ``stated_*`` cause flags
 read a stated figure's agreement with the other definition by the tolerance alone. ``consistent_beyond_rounding``
 names a figure that holds by the tolerance alone. Flags never change a verdict.
 """
@@ -95,6 +97,7 @@ class _Worked:
     concentration: Fraction | None = None
     ltv: Fraction | None = None
     ltv_on_revenue: Fraction | None = None
+    gross_margin_ltv: Fraction | None = None
     ltv_to_cac: Fraction | None = None
     ltv_to_cac_on_revenue: Fraction | None = None
     rule_of_40: Fraction | None = None
@@ -201,6 +204,9 @@ def _lifetime(inputs: MetricsCheckInput, blended_cac: Fraction | None) -> dict[s
     worked["ltv"] = ltv
     if inputs.stated_ltv is not None:
         worked["ltv_on_revenue"] = revenue
+        gross = inputs.gross_margin_percent
+        if inputs.contribution_margin_percent is not None and gross is not None:
+            worked["gross_margin_ltv"] = revenue * from_percent(gross)
     if blended_cac is not None:
         worked["ltv_to_cac"] = ltv / blended_cac
         if inputs.stated_ltv_to_cac is not None:
@@ -432,8 +438,9 @@ def _definition_flags(
 def _later_definition_flags(
     inputs: MetricsCheckInput, worked: _Worked, checks: tuple[MetricsCheck, ...]
 ) -> list[MetricsFlag]:
-    """The three later ``stated_*`` flags: an LTV or LTV/CAC on revenue alone, a Rule of 40 on gross margin and a
-    magic number without its 4, each beside a mismatch and by the tolerance alone."""
+    """The four later ``stated_*`` flags: an LTV or LTV/CAC on revenue alone, an LTV on gross margin when a
+    contribution margin is given, a Rule of 40 on gross margin and a magic number without its 4, each beside a mismatch
+    and by the tolerance alone."""
     points = from_percent(inputs.tolerance_points)
     relative = from_percent(inputs.tolerance_percent)
     flags: list[MetricsFlag] = []
@@ -445,6 +452,10 @@ def _later_definition_flags(
         if stated is not None and revenue is not None and _mismatched(checks, key):
             if _within(fraction(stated), revenue, relative * revenue):
                 flags.append("stated_ltv_uses_revenue_not_margin")
+    gross_ltv = worked.gross_margin_ltv
+    if inputs.stated_ltv is not None and gross_ltv is not None and _mismatched(checks, "ltv"):
+        if _within(fraction(inputs.stated_ltv), gross_ltv, relative * gross_ltv):
+            flags.append("stated_ltv_uses_gross_margin")
     growth, gross, rule = inputs.revenue_growth_percent, inputs.gross_margin_percent, inputs.stated_rule_of_40_percent
     if rule is not None and growth is not None and gross is not None and _mismatched(checks, "rule_of_40"):
         if _within(from_percent(rule), from_percent(growth) + from_percent(gross), points):
@@ -519,6 +530,9 @@ def _flags(inputs: MetricsCheckInput, worked: _Worked, checks: tuple[MetricsChec
             found.add("no_net_burn")
     if worked.ltv is not None and inputs.contribution_margin_percent is None:
         found.add("ltv_on_gross_margin")
+    contribution, gross = inputs.contribution_margin_percent, inputs.gross_margin_percent
+    if contribution is not None and gross is not None and contribution > gross:
+        found.add("contribution_margin_above_gross_margin")
     if worked.rule_of_40 is not None and inputs.profit_margin_basis == "unlabelled":
         found.add("rule_of_40_margin_basis_unlabelled")
 
@@ -586,6 +600,7 @@ def compute_metrics_check(inputs: MetricsCheckInput) -> MetricsCheckResult:
         ltv=_optional("money", worked.ltv),
         ltv_margin_basis=None if worked.ltv is None else _ltv_margin_basis(inputs),
         ltv_on_revenue=_optional("money", worked.ltv_on_revenue),
+        gross_margin_ltv=_optional("money", worked.gross_margin_ltv),
         ltv_to_cac=_optional("multiplier", worked.ltv_to_cac),
         ltv_to_cac_on_revenue=_optional("multiplier", worked.ltv_to_cac_on_revenue),
         rule_of_40=_optional("fraction", worked.rule_of_40),

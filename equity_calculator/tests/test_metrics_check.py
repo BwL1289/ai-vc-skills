@@ -11,9 +11,9 @@ Pure arithmetic: no DB, no network, nothing written. Expected values are exact f
   36/5 on revenue: the deck's 7.2 is the revenue figure, the model's 9.6 the margin one. Blended CAC 36k/45 = 800,
   paid 36k/20 = 1,800.
 - Company DL, one month: gross revenue churn (1k + 3k)/200k = 1/50, so LTV on the 60% contribution margin is
-  2k·(3/5)/(1/50) = 60k, and 100k on revenue alone: the deck's $100k. Blended CAC 150k/25 = 6k, so LTV/CAC 10 (the
-  deck's 10x) and 50/3 on revenue. Rule of 40 70% - 35% = 7/20 (the deck's 35). Magic number 4·(600k - 510k)/450k = 4/5;
-  the deck's 0.2 is 90k/450k = 1/5, the change without the 4.
+  2k·(3/5)/(1/50) = 60k, 80k on the 80% gross margin, and 100k on revenue alone: the deck's $100k. Blended CAC
+  150k/25 = 6k, so LTV/CAC 10 (the deck's 10x) and 50/3 on revenue. Rule of 40 70% - 35% = 7/20 (the deck's 35). Magic
+  number 4·(600k - 510k)/450k = 4/5; the deck's 0.2 is 90k/450k = 1/5, the change without the 4.
 """
 
 from __future__ import annotations
@@ -138,6 +138,7 @@ def test_company_dl_an_ltv_on_revenue_and_a_magic_number_without_its_4() -> None
     assert _exact(result, "ltv") == 60_000
     assert result.ltv_margin_basis == "contribution"
     assert _exact(result, "ltv_on_revenue") == 100_000
+    assert _exact(result, "gross_margin_ltv") == 80_000
     assert _exact(result, "ltv_to_cac") == 10
     assert _exact(result, "ltv_to_cac_on_revenue") == Fraction(50, 3)
     assert _exact(result, "rule_of_40") == Fraction(7, 20)
@@ -161,6 +162,7 @@ def test_the_new_figures_are_none_without_their_parts() -> None:
         "ltv",
         "ltv_margin_basis",
         "ltv_on_revenue",
+        "gross_margin_ltv",
         "ltv_to_cac",
         "ltv_to_cac_on_revenue",
         "rule_of_40",
@@ -189,6 +191,19 @@ def test_ltv_is_on_the_contribution_margin_when_given_else_the_gross_margin() ->
     assert "ltv_on_gross_margin" in gross.flags and "ltv_on_gross_margin" not in contribution.flags
     # LTV/CAC is worked only with a blended CAC; the revenue figures only beside a stated one.
     assert gross.ltv_to_cac is None and gross.ltv_on_revenue is None
+
+
+def test_ltv_on_gross_margin_is_worked_only_beside_a_stated_ltv_on_a_contribution_margin() -> None:
+    """With a stated LTV and both margins, LTV on the 50% gross margin is 100 beside 80 on the 40% contribution margin;
+    with no stated LTV, or no contribution margin, it is not worked."""
+    both = metrics_check(period_months=1, **_LTV_PARTS, contribution_margin_percent="40", stated_ltv="80")
+    unstated = metrics_check(period_months=1, **_LTV_PARTS, contribution_margin_percent="40")
+    gross_only = metrics_check(period_months=1, **_LTV_PARTS, stated_ltv="100")
+
+    assert _exact(both, "gross_margin_ltv") == 100
+    assert unstated.gross_margin_ltv is None and gross_only.gross_margin_ltv is None
+    # The stated 80 holds on the contribution margin, so no LTV flag; the 5% month's churn raises its benchmark alone.
+    assert both.flags == ("net_revenue_churn_above_band",)
 
 
 @pytest.mark.parametrize(
@@ -650,6 +665,16 @@ _FLAG_CASES: dict[MetricsFlag, tuple[dict[str, object], dict[str, object]]] = {
         {"starting_recurring": "100", "month_total_revenue": "101"},
     ),
     "ltv_on_gross_margin": (_LTV_PARTS, {**_LTV_PARTS, "contribution_margin_percent": "40"}),
+    # A 60% contribution margin above the 50% gross margin; equal margins are not above.
+    "contribution_margin_above_gross_margin": (
+        {**_LTV_PARTS, "contribution_margin_percent": "60"},
+        {**_LTV_PARTS, "contribution_margin_percent": "50"},
+    ),
+    # On the 40% contribution margin LTV is 10·(2/5)/(1/20) = 80; on the 50% gross margin 100.
+    "stated_ltv_uses_gross_margin": (
+        {**_LTV_PARTS, "contribution_margin_percent": "40", "stated_ltv": "100"},
+        {**_LTV_PARTS, "contribution_margin_percent": "40", "stated_ltv": "90"},
+    ),
     # LTV 10·(1/2)/(1/20) = 100 on margin, 200 on revenue alone.
     "stated_ltv_uses_revenue_not_margin": ({**_LTV_PARTS, "stated_ltv": "200"}, {**_LTV_PARTS, "stated_ltv": "150"}),
     "rule_of_40_margin_basis_unlabelled": (

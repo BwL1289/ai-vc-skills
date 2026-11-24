@@ -550,8 +550,10 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    account over the monthly churn (paraphrased); the churn basis, longer periods and leaving out discounting are ours,
    unverified. LTV/CAC = LTV / blended CAC (a16z names a contribution-margin LTV to CAC ratio; blended CAC is ours).
    On revenue alone, LTV = a·(P/u) / c and its LTV/CAC are worked whenever an LTV or LTV/CAC is stated, to test
-   whether the stated figure left the margin out. ARPA with no margin is refused (LTV is never worked on revenue
-   alone), and so is a churn at or below zero: with no churn the lifetime has no end.
+   whether the stated figure left the margin out; with a contribution margin and a gross margin g both given, LTV on
+   the gross margin, a·(P/u)·g / c, is worked whenever an LTV is stated, to test whether it used the gross margin.
+   ARPA with no margin is refused (LTV is never worked on revenue alone), and so is a churn at or below zero: with no
+   churn the lifetime has no end.
 6. **Growth and efficiency.** Three parts stand outside the period, each the founder's own: the revenue growth
    percent g, the profit margin percent q and its basis (EBITDA, operating, free cash flow or net; not named, it is
    flagged). The Rule of 40 = g + q, as given (a common SaaS rule of thumb, unverified). The magic number = 4·(Q - Q')
@@ -584,7 +586,8 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    figure lands within tolerance of that other definition (the tolerance alone: the rounding rule of step 7 decides a
    verdict, never a cause; the run-rate one also only when the latest month has one-time or usage revenue);
    `stated_ltv_uses_revenue_not_margin` (a stated LTV or LTV/CAC within tolerance of the figure on revenue alone),
-   `stated_rule_of_40_uses_gross_margin` (within tolerance of growth + the gross margin) and
+   `stated_ltv_uses_gross_margin` (a stated LTV within tolerance of the figure on the gross margin, when a contribution
+   margin is given), `stated_rule_of_40_uses_gross_margin` (within tolerance of growth + the gross margin) and
    `stated_magic_number_not_annualised` (within tolerance of the change without the 4).
    `consistent_beyond_rounding`: a figure consistent by the tolerance alone, not the computed figure
    rounded to its places, such as a monthly churn of 1.7% against 2.1%, so a VC recomputing gets another figure. With
@@ -595,7 +598,9 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    alone), `blended_cac_only` (no paid-channel count),
    `payback_not_margin_adjusted` (no gross margin), `burn_multiple_not_defined` (net new ARR at or below zero) and
    `no_net_burn` (a net burn at or below zero); each of these two says the overall verdict cannot be consistent only
-   when a multiple is stated; `ltv_on_gross_margin` (no contribution margin, so LTV is on the gross margin) and
+   when a multiple is stated; `ltv_on_gross_margin` (no contribution margin, so LTV is on the gross margin),
+   `contribution_margin_above_gross_margin` (a contribution margin above the gross margin, which takes out fewer
+   costs, so most often a swapped or mislabelled margin: a question, never a refusal) and
    `rule_of_40_margin_basis_unlabelled` (the margin's basis not named). The benchmarks, each an input: `payback_above_band` (at or above
    Bessemer's target for the customer segment, under 12 months for SMB, 18 for mid-market and 24 for enterprise, or
    the founder's own band), `burn_multiple_above_band` (3x or more, Sacks) and `net_revenue_churn_above_band` (above
@@ -912,6 +917,7 @@ equity_calculator metrics_check --period-months 1 --starting-recurring 200000 --
     --stated-rule-of-40-percent 35 --stated-magic-number 0.2
   LTV (contribution margin)                                              $60,000.00  ARPA × the period's units × margin / gross revenue churn
   LTV on revenue alone                                                  $100,000.00  ARPA × the period's units / gross revenue churn
+  LTV on gross margin                                                    $80,000.00  ARPA × the period's units × gross margin / gross revenue churn
   LTV/CAC                                                                10.000000x  LTV / blended CAC
   Rule of 40 (growth + EBITDA margin)                                      35.0000%  revenue growth + margin, as given
   Magic number (on revenue)                                               0.800000x  4·(quarter revenue - prior quarter's) / prior quarter's spend

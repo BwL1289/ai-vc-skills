@@ -183,6 +183,7 @@ async def test_the_report_names_ltvs_margin_the_rule_of_40s_and_the_magic_number
     for pattern in (
         r"LTV \(contribution margin\) +\$60,000\.00",
         r"LTV on revenue alone +\$100,000\.00",
+        r"LTV on gross margin +\$80,000\.00",
         r"LTV/CAC +10\.000000x",
         r"Rule of 40 \(growth \+ EBITDA margin\) +35\.0000%",
         r"Magic number \(on revenue\) +0\.800000x",
@@ -396,6 +397,16 @@ _EVERY_FLAG = (
         profit_margin_percent="10",
         gross_margin_percent="70",
         stated_rule_of_40_percent="100",
+    ),
+    # A 60% contribution margin above the 50% gross margin; LTV 10·(3/5)·20 = 120, on gross margin 100 (the stated).
+    metrics_check(
+        period_months=1,
+        starting_recurring="100",
+        churned_recurring="5",
+        arpa="10",
+        gross_margin_percent="50",
+        contribution_margin_percent="60",
+        stated_ltv="100",
     ),
 )
 

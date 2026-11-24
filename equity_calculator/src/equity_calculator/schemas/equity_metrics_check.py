@@ -11,8 +11,8 @@ contribution margin. Three parts stand apart from the period: the founder's reve
 number). It works each metric exactly and returns each stated figure as ``consistent``, a ``mismatch``, or
 ``not_checked`` (a stated burn multiple when no multiple can be worked), with flags that name the likely cause of a
 mismatch (a run-rate called ARR, new customers counted in net retention, a payback on revenue rather than gross margin,
-a burn multiple on new rather than net new ARR, an LTV on revenue, a Rule of 40 on gross margin, a magic number without
-its 4) and three benchmark questions, never errors.
+a burn multiple on new rather than net new ARR, an LTV on revenue or on gross margin, a Rule of 40 on gross margin, a
+magic number without its 4) and three benchmark questions, never errors.
 
 No valuation, instrument, runway or burn projection: those stay with ``deal_check``, ``round`` and ``runway_plan``.
 This module reuses ``equity_deal_check``'s verdict words and default tolerances, so no cycle.
@@ -128,11 +128,12 @@ MetricsCheckKey = Literal[
 ArrBasis = Literal["movement", "month"]
 
 # Facts and questions a VC is likely to raise. They never change a verdict; their plain words are in
-# ``equity_calculator.layout_metrics_check``. The seven ``stated_*`` flags are set only beside a mismatch (the burn
+# ``equity_calculator.layout_metrics_check``. The eight ``stated_*`` flags are set only beside a mismatch (the burn
 # multiple's also beside a figure left unchecked), when the stated figure is within the tolerance of the named wrong
 # definition instead, so each names the likely cause.
 # ``consistent_beyond_rounding`` names a stated percent, months or multiple consistent by the tolerance alone, not as
-# the computed figure rounded to the places the document writes it with.
+# the computed figure rounded to the places the document writes it with. ``contribution_margin_above_gross_margin`` is
+# a question, never a refusal: cost definitions differ, though the larger figure is most often a swapped margin.
 MetricsFlag = Literal[
     "stated_arr_matches_run_rate",
     "arr_movement_and_month_disagree",
@@ -145,7 +146,9 @@ MetricsFlag = Literal[
     "stated_payback_not_margin_adjusted",
     "stated_burn_multiple_uses_new_not_net_arr",
     "ltv_on_gross_margin",
+    "contribution_margin_above_gross_margin",
     "stated_ltv_uses_revenue_not_margin",
+    "stated_ltv_uses_gross_margin",
     "rule_of_40_margin_basis_unlabelled",
     "stated_rule_of_40_uses_gross_margin",
     "stated_magic_number_not_annualised",
@@ -614,7 +617,8 @@ class MetricsCheckResult(BaseModel):
     neither, or with no stated ARR). ``payback_band_months`` is the benchmark in force. ``ltv_margin_basis`` says which
     margin LTV is on and ``magic_number_variant`` which magic number was worked. ``ltv_on_revenue``,
     ``ltv_to_cac_on_revenue`` and ``magic_number_unannualised`` are worked only beside a stated LTV, LTV/CAC or magic
-    number, to test whether it used that other definition.
+    number, and ``gross_margin_ltv`` only beside a stated LTV on a contribution margin with a gross margin given, to
+    test whether it used that other definition.
     """
 
     model_config = MODEL_CONFIG
@@ -644,6 +648,7 @@ class MetricsCheckResult(BaseModel):
     ltv: EquityQuantity | None = None
     ltv_margin_basis: LtvMarginBasis | None = None
     ltv_on_revenue: EquityQuantity | None = None
+    gross_margin_ltv: EquityQuantity | None = None
     ltv_to_cac: EquityQuantity | None = None
     ltv_to_cac_on_revenue: EquityQuantity | None = None
     rule_of_40: EquityQuantity | None = None

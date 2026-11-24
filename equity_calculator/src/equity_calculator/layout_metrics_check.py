@@ -104,6 +104,11 @@ def _months(count: int) -> str:
     return "1 month" if count == 1 else f"{count} months"
 
 
+def _percent_words(value: Decimal | None) -> str:
+    """A percent field as the founder gave it ("60%"), or "none"."""
+    return "none" if value is None else f"{value:f}%"
+
+
 def _flag_words(flag: MetricsFlag, result: MetricsCheckResult) -> str:
     """What a flag means for the founder, in plain words, and what a VC is likely to ask."""
     inputs = result.inputs
@@ -123,6 +128,8 @@ def _flag_words(flag: MetricsFlag, result: MetricsCheckResult) -> str:
         if inputs.stated_burn_multiple is not None
         else ""
     )
+    contribution = _percent_words(inputs.contribution_margin_percent)
+    gross = _percent_words(inputs.gross_margin_percent)
     unlabelled = (
         "The churn figure names no basis; below zero it can only be net revenue churn, so it was checked on that "
         "alone; label it net revenue churn"
@@ -168,8 +175,13 @@ def _flag_words(flag: MetricsFlag, result: MetricsCheckResult) -> str:
         "ltv_on_gross_margin": "LTV is on gross margin, as no contribution margin was given; a16z works LTV on "
         "contribution margin, which also takes out the other costs that grow with each account, so a VC may work it "
         "lower: give the contribution margin",
+        "contribution_margin_above_gross_margin": f"The contribution margin ({contribution}) is above the gross "
+        f"margin ({gross}), though it takes out more costs than the gross margin does, so the two may be swapped or "
+        "mislabelled; LTV is worked on the contribution margin as given: check which figure is which",
         "stated_ltv_uses_revenue_not_margin": "A stated LTV or LTV/CAC matches the figure on revenue alone, with no "
         "margin taken out; a VC is likely to recompute it on margin",
+        "stated_ltv_uses_gross_margin": "The stated LTV matches the figure on gross margin, not on the contribution "
+        "margin given; a VC is likely to recompute it on contribution margin",
         "rule_of_40_margin_basis_unlabelled": "The Rule of 40's margin names no basis; a VC is likely to ask which "
         "margin it adds (EBITDA, operating, free cash flow or net): name it beside the figure",
         "stated_rule_of_40_uses_gross_margin": "The stated Rule of 40 matches revenue growth plus gross margin, not "
@@ -399,6 +411,12 @@ def _later_metrics(result: MetricsCheckResult) -> list[tuple[str, str, EquityQua
     return [
         ("ltv", f"LTV ({margin})", result.ltv, f"ARPA × the period's units × margin / {churn}"),
         ("ltv_on_revenue", "LTV on revenue alone", result.ltv_on_revenue, f"ARPA × the period's units / {churn}"),
+        (
+            "gross_margin_ltv",
+            "LTV on gross margin",
+            result.gross_margin_ltv,
+            f"ARPA × the period's units × gross margin / {churn}",
+        ),
         ("ltv_to_cac", "LTV/CAC", result.ltv_to_cac, "LTV / blended CAC"),
         ("ltv_to_cac_on_revenue", "LTV/CAC on revenue alone", result.ltv_to_cac_on_revenue, "LTV on revenue / CAC"),
         (

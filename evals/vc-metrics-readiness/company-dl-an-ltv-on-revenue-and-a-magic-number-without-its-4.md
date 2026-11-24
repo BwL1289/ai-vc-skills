@@ -63,6 +63,7 @@ the slide's places.
   CAC payback (gross margin)                                            9.38 months  spend/(new monthly recurring·margin)
   LTV (contribution margin)                                              $60,000.00  ARPA × the period's units × margin / gross revenue churn
   LTV on revenue alone                                                  $100,000.00  ARPA × the period's units / gross revenue churn
+  LTV on gross margin                                                    $80,000.00  ARPA × the period's units × gross margin / gross revenue churn
   LTV/CAC                                                                10.000000x  LTV / blended CAC
   LTV/CAC on revenue alone                                               16.666667x  LTV on revenue / CAC
   Rule of 40 (growth + EBITDA margin)                                      35.0000%  revenue growth + margin, as given
