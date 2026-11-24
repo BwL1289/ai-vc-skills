@@ -1,11 +1,15 @@
 # Eval 1: Company CQ, "does our cap table add up?"
 
-A test prompt for the `vc-cap-table-check` skill. The company is made up. The answer states the expected behaviour; it
-is not a recorded run, and this eval has not been run in a live session. Every figure under "Expected answer" is pasted
-from what `equity_calculator cap_table_check` printed for these inputs; none is typed by hand. A run passes when it
-makes the one tool call below (field order free, percents as strings with the table's places), leads with the verdict,
-shows the tie-outs with the tool's figures as printed, names the questions for the company's lawyer that the flags
-raise, never says whether a share was validly issued, and computes nothing in its own text.
+A test prompt for the `vc-cap-table-check` skill. The company is made up. "Expected answer" states the expected
+behaviour, and "Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.331 on 2026-11-24). Every figure under
+"Expected answer" is pasted from what `equity_calculator cap_table_check` printed for these inputs; none is typed by
+hand. A run passes when it makes the one tool call below (field order free, percents as strings with the table's
+places), leads with the verdict, shows the tie-outs with the tool's figures as printed, names the questions for the
+company's lawyer that the flags raise, never says whether a share was validly issued, and computes nothing in its own
+text. The verdict is Pass when every clause of that sentence is met, Partial when exactly one clause is missed or met
+only in part, and Fail when two or more are missed; a shortfall against the other points of the expected answer is noted
+but does not change the verdict. The recorded run is a Pass with shortfalls. The skill was changed after that run (see
+"Recorded answer").
 
 ## Prompt
 
@@ -131,3 +135,97 @@ raise, never says whether a share was validly issued, and computes nothing in it
   and says no percent counts it until a priced round converts it, offering a preview at the next round the founder
   expects, never at an assumed price.
 - It quotes the assumptions it leans on: `fully_diluted_basis`, `preferred_as_converted` and `legal_validity`.
+
+## Recorded answer
+
+Recorded with Claude Code 2.1.331 on 2026-11-24, with plugin 0.3.5 loaded from this repository and no user settings. An
+earlier run of this eval that day, on plugin 0.3.2, is not recorded. The answer is shown whole.
+
+**Pass, with shortfalls against the expected answer.** It met every clause of the pass sentence above. It made the one
+`equity_cap_table_check` call, its input the same as the expected call, and no other; it led with the verdict ("No, it
+does not add up: 9 of the 9 figures the table states do not match."); its tie-outs table sets the table's figure beside
+the tool's, with the difference, for the fully diluted total, every stated percent and the percent column's total, each
+percent the tool's fraction with its decimal point moved; it put to the company's lawyer the questions the flags raise
+(an amendment raising the authorised common, enough common reserved, the departed engineer's unvested shares, the SAFE's
+terms); it said the check is arithmetic only and never said whether a share was validly issued; and every figure in it
+is one the tool returned. Short of the expected answer: it half-guessed the wrong line ("The gap is 100,000 shares, and
+your warrants line is 100,000."), where the expected answer guesses none: no figure is worked out there, so the last
+clause holds, but the match relates two figures as the skill's limits rule out. It paraphrased the assumptions, with
+neither their keys (`fully_diluted_basis`, `preferred_as_converted`, `legal_validity`) nor their sources; the percent
+column's row trims the tool's digits (100.00% for 100.0000%, 0.035 for 0.0350%); and its SAFE paragraph, close to the
+expected answer, says every percent falls when the SAFE converts and a preview needs the founder's next round, but not
+in so many words that no percent counts it until a priced round converts it. The session's first line listed the
+calculator's server as still starting, with none of its tools; the run found the tool by searching for it by name, as
+the skill says, and called it once. Since this run the skill's limits say never to say or hint which line is wrong, not
+even when a difference the tool prints equals one line's shares, and its answering steps name each assumption by its
+key, with its source. The eval has not been run again.
+
+> **No, it does not add up: 9 of the 9 figures the table states do not match.** The classes add up to 10,100,000 fully diluted shares, not the 10,000,000 stated, so every percent is slightly overstated and the percent column totals 101.00%.
+>
+> The gap is 100,000 shares, and your warrants line is 100,000. Check whether the 10,000,000 total was built before the warrants were added; that is a question for you, not something the check can tell.
+>
+> ## Tie-outs
+>
+> | Figure                | The table says | The calculator gives | Difference                                  | Consistent? |
+> | --------------------- | -------------- | -------------------- | ------------------------------------------- | ----------- |
+> | Fully diluted shares  | 10,000,000     | 10,100,000           | 100,000                                     | No          |
+> | Founder A             | 45.00%         | 44.5545%             | -0.4455 pts                                 | No          |
+> | Founder B             | 35.00%         | 34.6535%             | -0.3465 pts                                 | No          |
+> | First engineer (left) | 2.50%          | 2.4752%              | -0.0248 pts                                 | No          |
+> | Seed preferred        | 10.00%         | 9.9010%              | -0.0990 pts                                 | No          |
+> | Options granted       | 5.00%          | 4.9505%              | -0.0495 pts                                 | No          |
+> | Unissued pool         | 2.50%          | 2.4752%              | -0.0248 pts                                 | No          |
+> | Warrants              | 1.00%          | 0.9901%              | -0.0099 pts                                 | No          |
+> | Percent column total  | 101.00%        | 100.00%              | -1.00 pts (rounding explains at most 0.035) | No          |
+>
+> ## What the table adds up to
+>
+> - **Fully diluted:** 10,100,000 shares.
+> - **Outstanding (common and preferred):** 9,250,000 shares.
+> - **Common:** 8,250,000 shares from the three holder lines, 81.6832% of fully diluted.
+> - **Founders together:** 79.2079% of fully diluted.
+> - **Departed holders (dead equity):** 2.4752% of fully diluted.
+>
+> ## Authorised shares
+>
+> | Item                               | Issued or needed | Authorised | Left                   |
+> | ---------------------------------- | ---------------- | ---------- | ---------------------- |
+> | Common                             | 8,250,000        | 8,000,000  | **-250,000 (over)**    |
+> | Seed preferred                     | 1,000,000        | 1,000,000  | 0                      |
+> | Option plan (granted and unissued) | 750,000          | 750,000    | 0                      |
+> | Common against fully diluted       | 10,100,000       | 8,000,000  | **-2,100,000 (short)** |
+>
+> The common overage is the more serious finding. Your three common lines add up to more common than the 8,000,000 you say the charter authorises.
+>
+> ## Outstanding SAFE
+>
+> There is one, a $1,000,000 post-money SAFE at a $12,000,000 cap. It holds no shares yet, so it sits outside every percent above, and all of them fall when it converts. I did not model the conversion because that needs the priced round you expect.
+>
+> ## Flags
+>
+> - **Percents do not sum:** the stated percents cannot all be roundings of shares that add up to 100%. A line is missing, counted twice, or on another basis.
+> - **Over authorised:** common has issued more than the authorised figure you gave.
+> - **Authorised common below fully diluted:** everything would be common once converted or exercised, and 8,000,000 does not cover it.
+> - **Unconverted instrument:** list the SAFE for investors alongside the table.
+> - **Departed holder's shares:** investors often ask about these.
+>
+> ## Questions for your lawyer
+>
+> 1. Is the 8,000,000 common figure the charter as filed, or was an amendment raising it filed?
+> 2. Does the charter reserve enough common for the preferred conversion, the options, and the warrants?
+> 3. Does the seed preferred still convert one to one?
+> 4. Were the option grants approved, and does the 750,000 reserve cover them?
+> 5. For the engineer who left, were unvested shares bought back or cancelled, and does the company keep any right to repurchase the 250,000?
+> 6. Are the warrant terms (shares, exercise price, expiry) and the SAFE terms as listed, and are any other SAFEs or notes outstanding?
+>
+> ## Assumptions
+>
+> - Preferred counts one common share per share, and warrants count as fully exercised. Both are unverified; your charter and the warrant decide.
+> - Authorised figures are the ones you gave; I did not read the charter.
+> - Percents are checked with zero tolerance beyond rounding to two places.
+> - This checks arithmetic only, not whether any share or grant is legally valid. It is not legal, tax or investment advice.
+>
+> ## Needs from the founder
+>
+> - [Which is right: the 10,000,000 total or the line items, and were warrants meant to be in the total?] Once you correct it, I can re-run the check.
+> - [Next priced round you expect: pre-money, raise amount, any pool top-up] With that I can show what the SAFE conversion does to each line.

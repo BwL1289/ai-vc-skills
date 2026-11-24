@@ -301,17 +301,18 @@ sections, not the tool's output, not another lens's objections. Without a subage
 never revise an earlier list. Lenses run this way are less independent than subagents, and the same agent then judges
 them in Stage B, so the answer says so.
 
-**The calculator's mismatches** from step 4 do not go through the lenses, and none is refuted: the calculator
-computed it. Each is added to the ranked fix list ahead of the tiers, quoting the document's figure with the tool's
-value and difference, with the flag that explains it, when one does, as the reason. It carries no tier: how much a gap
-hurts depends on its size, which the founder weighs. A stated figure less flattering than the tool's value (an ARR or
+**The calculator's mismatches** from step 4 do not go through the lenses, and none is refuted: the calculator computed
+it. Each is added to the ranked fix list ahead of the tiers, quoting the document's figure with the tool's value and
+difference, with the flag that explains it, when one does, as the reason. It carries no tier: how much a gap hurts
+depends on its size, which the founder weighs. A stated figure less flattering than the tool's value (an ARR or
 retention below it; a churn, CAC, payback, burn multiple or concentration above it) understates: it goes in the minor
-tier at most. A percent, months or multiple that is the tool's figure rounded to the places the document writes is
-consistent, so a mismatch of one is never that rounding and, when no flag explains it as another definition, may rest
-on other parts or another working. Money is checked by the tolerance alone, so an ARR or CAC mismatch that no flag
-explains may still be the founder's rounding. The fix for either asks
-`[how the model works this figure, unrounded]`. A `not_checked` row is not a mismatch (step 4). An unlabelled churn with one consistent basis row is not a mismatch
-(step 4).
+tier at most. A mismatch a flag explains as another definition (a magic number without its 4, say) is no understatement,
+whichever way it errs, and keeps no tier. A percent, months or multiple that is the tool's figure rounded to the places
+the document writes is consistent, so a mismatch of one is never that rounding and, when no flag explains it as another
+definition, may rest on other parts or another working. Money is checked by the tolerance alone, so an ARR or CAC
+mismatch that no flag explains may still be the founder's rounding. The fix for either asks
+`[how the model works this figure, unrounded]`. A `not_checked` row is not a mismatch (step 4). An unlabelled churn with
+one consistent basis row is not a mismatch (step 4).
 
 ### Check the quotes
 
@@ -368,10 +369,11 @@ line itself.
 
 Order the kept objections in three tiers, most damaging first: **ends the meeting**, **weakens it**, **minor**. The
 calculator's mismatches lead the list ahead of the tiers, with no tier (Tier: "none, the founder weighs the gap"),
-except an understated figure, which is minor at most (Stage A). Within a tier, an objection raised by more than one lens
-comes first. The tier is a judgment, not a probability: give no percentages and no score. Each entry is one fix: the
-document and place, the line quoted word for word, why a partner is likely to read it that way in one or two plain
-sentences, and the change to make, using only the founder's facts, a tool value or a bracketed ask.
+except an understated figure, which is minor at most (Stage A), never one a flag explains as another definition.
+Within a tier, an objection raised by more than one lens comes first. The tier is a judgment, not a probability: give
+no percentages and no score. Each entry is one fix: the document and place, the line quoted word for word, why a
+partner is likely to read it that way in one or two plain sentences, and the change to make, using only the founder's
+facts, a tool value or a bracketed ask.
 
 ## Flags
 

@@ -147,9 +147,12 @@ Two were run again after a skill fix, as their files say. One run each is a smal
 eval of every other review skill then in the pack except `vc-deal-math` was run live too. On 2026-11-24 one eval each
 of five of the six skills added that day (`vc-competitive-landscape`, `vc-raise-plan`, `vc-intro-email`,
 `vc-pass-debrief` and `vc-option-pool-plan`) was run live and recorded: four passed, each with a shortfall against its
-expected answer noted, and one passed in part; no live run of the sixth, `vc-cap-table-check`, is recorded yet. An eval
-file whose first paragraph says a live run is recorded holds an excerpt of it with its verdict; every other eval, the
-`vc-deal-math` and `vc-cap-table-check` ones included, states the expected behaviour only.
+expected answer noted, and one passed in part. Later that day, on plugin 0.3.5, one eval each of `vc-positioning`
+(Company BK), `vc-metrics-readiness` (Company DL), `vc-cap-table-check` (Company CQ) and `vc-deal-math` (Company DX) was
+run live and recorded: three passed, each with shortfalls against its expected answer noted, and the `vc-deal-math` one
+failed, with three clauses met only in part, because its session loaded the `equity-calculator` skill instead. An eval
+file whose first paragraph says a live run is recorded holds an excerpt of it with its verdict; every other eval states
+the expected behaviour only.
 
 The `equity-calculator` skill covers fifteen scenarios:
 

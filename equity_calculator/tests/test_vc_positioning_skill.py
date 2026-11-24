@@ -34,6 +34,9 @@ _NO_CALL = "## Expected tool call\n\nNone: no `equity_deal_check` call."
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
 _EVAL_HEADINGS = ("## Prompt", "## Expected tool call", "## Expected answer")
+_RECORDED = "## Recorded answer"
+# A recorded run's verdict line, in the shape the repository's recorded evals use.
+_VERDICT_LINE = re.compile(r"\*\*(?:Pass|Partial|Fail)\b[^*]*\*\*")
 _FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 # A fence inside a list item is indented; the indent is captured so it can be taken off each line.
 _FENCE = re.compile(r"^( *)```([a-z]*)\n(.*?)^\1```$", re.MULTILINE | re.DOTALL)
@@ -239,6 +242,17 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
         assert "made up" in text, path.name
+        if _RECORDED not in text:
+            assert "not a recorded run" in text and "has not been run in a live session" in text, path.name
+            continue
+        # A recorded run: the intro says so, the excerpt follows the expected answer, and it opens with its verdict
+        # and says what changed since.
+        assert text.index(f"\n{_RECORDED}\n") > positions[-1], path.name
+        assert '"Recorded answer" is an excerpt of a recorded run' in _unwrapped(text.split("\n## ", 1)[0]), path.name
+        recorded = _section(_RECORDED, text)
+        assert _VERDICT_LINE.match(recorded.strip("\n").split("\n\n")[1]), path.name
+        assert "Since this run" in _unwrapped(recorded), path.name
+        assert _fences("json", recorded) == [] and _fences("text", recorded) == [], path.name
 
 
 def test_one_eval_has_the_phrases_that_cost_the_meeting() -> None:
@@ -511,6 +525,16 @@ def test_the_contrarian_lens_tests_consensus_evidence_and_dependence_by_its_brie
     refute = _unwrapped(_section("### Stage B: refute"))
     assert "or that a belief stated as contrarian is one most investors already hold, rests on that reading" in refute
     assert "answered only by a line that names who rejects the belief and why" in refute
+    # A live run's judge dropped the objection quoting slide 4, which shows others acting on the belief, as not grounded
+    # because slide 4 never names the belief: such a line supports the objection, in the brief and in the verdict.
+    assert (
+        "A line showing others already acting on that belief supports the objection even when the line never names the"
+        " belief or calls it contrarian: never drop it as not grounded then."
+    ) in refute
+    assert (
+        "A line showing others acting on a belief stated as contrarian says what an objection that most investors"
+        " already hold that belief claims."
+    ) in refute
 
 
 def test_a_founder_with_no_contrarian_belief_is_asked_once_and_never_given_one() -> None:
@@ -575,3 +599,8 @@ def test_one_eval_catches_a_contrarian_claim_most_investors_already_hold() -> No
     assert _CONTRARIAN_ASK in answer
     assert "It asks once, in one message, with the two prompts" in answer
     assert "not every good company needs a contrarian story" in answer
+    # The live run is recorded: it met the pass sentence, and the slide-4 objection it dropped led to a fix.
+    recorded = _unwrapped(_section(_RECORDED, text)).strip()
+    assert recorded.startswith("Recorded with Claude Code 2.1.331 on 2026-11-24")
+    assert "**Pass, with shortfalls against the expected answer.** It met every clause of the pass sentence" in recorded
+    assert "the one quoting slide 4" in recorded and "Since this run the refute brief says" in recorded
