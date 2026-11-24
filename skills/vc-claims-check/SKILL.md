@@ -41,7 +41,10 @@ for a deck), in the file's own words, so the founder sees what was read from eac
 that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
 asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
 Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
-input below that it leaves out), and never ask the founder to paste what you already read.
+input below that it leaves out), and never ask the founder to paste what you already read. When the founder cannot
+answer now, do not wait for them: go on with what was given (a call or step that waits for an input still waits), invent
+nothing in a gap's place, and list each ask in brackets under **Needs from the founder**, the open asks under that name;
+a live drill waits for the founder.
 
 1. Every document the founder will send or show, each with a name ("deck", "one-pager", "narrative") and its places
    marked (slide numbers, page numbers or paragraph order), so every claim can be located.
@@ -99,13 +102,13 @@ claims list; step 7 then runs only the quote check and the refute pass.
      definitions), do not convert one into the other. Say they cannot be compared as stated, mark the claim Needs a
      source, and ask the founder to state one figure, in one form, with its period.
    - Projections are Figures too: check that each is labelled as a plan with its period, and quote it as stated.
-5. **Deal terms go to the calculator.** The raise, valuation and its label, percent sold, pool, founders' percent
-   after the round, outstanding SAFEs and notes, cash, burn, revenue, runway claim and use-of-funds lines are checked
-   with `equity_deal_check` (from the command line, `equity_calculator deal_check`), or `equity_runway_plan` as below,
-   following the vc-deal-math skill's steps: ask for what is missing, send money and percents as strings (a stated
-   percent or runway with the document's own places, since one that is the tool's figure rounded to them is
-   consistent, in `equity_deal_check` and `equity_runway_plan` alike; the post-money and the use-of-funds total keep
-   the tolerance alone), and call twice for a valuation with no label.
+5. **Deal terms go to the calculator.** The raise, valuation and its label, percent sold, pool, founders' percent after
+   the round, outstanding SAFEs and notes, cash, burn, revenue, runway claim (not on a phased plan: below) and
+   use-of-funds lines are checked with `equity_deal_check` (from the command line, `equity_calculator deal_check`), or
+   `equity_runway_plan` as below, following the vc-deal-math skill's steps: ask for what is missing, send money and
+   percents as strings (a stated percent or runway with the document's own places, since one that is the tool's figure
+   rounded to them is consistent, in `equity_deal_check` and `equity_runway_plan` alike; the post-money and the
+   use-of-funds total keep the tolerance alone), and call twice for a valuation with no label.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
      which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask for the
@@ -141,11 +144,15 @@ claims list; step 7 then runs only the quote check and the refute pass.
      runway call and give no runway figure; mark the runway line "not checked: waiting for [the month the planned spend
      starts]" while the month is missing, "not checked: waiting for [the planned monthly spend from that month]" while
      the month is given and the spend is missing, or "not checked: waiting for [the planned monthly revenue from that
-     month]" while only the revenue is missing. With no cash or burn given, ask for them by name
-     (`[cash on hand, monthly spend and revenue]`) and make no call until they are given. While the runway call waits
-     for an input (cash, burn, or a planned change's start month, monthly spend or monthly revenue), the runway claim is
-     Needs a source, with the bracketed ask in its fix (and, for a planned change, its not-checked line), and is never
-     worked out by hand.
+     month]" while only the revenue is missing. A priced round on a phased plan (spend or revenue that changes from a
+     later month the founder names; spend planned from the round on is `deal_check`'s planned burn) goes to
+     `equity_deal_check` without its runway claim, since its one flat burn could call the plan's runway a mismatch; the
+     plan's runway and the claim's check come from `equity_runway_plan`, the round's amount as one `raises` entry on
+     phases built, and waited for, as above, and both runways are quoted, each named, as vc-deal-math step 2 says. With
+     no cash or burn given, ask for them by name (`[cash on hand, monthly spend and revenue]`) and make no call until
+     they are given. While the runway call waits for an input (cash, burn, or a planned change's start month, monthly
+     spend or monthly revenue), the runway claim is Needs a source, with the bracketed ask in its fix (and, for a
+     planned change, its not-checked line), and is never worked out by hand.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
      its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%, -0.033333 is -3.3333%),
      which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
@@ -212,9 +219,11 @@ grounded. Questions to the founder go to the open asks.
 ### The refute pass
 
 Each attack gets its own refute pass. With a subagent tool, launch one subagent per attack in a single message; never
-put two attacks in one subagent. Give each the founder's material, that one attack, the Pattern column of the
-discount table below and the brief below with its three verdicts and the rules after them, and nothing else; without
-one, decide the attacks one at a time against the same brief. The brief:
+put two attacks in one subagent. Give each the founder's material, that one attack, the Pattern column of the discount
+table below and the brief below with its three verdicts and the rules after them, and nothing else; without one, decide
+the attacks one at a time against the same brief. One skeptic raises at most three attacks here, so the refute pass
+never has more than eight and lean mode, which other review skills use past eight, never applies, with or without a
+subagent tool. The brief:
 
 - You decide whether one attack is grounded in the founder's material. Write in the third person; you are not an
   investor and do not speak as one, named or not.

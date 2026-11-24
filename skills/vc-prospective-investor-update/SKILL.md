@@ -45,7 +45,10 @@ for a deck), in the file's own words, so the founder sees what was read from eac
 that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
 asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
 Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
-input below that it leaves out), and never ask the founder to paste what you already read.
+input below that it leaves out), and never ask the founder to paste what you already read. When the founder cannot
+answer now, do not wait for them: go on with what was given (a call or step that waits for an input still waits), invent
+nothing in a gap's place, and list each ask in brackets under **Needs from the founder**, the open asks under that name;
+a live drill waits for the founder.
 
 1. Every earlier update sent to these investors, word for word, each with its date and period; or "this is the first".
 2. This period's notes: what went right, what went wrong, what slipped, who joined or left, customers won and lost,
@@ -219,8 +222,7 @@ or burn. When the update shows a runway, it goes to `equity_runway_plan` (from t
   then prints, in the "Start raising by" row, how many months from the cash date the raise has to start by. That figure
   is for the founder; it goes in the update only if they want it there.
 - No `raises` and no `milestones`: sizing the round is the vc-round-sizing skill's job.
-- One call for the update, and none the founder did not ask for. Built from this period's current-investor update: the
-  same cash, spend and revenue as that update's call.
+- One call for the update, and none the founder did not ask for.
 
 **A claim stated as a floor** ("30+ months", "over 30 months", "at least 30 months") is passed as its number, but the
 tool's verdict row does not decide it: the tool calls a figure within its tolerance either way, or one that rounds to
@@ -358,7 +360,9 @@ and with this instruction, word for word: "Apply the brief to each objection as 
 Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
 answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
 says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
-ask for the full pass, one subagent per objection.
+ask for the full pass, one subagent per objection. Without a subagent tool, lean mode still applies past eight
+objections: go lens by lens, in order, and judge each lens's objections in one pass under that instruction, each with a
+verdict of its own; the answer says so, as above, and that the full pass then takes them one at a time.
 
 The refute brief:
 

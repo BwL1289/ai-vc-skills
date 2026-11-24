@@ -42,7 +42,9 @@ from each. A place you could not read (a slide that is only a picture, a page wh
 opened only in part) is listed as not read and asked for, never filled in from its title or the places around it, and a
 figure is never read off a chart or a picture. Ask only for what you could not read and what the file does not show
 (speaker notes, the figures behind a chart, an input below that it leaves out), and never ask the founder to paste what
-you already read.
+you already read. When the founder cannot answer now, do not wait for them: go on with what was given (a call or step
+that waits for an input still waits), invent nothing in a gap's place, and list each ask in brackets under **Needs from
+the founder**, the open asks under that name; a live drill waits for the founder.
 
 1. **The decisions**, as a numbered list in the founder's words: product, brand and scope. For each, what was decided,
    and the reason as the founder would give it.
@@ -65,38 +67,49 @@ and stop.
 
 Each decision is marked Clear, Needs work or Missing on each check, quoting the line that decides it.
 
-| Check      | What a clear answer does                                                                                     |
-| ---------- | ------------------------------------------------------------------------------------------------------------ |
-| Clarity    | A reader could say back what was decided, what was turned down, and why, from the founder's line alone       |
-| Usefulness | The reason ties to the core workflow or a named kind of customer, not to how the product looks or to a trend |
-| Trust      | A customer would trust the product more for it, and the founder names what shows it or labels it a judgment  |
+| Check      | What a clear answer does                                                                                                                                               |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clarity    | A reader could say back what was decided, what was turned down, and why, from the founder's line alone                                                                 |
+| Usefulness | The reason ties to the core workflow, a named kind of customer, or that customer's trust (an honesty or disclosure choice), not to how the product looks or to a trend |
+| Trust      | A customer would trust the product more for it, and the founder names what shows it or labels it a judgment                                                            |
 
 ## Flags
 
 Signals, not rules: a founder may have a reason. Flag, quote the line, explain, and let them decide. Every row is this
 skill's own judgment; no public source behind it was read.
 
-| Flag         | Pattern                                                                                                                         | What a partner is likely to hear                 | Fix                                                                                         |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| Generic      | A decision any company in any market could state: "we keep it simple", "customer-first", "quality over quantity"                | No decision was made                             | Name the specific thing cut or chosen, and for whom                                         |
-| Generic      | A NO nobody would have built anyway, or a list of decisions with no NO at all                                                   | No trade-off was faced                           | The NO that cost something: a feature customers asked for, a channel that would have worked |
-| AI-sounding  | Stacked abstractions or stock phrases: "seamless, intuitive and powerful", "unlock", "empower", "in today's fast-paced world"   | Boilerplate; the founder's own voice is missing  | The customer's words for the job, one concrete noun per claim                               |
-| AI-sounding  | Brand or outreach tactics the founder lists that read as automated: mass personalised openers, fake urgency, chatbot greeters   | The brand will feel like everyone else's inbox   | Say what the founder does instead, and why it fits the customer                             |
-| Copycat      | A reason that is only that another company does it: "because [company] does it", "industry standard", "users expect it"         | The angle is borrowed, not the founder's own     | The customer reason, or the founder's reason for departing from the borrowed choice         |
-| Taste-washed | A polish claim ("beautifully designed", "delightful", "premium", "crafted") with no cut or trade-off in the decisions behind it | Surface over substance; the core may be generic  | The decision under the polish: what was removed or refused so the core job is better        |
-| Taste-washed | The words taste, design-led or opinionated claimed in the material rather than shown by a decision                              | A claim to judgment, which is the thing in doubt | Drop the word; show one decision and its NO                                                 |
-| Scope        | A feature added for a demo, a trend or one loud customer, with no tie to the core workflow                                      | Bloat; the founder cannot say no                 | Cut it, or name the workflow step it serves                                                 |
+| Flag            | Pattern                                                                                                                                                         | What a partner is likely to hear                  | Fix                                                                                          |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Generic         | A decision any company in any market could state: "we keep it simple", "customer-first", "quality over quantity"                                                | No decision was made                              | Name the specific thing cut or chosen, and for whom                                          |
+| Generic         | A NO nobody would have built anyway, or a list of decisions with no NO at all                                                                                   | No trade-off was faced                            | The NO that cost something: a feature customers asked for, a channel that would have worked  |
+| AI-sounding     | Stacked abstractions or stock phrases: "seamless, intuitive and powerful", "unlock", "empower", "in today's fast-paced world"                                   | Boilerplate; the founder's own voice is missing   | The customer's words for the job, one concrete noun per claim                                |
+| AI-sounding     | Brand or outreach tactics the founder lists that read as automated: mass personalised openers, fake urgency, chatbot greeters                                   | The brand will feel like everyone else's inbox    | Say what the founder does instead, and why it fits the customer                              |
+| Copycat         | A reason that is only that another company does it: "because [company] does it", "industry standard", "users expect it"                                         | The angle is borrowed, not the founder's own      | The customer reason, or the founder's reason for departing from the borrowed choice          |
+| Taste-washed    | A polish claim ("beautifully designed", "delightful", "premium", "crafted") with no cut or trade-off in the decisions behind it                                 | Surface over substance; the core may be generic   | The decision under the polish: what was removed or refused so the core job is better         |
+| Taste-washed    | The words taste, design-led or opinionated claimed in the material rather than shown by a decision                                                              | A claim to judgment, which is the thing in doubt  | Drop the word; show one decision and its NO                                                  |
+| Claimed quality | A quality of the founder or team claimed in place of a decision: "deep domain know-how", "an obsessive eye for detail", "we know this buyer better than anyone" | A claim to the judgment the decisions should show | Keep the fact behind it if the founder gives one; show the decision it stands for and its NO |
+| Scope           | A feature added for a demo, a trend or one loud customer, with no tie to the core workflow                                                                      | Bloat; the founder cannot say no                  | Cut it, or name the workflow step it serves                                                  |
 
-"AI-sounding" describes how a line reads. Never say or imply that a model wrote it.
+"AI-sounding" describes how a line reads. Never say or imply that a model wrote it. "Claimed quality" is the same
+signal as the second Taste-washed row for any quality other than taste: expertise, craft, care, speed. A fact the
+founder gives behind it (a role held, a product shipped) is quoted as stated, never judged.
 
 ## Steps
 
 Without a subagent tool, run Stage A of the adversarial review first, before step 1, as "How to run the lenses" says,
 so the lenses do not anchor on the checks or the flags; step 5 then starts at the quote check.
 
-1. **Quote first.** List each decision and each NO word for word, numbered D1, D2 and so on, with the reason as given.
-   Add no decision. A decision the material implies but the founder did not list becomes a question in the open asks
-   ("Did you decide to ...?"), never a row.
+1. **Quote first.** List each decision and each NO word for word, numbered T1, T2 and so on, with the reason as given.
+   T numbers are this check's own, so they never clash with a log that numbers its decisions; the founder's own label
+   is kept and quoted beside it ("T1, your D4"). Add no decision. A decision the material implies but the founder did
+   not list becomes a question in the open asks ("Did you decide to ...?"), never a row.
+   - **A log that is mostly layout detail** (a spacing, a colour, where a button sits, each with no NO and no reason
+     tied to a customer): check every product, brand and scope decision and every entry with a NO, list the rest once
+     by their numbers as "not checked: layout detail", and ask in the open asks which of them the founder wants checked.
+   - **A log partly written by assistant sessions,** where the log itself marks an entry as an assistant's (a session
+     transcript's turn, a "suggested" note): only the founder's own words and the entries the founder marks adopted
+     count as decisions. Quote any other assistant entry labelled "assistant text, not the founder's", and ask in the
+     open asks whether the founder adopted it. Never infer who wrote a line from how it reads.
 2. **Run the three checks** on each decision, quoting the line that decides each mark. Give no overall score: taste
    from one conversation cannot be scored, and a number would invite false comfort.
 3. **Scan for flags** in the decisions and the material. For each hit: quote the line, name the flag, say what a
@@ -182,7 +195,9 @@ and with this instruction, word for word: "Apply the brief to each objection as 
 Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
 answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
 says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
-ask for the full pass, one subagent per objection.
+ask for the full pass, one subagent per objection. Without a subagent tool, lean mode still applies past eight
+objections: go lens by lens, in order, and judge each lens's objections in one pass under that instruction, each with a
+verdict of its own; the answer says so, as above, and that the full pass then takes them one at a time.
 
 The refute brief:
 
@@ -246,20 +261,20 @@ survivor that turns on a phrase joins the flags list.
 - **Plain words.** No stacked adjectives, and never the word taste: the line shows judgment by naming the trade-off.
 - **The repeatable line:** mark the one sentence a partner should be able to repeat to their partners on Monday.
 
-**Where each one goes** (a judgment, not a score). Every row of the decisions table gets exactly one placement:
+**Where each one goes** (a judgment, not a score). Every row of the decisions table gets exactly one placement. The
+deck and the meeting share one bar, and the deck adds to it. A decision **needs a story** when what it turned down
+happened rather than was only decided, and its lines name that event: a feature built and then removed, a paying
+customer's request turned down, a channel tried and dropped.
 
 - **In the deck:** at most three, each a decision with no kept objection above minor and no flag, Clear on all three
-  checks, and tied to the core workflow. Name the slide: the product or solution slide for a scope cut, the competition
-  or insight slide for a departure from the alternatives. Never a slide about the founder's taste. A decision that
-  needs a story to land goes in the meeting even when it also qualifies here, and so does a fourth decision that
-  qualifies.
-- **In the meeting:** decisions with no kept objection above minor and no flag that need a story to land (a feature
-  removed after launch, a paying customer's request turned down, a channel dropped), ready for when a partner asks
-  "why not build X?" or "what have you learned?".
+  checks, tied to the core workflow, and needing no story. Name the slide: the product or solution slide for a scope
+  cut, the competition or insight slide for a departure from the alternatives. Never a slide about the founder's taste.
+- **In the meeting:** every other decision with no kept objection above minor and no flag, Clear on all three checks:
+  one that needs a story, one past the deck's three, and one whose Usefulness rests on a named customer or their trust
+  rather than the core workflow. Each is ready for when a partner asks "why not build X?" or "what have you learned?".
 - **Not yet:** every other decision, with the fix that would move it, naming every kept objection on it: any decision
   with a kept objection that ends the meeting or weakens it, or a flag, which outranks the meeting and the deck, and
-  any decision that fits neither of the two above, such as one marked Needs work or Missing on a check with no story
-  behind it.
+  any decision marked Needs work or Missing on a check, a story or not.
 
 ## Answering
 

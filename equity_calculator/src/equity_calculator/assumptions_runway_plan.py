@@ -4,8 +4,9 @@ Two rows quote Y Combinator's "A guide to seed fundraising", read in full: the m
 need a follow-on round raises enough to reach its next fundable milestone) and the runway band (raising for N months,
 usually 12 to 18). The default band of 18 months is the top of that range, so the flag is a question, not a shortfall;
 the band is a benchmark, not a rule, and an input the founder can change. The time left to raise the next round, the
-runway, phase, landing and required-raise rules and the tolerances (and the rounding test beside them) are marked
-unverified: standard arithmetic or a modelling choice no source was read for.
+runway, phase, run-rate, landing and required-raise rules and the tolerances (and the rounding test beside them) are
+marked unverified: standard arithmetic or a modelling choice no source was read for, and so is the milestone rule of a
+founder's only round (self-funding), which assumes no follow-on round and so cannot rest on the guide's.
 """
 
 from __future__ import annotations
@@ -50,13 +51,25 @@ def _cash_rows(inputs: RunwayPlanInput) -> list[EquityAssumption]:
             f"{UNVERIFIED} (a modelling choice)",
         ),
     ]
+    if any(phase.revenue_run_rate is not None for case in inputs.cases for phase in case.phases):
+        rows.append(
+            _assumption(
+                "run_rate_rule",
+                "revenue a month = the annualised run-rate / 12",
+                "A phase's revenue given as an annualised run-rate is twelve times a month's revenue, so the "
+                "calculator takes one twelfth of it, exactly, flat for every month the phase covers; the run-rate is "
+                "the founder's, not a forecast of growth.",
+                f"{UNVERIFIED} (standard arithmetic)",
+            )
+        )
     if inputs.raises:
         rows.append(
             _assumption(
                 "landing_rule",
                 "the whole raise lands at once, at the start of month lands_month + 1",
                 "A raise lands in one amount after its whole months from today (0: today); cash that is exactly at "
-                "the floor as the money lands has not run out.",
+                "the floor as the money lands has not run out. A raise is cash whatever its instrument: a priced "
+                "round, a SAFE or a note adds its amount, and nothing converts here.",
                 f"{UNVERIFIED} (a modelling choice)",
             )
         )
@@ -79,6 +92,24 @@ def _milestone_rows(inputs: RunwayPlanInput) -> list[EquityAssumption]:
     if not inputs.milestones:
         return []
 
+    required = _assumption(
+        "required_raise_rule",
+        "the smallest raise that keeps cash at or above the floor through the target month",
+        "For each milestone and landing month, the least amount that, landing then, keeps the cash from going "
+        "below the floor before the target; none when the cash runs out before it lands.",
+        f"{UNVERIFIED} (standard arithmetic)",
+    )
+    if inputs.milestone_type == "self_funding":
+        only_round = _assumption(
+            "milestone_rule",
+            "covered when the cash lasts to the milestone month; no follow-on round assumed (self-funding)",
+            "The founder plans this as the only round, so each milestone is checked at its own month, with no time "
+            "left to raise a next one. The seed guide's rule, sizing a raise to the next fundable milestone, is for "
+            "a startup that will need a follow-on round, so it is not applied; whether the cash lasts after a "
+            "milestone shows in the runway rows, where a runway that ends is the plan running out.",
+            f"{UNVERIFIED} (a modelling choice)",
+        )
+        return [only_round, required]
     if inputs.months_to_raise is None:
         setting = "covered when the cash lasts to the milestone month (no months to raise given)"
     else:
@@ -92,13 +123,7 @@ def _milestone_rows(inputs: RunwayPlanInput) -> list[EquityAssumption]:
             f"next round is ours, {UNVERIFIED}.",
             f"{YC_SEED_GUIDE_SOURCE}: {_MILESTONE_QUOTE}",
         ),
-        _assumption(
-            "required_raise_rule",
-            "the smallest raise that keeps cash at or above the floor through the target month",
-            "For each milestone and landing month, the least amount that, landing then, keeps the cash from going "
-            "below the floor before the target; none when the cash runs out before it lands.",
-            f"{UNVERIFIED} (standard arithmetic)",
-        ),
+        required,
     ]
 
 

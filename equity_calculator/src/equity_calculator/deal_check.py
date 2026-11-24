@@ -11,7 +11,8 @@ V + I and the headline share sold I/(V + I). The round is then worked on one of 
   holders' shares, the unissued pool, the new pool (when it is counted in the pre-money) and the SAFE and note
   shares; the parts add up to V.
 - Runway on each burn given: (cash on hand + I) / burn, net (gross - revenue) and gross; no net runway when revenue
-  covers the burn. A runway claim is checked against the planned net runway, else today's.
+  covers the burn. A runway claim is checked against the planned net runway, else today's. That is one flat burn, a
+  quick check: a phased plan's runway is ``runway_plan``'s, with this round as cash in at its month.
 
 Each figure the deck states becomes one check: consistent within the tolerance (``tolerance_points`` points for a
 percent, ``tolerance_percent`` of the computed figure for the post-money and the runway, the edge included), else a

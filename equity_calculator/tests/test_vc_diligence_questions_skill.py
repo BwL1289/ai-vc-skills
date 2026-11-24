@@ -56,7 +56,7 @@ _FENCE = re.compile(r"^( *)```([a-z]*)\n(.*?)^\1```$", re.MULTILINE | re.DOTALL)
 _TOOL_NAME = re.compile(r"`(equity_[a-z_]+)`")
 _TOOL_PREFIX = "equity_"
 _WORKBOOK_TOOL = "equity_workbook"
-_TOOLS = {"equity_deal_check", "equity_round", "equity_runway_plan"}
+_TOOLS = {"equity_deal_check", "equity_round", "equity_runway_plan", "equity_instrument_compare"}
 _HANDOFF_SKILLS = (
     "vc-partner-meeting",
     "vc-claims-check",
@@ -90,7 +90,7 @@ _SOURCES = {
 _STAGE_RULE = "Do not spend too much time developing diligence documents for a seed round"
 _AREAS = ("Team", "Market", "Product", "Traction and metrics", "Financials and cap table", "Legal")
 _TIERS = ("stops the process", "slows it", "minor")
-_STATUSES = ("Contradicted", "Missing", "Ready")
+_STATUSES = ("Contradicted", "Missing", "Unknown: ask", "Ready")
 _REFUTE_VERDICTS = ("Dropped, answered:", "Dropped, not grounded:", "Kept:")
 _CAP_UNCHECKED = "not checked: no tool adds up a cap table"
 _NOT_COMPUTED = "not checked: no tool computes this"
@@ -496,7 +496,7 @@ def test_every_flag_code_each_tool_returns_has_a_meaning_in_the_skill() -> None:
 def test_the_checklist_has_three_statuses_in_order_and_keeps_to_the_stage() -> None:
     checklist = _unwrapped(_section("## The data-room checklist"))
 
-    assert "**Contradicted**, then **Missing**, then **Ready**" in checklist
+    assert "**Contradicted**, then **Missing**, then **Unknown: ask**, then **Ready**" in checklist
     for status in _STATUSES:
         assert f"- **{status}:**" in _section("## The data-room checklist"), status
     assert "Rows for a later stage are not listed as missing" in checklist
@@ -738,3 +738,52 @@ def test_the_readme_badge_counts_the_skill_folders() -> None:
 
     assert badge is not None
     assert int(badge.group(1)) == int(badge.group(2)) == len(folders), (badge.groups(), len(folders))
+
+
+def test_missing_says_only_what_the_founders_list_leaves_out_and_an_unasked_row_is_unknown() -> None:
+    """With no document list from the founder, a row could be marked Missing for a document the company has; Missing
+    now needs the founder's list, and a row nobody has asked about is Unknown: ask."""
+    checklist = _unwrapped(_section("## The data-room checklist"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert 'Missing is not "does not exist"' in checklist
+    assert "a row the founder has not been asked about is never Missing" in checklist
+    assert "- **Missing:** the founder gave their list of the documents they have (Inputs 4)" in _section(
+        "## The data-room checklist"
+    )
+    assert "the founder has given no document list yet, or called it partial" in checklist
+    assert "`[do you have an export of active accounts?]`" in checklist
+    assert "Status (Contradicted, Missing, Unknown: ask or Ready)" in answering
+
+
+def test_alt_text_and_a_pdfs_text_layer_count_as_read() -> None:
+    """Text an HTML image's alt attribute or a PDF page's text layer carries is the file's own words, so it is read."""
+    inputs = _unwrapped(_section("## Inputs"))
+    rule = (
+        "An HTML file's alt text for an image and a PDF page's text layer are the file's own words, so they count as"
+        " read"
+    )
+
+    assert rule in inputs and inputs.index(rule) < inputs.index("1. ")
+    assert 'quote each with where it came from ("alt text, slide 4")' in inputs
+    assert "a figure in them is quoted as that text states it, never as read off the picture" in inputs
+
+
+def test_a_listed_row_cites_only_the_bank_questions_of_the_founders_stage() -> None:
+    """Rows list from the founder's stage and earlier, but some answer bank questions asked only at a later stage; the
+    skill leaves those IDs off the row, so a seed checklist never cites a Series A question."""
+    checklist = _unwrapped(_section("## The data-room checklist"))
+    stages = {row[0]: row[4].split(", ") for row in _bank_rows()}
+    order = list(_STAGES)
+    later = []
+    for row in _checklist():
+        cited = [name.strip() for name in row[5].split(",") if name.strip() != _NONE]
+        for name in cited:
+            asked = stages[name]
+            if _ALL_STAGES not in asked and min(order.index(stage) for stage in asked) > order.index(row[4]):
+                later.append((row[0], name))
+
+    assert "A listed row cites only the bank IDs whose Stages include the founder's stage" in checklist
+    assert "that later question is left off the row" in checklist
+    # The rule is needed: the hiring plan, a seed row, answers a Series A team question.
+    assert ("TEAM-D3", "TEAM-8") in later

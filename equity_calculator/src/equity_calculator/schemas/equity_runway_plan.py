@@ -5,7 +5,15 @@ until the next phase starts (the last runs on). A downside or a lean case is giv
 of the plan's revenue and gross burn. Each raise option is an amount landing after some whole months (0: now); the
 no-raise row is always worked too. Milestones are months from today; ``months_to_raise`` is the time the founder
 allows to raise the next round after reaching one. The scenario is cash only: valuation, instrument and ownership
-stay with ``deal_check``, ``round`` and ``dilution``.
+stay with ``deal_check``, ``round`` and ``dilution``. A raise of any instrument (a priced round, a SAFE, a note) is
+its amount of cash in at its month, and nothing converts here, so a priced round on a phased plan gets its runway
+here too: ``deal_check`` works runway at one flat burn, a quick check, and on a plan whose spend or revenue changes by
+month this scenario's runway is the plan's.
+
+A phase's revenue is a month's, or an annualised run-rate (``revenue_run_rate``) the calculator turns into a month's
+by dividing by 12 exactly, so no one divides by hand. ``milestone_type`` says what a milestone is for: the next round
+(the default; ``months_to_raise`` is counted after it), or self-funding, when the founder plans this as the only round
+(no follow-on is assumed, so each milestone is checked at its own month and ``months_to_raise`` is refused).
 
 Stated runways are checked: ``stated_runway_months`` for the plan with no raise, and each option's own
 ``stated_runway_months`` (from today, or from when its money lands). Each is a ``WrittenDecimal``: a stated runway
@@ -22,6 +30,7 @@ tolerances and runway band (which import only ``equity_common`` and two other sc
 from __future__ import annotations
 
 from decimal import Decimal
+from fractions import Fraction
 from typing import Annotated, Literal
 
 from equity_calculator.schemas.equity_common import (
@@ -55,6 +64,7 @@ __all__ = [
     "BurnPhase",
     "CaseName",
     "MilestoneRow",
+    "MilestoneType",
     "MilestoneVerdict",
     "OptionFunds",
     "OptionRunway",
@@ -78,6 +88,11 @@ CaseName = Literal["plan", "downside", "lean"]
 
 # A milestone is ``covered`` when the cash lasts to its month plus the months to raise, else ``short``.
 MilestoneVerdict = Literal["covered", "short"]
+
+# What a milestone is for: ``next_round`` (a milestone to raise the next round from, with ``months_to_raise`` counted
+# after it) or ``self_funding`` (the founder plans this as the only round: no follow-on is assumed, so a milestone is
+# checked at its own month, and there are no months to raise).
+MilestoneType = Literal["next_round", "self_funding"]
 
 # Which stated figure a check is about: a runway claim, or an option's use-of-funds total.
 RunwayCheckKey = Literal["runway_months", "use_of_funds_total"]
@@ -114,19 +129,45 @@ _MAX_PERCENT_OF_PLAN = WHOLE_PERCENT * 10
 _PLAN: CaseName = "plan"
 # The description each stated runway carries in the JSON schema (``AS_WRITTEN``).
 _MONTHS_AS_WRITTEN = AS_WRITTEN.format(examples='"18", "18.0"')
+_MONTHS_PER_YEAR = 12
+_RUN_RATE = (
+    "The phase's revenue as an annualised run-rate (12 times a month's), instead of revenue a month: the calculator "
+    "divides it by 12 exactly. Give one or the other."
+)
 
 # strict: a month is a real int; a bool, a float or a numeric string is refused, never read as one.
 Month = Annotated[int, Field(strict=True, ge=1, le=MAX_MONTH)]
 
 
 class BurnPhase(BaseModel):
-    """From ``from_month`` until the next phase starts (the last runs on): monthly gross burn and revenue, flat."""
+    """From ``from_month`` until the next phase starts (the last runs on): monthly gross burn and revenue, flat.
+
+    The revenue is ``revenue`` a month, or ``revenue_run_rate``, an annualised run-rate the calculator divides by 12.
+    A ``revenue`` left out is ``None`` and worked as none, so "not given" survives a result's echoed ``inputs`` read
+    back from JSON (a stated 0 stays 0). "Not both" is a test of values (a run-rate beside revenue above zero), so
+    echoed inputs with a 0 or a null beside the run-rate are taken back as they are.
+    """
 
     model_config = MODEL_CONFIG
 
     from_month: Month
     gross_burn: BoundedDecimal = Field(gt=0)
-    revenue: BoundedDecimal = Field(default=Decimal(0), ge=0)
+    revenue: BoundedDecimal | None = Field(default=None, ge=0)
+    revenue_run_rate: BoundedDecimal | None = Field(default=None, ge=0, description=_RUN_RATE)
+
+    @model_validator(mode="after")
+    def _one_revenue(self) -> BurnPhase:
+        """Refuse a phase with both a revenue a month above zero and a run-rate."""
+        if self.revenue_run_rate is not None and self.revenue is not None and self.revenue > 0:
+            raise ValueError("give a phase's revenue a month or its revenue_run_rate (annualised), not both")
+
+        return self
+
+    def monthly_revenue(self) -> Fraction:
+        """The revenue a month, exactly: ``revenue`` (none when left out), or the run-rate divided by 12."""
+        if self.revenue_run_rate is None:
+            return Fraction(self.revenue or 0)
+        return Fraction(self.revenue_run_rate) / _MONTHS_PER_YEAR
 
 
 class BurnCase(BaseModel):
@@ -162,7 +203,8 @@ class BurnCase(BaseModel):
 class RaiseOption(BaseModel):
     """One amount to compare: when it lands (whole months from today), a stated runway, and its use-of-funds lines.
 
-    The whole amount lands at once, at the start of month ``lands_month`` + 1 (0: today).
+    The whole amount lands at once, at the start of month ``lands_month`` + 1 (0: today). It is cash whatever the
+    instrument: a priced round, a SAFE or a note adds its amount and converts nothing here.
     """
 
     model_config = MODEL_CONFIG
@@ -207,6 +249,7 @@ class RunwayPlanInput(BaseModel):
     cases: tuple[BurnCase, ...] = Field(min_length=1, max_length=MAX_CASES)
     raises: tuple[RaiseOption, ...] = Field(default=(), max_length=MAX_RAISES)
     milestones: tuple[Month, ...] = Field(default=(), max_length=MAX_MILESTONES)
+    milestone_type: MilestoneType = "next_round"
     months_to_raise: int | None = Field(default=None, strict=True, ge=0, le=MAX_MONTHS_TO_RAISE)
     stated_runway_months: WrittenDecimal | None = Field(default=None, gt=0, description=_MONTHS_AS_WRITTEN)
     tolerance_points: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_POINTS, ge=0, lt=WHOLE_PERCENT)
@@ -215,8 +258,8 @@ class RunwayPlanInput(BaseModel):
 
     @model_validator(mode="after")
     def _plan_can_be_worked(self) -> RunwayPlanInput:
-        """Refuse a plan that is not first or not given as phases, a case named twice, a floor above the cash, or a
-        milestone given twice."""
+        """Refuse a plan that is not first or not given as phases, a case named twice, a floor above the cash, a
+        milestone given twice, and a self-funding milestone type with months to raise or with no milestone."""
         first = self.cases[0]
         if first.name != _PLAN:
             raise ValueError(f"the first case must be the plan (got {first.name})")
@@ -231,12 +274,21 @@ class RunwayPlanInput(BaseModel):
             )
         if len(set(self.milestones)) != len(self.milestones):
             raise ValueError("milestones: each milestone month may appear once")
+        if self.milestone_type == "self_funding":
+            if self.months_to_raise is not None:
+                raise ValueError(
+                    "months_to_raise is the time to raise a next round, and a self-funding milestone_type assumes no "
+                    "next round: leave months_to_raise out"
+                )
+            if not self.milestones:
+                raise ValueError("a self-funding milestone_type needs at least one milestone")
 
         return self
 
 
 class PhaseRow(BaseModel):
-    """One phase as worked: its months (``to_month`` none for the last, which runs on), gross, revenue and net burn."""
+    """One phase as worked: its months (``to_month`` none for the last, which runs on), gross, revenue and net burn,
+    and the annualised run-rate its revenue a month came from, when the phase gave one."""
 
     model_config = MODEL_CONFIG
 
@@ -245,6 +297,7 @@ class PhaseRow(BaseModel):
     gross_burn: EquityQuantity
     revenue: EquityQuantity
     net_burn: EquityQuantity
+    revenue_run_rate: EquityQuantity | None = None
 
 
 class RunwayCase(BaseModel):

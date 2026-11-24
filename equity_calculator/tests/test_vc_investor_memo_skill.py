@@ -11,6 +11,7 @@ list in three tiers. Each eval in evals/vc-investor-memo/ has a prompt, an expec
 each call is labelled with its tool, is valid, and carries an excerpt that is lines of the report that call prints.
 The tools' flags come back as bare codes over MCP, so the skill carries a meaning for every code, in a flag table in
 references/ that its "Flags" section links, so the skill stays under its line cap with its lines wrapped like the rest.
+The outcome case's worked waterfall call lives in references/ too, for the same reason, and its test reads it there.
 An eval run in a live session records an excerpt of that run under "Recorded answer"; the others say they have not
 been run.
 """
@@ -38,6 +39,10 @@ _SKILL = _ROOT / "skills" / "vc-investor-memo" / "SKILL.md"
 _TEXT = _SKILL.read_text(encoding="utf-8")
 _FLAGS_LINK = "[`references/flags.md`](references/flags.md)"
 _FLAGS = (_SKILL.parent / "references" / "flags.md").read_text(encoding="utf-8")
+# The outcome case's worked waterfall call (its JSON, the same command and part of what it prints) lives beside the
+# skill, so the skill stays under its line cap; its section links it.
+_OUTCOME_LINK = "[`references/outcome-example.md`](references/outcome-example.md)"
+_OUTCOME = (_SKILL.parent / "references" / "outcome-example.md").read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-investor-memo").glob("*.md"))
 _EVAL_COUNT = 6
@@ -62,6 +67,7 @@ _TOOLS_USED = {
     "equity_waterfall",
     "equity_dilution",
     "equity_runway_plan",
+    "equity_instrument_compare",
 }
 _NOT_USED = "equity_investor"
 _HANDOFF_SKILLS = (
@@ -353,7 +359,7 @@ def test_the_round_goes_to_the_round_tools_and_asks_the_fully_diluted_basis() ->
 
 
 def test_the_deal_check_excerpt_is_what_the_calculator_prints() -> None:
-    (excerpt, _) = _fences("text")
+    (excerpt,) = _fences("text")
     report = render_sheet(sheet_for(compute(DealCheckInput.model_validate(_COMPANY_BM_ROUND))))
     printed = [line.rstrip() for line in report.splitlines()]
 
@@ -362,10 +368,11 @@ def test_the_deal_check_excerpt_is_what_the_calculator_prints() -> None:
 
 
 def test_the_waterfall_example_is_valid_and_prints_its_excerpt() -> None:
-    (example,) = _fences("json")
+    (example,) = _fences("json", _OUTCOME)
     inputs = json.loads(example)["inputs"]
-    (_, excerpt) = _fences("text")
+    (excerpt,) = _fences("text", _OUTCOME)
 
+    assert _OUTCOME_LINK in _section("## The outcome case")
     assert WaterfallInput.model_validate(inputs).scenario == "waterfall"
     printed = [line.rstrip() for line in _report("waterfall", inputs).splitlines()]
     for line in excerpt.splitlines():
@@ -373,8 +380,8 @@ def test_the_waterfall_example_is_valid_and_prints_its_excerpt() -> None:
 
 
 async def test_the_waterfall_command_is_the_same_call_as_the_json_example() -> None:
-    (example,) = _fences("json")
-    (command,) = _fences("")
+    (example,) = _fences("json", _OUTCOME)
+    (command,) = _fences("", _OUTCOME)
     assert command.startswith(_PROGRAM) and "\n" not in command.strip()
 
     printed = json.loads(await run([*shlex.split(command)[1:], "--json"]))
@@ -589,7 +596,7 @@ def test_every_flag_code_each_round_tool_returns_has_a_meaning_in_the_skill() ->
 
 def test_the_exit_statement_the_skill_quotes_is_the_waterfalls_own() -> None:
     """The memo quotes the waterfall's exit_is_shared_amount statement word for word, so the skill's copy must match."""
-    result = compute(WaterfallInput.model_validate(json.loads(_fences("json")[0])["inputs"]))
+    result = compute(WaterfallInput.model_validate(json.loads(_fences("json", _OUTCOME)[0])["inputs"]))
     (statement,) = (row.statement for row in result.assumptions if row.key == "exit_is_shared_amount")
 
     assert f'`exit_is_shared_amount`: "{statement}"' in _unwrapped(_section("## The outcome case"))
@@ -760,3 +767,43 @@ def test_the_fund_and_firm_eval_declines_both_and_names_no_firm() -> None:
     assert "declines to write in any named or chosen fund's format" in answer
     assert "declines the fund math" in answer and "is not used anywhere" in answer
     assert not _names_a_person_or_firm(answer)
+
+
+def test_the_exit_statement_is_quoted_only_under_an_outcome_table_a_waterfall_made() -> None:
+    """With no waterfall run there is no outcome table, yet step 8 asked for the statement under one."""
+    steps = _unwrapped(_section("## Steps"))
+    outcome = _unwrapped(_section("## The outcome case"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "when a waterfall ran, the `exit_is_shared_amount` statement is quoted word for word" in steps
+    assert 'there is no outcome table and no statement, only the "not run" line' in steps
+    assert "When a waterfall ran, directly under the outcome table, quote the waterfall's" in outcome
+    assert "with no waterfall run there is no table and no statement to quote" in outcome
+    assert "when a waterfall ran, the outcome table" in answering and 'otherwise the "not run" line' in answering
+
+
+def test_a_computed_mismatch_has_no_tier_and_its_two_exceptions_say_where_they_go() -> None:
+    """The mismatch paragraph said every mismatch heads the list with no tier, then put one in the minor tier."""
+    dissent = _unwrapped(_section("## Dissent pass (adversarial review)"))
+    ranked = _unwrapped(_section("### The ranked fix list"))
+
+    assert "under **figures that do not match (computed)**, with no tier, quoting the memo's figure" in dissent
+    assert "with two exceptions, neither refuted" in dissent
+    assert 'it becomes the fix "The round" gives, placed in a tier by judgment' in dissent
+    assert "understates it, so it does not head the list" in dissent
+    assert "(an understated runway and a one-reading valuation mismatch excepted, as above, each in a tier)" in ranked
+
+
+def test_every_risk_left_out_is_raised_however_many_and_milestones_keep_their_own_clock() -> None:
+    """A lens capped at three objections could not raise every risk the memo must carry, and a milestone counted from
+    another start could be set against a runway counted from today."""
+    attack = _unwrapped(_section("### Stage A: attack"))
+    shape = _unwrapped(_section("## The memo's shape"))
+
+    assert "with one exception: the Risks left out lens returns one for each risk the founder's material" in attack
+    assert "that the memo leaves out, however many, since every such risk belongs in Top risks" in attack
+    assert "in the founder's words, however many that makes" in shape
+    assert "The three to five risks most likely to stop the case, then every other risk the founder's material" in shape
+    assert "**Each milestone on its own clock.** The runway counts months from today." in shape
+    assert "never set against the runway as if both counted from today" in shape
+    assert "`[the month from today that milestone falls in]`" in shape

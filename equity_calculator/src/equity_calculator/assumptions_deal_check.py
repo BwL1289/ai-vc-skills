@@ -98,7 +98,9 @@ def _runway_rows(inputs: DealCheckInput) -> list[EquityAssumption]:
             "runway_rule",
             f"(cash on hand ${inputs.cash_on_hand:,f} + I) / monthly burn",
             "Runway in months is cash on hand plus the raise over the monthly burn, net (gross burn - revenue) and "
-            "gross: no fees, the whole raise lands at once, and burn and revenue stay as given.",
+            "gross: no fees, the whole raise lands at once, and burn and revenue stay as given. That is one flat "
+            "burn, a quick check: on a plan whose spend or revenue changes by month, the plan's runway comes from "
+            "runway_plan, which takes this round as cash in at its month.",
             f"{UNVERIFIED} (standard arithmetic)",
         ),
         _assumption(

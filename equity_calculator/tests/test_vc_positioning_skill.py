@@ -152,6 +152,14 @@ def test_the_frontmatter_names_the_skill_and_the_founders_questions() -> None:
     assert "founder" in description and "adversarial review" in description
 
 
+def test_the_first_when_to_use_bullet_holds_the_contrarian_triggers() -> None:
+    """The contrarian triggers were in the description only; the first "When to use it" bullet lists them too."""
+    when = _TEXT.split("\n## When to use it\n", 1)[1].split("\n## ", 1)[0]
+    first = " ".join(line.strip() for line in when.strip().split("\n- ", 1)[0].splitlines())
+
+    assert '"What is our contrarian insight?" "What do we believe that others don\'t?"' in first
+
+
 def test_every_tool_the_skill_names_is_a_tool_the_server_serves() -> None:
     served = {f"{_TOOL_PREFIX}{scenario}" for scenario in _INPUT_MODELS} | {_WORKBOOK_TOOL}
     named = set(_TOOL_NAME.findall(_TEXT))
@@ -386,12 +394,14 @@ def test_step_4_asks_which_way_the_founders_fully_diluted_total_counts_safes_and
 def test_every_flag_code_has_its_meaning_in_the_skill() -> None:
     """The MCP tool returns flag codes only, so the skill carries each flag's meaning itself."""
     table = _section("## Calculator flags")
-    rows = re.findall(r"^\| `([a-z_]+)` +\|", table, re.MULTILINE)
+    deal, runway = table.split("\n| `equity_runway_plan` flag", 1)
     prose = _unwrapped(table.split("\n|", 1)[0])
 
-    assert rows == list(get_args(DealFlag))
-    for flag in ("runway_below_band", "cash_never_runs_out", "consistent_beyond_rounding"):
-        assert flag in get_args(RunwayPlanFlag) and f"`{flag}` (" in prose, flag
+    assert re.findall(r"^\| `([a-z_]+)` +\|", deal, re.MULTILINE) == list(get_args(DealFlag))
+    # Every runway-plan code has its row, as a call with a milestone brings codes past the three a plain call returns.
+    assert re.findall(r"^\| `([a-z_]+)` +\|", runway, re.MULTILINE) == list(get_args(RunwayPlanFlag))
+    plain = "returns only `runway_below_band`, `cash_never_runs_out` and `consistent_beyond_rounding`"
+    assert plain in prose
     assert 'with its meaning from "Calculator flags" below' in _unwrapped(_section("## Steps"))
 
 

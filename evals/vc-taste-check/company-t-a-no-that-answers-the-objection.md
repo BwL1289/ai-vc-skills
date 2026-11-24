@@ -35,8 +35,9 @@ None: no `equity_deal_check` call. The prompt states no deal terms, and the skil
   export to spreadsheets for reports anyway, and the dashboard took a third of our build time." Raised or not, that
   reason sits next to D1, in its why-we-built-it line or the decisions table.
 - D1 is placed In the meeting, as the story of a feature removed after launch, unless an objection that ends the
-  meeting or weakens it survives on D1. A minor survivor, such as one about the evidence line, leaves D1 in the
-  meeting with its bracketed ask beside the line.
+  meeting or weakens it survives on D1, or a check marks it Needs work or Missing (the meeting and the deck share one
+  bar). A minor survivor, such as one about the evidence line, leaves D1 in the meeting with its bracketed ask beside
+  the line.
 - D2 is Clear on all three checks with no flag: its Trust mark rests on the founder's honest label of a judgment before
   data and how they will know. Its why-we-built-it line uses only the founder's reason; it may be marked the repeatable
   line. It is placed in the deck on the product or solution slide when no objection above minor survives on it.

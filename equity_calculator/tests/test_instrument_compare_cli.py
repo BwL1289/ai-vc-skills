@@ -100,6 +100,12 @@ def _line(report: str, label: str) -> str:
     return next(line for line in report.splitlines() if line.strip().startswith(label))
 
 
+def _cells(report: str, label: str) -> list[str]:
+    """A line's A, B and B - A cells, as printed (the label and the how column dropped)."""
+    how = report.splitlines()[1].index("How it is computed")
+    return re.split(r" {2,}", _line(report, label)[:how].strip())[1:]
+
+
 def _flags(report: str) -> dict[str, str]:
     """Each printed flag's code and its whole line, trailing space dropped."""
     return {line.split()[1]: line.rstrip() for line in report.splitlines() if line.startswith("  Flag ")}
@@ -123,6 +129,29 @@ async def test_the_report_sets_a_beside_b_with_b_minus_a() -> None:
     assert "its cap price, the lower" in _line(report, "Next round 1: B's note: converts at")
     assert "its discount price, the lower" in _line(report, "Next round 2: B's note: converts at")
     assert "\nAssumptions:\n" in report
+
+
+async def test_the_summary_prints_first_and_leads_the_json() -> None:
+    """The report opens with the summary, before the mode and the inputs; each summary line has the same cells as the
+    full line it copies; the JSON's ``summary`` comes right after ``scenario``."""
+    report = await run(_COMPANY_BU)
+    rows = report.splitlines()[2:]
+    summary = [line for line in rows if line.startswith("  Summary")]
+
+    assert rows[: len(summary)] == summary and len(summary) == 2 + 2 * 2 + 6
+    assert rows[len(summary)].startswith("  Mode")
+    for label, full in (
+        ("Summary, today: founders", "Today: founders"),
+        ("Summary, after next round 2: new money", "Next round 2: new money"),
+        ("Summary, next round 1, exit $20,000,000.00: founders' payout", "Next round 1: exit $20,000,000.00: founders"),
+    ):
+        assert _cells(report, label) == _cells(report, full)
+    printed = json.loads(await run([*_COMPANY_BU, "--json"]))
+    assert list(printed)[:2] == ["scenario", "summary"]
+
+    no_round = (await run(_COMPANY_DX)).splitlines()[2:]
+    assert no_round[0].startswith("  Summary, today: founders")
+    assert any(line.startswith("  Summary, at B's maturity conversion: founders") for line in no_round)
 
 
 async def test_the_report_never_picks_an_option() -> None:

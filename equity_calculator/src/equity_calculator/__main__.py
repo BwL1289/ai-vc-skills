@@ -31,7 +31,8 @@ founder's cap table checked against itself.
     equity_calculator runway_plan --cash-on-hand C [--cash-floor F] (--phase "TERMS")...
         [--downside-phase "TERMS"... | [--downside-revenue-percent R] [--downside-gross-burn-percent G]]
         [--lean-phase "TERMS"... | [--lean-revenue-percent R] [--lean-gross-burn-percent G]]
-        [--raise "TERMS"]... [--raise-use-of-funds "N AMOUNT|PCT%"]... [--milestone M]... [--months-to-raise T]
+        [--raise "TERMS"]... [--raise-use-of-funds "N AMOUNT|PCT%"]... [--milestone M]...
+        [--milestone-type next_round|self_funding] [--months-to-raise T]
         [--stated-runway-months S] [--tolerance-points P] [--tolerance-percent Q] [--runway-band-months B]
     equity_calculator metrics_check --period-months P [--recurring-unit monthly|annual]
         [--starting-recurring S [--new-recurring N] [--expansion-recurring E] [--contraction-recurring C]
@@ -50,8 +51,8 @@ founder's cap table checked against itself.
         [--tolerance-points P] [--tolerance-percent Q] [--customer-segment smb|mid_market|enterprise]
         [--payback-band-months B] [--burn-multiple-band X] [--net-revenue-churn-band-percent C]
     equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
-        [--population N] [--annual-revenue-today R] [--som-years Y] [--som-target T] [--stated-tam X]
-        [--stated-sam X] [--stated-som X] [--tolerance-percent Q]
+        [--population N] [--annual-revenue-today R] [--som-years Y | --som-months M] [--som-target T]
+        [--stated-tam X] [--stated-sam X] [--stated-som X] [--tolerance-percent Q]
     equity_calculator instrument_compare --founder-shares F --team-shares T --unissued-pool-shares U
         [--existing-series "TERMS"]... [--existing-safe "TERMS" | --existing-note "TERMS"]... --investment I
         --priced-pre-money V [--priced-target-pool-percent T] [--priced-pool-timing pre_money|post_money]

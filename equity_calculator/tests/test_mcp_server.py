@@ -224,6 +224,7 @@ async def test_the_comparison_tool_schema_names_both_options_the_next_rounds_and
         assert f'"{field}"' in schema, field
     assert "never a pick" in (tool.title or "")
     assert "mode no_next_round" in (tool.description or "")
+    assert "The result opens with summary" in (tool.description or "")
     without = {key: value for key, value in COMPARE_BU.items() if key != "next_rounds"}
     refused = await _call(mcp_server.build_server(), "equity_instrument_compare", {"inputs": without})
     assert refused.isError is True
@@ -838,6 +839,17 @@ async def test_the_deal_check_tool_schema_says_to_send_each_rounded_figure_as_te
         assert "Send it as text with exactly the places the document writes" in fields[name]["description"], name
     for name in ("investment", "pre_money", "post_money"):
         assert "description" not in fields[name], name
+
+
+async def test_the_runway_plan_tool_description_names_the_run_rate_the_milestone_type_and_any_instrument() -> None:
+    """An agent reads the description before it builds a call: it named none of the run-rate, the milestone type or a
+    raise as cash of any instrument, though the tool takes all three."""
+    tools = await _tools(mcp_server.build_server())
+    description = next(tool for tool in tools if tool.name == "equity_runway_plan").description or ""
+
+    assert "revenue_run_rate, annualised, divided by 12 exactly" in description
+    assert "a raise is cash of any instrument, a priced round, a SAFE or a note" in description
+    assert "milestone_type self_funding" in description and "refuses months_to_raise" in description
 
 
 @pytest.mark.parametrize(("typed", "verdict", "within"), [("12", "consistent", True), ("12.0", "mismatch", False)])

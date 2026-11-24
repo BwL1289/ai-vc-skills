@@ -1,11 +1,13 @@
 """A priced round now beside a convertible note now (the ``Priced vs note`` sheet): A, B and B - A in three columns.
 
-The inputs come first (the ones both options share in both columns, an option's own terms in its column), then
+A short summary comes first: the founders' and the new money's ownership today and after each next round (or at the
+note's maturity conversion), then the founders' payout at each exit, both ways, each a copy of a full line below.
+The inputs come next (the ones both options share in both columns, an option's own terms in its column), then
 today's financing (option A's price, new shares and any existing SAFEs and notes converting; option B's note
 outstanding, what it owes when it converts and its cap price), who owns what right after it, then a block per next
 round (its terms, each option's price and new shares, the note's conversion in B, who owns what after it, and every
 exit's payouts by holder group), then the flags in plain words. A cell that does not apply to an option is empty.
-With no next round given, the first line says so, and the next-round blocks give way to what the note owes at each
+With no next round given, the Mode line says so, and the next-round blocks give way to what the note owes at each
 month named, the note at its maturity and a block per sale before any priced round (option B "not worked", with the
 reason, where the note's term for it is not given). Values only: no line carries a live formula, and no line says
 which option to take.
@@ -30,7 +32,10 @@ from equity_calculator.schemas.equity_instrument_compare import (
     NextRoundComparison,
     NoteAtExit,
     NoteOwed,
+    OwnershipSummary,
+    PayoutSummary,
     SeriesTerms,
+    SummaryValue,
 )
 from equity_calculator.schemas.equity_round import ConversionRow
 from equity_calculator.schemas.equity_waterfall import Participation
@@ -71,6 +76,9 @@ _BASIS_NAMES = {"cap": "its cap price", "discount": "its discount price", "round
 _PARTICIPATION_NAMES = {"none": "non-participating", "full": "full participation"}
 _SERIES_HOW = "given (standard: 1x, non-participating)"
 _OWED_HOW = "principal + interest, to the cent"
+_SUMMARY = "Summary"
+_SUMMARY_GROUPS: tuple[HolderGroup, ...] = ("founders", "new_money")
+_NOT_CONVERTED_HOW = "as the Today lines below; B's note holds no shares until it converts"
 
 
 def _participation_text(participation: Participation, cap_multiple: Decimal | None) -> str:
@@ -524,10 +532,55 @@ def _flag_words(flag: InstrumentFlag, result: InstrumentCompareResult) -> str:
     return words[flag]
 
 
+def _summary_cells(value: SummaryValue) -> tuple[EquityQuantity | str, ...]:
+    """One summary figure's three cells: A, B (``not worked`` where B is not) and B - A."""
+    return (
+        value.priced,
+        _NOT_WORKED if value.note is None else value.note,
+        _EMPTY if value.difference is None else value.difference,
+    )
+
+
+def _summary_ownership_lines(row: OwnershipSummary) -> list[Line]:
+    """One point's founders' and new money's ownership, both ways."""
+    where = {
+        "today": ("today", "today", "as the Today lines below"),
+        "next_round": (f"round_{row.next_round}", f"after next round {row.next_round}", "as that round's lines below"),
+        "maturity": ("maturity", "at B's maturity conversion", "A as today; B as the maturity lines below"),
+    }
+    key, label, how = where[row.point]
+    lines = []
+    for group in _SUMMARY_GROUPS:
+        value = row.founders if group == "founders" else row.new_money
+        line_how = _NOT_CONVERTED_HOW if row.point == "today" and group == "new_money" else how
+        name = f"{_SUMMARY}, {label}: {_GROUP_NAMES[group]}"
+        lines.append(Line(f"summary_{key}_{group}", name, _summary_cells(value), line_how))
+    return lines
+
+
+def _summary_payout_line(index: int, row: PayoutSummary) -> Line:
+    """The founders' payout at one exit, both ways."""
+    amount = f"${row.exit_amount.rounded:,f}"
+    if row.next_round is None:
+        label = f"{_SUMMARY}, sale before any round, {amount}: founders' payout"
+        how = "as the sale's lines below" if row.note_refusal is None else "as the sale's lines below; B is not worked"
+    else:
+        label = f"{_SUMMARY}, next round {row.next_round}, exit {amount}: founders' payout"
+        how = "as the exit's founders line below"
+    return Line(f"summary_payout_{index}", label, _summary_cells(row.founders), how)
+
+
+def _summary_lines(result: InstrumentCompareResult) -> list[Line]:
+    """The summary: ownership at each point, then the founders' payout at each exit."""
+    lines = [line for row in result.summary.ownership for line in _summary_ownership_lines(row)]
+    lines += [_summary_payout_line(index, row) for index, row in enumerate(result.summary.founders_payouts, start=1)]
+    return lines
+
+
 def instrument_compare_sheet(result: InstrumentCompareResult) -> Sheet:
-    """The comparison's lines: the mode and the inputs, today both ways, each next round and its exits (with no next
-    round: the note at maturity and each sale before any round), then the flags."""
-    lines = _given_lines(result) + _today_lines(result)
+    """The comparison's lines: the summary, the mode and the inputs, today both ways, each next round and its exits
+    (with no next round: the note at maturity and each sale before any round), then the flags."""
+    lines = _summary_lines(result) + _given_lines(result) + _today_lines(result)
     for terms, comparison in zip(result.inputs.next_rounds, result.next_rounds, strict=True):
         lines += _round_lines(terms, comparison)
     heading = _HEADING

@@ -19,7 +19,8 @@ adds a fact about the company that the founder did not give.
 ## When to use it
 
 - "Tighten my pitch." "Stress-test my pitch." "Why would a VC pass on us?" "How should we position this round?"
-  "What should I not say to VCs?" "Is my one-liner clear?" "Prep me before we go out to raise."
+  "What should I not say to VCs?" "Is my one-liner clear?" "Prep me before we go out to raise." "What is our
+  contrarian insight?" "What do we believe that others don't?"
 - A request about the story and the ask's numbers together ("check our story and our ask"): this skill runs it, and
   step 4 sends the ask's figures to `equity_deal_check`.
 - A pasted one-liner, elevator pitch, deck outline or slide text, executive summary or intro blurb. Any of these may
@@ -27,7 +28,8 @@ adds a fact about the company that the founder did not give.
 - Hand off:
   - The arithmetic in the ask (valuation, percent sold, option pool, SAFEs and notes, runway, use of funds): follow the
     vc-deal-math skill, which calls `equity_deal_check`. New money on a SAFE or note: `equity_round` (equity-calculator
-    skill), and its runway and use of funds `equity_runway_plan`. A stake through later rounds: `equity_dilution`.
+    skill), or `equity_instrument_compare` for a note weighed against a priced round now (vc-deal-math step 7), and its
+    runway and use of funds `equity_runway_plan`. A stake through later rounds: `equity_dilution`.
   - Each claim's evidence, and figures that disagree across the deck, one-pager and narrative: the vc-claims-check
     skill (preview). Point the founder to it when they give more than one document or a claim has no evidence named.
   - A slide-by-slide deck review: the vc-deck-review skill. Point the founder to it when they share a whole
@@ -54,7 +56,10 @@ for a deck), in the file's own words, so the founder sees what was read from eac
 that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
 asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
 Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
-input below that it leaves out), and never ask the founder to paste what you already read.
+input below that it leaves out), and never ask the founder to paste what you already read. When the founder cannot
+answer now, do not wait for them: go on with what was given (a call or step that waits for an input still waits), invent
+nothing in a gap's place, and list each ask in brackets under **Needs from the founder**, the open asks under that name;
+a live drill waits for the founder.
 
 1. The one-liner as the founder says it today, word for word.
 2. The narrative in order: slide titles and text, or the spoken pitch.
@@ -116,12 +121,16 @@ so the lenses do not anchor on the dimension marks; step 5 then starts at the qu
    what a partner is likely to hear, name the source, and give a rewrite that uses only facts the founder gave. Where
    a rewrite needs a fact they did not give, write a bracketed ask: `[number of paying customers today]`.
 4. **Numbers.** Collect every figure the founder states.
-   - The ask's figures (raise, valuation and its label, percent sold, pool, SAFEs and notes, cash, burn, runway claim,
-     use-of-funds lines): run the check as the vc-deal-math skill describes, with `equity_deal_check`, and use only
-     the tool's values, as printed, in the rewrites too (20.83 months stays 20.83 months, never "about 21"). Make one
-     call per version of the ask the founder states (two for a valuation with no label, as vc-deal-math step 4 says),
-     and run no what-if they did not ask for. A raise on a SAFE or note goes to
-     `equity_round` as vc-deal-math step 2 says. A mismatch goes to the top of the answer: a story whose numbers
+   - The ask's figures (raise, valuation and its label, percent sold, pool, SAFEs and notes, cash, burn, runway claim
+     (not on a phased plan: below), use-of-funds lines): run the check as the vc-deal-math skill describes, with
+     `equity_deal_check`, and use only the tool's values, as printed, in the rewrites too (20.83 months stays 20.83
+     months, never "about 21"). Make one call per version of the ask the founder states (two for a valuation with no
+     label, as vc-deal-math step 4 says), and run no what-if they did not ask for. A raise on a SAFE or note goes to
+     `equity_round` as vc-deal-math step 2 says. A note the founder weighs against a priced round now goes to
+     `equity_instrument_compare` as vc-deal-math step 7 says (its flags' meanings too), capped or not, and with no next
+     round expected in that tool's no-next-round mode, never to `equity_round`. With no next round expected and no
+     priced round to weigh it against, `equity_round` cannot run (it needs that round): the SAFE's or note's share is
+     "not computed: set at the next priced round". A mismatch goes to the top of the answer: a story whose numbers
      disagree undercuts every message in it.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
@@ -143,8 +152,13 @@ so the lenses do not anchor on the dimension marks; step 5 then starts at the qu
      the runway line "not checked: waiting for [the month the planned spend starts]" while the month is missing, "not
      checked: waiting for [the planned monthly spend from that month]" while the month is given and the spend is
      missing, or "not checked: waiting for [the planned monthly revenue from that month]" while only the revenue is
-     missing. With no cash or burn given, ask for them by name (`[cash on hand, monthly spend and revenue]`) and make no
-     call until they are given; quote the claim as stated meanwhile, and never work it out by hand.
+     missing. A priced round on a phased plan (spend or revenue that changes from a later month the founder names; spend
+     planned from the round on is `deal_check`'s planned burn) goes to `equity_deal_check` without its runway claim,
+     since its one flat burn could call the plan's runway a mismatch; the plan's runway and the claim's check come from
+     `equity_runway_plan`, the round's amount as one `raises` entry on phases built, and waited for, as above, and both
+     runways are quoted, each named, as vc-deal-math step 2 says. With no cash or burn given, ask for them by name
+     (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; quote the claim as stated
+     meanwhile, and never work it out by hand.
    - Each code in a result's `flags` goes to the answer as a question a partner is likely to ask, with its meaning
      from "Calculator flags" below, since the MCP result gives the codes only. The benchmark flags are common
      benchmarks, not rules: say so and quote the tool's assumption row with the source that row gives.
@@ -219,10 +233,10 @@ paragraph above):
 **How to run the lenses.** When the agent has a subagent tool (in Claude Code, the Agent or Task tool), run the lenses
 as parallel subagents, however short the material. Give each one only the founder's material and its lens brief: not
 this skill's other sections, not the dimension table, not another lens's output, so no lens anchors on another. Without
-a subagent tool, run Stage A first, before step 1, without consulting the dimension table, the phrase table or any
-dimension mark: run the lenses one after another, write each lens's objections down in full before reading the next
-lens's brief, and never revise an earlier lens's list after a later one. Lenses run this way are less independent than
-subagents, and the same agent then judges them in Stage B, so the answer says so.
+a subagent tool, run Stage A first, before step 1, before any dimension mark exists: run the lenses one after another,
+write each lens's objections down in full before reading the next lens's brief, and never revise an earlier lens's list
+after a later one. This agent has already read this skill, its tables included, so lenses run this way are not blind to
+them: they are less independent than subagents, and the same agent then judges them in Stage B, so the answer says so.
 
 **The calculator's mismatches** from step 4 do not go through the lenses. Each heads the survivors, ahead of the
 tiers, under **figures that do not match (computed)**, quoting the figure as the founder states it with the tool's
@@ -254,7 +268,9 @@ and with this instruction, word for word: "Apply the brief to each objection as 
 Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
 answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
 says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
-ask for the full pass, one subagent per objection.
+ask for the full pass, one subagent per objection. Without a subagent tool, lean mode still applies past eight
+objections: go lens by lens, in order, and judge each lens's objections in one pass under that instruction, each with a
+verdict of its own; the answer says so, as above, and that the full pass then takes them one at a time.
 
 The refute brief:
 
@@ -326,13 +342,11 @@ public source behind it that this skill's authors read; say so when you use it.
 
 ## Calculator flags
 
-The MCP result's `flags` holds codes only; the command line's report prints the meaning beside each one. This table,
-the same as the vc-deal-math skill's, gives each `equity_deal_check` flag's meaning, so a flag reaches the founder in
-words. A flag is a question a partner is likely to ask, never an error. From `equity_runway_plan` (no milestone,
-months to raise or landing month passed), three flags can come back: `runway_below_band` (on the plan the raise lasts
-under the runway benchmark, 18 months by default; a common benchmark, not a rule), `cash_never_runs_out` (revenue
-covers the spend before the cash runs out, so there is no runway end and a stated runway is not checked) and
-`consistent_beyond_rounding` (a stated runway holds by the tolerance alone, as the table's row says).
+The MCP result's `flags` holds codes only; the command line's report prints the meaning beside each one. These
+tables, the same as the vc-deal-math skill's, give each `equity_deal_check` and each `equity_runway_plan` flag's
+meaning, so a flag reaches the founder in words. A flag is a question a partner is likely to ask, never an error. With
+no milestone, months to raise or landing month passed, `equity_runway_plan` returns only `runway_below_band`,
+`cash_never_runs_out` and `consistent_beyond_rounding`; a milestone the founder names brings the rest of its table.
 
 | Flag                                  | What it means for the founder                                                                                   | What to change or prepare                                                                      |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
@@ -348,6 +362,18 @@ covers the spend before the cash runs out, so there is no runway end and a state
 | `current_burn_runway_longer`          | Runway on today's burn is longer than on the planned burn.                                                      | Say which burn the deck's runway uses; a VC will check it against the planned spend.           |
 | `runway_below_band`                   | Planned net runway is under the runway benchmark (18 months by default).                                        | Be ready to say whether the raise reaches the next milestone (a common benchmark, not a rule). |
 | `dilution_above_band`                 | The investors get more than the dilution benchmark (25% by default) in one round.                               | Be ready to say why so much is sold (a common benchmark, not a rule).                          |
+
+| `equity_runway_plan` flag          | What it means for the founder                                                                              | What to change or prepare                                                    |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `cash_never_runs_out`              | Revenue covers the spend before the cash runs out, so there is no runway end; a stated one is not checked. | Say so; a VC will check the revenue that makes it true.                      |
+| `cash_out_before_raise_lands`      | The cash goes below the floor before a later raise lands.                                                  | That raise needs bridge money or an earlier close; show it.                  |
+| `milestone_short_on_plan`          | A raise does not reach a milestone, with the months to raise after it, even on the plan.                   | See the tool's required raise, or move the milestone.                        |
+| `downside_short_where_plan_covers` | A raise reaches a milestone on the plan but not on the downside.                                           | Be ready to say what you would cut, and when you would know.                 |
+| `covered_without_raise`            | The cash already reaches a milestone with no raise.                                                        | Say what the raise buys beyond it.                                           |
+| `start_raising_date_passed`        | On the cash alone, with the months to raise given, raising should already have started.                    | Say when the raise started or will close.                                    |
+| `no_time_to_raise_given`           | Milestones were checked at their own month, with no time left to raise the next round.                     | Give the months you allow to raise, and re-run.                              |
+| `runway_below_band`                | On the plan a raise lasts under the runway benchmark (18 months by default).                               | Be ready to say which milestone it reaches (a common benchmark, not a rule). |
+| `consistent_beyond_rounding`       | A stated runway holds by the tolerance alone: it is not the tool's runway rounded to its own places.       | Quote the tool's runway; a VC recomputing gets it.                           |
 
 ## The tightened narrative
 
@@ -395,8 +421,8 @@ Lead with what to fix, then the material to take into the prep session.
      Rewrite or evidence to add, with the figures that do not match (computed) first, then the tiers.
    - **Dropped,** one line each: the objection, its lens, and why it fell (answered, quoting the founder's line that
      answers it and saying whether to move that line earlier, or not grounded), so the founder sees it was tested.
-   - When the lenses ran one after another in one agent, with no subagent tool, say so: they are less independent
-     than separate subagents.
+   - When the lenses ran one after another in one agent, with no subagent tool, say so: they are less independent than
+     separate subagents and were not blind to this skill's tables.
    - When the refute pass ran per lens (lean mode), say so, say it is less independent than one subagent per objection,
      and say the founder may ask for the full pass.
 3. **Dimension table:** Dimension, What you say (quoted), Clear / Needs work / Missing (Not stated for row 12), Fix.

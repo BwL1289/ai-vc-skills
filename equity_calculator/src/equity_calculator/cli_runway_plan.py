@@ -19,6 +19,7 @@ _DIRECT = (
     "cash_on_hand",
     "cash_floor",
     "milestones",
+    "milestone_type",
     "months_to_raise",
     "stated_runway_months",
     "tolerance_points",

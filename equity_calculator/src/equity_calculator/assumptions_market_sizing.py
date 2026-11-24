@@ -92,6 +92,18 @@ def _size_rows(inputs: MarketSizingInput) -> list[EquityAssumption]:
                 f"{YC_SEED_GUIDE_SOURCE}, glossary, TAM: {TAM_GLOSSARY_QUOTE}",
             )
         )
+    if not all(segment.market_counted() for segment in inputs.segments):
+        rows.append(
+            _assumption(
+                "no_market_count_rule",
+                "no TAM or SAM for a segment with only the customers to win",
+                "A segment that gives the customers to win and no count of its whole market (none given, or a count "
+                "equal to the customers to win) has no TAM or SAM: they would be the SOM again, not a market size. "
+                "Its SOM is worked as usual; the TAM and SAM totals, the shares built on them and the top-down "
+                "comparison are not, and a stated TAM or SAM or a population is refused.",
+                f"{UNVERIFIED} (a modelling choice)",
+            )
+        )
     rows.append(
         _assumption(
             "sam_rule",
@@ -108,7 +120,11 @@ def _som_rows(inputs: MarketSizingInput) -> list[EquityAssumption]:
     """The SOM rule (with any SOM) and the top-down rule (with a top-down figure)."""
     rows = []
     if any(segment.has_som() for segment in inputs.segments):
-        horizon = "no horizon given" if inputs.som_years is None else f"in {_years(inputs.som_years)}"
+        horizon = "no horizon given"
+        if inputs.som_years is not None:
+            horizon = f"in {_years(inputs.som_years)}"
+        elif inputs.som_months is not None:
+            horizon = f"in {inputs.som_months} month" + ("" if inputs.som_months == 1 else "s")
         rows.append(
             _assumption(
                 "som_rule",
@@ -116,6 +132,35 @@ def _som_rows(inputs: MarketSizingInput) -> list[EquityAssumption]:
                 "SOM is the founder's own plan: a count of customers (preferred) or a share of the serviceable ones, "
                 "with a straight-line path from today's customers; no compound growth rate is worked.",
                 f"{UNVERIFIED} (common usage; neither YC page defines SOM)",
+            )
+        )
+    if any(segment.second_line_percent is not None for segment in inputs.segments):
+        rows.append(
+            _assumption(
+                "second_line_rule",
+                "annual revenue from one customer = the main bill × (take rate + second line)",
+                "A second revenue line from the same buyer (support, services, a second product) is the founder's "
+                "share of the main bill (the buyer's spend on the main line, before the take rate). The company keeps "
+                "all of it, so it is added to the take rate; the gross spend includes it; it is held at that share "
+                "over the horizon.",
+                f"{UNVERIFIED} (a modelling choice)",
+            )
+        )
+    units_segments = [segment for segment in inputs.segments if segment.obtainable_units is not None]
+    if units_segments:
+        # With a second line the company keeps it too, so the units' SOM is on the take rate plus that line.
+        share = (
+            "(the take rate + the second line)"
+            if any(segment.second_line_percent is not None for segment in units_segments)
+            else "the take rate"
+        )
+        rows.append(
+            _assumption(
+                "units_rule",
+                f"SOM = the units to win × the price a year × {share}",
+                "A SOM given in the price's own unit (seats, locations, licences) is worked in that unit, "
+                "with no SOM customers, so a unit is never shown as a fraction of a customer.",
+                f"{UNVERIFIED} (standard arithmetic)",
             )
         )
     if inputs.top_down:

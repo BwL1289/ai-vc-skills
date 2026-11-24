@@ -54,6 +54,7 @@ from equity_calculator.round import conversion_row
 from equity_calculator.schemas.equity_common import EquityQuantity, PoolTiming
 from equity_calculator.schemas.equity_instrument_compare import (
     STANDARD_MULTIPLE,
+    CompareSummary,
     EarlyGroupPayout,
     ExitBeforeRoundComparison,
     ExitComparison,
@@ -72,7 +73,11 @@ from equity_calculator.schemas.equity_instrument_compare import (
     NoteExitRefusal,
     NoteExitRule,
     NoteOwed,
+    OwnershipSummary,
+    PayoutSummary,
     SeriesTerms,
+    SummaryPoint,
+    SummaryValue,
 )
 from equity_calculator.schemas.equity_round import ConversionRow, NoteTerms, SafeTerms
 from equity_calculator.schemas.equity_waterfall import Participation
@@ -570,6 +575,55 @@ def _note_paid(item: ExitBeforeRoundComparison) -> Fraction:
     return payout.note.exact
 
 
+def _stake_value(stakes: Sequence[GroupStake], group: HolderGroup) -> SummaryValue:
+    """``group``'s ownership both ways and B - A, copied from its stake: the founders and the new money always hold
+    shares under option A (founder shares and the raise are above zero), so each always has one."""
+    stake = next(stake for stake in stakes if stake.group == group)
+    return SummaryValue(priced=stake.priced, note=stake.note, difference=stake.difference)
+
+
+def _ownership(point: SummaryPoint, stakes: Sequence[GroupStake], next_round: int | None = None) -> OwnershipSummary:
+    """The founders' and the new money's ownership both ways at one point."""
+    return OwnershipSummary(
+        point=point,
+        next_round=next_round,
+        founders=_stake_value(stakes, "founders"),
+        new_money=_stake_value(stakes, "new_money"),
+    )
+
+
+def _founders_payout(payouts: Sequence[GroupPayout] | Sequence[EarlyGroupPayout]) -> SummaryValue:
+    """The founders' payout both ways at one exit, copied from its row."""
+    row = next(payout for payout in payouts if payout.group == "founders")
+    return SummaryValue(priced=row.priced, note=row.note, difference=row.difference)
+
+
+def _summary(
+    stakes_now: Sequence[GroupStake],
+    rounds: Sequence[NextRoundComparison],
+    maturity: MaturityOutcome | None,
+    sales: Sequence[ExitBeforeRoundComparison],
+) -> CompareSummary:
+    """The comparison in short: ownership today, after each next round (or at the note's maturity conversion), and the
+    founders' payout at each exit after each round (or at each sale before any round)."""
+    ownership = [_ownership("today", stakes_now)]
+    ownership += [_ownership("next_round", item.stakes, item.index) for item in rounds]
+    if maturity is not None and maturity.conversion is not None:
+        ownership.append(_ownership("maturity", maturity.conversion.stakes))
+    payouts = [
+        PayoutSummary(next_round=item.index, exit_amount=sale.exit_amount, founders=_founders_payout(sale.payouts))
+        for item in rounds
+        for sale in item.exits
+    ]
+    payouts += [
+        PayoutSummary(
+            exit_amount=sale.exit_amount, founders=_founders_payout(sale.payouts), note_refusal=sale.note_refusal
+        )
+        for sale in sales
+    ]
+    return CompareSummary(ownership=tuple(ownership), founders_payouts=tuple(payouts))
+
+
 def _no_round(
     inputs: InstrumentCompareInput,
     tables: tuple[_Table, _Table],
@@ -727,6 +781,7 @@ def compute_instrument_compare(inputs: InstrumentCompareInput) -> InstrumentComp
 
     return InstrumentCompareResult.model_validate(
         {
+            "summary": _summary(stakes_now, rounds, no_round.maturity, no_round.exits),
             "inputs": inputs,
             "fully_diluted_shares": quantity("shares", fully_diluted),
             "priced_price": quantity("price", price_now),

@@ -585,3 +585,27 @@ def test_existing_instruments_convert_in_option_a_and_hold_no_shares_under_b() -
 def test_terms_that_do_not_fit_the_mode_are_refused_never_assumed(changes: dict[str, object], message: str) -> None:
     with pytest.raises(ValidationError, match=message):
         InstrumentCompareInput.model_validate(_bu(**changes))
+
+
+def test_with_no_next_round_the_summary_holds_today_the_maturity_and_each_sale_and_says_where_b_is_not_worked() -> None:
+    """Company DX: today and the maturity conversion, then each sale; with no change-of-control term, B is not worked at
+    a sale and the summary carries the refusal beside no B figure."""
+    result = instrument_compare(**COMPARE_DX)
+    summary = result.summary
+    maturity = result.maturity
+
+    assert [row.point for row in summary.ownership] == ["today", "maturity"]
+    assert maturity is not None and maturity.conversion is not None
+    stake = _stake(maturity.conversion.stakes, "founders")
+    assert summary.ownership[1].founders.note == stake.note and summary.ownership[1].next_round is None
+    for row, sale in zip(summary.founders_payouts, result.exits_before_any_round, strict=True):
+        founders = next(payout for payout in sale.payouts if payout.group == "founders")
+        assert row.next_round is None and row.exit_amount == sale.exit_amount and row.note_refusal is None
+        assert (row.founders.priced, row.founders.note) == (founders.priced, founders.note)
+
+    refused = instrument_compare(**_dx(note_change_of_control_multiple=None)).summary
+    assert [row.point for row in refused.ownership] == ["today", "maturity"]
+    assert {row.note_refusal for row in refused.founders_payouts} == {"uncapped_no_change_of_control_term"}
+    assert all(row.founders.note is None and row.founders.difference is None for row in refused.founders_payouts)
+    without_maturity = instrument_compare(**_dx(note_maturity_conversion_valuation=None)).summary
+    assert [row.point for row in without_maturity.ownership] == ["today"]

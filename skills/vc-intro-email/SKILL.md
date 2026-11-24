@@ -32,6 +32,8 @@ contact details, and never adds a figure, customer, credential or fact the found
     vc-prospective-investor-update skill (preview).
   - The deck the email links to: the vc-deck-review skill.
   - A reply to an investor who passed: the vc-pass-debrief skill (preview).
+  - The investor list and the tracker (who to write to next, who passed and why, what is left of the round): the
+    vc-raise-plan skill (preview).
 
 ## Inputs
 
@@ -42,7 +44,9 @@ from each. A place you could not read (a slide that is only a picture, a page wh
 opened only in part) is listed as not read and asked for, never filled in from its title or the places around it, and a
 figure is never read off a chart or a picture. Ask only for what you could not read and what the file does not show
 (speaker notes, the figures behind a chart, an input below that it leaves out), and never ask the founder to paste what
-you already read.
+you already read. When the founder cannot answer now, do not wait for them: go on with what was given (a call or step
+that waits for an input still waits), invent nothing in a gap's place, and list each ask in brackets under **Needs from
+the founder**, the open asks under that name; a live drill waits for the founder.
 
 1. **The founder's material:** the one-liner, the deck or one-pager, and each metric to show as the founder states it,
    with its definition and period, each named by the document it comes from.

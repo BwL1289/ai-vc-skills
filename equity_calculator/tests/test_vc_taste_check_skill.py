@@ -42,7 +42,7 @@ _TRIGGERS = (
 )
 _DESCRIPTION_WORDS = ("founder", "adversarial review", "said no to", "taste-washed", "AI-sounding", "copycat")
 _CHECKS = ("Clarity", "Usefulness", "Trust")
-_FLAGS = ("Generic", "AI-sounding", "Copycat", "Taste-washed")
+_FLAGS = ("Generic", "AI-sounding", "Copycat", "Taste-washed", "Claimed quality")
 _SCOPE_FLAG = "Scope"
 # Names a lens must never carry: the skill tests frameworks, never people or firms.
 _PEOPLE_AND_FIRMS = ("sequoia", "a16z", "andreessen", "y combinator", "yc", "graham", "dixon", "stebbings", "20vc")
@@ -293,8 +293,14 @@ def test_the_lines_are_placed_in_the_deck_the_meeting_or_not_yet() -> None:
     # kept objection or a flag outranks the meeting.
     assert "Every row of the decisions table gets exactly one placement" in placement
     assert _CATCH_ALL in placement and _OUTRANKS in placement
-    assert "Needs work or Missing" in placement.split(_CATCH_ALL, 1)[1]
+    assert "any decision marked Needs work or Missing on a check, a story or not" in placement.split(_CATCH_ALL, 1)[1]
     assert placement.count("no kept objection above minor and no flag") == 2
+    # The deck and the meeting share one bar (a deck run found the meeting's bar lower than the deck's, with "needs a
+    # story" undefined): both say Clear on all three checks, and the story is defined by what happened.
+    assert placement.count("no kept objection above minor and no flag, Clear on all three") == 2
+    assert "The deck and the meeting share one bar, and the deck adds to it" in placement
+    assert "A decision **needs a story** when what it turned down happened rather than was only decided" in placement
+    assert "tied to the core workflow, and needing no story" in placement
     assert "naming every kept objection on it" in placement
     assert "A second sentence is allowed only for the founder's evidence line" in placement
 
@@ -428,3 +434,36 @@ def test_the_drop_eval_scores_only_what_a_run_can_show_and_records_its_live_run(
     assert "unless an objection that ends the meeting or weakens it survives on D1" in answer
     assert "when no objection above minor survives on it" in answer and "naming every kept objection on it" in answer
     assert "## Recorded answer" in text and text.index("## Expected answer") < text.index("## Recorded answer")
+
+
+def test_decisions_are_numbered_t_so_a_founders_own_d_numbers_never_clash() -> None:
+    """A founder log that numbers its own decisions D1, D2 used the same labels the skill gave its rows."""
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "numbered T1, T2 and so on" in steps and "numbered D1" not in steps
+    assert 'the founder\'s own label is kept and quoted beside it ("T1, your D4")' in steps
+
+
+def test_a_log_of_layout_detail_or_assistant_text_keeps_only_the_founders_decisions() -> None:
+    """A log of mostly layout entries, or partly written by assistant sessions, had every line checked as a decision."""
+    steps = _unwrapped(_section("## Steps"))
+
+    assert '"not checked: layout detail"' in steps and "which of them the founder wants checked" in steps
+    assert "where the log itself marks an entry as an assistant's" in steps
+    assert "only the founder's own words and the entries the founder marks adopted count as decisions" in steps
+    assert 'labelled "assistant text, not the founder\'s"' in steps
+    assert "Never infer who wrote a line from how it reads" in steps
+
+
+def test_an_honesty_choice_can_be_clear_on_usefulness_and_a_claimed_quality_is_flagged() -> None:
+    """Trust and honesty decisions were Needs work on Usefulness by construction, and a claimed quality other than
+    taste had no flag."""
+    usefulness = {row[0]: row[1] for row in _table("## The three checks")}["Usefulness"]
+    flags = _unwrapped(_section("## Flags"))
+    claimed = [row for row in _table("## Flags") if row[0] == "Claimed quality"]
+
+    assert "or that customer's trust (an honesty or disclosure choice)" in usefulness
+    assert len(claimed) == 1 and "claimed in place of a decision" in claimed[0][1]
+    assert (
+        '"Claimed quality" is the same signal as the second Taste-washed row for any quality other than taste' in flags
+    )

@@ -40,20 +40,30 @@ sees what was read from each. A place you could not read (a slide that is only a
 out, a file that opened only in part) is listed as not read and asked for, never filled in from its title or the places
 around it, and a figure is never read off a chart or a picture. Ask only for what you could not read and what the file
 does not show (speaker notes, the figures behind a chart, an input below that it leaves out), and never ask the founder
-to paste what you already read.
+to paste what you already read. When the founder cannot answer now, do not wait for them: go on with what was given (a
+call or step that waits for an input still waits), invent nothing in a gap's place, and list each ask in brackets under
+**Needs from the founder**, the open asks under that name; a live drill waits for the founder.
 
 1. **Who buys, as segments** (one to eight): the buying customer (a clinic, a household, a store), how many there
-   are, and where that count comes from. Segments must not overlap: one buyer in one segment only.
+   are, and where that count comes from. Segments must not overlap: one buyer in one segment only. A founder with
+   only the customers to win and no count of the market leaves `customers` out (never types the customers to win
+   there): the tool works the SOM and says TAM and SAM are not worked (`no_market_count`). A plan counted in the
+   price's own unit (seats, locations, licences) sends the units to win as `obtainable_units`, never as
+   fractional customers, and then no `customers_today` (the tool refuses customers beside units).
 2. **What each pays:** the price, the period it covers (a month, a year, or a device's life in months), units per
    customer if priced per seat or location, and for a marketplace or payments business the share of the spend the
-   company keeps. Where the price comes from: what customers pay today, a pricing test, or the plan.
+   company keeps. A second revenue line from the same buyer (support, services, a second product) is its share of
+   the main bill, sent as `second_line_percent`, never folded into the price. Where the price comes from: what
+   customers pay today, a pricing test, or the plan.
 3. **Who the product can serve today:** the share of each segment it can serve and reach now (geography, the systems
    it works with, the channel), and why.
 4. **What you plan to win, and by when:** per segment, the number of customers (preferred) or a share of the
    serviceable ones, the horizon in years, customers today, and how you will reach them (channel, sales capacity).
 5. **Optional:** any top-down figure with its publisher, year and definition, and the share of it that matches your
    definition; the total population the segments come from, in the same buying unit; annual revenue today; the
-   revenue your plan needs from this market by the horizon; and the deck's stated TAM, SAM and SOM, word for word.
+   revenue your plan needs from this market by the horizon; and the deck's stated TAM, SAM and SOM, word for word. A
+   deck figure built from a top-down one ("30% of a $2B market") sends that top-down figure with the deck's share as
+   its `comparable_percent`: the tool's `comparable part` row is then the check of the deck's own arithmetic.
 
 A missing input becomes a named gap, written as a bracketed ask: `[the channel that reaches multi-site groups]`.
 
@@ -62,7 +72,8 @@ A missing input becomes a named gap, written as a bracketed ask: `[the channel t
 Every input is one row: Segment, Assumption, Value (quoted as the founder states it), Founder's source, Kind. The
 kind is the first that applies, in this order: **Own data**, then **Named third party**, then **Estimate**. Each
 segment with a SOM has its own Horizon row: `<N> years (founder's)` when the founder gave that segment a year, or
-`<N> years (the call's one horizon; the founder gave none for this segment)`, with the ask step 3 gives.
+`<N> years (the call's one horizon; the founder gave none for this segment)`, with the ask step 3 gives. A horizon
+sent as `som_months` is written in months the same way, `<N> months (founder's)`, never converted to years.
 
 | Kind              | When                                                                                                              |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -89,16 +100,17 @@ says. A turn that makes no call runs no review.
 3. **Ask for what is missing** (Inputs), in one message. With at least one segment in, the call runs on what is there
    and each missing input stays a bracketed ask in the answer. For each Estimate row on a figure that moves its
    segment's SOM (at most three), and for any assumption the founder asks about ("what if our price is lower?"), also
-   ask for a low and a high value: the founder's numbers, never a percentage the skill picks. The tool varies seven
-   segment fields: `customers`, `price`, `units_per_customer`, `take_rate_percent`, `serviceable_percent`,
-   `obtainable_percent` and `obtainable_customers`. Where a segment's SOM is a count of customers, its `customers` and
-   `serviceable_percent` do not move the SOM; where a segment has no SOM, none of its fields does. An Estimate on any
-   other figure (a top-down figure, the horizon, the population, customers today) gets an ask for its source, never
-   for a range. When the founder gives none, the call still runs and that Estimate stays a bracketed ask for its
-   range. An assumption shared by several segments (one fee, one price) gets one row per segment: the tool moves one
-   segment at a time, so no single row is quoted as the whole company's case. One horizon (`som_years`) covers every
-   segment: when the founder gave a year for some segments only, the ledger says so and the answer asks
-   `[the year you expect to win that segment's customers]`.
+   ask for a low and a high value: the founder's numbers, never a percentage the skill picks. The tool varies nine
+   segment fields: `customers`, `price`, `units_per_customer`, `take_rate_percent`, `second_line_percent`,
+   `serviceable_percent`, `obtainable_percent`, `obtainable_customers` and `obtainable_units`. Where a segment's SOM is
+   a count of customers, its `customers` and `serviceable_percent` do not move the SOM; where it is a count of units,
+   neither do those two nor `units_per_customer`; where a segment has no SOM, none of its fields does. An Estimate on
+   any other figure (a top-down figure, the horizon, the population, customers today) gets an ask for its source, never
+   for a range. When the founder gives none, the call still runs and that Estimate stays a bracketed ask for its range.
+   An assumption shared by several segments (one fee, one price) gets one row per segment: the tool moves one segment at
+   a time, so no single row is quoted as the whole company's case. One horizon (`som_years`, or `som_months` for one the
+   founder gives in months, such as 30) covers every segment: when the founder gave a year for some segments only, the
+   ledger says so and the answer asks `[the year you expect to win that segment's customers]`.
 
    **What one call takes:** at most 8 segments, 3 top-down figures and 6 sensitivity rows of at most 4 values each.
    When the rows above come to more than 6, keep them in this order: the Estimate rows first, then the rows for an
@@ -109,11 +121,11 @@ says. A turn that makes no call runs no review.
 4. **Build the ledger.**
 5. **Call `equity_market_sizing` once,** with every segment, top-down figure, sensitivity row and stated figure; the
    only other calls are the whole-company runs below. Send money and percents as strings, and `price_period_months`,
-   `som_years` and a sensitivity row's `segment` as whole numbers, never strings. Always send `price_period_months`
-   (1 for a monthly price, 12 for a yearly one): left out or null, the tool reads the price as yearly and raises
-   `price_period_defaulted` (the result's echoed `inputs` show it as null, so a call built from them keeps the
-   flag). A price is quoted as the tool prints it: a typed price exactly, to the cent at least, with no trailing
-   zeros past it ($0.0075 a message, never $0.01); a break-even price rounded as printed. Company AW (made up),
+   `som_years` or `som_months` and a sensitivity row's `segment` as whole numbers, never strings. Always send
+   `price_period_months` (1 for a monthly price, 12 for a yearly one): left out or null, the tool reads the price as
+   yearly and raises `price_period_defaulted` (the result's echoed `inputs` show it as null, so a call built from them
+   keeps the flag). A price is quoted as the tool prints it: a typed price exactly, to the cent at least, with no
+   trailing zeros past it ($0.0075 a message, never $0.01); a break-even price rounded as printed. Company AW (made up),
    software for vet clinics:
 
    ```json
@@ -198,31 +210,43 @@ says. A turn that makes no call runs no review.
 6. **Read the result:** per segment and in total, gross spend, TAM, SAM and SOM (money and customers), each segment's
    share of TAM, the path per segment (`som_multiple_of_today`, `new_customers_per_year`), the top-down rows, the
    checks, the flags, and each sensitivity row's swing and break-even values. A break-even value against the top-down
-   figure is a cross-check, never a target: never offer it as a price, a count or a share to aim for. A value at the
-   SOM target is what the plan would need from that one field with the rest at base, never a recommendation either:
-   quote it beside the founder's own low and high values, and when it is above their high value, say so with the
-   row's SOM high beside the target: even at the founder's own best case, that assumption alone does not reach the
-   plan. A top-down figure sent with no `comparable_percent` is compared in full: the tool reads the share that
-   matches the founder's definition as 100% and prints it as given. Say the founder gave no share, so the bottom-up
-   share and the difference are against the whole figure, and keep
-   `[the share of the figure that matches your definition]` as an open ask.
+   figure is a cross-check, never a target: never offer it as a price, a count or a share to aim for. A value at the SOM
+   target is what the plan would need from that one field with the rest at base, never a recommendation either: quote it
+   beside the founder's own low and high values, and when it is above their highest value, say so with the row's SOM
+   high beside the target: even at the founder's own best case, that assumption alone does not reach the plan. When the
+   row's `som_high_at` is `base`, every value the founder gave is below the base, so the SOM high is the base's, not
+   their best case: say so, and quote the SOM at their highest value from its case row instead (the same for
+   `som_low_at` and the lowest value). A top-down figure sent with no `comparable_percent` is compared in full: the tool
+   reads the share that matches the founder's definition as 100% and prints it as given. Say the founder gave no share,
+   so the bottom-up share and the difference are against the whole figure, and keep
+   `[the share of the figure that matches your definition]` as an open ask. A deck figure built from a top-down one
+   (Inputs 5) is quoted beside the tool's `comparable part` row, both as printed, as a check of the deck's own
+   arithmetic, never as a market size; the share is never worked out by hand. That row checks the deck's arithmetic
+   only: send it after every true top-down figure (the break-even uses the first), quote only its comparable part, and
+   do not put its bottom-up share, its difference, a `bottom_up_above_top_down` flag that only it raises, or a
+   break-even against it to the founder as a finding; say once that the row is the deck's own figure. With a segment
+   that has no market count (`no_market_count`), TAM, SAM, the shares of TAM and the top-down comparison print "not
+   worked": quote them so, never as $0.00, and never send a stated TAM or SAM, or a population (the tool refuses each
+   with no count).
 7. **Name the shakiest assumption:** among the ledger rows of the weakest kind present whose sensitivity row has a
-   `som_swing` above $0.00, the one with the largest `som_swing` in the result (the swing runs over the founder's
-   values and the base). Quote its swing and its value at the SOM target beside the founder's high value, as step 6
-   says. When the reach is `met_without_it`, also quote its `som_low` beside the target, so the founder sees whether
-   their own low value still reaches the plan. That is a comparison of tool values, not a calculation. When no row of
-   that kind has a sensitivity row, name none: the ask for its low and high values stands. When that kind's rows all
-   swing by $0.00 or have no swing, name none and say why: the field does not move that segment's SOM
-   (`does_not_move`), or no SOM is totalled (`som_not_given`). A shared assumption's rows move one segment each: when
-   one is named, say so, and point to the whole-company runs for the company as a whole. Then, in one line, give each
-   other sensitivity row's kind and swing and why it was not picked: a stronger kind (an Own data price is never a
-   candidate while an Estimate is in play), or a smaller swing.
+   `som_swing` above $0.00, the one with the largest `som_swing` in the result (the swing runs over the founder's values
+   and the base). Quote its swing and its value at the SOM target beside the founder's highest value, as step 6 says
+   (that value may be below the base: step 6 says how `som_high_at` shows it). When the reach is `met_without_it`, also
+   quote its `som_low` beside the target, so the founder sees whether their own low value still reaches the plan. That
+   is a comparison of tool values, not a calculation. When no row of that kind has a sensitivity row, name none: the ask
+   for its low and high values stands. When that kind's rows all swing by $0.00 or have no swing, name none and say why:
+   the field does not move that segment's SOM (`does_not_move`), or no SOM is totalled (`som_not_given`). A shared
+   assumption's rows move one segment each: when one is named, say so, and point to the whole-company runs for the
+   company as a whole. Then, in one line, give each other sensitivity row's kind and swing and why it was not picked: a
+   stronger kind (an Own data price is never a candidate while an Estimate is in play), or a smaller swing.
 8. **Run the adversarial review** (below).
 9. **Check before answering.** Every figure is quoted as stated or comes from a tool result; every objection quotes a
    founder line word for word; no market fact, source or competitor is brought in; nothing speaks as an investor; with a
    subagent tool, the number of refute subagents equals the number of objections that passed the quote check, each given
    exactly one (in lean mode: one per lens that still has an objection, each given only that lens's objections, and
-   every objection has a verdict of its own); no reason for a top-down gap is offered except as a question.
+   every objection has a verdict of its own); without one, every objection that passed the quote check has a verdict of
+   its own, decided one at a time or, in lean mode, lens by lens; no reason for a top-down gap is offered except as a
+   question.
 
 Tool values: use each value's `rounded` with its unit; never round again or recompute. A `fraction` value is shown as
 a percent by moving its decimal point two places right, keeping every digit (0.580000 is 58.0000%); a change of
@@ -291,7 +315,9 @@ and with this instruction, word for word: "Apply the brief to each objection as 
 Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
 answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
 says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
-ask for the full pass, one subagent per objection.
+ask for the full pass, one subagent per objection. Without a subagent tool, lean mode still applies past eight
+objections: go lens by lens, in order, and judge each lens's objections in one pass under that instruction, each with a
+verdict of its own; the answer says so, as above, and that the full pass then takes them one at a time.
 
 The refute brief:
 
@@ -353,6 +379,7 @@ so this table is what each means. A flag is a question to prepare for and never 
 | Flag                         | What it means for the founder                                                                  | Tier             |
 | ---------------------------- | ---------------------------------------------------------------------------------------------- | ---------------- |
 | `price_period_defaulted`     | A price was sent with no months, so it was read as yearly: ask for the months and run it again | weakens it       |
+| `no_market_count`            | A segment gives the customers to win and no count of its whole market, so no TAM or SAM        | weakens it       |
 | `segments_exceed_population` | The segments add up to more customers than the population you gave: a double count             | ends the meeting |
 | `bottom_up_above_top_down`   | Your bottom-up figure is above the top-down figure you compared it with                        | ends the meeting |
 | `sam_equals_tam`             | No segment is narrowed to the customers you can serve today                                    | minor            |
@@ -375,19 +402,23 @@ Lead with what a partner will doubt first, then the numbers.
 1. **Doubted first:** the computed findings (mismatches with no tier, then flags by tier), then the kept objections in
    their tiers, each with the line quoted, its lens or lenses in brackets after the quote ("(Path)", "(Inflation,
    Overlap)"), why, and the fix. Then **Dropped,** one line each with why it fell. Say whether the lenses ran as
-   subagents, and give the number of refute subagents run. When the refute pass ran per lens (lean mode), say so, say it
+   subagents; with a subagent tool, give the number of refute subagents run, and without one, say each objection was
+   decided in this agent, one at a time or lens by lens. When the refute pass ran per lens (lean mode), say so, say it
    is less independent than one subagent per objection, and say the founder may ask for the full pass.
 2. **The market:** a table per segment and in total: Customers, Gross spend, TAM, SAM, SOM, Share of TAM, SOM
-   customers / today, New customers a year. Tool values only. Each whole-company run's totals follow, labelled with
-   its value.
+   customers / today, New customers a year. Tool values only, "not worked" included where the tool prints it (no
+   market count). Each whole-company run's totals follow, labelled with its value.
 3. **Against the deck,** its own section: each stated TAM, SAM or SOM, the tool's figure, the difference and the
    verdict. Beside a stated TAM, always give the tool's total gross spend, both quoted, and say whether the gap could
-   be a gross-spend count: with no take rate the two figures are the same, so it cannot.
+   be a gross-spend count: with no take rate the two figures are the same, so it cannot. With no market count, a stated
+   TAM or SAM is quoted with "not checked: TAM and SAM not worked (no market count)" and the count is asked for.
 4. **Against the top-down figure:** the tool's share and difference only, as a cross-check, never as the market size;
-   with no share given, say it is against the whole figure. Any reason for the gap is a question to the founder under
-   Open asks, never a statement.
+   with no share given, say it is against the whole figure; with no market count, the comparable part and the "not
+   worked" comparison as printed; a deck figure built from one, its comparable part only, beside the deck's figure
+   (step 6), with none of that row's share, difference, flag or break-even put as a finding. Any reason for the gap is
+   a question to the founder under Open asks, never a statement.
 5. **The shakiest assumption:** the ledger row, its kind, its swing, and its value at the SOM target beside the
-   founder's high value (or the tool's `met_without_it` with its `som_low` beside the target, `does_not_move` or
+   founder's highest value (or the tool's `met_without_it` with its `som_low` beside the target, `does_not_move` or
    `out_of_range`), quoted; or none, with why. Then the one line on each other row's kind and swing (step 7).
 6. **The ledger:** every assumption with its source and kind.
 7. **Assumptions** the tool's result lists, quoted with their sources.

@@ -15,6 +15,9 @@ month L adds I at time L (with L = 0, from the start), so cash(t) = A - S(t) bef
   piecewise-linear function being at a breakpoint or an end; none when S(t) > A for some t in [0, min(L, T)] (the
   cash runs out first). An option landing at L covers T exactly when its amount is at least I*.
 - A downside or lean case given as percents scales every plan phase's revenue by R/100 and gross burn by G/100.
+- A phase's revenue given as an annualised run-rate is that run-rate / 12 a month, exactly.
+- With ``milestone_type`` ``self_funding`` (the founder's only round) no follow-on is assumed: T is the month itself,
+  there are no months to raise, and ``no_time_to_raise_given`` never fires.
 
 Each stated runway becomes one check: consistent within ``tolerance_percent`` of the computed runway (the edge
 included), or when it is the computed runway rounded half away from zero to the places it is typed with (``12`` months
@@ -66,11 +69,13 @@ _DOWNSIDE: CaseName = "downside"
 
 @dataclass(frozen=True)
 class Phase:
-    """One phase as worked: its first month, its gross burn and revenue a month (exact)."""
+    """One phase as worked: its first month, its gross burn and revenue a month (exact), and the annualised run-rate
+    the revenue came from when the phase gave one."""
 
     from_month: int
     gross: Fraction
     revenue: Fraction
+    run_rate: Fraction | None = None
 
     @property
     def net(self) -> Fraction:
@@ -158,7 +163,15 @@ def required_raise(phases: tuple[Phase, ...], available: Fraction, lands: int, t
 def _case_phases(case: BurnCase, plan: tuple[Phase, ...]) -> tuple[Phase, ...]:
     """A case's phases: its own, or the plan's with revenue and gross burn scaled by its percents (100 if left out)."""
     if case.phases:
-        return tuple(Phase(p.from_month, fraction(p.gross_burn), fraction(p.revenue)) for p in case.phases)
+        return tuple(
+            Phase(
+                p.from_month,
+                fraction(p.gross_burn),
+                p.monthly_revenue(),
+                None if p.revenue_run_rate is None else fraction(p.revenue_run_rate),
+            )
+            for p in case.phases
+        )
 
     revenue = _share(case.revenue_percent_of_plan)
     gross = _share(case.gross_burn_percent_of_plan)
@@ -180,6 +193,7 @@ def _case_row(name: CaseName, phases: tuple[Phase, ...]) -> RunwayCase:
                 gross_burn=quantity("money", phase.gross),
                 revenue=quantity("money", phase.revenue),
                 net_burn=quantity("money", phase.net),
+                revenue_run_rate=_optional("money", phase.run_rate),
             )
         )
     return RunwayCase(name=name, phases=tuple(rows))
@@ -399,7 +413,7 @@ def _flags(inputs: RunwayPlanInput, worked: _Worked, checks: tuple[RunwayPlanChe
     start = _plan_runway(worked, _NO_RAISE).start_raising_by
     if start is not None and start.exact <= ZERO:
         flags.append("start_raising_date_passed")
-    if inputs.milestones and inputs.months_to_raise is None:
+    if inputs.milestones and inputs.months_to_raise is None and inputs.milestone_type == "next_round":
         flags.append("no_time_to_raise_given")
     band = fraction(inputs.runway_band_months)
     plan_raises = [row for row in worked.runway if row.case == _PLAN and row.option != _NO_RAISE]

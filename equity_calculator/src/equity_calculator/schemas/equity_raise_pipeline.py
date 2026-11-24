@@ -200,13 +200,14 @@ class RaiseRunway(BaseModel):
 
     ``cash_on_hand``, ``cash_floor`` and ``phases`` are the runway plan's own fields for its plan case (its first phase
     from month 1); ``months_to_raise`` is the time the founder allows to raise, and is needed here: the start-raising
-    month is the runway with no raise less it.
+    month is the runway with no raise less it. A ``cash_floor`` left out is ``None`` and worked as none, so "not given"
+    survives a result's echoed ``inputs`` read back from JSON (a stated 0 stays 0).
     """
 
     model_config = MODEL_CONFIG
 
     cash_on_hand: BoundedDecimal = Field(ge=0)
-    cash_floor: BoundedDecimal = Field(default=Decimal(0), ge=0)
+    cash_floor: BoundedDecimal | None = Field(default=None, ge=0)
     phases: tuple[BurnPhase, ...] = Field(min_length=1, max_length=MAX_PHASES)
     months_to_raise: int | None = Field(default=None, strict=True, ge=0, le=MAX_MONTHS_TO_RAISE)
 
@@ -233,7 +234,7 @@ class RaiseRunway(BaseModel):
         return RunwayPlanInput.model_validate(
             {
                 "cash_on_hand": self.cash_on_hand,
-                "cash_floor": self.cash_floor,
+                "cash_floor": Decimal(0) if self.cash_floor is None else self.cash_floor,
                 "cases": [{"name": "plan", "phases": self.phases}],
                 "months_to_raise": self.months_to_raise,
             }

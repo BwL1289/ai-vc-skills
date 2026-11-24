@@ -14,3 +14,7 @@ standing row of the question bank, word for word, and the skill's test checks bo
 | Whom will the partner call, on your list and off it?          | Customers, former colleagues and investors who may be called; brief the ones you list   |
 | What happens if this round does not close?                    | Runway on today's cash from `equity_runway_plan` with no raise, what gets cut, the plan |
 | What happens after this meeting, and when?                    | A question for the founder to ask the partner, not to guess                             |
+
+The first five topics came, as ideas, from the investor-persona prompts the skill's Sources credit, which cite no
+source for them; the wording, the sixth question and the list as a whole are the skill's own. All six are
+unverified.

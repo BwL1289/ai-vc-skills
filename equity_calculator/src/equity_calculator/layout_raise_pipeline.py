@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from equity_calculator.exact import quantity
 from equity_calculator.schemas.equity_common import EquityQuantity
 from equity_calculator.schemas.equity_raise_pipeline import (
     FunnelResult,
@@ -32,14 +33,13 @@ _NEVER = "none: the cash never runs out"
 # The room and the allocation left are values, as every line but a total is outside the investor sheet: in the
 # workbook, the totals above them re-total when a part is edited, and these two do not.
 _AS_RUN = "the value when run, not a live formula"
-_REVENUE = "revenue"
 _REVENUE_NOT_GIVEN = "not given: read as none"
-_FLOOR = "cash_floor"
+_RUN_RATE_HOW = "the run-rate / 12"
 _FLOOR_NOT_GIVEN = "not given: read as none"
 
 
 def _floor_how(runway: RaiseRunway) -> str:
-    return GIVEN if _FLOOR in runway.model_fields_set else _FLOOR_NOT_GIVEN
+    return _FLOOR_NOT_GIVEN if runway.cash_floor is None else GIVEN
 
 
 def _allocation_lines(result: RaisePipelineResult) -> list[Line]:
@@ -156,16 +156,30 @@ def _funnel_lines(funnel: FunnelResult) -> list[Line]:
 
 def _phase_lines(runway: RaiseRunway) -> list[Line]:
     """Each phase of the burn the runway is worked on, as given: its gross burn and its revenue a month, from its
-    month. A phase given with no revenue is worked as none, and its line says so."""
+    month. A phase given with no revenue is worked as none, and its line says so; one given as an annualised run-rate
+    shows the run-rate and the revenue a month the runway plan takes from it."""
     lines = []
     for number, phase in enumerate(runway.phases, start=1):
         name = f"Phase {number}, from month {phase.from_month}"
         key = f"phase_{number}"
-        revenue_how = GIVEN if _REVENUE in phase.model_fields_set else _REVENUE_NOT_GIVEN
-        lines += [
-            Line(f"{key}_gross_burn", f"{name}: gross burn a month", (given("money", phase.gross_burn),), GIVEN),
-            Line(f"{key}_revenue", f"{name}: revenue a month", (given("money", phase.revenue),), revenue_how),
-        ]
+        lines.append(
+            Line(f"{key}_gross_burn", f"{name}: gross burn a month", (given("money", phase.gross_burn),), GIVEN)
+        )
+        if phase.revenue_run_rate is not None:
+            run_rate = given("money", phase.revenue_run_rate)
+            lines += [
+                Line(f"{key}_run_rate", f"{name}: revenue run-rate, a year", (run_rate,), GIVEN),
+                Line(
+                    f"{key}_revenue",
+                    f"{name}: revenue a month",
+                    (quantity("money", phase.monthly_revenue()),),
+                    _RUN_RATE_HOW,
+                ),
+            ]
+            continue
+        revenue_how = _REVENUE_NOT_GIVEN if phase.revenue is None else GIVEN
+        revenue = given("money", phase.revenue or Decimal(0))
+        lines.append(Line(f"{key}_revenue", f"{name}: revenue a month", (revenue,), revenue_how))
     return lines
 
 
@@ -177,7 +191,7 @@ def _timing_lines(result: RaisePipelineResult, timing: RaiseTiming) -> list[Line
     if runway is not None:
         lines += [
             Line("cash_on_hand", "Cash on hand", (given("money", runway.cash_on_hand),), GIVEN),
-            Line("cash_floor", "Cash floor", (given("money", runway.cash_floor),), _floor_how(runway)),
+            Line("cash_floor", "Cash floor", (given("money", runway.cash_floor or Decimal(0)),), _floor_how(runway)),
             *_phase_lines(runway),
         ]
     runway_months: EquityQuantity | str = _NEVER if timing.runway_months is None else timing.runway_months

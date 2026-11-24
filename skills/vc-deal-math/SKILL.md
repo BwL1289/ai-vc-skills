@@ -22,7 +22,8 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
   or an exit waterfall.
 - Hand off to the vc-round-sizing skill for how much to raise on a phased plan, raise now or wait, or which milestone
   month a raise's cash reaches. A runway claim with no raise, or on a SAFE or note raise, goes to its tool,
-  `equity_runway_plan`, as step 2 says; `deal_check` checks only the runway a priced round buys.
+  `equity_runway_plan`, as step 2 says; `deal_check` works a priced round's runway at one flat burn, a quick check,
+  and on a phased plan that round's runway comes from `equity_runway_plan` too.
 - Hand off ARR, retention, churn, CAC payback and burn multiple to the vc-metrics-readiness skill (preview), a market
   size to the vc-market-sizing skill (preview), and a term sheet to the vc-term-sheet-review skill (preview).
 - Hand off a term sheet's pool ask, set beside the pool the founder's hiring plan needs, to the vc-option-pool-plan
@@ -41,13 +42,17 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
    for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an input
    below that it leaves out), and never ask the founder to paste what you already read.
 2. **Ask the founder for what is missing, by name, in one message.** Never guess:
-   - **Is the new money a priced round, or a SAFE or note?** `deal_check` works the new money as a priced equity
-     round. If the founder is raising on a SAFE or a note, do not pass it as `investment`: a SAFE's share is set only
-     at the next priced round, and "the safes are not diluted by each other" (Y Combinator's post-money SAFE user
-     guide), so `deal_check` would report a correct founders' figure as a mismatch. Say so, and offer `equity_round` instead
-     (the equity-calculator skill), with the new SAFE or note as one more instrument and the next priced round the
-     founder expects (its size, pre-money and pool target) as the round; say the figures depend on that round. The
-     raise's runway claim and use-of-funds lines go to `equity_runway_plan` (the runway bullet below).
+   - **Is the new money a priced round, or a SAFE or note?** `deal_check` works the new money as a priced equity round.
+     If the founder is raising on a SAFE or a note, do not pass it as `investment`: a SAFE's share is set only at the
+     next priced round, and "the safes are not diluted by each other" (Y Combinator's post-money SAFE user guide), so
+     `deal_check` would report a correct founders' figure as a mismatch. Say so, and offer `equity_round` instead (the
+     equity-calculator skill), with the new SAFE or note as one more instrument and the next priced round the founder
+     expects (its size, pre-money and pool target) as the round; say the figures depend on that round. A note the
+     founder weighs against a priced round now goes to step 7 instead, capped or not, and with no next round expected in
+     its no-next-round mode. With no next round expected and nothing to weigh it against, `equity_round` cannot run (it
+     needs that round): the SAFE's or note's share is "not computed: set at the next priced round". An uncapped note
+     with that next round given still runs in `equity_round`, converting at its discount price. The raise's runway claim
+     and use-of-funds lines go to `equity_runway_plan` (the runway bullet below).
    - SAFEs, notes or a pool top-up need the fully diluted share count before the round (every share, granted options
      and the unissued pool included, SAFEs and notes left out, since the tool converts them itself) and the unissued
      pool, as shares (`unissued_pool_shares`) or as a percent of the fully diluted shares (`unissued_pool_percent`).
@@ -83,12 +88,19 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      is missing, "not checked: waiting for [the planned monthly spend from that month]" while the month is given and the
      spend is missing, or "not checked: waiting for [the planned monthly revenue from that month]" while only the
      revenue is missing. With no cash or burn given, ask for them by name (`[cash on hand, monthly spend and revenue]`)
-     and make no call until they are given. A mismatch row is quoted with the tool's value, as `deal_check`'s are. With
-     no milestone, months to raise or landing month passed, three flags can come back: `runway_below_band` (on the plan
-     the raise lasts under the runway benchmark, 18 months by default; a common benchmark, not a rule),
-     `cash_never_runs_out` (revenue covers the spend before the cash runs out, so there is no runway end and a stated
-     runway is not checked) and `consistent_beyond_rounding` (a stated runway holds by the tolerance alone, as the flag
-     table's row says).
+     and make no call until they are given. A mismatch row is quoted with the tool's value, as `deal_check`'s are. Each
+     flag the call returns takes its meaning from the `equity_runway_plan` flag table under Flags: with no milestone,
+     months to raise or landing month passed, only `runway_below_band`, `cash_never_runs_out` and
+     `consistent_beyond_rounding` can come back, and a milestone the founder names brings the rest of that table.
+   - **A priced round on a phased plan** (spend or revenue that changes from a later month the founder names; spend
+     planned from the round on is the planned monthly spend above): `deal_check` still works the round, and its runway
+     at one flat burn is a quick check: leave the runway claim out of that call, since one flat burn can call the plan's
+     runway a mismatch. The plan's runway, and the check of the deck's runway claim against it, come from
+     `equity_runway_plan`, the round's amount as one `raises` entry (cash in at its month; nothing converts there) on
+     the founder's own phases, each asked for by name when missing. Quote both runways, each named: the runway plan's is
+     the plan's, and `deal_check`'s is the one-burn quick check. Send `deal_check` the planned monthly spend and revenue
+     of the phase the round lands in, and say which phase; a `runway_below_band` it returns is the quick check's, said
+     so beside the flag, and the plan's band flag is `equity_runway_plan`'s.
    - Pool timing: if the term sheet or deck does not say, use the pre-money (the usual term sheet), say so, and offer
      to re-run with the pool in the post-money.
    - In `equity_deal_check` and `equity_runway_plan`, a stated percent or runway that is the tool's figure rounded to
@@ -99,6 +111,9 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      exactly the places the deck writes ("12", "12.0"). The post-money and the use-of-funds total keep the tolerance
      alone. The verdict is the tool's; `consistent_beyond_rounding` names a figure that holds by the tolerance alone,
      and goes to the answer as the flag table says.
+   - When the founder cannot answer now, do not wait for them: go on with what was given (a call or step that waits for
+     an input still waits), invent nothing in a gap's place, and list each ask in brackets under **Needs from the
+     founder**, the open asks under that name; a live drill waits for the founder.
 3. **Call `equity_deal_check`** with every stated figure. Send money and percents as strings, each stated percent
    and the runway with the deck's own places:
 
@@ -186,11 +201,14 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      and ask for the term.
 
    With no next round the tool refuses `note_months_to_conversion` (`no_next_round_given`), and with one it refuses the
-   maturity and sale terms above, so pass each only in its own mode. Call `equity_instrument_compare` and show the
-   side-by-side table with the tool's figures: ownership by group right after today (the note outstanding, with no
-   shares), then after each next round and each group's payout at each exit, or with no next round the note at its
-   maturity and each group's payout at each sale, under option A, option B and B - A, the founders' lines first, then
-   the flags and the assumptions the answer leans on. The MCP result gives flag codes only; relay each in these words:
+   maturity and sale terms above, so pass each only in its own mode. Call `equity_instrument_compare` and lead the
+   answer with the result's `summary`, before any other row: the founders' and the new money's ownership at each point
+   and the founders' payout at each exit, under A, B and B - A, each a copy of a full row (the report's first lines;
+   over MCP the key after `scenario`, read first, since the full result is long). Then show the side-by-side table
+   with the tool's figures: ownership by group right after today (the note outstanding, with no shares), then after
+   each next round and each group's payout at each exit, or with no next round the note at its maturity and each
+   group's payout at each sale, under option A, option B and B - A, the founders' lines first, then the flags and the
+   assumptions the answer leans on. The MCP result gives flag codes only; relay each in these words:
    `no_next_round_given` (no next round was given, so the note never converts at a priced round here: the table shows
    ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round);
    `cap_below_round_price_now` (the note's cap
@@ -256,8 +274,9 @@ is a change of notation, not a calculation.
 
 ## Flags
 
-The result's `flags` holds codes only; this table is what each `deal_check` flag means for the founder (step 2 gives
-the three `runway_plan` flags; the runway plan's `consistent_beyond_rounding` means what its row here says). The text report prints the same meaning beside each flag; the MCP result does not.
+The result's `flags` holds codes only; the first table is what each `deal_check` flag means for the founder, and the
+second each `runway_plan` flag (step 2). The text report prints the same meaning beside each flag; the MCP result does
+not.
 
 | Flag                                  | What it means for the founder                                                                                   | What to change or prepare                                                                      |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
@@ -274,6 +293,18 @@ the three `runway_plan` flags; the runway plan's `consistent_beyond_rounding` me
 | `runway_below_band`                   | Planned net runway is under the runway benchmark (18 months by default).                                        | Be ready to say whether the raise reaches the next milestone (a common benchmark, not a rule). |
 | `dilution_above_band`                 | The investors get more than the dilution benchmark (25% by default) in one round.                               | Be ready to say why so much is sold (a common benchmark, not a rule).                          |
 
+| `equity_runway_plan` flag          | What it means for the founder                                                                              | What to change or prepare                                                    |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `cash_never_runs_out`              | Revenue covers the spend before the cash runs out, so there is no runway end; a stated one is not checked. | Say so; a VC will check the revenue that makes it true.                      |
+| `cash_out_before_raise_lands`      | The cash goes below the floor before a later raise lands.                                                  | That raise needs bridge money or an earlier close; show it.                  |
+| `milestone_short_on_plan`          | A raise does not reach a milestone, with the months to raise after it, even on the plan.                   | See the tool's required raise, or move the milestone.                        |
+| `downside_short_where_plan_covers` | A raise reaches a milestone on the plan but not on the downside.                                           | Be ready to say what you would cut, and when you would know.                 |
+| `covered_without_raise`            | The cash already reaches a milestone with no raise.                                                        | Say what the raise buys beyond it.                                           |
+| `start_raising_date_passed`        | On the cash alone, with the months to raise given, raising should already have started.                    | Say when the raise started or will close.                                    |
+| `no_time_to_raise_given`           | Milestones were checked at their own month, with no time left to raise the next round.                     | Give the months you allow to raise, and re-run.                              |
+| `runway_below_band`                | On the plan a raise lasts under the runway benchmark (18 months by default).                               | Be ready to say which milestone it reaches (a common benchmark, not a rule). |
+| `consistent_beyond_rounding`       | A stated runway holds by the tolerance alone: it is not the tool's runway rounded to its own places.       | Quote the tool's runway; a VC recomputing gets it.                           |
+
 ## Limits
 
 - No arithmetic outside the calculator's tools, and no what-if the founder did not ask for. Never work out how two of
@@ -289,8 +320,8 @@ the three `runway_plan` flags; the runway plan's `consistent_beyond_rounding` me
   the vc-term-sheet-review skill.
 - It is not investment, legal or tax advice, and it does not say whether to take a round or what a company is worth.
 - It works the new money as a priced equity round. A raise on a SAFE or note is not modelled by `deal_check`; step 2
-  routes its ownership to `equity_round` with the next priced round the founder expects, and its runway and
-  use-of-funds lines to `equity_runway_plan`.
+  routes its ownership to `equity_round` with the next priced round the founder expects (a note weighed against a priced
+  round now goes to `equity_instrument_compare`, step 7), and its runway and use-of-funds lines to `equity_runway_plan`.
 - Benchmarks are common benchmarks, not rules. Quote one only as the tool's assumption rows give it, with the source
   they name, or as `unverified` when they name none.
 - It uses named public frameworks (Y Combinator's post-money SAFE user guide, the option-pool shuffle, runway on net
