@@ -169,13 +169,17 @@ def test_the_comparison_s_hand_off_opens_the_skill_and_its_description_and_keeps
 
 
 def test_its_own_copy_of_step_7_s_rules_names_the_flag_codes_and_marks_the_unverified_assumptions() -> None:
-    """The live run that answered from this skill named no flag by its code and marked no assumption ``unverified``."""
+    """The live run that answered from this skill named no flag by its code and marked no assumption ``unverified``.
+    Installed alone, this skill cannot read step 7's words, so a flag's meaning then comes from the report of a call
+    that ran as the command-line fallback, or is said to be unread: never one of the agent's own."""
     text = " ".join(line.strip() for line in _TEXT.splitlines())
     rules = (
         "and never say which option to take. Then give the flags and the assumptions the answer leans on: the MCP"
         " result gives flag codes only, so name each flag by its code with its meaning in vc-deal-math step 7's words,"
-        " and quote each assumption by its name with its source, marking it `unverified` where the result says so."
-        " For `pool_plan`"
+        " or, when that skill cannot be read and the call ran as the command-line fallback, as its report prints it"
+        " beside the flag; with neither, give the code and say its meaning was not read, never a meaning of your own."
+        " Quote each assumption by its name (the result's `key`) with its source, marking it `unverified` where the"
+        " result says so. For `pool_plan`"
     )
 
     assert rules in text

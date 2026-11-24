@@ -720,6 +720,8 @@ def test_the_deal_math_hub_sends_a_weighed_note_to_step_7_and_says_where_equity_
     assert '"not computed: set at the next priced round"' in step_2
     # equity_round needs only a next round, not a cap: an uncapped note converts there at its discount price.
     assert "An uncapped note with that next round given still runs in `equity_round`" in step_2
+    # The comparison tool's option B is a note: a SAFE weighed against a priced round is worked in equity_round instead.
+    assert "never pass a SAFE to it as one" in step_2
     assert "a note weighed against a priced round now goes to `equity_instrument_compare`, step 7" in limits
 
 

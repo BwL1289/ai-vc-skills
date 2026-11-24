@@ -49,10 +49,14 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      equity-calculator skill), with the new SAFE or note as one more instrument and the next priced round the founder
      expects (its size, pre-money and pool target) as the round; say the figures depend on that round. A note the
      founder weighs against a priced round now goes to step 7 instead, capped or not, and with no next round expected in
-     its no-next-round mode. With no next round expected and nothing to weigh it against, `equity_round` cannot run (it
-     needs that round): the SAFE's or note's share is "not computed: set at the next priced round". An uncapped note
-     with that next round given still runs in `equity_round`, converting at its discount price. The raise's runway claim
-     and use-of-funds lines go to `equity_runway_plan` (the runway bullet below).
+     its no-next-round mode. A SAFE the founder weighs against a priced round now has no side-by-side tool:
+     `equity_instrument_compare`'s option B is a note, with a note's interest, maturity and cap, so never pass a SAFE to
+     it as one. Say so, and work the SAFE with `equity_round` on the next priced round the founder expects, as above;
+     with none expected its share is "not computed: set at the next priced round". With no next round expected and
+     nothing to weigh it against, `equity_round` cannot run (it needs that round): the SAFE's or note's share is "not
+     computed: set at the next priced round". An uncapped note with that next round given still runs in `equity_round`,
+     converting at its discount price. The raise's runway claim and use-of-funds lines go to `equity_runway_plan` (the
+     runway bullet below).
    - SAFEs, notes or a pool top-up need the fully diluted share count before the round (every share, granted options
      and the unissued pool included, SAFEs and notes left out, since the tool converts them itself) and the unissued
      pool, as shares (`unissued_pool_shares`) or as a percent of the fully diluted shares (`unissued_pool_percent`).

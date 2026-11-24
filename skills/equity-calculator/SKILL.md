@@ -150,17 +150,18 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
    `summary`, say in words which mode ran (with no next round, that the note never converts at a priced round here),
    show A, B and B - A as the tool gives them for every row that has them, ownership included, and never say which
    option to take. Then give the flags and the assumptions the answer leans on: the MCP result gives flag codes only,
-   so name each flag by its code with its meaning in vc-deal-math step 7's words, and quote each assumption by its
-   name with its source, marking it `unverified` where the result says so. For `pool_plan`, never assume one: the
-   share counts, the round, the
-   requested pool, the next round's month and every hire's start month and grant are the founder's own figures, so ask
-   for them; with no hire the tool refuses (`no_hiring_plan_given`). Show the plan, the requested pool and requested -
-   plan as the tool gives them and never say which pool to accept. For `raise_pipeline`, never assume one: the round,
-   the lead's cheque, each commitment and whether it is soft or firm, the pro rata amounts, each stage's investors and
-   rate, the term sheets wanted, and the cash, burn and months to raise are the founder's own figures, so ask for them;
-   a stage with no rate or a commitment with no kind is refused (`stage_rate_missing`, `commitment_kind_missing`), and a
-   benchmark rate goes in only with the founder's source. The expected term sheets are an expectation from the founder's
-   rates, never a forecast.
+   so name each flag by its code with its meaning in vc-deal-math step 7's words, or, when that skill cannot be read and
+   the call ran as the command-line fallback, as its report prints it beside the flag; with neither, give the code and
+   say its meaning was not read, never a meaning of your own. Quote each assumption by its name (the result's `key`)
+   with its source, marking it `unverified` where the result says so. For `pool_plan`, never assume one: the share
+   counts, the round, the requested pool, the next round's month and every hire's start month and grant are the
+   founder's own figures, so ask for them; with no hire the tool refuses (`no_hiring_plan_given`). Show the plan, the
+   requested pool and requested - plan as the tool gives them and never say which pool to accept. For `raise_pipeline`,
+   never assume one: the round, the lead's cheque, each commitment and whether it is soft or firm, the pro rata amounts,
+   each stage's investors and rate, the term sheets wanted, and the cash, burn and months to raise are the founder's own
+   figures, so ask for them; a stage with no rate or a commitment with no kind is refused (`stage_rate_missing`,
+   `commitment_kind_missing`), and a benchmark rate goes in only with the founder's source. The expected term sheets are
+   an expectation from the founder's rates, never a forecast.
    For `cap_table_check`, never assume a figure: each class's kind and shares, each holder line, the authorised shares,
    the plan's reserve and every SAFE and note are the founder's own, and so is the basis the table's percents are on
    (`stated_percent_basis`): ask which it is rather than guess, as the tool refuses a stated percent without it. A

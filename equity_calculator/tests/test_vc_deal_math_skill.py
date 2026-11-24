@@ -436,7 +436,9 @@ def test_a_founder_who_expects_no_next_round_is_asked_for_the_note_s_own_maturit
     assert "The session loaded this skill: its first tool call loaded vc-deal-math" in verdict
     assert "it never loaded the equity-calculator skill, so this skill's step 7 reached the run" in verdict
     assert "It names no flag by its code" in verdict and "marks none `unverified`" in verdict
-    assert "Since this run neither skill's text has changed: the hand-off to this skill fired" in verdict
+    # The skill text changed after the run (plugin 0.3.10) is named, and the text the run routed on is still as it was.
+    assert "Since this run plugin 0.3.10 changed" in verdict
+    assert "are as the run had them: the hand-off to this skill fired" in verdict
     assert "on plugin 0.3.7 the same day, passed with shortfalls against the expected answer" in third
     assert "its session loaded the equity-calculator skill, never this one" in third
     assert (

@@ -114,43 +114,51 @@ plugin 0.3.2, is not recorded. The answer is shown whole.
 
 **Pass, with shortfalls against the expected answer.** It met every clause of the pass sentence above. The session
 loaded this skill: its first tool call loaded vc-deal-math, before it searched for the calculator's tool, and it never
-loaded the equity-calculator skill, so this skill's step 7 reached the run, the first of the four runs where it did. It
-made the one `equity_instrument_compare` call, its input the same as the expected call, with no `next_rounds` and no
-`note_months_to_conversion`, and the tool ran its no-next-round mode. Its first paragraph says in words that the
-comparison runs with no next round: "you said this is the only round, so nothing here assumes a later priced round", a
-line about the whole comparison; its discount line adds that "with no next round it changes none of these figures". Its
-ownership table sets the priced seed, the note and the note minus the priced seed side by side for every group, the
-founders, the team, the unissued pool and the new money, right after closing and if the note converts at month 24 (the
-founders' 18.0000 and -4.6347 points, the new money's -20.0000 and 5.1497, the team's and the pool's 1.0000 and
--0.2575), where the third run gave the team's and the pool's percents in a sentence with no B - A, and its sale table
-does the same for every group at each sale; the note owed at months 12 and 24 is option B's alone, as the tool gives it.
-It never says which option to take: its first sentence opens "Neither option is better at every sale price" and goes on
-to what the note leaves the founders at each sale, comparing the options without choosing one. Every figure in its text
-is one the tool returned or the founder gave: each number in the answer was checked against the tool's result and the
-prompt, and none is missing from both. Short of the expected answer: it does not lead with the result's summary but with
-a line of its own, then the note owed and the ownership table. It names no flag by its code (`no_next_round_given`,
-`note_interest_converts`, `discount_unused_without_round`) and relays none in step 7's words, though it gives each one's
-meaning in its own: "nothing here assumes a later priced round", "the conversion includes the $180,000 of interest" and
-the discount "only applies at a priced round". It names none of the assumptions `maturity_rule`, `exit_before_any_round`
-and `note_discount_rule` and marks none `unverified`, listing its own instead, which match the tool's rules (the 2x on
-the principal alone with no interest added, paid before any shareholder; the discount only at a priced round; the
-interest converting; the $5M over today's fully diluted shares; the pool paid as if granted). It does not say in one
-line what the mode shows: that the note never converts at a priced round here, so the table gives ownership right after
-today, the note at its maturity and each sale before any priced round. Its tables drop the cents, and they give the new
-money's stake under the note today as "0% (note outstanding, no shares)" rather than to four places. Its lawyer section
-hands over who chooses at maturity, the 2x change-of-control wording (interest added to the multiple, or the greater of
-2x and converting) and what the maturity shares carry, while whether the interest converts sits under its assumptions;
-it asks the lawyer who chooses at maturity but does not say that the note's own terms decide whether it is repaid or
-converted. Two lines there make claims the tool did not work, with no figure: the greater of 2x and converting "would
-change the $40M row a lot", and if the choice at maturity is the company's "the note behaves very differently". It asks
-the founder for nothing more, does not call `equity_deal_check`, says the $5M is measured over today's 10,000,000 fully
-diluted shares, pool included, and says the 2x is on the principal only. The session's first line listed the
-calculator's server as still starting, with none of its tools; the run found the tool by searching for it by name, a
-first search under a shorter name finding nothing, and called it once. Since this run neither skill's text has changed:
-the hand-off to this skill fired, and this skill's step 7, which asks to lead with the summary, to say what the mode
-shows in one line, to relay each flag in its words and to give the assumptions the answer leans on, and its "Answering"
-section, which asks to say plainly which are `unverified`, reached the run and were not followed on those points; how to
-make them land is open. The eval has not been run again.
+loaded the equity-calculator skill, so this skill's step 7 reached the run, the first of the four runs where it did. The
+equity-calculator skill was never loaded, so no live run has yet exercised its new opening line or its fallback copy of
+step 7's rules. It made the one `equity_instrument_compare` call, its input the same as the expected call, with no
+`next_rounds` and no `note_months_to_conversion`, and the tool ran its no-next-round mode. Its first paragraph says in
+words that the comparison runs with no next round: "you said this is the only round, so nothing here assumes a later
+priced round", a line about the whole comparison; its discount line adds that "with no next round it changes none of
+these figures". Its ownership table sets the priced seed, the note and the note minus the priced seed side by side for
+every group, the founders, the team, the unissued pool and the new money, right after closing and if the note converts
+at month 24 (the founders' 18.0000 and -4.6347 points, the new money's -20.0000 and 5.1497, the team's and the pool's
+1.0000 and -0.2575), where the third run gave the team's and the pool's percents in a sentence with no B - A, and its
+sale table does the same for every group at each sale; the note owed at months 12 and 24 is option B's alone, as the
+tool gives it. It never says which option to take: its first sentence opens "Neither option is better at every sale
+price" and goes on to what the note leaves the founders at each sale, comparing the options without choosing one. Every
+figure in its text is one the tool returned or the founder gave: each number in the answer was checked against the
+tool's result and the prompt, and none is missing from both. Short of the expected answer: it does not lead with the
+result's summary but with a line of its own, then the note owed and the ownership table. It names no flag by its code
+(`no_next_round_given`, `note_interest_converts`, `discount_unused_without_round`) and relays none in step 7's words,
+though it gives each one's meaning in its own: "nothing here assumes a later priced round", "the conversion includes the
+$180,000 of interest" and the discount "only applies at a priced round". It names none of the assumptions
+`maturity_rule`, `exit_before_any_round` and `note_discount_rule` and marks none `unverified`, listing its own instead,
+which match the tool's rules (the 2x on the principal alone with no interest added, paid before any shareholder; the
+discount only at a priced round; the interest converting; the $5M over today's fully diluted shares; the pool paid as if
+granted). It does not say in one line what the mode shows: that the note never converts at a priced round here, so the
+table gives ownership right after today, the note at its maturity and each sale before any priced round. Its tables drop
+the cents, and they give the new money's stake under the note today as "0% (note outstanding, no shares)" rather than to
+four places. Its lawyer section hands over who chooses at maturity, the 2x change-of-control wording (interest added to
+the multiple, or the greater of 2x and converting) and what the maturity shares carry, while whether the interest
+converts sits under its assumptions; it asks the lawyer who chooses at maturity but does not say that the note's own
+terms decide whether it is repaid or converted. All three lines there make a claim the tool did not work, with no
+figure: if the choice at maturity is the company's "the note behaves very differently", the greater of 2x and converting
+"would change the $40M row a lot", and if the maturity shares carry a liquidation preference "a sale after month 24
+looks different from the table". Three lines under its assumptions add such a claim to how a default changes: a pool
+top-up inside the pre-money "would lower the founders' seed figures", if the note converts its principal only "the
+investor's share is smaller", and an ungranted pool's line "goes to the other holders instead". It asks the founder for
+nothing more, does not call `equity_deal_check`, says the $5M is measured over today's 10,000,000 fully diluted shares,
+pool included, and says the 2x is on the principal only. The session's first line listed the calculator's server as
+still starting, with none of its tools; the run found the tool by searching for it by name, a first search under a
+shorter name finding nothing, and called it once. Since this run plugin 0.3.10 changed this skill's step 2, which now
+says a SAFE weighed against a priced round has no side-by-side tool and is never passed to `equity_instrument_compare`
+as a note, and the equity-calculator skill's fallback copy of step 7's rules, which the run never loaded and which now
+says where a flag's meaning comes from when this skill cannot be read; both descriptions, this skill's step 7 and its
+"Answering" section are as the run had them: the hand-off to this skill fired, and this skill's step 7, which asks to
+lead with the summary, to say what the mode shows in one line, to relay each flag in its words and to give the
+assumptions the answer leans on, and its "Answering" section, which asks to say plainly which are `unverified`, reached
+the run and were not followed on those points; how to make them land is open. The eval has not been run again.
 
 The third run, on plugin 0.3.7 the same day, passed with shortfalls against the expected answer; its session loaded the
 equity-calculator skill, never this one, as the first two runs' had, and answered from that skill's own copy of step 7's
