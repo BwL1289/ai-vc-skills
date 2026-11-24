@@ -1,5 +1,5 @@
 """Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check|``
-``runway_plan|metrics_check|market_sizing|instrument_compare``).
+``runway_plan|metrics_check|market_sizing|instrument_compare|cap_table_check``).
 
 The number readers are ``cli_numbers``; a repeated flag's one-argument terms are ``cli_instruments``.
 """
@@ -10,11 +10,14 @@ import argparse
 from typing import get_args
 
 from equity_calculator.cli_instruments import (
+    parse_cap_class,
     parse_class,
     parse_funds_line,
+    parse_holder,
     parse_next_round,
     parse_note,
     parse_phase,
+    parse_preview,
     parse_raise,
     parse_raise_funds_line,
     parse_round,
@@ -33,6 +36,7 @@ from equity_calculator.cli_numbers import (
     parse_years,
 )
 from equity_calculator.schemas.equity import PoolTiming, ShareRounding
+from equity_calculator.schemas.equity_cap_table_check import PercentBasis
 from equity_calculator.schemas.equity_instrument_compare import PoolAtExit
 from equity_calculator.schemas.equity_metrics_check import CustomerSegment, RecurringUnit, StatedChurnBasis
 from equity_calculator.schemas.equity_round import NoteCompounding, StubRule
@@ -712,4 +716,64 @@ def instrument_compare_arguments(parser: argparse.ArgumentParser) -> None:
         "--pool-at-exit",
         choices=get_args(PoolAtExit),
         help="as_common (default: the pool counted as exercised, as in the ownership lines) or left_out.",
+    )
+
+
+def cap_table_check_arguments(parser: argparse.ArgumentParser) -> None:
+    """A cap table's flags: one ``--share-class`` per class and one ``--holder`` per holder line, in order, then the
+    stated total and basis, the plan's reserve, the SAFEs and notes, and the founder's next round and planned rounds."""
+    parser.add_argument(
+        "--share-class",
+        type=parse_cap_class,
+        action="append",
+        dest=_CLASSES,
+        required=True,
+        metavar=_TERMS,
+        help="One class: 'kind=common|preferred|options_granted|options_unissued|warrants [shares=S] "
+        "[authorised-shares=A] [stated-percent=P]'; shares may be left to its holder lines. Repeat for each class, "
+        "in the table's order (the first is class 1).",
+    )
+    parser.add_argument(
+        "--holder",
+        type=parse_holder,
+        action="append",
+        dest="holders",
+        metavar=_TERMS,
+        help="One holder line: 'share-class=K shares=S [stated-percent=P] [founder] [departed]', K the class's number; "
+        "departed marks shares held by someone who has left. Repeat for each line.",
+    )
+    parser.add_argument(
+        "--stated-fully-diluted-shares", type=parse_whole, help="The table's own fully diluted total, to check."
+    )
+    parser.add_argument(
+        "--stated-percent-basis",
+        choices=get_args(PercentBasis),
+        help="What the table's percents are a share of; required with any stated-percent, never assumed.",
+    )
+    parser.add_argument(
+        "--option-plan-reserve", type=parse_whole, help="The option plan's authorised reserve (granted + unissued)."
+    )
+    parser.add_argument("--safe", type=parse_safe, action="append", dest=_INSTRUMENTS, metavar=_TERMS, help=_SAFE_HELP)
+    parser.add_argument("--note", type=parse_note, action="append", dest=_INSTRUMENTS, metavar=_TERMS, help=_NOTE_HELP)
+    parser.add_argument(
+        "--preview",
+        type=parse_preview,
+        dest="conversion_preview",
+        metavar=_TERMS,
+        help="The next priced round as the founder gives it, to convert the SAFEs and notes: 'pre-money=V "
+        "investment=I [target-pool-percent=T] [pool-timing=pre_money|post_money]'. Never assumed.",
+    )
+    parser.add_argument(
+        "--planned-round",
+        type=parse_round,
+        action="append",
+        dest="planned_rounds",
+        metavar=_TERMS,
+        help="One planned round for the founders' path, as --round takes it in dilution: '(investor-percent=N | "
+        "pre-money=V investment=I) [pool-percent=P]'. Repeat for each round, in order.",
+    )
+    parser.add_argument(
+        "--tolerance-points",
+        type=parse_percent,
+        help="How far a stated percent may sit from the computed one beyond rounding, in points (default 0).",
     )

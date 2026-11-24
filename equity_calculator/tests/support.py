@@ -17,6 +17,7 @@ from equity_calculator.schemas.equity import (
     PoolInput,
     PoolResult,
 )
+from equity_calculator.schemas.equity_cap_table_check import CapTableCheckInput, CapTableCheckResult
 from equity_calculator.schemas.equity_common import (
     MAX_ADJUSTED_EXPONENT,
     MAX_SIGNIFICANT_DIGITS,
@@ -471,3 +472,57 @@ COMPARE_BU: dict[str, object] = {
 def instrument_compare(**fields: object) -> InstrumentCompareResult:
     """The priced-round-or-note comparison for ``fields`` (an ``InstrumentCompareInput``'s fields)."""
     return compute(InstrumentCompareInput.model_validate(fields))
+
+
+# Company CQ, made up, worked by exact fractions in test_cap_table_check.py: two founders' common (4,500,000 and
+# 3,500,000) and a departed early hire's 250,000, under 8,000,000 authorised common; 1,000,000 seed preferred (all of
+# its 1,000,000 authorised); 500,000 options granted and a 250,000 unissued pool under a 750,000 reserve; 100,000
+# warrants; and a $1,000,000 SAFE at a $12,000,000 cap. The table states 10,000,000 fully diluted shares and percents
+# to two places that were worked on it, before the warrants: they add up to 101.00%, against 10,100,000 shares.
+CAP_TABLE_CQ: dict[str, object] = {
+    "classes": [
+        {"kind": "common", "authorised_shares": 8_000_000},
+        {"kind": "preferred", "shares": 1_000_000, "authorised_shares": 1_000_000, "stated_percent": "10.00"},
+        {"kind": "options_granted", "shares": 500_000, "stated_percent": "5.00"},
+        {"kind": "options_unissued", "shares": 250_000, "stated_percent": "2.50"},
+        {"kind": "warrants", "shares": 100_000, "stated_percent": "1.00"},
+    ],
+    "holders": [
+        {"share_class": 1, "shares": 4_500_000, "stated_percent": "45.00", "founder": True},
+        {"share_class": 1, "shares": 3_500_000, "stated_percent": "35.00", "founder": True},
+        {"share_class": 1, "shares": 250_000, "stated_percent": "2.50", "departed": True},
+    ],
+    "stated_fully_diluted_shares": 10_000_000,
+    "stated_percent_basis": "fully_diluted",
+    "option_plan_reserve": 750_000,
+    "instruments": [{"kind": "safe", "purchase_amount": "1000000", "valuation_cap": "12000000"}],
+}
+
+# Company CR, made up: two founders' common (5,000,000 and 3,000,000) and a departed co-founder's 500,000, 1,000,000
+# options granted and a 500,000 unissued pool (10,000,000 fully diluted), two SAFEs ($1,000,000 at a $10,000,000 cap;
+# $500,000 at an $8,000,000 cap and a 20% discount), the founder's next round ($4,000,000 at an $18,000,000
+# pre-money) and two planned rounds (20% sold with a 5% new pool, then 20% sold).
+CAP_TABLE_CR: dict[str, object] = {
+    "classes": [
+        {"kind": "common"},
+        {"kind": "options_granted", "shares": 1_000_000},
+        {"kind": "options_unissued", "shares": 500_000},
+    ],
+    "holders": [
+        {"share_class": 1, "shares": 5_000_000, "stated_percent": "50", "founder": True},
+        {"share_class": 1, "shares": 3_000_000, "stated_percent": "30", "founder": True},
+        {"share_class": 1, "shares": 500_000, "stated_percent": "5", "departed": True},
+    ],
+    "stated_percent_basis": "fully_diluted",
+    "instruments": [
+        {"kind": "safe", "purchase_amount": "1000000", "valuation_cap": "10000000"},
+        {"kind": "safe", "purchase_amount": "500000", "valuation_cap": "8000000", "discount_percent": "20"},
+    ],
+    "conversion_preview": {"pre_money": "18000000", "investment": "4000000"},
+    "planned_rounds": [{"investor_percent": "20", "pool_percent": "5"}, {"investor_percent": "20"}],
+}
+
+
+def cap_table_check(**fields: object) -> CapTableCheckResult:
+    """The cap table check for ``fields`` (a ``CapTableCheckInput``'s fields)."""
+    return compute(CapTableCheckInput.model_validate(fields))

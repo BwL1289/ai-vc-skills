@@ -5,7 +5,7 @@ and the essay it implements, Paul Graham's "The Equity Equation" (July 2007). Ev
 inside, ``Decimal`` in and out); the input and result models live in ``equity_calculator.schemas.equity`` and the
 ``equity_calculator.schemas.equity_*`` modules it re-exports (``equity_common``, ``equity_pool``, ``equity_round``,
 ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``, ``equity_runway_plan``,
-``equity_metrics_check``, ``equity_market_sizing``, ``equity_instrument_compare``).
+``equity_metrics_check``, ``equity_market_sizing``, ``equity_instrument_compare``, ``equity_cap_table_check``).
 
   - ``exact``       — exact arithmetic, display rounding, the money split that adds up to the cent;
   - ``equation``    — PG's test, R = (1 - n)·m, and its inverse for a hire, n = (i - 1)/i;
@@ -40,6 +40,11 @@ inside, ``Decimal`` in and out); the input and result models live in ``equity_ca
     next round, and each exit's payouts, with B - A, worked through the round and waterfall code;
   - ``assumptions_instrument_compare`` — the comparison's labelled assumptions (the round's and the waterfall's rows
     reused, its own unverified);
+  - ``cap_table_check`` — a founder's cap table checked against itself: totals, each line's exact share, the stated
+    percents, authorised shares, the instruments outstanding, departed holders, and a conversion preview and the
+    founders' path through the round and dilution code;
+  - ``assumptions_cap_table_check`` — the cap table check's labelled assumptions (Altman's fully diluted measure,
+    the rest unverified or a question for the company's lawyer);
   - ``scenarios``   — ``compute``: any scenario's input to its result;
   - ``result_range`` — the size limit on an answer: no value a spreadsheet cell cannot hold reaches a workbook;
   - ``sheet_parts`` — ``Line`` and ``Sheet``, the parts every report is built from;
@@ -55,16 +60,17 @@ inside, ``Decimal`` in and out); the input and result models live in ``equity_ca
   - ``layout_metrics_check`` — the report lines of a metrics check (the Metrics check sheet);
   - ``layout_market_sizing`` — the report lines of a market size (the Market sizing sheet);
   - ``layout_instrument_compare`` — the report lines of the comparison (the Priced vs note sheet);
+  - ``layout_cap_table_check`` — the report lines of a cap table check (the Cap table check sheet);
   - ``text``        — the CLI's printed report;
   - ``workbook``    — the formatted Excel workbook (real formulas, number formats, verdict colours);
   - ``cli_numbers`` — the CLI's number readers (amounts, percents, whole counts, customers, the workbook path);
   - ``cli_arguments`` — each scenario's CLI flags;
   - ``cli_instruments`` — the repeated-flag readers: ``--safe``, ``--note``, ``--round``, ``--class``, ``--phase``,
-    ``--raise``, the use-of-funds lines, ``--segment``, ``--top-down``, ``--sensitivity``, ``--priced-preference``
-    and ``--next-round``;
+    ``--raise``, the use-of-funds lines, ``--segment``, ``--top-down``, ``--sensitivity``, ``--priced-preference``,
+    ``--next-round``, ``--share-class``, ``--holder`` and ``--preview``;
   - ``cli_runway_plan`` — a runway plan's flags gathered into its cases and raises, and where each came from;
   - ``__main__``    — the CLI, ``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check|
-    runway_plan|metrics_check|market_sizing|instrument_compare [--json] [--xlsx PATH]``;
+    runway_plan|metrics_check|market_sizing|instrument_compare|cap_table_check [--json] [--xlsx PATH]``;
   - ``mcp_server``  — the MCP server, ``equity_calculator_mcp [--output-dir DIR]``: one tool per scenario over stdio.
 
 Nothing here reads the network or a database; it is pure arithmetic plus the workbook writes: the CLI's ``--xlsx``

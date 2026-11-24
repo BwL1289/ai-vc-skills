@@ -5,32 +5,34 @@ description: Exact startup equity arithmetic with the equity_calculator command 
 
 # Equity calculator
 
-The calculator works twelve scenarios exactly (rational arithmetic, no floating point) and returns every value, the
+The calculator works thirteen scenarios exactly (rational arithmetic, no floating point) and returns every value, the
 exact fractions, and the assumptions each result rests on, each with its source. Use it for the numbers; do not
 work them out by hand, and do not round or re-derive what it returns.
 
 ## Which scenario answers which question
 
-| Question                                                                                                        | Scenario             | MCP tool                    |
-| --------------------------------------------------------------------------------------------------------------- | -------------------- | --------------------------- |
-| Is selling n% worth it for an m-times better average outcome?                                                   | `investor`           | `equity_investor`           |
-| What is the most of the company a hire is worth, and what should the offer be?                                  | `employee`           | `equity_employee`           |
-| How many pool shares does a target pool need, and what is the price per share?                                  | `pool`               | `equity_pool`               |
-| How do SAFEs and notes convert in a priced round, and what is the cap table after it?                           | `round`              | `equity_round`              |
-| What is my stake after these rounds?                                                                            | `dilution`           | `equity_dilution`           |
-| How many shares have vested at month M, and what do they cost or are they worth?                                | `vesting`            | `equity_vesting`            |
-| Who gets what when the company is sold for E?                                                                   | `waterfall`          | `equity_waterfall`          |
-| Does a deck's raise, valuation, ownership and runway add up before a VC checks it?                              | `deal_check`         | `equity_deal_check`         |
-| How long does each raise last on our plan and a downside, and which milestones does it reach?                   | `runway_plan`        | `equity_runway_plan`        |
-| Do our ARR, retention, churn, CAC payback and burn multiple match their parts before a VC checks them?          | `metrics_check`      | `equity_metrics_check`      |
-| What are our TAM, SAM and SOM bottom-up, do they match the deck, and which assumption moves them most?          | `market_sizing`      | `equity_market_sizing`      |
-| A priced round now or a convertible note now: who owns what after the next round, and who gets what at an exit? | `instrument_compare` | `equity_instrument_compare` |
+| Question                                                                                                          | Scenario             | MCP tool                    |
+| ----------------------------------------------------------------------------------------------------------------- | -------------------- | --------------------------- |
+| Is selling n% worth it for an m-times better average outcome?                                                     | `investor`           | `equity_investor`           |
+| What is the most of the company a hire is worth, and what should the offer be?                                    | `employee`           | `equity_employee`           |
+| How many pool shares does a target pool need, and what is the price per share?                                    | `pool`               | `equity_pool`               |
+| How do SAFEs and notes convert in a priced round, and what is the cap table after it?                             | `round`              | `equity_round`              |
+| What is my stake after these rounds?                                                                              | `dilution`           | `equity_dilution`           |
+| How many shares have vested at month M, and what do they cost or are they worth?                                  | `vesting`            | `equity_vesting`            |
+| Who gets what when the company is sold for E?                                                                     | `waterfall`          | `equity_waterfall`          |
+| Does a deck's raise, valuation, ownership and runway add up before a VC checks it?                                | `deal_check`         | `equity_deal_check`         |
+| How long does each raise last on our plan and a downside, and which milestones does it reach?                     | `runway_plan`        | `equity_runway_plan`        |
+| Do our ARR, retention, churn, CAC payback and burn multiple match their parts before a VC checks them?            | `metrics_check`      | `equity_metrics_check`      |
+| What are our TAM, SAM and SOM bottom-up, do they match the deck, and which assumption moves them most?            | `market_sizing`      | `equity_market_sizing`      |
+| A priced round now or a convertible note now: who owns what after the next round, and who gets what at an exit?   | `instrument_compare` | `equity_instrument_compare` |
+| Does our cap table add up: totals, each holder's percent, authorised shares, SAFEs outstanding, departed holders? | `cap_table_check`    | `equity_cap_table_check`    |
 
 A founder's question about a whole raise goes to the review built for it, which runs these tools and explains what
 they return: a deck's ask, ownership after the round and runway to the vc-deal-math skill; how much to raise on a
 phased plan to the vc-round-sizing skill; traction metrics to the vc-metrics-readiness skill; a market slide to the
 vc-market-sizing skill; a term sheet to the vc-term-sheet-review skill; an update to current investors to the
-vc-current-investor-update skill. This skill answers one scenario on its own.
+vc-current-investor-update skill; a cap table to tie out to the vc-cap-table-check skill (preview). This skill answers
+one scenario on its own.
 
 ## Running it
 
@@ -55,12 +57,15 @@ scenario's fields, and returns the same JSON text as `equity_calculator <scenari
 | metrics_check      | **`period_months`** (1 to 36, the one period every flow figure covers), `recurring_unit` (`monthly` or `annual`); `starting_recurring` with the period's `new_recurring`, `expansion_recurring`, `contraction_recurring`, `churned_recurring`, and the starting customers' own `cohort_expansion_recurring`, `cohort_contraction_recurring`, `cohort_churned_recurring`; `month_total_revenue` with `month_one_time_revenue`, `month_usage_revenue`; `customers_start`, `customers_lost`, `customers_new`, `customers_new_paid`; `sales_marketing_spend`, `gross_margin_percent`, `net_burn`; `largest_customer_revenue` with `period_revenue`; what the document states: `stated_arr`, `stated_nrr_percent`, `stated_grr_percent`, `stated_churn_percent` with `stated_churn_basis` (`logo`, `gross_revenue`, `net_revenue` or `unlabelled`), `stated_cac`, `stated_cac_payback_months`, `stated_burn_multiple`, `stated_concentration_percent`; `tolerance_points`, `tolerance_percent`, `customer_segment` (`smb`, `mid_market`, `enterprise`), `payback_band_months`, `burn_multiple_band`, `net_revenue_churn_band_percent`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | market_sizing      | **`segments`**: a list of up to 8 `{"customers", "price", "price_period_months" (1 to 120, the months the price covers; left out or null it is read as 12 and flagged), "units_per_customer", "take_rate_percent", "serviceable_percent", "obtainable_percent"` or `"obtainable_customers"` (the SOM, at most one), `"customers_today"}`; `top_down`: a list of up to 3 `{"amount", "comparable_percent", "compare_to"` (`tam` or `sam`)`}`; `sensitivity`: a list of up to 6 `{"field"` (`customers`, `price`, `units_per_customer`, `take_rate_percent`, `serviceable_percent`, `obtainable_percent`, `obtainable_customers`), `"segment"` (1 is the first), `"values"` (1 to 4)`}`; `population`, `annual_revenue_today`, `som_years` (1 to 20), `som_target`; what the deck states: `stated_tam`, `stated_sam`, `stated_som`; `tolerance_percent`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | instrument_compare | **`founder_shares`**, **`team_shares`** and **`unissued_pool_shares`** (`0` for none), `existing_series` (a list of the same `{"shares", "invested", "preference_multiple", "rank", "participation", "cap_multiple"}` objects as waterfall, each with its own `"preference_multiple"` and `"participation"` always given), `existing_instruments` (the same `{"kind": "safe", "purchase_amount", "valuation_cap", "discount_percent", "mfn"}` and `{"kind": "note", "principal", "interest_rate_percent", "months_outstanding", "compounding", "stub_rule", "valuation_cap", "discount_percent", "interest_paid_in_cash"}` objects as round; a note gives `"months_outstanding"` as of today and its `"compounding"`, never `"issue_date"`, `"conversion_date"` or `"day_count"`); **`investment`**; option A: **`priced_pre_money`**, `priced_target_pool_percent`, `priced_pool_timing`, **`priced_preference`** (`{"standard": true}` only when the founder says standard, else `{"preference_multiple", "participation"` (`none`, `full`, `capped`), `"cap_multiple"}`, either with `"rank"`); option B: `note_valuation_cap`, `note_discount_percent`, **`note_interest_rate_percent`**, **`note_compounding`** (`simple`, `annual`, `monthly`), `note_stub_rule`, **`note_months_to_conversion`**, `note_maturity_months`, `note_interest_paid_in_cash`; **`next_rounds`**: up to 4 alternatives for the one round after today, each worked from today, `{"pre_money", "investment", "target_pool_percent", "pool_timing", "preference"}` (`preference` as `priced_preference`); **`exit_amounts`**: up to 6; `pool_at_exit` (`as_common` or `left_out`) |
+| cap_table_check    | **`classes`**: a list of up to 20 `{"kind"` (`common`, `preferred`, `options_granted`, `options_unissued` for the unissued pool, `warrants`), `"shares"` (left out to take its holder lines' sum), `"authorised_shares"` (common and preferred only), `"stated_percent"}`, numbered in order from 1; `holders`: a list of up to 100 `{"share_class"` (the class's number), `"shares", "stated_percent", "founder", "departed"}`, never in the unissued pool; `stated_fully_diluted_shares`; `stated_percent_basis` (`fully_diluted` or `outstanding`; required with any `stated_percent`, never assumed); `option_plan_reserve`; `instruments` (the same `{"kind": "safe", "purchase_amount", "valuation_cap", "discount_percent", "mfn"}` and `{"kind": "note", "principal", "interest_rate_percent", "months_outstanding"` or `"issue_date"` and `"conversion_date", "compounding", "stub_rule", "day_count", "valuation_cap", "discount_percent", "interest_paid_in_cash"}` objects as round, listed and never counted); `conversion_preview`: the founder's next round, `{"pre_money", "investment", "target_pool_percent", "pool_timing"}`, needs `instruments`; `planned_rounds`: dilution's `{"investor_percent"` or `"pre_money"` and `"investment", "pool_percent"}`, needs a `founder` line; `tolerance_points`                                                                                                                                                                                                                                                                                                                                      |
 
 Send money, percents and multipliers as JSON strings (`"7"`, `"1.10"`, `"8000000"`): a JSON number with a decimal
 point arrives as a binary float and keeps only about 15 digits. Percents are percents (`"7"` is 7%). Share counts,
 customer counts (`customers_start`, `customers_lost`, `customers_new`, `customers_new_paid`) and month counts
 (`period_months`, `price_period_months`, `from_month`, `lands_month`, `months_to_raise`, `milestones`, `som_years`,
-`note_months_to_conversion`, `note_maturity_months`, and a sensitivity row's `segment`) are whole numbers, sent as JSON integers, never strings; a string is refused.
+`note_months_to_conversion`, `note_maturity_months`, a sensitivity row's `segment`, and a cap table holder line's
+`share_class`) are whole numbers, sent as JSON integers, never strings; a string is refused. A cap table's `founder`
+and `departed` marks are JSON `true` or `false`.
 
 `fully_diluted_shares` (in `round` and `deal_check`) counts every share before the round, granted options and the
 unissued pool included, and leaves SAFEs and notes out: the tool converts them itself. Some cap tables count SAFEs
@@ -114,7 +119,13 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
    round and every exit are the founder's own figures, so ask for them. Each next round is an alternative for the one
    round after today, worked from today, never after the one before. `{"standard": true}` goes in only when the
    founder says the terms are standard. With no next round the tool refuses (`no_next_round_given`): ask for one.
-   Show A, B and B - A as the tool gives them and never say which option to take.
+   Show A, B and B - A as the tool gives them and never say which option to take. For `cap_table_check`, never
+   assume a figure: each class's kind and shares, each holder line, the authorised shares, the plan's reserve and every
+   SAFE and note are the founder's own, and so is the basis the table's percents are on (`stated_percent_basis`): ask
+   which it is rather than guess, as the tool refuses a stated percent without it. A conversion preview takes the next
+   round the founder gives (its pre-money and raise), never an assumed price, and the founders' path takes the
+   rounds the founder plans. Never say whether a share was validly issued: the tool flags the questions for the
+   company's lawyer.
 2. Give the headline numbers as the tool prints them (the `rounded` value with its unit, or the exact fraction when
    precision matters). Do not round them again or recompute them. A value whose unit is `fraction` is a share of the
    whole: show it as a percent by moving the decimal point of its `rounded` value two places to the right, keeping
@@ -127,8 +138,8 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
 5. A result's `flags` are codes. The command line's report prints each one's meaning beside it; the MCP result does
    not. Relay a flag with its meaning from the table of the skill built on that tool: vc-deal-math for `deal_check`,
    vc-round-sizing for `runway_plan`, vc-metrics-readiness for `metrics_check`, vc-market-sizing for
-   `market_sizing`, and vc-deal-math's step 7 for `instrument_compare`. A flag is a question to be ready for, never
-   an error.
+   `market_sizing`, vc-deal-math's step 7 for `instrument_compare`, and vc-cap-table-check for `cap_table_check`. A
+   flag is a question to be ready for, never an error.
 6. The calculator works the arithmetic of the terms given. It does not read a term sheet or a cap table file, and it
    is not legal, tax or investment advice: say so when the question needs either.
 
@@ -243,6 +254,20 @@ page). Everything else is standard arithmetic, labelled `unverified` in the resu
   through the waterfall on each option's classes, converted shares on their round's series terms with a preference on
   the amount converted. Ownership is shares over the total; payouts are split to the cent within each option; B - A is
   the exact difference rounded once. The note's maturity is only compared, never modelled; no anti-dilution applies.
+- **Cap table check (Altman for the fully diluted measure; the rest unverified, or a question for the company's
+  lawyer).** A class's shares are its stated shares, else its holder lines' sum (with both, the lines are checked
+  against it); FD is every class added up (preferred one share per share, warrants as exercised, the unissued pool
+  included, SAFEs and notes left out until they convert) and O is common plus preferred. Each class and holder line
+  holds shares/FD, and stock shares/O. A stated percent is consistent when it is the computed share rounded half away
+  from zero to the places it is written with, or within `tolerance_points` (0 by default), so send each as text with
+  the table's places; a column of stated percents (the classes', or the table line by line: each class's holder lines,
+  else its own percent) is consistent when its gap from 100% is at most half a unit in the last place of each percent
+  added, plus the tolerance for each. A share count is consistent only when equal. Issued shares are set against
+  each class's authorised shares, the options against the plan's reserve and authorised common against FD. The
+  departed holders' share is their lines over FD. The conversion preview is the round scenario on FD, the unissued
+  pool and the instruments at the founder's next round; the founders' path is their share of FD times each planned
+  round's 1 - n - p (the dilution scenario), converting no SAFE or note. Flags raise questions, some for the
+  company's lawyer, never a ruling on legal validity.
 
 ## Limits
 
@@ -252,5 +277,6 @@ most 50 SAFEs and notes and 20 use-of-funds lines, and a runway plan at most 3 c
 use-of-funds lines each), 10 milestones, months up to 600 and 60 months to raise; a metrics check covers one
 period of 1 to 36 months; a market size takes at most 8 segments, 3 top-down figures and 6 sensitivity rows of
 up to 4 values each; a comparison takes at most 6 existing series, 4 existing SAFEs and notes, 4 next rounds and 6
-exits. Anything past a
+exits; a cap table check takes at most 20 classes, 100 holder lines, 50 SAFEs and notes and 20 planned rounds.
+Anything past a
 limit is refused with a message naming the field.

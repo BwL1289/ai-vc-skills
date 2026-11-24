@@ -1,5 +1,5 @@
 """The repeated-flag readers: ``--safe``, ``--note``, ``--round``, ``--class``, ``--use-of-funds``, a runway plan's,
-a market size's and a priced-round-or-note comparison's.
+a market size's, a priced-round-or-note comparison's and a cap table check's.
 
 A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a note's principal) and goes on with
 ``name=value`` terms named like the model fields, hyphens for underscores, plus bare flags; a ``--round`` or a
@@ -23,12 +23,16 @@ A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a n
     --priced-preference "standard"   (a comparison's series terms: standard, 1x non-participating, only when so said)
     --priced-preference "preference-multiple=1 participation=none rank=1"
     --next-round "pre-money=27000000 investment=6000000 target-pool-percent=10 standard"
+    --share-class "kind=preferred shares=2000000 authorised-shares=2000000 stated-percent=20"   (a cap table's class)
+    --holder "share-class=1 shares=4000000 stated-percent=40 founder"   (a holder line; also the bare flag departed)
+    --preview "pre-money=20000000 investment=5000000"   (the next round a cap table check converts its SAFEs at)
 
 Numbers read as every other flag's do (``equity_calculator.cli_numbers``); a date is ``YYYY-MM-DD``. An unknown,
 repeated or malformed term is refused naming the term; which terms go together is the model's check
 (``equity_calculator.schemas.equity_round``, ``equity_calculator.schemas.equity_dilution``,
 ``equity_calculator.schemas.equity_waterfall``, ``equity_calculator.schemas.equity_runway_plan``,
-``equity_calculator.schemas.equity_market_sizing``, ``equity_calculator.schemas.equity_instrument_compare``).
+``equity_calculator.schemas.equity_market_sizing``, ``equity_calculator.schemas.equity_instrument_compare``,
+``equity_calculator.schemas.equity_cap_table_check``).
 """
 
 from __future__ import annotations
@@ -39,6 +43,7 @@ from datetime import date
 from typing import get_args
 
 from equity_calculator.cli_numbers import parse_decimal, parse_months, parse_percent, parse_rank, parse_whole
+from equity_calculator.schemas.equity_cap_table_check import ShareClassKind
 from equity_calculator.schemas.equity_common import MAX_NUMBER_TEXT, PoolTiming
 from equity_calculator.schemas.equity_market_sizing import PERCENT_FIELDS, CompareTo, SegmentField
 from equity_calculator.schemas.equity_round import DayCount, NoteCompounding, StubRule
@@ -46,11 +51,14 @@ from equity_calculator.schemas.equity_runway_plan import RunwayFrom
 from equity_calculator.schemas.equity_waterfall import Participation
 
 __all__ = [
+    "parse_cap_class",
     "parse_class",
     "parse_funds_line",
+    "parse_holder",
     "parse_next_round",
     "parse_note",
     "parse_phase",
+    "parse_preview",
     "parse_raise",
     "parse_raise_funds_line",
     "parse_round",
@@ -195,6 +203,31 @@ def _segment_number(raw: str) -> object:
 _SENSITIVITY_TERMS: dict[str, _Reader] = {"field": _sensitivity_field, "segment": _segment_number, _VALUES: str}
 
 
+def _class_number(raw: str) -> object:
+    """A holder line's class: a whole number, 1 for the first ``--share-class``."""
+    try:
+        return int(raw)
+    except ValueError:
+        raise argparse.ArgumentTypeError(
+            f"must be a class's number (1 for the first --share-class), got {raw!r}"
+        ) from None
+
+
+# A cap table's class and holder line; a stated percent keeps the places it is typed with, as every stated figure does.
+_CAP_CLASS_TERMS: dict[str, _Reader] = {
+    "kind": _choice(get_args(ShareClassKind)),
+    "shares": parse_whole,
+    "authorised_shares": parse_whole,
+    "stated_percent": parse_percent,
+}
+_HOLDER_TERMS: dict[str, _Reader] = {
+    "share_class": _class_number,
+    "shares": parse_whole,
+    "stated_percent": parse_percent,
+}
+_HOLDER_FLAGS = ("founder", "departed")
+
+
 def _as_term(field: str) -> str:
     return field.replace("_", "-")
 
@@ -280,6 +313,24 @@ def parse_next_round(raw: str) -> dict[str, object]:
     round_terms = {name: value for name, value in terms.items() if name in _NEXT_ROUND_TERMS}
     series = {name: value for name, value in terms.items() if name not in _NEXT_ROUND_TERMS}
     return {**round_terms, _PREFERENCE: series}
+
+
+def parse_cap_class(raw: str) -> dict[str, object]:
+    """argparse type for a cap table check's ``--share-class``: ``kind=common|preferred|options_granted|``
+    ``options_unissued|warrants [shares=S] [authorised-shares=A] [stated-percent=P]``."""
+    return _named_terms(_checked_length(raw).split(), {}, _CAP_CLASS_TERMS, ())
+
+
+def parse_holder(raw: str) -> dict[str, object]:
+    """argparse type for a cap table check's ``--holder``: ``share-class=K shares=S [stated-percent=P] [founder]
+    [departed]`` (K is 1 for the first ``--share-class``)."""
+    return _named_terms(_checked_length(raw).split(), {}, _HOLDER_TERMS, _HOLDER_FLAGS)
+
+
+def parse_preview(raw: str) -> dict[str, object]:
+    """argparse type for a cap table check's ``--preview``: ``pre-money=V investment=I [target-pool-percent=T]
+    [pool-timing=pre_money|post_money]``, the next round as the founder gives it."""
+    return _named_terms(_checked_length(raw).split(), {}, _NEXT_ROUND_TERMS, ())
 
 
 def parse_phase(raw: str) -> dict[str, object]:

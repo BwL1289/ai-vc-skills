@@ -9,15 +9,15 @@
 
 The first of the [AI VC skills](../README.md).
 
-Should we trade stock for this, and what does a round do to the cap table? Twelve scenarios, worked with exact
+Should we trade stock for this, and what does a round do to the cap table? Thirteen scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
 [`skills/equity-calculator/`](../skills/equity-calculator/SKILL.md), at the repository root, tells an assistant when and
-how to use it. The fourteen founder reviews in the root README's [skills table](../README.md#skills), all in preview,
-take every figure they work out from these scenarios; four were built around one: `deal_check` for `vc-deal-math`,
-`runway_plan` for `vc-round-sizing`, `metrics_check` for `vc-metrics-readiness` and `market_sizing` for
-`vc-market-sizing`.
+how to use it. The fifteen founder reviews in the root README's [skills table](../README.md#skills), all in preview,
+take every figure they work out from these scenarios; five were built around one: `deal_check` for `vc-deal-math`,
+`runway_plan` for `vc-round-sizing`, `metrics_check` for `vc-metrics-readiness`, `market_sizing` for
+`vc-market-sizing` and `cap_table_check` for `vc-cap-table-check`.
 
 Built from the original `equity_equation` script this repository started with (it is in the git history, at
 [`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/ai-vc-skills/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation))
@@ -25,20 +25,21 @@ and the essay it implements. That script's own TODO
 list asked for Pydantic models and cell formatting (percent, numbers); both are here, along with the employee formula
 and the option-pool shuffle.
 
-| Scenario             | The question it answers                                                                                                                                                                             |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `investor`           | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                                                                      |
-| `employee`           | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                                                                  |
-| `pool`               | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?                                                         |
-| `round`              | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards?                                             |
-| `dilution`           | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                                                                      |
-| `vesting`            | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                                                               |
-| `waterfall`          | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                                                |
-| `deal_check`         | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                                             |
-| `runway_plan`        | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there?                     |
-| `metrics_check`      | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback and burn multiple the deck states agree with their parts?                                       |
-| `market_sizing`      | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?                              |
-| `instrument_compare` | A founder choosing between a priced round now and a convertible note now: who owns what after today and after each next round, and who gets what at each exit, A beside B with B - A, never a pick? |
+| Scenario             | The question it answers                                                                                                                                                                                                                                                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `investor`           | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                                                                                                                                                                                               |
+| `employee`           | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                                                                                                                                                                                           |
+| `pool`               | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?                                                                                                                                                                                  |
+| `round`              | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards?                                                                                                                                                                      |
+| `dilution`           | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                                                                                                                                                                                               |
+| `vesting`            | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                                                                                                                                                                                        |
+| `waterfall`          | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                                                                                                                                                                         |
+| `deal_check`         | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                                                                                                                                                                      |
+| `runway_plan`        | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there?                                                                                                                                              |
+| `metrics_check`      | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback and burn multiple the deck states agree with their parts?                                                                                                                                                                |
+| `market_sizing`      | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?                                                                                                                                                       |
+| `instrument_compare` | A founder choosing between a priced round now and a convertible note now: who owns what after today and after each next round, and who gets what at each exit, A beside B with B - A, never a pick?                                                                                                                          |
+| `cap_table_check`    | A founder's cap table as an investor's counsel will tie it out: do the classes add up to the fully diluted shares, does each stated percent match its shares, is any class past its authorised shares, which SAFEs and notes are still outstanding, and how much do departed holders hold? It never rules on legal validity. |
 
 ## Install
 
@@ -106,10 +107,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 `equity_calculator_mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
 instead of doing the arithmetic itself.
 
-| Tool                                                                                                                                                                                                                                                 | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing`, `equity_instrument_compare` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
-| `equity_workbook`                                                                                                                                                                                                                                    | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
+| Tool                                                                                                                                                                                                                                                                           | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing`, `equity_instrument_compare`, `equity_cap_table_check` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
+| `equity_workbook`                                                                                                                                                                                                                                                              | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
 error that says why. The SDK checks the arguments itself and passes the validation library's text through
@@ -672,6 +673,45 @@ and every exit from the waterfall code; nothing is worked a second way.
 No next round is refused (`no_next_round_given`: the note converts only at one), and so is a comparison with no
 exit. An exit before the next round, while the note is outstanding, is not modelled.
 
+### Cap table check (Altman for the fully diluted measure; the rest unverified, or a question for the lawyer)
+
+A founder's cap table as they give it: classes numbered in order (common, each preferred series, options granted, the
+unissued pool, warrants), holder lines numbered in order, each in one class, and the SAFEs and notes outstanding. It
+checks the arithmetic of those figures against each other; whether any share was validly issued is for the company's
+lawyer, and the report says what to ask.
+
+1. **Totals.** A class's shares are its stated shares, else its holder lines' sum; with both, the lines are checked
+   against the stated shares (equal or a mismatch) and the stated shares are used. The fully diluted shares FD are
+   every class added up: each preferred share counts as one common share, each warrant share as exercised, and the
+   unissued pool is included (Altman measures grants as "what percentage of the fully-diluted shares"). The
+   outstanding stock O is common plus preferred. SAFEs and notes hold no shares until they convert, so they are in
+   neither.
+2. **Shares.** Each class and holder line holds shares/FD, and each common or preferred one shares/O, exactly. The
+   founders' share is the founder lines over FD; the departed holders' share (vested shares held by people who have
+   left, sometimes called dead equity) is the departed lines over FD.
+3. **Stated figures.** `--stated-percent-basis` says what the table's percents are a share of (FD or O); it is
+   required with any stated percent and never assumed. A stated percent is consistent when it is the computed share
+   rounded half away from zero to the places it is written with (the deal check's rounding test), or within
+   `--tolerance-points` (0 by default). A column of stated percents, the classes' own when every class states one and
+   the table read line by line (each class's holder lines when every line states one, else the class's own), is set
+   against 100%: consistent when the gap is at most half a unit in the last place of each percent added (what their
+   rounding can explain: three thirds written 33.33 add up to 99.99, inside 0.015 points), plus the tolerance for
+   each. The stated fully diluted total is consistent only when it is FD.
+4. **Authorised shares.** Each common or preferred class's shares are set against its authorised shares (what is
+   left, below 0 when over), the options granted and unissued against the plan's reserve, and authorised common (every
+   common class's) against FD, every share of which would be common once converted or exercised.
+5. **Instruments.** Each SAFE and note is listed with its amount, cap and discount, and their amounts are totalled.
+   `--preview` converts them at the next round the founder gives (its pre-money and raise, any pool top-up), through
+   the round scenario above on FD and the unissued pool, and reads every line back as a share of the shares after it.
+   No price is ever assumed: with no `--preview` nothing converts.
+6. **Founders' path.** Each `--planned-round` (the dilution scenario's terms) keeps 1 - n - p of the founders' share
+   of FD; it converts no SAFE or note, and says so.
+7. **Flags**, never a ruling: `percents_do_not_sum` (a column cannot be roundings of shares that add up to 100%),
+   `consistent_beyond_rounding` (a percent holds by the tolerance alone), `over_authorised` (a class past its
+   authorised shares, or the plan past its reserve), `common_authorised_below_fully_diluted`,
+   `unconverted_instruments_present`, `departed_holders_share` and `path_leaves_out_instruments`. Each one's words
+   name the question, and the ones only a lawyer can settle say to ask the company's lawyer.
+
 </details>
 
 ## Worked examples
@@ -948,6 +988,56 @@ founders nothing: the preferences ($8M in A, $8.1M in B) take it all. At $20M th
 $8,296,296.29 in B ($8,296,296.30 on its own; the cent goes elsewhere by largest remainder), $663,703.70 less; at
 $100M everyone converts and the payouts follow ownership. The report never says which to take.
 
+**A cap table tied out (Company CQ, made up).** Two founders hold 4,500,000 and 3,500,000 common and a departed early
+hire 250,000, under 8,000,000 authorised common; the seed preferred holds all of its 1,000,000 authorised shares;
+500,000 options are granted and 250,000 unissued under a 750,000 reserve; 100,000 warrants; one $1,000,000 SAFE at a
+$12,000,000 cap. The table says 10,000,000 fully diluted shares, with every percent to two places:
+
+```
+equity_calculator cap_table_check --share-class "kind=common authorised-shares=8,000,000" \
+    --share-class "kind=preferred shares=1,000,000 authorised-shares=1,000,000 stated-percent=10.00" \
+    --share-class "kind=options_granted shares=500,000 stated-percent=5.00" \
+    --share-class "kind=options_unissued shares=250,000 stated-percent=2.50" \
+    --share-class "kind=warrants shares=100,000 stated-percent=1.00" \
+    --holder "share-class=1 shares=4,500,000 stated-percent=45.00 founder" \
+    --holder "share-class=1 shares=3,500,000 stated-percent=35.00 founder" \
+    --holder "share-class=1 shares=250,000 stated-percent=2.50 departed" \
+    --stated-fully-diluted-shares 10,000,000 --stated-percent-basis fully_diluted --option-plan-reserve 750,000 \
+    --safe "1,000,000 valuation-cap=12,000,000"
+  Class 1 (common): shares                                                                            8,250,000  its holder lines added up
+  Class 1 (common): authorised left                                                                    -250,000  authorised - shares (below 0: over)
+  Fully diluted shares (FD)                                                                          10,100,000  every class
+  Holder line 1 (class 1, common): of fully diluted                                                    44.5545%  shares/FD
+  Founders' lines: of fully diluted                                                                    79.2079%  founder lines' shares/FD
+  Departed holders: of fully diluted                                                                    2.4752%  departed lines' shares/FD
+  Authorised common left over FD                                                                     -2,100,000  authorised common - FD
+  Fully diluted shares: the table says                                                               10,000,000  given
+  Fully diluted shares: difference                                                                      100,000  computed - stated
+  Fully diluted shares: verdict                                                                        mismatch  consistent only when equal
+  Holder line 1 (class 1, common) percent: the table says                                              45.0000%  given
+  Holder line 1 (class 1, common) percent: the calculator gives                                        44.5545%  shares/FD
+  Holder line 1 (class 1, common) percent: rounds to the table's "45.00"                                     no  the computed figure, rounded half away from zero to the places the table writes, is the table's
+  Holder line 1 (class 1, common) percent: verdict                                                     mismatch  within the tolerance, or rounding to the table's, is consistent
+  Percent column, line by line: the table says                                                        101.0000%  given
+  Percent column, line by line: what rounding explains                                                  0.0350%  half the last place of each
+  Percent column, line by line: verdict                                                                mismatch  a gap within what rounding explains, plus the tolerance for each, is consistent
+  Flag                                                                                      percents_do_not_sum  The stated percents cannot all be roundings of shares that add up to 100%: a line is missing, counted twice, or on another basis; find it before the table goes to an investor
+  Flag                                                                                          over_authorised  A class has issued more shares than the authorised figure given, or the option plan has granted and reserved more than its reserve; ask the company's lawyer whether the charter or the plan was amended, as shares past the authorised number may not be validly issued
+  Flag                                                                    common_authorised_below_fully_diluted  Authorised common is below the fully diluted shares, all of which would be common once converted or exercised; ask the company's lawyer whether the charter reserves enough common
+  Flag                                                                          unconverted_instruments_present  SAFEs or notes are outstanding and hold no shares yet, so every percent here falls when they convert; list them for investors, and ask the company's lawyer to confirm their terms
+  Flag                                                                                   departed_holders_share  People who have left hold shares (the departed holders' line above); investors often ask about it, and the company's lawyer can say whether any repurchase right or unvested shares were handled
+  Overall verdict                                                                                      mismatch  mismatch if any check is; consistent if all are; not_checked with none
+```
+
+The classes add up to 10,100,000 shares, not the table's 10,000,000. Each stated percent is its shares over the
+table's 10,000,000, so every one misses at two places against the classes' total (the first founder holds 44.5545%,
+not 45.00%), and the column, read line by line, adds up to 101.00%, past the 0.035 points that rounding seven percents
+to two places can explain; the report does not say which line is the extra one. Common is
+250,000 shares past its authorised 8,000,000, and authorised common is 2,100,000 short of the fully diluted shares;
+both are questions for the company's lawyer, and the report never says whether a share was validly issued. The
+departed hire holds 2.4752%, and the SAFE is listed outstanding: no percent here counts it until a `--preview` round
+converts it.
+
 ## Using it
 
 ```
@@ -999,6 +1089,9 @@ equity_calculator instrument_compare --founder-shares F --team-shares T --unissu
     --note-interest-rate-percent R --note-compounding simple|annual|monthly [--note-stub-rule RULE]
     --note-months-to-conversion M [--note-maturity-months M] [--note-interest-paid-in-cash]
     --next-round "TERMS"... --exit E... [--pool-at-exit as_common|left_out]
+equity_calculator cap_table_check --share-class "TERMS"... [--holder "TERMS"]... [--stated-fully-diluted-shares S]
+    [--stated-percent-basis fully_diluted|outstanding] [--option-plan-reserve R]
+    [--safe "TERMS" | --note "TERMS"]... [--preview "TERMS"] [--planned-round "TERMS"]... [--tolerance-points P]
 ```
 
 `deal_check` needs `--investment` and at least one of `--pre-money`, `--post-money` and `--stated-investor-percent`.
@@ -1051,6 +1144,15 @@ unless given), and `--existing-safe` and `--existing-note` take `--safe`'s and `
 only compared with the months to conversion; nothing at maturity is modelled. `--pool-at-exit left_out` gives the pool
 nothing at an exit.
 
+`cap_table_check` needs at least one `--share-class`, in the table's order (the first is class 1), each with its
+`kind` and, unless its `--holder` lines give them, its `shares`. Each `--holder` names its class by number and is
+marked `founder` or `departed` (vested shares held by someone who has left) as the founder says; the unissued pool
+has no holder lines. A stated percent needs `--stated-percent-basis`, never assumed, and on `outstanding` only common
+and preferred lines carry one. Give each stated percent with the places the table writes (`stated-percent=45.00` for
+"45.00%"). `--safe` and `--note` take `round`'s terms and are listed, never counted; `--preview` converts them at the
+next round the founder gives, and needs at least one; `--planned-round` takes `dilution`'s `--round` terms and needs a
+`founder` line. `authorised-shares` is for common and preferred only; the plan's reserve is `--option-plan-reserve`.
+
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
 `--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure or sensitivity
 row, given as one quoted string of `key=value` terms and
@@ -1069,6 +1171,10 @@ bare flags in any order, after the amount for a SAFE or the principal for a note
 | `--sensitivity`       | `field=F segment=K values=V1/V2/...` (F one of `customers`, `price`, `units-per-customer`, `take-rate-percent`, `serviceable-percent`, `obtainable-percent`, `obtainable-customers`; 1 to 4 values)                                                                                         |
 | `--priced-preference` | `standard [rank=K]` or `preference-multiple=M participation=none\|full\|capped [cap-multiple=C] [rank=K]`                                                                                                                                                                                   |
 | `--next-round`        | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]` and the series' terms as `--priced-preference` takes them                                                                                                                                            |
+| `--share-class`       | `kind=common\|preferred\|options_granted\|options_unissued\|warrants [shares=S] [authorised-shares=A] [stated-percent=P]`                                                                                                                                                                   |
+| `--holder`            | `share-class=K shares=S [stated-percent=P] [founder] [departed]` (K is 1 for the first `--share-class`)                                                                                                                                                                                     |
+| `--preview`           | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]`                                                                                                                                                                                                      |
+| `--planned-round`     | `--round`'s terms                                                                                                                                                                                                                                                                           |
 
 A note that names no `compounding` compounds `annual`, and one that names no `stub-rule` uses `fractional_power`.
 An unknown term, a term given twice, or a value that is not a number is refused, naming the flag.
@@ -1117,7 +1223,8 @@ as `"a"`) and `rounded` is the display value as a decimal string.
 Every decimal input has at most 28 significant digits, trailing zeros included, and a nonzero value at least 1e-15
 and under 1e16 in size. A share count is a whole number below 1e16. Number text is at most 100 characters. A round takes at
 most 50 SAFEs and notes, a dilution at most 20 rounds, a waterfall at most 12 preferred classes, ranked 1 to 12, and a
-deal check at most 50 SAFEs and notes and 20 use-of-funds lines. A runway plan takes at most 3 cases (the plan, a
+deal check at most 50 SAFEs and notes and 20 use-of-funds lines, and a cap table check at most 20 classes, 100 holder lines, 50
+SAFEs and notes and 20 planned rounds. A runway plan takes at most 3 cases (the plan, a
 downside and a lean case) of at most 12 phases, 6 raises of at most 20 use-of-funds lines each, and 10 milestones;
 its months are at most 600 and its months to raise at most 60. A metrics check covers one period of 1 to 36
 months, and its customer counts are whole numbers below 1e16. A market size takes at most 8 segments, 3 top-down
@@ -1140,7 +1247,7 @@ tools do not check it.
 ## The Excel workbook
 
 There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` for the round, `Dilution`, `Vesting`,
-`Waterfall`, `Deal check`, `Runway plan`, `Metrics check`, `Market sizing` or `Priced vs note`):
+`Waterfall`, `Deal check`, `Runway plan`, `Metrics check`, `Market sizing`, `Priced vs note` or `Cap table check`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
@@ -1164,7 +1271,7 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
   does not calculate, such as a file preview or openpyxl's `data_only` read, shows them empty.
 - Totals are live `=SUM` formulas, so editing a part re-totals: the investor's post-money, total shares, total
   ownership and post-money (pool and round), the stake lost in all (dilution), vested in all and the grant (vesting), the total paid out
-  (waterfall), the pre-money split and use-of-funds totals (deal check), each raise's use-of-funds total (runway plan), and a market size's totals across its segments (customers, gross spend, TAM, SAM and SOM). A live total adds the rounded cells, so it can differ from the model's exact total in the last place
+  (waterfall), the pre-money split and use-of-funds totals (deal check), each raise's use-of-funds total (runway plan), a market size's totals across its segments (customers, gross spend, TAM, SAM and SOM), and a cap table's fully diluted shares and its SAFE and note amounts. A live total adds the rounded cells, so it can differ from the model's exact total in the last place
   kept: a cent on the investor's post-money, a thousandth of a share on the pool's total shares, 0.000001 on its total
   ownership. The number formats hide that difference.
 - The pool's and the round's value rows, the waterfall's payouts, a deal check's pre-money split and percent
@@ -1173,7 +1280,7 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
   rounding too: when it is not the typed count (0.335 shows 0.34 in one segment and 0.33 in the next), its
   how-column says "given, shown rounded so the segments add up to the total".
 - Verdict cells are coloured by conditional formatting: green for accept, grant and in the money, amber for break
-  even and at the money, red for reject, no grant and underwater. A deal check's, a runway plan's, a metrics check's and a market size's verdicts are
+  even and at the money, red for reject, no grant and underwater. A deal check's, a runway plan's, a metrics check's, a market size's and a cap table check's verdicts are
   green for consistent, red for mismatch and amber for not checked; a runway plan's milestones are green when covered and red
   when short. A waterfall choice is blue when the class converts
   and grey when it stays: neither is good or bad. The investor verdict recolours itself when an input changes;
@@ -1376,6 +1483,23 @@ these (`standard_preference` only when a series is given as standard):
 | `pool_at_exit`              | the pool takes part as common                                                               | `--pool-at-exit left_out`                         | method                                      |
 | `money_split`               | largest remainder within each option                                                        | fixed                                             | display convention                          |
 | `difference_rounding`       | B - A of the exact values, rounded once                                                     | fixed                                             | display convention                          |
+
+The `cap_table_check` scenario adds these (`preferred_as_converted` only with a preferred class, `warrants_as_exercised`
+only with warrants, the rest only when the input uses them, `legal_validity` always), then the nested round's and
+dilution's own rows that it does not already list:
+
+| Key                      | Default                                                 | How to change it                              | Source                                                      |
+| ------------------------ | ------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------- |
+| `fully_diluted_basis`    | every class, the unissued pool included                 | fixed                                         | unverified; Altman's fully-diluted measure                  |
+| `class_shares`           | a class's stated shares, else its holder lines' sum     | `shares=`                                     | method                                                      |
+| `preferred_as_converted` | one common share per preferred share                    | fixed                                         | unverified (the charter decides; a question for the lawyer) |
+| `warrants_as_exercised`  | one share per warrant share                             | fixed                                         | unverified (the warrant decides; a question for the lawyer) |
+| `outstanding_basis`      | common and preferred only                               | `--stated-percent-basis`                      | unverified (the founder named the basis)                    |
+| `tolerance`              | 0 points beyond rounding                                | `--tolerance-points`                          | unverified (the rounding test is standard arithmetic)       |
+| `authorised_shares`      | the founder's authorised figures, class by class        | `authorised-shares=`, `--option-plan-reserve` | unverified (the charter decides; a question for the lawyer) |
+| `instruments_outside`    | SAFEs and notes are not in FD until they convert        | `--preview`                                   | unverified                                                  |
+| `founder_path`           | the founders' share of FD times each round's share kept | `--planned-round`                             | unverified                                                  |
+| `legal_validity`         | not checked                                             | fixed                                         | method                                                      |
 
 </details>
 

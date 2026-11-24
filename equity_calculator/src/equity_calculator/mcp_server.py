@@ -4,7 +4,8 @@
 
 Each scenario is one tool, ``equity_<scenario>`` (``equity_investor``, ``equity_employee``, ``equity_pool``,
 ``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``,
-``equity_runway_plan``, ``equity_metrics_check``, ``equity_market_sizing``, ``equity_instrument_compare``). A tool takes
+``equity_runway_plan``, ``equity_metrics_check``, ``equity_market_sizing``, ``equity_instrument_compare``,
+``equity_cap_table_check``). A tool takes
 one argument, ``inputs``: that scenario's input model (``equity_calculator.schemas``). It returns exactly the text
 ``equity_calculator <scenario> --json`` prints: the result model as JSON, exact fractions and labelled assumptions
 included. An input the model refuses, or one it accepts that has no answer (``equity_calculator.errors``), comes back
@@ -52,6 +53,7 @@ from equity_calculator.errors import EquityComputeError
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity import (
+    CapTableCheckInput,
     DealCheckInput,
     DilutionInput,
     EmployeeInput,
@@ -249,6 +251,32 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "existing MFN SAFE beside the note) never pick an option. No next round is refused (no_next_round_given). "
         "Every term is the founder's: never assume one.",
     ),
+    "cap_table_check": (
+        CapTableCheckInput,
+        "Cap table check (totals, exact percents, authorised shares, instruments, departed holders)",
+        "A founder's cap table checked against itself, exactly. classes (one to 20, numbered in order, no names) each "
+        "have a kind (common, preferred, options_granted, options_unissued for the unissued pool, warrants), shares "
+        "(or left to their holder lines), any authorised_shares (common and preferred only) and stated_percent; "
+        "holders (up to 100, numbered in order) each sit in share_class (1 is the first class) with shares, any "
+        "stated_percent, and the founder and departed marks. A class's shares are its stated shares, else its holder "
+        "lines' sum (both given: the lines are checked against it). FD = every class added up (preferred one to one, "
+        "warrants as exercised, the unissued pool included, SAFEs and notes left out); O = common + preferred. Each "
+        "class and holder line comes back as shares/FD and, for stock, shares/O. Each stated_percent is checked "
+        "against the basis stated_percent_basis names (fully_diluted or outstanding: required with any stated "
+        "percent, never assumed), consistent when it is the computed share rounded half away from zero to the places "
+        "it is typed with (send it as text, those places as the table writes them) or within tolerance_points "
+        "(default 0); a column of stated percents (the classes', and the table line by line) is checked against 100% "
+        "within half a unit in the last place of each; stated_fully_diluted_shares and a class's shares against its "
+        "lines only when equal. Issued shares against authorised_shares per class, the options against "
+        "option_plan_reserve, authorised common against FD. instruments (the round's SAFE and note terms) are listed "
+        "with their amount; conversion_preview (pre_money, investment, any target_pool_percent and pool_timing, the "
+        "founder's next round, never assumed) converts them through the round scenario and reads every line back "
+        "after it. Departed holders' share of FD, the founders' share, and with planned_rounds (the dilution "
+        "scenario's rounds) the founders' path. Flags (percents that cannot sum to 100%, over authorised, authorised "
+        "common below FD, unconverted instruments, departed holders' shares, a path without the instruments) are "
+        "questions, some for the company's lawyer, never a ruling on legal validity. Every figure is the founder's: "
+        "never assume one.",
+    ),
 }
 
 _INSTRUCTIONS = (
@@ -262,7 +290,9 @@ _INSTRUCTIONS = (
     "checked against the document's figures), equity_market_sizing (a founder's TAM, SAM and SOM built bottom-up "
     "from their own segments, checked against the deck, set beside any top-down figure, with ranges), "
     "equity_instrument_compare (a priced round now beside a convertible note now: ownership after today and after "
-    "each next round, and each exit's payouts, side by side, never a pick). Pass the "
+    "each next round, and each exit's payouts, side by side, never a pick), equity_cap_table_check (a founder's cap "
+    "table checked against itself: totals, each class's and holder's exact percent, authorised shares, SAFEs and "
+    "notes outstanding, departed holders, never a ruling on legal validity). Pass the "
     "scenario's fields in `inputs`; give money and percents as JSON strings to keep every digit. Quote the result's "
     "numbers and its labelled assumptions; never round them further without saying so. A value whose unit is "
     "fraction is a share of the whole: show it as a percent by moving the decimal point of its rounded value two "
@@ -433,8 +463,8 @@ def build_server(output_dir: Path | None = None) -> FastMCP:
                 f"dot, no control, format or surrogate character), and a name that would land outside the folder, an "
                 f"existing file, a link or an answer too large for a workbook is refused. `inputs` is any "
                 f'scenario\'s input with its `scenario` tag set ("investor", "employee", "pool", "round", "dilution", '
-                f'"vesting", "waterfall", "deal_check", "runway_plan", "metrics_check", "market_sizing" or '
-                f'"instrument_compare"). Returns '
+                f'"vesting", "waterfall", "deal_check", "runway_plan", "metrics_check", "market_sizing", '
+                f'"instrument_compare" or "cap_table_check"). Returns '
                 f"the path written. {_DIGITS_ADVICE}"
             ),
             annotations=ToolAnnotations(

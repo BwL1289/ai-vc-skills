@@ -1,8 +1,8 @@
 # Command-line interface: stdout is the report.
 """``equity_calculator`` — an equity question: PG's two tests, the option pool, a round, dilution, vesting, an exit,
 a fundraising ask checked before a VC reads it, how long a raise lasts on a founder's plan, a founder's traction
-metrics checked against their parts, a founder's market size built bottom-up, or a priced round now set beside a
-convertible note now.
+metrics checked against their parts, a founder's market size built bottom-up, a priced round now set beside a
+convertible note now, or a founder's cap table checked against itself.
 
     equity_calculator investor (--equity-percent N | --pre-money V --investment I)
         (--outcome-multiplier M | --growth-percent G) [--holder-percent H]
@@ -52,6 +52,10 @@ convertible note now.
         --note-interest-rate-percent R --note-compounding simple|annual|monthly [--note-stub-rule RULE]
         --note-months-to-conversion M [--note-maturity-months M] [--note-interest-paid-in-cash]
         (--next-round "TERMS")... (--exit E)... [--pool-at-exit as_common|left_out]
+    equity_calculator cap_table_check (--share-class "TERMS")... [--holder "TERMS"]...
+        [--stated-fully-diluted-shares S] [--stated-percent-basis fully_diluted|outstanding]
+        [--option-plan-reserve R] [--safe "TERMS" | --note "TERMS"]... [--preview "TERMS"]
+        [--planned-round "TERMS"]... [--tolerance-points P]
 
 Every scenario also takes ``--json`` (print the whole result model, exact fractions included, instead of the
 report) and ``--xlsx PATH`` (also write the formatted workbook to PATH; the report then names it). The report is
@@ -65,7 +69,8 @@ any folders on its path that do not exist yet; while saving, the Excel library a
 file in the system's temporary folder (``TMPDIR`` if set), so that folder must be writable. The number readers are
 ``equity_calculator.cli_numbers``; each scenario's flags are ``equity_calculator.cli_arguments``; a ``--safe``,
 ``--note``, ``--round``, ``--class``, ``--use-of-funds``, ``--phase``, ``--raise``, ``--raise-use-of-funds``,
-``--segment``, ``--top-down``, ``--sensitivity``, ``--priced-preference`` or ``--next-round`` is one argument of
+``--segment``, ``--top-down``, ``--sensitivity``, ``--priced-preference``, ``--next-round``, ``--share-class``,
+``--holder``, ``--preview`` or ``--planned-round`` is one argument of
 terms (``equity_calculator.cli_instruments``); a runway plan's flags become its cases and raises in
 ``equity_calculator.cli_runway_plan``. A refusal names the flag,
 or a repeated flag's item as ``--note #2`` (the second instrument in the order given) and its term.
@@ -82,6 +87,7 @@ from pathlib import Path
 from typing import Any, get_args
 
 from equity_calculator.cli_arguments import (
+    cap_table_check_arguments,
     deal_check_arguments,
     dilution_arguments,
     employee_arguments,
@@ -101,6 +107,7 @@ from equity_calculator.errors import EquityComputeError
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity import (
+    CapTableCheckInput,
     DealCheckInput,
     DilutionInput,
     EmployeeInput,
@@ -135,6 +142,7 @@ _INPUT_MODELS: dict[str, type[ScenarioInput]] = {
     "metrics_check": MetricsCheckInput,
     "market_sizing": MarketSizingInput,
     "instrument_compare": InstrumentCompareInput,
+    "cap_table_check": CapTableCheckInput,
 }
 # A scenario whose flags do not map one to one onto its model's fields: the fields they make, and where each came from.
 _SHAPES: dict[str, Callable[[dict[str, Any]], tuple[dict[str, object], Places]]] = {"runway_plan": runway_plan_fields}
@@ -193,6 +201,12 @@ def _build_parser() -> argparse.ArgumentParser:
             "A priced round now beside a convertible note now: who owns what after today and after each next "
             "round, and who gets what at each exit, B - A; never a recommendation",
             instrument_compare_arguments,
+        ),
+        (
+            "cap_table_check",
+            "Check your cap table before a VC does: totals, each class's and holder's exact percent, authorised "
+            "shares, SAFEs and notes outstanding, departed holders; never a ruling on legal validity",
+            cap_table_check_arguments,
         ),
     )
     for name, summary, add_arguments in scenarios_help:

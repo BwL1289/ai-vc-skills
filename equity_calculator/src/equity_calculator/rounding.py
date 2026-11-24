@@ -1,5 +1,5 @@
 """The rounding test every check of a document's stated figure shares (``metrics_check``, ``deal_check``,
-``runway_plan``).
+``runway_plan``, ``cap_table_check``).
 
 People write figures rounded to the places they show: "12 months" for a computed 12.40, "17%" for 16.6667%. A stated
 percent, months or multiple is therefore consistent when it is the computed figure rounded half away from zero to the
