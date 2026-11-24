@@ -548,7 +548,7 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    period's churn on `ltv_churn_basis` (gross revenue churn by default, or net revenue or logo churn, the founder's
    choice): LTV = a·(P/u)·m / c, with no discounting. Over one month this is a16z's own shape, a month's margin per
    account over the monthly churn (paraphrased); the churn basis, longer periods and leaving out discounting are ours,
-   unverified. LTV/CAC = LTV / blended CAC (a16z names a contribution-margin LTV to CAC ratio; blended CAC is ours).
+   unverified. LTV/CAC = LTV / blended CAC (a16z sets a contribution-margin LTV against CAC; blended CAC is ours).
    On revenue alone, LTV = a·(P/u) / c and its LTV/CAC are worked whenever an LTV or LTV/CAC is stated, to test
    whether the stated figure left the margin out; with a contribution margin and a gross margin g both given, LTV on
    the gross margin, a·(P/u)·g / c, is worked whenever an LTV is stated, to test whether it used the gross margin.
