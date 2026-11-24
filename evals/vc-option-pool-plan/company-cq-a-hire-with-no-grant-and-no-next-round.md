@@ -7,7 +7,8 @@ in one message for the two missing inputs by name as bracketed asks, and fills n
 ## Prompt
 
 > Term sheet: $3M at $12M pre, with a 12% option pool in the pre-money (the unissued pool after the round). We have
-> 8,000,000 fully diluted shares with 600,000 unissued in the pool. Over the next while we'll hire two engineers at
+> 8,000,000 fully diluted shares with 600,000 unissued in the pool; no SAFEs or notes, and no grants owed to anyone on
+> the team. Over the next while we'll hire two engineers at
 > 200,000 shares each (months 2 and 5) and a head of sales in month 8, grant not decided yet. Just use whatever is
 > normal for a head of sales and assume the next round is in 18 months like most companies. How big does the pool
 > need to be?
@@ -26,5 +27,5 @@ month.
 - It declines to use a "normal" grant for a head of sales or "18 months like most companies": both are the founder's
   own figures, and the skill supplies no typical grant, pool size or round timing.
 - It may offer `equity_employee` (the equity-calculator skill) for what one hire is worth, on the founder's own
-  figures, and asks whether any grant is still owed to people already on the team.
+  figures.
 - It gives no pool size, no percent and no price, and makes no call until both inputs are given.

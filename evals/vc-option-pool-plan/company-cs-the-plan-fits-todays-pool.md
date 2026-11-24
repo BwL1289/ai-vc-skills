@@ -9,8 +9,9 @@ pool's top-up and difference as printed, and never says which pool to accept.
 
 ## Prompt
 
-> We're raising $3M at a $12M pre-money and the lead wants a 15% pool after the round, in the pre-money. We have
-> 10,000,000 fully diluted shares, 1,500,000 of them an unissued pool. Our plan until the next round in month 15:
+> We're raising $3M at a $12M pre-money and the lead wants an unissued pool of 15% after the round, in the pre-money.
+> We have 10,000,000 fully diluted shares, 1,500,000 of them an unissued pool; no SAFEs or notes, and no grants owed to
+> the team. Our plan until the next round in month 15:
 > a backend engineer (month 2) and a frontend engineer (month 3) at 1% each, a support lead in month 6 at 0.5%, a
 > head of product in month 10 at 2%, and a head of finance in month 20 at 1%. Grants are percents of the fully diluted
 > shares after this round. Do we even need a top-up?
@@ -60,7 +61,8 @@ pool's top-up and difference as printed, and never says which pool to accept.
 ## Expected answer
 
 - It asks for nothing more: every grant is given the same way, as a percent of the shares after this round, and the
-  15% is the unissued pool after the round in the pre-money. It passes no `founder_shares`, as none was given, and
+  15% is the unissued pool after the round in the pre-money; there are no SAFEs or notes and no grants owed to the
+  team. It passes no `founder_shares`, as none was given, and
   says the founders' own line needs their share count.
 - `plan_fits_current_pool` in its words: the four hires counted by month 15 take 562,500 shares (4.5000% as their
   target), which today's 1,500,000-share pool holds, so the plan needs no top-up (0 new pool shares). It quotes the

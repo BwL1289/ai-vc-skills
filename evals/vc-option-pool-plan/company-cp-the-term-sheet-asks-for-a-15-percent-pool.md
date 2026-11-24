@@ -11,7 +11,8 @@ to accept, and computes nothing in its own text.
 
 > Our term sheet is $4M at a $16M pre-money, and it asks for "an available option pool of 15% of the fully diluted
 > capitalization after the financing, included in the pre-money valuation". We have 10,000,000 fully diluted shares
-> today, 1,000,000 of them unissued pool, and the two founders hold 7,000,000; no SAFEs or notes. We expect to raise
+> today, 1,000,000 of them unissued pool, and the two founders hold 7,000,000; no SAFEs or notes, and no grants owed
+> to anyone already on the team. We expect to raise
 > the next round in month 18. Hiring plan: a founding engineer in month 1 (400,000 shares), senior engineers in months
 > 4 and 6 (250,000 each), a head of sales in month 9 (350,000), a designer in month 12 (150,000) and a VP of
 > engineering in month 24 (500,000). Is 15% more than we need?
@@ -61,7 +62,8 @@ to accept, and computes nothing in its own text.
 ## Expected answer
 
 - It asks for nothing more: the clause says the pool is the available (unissued) pool after the financing, in the
-  pre-money, which is how the tool reads `requested_pool_percent`, and there are no SAFEs or notes to convert.
+  pre-money, which is how the tool reads `requested_pool_percent`; there are no SAFEs or notes to convert and no grants
+  owed to the team.
 - The side-by-side, as printed: the target pool 10.7692% (plan) against 15.0000% (requested), 4.2308% in the
   difference column; new pool shares 400,000 against 1,076,923.077; the price per share $1.538462 against $1.444444
   ($-0.094017); the founders 53.8462% against 50.5556% (-3.2906%); the pool left ungranted at the next round 0 against

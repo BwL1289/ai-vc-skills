@@ -6,8 +6,8 @@ description: Helps a founder size the option pool their own hiring plan needs un
 # VC option pool plan
 
 Helps a founder answer the pool ask in a term sheet with their own hiring plan. A term sheet often asks for an option
-pool of some percent of the shares after the round, created in the pre-money, so the founders pay for it and the
-effective pre-money falls below the headline. The founder's plan says how much of a pool the hires until the next round
+pool of some percent of the shares after the round, created in the pre-money, so the existing holders (the founders
+among them) pay for it and the effective pre-money falls below the headline. The founder's plan says how much of a pool the hires until the next round
 actually take. The `equity_pool_plan` tool works the round both ways, exactly: at the pool the plan needs and at the
 pool requested, with the requested column less the plan's for every figure. The founder sees what the ask costs in
 their own numbers and walks into the conversation with one line of evidence built from their plan. A VC's view is
@@ -125,8 +125,9 @@ the founder gives one as a row of its own, with the founder's own figure.
      Flag                                               requested_above_plan                                                The requested pool is larger than the plan's: the difference column shows what the larger pool does to the price, the effective pre-money and who owns what
    ```
 
-   The plan's five hires take a 10.7692% pool after the round; the 15% asked for puts the founders' shares at
-   $13,000,000.00 rather than $13,846,153.85, and leaves 676,923.077 shares ungranted when the next round comes.
+   The plan's five hires take a 10.7692% pool after the round; the 15% asked for sets the effective pre-money (the
+   existing holders' shares at the round price) at $13,000,000.00 rather than $13,846,153.85, and leaves 676,923.077
+   shares ungranted when the next round comes.
 
 4. **Read the result before answering**: both columns' `cap_table`, `target_pool`, `grant_shares`,
    `pool_left_at_next_round` and `founders_ownership`, every figure in `requested_minus_plan`, `hires_counted`,
@@ -175,8 +176,8 @@ notation, not a calculation.
 
 1. **Side by side:** a table with "Plan: hires to the next round", "Term sheet: requested pool" and "Requested -
    plan", one row each for the target pool, the new pool shares, the price per share, the founders' ownership (when
-   given), the existing holders' ownership, the pool left ungranted at the next round and the effective pre-money,
-   every cell as the tool printed it.
+   given), the existing holders' and the option pool's ownership, the pool left ungranted at the next round and the
+   effective pre-money, every cell as the tool printed it.
 2. **The hires:** each hire, counted or left out, as the result lists them, and the counted grants' shares.
 3. **The evidence line** from step 5.
 4. **Flags,** one line per code in `flags`, with its meaning from the table above.

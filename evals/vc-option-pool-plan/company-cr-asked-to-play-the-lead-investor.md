@@ -21,8 +21,9 @@ None: no `equity_pool_plan` call. There is no hiring plan, no unissued pool figu
   investor's likely question as a lens only: how was the pool sized? The founder's hiring plan is the answer.
 - It quotes no typical, normal or benchmark pool size for seed or any stage, and names no firm.
 - It declines to assume about 1% per engineer: each grant is the founder's own figure.
-- It asks, in one message, for the inputs by name: `[the unissued pool today]`, `[each hire until the next round:
-role, start month and grant]`, `[the month you expect the next round]`, and whether the 20% is the unissued pool
-  after the round in the pre-money.
+- It asks, in one message, for the inputs by name: `[the unissued pool today]`,
+  `[each hire until the next round: role, start month and grant]`, `[the month you expect the next round]`, whether
+  the 20% is the unissued pool after the round in the pre-money, and whether any SAFEs or notes convert in the round
+  or any grants are owed to the team.
 - It gives no pool size, no percent and no price, says it never says which pool to accept, and closes as not
   investment, legal or tax advice.
