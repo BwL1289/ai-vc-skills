@@ -11,10 +11,10 @@ one once with the two prompts instead.
 
 > What do we believe that others don't? I want our contrarian slide to hold up before we pitch seed funds next month.
 > Opening line: "Company BK writes claim reports for independent insurance adjusters." Slide 2, Our contrarian insight:
-> "AI is going to transform how insurance claims are handled." Slide 3, Problem: "An adjuster spends more time writing
-> each claim report than inspecting the damage." Slide 4, Competition: "Every large insurer now has an AI claims team,
-> and four funded startups sell AI claims tools to insurers." Slide 5, Team: "Our CEO worked 9 years as an independent
-> adjuster; our CTO built document tools at a legal-software company."
+> "Insurance claims work is moving from paper to software." Slide 3, Problem: "An adjuster spends more time writing
+> each claim report than inspecting the damage." Slide 4, Competition: "Every large insurer now runs claims on its own
+> software, and four funded startups sell claims software to insurers." Slide 5, Team: "Our CEO worked 9 years as an
+> independent adjuster; our CTO built document tools at a legal-software company."
 
 ## Expected tool call
 
@@ -22,14 +22,14 @@ None: no `equity_deal_check` call. No ask figures are given, so the ask is an op
 
 ## Expected answer
 
-- The Is it really contrarian? lens objects to the slide-2 line, quoted word for word, "AI is going to transform how
-  insurance claims are handled.": a partner is likely to read it as a trend most investors already expect, not a
-  belief most of them would reject, and the founder's own slide 4, "Every large insurer now has an AI claims team, and
-  four funded startups sell AI claims tools to insurers.", shows others already acting on it. The line also names no
+- The Is it really contrarian? lens objects to the slide-2 line, quoted word for word, "Insurance claims work is moving
+  from paper to software.": a partner is likely to read it as a trend most investors already expect, not a belief most
+  of them would reject, and the founder's own slide 4, "Every large insurer now runs claims on its own software, and
+  four funded startups sell claims software to insurers.", shows others already acting on it. The line also names no
   one who disagrees and no evidence that it is right.
-- That objection survives the refute pass. No other line of the material states a belief most investors would reject,
-  and the slide-4 line supports the objection rather than answering it. The refute pass judges it on a partner's likely
-  reading of the line and does not drop it as resting on an outside fact.
+- That objection survives the refute pass. No other line of the material names anyone who rejects the belief or says
+  why they are wrong, and the slide-4 line supports the objection rather than answering it. The refute pass judges it
+  on a partner's likely reading of the line and does not drop it as resting on an outside fact.
 - Row 12 is marked Needs work, quoting the slide-2 line. The Contrarian insight block quotes that line as stated and
   lists the lens's surviving objection.
 - The answer writes no contrarian belief the founder did not state. No rewrite claims, for instance, that independent
@@ -41,7 +41,6 @@ None: no `equity_deal_check` call. No ask figures are given, so the ask is an op
   others have not. The prompts are one item in the open asks, with the bracketed ask, and the Contrarian insight block
   points to it rather than asking again. It says not every good company needs a contrarian story, so cutting the slide
   is an option.
-- The phrase scan may flag "transform" under the "Transforming" row; the rewrite stays in plain words.
 - "9 years" and "four funded startups" are quoted as stated; nothing is computed. The missing ask, metrics and
   market go to the open asks.
 - It invents nothing about Company BK: no customers, pilots, figures or market size. The lens is named by its test and

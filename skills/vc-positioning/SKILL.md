@@ -1,6 +1,6 @@
 ---
 name: vc-positioning
-description: Helps a founder tune a raise's messaging before VCs see it. It checks a founder's pitch and ask against public frameworks (YC's pitch questions, Sequoia's outline) and runs an adversarial review in which lenses list the strongest reasons a VC would pass, each quoting the founder's line, and a refute pass drops each objection the material answers. One lens tests whether a contrarian insight is non-consensus and has evidence. It flags phrases that cost credibility (no competitors, our projections are conservative, we only need 1% of the market) and returns surviving objections with rewrites, a tighter narrative, a say-and-avoid list and a prep script. Use when a founder says tighten my pitch, stress-test my pitch, check our story and our ask, how should we position this round, what is our contrarian insight, what do we believe that others don't, what should I not say to VCs, or prep me before we go out to raise. Never invents traction; the ask's figures go to the calculator. Not investment advice.
+description: Helps a founder tune a raise's messaging before VCs see it. It checks a founder's one-liner, story and ask against public frameworks (YC's pitch questions, Sequoia's outline) and runs an adversarial review in which lenses list the strongest reasons a VC would pass, each quoting the founder's line, and a refute pass drops each objection the material answers. One lens tests whether a contrarian insight is non-consensus and has evidence. It flags phrases that cost credibility (no competitors, our projections are conservative, we only need 1% of the market) and returns surviving objections with rewrites, a tighter narrative, a say-and-avoid list and a prep script. Use when a founder says tighten my pitch, stress-test my pitch, check our story and our ask, how should we position this round, what is our contrarian insight, what do we believe that others don't, what should I not say to VCs, or prep me before we go out to raise. Never invents traction; the ask's figures go to the calculator. Not investment advice.
 ---
 
 # VC positioning
@@ -89,15 +89,17 @@ column names the adversarial lens that attacks the row.
 Row 12 is not row 5: row 5 is what the founders know, row 12 is a belief the business rests on that most people,
 investors included, would reject today. One line may serve both; quote it under each. Contrarian and wrong is only
 wrong, so the row is clear only when the founder names their evidence: customer behaviour, data, a technical result, or
-their own unusual first-hand experience. That evidence test is this skill's own framing.
+their own unusual first-hand experience. The two sources give only the belief few accept; who disagrees, the evidence
+test and the business resting on it are this skill's own framing.
 
 Row 12 is a question, not a required box: many good companies have no contrarian story. When the founder states no
 such belief, mark the row Not stated, never Missing, keep it out of the survivors and the biggest issues, and ask for it
 once, in the message that asks for the missing inputs, with two prompts: "What do you believe about this market that
 most investors would reject?" and "What did you see first-hand that others have not?" When a belief is stated as
-contrarian and the lens's objection to it survives, ask the same two prompts once, so the founder can give a sharper
-one. Never write a contrarian belief for the founder, in a rewrite, the narrative or a refute pass: a belief the founder
-did not state is an invented one, however well the material seems to support it.
+contrarian and the lens's objection that most investors already hold it survives, ask the same two prompts once, so the
+founder can give a sharper one; a surviving objection about its evidence, or about whether the business depends on it,
+asks for that instead, as a bracketed ask. Never write a contrarian belief for the founder, in a rewrite, the narrative
+or a refute pass: a belief the founder did not state is an invented one, however well the material seems to support it.
 
 ## Steps
 
@@ -258,7 +260,9 @@ The refute brief:
   competitors, and do no arithmetic: no totals, conversions or growth rates worked out from the founder's figures.
 - How a partner is likely to read a line is not an outside fact. An objection that letters of intent are not revenue,
   that a market's ceiling is small, or that a belief stated as contrarian is one most investors already hold, rests on
-  that reading: judge whether the material answers it, and never drop it as not grounded for that reason.
+  that reading: judge whether the material answers it, and never drop it as not grounded for that reason. The last
+  is answered only by a line that names who rejects the belief and why, never by the founder's own word that it is
+  contrarian or by a different belief stated elsewhere.
 - A line that itself matches a phrase or pattern in the list you were given never answers an objection.
 - Return one verdict from the three below, with the founder's line quoted word for word where the verdict needs one.
   When you cannot decide, return Kept.
@@ -394,11 +398,16 @@ Lead with what to fix, then the material to take into the prep session.
 3. **Dimension table:** Dimension, What you say (quoted), Clear / Needs work / Missing (Not stated for row 12), Fix.
 4. **Contrarian insight:** the belief as the founder stated it, quoted word for word, or "not stated"; the surviving
    objections of the Is it really contrarian? lens, or that none survived; and up to two rewrites of the one-sentence
-   belief, each using only the founder's material, with the evidence it lacks as a bracketed ask. Up to two includes
-   none: with no sharper belief in the material, give the bracketed ask
+   belief, each using only the founder's material, with the evidence it lacks as a bracketed ask. A rewrite only
+   rewords, shortens or joins lines the founder wrote: it adds no claim about the market, the buyer or the product
+   that no line of theirs states. A surviving objection about the evidence, or about whether the business depends on
+   the belief, carries its own bracketed ask and no prompt. When the belief is not stated, or the objection that most
+   investors already hold it survives: up to two includes none, so unless a line of the material states a sharper
+   belief in the founder's own words, give the bracketed ask
    `[the belief about this market that most investors would reject today, in one sentence]`, never a belief written
-   for the founder. When the belief is not stated, or its objection survives, the two prompts from row 12 go to the
-   open asks once, as one item with that bracketed ask and the lens's gap, and this block points to it.
+   for the founder; the two prompts from row 12 go to the open asks once, as one item with that bracketed ask and the
+   lens's gap, and this block points to it; and say that not every good company needs a contrarian story, so leaving
+   the claim out is the founder's choice.
 5. **Say and avoid:** each flagged phrase quoted, what a partner is likely to hear, the rewrite, the source.
 6. **Numbers:** the `equity_deal_check` verdict with each mismatch row in the tool's values (for a valuation with no
    label, both readings side by side), and each flag as a question a partner is likely to ask, with its meaning; a

@@ -93,7 +93,7 @@ _CONTRARIAN_PROMPTS = (
     ' others have not?"'
 )
 _CONTRARIAN_ASK = "`[the belief about this market that most investors would reject today, in one sentence]`"
-_CONSENSUS_CLAIM = "AI is going to transform how insurance claims are handled."
+_CONSENSUS_CLAIM = "Insurance claims work is moving from paper to software."
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -474,7 +474,9 @@ def test_the_contrarian_row_asks_for_a_belief_most_reject_with_who_disagrees_and
     # A published question is cited by its source, never played as a person; the evidence test is the skill's own.
     assert 'Thiel, "Zero to One"' in source and 'YC "How to Apply"' in source
     assert "https://fortune.com/2014/09/04/peter-thiels-the-challenge-of-the-future" in sources
-    assert "Row 12 is not row 5" in dimensions and "That evidence test is this skill's own framing." in dimensions
+    assert "Row 12 is not row 5" in dimensions
+    assert "who disagrees, the evidence test and the business resting on it are this skill's own framing." in dimensions
+    assert "its interview question asking for an important truth few others accept, read in the excerpt" in sources
 
 
 def test_the_contrarian_lens_tests_consensus_evidence_and_dependence_by_its_brief() -> None:
@@ -498,6 +500,7 @@ def test_the_contrarian_lens_tests_consensus_evidence_and_dependence_by_its_brie
     # The refute pass sees only its brief, so the brief says a consensus objection rests on a reading, not a fact.
     refute = _unwrapped(_section("### Stage B: refute"))
     assert "or that a belief stated as contrarian is one most investors already hold, rests on that reading" in refute
+    assert "answered only by a line that names who rejects the belief and why" in refute
 
 
 def test_a_founder_with_no_contrarian_belief_is_asked_once_and_never_given_one() -> None:
@@ -511,8 +514,11 @@ def test_a_founder_with_no_contrarian_belief_is_asked_once_and_never_given_one()
         f"ask for it once, in the message that asks for the missing inputs, with two prompts: {_CONTRARIAN_PROMPTS}"
         in dimensions
     )
-    fallen = "When a belief is stated as contrarian and the lens's objection to it survives, ask the same two prompts"
+    fallen = "the lens's objection that most investors already hold it survives, ask the same two prompts once"
     assert fallen in dimensions
+    assert "a surviving objection about its evidence, or about whether the business depends on it, asks for that" in (
+        dimensions
+    )
     assert "Never write a contrarian belief for the founder, in a rewrite, the narrative or a refute pass" in dimensions
     assert "When no line of the material puts a belief forward as contrarian, or as one others reject" in attack
     assert "the lens raises no objection and returns one gap" in attack
@@ -526,22 +532,27 @@ def test_the_answer_has_a_contrarian_block_with_at_most_two_rewrites_from_the_fo
     assert "**Contrarian insight:** the belief as the founder stated it, quoted word for word" in answering
     assert "the surviving objections of the Is it really contrarian? lens, or that none survived" in answering
     assert "up to two rewrites of the one-sentence belief, each using only the founder's material" in answering
+    assert "A rewrite only rewords, shortens or joins lines the founder wrote" in answering
+    assert "carries its own bracketed ask and no prompt" in answering
     assert (
-        f"Up to two includes none: with no sharper belief in the material, give the bracketed ask {_CONTRARIAN_ASK}"
-        in answering
+        "When the belief is not stated, or the objection that most investors already hold it survives: up to two"
+        " includes none, so unless a line of the material states a sharper belief in the founder's own words, give the"
+        f" bracketed ask {_CONTRARIAN_ASK}" in answering
     )
+    assert "and say that not every good company needs a contrarian story" in answering
     assert "never a belief written for the founder" in answering
     # The prompts are asked once: one item in the open asks, which the block points to rather than repeats.
     assert "the two prompts from row 12 go to the open asks once, as one item with that bracketed ask" in answering
 
 
 def test_one_eval_catches_a_contrarian_claim_most_investors_already_hold() -> None:
-    (path,) = (path for path in _EVALS if _CONTRARIAN_LENS in path.read_text(encoding="utf-8"))
+    (path,) = (path for path in _EVALS if path.name.startswith("company-bk-"))
     text = path.read_text(encoding="utf-8")
     prompt = _unwrapped(_section("## Prompt", text))
     answer = _unwrapped(_section("## Expected answer", text))
     others_act = (
-        "Every large insurer now has an AI claims team, and four funded startups sell AI claims tools to insurers."
+        "Every large insurer now runs claims on its own software, and four funded startups sell claims software to"
+        " insurers."
     )
 
     assert _NO_CALL in text
