@@ -88,8 +88,8 @@ wording, unverified.
 | Growth                  | Compounded monthly growth rather than the simple average of monthly rates                                                 | A simple average                                        | Quoted                    | a16z "16 Startup Metrics" (10)                                                                                       |
 | Active users            | A defined action, applied the same way every period                                                                       | "Active" undefined                                      | Quoted                    | a16z "16 Startup Metrics" (9); a16z "16 More" (12)                                                                   |
 | Customer concentration  | The largest customer's revenue over total revenue, same period                                                            | Not shown                                               | Computed: concentration   | a16z "16 More" (14)                                                                                                  |
-| LTV                     | What one account earns after margin over its expected life: ARPA times margin over the period's churn, undiscounted       | Revenue or gross margin in place of contribution margin | Computed: LTV             | a16z "16 Startup Metrics" (5); the formula and leaving out discounting: ours, unverified                             |
-| LTV/CAC                 | LTV over blended CAC                                                                                                      | An LTV on revenue; a CAC with costs left out            | Computed: LTV/CAC         | Unverified (the ratio, its parts as LTV and CAC above)                                                               |
+| LTV                     | What one account earns after margin over its expected life: ARPA times margin over the period's churn, undiscounted       | Revenue or gross margin in place of contribution margin | Computed: LTV             | a16z "16 Startup Metrics" (5), its one-month formula; churn basis, longer periods, no discounting: ours, unverified  |
+| LTV/CAC                 | LTV over blended CAC                                                                                                      | An LTV on revenue; a CAC with costs left out            | Computed: LTV/CAC         | a16z "16 Startup Metrics" (5), a contribution-margin LTV over CAC; blended CAC: ours, unverified                     |
 | Rule of 40              | The founder's revenue growth percent plus a profit margin percent, the margin's basis named                               | The margin unnamed, or gross margin in its place        | Computed: Rule of 40      | Unverified (a common rule of thumb, its sources not read)                                                            |
 | Magic number            | Four times a quarter's revenue change over the prior quarter's sales and marketing spend; on ARR, the change with no four | The four left out; the same quarter's spend             | Computed: magic number    | Unverified (a common definition, its sources not read)                                                               |
 
@@ -204,8 +204,11 @@ parts]`.
      default, `net_revenue` or `logo`; ask which when the material does not say), in a call whose `period_months` is
      that churn's period; `revenue_growth_percent` and `profit_margin_percent` with `profit_margin_basis`, each the
      founder's own figure, never worked from the period's parts; `quarter_revenue` and `prior_quarter_revenue` (or
-     `quarter_ending_arr` and `prior_quarter_ending_arr`) with `prior_quarter_sales_marketing_spend`. Each missing part
-     is a bracketed ask (`[average revenue per account a month]`, `[which margin the Rule of 40 uses]`), never assumed.
+     `quarter_ending_arr` and `prior_quarter_ending_arr`) with `prior_quarter_sales_marketing_spend`. The Rule of 40's
+     and the magic number's parts do not depend on `period_months`: send them once, in the call that carries the
+     document's other figures; when they are the only figures, the call still needs `period_months`, so ask for
+     `[the period, in months, the document's figures cover]` rather than picking one. Each missing part is a bracketed
+     ask (`[average revenue per account a month]`, `[which margin the Rule of 40 uses]`), never assumed.
      The tool refuses LTV with no margin, or with no churn above zero on its basis: that LTV is Needs a source. No
      benchmark is set for any of the four, so none is set against a line by eye.
    - Growth rates and every other metric the table marks quoted: quote as stated with "not checked: no tool computes
@@ -445,9 +448,11 @@ Lead with what to fix, in order, then the evidence behind it.
 These guides are years old and describe software companies most of all; say their dates when a founder leans on one.
 Bessemer's figures come from its own cloud portfolio, not a random sample. The exact CAC payback formula, new customers
 in net retention as a named mistake, a ratio with no period as a pattern, and the mapping of stage to metric are this
-skill's own judgment, unverified. The LTV formula, LTV/CAC, the Rule of 40 and the magic number are common
-definitions whose sources this skill's authors have not read, so the tool's assumption rows mark them unverified. The two-stage review (attack, then refute with the founder's own material) is this
-repository's own method.
+skill's own judgment, unverified. LTV's one-month formula on contribution margin and a contribution-margin LTV/CAC
+are a16z's (item 5, paraphrased); the churn basis, longer periods, leaving out discounting and blended CAC are the
+tool's own, unverified. The Rule of 40 and the magic number are common definitions for which no source was read, so
+none is credited and the tool's assumption rows mark them unverified. The two-stage review (attack, then refute with
+the founder's own material) is this repository's own method.
 
 ## Limits
 

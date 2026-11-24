@@ -108,7 +108,10 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
    `recurring_unit`, a margin (the contribution margin when the founder has one, else the gross margin) and a churn
    above zero, each asked for, never assumed; the Rule of 40 takes the founder's own growth and margin percents and
    the margin's basis; the magic number takes two consecutive quarters' revenue (or ending ARR) and the earlier
-   quarter's sales and marketing spend. No benchmark is set for any of the three. For `market_sizing`,
+   quarter's sales and marketing spend. The Rule of 40's and the magic number's parts do not depend on
+   `period_months`: send them once, in the call with the document's other figures; when they are the only figures,
+   ask for `[the period, in months, the document's figures cover]` rather than picking one. No benchmark is set for
+   any of the three. For `market_sizing`,
    never assume a customer count, a price, a take rate or a share: each is the founder's own figure with the founder's
    source, so ask for it; a price is sent with the months it covers, never turned into a year by hand. A SOM is best a
    count of customers the founder plans to win; a SOM given only as a percent runs, with the `som_as_percent_only`

@@ -19,6 +19,8 @@ from equity_calculator.exact import from_percent, quantity
 from equity_calculator.rounding import ROUNDING_HOW, ROUNDING_VERDICT_HOW, rounding_label
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_metrics_check import (
+    CHURN_BASIS_NAMES,
+    PROFIT_MARGIN_NAMES,
     MetricsCheck,
     MetricsCheckInput,
     MetricsCheckResult,
@@ -70,7 +72,6 @@ _MAGIC_HOW = {
     "arr": "(quarter-end ARR - prior quarter's) / prior quarter's spend",
 }
 _LTV_MARGIN_NAMES = {"contribution": "contribution margin", "gross": "gross margin"}
-_CHURN_WORDS = {"gross_revenue": "gross revenue churn", "net_revenue": "net revenue churn", "logo": "logo churn"}
 # A profit margin's basis as the given line shows it.
 _BASIS_WORDS = {
     "ebitda": "EBITDA",
@@ -79,13 +80,9 @@ _BASIS_WORDS = {
     "net": "net",
     "unlabelled": "unlabelled",
 }
-_PROFIT_MARGIN_WORDS = {
-    "ebitda": "EBITDA margin",
-    "operating": "operating margin",
-    "free_cash_flow": "free cash flow margin",
-    "net": "net margin",
-    "unlabelled": "margin, basis not named",
-}
+# The margin inside the Rule of 40's label, "Rule of 40 (growth + EBITDA margin)": the assumptions' words, with an
+# unlabelled one worded to sit inside the parentheses.
+_PROFIT_MARGIN_WORDS = {**PROFIT_MARGIN_NAMES, "unlabelled": "margin, basis not named"}
 _CHURN_HOW = {
     "logo": "customers lost / customers at the start",
     "gross_revenue": "(C + X)/S",
@@ -233,7 +230,7 @@ def _later_given(inputs: MetricsCheckInput) -> list[tuple[str, str, EquityQuanti
     return [
         ("arpa", f"Average revenue per account ({unit}, ARPA)", _maybe("money", inputs.arpa)),
         ("contribution_margin", "Contribution margin", _maybe_percent(inputs.contribution_margin_percent)),
-        ("ltv_churn_basis", "LTV divides by", _CHURN_WORDS[inputs.ltv_churn_basis] if ltv else None),
+        ("ltv_churn_basis", "LTV divides by", CHURN_BASIS_NAMES[inputs.ltv_churn_basis] if ltv else None),
         ("revenue_growth", "Revenue growth", _maybe_percent(inputs.revenue_growth_percent)),
         ("profit_margin", "Profit margin", _maybe_percent(inputs.profit_margin_percent)),
         ("profit_margin_basis", "Profit margin basis", _BASIS_WORDS[inputs.profit_margin_basis] if margin else None),
@@ -396,7 +393,7 @@ def _later_metrics(result: MetricsCheckResult) -> list[tuple[str, str, EquityQua
     number (with its variant), and each figure on the other definition worked beside a stated one."""
     inputs = result.inputs
     margin = "none" if result.ltv_margin_basis is None else _LTV_MARGIN_NAMES[result.ltv_margin_basis]
-    churn = _CHURN_WORDS[inputs.ltv_churn_basis]
+    churn = CHURN_BASIS_NAMES[inputs.ltv_churn_basis]
     variant = result.magic_number_variant
     on = "revenue" if variant == "revenue" else "ARR"
     return [
@@ -466,7 +463,7 @@ def _check_lines(check: MetricsCheck, result: MetricsCheckResult) -> list[Line]:
         elif check.key == "magic_number":
             how = _MAGIC_HOW[result.magic_number_variant or "revenue"]
         elif check.key == "ltv":
-            how = f"ARPA × the period's units × margin / {_CHURN_WORDS[inputs.ltv_churn_basis]}"
+            how = f"ARPA × the period's units × margin / {CHURN_BASIS_NAMES[inputs.ltv_churn_basis]}"
         else:
             how = _CHECK_HOW[check.key]
         if check.key in ("grr", "nrr"):

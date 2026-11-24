@@ -535,7 +535,7 @@ def metrics_check_arguments(parser: argparse.ArgumentParser) -> None:
         ("--stated-concentration-percent", parse_percent, "The largest customer's share of revenue it states."),
         ("--stated-ltv", parse_decimal, "The LTV it states, in dollars."),
         ("--stated-ltv-to-cac", parse_decimal, "The LTV/CAC it states (3 for 3x)."),
-        ("--stated-rule-of-40-percent", parse_percent, "The Rule of 40 it states, in percent (45 for 45%)."),
+        ("--stated-rule-of-40-percent", parse_percent, "The Rule of 40 it states, in percent (45 for 45%%)."),
         ("--stated-magic-number", parse_decimal, "The magic number it states (0.8 for 0.8)."),
         (
             "--tolerance-points",

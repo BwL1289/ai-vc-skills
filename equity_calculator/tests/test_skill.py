@@ -145,6 +145,8 @@ def test_the_skill_asks_the_founders_basis_assumes_no_figure_and_points_to_the_r
     # No figure is assumed: a default left in place is named as one.
     assert "Never fill a gap with a figure the user did not give" in text and "never as an assumed figure" in text
     assert "For `deal_check`, never assume one" in text
+    # A metrics call with only the Rule of 40 or the magic number still needs a period: asked for, never picked.
+    assert "ask for `[the period, in months, the document's figures cover]` rather than picking one" in text
     for name in (
         "vc-deal-math",
         "vc-round-sizing",

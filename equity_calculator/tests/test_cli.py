@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 import pytest
-from equity_calculator.__main__ import main, run
+from equity_calculator.__main__ import _INPUT_MODELS, main, run
 from equity_calculator.schemas.equity import EquityAssumption
 from openpyxl import load_workbook
 from tests.support import (
@@ -363,6 +363,17 @@ async def test_bad_arguments_exit_2_with_argparse_usage(
 
     assert caught.value.code == _ARGPARSE_EXIT
     assert message in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("scenario", sorted(_INPUT_MODELS))
+async def test_each_scenario_lists_its_flags(scenario: str, capsys: pytest.CaptureFixture[str]) -> None:
+    """``<scenario> --help`` prints the flags and exits 0: argparse formats help text with %, so a bare % in one
+    flag's words (``45%`` where ``45%%`` is meant) would crash the whole listing."""
+    with pytest.raises(SystemExit) as stopped:
+        await run([scenario, "--help"])
+
+    assert stopped.value.code == 0
+    assert f"usage: equity_calculator {scenario}" in capsys.readouterr().out
 
 
 async def test_an_unwritable_workbook_exits_with_a_clean_message(tmp_path: Path) -> None:

@@ -379,6 +379,10 @@ def test_the_model_converts_nothing_and_the_calculator_does_every_ratio() -> Non
         "LTV, LTV/CAC, the Rule of 40 and the magic number go to this tool from the founder's parts, never worked by "
         "hand",
         "Each missing part is a bracketed ask",
+        # The period is required even for a call with only these parts: it is asked for, never picked.
+        "The Rule of 40's and the magic number's parts do not depend on `period_months`: send them once, in the call "
+        "that carries the document's other figures",
+        "ask for `[the period, in months, the document's figures cover]` rather than picking one",
         "No benchmark is set for any of the four, so none is set against a line by eye.",
         "No deal term, runway or use-of-funds line goes to this tool, `equity_metrics_check`.",
     ):

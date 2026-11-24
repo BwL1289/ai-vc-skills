@@ -282,6 +282,46 @@ def test_the_magic_number_on_arr_has_no_4_and_may_fall_below_zero() -> None:
     assert rows["magic_number_rule"].setting.startswith("(ARR at this quarter's end - at the prior quarter's end)")
 
 
+def test_a_magic_number_on_revenue_with_none_stated_works_no_figure_without_the_4() -> None:
+    """4·(110 - 100)/50 = 4/5. With no stated figure there is nothing to test, so the change without the 4 is not
+    worked, and with no check at all the verdict is not_checked."""
+    result = metrics_check(
+        period_months=1, quarter_revenue="110", prior_quarter_revenue="100", prior_quarter_sales_marketing_spend="50"
+    )
+
+    assert _exact(result, "magic_number") == Fraction(4, 5)
+    assert result.magic_number_variant == "revenue"
+    assert result.magic_number_unannualised is None
+    assert result.checks == ()
+    assert result.verdict == "not_checked"
+
+
+def test_the_later_rows_print_a_percent_in_exponent_form_as_its_digits() -> None:
+    """A percent sent as "5E+1" through the MCP tool or the Python API prints as 50%, never 5E+1%; one typed with a
+    place keeps it (60.0%)."""
+    exponent = metrics_check(
+        period_months=1,
+        starting_recurring="100",
+        churned_recurring="5",
+        new_recurring="1E+1",
+        sales_marketing_spend="500",
+        arpa="10",
+        gross_margin_percent="5E+1",
+        revenue_growth_percent="7E+1",
+        profit_margin_percent="-3.5E+1",
+        profit_margin_basis="ebitda",
+    )
+    placed = metrics_check(period_months=1, **{**_LTV_PARTS, "contribution_margin_percent": "60.0"})
+
+    rows = {row.key: row.setting for row in exponent.assumptions}
+    assert rows["ltv_rule"] == "monthly ARPA × 1 month × 50% gross margin / gross revenue churn over 1 month"
+    assert rows["rule_of_40_rule"] == "revenue growth 70% + EBITDA margin -35%"
+    assert rows["payback_rule"] == "spend / (new monthly recurring revenue × 50% gross margin)"
+    assert {row.key: row.setting for row in placed.assumptions}["ltv_rule"].startswith(
+        "monthly ARPA × 1 month × 60.0% contribution margin /"
+    )
+
+
 def test_the_later_rules_cite_what_was_read_and_quote_nothing_unread() -> None:
     rows = {row.key: row for row in metrics_check(**METRICS_DL).assumptions}
 
@@ -292,6 +332,8 @@ def test_the_later_rules_cite_what_was_read_and_quote_nothing_unread() -> None:
     assert rows["magic_number_rule"].setting.startswith("4 × (this quarter's revenue - the prior quarter's)")
     for key in ("rule_of_40_rule", "magic_number_rule"):
         assert rows[key].source.startswith("unverified") and '"' not in rows[key].source, key
+        # With no source read, no person or firm is credited either: a name is no citation.
+        assert rows[key].source.endswith("no source was read for it, so none is credited or quoted"), key
         assert "no benchmark" in rows[key].statement or "No line is set" in rows[key].statement, key
     assert "outside this period" in rows["period_rule"].statement
     assert "outside this period" not in metrics_check(**METRICS_AN_DECK).assumptions[0].statement
@@ -1358,6 +1400,10 @@ _NEEDS = "to check it"
             "arpa needs logo churn above 0 in the period to work LTV (customers_start above 0 and customers_lost "
             "above 0;",
         ),
+        (
+            {"arpa": "10", "gross_margin_percent": "50", "ltv_churn_basis": "logo"},
+            "arpa needs logo churn above 0 in the period to work LTV",
+        ),
         ({**_LTV_PARTS, "contribution_margin_percent": "0"}, "greater than 0"),
         ({"revenue_growth_percent": "30"}, "revenue_growth_percent needs profit_margin_percent: the Rule of 40 adds"),
         ({"profit_margin_percent": "10"}, "profit_margin_percent needs revenue_growth_percent"),
@@ -1434,6 +1480,7 @@ _NEEDS = "to check it"
         "arpa-with-nothing-at-the-start",
         "arpa-with-net-churn-at-zero",
         "arpa-with-no-logo-lost",
+        "arpa-with-no-customer-counts",
         "contribution-margin-zero",
         "growth-without-margin",
         "margin-without-growth",

@@ -39,10 +39,12 @@ from equity_calculator.schemas.equity_deal_check import DEFAULT_TOLERANCE_PERCEN
 from pydantic import BaseModel, Field, model_validator
 
 __all__ = [
+    "CHURN_BASIS_NAMES",
     "DEFAULT_BURN_MULTIPLE_BAND",
     "DEFAULT_NET_REVENUE_CHURN_BAND_PERCENT",
     "MAGIC_NUMBER_QUARTERS_PER_YEAR",
     "MAX_PERIOD_MONTHS",
+    "PROFIT_MARGIN_NAMES",
     "SEGMENT_PAYBACK_MONTHS",
     "ArrBasis",
     "ChurnBasis",
@@ -73,6 +75,12 @@ RecurringUnit = Literal["monthly", "annual"]
 # inputs can compute.
 ChurnBasis = Literal["logo", "gross_revenue", "net_revenue"]
 StatedChurnBasis = Literal["logo", "gross_revenue", "net_revenue", "unlabelled"]
+# Each churn basis in words, as the report and the assumptions print it.
+CHURN_BASIS_NAMES: dict[ChurnBasis, str] = {
+    "gross_revenue": "gross revenue churn",
+    "net_revenue": "net revenue churn",
+    "logo": "logo churn",
+}
 
 # Who the company sells to; it sets the CAC payback benchmark when no band is given.
 CustomerSegment = Literal["smb", "mid_market", "enterprise"]
@@ -83,6 +91,14 @@ LtvMarginBasis = Literal["contribution", "gross"]
 # Which profit margin the founder adds to revenue growth for the Rule of 40; ``unlabelled`` when they do not say (a
 # flag asks them to name it).
 ProfitMarginBasis = Literal["ebitda", "operating", "free_cash_flow", "net", "unlabelled"]
+# Each profit margin in words, as the assumptions print it (the report words an unlabelled one to fit its label).
+PROFIT_MARGIN_NAMES: dict[ProfitMarginBasis, str] = {
+    "ebitda": "EBITDA margin",
+    "operating": "operating margin",
+    "free_cash_flow": "free cash flow margin",
+    "net": "net margin",
+    "unlabelled": "profit margin (basis not named)",
+}
 
 # Which magic number was worked: on two quarters' revenue (the change times 4) or on their ending ARR (no 4, since ARR
 # is already a year's).
@@ -297,13 +313,37 @@ class MetricsCheckInput(BaseModel):
         """Whether the Rule of 40 can be worked: the founder's revenue growth and profit margin both given."""
         return self.revenue_growth_percent is not None and self.profit_margin_percent is not None
 
+    def magic_number_quarters(self) -> tuple[MagicNumberVariant, Decimal, Decimal] | None:
+        """The magic number's variant and its two quarters (the latest, then the prior): their revenue, else their
+        ending ARR, else none."""
+        if self.quarter_revenue is not None and self.prior_quarter_revenue is not None:
+            return "revenue", self.quarter_revenue, self.prior_quarter_revenue
+        if self.quarter_ending_arr is not None and self.prior_quarter_ending_arr is not None:
+            return "arr", self.quarter_ending_arr, self.prior_quarter_ending_arr
+        return None
+
     def magic_number_variant(self) -> MagicNumberVariant | None:
         """Which magic number the inputs give: on two quarters' revenue, on their ending ARR, or none."""
-        if self.quarter_revenue is not None and self.prior_quarter_revenue is not None:
-            return "revenue"
-        if self.quarter_ending_arr is not None and self.prior_quarter_ending_arr is not None:
-            return "arr"
-        return None
+        quarters = self.magic_number_quarters()
+        return None if quarters is None else quarters[0]
+
+    def churn_on(self, basis: ChurnBasis) -> Fraction | None:
+        """The period's churn on ``basis``, none when it cannot be worked: logo churn is the customers lost over the
+        customers at the start (above 0); revenue churn is the starting customers' contraction plus churn, less their
+        expansion for ``net_revenue``, over the recurring revenue at the start (above 0), each ``cohort_*`` part when
+        given, else the period's total. The validator and ``metrics_check`` both work churn here, so they never
+        differ."""
+        if basis == "logo":
+            if self.customers_start is None or self.customers_start <= 0 or self.customers_lost is None:
+                return None
+            return Fraction(self.customers_lost, self.customers_start)
+        if self.starting_recurring is None or self.starting_recurring <= 0:
+            return None
+        lost = self._cohort_lost()
+        if basis == "net_revenue":
+            given = self.cohort_expansion_recurring
+            lost -= Fraction(self.expansion_recurring if given is None else given)
+        return lost / Fraction(self.starting_recurring)
 
     def _movement_rules(self) -> None:
         """Refuse a movement without its start, more lost than there was, or a cohort part above its total.
@@ -386,21 +426,6 @@ class MetricsCheckInput(BaseModel):
             if self.largest_customer_revenue > self.period_revenue:
                 raise ValueError("largest_customer_revenue is above period_revenue")
 
-    def _ltv_churn(self) -> Fraction | None:
-        """The period's churn on ``ltv_churn_basis``, exactly as ``metrics_check`` works it; none when it cannot be
-        worked."""
-        if self.ltv_churn_basis == "logo":
-            if not self.has_logo_churn() or self.customers_start is None or self.customers_lost is None:
-                return None
-            return Fraction(self.customers_lost, self.customers_start)
-        if not self.has_revenue_churn() or self.starting_recurring is None:
-            return None
-        lost = self._cohort_lost()
-        if self.ltv_churn_basis == "net_revenue":
-            given = self.cohort_expansion_recurring
-            lost -= Fraction(self.expansion_recurring if given is None else given)
-        return lost / Fraction(self.starting_recurring)
-
     def _ltv_rules(self) -> None:
         """Refuse LTV's parts without ``arpa``, an ``arpa`` with no margin, and an LTV whose churn is not above 0."""
         if self.arpa is None:
@@ -415,7 +440,7 @@ class MetricsCheckInput(BaseModel):
                 "arpa needs contribution_margin_percent or gross_margin_percent: LTV is worked on a margin, never on "
                 "revenue alone"
             )
-        churn = self._ltv_churn()
+        churn = self.churn_on(self.ltv_churn_basis)
         if churn is None or churn <= 0:
             name, needs = _LTV_CHURN_NEEDS[self.ltv_churn_basis]
             raise ValueError(

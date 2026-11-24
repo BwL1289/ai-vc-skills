@@ -18,7 +18,7 @@ customers' own movements when given, else the totals.
   multiple is stated, to test whether the stated figure used new ARR. Customer concentration: the largest customer's
   revenue / the period's revenue.
 - LTV = a·(P/u)·m / c: a the average recurring revenue per account in the recurring unit, P/u the units in the period
-  (P months, u = 1 for a monthly unit, 12 for an annual one), m the contribution margin when given, else the gross
+  (P months, u = 12/k: 1 for a monthly unit, 12 for an annual one), m the contribution margin when given, else the gross
   margin, c the period's churn on ``ltv_churn_basis`` (gross revenue churn unless the founder picks net revenue or logo
   churn; the validator refuses a churn at or below 0). LTV/CAC = LTV / blended CAC. On revenue alone (no m), each is
   worked only beside its stated figure, to test whether that figure left the margin out.
@@ -68,8 +68,6 @@ __all__ = ["compute_metrics_check"]
 
 _MONTHS_PER_YEAR = 12
 _ONE_MONTH = 1
-# Which worked churn LTV divides by, for each ``ltv_churn_basis``.
-_LTV_CHURN: dict[ChurnBasis, str] = {"gross_revenue": "gross_churn", "net_revenue": "net_churn", "logo": "logo_churn"}
 
 
 @dataclass(frozen=True)
@@ -109,16 +107,6 @@ def _annual_factor(inputs: MetricsCheckInput) -> int:
     return _MONTHS_PER_YEAR if inputs.recurring_unit == "monthly" else 1
 
 
-def _months_per_unit(inputs: MetricsCheckInput) -> int:
-    """u: the months one recurring unit covers, 1 for monthly and 12 for annual."""
-    return 1 if inputs.recurring_unit == "monthly" else _MONTHS_PER_YEAR
-
-
-def _cohort(given: Decimal | None, total: Decimal) -> Fraction:
-    """The starting customers' movement when given, else the period's total."""
-    return fraction(total if given is None else given)
-
-
 def _arr(inputs: MetricsCheckInput) -> dict[str, Fraction | None]:
     """The ARR figures: start, end, net new and new from the movement; the latest month's ARR and run-rate."""
     worked: dict[str, Fraction | None] = {}
@@ -148,22 +136,12 @@ def _arr(inputs: MetricsCheckInput) -> dict[str, Fraction | None]:
 
 
 def _retention(inputs: MetricsCheckInput) -> dict[str, Fraction | None]:
-    """Gross and net revenue retention and churn on the starting customers' movements, and logo churn."""
-    worked: dict[str, Fraction | None] = {}
-    if inputs.has_revenue_churn() and inputs.starting_recurring is not None:
-        start = fraction(inputs.starting_recurring)
-        expansion = _cohort(inputs.cohort_expansion_recurring, inputs.expansion_recurring)
-        lost = _cohort(inputs.cohort_contraction_recurring, inputs.contraction_recurring) + _cohort(
-            inputs.cohort_churned_recurring, inputs.churned_recurring
-        )
-        worked |= {
-            "grr": (start - lost) / start,
-            "nrr": (start + expansion - lost) / start,
-            "gross_churn": lost / start,
-            "net_churn": (lost - expansion) / start,
-        }
-    if inputs.has_logo_churn() and inputs.customers_start is not None and inputs.customers_lost is not None:
-        worked["logo_churn"] = fraction(inputs.customers_lost) / fraction(inputs.customers_start)
+    """Gross and net revenue churn on the starting customers' movements and retention as one less each, and logo
+    churn; each churn as the input model works it (``churn_on``), the same figure its validator reads."""
+    worked: dict[str, Fraction | None] = {"logo_churn": inputs.churn_on("logo")}
+    gross, net = inputs.churn_on("gross_revenue"), inputs.churn_on("net_revenue")
+    if gross is not None and net is not None:
+        worked |= {"grr": ONE - gross, "nrr": ONE - net, "gross_churn": gross, "net_churn": net}
 
     return worked
 
@@ -204,21 +182,21 @@ def _efficiency(inputs: MetricsCheckInput, net_new_arr: Fraction | None) -> dict
     return worked
 
 
-def _lifetime(
-    inputs: MetricsCheckInput, retention: dict[str, Fraction | None], blended_cac: Fraction | None
-) -> dict[str, Fraction | None]:
+def _lifetime(inputs: MetricsCheckInput, blended_cac: Fraction | None) -> dict[str, Fraction | None]:
     """LTV on its margin over the period's churn on ``ltv_churn_basis``, and LTV/CAC; on revenue alone beside a stated
     figure."""
     worked: dict[str, Fraction | None] = {}
     margin = inputs.contribution_margin_percent
     if margin is None:
         margin = inputs.gross_margin_percent
-    churn = retention.get(_LTV_CHURN[inputs.ltv_churn_basis])
+    churn = inputs.churn_on(inputs.ltv_churn_basis)
     # The validator refuses an ``arpa`` with no margin or with a churn at or below 0; this only narrows the types.
     if inputs.arpa is None or margin is None or churn is None or churn <= ZERO:
         return worked
 
-    revenue = fraction(inputs.arpa) * Fraction(inputs.period_months, _months_per_unit(inputs)) / churn
+    # The period's units of ARPA, P/u = P·k/12: P for a monthly unit, P/12 for an annual one.
+    units = Fraction(inputs.period_months * _annual_factor(inputs), _MONTHS_PER_YEAR)
+    revenue = fraction(inputs.arpa) * units / churn
     ltv = revenue * from_percent(margin)
     worked["ltv"] = ltv
     if inputs.stated_ltv is not None:
@@ -236,19 +214,19 @@ def _growth_efficiency(inputs: MetricsCheckInput) -> dict[str, Fraction | None]:
     worked: dict[str, Fraction | None] = {}
     if inputs.revenue_growth_percent is not None and inputs.profit_margin_percent is not None:
         worked["rule_of_40"] = from_percent(inputs.revenue_growth_percent) + from_percent(inputs.profit_margin_percent)
+    quarters = inputs.magic_number_quarters()
     spend = inputs.prior_quarter_sales_marketing_spend
-    if spend is None:
+    if quarters is None or spend is None:
         return worked
 
-    if inputs.quarter_revenue is not None and inputs.prior_quarter_revenue is not None:
-        change = fraction(inputs.quarter_revenue) - fraction(inputs.prior_quarter_revenue)
-        worked["magic_number"] = MAGIC_NUMBER_QUARTERS_PER_YEAR * change / fraction(spend)
+    variant, latest, prior = quarters
+    change = (fraction(latest) - fraction(prior)) / fraction(spend)
+    if variant == "arr":
+        worked["magic_number"] = change
+    else:
+        worked["magic_number"] = MAGIC_NUMBER_QUARTERS_PER_YEAR * change
         if inputs.stated_magic_number is not None:
-            worked["magic_number_unannualised"] = change / fraction(spend)
-    elif inputs.quarter_ending_arr is not None and inputs.prior_quarter_ending_arr is not None:
-        worked["magic_number"] = (fraction(inputs.quarter_ending_arr) - fraction(inputs.prior_quarter_ending_arr)) / (
-            fraction(spend)
-        )
+            worked["magic_number_unannualised"] = change
 
     return worked
 
@@ -256,15 +234,14 @@ def _growth_efficiency(inputs: MetricsCheckInput) -> dict[str, Fraction | None]:
 def _work(inputs: MetricsCheckInput) -> _Worked:
     """Every metric the inputs give."""
     arr = _arr(inputs)
-    retention = _retention(inputs)
     acquisition = _acquisition(inputs)
 
     return _Worked(
         **arr,
-        **retention,
+        **_retention(inputs),
         **acquisition,
         **_efficiency(inputs, arr.get("net_new_arr")),
-        **_lifetime(inputs, retention, acquisition.get("blended_cac")),
+        **_lifetime(inputs, acquisition.get("blended_cac")),
         **_growth_efficiency(inputs),
     )
 

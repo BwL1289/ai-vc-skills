@@ -108,7 +108,8 @@ the slide's places.
   is raised. The answer sets no line against it, says the tool sets none, and never says whether it clears 40.
 - No benchmark is set for LTV, LTV/CAC, the Rule of 40 or the magic number, and none is set against any of them by
   eye. The `ltv_rule`, `rule_of_40_rule` and `magic_number_rule` assumption rows are named with the sources the
-  tool's rows give: a16z's item 5, paraphrased, for working LTV on contribution margin, and the rest unverified.
+  tool's rows give: a16z's item 5, paraphrased, for LTV on contribution margin over one month's churn, and the rest
+  unverified.
 - Stage expectations (Series A, recurring revenue): LTV, LTV/CAC, the Rule of 40 and the magic number are on slide 9.
   ARR and its movement, gross and net revenue retention, CAC and payback and gross margin are Missing from the slide;
   the founder gave their parts, so the fix is to show them with the tool's values (gross revenue churn 2.0000% for
