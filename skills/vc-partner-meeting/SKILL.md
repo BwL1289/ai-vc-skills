@@ -150,17 +150,17 @@ lenses" says, so the lenses do not anchor on the numbers or the bank; step 4 the
      this". Never compute, convert or round one.
 4. **Run the adversarial review** (next section): attack, check quotes, refute, rank. Its kept questions are the drill.
 5. **Add the standing prep questions** (the section after it). They are asked of every founder and are not refuted.
-6. **Drill.** Live mode: put one question at a time, kept questions first, then the first five standing ones, at
-   most twelve in all unless the founder asks for more, keeping five of the twelve for those standing ones; the sixth
-   is the founder's to ask, so it goes in the standing prep, not the drill. The quick-rehearsal list comes after, only
-   if the founder wants it. The first turn names the lenses and puts question 1; the numbered answer below comes once
-   the drill ends or the founder stops, so the kept list is not shown before the drill. Wait for each answer and label
-   it. Ask at most one follow-up per question, only when the answer leaves out the specific thing the question asked
-   for, and quote the part of the answer it follows. One-message mode: debrief every pasted answer. Match each to the
-   kept, dropped or standing question it answers; a dropped, answered question with a pasted answer is debriefed too,
-   leading with its answering line. A pasted answer that matches none is debriefed under the founder's own question,
-   quoted, labelled "your question" in place of a lens. A kept question with no pasted answer is marked "not
-   rehearsed". The founder can stop at any point; debrief what was answered.
+6. **Drill.** Live mode: put one question at a time, kept questions first, then the first five standing ones, at most
+   twelve in all unless the founder asks for more, keeping five of the twelve for those standing ones; the sixth is the
+   founder's to ask, so it goes in the standing prep, not the drill. The quick-rehearsal list comes after, only if the
+   founder wants it. Wait for each answer and label it. The first three questions, and every one in the ends-the-meeting
+   tier, are answered in the founder's own words before any draft is shown. How the drill runs (the first turn, a
+   follow-up in the founder's everyday words, a draft redone when a figure changes) is in
+   [`references/drill.md`](references/drill.md); read it before question 1. One-message mode: debrief every pasted
+   answer. Match each to the kept, dropped or standing question it answers; a dropped, answered question with a pasted
+   answer is debriefed too, leading with its answering line. A pasted answer that matches none is debriefed under the
+   founder's own question, quoted, labelled "your question" in place of a lens. A kept question with no pasted answer is
+   marked "not rehearsed". The founder can stop at any point; debrief what was answered.
 7. **Debrief** (the section below): each answer, a stronger one, and what a yes would need.
 8. **Check before answering.** Every question and every weak-answer note quotes a line that is in the founder's material
    word for word, or, for a mismatch or a flag, the tool's row; every stronger answer uses only facts from the material
@@ -275,7 +275,7 @@ not a probability: give no percentages and no score. The kept questions, in this
 A partner is likely to ask or check these whatever the pitch says, so every founder prepares them. They are not attacks
 on a line and are not refuted. For each, the skill drafts an answer only from the founder's material, or leaves a
 bracketed ask; it never invents a fund, a commitment, a term sheet or a reference. The six questions, each with what the
-founder should have ready and where its topic came from, are in
+founder should have ready, the one next step a short answer gets, and where its topic came from, are in
 [`references/standing-prep.md`](references/standing-prep.md). All six are unverified. The sixth is for the founder to
 ask the partner, so it is drafted here and never put to the founder in the drill.
 
@@ -303,7 +303,7 @@ The full shape is in [`references/debrief.md`](references/debrief.md); read it b
    - When the refute pass ran per lens (lean mode), say so, say it is less independent than one subagent per question,
      and say the founder may ask for the full pass.
 3. **Debrief,** question by question, as above.
-4. **Standing prep:** each standing question with the drafted answer or its bracketed ask.
+4. **Standing prep:** each standing question with its drafted answer or bracketed ask, and a short answer's next step.
 5. **Numbers:** each tool's verdict, mismatch rows and flags, and the runway from `equity_runway_plan`, laid out as
    "Numbers in the answer" in [`references/calculator-flags.md`](references/calculator-flags.md) says.
 6. **What a yes would need,** as a list of bracketed asks.
