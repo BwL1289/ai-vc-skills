@@ -23,6 +23,9 @@ _EVALS = sorted((_ROOT / "evals" / "vc-pass-debrief").glob("*.md"))
 _EVAL_COUNT = 4
 _NO_CALL = "## Expected tool call\n\nNone: no calculator call."
 _EVAL_HEADINGS = ("## Prompt", "## Expected tool call", "## Expected answer")
+_RECORDED = "## Recorded answer"
+# A recorded run's verdict line, in the shape the repository's recorded evals use.
+_VERDICT_LINE = re.compile(r"\*\*(?:Pass|Partial|Fail)\b[^*]*\*\*")
 _FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 # A fence inside a list item is indented; the indent is captured so it can be taken off each line.
 _FENCE = re.compile(r"^( *)```([a-z]*)\n(.*?)^\1```$", re.MULTILINE | re.DOTALL)
@@ -248,6 +251,10 @@ def test_each_reply_keeps_the_door_open_and_asks_for_at_most_one_referral() -> N
     assert "no other investor named or hinted at" in replies and "no deadline or pressure" in replies
     assert "at most five sentences" in replies
     assert "The skill sends nothing" in replies
+    # A live run sent one reply with no come-back condition and no update offered, so nothing kept its door open, and
+    # offered updates in another the founder never asked to send.
+    assert "otherwise it ends on one line that keeps the door open and promises nothing" in replies
+    assert "Every reply has one of the three; none offers updates the founder did not ask to send" in replies
 
 
 def test_it_adds_no_contact_detail_and_names_no_fund_to_try() -> None:
@@ -300,8 +307,18 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
         positions = [text.find(f"\n{heading}\n") for heading in _EVAL_HEADINGS]
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
-        assert "made up" in text and "not a recorded run" in text, path.name
-        assert "## Recorded answer" not in text, path.name
+        assert "made up" in text, path.name
+        if _RECORDED not in text:
+            assert "not a recorded run" in text and "has not been run in a live session" in text, path.name
+            continue
+        # A recorded run: the intro says so, the excerpt follows the expected answer, and it opens with its verdict
+        # and says whether the skill changed since.
+        assert text.index(f"\n{_RECORDED}\n") > positions[-1], path.name
+        assert '"Recorded answer" is an excerpt of a recorded run' in _unwrapped(text.split("\n## ", 1)[0]), path.name
+        recorded = _section(_RECORDED, text)
+        assert _VERDICT_LINE.match(recorded.strip("\n").split("\n\n")[1]), path.name
+        assert "Since this run" in _unwrapped(recorded) or "led to no change in it" in _unwrapped(recorded), path.name
+        assert _fences("json", recorded) == [] and _fences("text", recorded) == [], path.name
 
 
 def test_the_evals_are_numbered_in_letter_order() -> None:

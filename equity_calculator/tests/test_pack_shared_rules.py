@@ -99,6 +99,10 @@ _PASS_SENTENCE_AT_RUN = {
     "company-aw-bottom-up-against-the-deck": "d7ee0daae37d",
     "company-be-a-moved-target-and-a-redefined-customer-count": "686844b0304f",
     "company-bm-a-memo-that-hides-its-biggest-risk": "a949dba188d6",
+    "company-cm-a-logo-grid-and-the-founders-own-axes": "21ed6c32210f",
+    "company-cp-the-term-sheet-asks-for-a-15-percent-pool": "fbca419fa17c",
+    "company-cq-three-passes-and-a-come-back-bar": "c60b48d40801",
+    "company-cu-a-warm-intro-through-a-founder-the-investor-backed": "f874f62f569e",
     "company-e-phrases-that-cost-the-meeting": "b0c28683e6ff",
     "company-f-numbers-go-to-the-calculator": "4245cbea0f66",
     "company-g-an-objection-the-material-answers": "1ab43e33700b",
@@ -108,6 +112,7 @@ _PASS_SENTENCE_AT_RUN = {
     "company-l-an-attack-the-material-does-not-ground": "c59bfc8ce84d",
     "company-m-use-of-funds-that-does-not-add-up": "330879e16c4d",
     "company-r-a-runway-answer-the-calculator-checks": "891fe89e539a",
+    "company-ra-plan-our-raise-from-our-list": "4e45c2c8bcaa",
     "company-t-a-no-that-answers-the-objection": "6a76e240266a",
     "company-w-how-much-should-we-raise": "b5ae91a9f0a7",
 }

@@ -6,6 +6,13 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- Live runs of five of the six skills added on 2026-11-24 (Claude Code 2.1.331), one eval each, each recorded in its
+  eval with a trimmed excerpt and a verdict under the README's rule: `vc-competitive-landscape` (Company CM),
+  `vc-option-pool-plan` (Company CP), `vc-pass-debrief` (Company CQ) and `vc-intro-email` (Company CU) passed, each
+  with a shortfall against its expected answer noted, and `vc-raise-plan` (Company RA) passed in part. The
+  raise-plan and option-pool-plan runs are second attempts: the first of each reached an out-of-date build of the
+  calculator's server that lacked its tool, and is not graded. No live run of `vc-cap-table-check` is recorded yet.
+- Plugin version 0.3.3, so an installed copy picks up the skill fixes from those runs, listed under Changed.
 - The calculator's fifteenth scenario, `cap_table_check` (MCP tool `equity_cap_table_check`, a command and a
   `Cap table check` workbook sheet): a founder's cap table by class and holder line added up to the fully diluted
   shares, each class's and holder's exact percent set beside the percent the table states (rounding-aware, as in
@@ -267,6 +274,16 @@ All notable changes to this repository. Dates are UTC.
 
 ### Changed
 
+- Skill fixes from the 2026-11-24 live runs. `vc-competitive-landscape` keeps an objection to a line that matches a
+  pattern in its patterns table until the founder replaces the line, whatever other line would answer it, and quotes
+  that line in the fix (a run had dropped the objection to "the only" line as answered by other lines).
+  `vc-raise-plan` never proposes an earlier start month of its own, outside its late-plan and no-runway flags: until
+  the founder names one, every week keeps the printed month's label (a run numbered its weeks from a window of its
+  own and advised opening it now). `vc-raise-plan` and
+  `vc-option-pool-plan` say so and give no figure when neither their tool nor its command line runs, never one from
+  their worked example (a run with no tool quoted the example's figures as the calculator's). `vc-pass-debrief` ends a
+  reply that has no come-back condition and no update to offer on one line that keeps the door open and promises
+  nothing, and offers no update the founder did not ask to send.
 - Per-skill fixes from a real deck run's feedback (the figures and wording of that deck are in no file):
   - `vc-deal-math`: an instrument comparison leads with the result's `summary`, read first over MCP, before the
     side-by-side table.

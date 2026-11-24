@@ -199,6 +199,8 @@ notation, not a calculation.
   a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a line or a table cell unless the founder's
   material states it or a tool returned it; quote both figures as stated instead ("from 2,000 to 4,500", never "more
   than doubled"). The requested pool less the plan's comes from the tool's difference column only.
+- When neither `equity_pool_plan` nor its command line runs in the session, say so and give no figure in its place:
+  never one from the worked example in step 3, which is one made-up company's result, not the founder's.
 - Every grant, start month and share count is the founder's. It never supplies a typical grant, a typical pool size
   or a buffer, and it quotes no benchmark pool size: none is applied.
 - It never role-plays or speaks as a named investor or firm, and never names a firm as a fit. Asked to "be" the

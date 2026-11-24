@@ -307,6 +307,9 @@ The refute brief:
 - A fact the founder marks unverified never answers an objection that asks for evidence: it shows what the founder
   believes, not what a partner can check.
 - A line that itself matches a pattern in the list you were given never answers an objection.
+- An objection to a line that itself matches a pattern in that list stays Kept while the line stands, whatever
+  other line would answer it: the founder replaces the line, and a line that answers it, judged as above, becomes
+  the fix.
 - Return one verdict from the three below, with the founder's line quoted word for word where the verdict needs one.
   When you cannot decide, return Kept.
 
@@ -327,6 +330,8 @@ not give. When it cannot decide, the objection is kept.
 After the passes, check every answering line the same way as the objections' quotes: an answering line that is not in
 the material word for word does not drop the objection, which stays kept, and neither does one that is the objected
 line itself, one marked unverified that is offered as evidence, or one that matches a pattern in the patterns table.
+An objection whose objected line matches a pattern in the patterns table stays kept, whatever verdict came back,
+until the founder replaces that line; a line that would answer it is quoted in its fix instead.
 
 ### Rank what survives
 

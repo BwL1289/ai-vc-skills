@@ -26,6 +26,9 @@ _EVALS = sorted((_ROOT / "evals" / "vc-competitive-landscape").glob("*.md"))
 _EVAL_COUNT = 4
 _NO_CALL = "## Expected tool call\n\nNone: no calculator call."
 _EVAL_HEADINGS = ("## Prompt", "## Expected tool call", "## Expected answer")
+_RECORDED = "## Recorded answer"
+# A recorded run's verdict line, in the shape the repository's recorded evals use.
+_VERDICT_LINE = re.compile(r"\*\*(?:Pass|Partial|Fail)\b[^*]*\*\*")
 _FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 # A fence inside a list item is indented; the indent is captured so it can be taken off each line.
 _FENCE = re.compile(r"^( *)```([a-z]*)\n(.*?)^\1```$", re.MULTILINE | re.DOTALL)
@@ -338,6 +341,14 @@ def test_the_refute_stage_uses_only_the_founders_material_and_says_why_each_obje
         assert verdict in refute, verdict
     assert "Quote the founder's line that answers it" in refute
     assert "word for word" in quotes and "dropped as not grounded" in quotes
+    # A live run dropped the objection to "the only" line as answered by another line while the line stayed on the
+    # slide: an objection to a pattern line is kept until the founder replaces it.
+    kept = "An objection to a line that itself matches a pattern in that list stays Kept while the line stands"
+    assert kept in refute
+    assert (
+        "An objection whose objected line matches a pattern in the patterns table stays kept, whatever verdict came"
+        " back, until the founder replaces that line"
+    ) in refute
 
 
 def test_the_survivors_are_ranked_with_quotes_and_feed_the_drafts() -> None:
@@ -385,8 +396,18 @@ def test_there_is_one_eval_per_worked_company_and_each_has_the_three_parts() -> 
         positions = [text.find(f"\n{heading}\n") for heading in _EVAL_HEADINGS]
         assert -1 not in positions and positions == sorted(positions), path.name
         assert _section("## Prompt", text).strip().startswith("> "), path.name
-        assert "made up" in text and "not a recorded run" in text, path.name
-        assert "## Recorded answer" not in text, path.name
+        assert "made up" in text, path.name
+        if _RECORDED not in text:
+            assert "not a recorded run" in text and "has not been run in a live session" in text, path.name
+            continue
+        # A recorded run: the intro says so, the excerpt follows the expected answer, and it opens with its verdict
+        # and says whether the skill changed since.
+        assert text.index(f"\n{_RECORDED}\n") > positions[-1], path.name
+        assert '"Recorded answer" is an excerpt of a recorded run' in _unwrapped(text.split("\n## ", 1)[0]), path.name
+        recorded = _section(_RECORDED, text)
+        assert _VERDICT_LINE.match(recorded.strip("\n").split("\n\n")[1]), path.name
+        assert "Since this run" in _unwrapped(recorded) or "led to no change in it" in _unwrapped(recorded), path.name
+        assert _fences("json", recorded) == [] and _fences("text", recorded) == [], path.name
 
 
 def test_the_evals_are_numbered_in_letter_order() -> None:

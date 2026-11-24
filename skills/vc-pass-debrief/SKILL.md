@@ -146,8 +146,10 @@ One short reply per pass the founder wants to answer, in the founder's voice, re
   asking them to reconsider.
 - **Names their reason** in their own words, briefly, when that helps ("Understood on the traction").
 - **Keeps the door open:** when the pass names a come-back condition and the founder agrees, it says the founder will
-  write when it is met; otherwise it offers an occasional update, only if the founder wants to send one (the
-  vc-prospective-investor-update skill).
+  write when it is met; when the founder wants to send occasional updates, it offers one (the
+  vc-prospective-investor-update skill); otherwise it ends on one line that keeps the door open and promises nothing
+  ("I'd welcome staying in touch."). Every reply has one of the three; none offers updates the founder did not ask
+  to send.
 - **Asks for at most one referral,** and only when the founder wants to: one person, a founder or an investor, the
   investor thinks the founder should talk to, worded so it is easy to say no. Never more than one, and never a list of
   funds.
