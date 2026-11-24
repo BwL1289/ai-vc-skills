@@ -130,7 +130,7 @@ _COMPANY_DL = [
     "0.2",
 ]
 _VERDICT_COLOURS = {"consistent": "C6EFCE", "mismatch": "FFC7CE", "not_checked": "FFEB9C"}
-_MODEL_FIELD = re.compile(r"\b[a-z]+_[a-z_]+\b")
+_MODEL_FIELD = re.compile(r"\b[a-z]+_[a-z0-9_]+\b")
 
 
 async def test_the_report_shows_each_check_the_flags_and_the_verdict() -> None:
@@ -228,6 +228,10 @@ async def test_the_report_names_ltvs_margin_the_rule_of_40s_and_the_magic_number
             "--quarter-revenue needs --prior-quarter-sales-marketing-spend",
         ),
         (["--stated-magic-number", "1"], "--stated-magic-number needs --quarter-revenue and --prior-quarter-revenue"),
+        (
+            ["--stated-rule-of-40-percent", "40"],
+            "--stated-rule-of-40-percent needs --revenue-growth-percent and --profit-margin-percent to check it",
+        ),
     ],
     ids=[
         "movement-without-start",
@@ -243,6 +247,7 @@ async def test_the_report_names_ltvs_margin_the_rule_of_40s_and_the_magic_number
         "growth-without-margin",
         "quarters-without-spend",
         "magic-number-without-quarters",
+        "rule-of-40-without-parts",
     ],
 )
 async def test_refusals_name_flags_never_model_fields(argv: list[str], message: str) -> None:

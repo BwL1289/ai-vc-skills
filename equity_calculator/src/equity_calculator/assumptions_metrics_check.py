@@ -108,13 +108,12 @@ _LTV_SOURCE = (
     f"formula, the churn basis and leaving out discounting are ours, {UNVERIFIED}"
 )
 _RULE_OF_40_SOURCE = (
-    f"{UNVERIFIED}: a common SaaS rule of thumb, made widely known by a Brad Feld post (Feb 2015) that credits an "
-    "unnamed investor; not read for this release, so nothing of it is quoted"
+    f"{UNVERIFIED}: a common SaaS rule of thumb, usually credited to Brad Feld; not read for this release, so nothing "
+    "of it is quoted"
 )
 _MAGIC_NUMBER_SOURCE = (
-    f"{UNVERIFIED}: a common SaaS ratio; Scale Venture Partners credits the name to one of its own partners (2005), "
-    "and the quarterly formula is often traced to a 2008 Hummer Winblad post; neither was read for this release, so "
-    "nothing of either is quoted"
+    f"{UNVERIFIED}: a common SaaS ratio, usually credited to Scale Venture Partners; not read for this release, so "
+    "nothing of it is quoted"
 )
 
 

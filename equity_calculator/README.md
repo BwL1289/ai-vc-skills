@@ -195,10 +195,9 @@ preview until it has been checked on real decks and meetings.
   raises a question, never an error, and each is an input. The period rule, the cohort rule, leaving new customers
   out of retention, the exact payback formula and the tolerances are unverified. LTV rests on the same a16z page's
   item 5 for working it on contribution margin rather than on revenue or gross margin, paraphrased, not quoted; the
-  LTV formula itself (no discounting, the churn it divides by) is ours, unverified. The Rule of 40 (made widely known
-  by a Brad Feld post of February 2015) and the magic number (a name Scale Venture Partners credits to one of its own
-  partners, with the quarterly formula often traced to a 2008 Hummer Winblad post) are common definitions whose
-  sources were not read for this release: nothing of them is quoted, both are marked unverified, and no benchmark is
+  LTV formula itself (no discounting, the churn it divides by) is ours, unverified. The Rule of 40 (usually credited to
+  Brad Feld) and the magic number (usually credited to Scale Venture Partners) are common definitions whose sources
+  were not read for this release: nothing of them is quoted, both are marked unverified, and no benchmark is
   set for either, nor for LTV or LTV/CAC.
 - **Market size**: the market sizing quotes two Y Combinator pages word for word in its assumptions:
   ["How to Pitch Your Company"](https://www.ycombinator.com/library/4b-how-to-pitch-your-company)

@@ -299,12 +299,11 @@ def test_the_later_rules_cite_what_was_read_and_quote_nothing_unread() -> None:
 
 def _random_input(rng: random.Random) -> dict[str, object]:
     start = rng.randint(1, 10**6)
-    # Some churn always, so LTV has a lifetime to divide by.
-    contraction = rng.randint(0, start - 1)
-    churned = rng.randint(1, start - contraction)
+    contraction = rng.randint(0, start)
+    churned = rng.randint(0, start - contraction)
     new = rng.randint(1, 10**6)
     expansion = rng.randint(0, 10**5)
-    return {
+    fields: dict[str, object] = {
         "period_months": rng.randint(1, MAX_PERIOD_MONTHS),
         "starting_recurring": str(start),
         "new_recurring": str(new),
@@ -314,10 +313,12 @@ def _random_input(rng: random.Random) -> dict[str, object]:
         "sales_marketing_spend": str(rng.randint(1, 10**7)),
         "gross_margin_percent": str(rng.randint(1, 100)),
         "net_burn": str(rng.randint(-(10**6), 10**7)),
-        "arpa": str(rng.randint(1, 10**4)),
-        "contribution_margin_percent": str(rng.randint(1, 100)),
         "customers_new": rng.randint(1, 1000),
     }
+    # LTV needs a churn above zero to divide by, so ARPA and its margin come only when something was lost.
+    if contraction + churned > 0:
+        fields |= {"arpa": str(rng.randint(1, 10**4)), "contribution_margin_percent": str(rng.randint(1, 100))}
+    return fields
 
 
 def test_property_the_metrics_hold_their_identities() -> None:
@@ -341,7 +342,10 @@ def test_property_the_metrics_hold_their_identities() -> None:
             assert _exact(result, "burn_multiple") == burn / net_new
         else:
             assert result.burn_multiple is None
-        # LTV times the churn is the period's ARPA after margin; LTV/CAC times CAC is LTV.
+        # LTV times the churn is the period's ARPA after margin; LTV/CAC times CAC is LTV; no churn, no LTV.
+        if "arpa" not in fields:
+            assert result.ltv is None and result.ltv_to_cac is None
+            continue
         months = Fraction(int(str(fields["period_months"])))
         contribution = Fraction(str(fields["contribution_margin_percent"])) / 100
         arpa = Fraction(str(fields["arpa"]))
