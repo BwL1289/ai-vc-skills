@@ -62,6 +62,8 @@ _COMPANY_Y = [
     "6",
 ]
 _FLAT = ["runway_plan", "--cash-on-hand", "300000", "--phase", "from-month=1 gross-burn=100000"]
+# How a revenue left out reads, in the raise pipeline's words; a revenue given as 0 reads "given".
+_NOT_GIVEN = "not given: read as none"
 # Company Y's raise with a 60/40 use of funds in percents.
 _Y_WITH_FUNDS: dict[str, object] = {
     **RUNWAY_Y,
@@ -342,6 +344,52 @@ async def test_a_run_rate_phase_and_a_self_funding_milestone_come_from_their_fla
     # The echoed inputs, revenue 0 beside each run-rate, are taken back as they are and work the same plan.
     again = runway_plan(**result["inputs"]).model_dump(mode="json")
     assert again["runway"] == result["runway"] and again["cases"] == result["cases"]
+
+
+def _line(report: str, label: str) -> str:
+    """The one report line that starts with ``label``."""
+    (line,) = (line for line in report.splitlines() if line.startswith(f"  {label}  "))
+    return line
+
+
+async def test_a_phase_with_no_revenue_says_it_was_read_as_none_and_a_stated_0_reads_as_given() -> None:
+    """Company Y's first phase gives no revenue: it is worked as none, and its line says so, in the plan and in a case
+    given its own phases, as the raise pipeline's does. Given as 0, it works the same plan and reads as given."""
+    cases = ["--downside-revenue-percent", "50", "--lean-phase", "from-month=1 gross-burn=80000"]
+    report = await run([*_COMPANY_Y, *cases])
+    revenue = "Plan, phase 1 (months 1-3): revenue a month"
+
+    left_out = _line(report, revenue)
+    assert "$0.00" in left_out and left_out.endswith(_NOT_GIVEN)
+    later = _line(report, "Plan, phase 2 (month 4 on): revenue a month")
+    assert "$10,000.00" in later and later.endswith("given") and _NOT_GIVEN not in later
+    assert _line(report, "Lean, phase 1 (month 1 on): revenue a month").endswith(_NOT_GIVEN)
+    # A case given as percents is the plan's, scaled; the plan's own line says whether its revenue was given.
+    downside = _line(report, "Downside, phase 1 (months 1-3): revenue a month")
+    assert downside.endswith("the plan's, scaled by the case's percent")
+
+    stated = await run([*[arg.replace("gross-burn=90000", "gross-burn=90000 revenue=0") for arg in _COMPANY_Y], *cases])
+    zero = _line(stated, revenue)
+    assert "$0.00" in zero and zero.endswith("given") and _NOT_GIVEN not in zero
+    assert _line(stated, "Runway, plan, no raise") == _line(report, "Runway, plan, no raise")
+
+
+@pytest.mark.parametrize(
+    ("revenue", "how"),
+    [({}, _NOT_GIVEN), ({"revenue": "0"}, "given")],
+    ids=["left-out", "stated-zero"],
+)
+def test_a_revenue_keeps_given_or_not_when_the_echoed_inputs_are_read_back(revenue: dict[str, str], how: str) -> None:
+    """Given or not is read from the echoed inputs, where a revenue left out is null: fed back (as an agent sends them
+    to the workbook tool), a revenue left out still reads as not given, and a stated 0 as given."""
+    phase = {"from_month": 1, "gross_burn": "90000"} | revenue
+    first = runway_plan(cash_on_hand="300000", cases=[{"name": "plan", "phases": [phase]}])
+    again = runway_plan(**json.loads(first.inputs.model_dump_json()))
+
+    for result in (first, again):
+        line = {line.key: line for line in sheet_for(result).lines}["plan_phase_1_revenue"]
+        assert line.how == how
+        assert isinstance(line.values[0], EquityQuantity) and line.values[0].exact == 0
 
 
 def test_a_plan_with_nothing_to_check_says_so() -> None:

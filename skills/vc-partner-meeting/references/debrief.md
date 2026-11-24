@@ -14,6 +14,11 @@ For each question asked, in the drill's order, then, in one-message mode, each o
   argument about which assumptions would make the stated figure true); it claims less than the material's own line on
   the same point (both quoted); it uses a phrase the vc-positioning skill flags; it ran long before the point. Say "held
   up" when nothing was weak.
+- **Draft taken,** in place of what was weak or "held up", when the founder took the skill's draft as the answer
+  ([drill.md](drill.md)): the draft is quoted as the skill's text, with no answer label, since it adds nothing to the
+  founder's material, and gets no weak notes and no stronger answer, being one already. The entry reads "Draft taken:
+  rehearse it in your own words before the meeting." It is used only where the taken draft is the whole answer: an
+  answer the founder also gave in their own words is debriefed as any answer.
 - **A stronger answer,** at most four sentences, the point first, built only from the founder's material and tool
   results, each fact traceable to a label. Never stronger than the facts: no number, customer, investor, partner,
   credential or plan that is not in the material. Each gap is a bracketed ask. When the spoken answer claims less than

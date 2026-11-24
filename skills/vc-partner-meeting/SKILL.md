@@ -161,7 +161,7 @@ lenses" says, so the lenses do not anchor on the numbers or the bank; step 4 the
    answer is debriefed too, leading with its answering line. A pasted answer that matches none is debriefed under the
    founder's own question, quoted, labelled "your question" in place of a lens. A kept question with no pasted answer is
    marked "not rehearsed". The founder can stop at any point; debrief what was answered.
-7. **Debrief** (the section below): each answer, a stronger one, and what a yes would need.
+7. **Debrief** (the section below): each answer, a stronger one (none for "Draft taken"), and what a yes would need.
 8. **Check before answering.** Every question and every weak-answer note quotes a line that is in the founder's material
    word for word, or, for a mismatch or a flag, the tool's row; every stronger answer uses only facts from the material
    or a tool result, and marks each gap as a bracketed ask; every figure is quoted as stated or comes from a tool,
@@ -282,15 +282,15 @@ ask the partner, so it is drafted here and never put to the founder in the drill
 ## The debrief
 
 Each question asked, in the drill's order, then, in one-message mode, each other pasted answer ("your question" in place
-of a lens for one only the founder asked), gets the founder's answer quoted, what was weak or "held up", and a stronger
-answer built only from the founder's material and tool results, every gap a bracketed ask; then what a yes would need,
-as bracketed asks by tier, never a prediction: never say a partner or a firm would invest, pass or score the company.
-The full shape is in [`references/debrief.md`](references/debrief.md); read it before writing the debrief.
+of a lens for one only the founder asked), gets the founder's answer quoted, what was weak, "held up" or "Draft taken",
+and a stronger answer built only from the founder's material and tool results, every gap a bracketed ask; then what a
+yes would need, as bracketed asks by tier, never a prediction: never say a partner or a firm would invest, pass or score
+the company. The full shape is in [`references/debrief.md`](references/debrief.md); read it before writing the debrief.
 
 ## Answering
 
 1. **The hardest three,** one line each, in the third person ("A partner is likely to ask ..."): the top kept
-   questions, and whether the founder's answer held up.
+   questions, and whether the founder's answer held up, or "Draft taken" where the founder took the skill's draft.
 2. **Adversarial review:**
    - **Kept,** ranked, as a table: Rank, Tier, Lens, The founder's line (quoted; the tool's row for a mismatch or
      flag), What a partner is likely to ask (third person), Bracketed ask. The calculator's rows are marked "from

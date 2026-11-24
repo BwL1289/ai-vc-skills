@@ -8,7 +8,7 @@ name = "equity_calculator"
 # all three (CONTRIBUTING.md, "Releasing"). The plugin starts this package with uvx, which reuses its cached build of a
 # folder while the files in its cache keys stay the same: with this file unchanged from release to release, a plugin
 # loaded from one folder that is updated in place kept serving an old server.
-version = "0.3.7"
+version = "0.3.8"
 description = "Exact startup equity arithmetic: Paul Graham's equity equation, the option-pool shuffle, priced rounds with SAFEs and notes, dilution, vesting, exit waterfalls, and a founder's check of their own raise. CLI, Excel workbook and MCP server."
 readme = "README.md"
 license = "MIT"

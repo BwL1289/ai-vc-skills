@@ -150,9 +150,11 @@ of five of the six skills added that day (`vc-competitive-landscape`, `vc-raise-
 expected answer noted, and one passed in part. Later that day, on plugin 0.3.5, one eval each of `vc-positioning`
 (Company BK), `vc-metrics-readiness` (Company DL), `vc-cap-table-check` (Company CQ) and `vc-deal-math` (Company DX) was
 run live and recorded: three passed, each with shortfalls against its expected answer noted, and the `vc-deal-math` one
-failed, with three clauses met only in part, because its session loaded the `equity-calculator` skill instead. An eval
-file whose first paragraph says a live run is recorded holds an excerpt of it with its verdict; every other eval states
-the expected behaviour only.
+failed, with three clauses met only in part, because its session loaded the `equity-calculator` skill instead. Run
+again on plugin 0.3.7 after a fix to the `equity-calculator` skill, that `vc-deal-math` eval passed, with shortfalls
+noted, though its session again loaded the `equity-calculator` skill and answered from that skill's own copy of the
+comparison's rules; its file records the new run and describes the failed one. An eval file whose first paragraph says
+a live run is recorded holds an excerpt of it with its verdict; every other eval states the expected behaviour only.
 
 The `equity-calculator` skill covers fifteen scenarios:
 

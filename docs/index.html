@@ -1458,9 +1458,11 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
             vc-positioning, vc-metrics-readiness, vc-cap-table-check and
             vc-deal-math was run live: three passed, and the vc-deal-math run
             failed because its session loaded the equity-calculator skill
-            instead. An eval file whose first paragraph says a live run is
-            recorded holds an excerpt of it with its verdict. One run each is a
-            small sample.
+            instead. Run again after a fix to the equity-calculator skill, the
+            vc-deal-math eval passed, though its session again loaded that skill
+            rather than vc-deal-math. An eval file whose first paragraph says a
+            live run is recorded holds an excerpt of it with its verdict. One
+            run each is a small sample.
           </p>
         </div>
       </section>

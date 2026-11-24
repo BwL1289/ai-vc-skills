@@ -120,6 +120,8 @@ _OWN_WORDS_FIRST = (
     "The first three questions, and every one in the ends-the-meeting tier, are answered in the founder's own words"
     " before any draft is shown"
 )
+# The debrief's label for an answer that is a draft the founder took, and the one step it gives.
+_DRAFT_TAKEN = '"Draft taken: rehearse it in your own words before the meeting."'
 # The mark a draft takes when a figure it cites changes mid-session; no square brackets, which mark an ask.
 _STALE = "\"stale\" followed by the figure's name in the founder's words"
 # An eval's call: a line that starts with the tool's name and ends with a colon, then its JSON fence.
@@ -657,6 +659,35 @@ def test_the_top_questions_are_answered_in_the_founders_own_words_before_any_dra
     # The first turn's rule moved here whole, so the skill and its drill page never give two versions of it.
     assert "The first turn** names the lenses and puts question 1" in drill and "The first turn names" not in _TEXT
     assert "so the kept list is not shown before the drill" in drill
+
+
+def test_a_draft_the_founder_takes_is_labelled_draft_taken_never_held_up() -> None:
+    """A taken draft is the skill's text, not the founder's answer, so its debrief entry is labelled "Draft taken", with
+    the step a founder needs (rehearse it in their own words), in place of what was weak or "held up". The debrief page
+    defines it where "held up" is, the drill names it, and the skill's debrief summary and hardest three carry it."""
+    shape = _unwrapped(_DEBRIEF)
+    drill = _unwrapped(_DRILL)
+
+    assert (
+        '- **Draft taken,** in place of what was weak or "held up", when the founder took the skill\'s draft' in shape
+    )
+    assert "quoted as the skill's text, with no answer label, since it adds nothing to the founder's material" in shape
+    assert "gets no weak notes and no stronger answer, being one already" in shape
+    assert f"The entry reads {_DRAFT_TAKEN}" in shape
+    # Only a draft that is the whole answer takes the label; the founder's own words beside it are debriefed as usual.
+    assert "It is used only where the taken draft is the whole answer" in shape
+    assert "an answer the founder also gave in their own words is debriefed as any answer" in shape
+    held_up = shape.index('Say "held up" when nothing was weak')
+    assert held_up < shape.index("**Draft taken,**") < shape.index("**A stronger answer,**")
+    # The drill's rule names the label after its pinned sentence, which stays as it was.
+    assert 'The debrief labels it "Draft taken", with the step [debrief.md](debrief.md) gives it' in drill
+    assert drill.index("never that the answer held up") < drill.index('labels it "Draft taken"')
+    assert 'what was weak, "held up" or "Draft taken"' in _unwrapped(_section("## The debrief"))
+    answering = _unwrapped(_section("## Answering"))
+    assert (
+        "whether the founder's answer held up, or \"Draft taken\" where the founder took the skill's draft" in answering
+    )
+    assert 'a stronger one (none for "Draft taken")' in _unwrapped(_section("## Steps"))
 
 
 def test_a_follow_up_is_in_the_founders_everyday_words_never_the_skills_or_investors_terms() -> None:

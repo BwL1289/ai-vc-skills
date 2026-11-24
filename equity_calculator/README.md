@@ -1473,7 +1473,8 @@ burn, not both. Each `--raise` is one option to compare, and each `--raise-use-o
 names by number (`1` is the first `--raise`), an amount or a percent of that raise. `--milestone` is a month from
 today; `--milestone-type self_funding` marks the milestones of an only round, with no follow-on assumed;
 `--stated-runway-months` is the runway stated with no raise. A phase's `revenue-run-rate=Y` is its revenue as an
-annualised run-rate, divided by 12 for you, in place of `revenue=R`.
+annualised run-rate, divided by 12 for you, in place of `revenue=R`. A phase with neither is worked with no revenue,
+and its revenue line says `not given: read as none`, as `raise_pipeline`'s does; `revenue=0` reads as given.
 
 `metrics_check` needs `--period-months`, the one period every flow figure covers. Each part is the founder's own
 figure: recurring revenue in the unit `--recurring-unit` names (monthly by default), customers as whole numbers,
