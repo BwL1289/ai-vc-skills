@@ -84,7 +84,7 @@ Each draft is short, in the founder's voice, with one ask, and reads on its own.
 - **Exactly as stated:** every figure keeps the founder's own words, units, period and form: "$38k MRR in October"
   stays "$38k MRR in October", never turned into a yearly figure, never "about $40k" or "nearly $40k". A figure with
   no period gets a bracketed ask for it.
-- **From one document only when they agree:** a figure that appears in two of the founder's documents with different
+- **Two values for one figure:** a figure that appears in two of the founder's documents with different
   values for the same metric and period goes into no draft until the founder says which is right; the draft holds a
   bracketed ask naming both, and the reader pass flags it.
 - **Never combined:** no growth rate, multiple, total or "doubled" worked out from two figures.

@@ -238,8 +238,9 @@ def test_no_two_by_two_or_slide_is_drawn_until_the_founder_has_placed() -> None:
     steps = _unwrapped(_section("## Steps"))
     answering = _unwrapped(_section("## Answering"))
 
-    assert "Until the founder has placed every company on the two axes chosen for the 2x2" in axes
+    assert "Until the founder has placed their own company and at least one competitor on both axes" in axes
     assert "draw no 2x2 and draft no slide" in axes
+    assert 'is listed under it as "not placed", and its placements stay among the open asks' in axes
     assert "The adversarial review runs once, on the full draft, when the placements come back" in axes
     assert "stop as Axes says" in steps
     assert '"waiting for your placements"' in answering

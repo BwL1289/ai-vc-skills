@@ -120,10 +120,12 @@ source, or "unverified"). The skill:
 - flags, as patterns below, the company at 5 on every axis, every competitor in the low half on every axis, and an
   axis whose anchors fit the founder's own product alone.
 
-Until the founder has placed every company on the two axes chosen for the 2x2, draw no 2x2 and draft no slide. Give
-the levels, the axes with their anchors and halves, and the empty placement table; draft the substitutes story, the
-"why customers pick us" lines and the platform-risk answer; ask for the placements and every other open input in one
-message; and stop. The adversarial review runs once, on the full draft, when the placements come back.
+Until the founder has placed their own company and at least one competitor on both axes chosen for the 2x2, draw no
+2x2 and draft no slide. Give the levels, the axes with their anchors and halves, and the empty placement table; draft
+the substitutes story, the "why customers pick us" lines and the platform-risk answer; ask for the placements and every
+other open input in one message; and stop. The adversarial review runs once, on the full draft, when the placements
+come back. Once the 2x2 can be drawn, a company still missing a placement on either of its axes is listed under it as
+"not placed", and its placements stay among the open asks.
 
 ## The substitutes story
 
@@ -221,8 +223,9 @@ In the turn the review runs, without a subagent tool, run Stage A of the adversa
 ## Adversarial review
 
 The map says where everyone sits; this review says what a partner is likely to push on. Independent lenses attack the
-founder's material and the draft, a second pass judges each objection using only the founder's material, and only the
-objections that material does not answer reach the founder, who sees both what survived and what was tested and fell.
+founder's material (the facts, axes, placements and lines the drafts are built from), a second pass judges each
+objection using only that material, and only the objections it does not answer reach the founder, who sees both what
+survived and what was tested and fell.
 
 ### Stage A: attack
 

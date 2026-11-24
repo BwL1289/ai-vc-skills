@@ -8,10 +8,10 @@ stated.
 
 ## Prompt
 
-> Draft a cold email and two follow-ups to Priya Nair at Larchmont Seed; I met her at a demo day and she asked me to
-> send a note. Our deck, slide 5: "31 paying customers as of October". Our one-pager: "28 paying customers as of
-> October". Deck, slide 1: "The world's first AI platform for kitchen inventory." Deck, slide 6: "$2,000 average
-> monthly contract". Please also mention that two other funds are already in. Sign off as Theo Grant, CEO, Company CX.
+> Draft a cold email and two follow-ups to Priya at Fund L; I met her at a demo day and she asked me to send a note. Our
+> deck, slide 5: "31 paying customers as of October". Our one-pager: "28 paying customers as of October". Deck, slide 1:
+> "The world's first AI platform for kitchen inventory." Deck, slide 6: "$2,000 average monthly contract". Please also
+> mention that two other funds are already in. Sign off as Theo, CEO, Company CX.
 
 ## Expected tool call
 
@@ -20,11 +20,11 @@ None: no calculator call. The skill names no calculator tool and does no arithme
 ## Expected answer
 
 - The reader pass flags "31 paying customers as of October" and "28 paying customers as of October" side by side with
-  their places, as two figures for one metric and one period. Neither goes into a draft: the draft holds a bracketed
-  ask naming both, and the flag is handed to the vc-claims-check skill.
-- "The world's first AI platform for kitchen inventory." is flagged twice: as a hype word with no source the founder
-  can show, handed to the vc-claims-check skill, and as "AI" with nothing that says what the model does. The drafts
-  say what the product does in plain words or hold a bracketed ask for it.
+  their places, as two figures for one metric and one period. Neither goes into a draft: the draft holds a bracketed ask
+  naming both, and the flag is handed to the vc-claims-check skill.
+- "The world's first AI platform for kitchen inventory." is flagged twice: as a hype word with no source the founder can
+  show, handed to the vc-claims-check skill, and as "AI" with nothing that says what the model does. The drafts say what
+  the product does in plain words or hold a bracketed ask for it.
 - "$2,000 average monthly contract" is quoted as stated; no total revenue is worked out from it and a customer count.
 - The line about two other funds is left out and flagged as pressure that may break a confidence.
 - The cold email says how Theo and Priya met, in the founder's words, and has one ask. Nothing about Priya or Larchmont
