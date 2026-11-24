@@ -6,6 +6,15 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- A `vc-deal-math` eval (Company BW, unrecorded) for a SAFE raise whose planned rise has its start month but no
+  monthly spend, marked "not checked: waiting for [the planned monthly spend from that month]". It and the Company BV
+  eval also expect the `equity_round` offer for the SAFE's ownership while the runway waits.
+- Plugin version 0.2.6: every printed figure now rounds half away from zero (12.125 prints 12.13, -12.125 prints
+  -12.13), the rule the rounding test of a deck's stated figure uses, so a deck that copies the report's figure holds;
+  a note's interest keeps its own half-even rounding to the cent. The shared SAFE runway sentence also holds a planned
+  change that has its start month but no amount, marking the runway line "not checked: waiting for [the planned monthly
+  spend from that month]"; `vc-claims-check` names that held runway, and one held for its month, Needs a source; a
+  `vc-deal-math` eval (Company BV) checks the month hold; and `vc-metrics-readiness` says what stays out of its tool.
 - Plugin version 0.2.5: the priced-round-or-note comparison reaches installed copies, and `vc-deal-math` now triggers on "should we raise a priced round or a note".
 - The calculator's twelfth scenario, `instrument_compare` (MCP tool `equity_instrument_compare`, a command and a
   `Priced vs note` workbook sheet): a founder choosing between a priced round now and a convertible note now gives
@@ -175,6 +184,14 @@ All notable changes to this repository. Dates are UTC.
 
 ### Changed
 
+- Every printed figure (the report, the JSON's `rounded`, workbook values, split cents and a message's percents) now
+  rounds half away from zero, where it rounded half to even: 12.125 prints 12.13, not 12.12. No exact value, verdict
+  or flag changes; a note's interest keeps its half-even rounding to the cent.
+- The shared SAFE runway sentence (eight skills) also holds a planned change given with its start month and spend but
+  no word on its revenue, marking the runway line "not checked: waiting for [the planned monthly revenue from that
+  month]": the calculator reads a phase with no revenue as none, which shortens the runway (on one plan, 17.37 months
+  for the raise against 20.06 with the revenue kept). `vc-claims-check` counts that wait among those that make a runway
+  claim Needs a source, and gives a not-checked line only to a planned change's wait.
 - The repository was renamed from `opensource-content` to `ai-vc-skills`; GitHub redirects the old address.
 - The knight logo has a little depth: a soft drop shadow, each slice shaded lighter at the top, and a faint
   highlight along the head's top edges. The banners, the site's logo and favicon (which follow the light or dark

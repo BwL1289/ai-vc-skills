@@ -2,8 +2,8 @@
 
 ``equity_calculator`` turns each input decimal into a ``fractions.Fraction`` and does every step exactly (how the
 decimals are read: ``equity_calculator.schemas.equity_common``). Each computed number is an ``EquityQuantity``: the
-exact fraction plus one half-even rounding of it for display, so the CLI, the JSON and the workbook all show the same
-rounding of the same exact answer. Percent fields take percent points (``7`` means 7%).
+exact fraction plus one rounding of it, half away from zero, for display, so the CLI, the JSON and the workbook all
+show the same rounding of the same exact answer. Percent fields take percent points (``7`` means 7%).
 
 A scenario is an input and a result model sharing a ``scenario`` tag; ``EquityInput`` and ``EquityResult`` are the
 tagged unions, so a later scenario only adds members. The shared parts (config, units, ``EquityQuantity``,

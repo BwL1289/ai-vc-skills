@@ -69,12 +69,12 @@ Every claim gets exactly one class. A claim that fits two takes the one a partne
 Each claim gets one verdict. When a claim earns more than one, it takes the first in this order and the others go in
 its fix: **Contradicted**, then **Will be discounted**, then **Needs a source**, then **Supported**.
 
-| Verdict            | When                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Contradicted       | Two lines of the founder's material state the claim differently (both quoted, with their places; for a figure, the same metric in the same form for the same period), or a calculator tool reports a mismatch on a deal term (under every reading of a valuation with no label), apart from a runway claim below the computed runway                                                             |
-| Will be discounted | The claim matches a pattern in the discount table below, whatever its evidence                                                                                                                                                                                                                                                                                                                   |
-| Needs a source     | The founder names no evidence they can show, or the claim can only be compared with another line after a conversion this skill does not do (MRR against ARR, a month against a year), or a deal term no tool gives a verdict on (a SAFE or note raise's ownership), a mismatch under one reading only of a valuation with no label, or a runway claim below the computed runway (it understates) |
-| Supported          | The founder names evidence they can show, every place the claim appears agrees, and no discount pattern applies; a deal term also needs a consistent verdict from `equity_deal_check`, or for a runway with no raise or on a SAFE or note raise, from `equity_runway_plan`                                                                                                                       |
+| Verdict            | When                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contradicted       | Two lines of the founder's material state the claim differently (both quoted, with their places; for a figure, the same metric in the same form for the same period), or a calculator tool reports a mismatch on a deal term (under every reading of a valuation with no label), apart from a runway claim below the computed runway                                                                                                                                                                                             |
+| Will be discounted | The claim matches a pattern in the discount table below, whatever its evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Needs a source     | The founder names no evidence they can show, or the claim can only be compared with another line after a conversion this skill does not do (MRR against ARR, a month against a year), or a deal term no tool gives a verdict on (a SAFE or note raise's ownership), a mismatch under one reading only of a valuation with no label, a runway claim below the computed runway (it understates), or a runway claim whose call waits for an input (cash, burn, or a planned change's start month, monthly spend or monthly revenue) |
+| Supported          | The founder names evidence they can show, every place the claim appears agrees, and no discount pattern applies; a deal term also needs a consistent verdict from `equity_deal_check`, or for a runway with no raise or on a SAFE or note raise, from `equity_runway_plan`                                                                                                                                                                                                                                                       |
 
 "Supported" means supported by what the founder says they can show. The skill does not see or verify that evidence;
 the answer says a partner will ask for it.
@@ -135,10 +135,15 @@ claims list; step 7 then runs only the quote check and the refute pass.
      case's phases are the founder's own figures: today's monthly spend and revenue as the first phase, from month 1,
      and each change the founder plans (more spend after the raise, say) as a later phase from the month the founder
      names, each asked for by name when missing (`[planned monthly spend and revenue, from which month]`), never
-     assumed. Until a planned change's start month is given, make no runway call and give no runway figure; mark the
-     runway line "not checked: waiting for [the month the planned spend starts]". With no cash or burn given, ask for
-     them by name (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; the claim is
-     Needs a source meanwhile, and is never worked out by hand.
+     assumed. Until a planned change's start month, its monthly spend and its monthly revenue are all given, make no
+     runway call and give no runway figure; mark the runway line "not checked: waiting for [the month the planned spend
+     starts]" while the month is missing, "not checked: waiting for [the planned monthly spend from that month]" while
+     the month is given and the spend is missing, or "not checked: waiting for [the planned monthly revenue from that
+     month]" while only the revenue is missing. With no cash or burn given, ask for them by name
+     (`[cash on hand, monthly spend and revenue]`) and make no call until they are given. While the runway call waits
+     for an input (cash, burn, or a planned change's start month, monthly spend or monthly revenue), the runway claim is
+     Needs a source, with the bracketed ask in its fix (and, for a planned change, its not-checked line), and is never
+     worked out by hand.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
      its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%, -0.033333 is -3.3333%),
      which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
@@ -265,7 +270,9 @@ Lead with what a partner will check first, then the full list.
    Verdict, Fix. Order by verdict, Contradicted first.
 3. **Deal terms:** the `equity_deal_check` verdict for each call (for a valuation with no label, both readings side
    by side), which document's figures it used, and each mismatch row in the tool's values; the same for each
-   `equity_runway_plan` call, or the ask for cash and burn when they were not given.
+   `equity_runway_plan` call, or, for a runway call that waits for an input, the ask for what it waits for (cash and
+   burn, or a planned change's start month, monthly spend or monthly revenue) and, for a planned change, its not-checked
+   line.
 4. **Disagreements:** each pair of lines that disagree, side by side with their places, and which one the founder
    should keep once they confirm it.
 5. **Open asks:** every bracketed gap and every question from the skeptic, in one list.

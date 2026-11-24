@@ -11,17 +11,15 @@ context.
 
 from __future__ import annotations
 
-import math
 from decimal import Decimal
 from fractions import Fraction
 
-from equity_calculator.exact import HUNDRED, ZERO, fraction
-from equity_calculator.schemas.equity_common import EquityUnit
+from equity_calculator.exact import HUNDRED, fraction
+from equity_calculator.schemas.equity_common import EquityUnit, round_half_away_whole
 
 __all__ = ["ROUNDING_HOW", "ROUNDING_VERDICT_HOW", "round_half_away", "rounding_label", "rounds_to", "typed_places"]
 
 _DECIMAL_BASE = 10
-_HALF = Fraction(1, 2)
 
 # The report's words on a row the rounding test applies to: its verdict line, and its rounding line.
 ROUNDING_VERDICT_HOW = "within the tolerance, or rounding to the deck's, is consistent"
@@ -38,8 +36,7 @@ def typed_places(written: Decimal) -> int:
 def round_half_away(value: Fraction, places: int) -> Fraction:
     """``value`` rounded half away from zero to ``places`` decimal places, exactly (12.5 to 13, -2.5 to -3)."""
     scale = _DECIMAL_BASE**places
-    whole = math.floor(abs(value) * scale + _HALF)
-    return Fraction(whole if value >= ZERO else -whole, scale)
+    return Fraction(round_half_away_whole(value * scale), scale)
 
 
 def rounds_to(written: Decimal, unit: EquityUnit, computed: Fraction) -> bool | None:

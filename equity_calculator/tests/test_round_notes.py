@@ -169,6 +169,18 @@ def test_simple_interest_is_still_selectable() -> None:
 
 
 @pytest.mark.parametrize(
+    ("principal", "owed"), [("100.10", "105.10"), ("100.50", "105.52")], ids=["105.105", "105.525"]
+)
+def test_a_notes_interest_rounds_a_half_cent_to_the_even_cent(principal: str, owed: str) -> None:
+    """The amount owed keeps its own rule (the ``interest_rounding`` assumption), not the display rule: 5% simple for
+    12 months on $100.10 is $105.105 exactly and owes $105.10, never $105.11; on $100.50, $105.525 owes $105.52."""
+    terms = {"interest_rate_percent": "5", "months_outstanding": 12, "compounding": "simple"}
+    note = NoteTerms.model_validate({"principal": principal, "valuation_cap": "1000000", **terms})
+
+    assert note_interest(note).owed == Fraction(owed)
+
+
+@pytest.mark.parametrize(
     ("terms", "owed", "approximate"),
     [
         ({}, _YEARLY_POWER_18_MONTHS, True),

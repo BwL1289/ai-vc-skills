@@ -1186,8 +1186,9 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
 
 Inside, every number is a `Fraction`. Inputs arrive as `Decimal` (the models refuse NaN and infinity, and hold every
 number to the limits above) and share counts as plain integers (a bool, a float or a numeric string is refused, never
-read as a count). The output carries both the exact fraction and a `Decimal` rounded half-even at a fixed number of
-places: 6 places for ratios and prices, 2 for money and months, 3 for shares. Three exceptions: a market's unit price
+read as a count). The output carries both the exact fraction and a `Decimal` rounded half away from zero at a fixed
+number of places (12.125 months prints 12.13, the figure the rounding test of a document's stated figure gives too):
+6 places for ratios and prices, 2 for money and months, 3 for shares. Three exceptions: a market's unit price
 the founder typed (a segment's price, a sensitivity base or value) is shown exactly, to the cent at least, with no
 trailing zeros past it ($400.00, $0.0075, $0.00000125, $0.3333333); a break-even price, which is worked, shows
 the fewest places from 2 that give the same figure as 6 (a price under $0.00001 keeps two significant digits, up to 15
@@ -1204,8 +1205,10 @@ compounds exactly under either stub rule.
 
 Verdicts, checks and flags use the exact values, never the rounded ones shown. So a line can look as if it contradicts
 the verdict beside it: a runway of 17.996 months prints as 18.00 months beside a flag for a raise lasting under 18,
-and a difference of 0.50004 points prints as 0.5000% beside a 0.5-point tolerance and the verdict mismatch. The exact
-fraction of each is in the JSON.
+and a difference of 0.50004 points prints as 0.5000% beside a 0.5-point tolerance and the verdict mismatch. A deck that
+copies a figure printed from an exact half (a runway of 12.125 months, printed 12.13) is consistent, and its difference
+line prints -0.01 months beside two equal figures: the exact difference, -0.005 months, is half a hundredth, rounded
+away from zero like every figure. The exact fraction of each is in the JSON.
 
 Each number shown is its own exact value rounded once. So rounded parts can miss a rounded total by one in the last
 place shown: in the report, a thousandth of a share or 0.0001% beside a total line. The pool's and the round's value

@@ -186,8 +186,8 @@ def _case_row(name: CaseName, phases: tuple[Phase, ...]) -> RunwayCase:
 
 
 def _covering(amount: Fraction | None) -> EquityQuantity | None:
-    """A required raise, exact, with its display rounded up to the next cent (never half-even), so raising the amount
-    shown always reaches the milestone."""
+    """A required raise, exact, with its display rounded up to the next cent (never to the nearest), so raising the
+    amount shown always reaches the milestone."""
     if amount is None:
         return None
     cents = math.ceil(amount * _CENTS)

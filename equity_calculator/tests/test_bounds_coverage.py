@@ -164,6 +164,20 @@ def test_a_tiny_percent_in_a_message_never_reads_zero(value: Fraction, text: str
     assert percent_text(value) == text
 
 
+@pytest.mark.parametrize(
+    ("value", "text"),
+    [
+        (Fraction(1_212_125, 10**7), "12.1213%"),
+        (Fraction(-1_212_125, 10**7), "-12.1213%"),
+        (Fraction(5, 10**7), "0.0001%"),
+    ],
+    ids=["a-half-rounds-up", "a-negative-half-rounds-down", "a-half-of-the-smallest-shown"],
+)
+def test_a_percent_in_a_message_rounds_half_away_from_zero(value: Fraction, text: str) -> None:
+    """A message's percent rounds as the report's figures do: 12.12125% reads 12.1213%, never the even 12.1212%."""
+    assert percent_text(value) == text
+
+
 def test_the_pool_refusal_never_states_a_false_zero_bound() -> None:
     """$1 pre-money against $1e15 in: the holders keep under 0.0001%, and the refusal says so rather than 0.0000%."""
     with pytest.raises(ValidationError) as caught:

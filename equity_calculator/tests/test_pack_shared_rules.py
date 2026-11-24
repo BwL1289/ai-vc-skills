@@ -3,12 +3,16 @@
 Four sentences are copied into several skills and must stay identical there:
 
 - Which monthly spend goes into ``equity_runway_plan`` for a runway claim on a SAFE or note raise, and what happens
-  while a planned change's start month is missing. When the skills disagreed, the same founder input ($400,000 in the
-  bank, a $1,000,000 raise, $80,000 a month today and $120,000 planned after the raise) gave 11.67 months in one skill,
-  which sent the planned $120,000 as the only phase, and 17.50 in another, which sent today's $80,000 and left the rise
-  out. The founder's plan, $80,000 and then $120,000 from month 4, gives 12.67. A plan with the rise and no start month
-  cannot be run, so the call waits for the month and the runway line says so. Every skill that sends a SAFE or note
-  raise's runway to that tool carries the sentence.
+  while a planned change's start month, its monthly spend or its monthly revenue is missing. When the skills
+  disagreed, the same founder input ($400,000 in the bank, a $1,000,000 raise, $80,000 a month today and $120,000
+  planned after the raise) gave 11.67 months in one skill, which sent the planned $120,000 as the only phase, and 17.50
+  in another, which sent today's $80,000 and left the rise out. The founder's plan, $80,000 and then $120,000 from
+  month 4, gives 12.67. A plan with the rise and no start month cannot be run, so the call waits for the month and the
+  runway line says so; a rise with its month and no amount cannot be run either, so it waits the same way, under its
+  own label, and so does one with no word on its revenue: the tool reads a phase with no revenue as none, which on one
+  plan ($300,000 in the bank, a $1,200,000 raise, $60,000 a month and $15,000 of revenue, then $95,000 from month 4)
+  gives the raise 17.37 months, against 20.06 with the $15,000 kept. Every skill that sends a SAFE or note raise's
+  runway to that tool carries the sentence.
 - No working out how two of the founder's figures relate in founder-facing text: a live positioning run wrote that
   users "more than doubled", which neither the founder nor the calculator said. Every skill that writes rewrites,
   lines, draft answers, update text or deck fixes for the founder carries the sentence, except the partner-meeting
@@ -116,10 +120,17 @@ _PLAN_PHASES = (
     "On a SAFE or note raise, the `plan` case's phases are the founder's own figures: today's monthly spend and revenue"
     " as the first phase, from month 1, and each change the founder plans (more spend after the raise, say) as a later"
     " phase from the month the founder names, each asked for by name when missing (`[planned monthly spend and"
-    " revenue, from which month]`), never assumed. Until a planned change's start month is given, make no runway call"
-    ' and give no runway figure; mark the runway line "not checked: waiting for [the month the planned spend'
-    ' starts]".'
+    " revenue, from which month]`), never assumed. Until a planned change's start month, its monthly spend and its"
+    ' monthly revenue are all given, make no runway call and give no runway figure; mark the runway line "not checked:'
+    ' waiting for [the month the planned spend starts]" while the month is missing, "not checked: waiting for [the'
+    ' planned monthly spend from that month]" while the month is given and the spend is missing, or "not checked:'
+    ' waiting for [the planned monthly revenue from that month]" while only the revenue is missing.'
 )
+# The three labels the runway line takes while a planned change waits: for its start month, then for its monthly
+# spend, then for its monthly revenue.
+_WAITING_FOR_MONTH = '"not checked: waiting for [the month the planned spend starts]"'
+_WAITING_FOR_SPEND = '"not checked: waiting for [the planned monthly spend from that month]"'
+_WAITING_FOR_REVENUE = '"not checked: waiting for [the planned monthly revenue from that month]"'
 _NO_COMPARISON = (
     "Never work out how two of the founder's figures relate (a difference, a sum, a ratio or multiple, a share left"
     ' over, "doubled") in a rewrite, a line or a table cell unless the founder\'s material states it or a tool returned'
@@ -246,6 +257,10 @@ def test_a_safe_raises_runway_takes_each_planned_change_as_a_later_phase_and_wai
     text = _unwrapped(name)
 
     assert _PLAN_PHASES in text
+    # A planned change waits for whichever of its three inputs is missing, each under its own label, so a rise with a
+    # month and no amount, or with both and no word on its revenue, is held like one with an amount and no month, never
+    # sent with a spend or a revenue the founder did not give (the tool reads a phase with no revenue as none).
+    assert _WAITING_FOR_MONTH in text and _WAITING_FOR_SPEND in text and _WAITING_FOR_REVENUE in text
     # Sending only the spend planned after the raise, from month 1, gives a shorter runway than the founder's plan; the
     # partner-meeting skill used to do that.
     assert "on a `plan` case of the spend planned after the raise" not in text

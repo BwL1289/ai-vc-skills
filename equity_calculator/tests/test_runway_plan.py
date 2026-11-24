@@ -794,8 +794,9 @@ def test_the_downside_flag_counts_the_no_raise_row_and_says_so() -> None:
 
 
 def test_the_required_raise_shown_is_rounded_up_so_raising_it_covers() -> None:
-    """The exact requirement is $100.0002; half-even would print $100.00, which is short. The display rounds up to
-    $100.01, and a raise of that amount covers the milestone; an amount already in whole cents is shown as is."""
+    """The exact requirement is $100.0002; rounding to the nearest cent would print $100.00, which is short. The display
+    rounds up to $100.01, and a raise of that amount covers the milestone; an amount already in whole cents is shown as
+    is."""
     fields = _plan((1, "33.3334", "0"), cash_on_hand="0", milestones=[3], months_to_raise=0)
     result = runway_plan(**fields)
     row = next(row for row in result.required if row.case == "plan" and row.lands_month == 0)

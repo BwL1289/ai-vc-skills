@@ -366,6 +366,28 @@ def test_a_safe_raise_has_no_ownership_verdict_and_its_runway_goes_to_the_runway
     assert "0.166667 is 16.6667%" in steps and "a change of notation, not a calculation" in steps
 
 
+def test_a_runway_claim_whose_call_waits_for_an_input_is_needs_a_source() -> None:
+    """A runway held for a planned change's month, monthly spend or monthly revenue gets a named verdict, as one held
+    for cash or burn does: its not-checked line alone would leave the claims table's Verdict cell empty. Only a planned
+    change has a not-checked label; a wait for cash or burn has its bracketed ask alone, so no label is invented."""
+    steps = _unwrapped(_section("## Steps"))
+    answering = _unwrapped(_section("## Answering"))
+    verdicts = {row[0]: row[1] for row in _table("## The four verdicts")}
+    waits_for = "(cash, burn, or a planned change's start month, monthly spend or monthly revenue)"
+
+    assert f"While the runway call waits for an input {waits_for}, the runway claim is Needs a source" in steps
+    assert "with the bracketed ask in its fix (and, for a planned change, its not-checked line)" in steps
+    assert f"a runway claim whose call waits for an input {waits_for}" in verdicts["Needs a source"]
+    assert "for a runway call that waits for an input, the ask for what it waits for" in answering
+    assert (
+        "(cash and burn, or a planned change's start month, monthly spend or monthly revenue) and, for a planned"
+        " change, its not-checked line" in answering
+    )
+    assert "with its not-checked line and the bracketed ask" not in steps
+    # The verdict sentence follows the shared hold sentence and is not part of it, so the eight copies stay identical.
+    assert "the claim is Needs a source meanwhile" not in steps
+
+
 def test_step_5_asks_which_way_the_founders_fully_diluted_total_counts_safes_and_notes() -> None:
     steps = _unwrapped(_section("## Steps"))
 

@@ -173,8 +173,11 @@ The round's figures are checked once, as the vc-deal-math skill describes:
   case's phases are the founder's own figures: today's monthly spend and revenue as the first phase, from month 1, and
   each change the founder plans (more spend after the raise, say) as a later phase from the month the founder names,
   each asked for by name when missing (`[planned monthly spend and revenue, from which month]`), never assumed. Until a
-  planned change's start month is given, make no runway call and give no runway figure; mark the runway line "not
-  checked: waiting for [the month the planned spend starts]".
+  planned change's start month, its monthly spend and its monthly revenue are all given, make no runway call and give no
+  runway figure; mark the runway line "not checked: waiting for [the month the planned spend starts]" while the month is
+  missing, "not checked: waiting for [the planned monthly spend from that month]" while the month is given and the spend
+  is missing, or "not checked: waiting for [the planned monthly revenue from that month]" while only the revenue is
+  missing.
 - **Runway with no raise** (what happens if the round does not close), on any instrument: `equity_runway_plan`, whose
   no-raise row is the figure, with the memo's stated no-raise runway as the top-level `stated_runway_months`. With no
   cash on hand or no burn given, ask for them; make no runway call until they are in.

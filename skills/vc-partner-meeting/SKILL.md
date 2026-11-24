@@ -118,8 +118,11 @@ lenses" says, so the lenses do not anchor on the numbers or the bank; step 4 the
      the `plan` case's phases are the founder's own figures: today's monthly spend and revenue as the first phase, from
      month 1, and each change the founder plans (more spend after the raise, say) as a later phase from the month the
      founder names, each asked for by name when missing (`[planned monthly spend and revenue, from which month]`), never
-     assumed. Until a planned change's start month is given, make no runway call and give no runway figure; mark the
-     runway line "not checked: waiting for [the month the planned spend starts]". Never work either out by hand.
+     assumed. Until a planned change's start month, its monthly spend and its monthly revenue are all given, make no
+     runway call and give no runway figure; mark the runway line "not checked: waiting for [the month the planned spend
+     starts]" while the month is missing, "not checked: waiting for [the planned monthly spend from that month]" while
+     the month is given and the spend is missing, or "not checked: waiting for [the planned monthly revenue from that
+     month]" while only the revenue is missing. Never work either out by hand.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
      its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%), which is what the
      command line's report prints. That is a change of notation, not a calculation; never round it.
