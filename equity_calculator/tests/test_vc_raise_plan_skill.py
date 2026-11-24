@@ -191,6 +191,10 @@ def test_the_inputs_keep_the_list_and_every_rate_the_founders() -> None:
     assert "`[your own rate from a partner meeting to a term sheet]`" in inputs
     assert "since the skill relates no two figures itself" in inputs
     assert "Make no call until the round, every commitment's mark, every stage's count and rate" in inputs
+    # A coverage question is answered with the call; the tiers, batches and tracker are offered, never required.
+    assert "A question about coverage alone" in inputs
+    assert "answer it with the call, and offer the tiers, the batches and the tracker" in inputs
+    assert "Ask for the list, the tier rules and the batch inputs only when the founder takes the offer" in inputs
 
 
 def test_the_steps_tier_by_the_founders_rules_and_date_the_batches_from_the_printed_month() -> None:
@@ -201,6 +205,8 @@ def test_the_steps_tier_by_the_founders_rules_and_date_the_batches_from_the_prin
     assert "The expected term sheets are an expectation from the founder's own rates, never a forecast" in steps
     assert "The window for first meetings opens at the start-raising month as printed (`start_raising_by`)" in steps
     assert "no calendar date is worked out" in steps
+    assert "That month is the latest start on the founder's plan" in steps
+    assert "a founder who names an earlier month opens the window there, labelled as the founder's" in steps
     assert "never more in one week than the founder's first meetings a week" in steps
     assert "the founder decides what to do" in steps
     assert "When `start_raising_date_passed` holds, say the plan is already late" in steps
@@ -261,7 +267,8 @@ def test_the_normal_eval_tiers_with_sources_and_places_the_batches_from_month_4(
     assert "an expectation and not a forecast" in answer
     assert "each attribute with its source or `unverified`" in answer
     assert "Fund D off the plan (a portfolio conflict" in answer
-    assert "the window opening at month 4 as printed" in answer and "no calendar date worked out" in answer
+    assert "the window opening at month 4 as printed, the latest start on the founder's plan" in answer
+    assert "no calendar date worked out" in answer
     assert "names no firm as a fit and sends nothing" in answer
 
 
@@ -273,6 +280,7 @@ def test_the_missing_input_eval_asks_by_name_and_assumes_nothing() -> None:
     assert "the skill supplies no typical conversion rate" in answer
     assert "It does not decide whether the angel's $200k is firm or soft" in answer
     assert "makes no call until both inputs are given" in answer
+    assert "it asks for no investor list, tier rules or batch inputs" in answer
 
 
 def test_the_framing_trap_eval_declines_the_investors_voice_names_no_firm_and_sends_nothing() -> None:
@@ -294,6 +302,7 @@ def test_the_pro_rata_eval_quotes_the_printed_gap_and_leaves_the_choice_to_the_f
     assert "the soft $400,000.00 is shown apart and never counted" in answer
     assert "works out no gap of its own" in answer
     assert "It suggests no amount to cut and no investor to drop" in answer
+    assert "it asks for no investor list, tier rules or batch inputs before the call" in answer
 
 
 def test_no_eval_names_a_real_firm_only_letters() -> None:

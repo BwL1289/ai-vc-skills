@@ -25,7 +25,7 @@ the printed start-raising month, keeps the tracker, never names a firm as a fit 
 > - Fund D: seed, leads, cheque fits, devtools, backs a direct competitor (from their portfolio page, I checked).
 > - Fund E: seed, follows only, follow-size cheque, devtools, no conflict, warm path through our advisor.
 > - Fund F: seed, leads, cheque fits, devtools, no conflict, no warm path (I think they do seed; not sure).
-> - Angel G: angel, follows, small cheque, devtools, no conflict, warm path through our angel.
+> - Angel G: seed, follows, small cheque, devtools, no conflict, warm path through our angel.
 > - Fund H: Series A only, leads, devtools (from their site).
 >
 > My rules: tier 1 leads at seed in devtools with a warm path and no conflict; tier 2 leads at seed with no warm path
@@ -92,7 +92,8 @@ the printed start-raising month, keeps the tracker, never names a firm as a fit 
   Angel G tier 3; Fund D off the plan (a portfolio conflict, from the founder's check of the portfolio page); Fund H
   off the plan (not at seed). Fund B's warm path is sourced to the founder it backed; Fund E's and Angel G's warm
   paths and every attribute the founder gave with no source are `unverified`.
-- The batches, the window opening at month 4 as printed, weeks numbered from there and no calendar date worked out:
+- The batches, the window opening at month 4 as printed, the latest start on the founder's plan (the founder may name
+  an earlier month, labelled as the founder's), weeks numbered from there and no calendar date worked out:
   week 1 holds Fund B, Fund C and Fund F (tier 1, then tier 2, at most 3 a week); week 2 holds Fund E and Angel G;
   each batch's intro asks go out 2 weeks before its week.
 - A tracker table with one row per investor on the plan: investor, tier, warm path with its source, batch and week,

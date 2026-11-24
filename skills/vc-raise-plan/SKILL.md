@@ -66,6 +66,11 @@ stage's count and rate and the term sheets wanted are given. Without cash and bu
 ask for them, and run without them only when the founder names a start month of their own, which the plan then
 labels as the founder's.
 
+A question about coverage alone (how much of the round is left, how many investors to talk to, when to start raising)
+needs only the round, the funnel and the cash, burn and months to raise: answer it with the call, and offer the tiers,
+the batches and the tracker. Ask for the list, the tier rules and the batch inputs only when the founder takes the
+offer.
+
 ## Steps
 
 1. **List what the founder gave, word for word**: the round, each commitment and its mark, each pro rata amount,
@@ -143,7 +148,9 @@ labels as the founder's.
    months to raise).
 6. **Plan the batches** from the tiers, the founder's batch inputs and the printed start-raising month. The window
    for first meetings opens at the start-raising month as printed (`start_raising_by`), and its weeks are numbered
-   from there (month 4, week 1): no calendar date is worked out. Place the tiered investors in the founder's tier
+   from there (month 4, week 1): no calendar date is worked out. That month is the latest start on the founder's plan,
+   so say so: a founder who names an earlier month opens the window there, labelled as the founder's, with the printed
+   month quoted beside it. Place the tiered investors in the founder's tier
    order into the window's weeks, never more in one week than the founder's first meetings a week, so the first
    meetings land within the founder's window. Each batch's intro asks go out the founder's lead time before its week,
    written as that lead time ("2 weeks before month 4, week 1"). An investor who does not fit in the window is listed

@@ -2,8 +2,8 @@
 
 A test prompt for the `vc-raise-plan` skill. The company is made up. The answer states the expected behaviour; it is
 not a recorded run, and this eval has not been run in a live session. A run passes when it makes no call, asks in one
-message for the missing rate and the commitment's mark by name as bracketed asks, and fills neither with a typical
-figure or a guess.
+message for the missing rate and the commitment's mark by name as bracketed asks, fills neither with a typical figure
+or a guess, and, as the question is about coverage alone, asks for no investor list, tier rules or batch inputs.
 
 ## Prompt
 
@@ -29,5 +29,7 @@ $200k is not marked firm or soft.
 - It declines to use a typical rate: every rate is the founder's, and a benchmark goes in only when the founder gives
   one with its source, so the skill supplies no typical conversion rate.
 - It does not decide whether the angel's $200k is firm or soft.
+- The question is about coverage alone, so it asks for no investor list, tier rules or batch inputs; it may offer the
+  tiers, the batches and the tracker once the coverage is worked.
 - It gives no expected term sheets, no targets needed and no start-raising month, and makes no call until both inputs
   are given.

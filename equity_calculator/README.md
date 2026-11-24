@@ -9,7 +9,7 @@
 
 The first of the [AI VC skills](../README.md).
 
-Should we trade stock for this, and what does a round do to the cap table? Thirteen scenarios, worked with exact
+Should we trade stock for this, and what does a round do to the cap table? Fourteen scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in

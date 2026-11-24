@@ -5,7 +5,7 @@ not a recorded run, and this eval has not been run in a live session. Every figu
 from what `equity_calculator raise_pipeline` printed for these inputs; none is typed by hand. A run passes when it
 makes the one tool call below (field order free, money and percents as strings), quotes the allocation left below zero
 and `pro_rata_exceeds_left` as printed, never counts the soft commitments, leaves the pro rata and the round size to
-the founder, and computes nothing in its own text.
+the founder, asks for no investor list (the question is about coverage alone), and computes nothing in its own text.
 
 ## Prompt
 
@@ -72,6 +72,8 @@ the founder, and computes nothing in its own text.
 - The funnel, as printed: on the founder's own rates today's funnel is expected to give 2.40 term sheets, an
   expectation and not a forecast, against the 2 wanted, and 0 more first-stage targets are needed; the start-raising
   month is month 3.
+- The question is about coverage alone, so it asks for no investor list, tier rules or batch inputs before the call;
+  it offers the tiers, the batches and the tracker after the coverage.
 - `soft_commitments_not_counted` with its meaning, and the assumptions it leans on, each `unverified` where the
   result says so: `allocation_rule` and `pro_rata_rule` (each pro rata amount counted in full).
 - It closes as not investment, legal or tax advice, and adds, subtracts or divides none of the tool's or the founder's
