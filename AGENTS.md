@@ -5,10 +5,10 @@ Instructions for AI coding agents working on this repository. Humans: see [CONTR
 ## What this repository is
 
 AI VC skills: agent skills that help a founder get a raise ready (exact equity math, skeptical reviews of the deck,
-claims, competition, metrics, round and term sheet, and help planning the raise, writing intro emails, reading passes
-and sizing the option pool), shipped as one Claude Code plugin. Skills live in `skills/<name>/SKILL.md`; the
-exact math lives in the `equity_calculator` Python package, which the skills call through its command or its MCP
-server.
+claims, competition, metrics, round and term sheet, and help planning the raise, writing intro emails, reading passes,
+sizing the option pool and tying out the cap table), shipped as one Claude Code plugin. Skills live in
+`skills/<name>/SKILL.md`; the exact math lives in the `equity_calculator` Python package, which the skills call through
+its command or its MCP server.
 
 ## Layout
 

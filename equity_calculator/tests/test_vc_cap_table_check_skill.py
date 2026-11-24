@@ -42,9 +42,9 @@ _TRIGGERS = (
     "what do our SAFEs do to the cap table",
     "how much dead equity do we have",
 )
-# Each is a skill folder in this repository, except the pool skill, which another change builds: named, not required.
-_HANDOFF_SKILLS = ("equity-calculator", "vc-deal-math", "vc-term-sheet-review", "vc-diligence-questions")
+# Each is a skill folder in this repository.
 _POOL_SKILL = "vc-option-pool-plan"
+_HANDOFF_SKILLS = ("equity-calculator", "vc-deal-math", "vc-term-sheet-review", "vc-diligence-questions", _POOL_SKILL)
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_cap_table_check` call yet."
 _CALLED_TOOL = re.compile(r"^## Expected tool call\n\n`equity_([a-z_]+)`, once:$", re.MULTILINE)
 _BASIS_ASK = "`[what the table's percents are a share of: fully diluted or outstanding]`"
@@ -207,14 +207,15 @@ def test_every_flag_code_has_a_row_in_the_skills_flag_table() -> None:
     assert rows == list(get_args(CapTableFlag))
 
 
-def test_every_skill_it_hands_off_to_is_named_and_the_built_ones_exist() -> None:
+def test_every_skill_it_hands_off_to_is_named_and_exists() -> None:
     handoffs = _unwrapped(_section("## When to use it"))
 
     for name in _HANDOFF_SKILLS:
         assert f"the {name} skill" in handoffs, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
-    assert f"the {_POOL_SKILL} skill" in handoffs
-    assert "until it is there, `equity_pool` in the equity-calculator skill works the arithmetic" in handoffs
+    assert "`equity_pool_plan`" in handoffs
+    assert "being built" not in _TEXT
+    assert "until it is there" not in _TEXT
 
 
 def test_it_never_rules_on_legal_validity_and_lists_the_lawyer_s_questions() -> None:

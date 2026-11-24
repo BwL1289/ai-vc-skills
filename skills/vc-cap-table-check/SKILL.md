@@ -23,7 +23,7 @@ rules on whether a share, a grant or a transfer is legally valid.
   vc-deal-math skill, and a single scenario with no table to check to the equity-calculator skill (`equity_round`,
   `equity_dilution`, `equity_pool`).
 - Hand off how big the option pool should be, and what a top-up costs the founders, to the vc-option-pool-plan skill
-  (preview, being built); until it is there, `equity_pool` in the equity-calculator skill works the arithmetic.
+  (preview), which sizes it from the founder's own hiring plan (`equity_pool_plan`).
 - Hand off a term sheet to the vc-term-sheet-review skill (preview), and the diligence questions an investor is likely
   to ask about the company to the vc-diligence-questions skill (preview).
 
@@ -167,8 +167,7 @@ rules on whether a share, a grant or a transfer is legally valid.
    with no basis, a class with shares and holder lines and no word on whether the lines are every holder, a holder
    line in a class that is not there, a preview with no SAFE or note). Never work around it.
 5. **Follow-ups go to tools too**: a corrected table by re-running `equity_cap_table_check`; a priced round's full
-   effect to the vc-deal-math skill; a pool top-up to the vc-option-pool-plan skill, or `equity_pool` until it is
-   there.
+   effect to the vc-deal-math skill; a pool top-up to the vc-option-pool-plan skill.
 
 ## Answering
 

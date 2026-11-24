@@ -23,18 +23,19 @@ _SITE = _ROOT / "docs" / "index.html"
 _INSTALL = _ROOT / "docs" / "install.md"
 _README = _ROOT / "README.md"
 _SKILLS = sorted(path.parent.name for path in (_ROOT / "skills").glob("*/SKILL.md"))
+_ONES = "zero one two three four five six seven eight nine".split()
 _NUMBER_WORDS = {
     word: value
     for value, word in enumerate(
-        (
-            "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen "
-            "seventeen eighteen nineteen twenty"
-        ).split()
+        _ONES
+        + "ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty".split()
+        + [f"twenty-{one}" for one in _ONES[1:]]
     )
 }
-_SITE_SKILL_COUNT = re.compile(r"(\w+) skills for Claude and any MCP client")
-_SITE_SCENARIO_COUNT = re.compile(r"Works (\w+) equity questions exactly")
-_README_SCENARIO_COUNT = re.compile(r"The `equity-calculator` skill covers (\w+) scenarios")
+# A count word may be hyphenated ("twenty-one"), so each pattern takes the whole word, hyphen included.
+_SITE_SKILL_COUNT = re.compile(r"([\w-]+) skills for Claude and any MCP client")
+_SITE_SCENARIO_COUNT = re.compile(r"Works ([\w-]+) equity questions exactly")
+_README_SCENARIO_COUNT = re.compile(r"The `equity-calculator` skill covers ([\w-]+) scenarios")
 _SITE_CARD = re.compile(r'<article class="card">')
 # A command block on the site, then the output block the page shows for it, in page order.
 _SITE_COMMAND = re.compile(r"<pre[^>]*><code>(equity_calculator .*?)</code></pre>", re.DOTALL)

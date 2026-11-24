@@ -161,6 +161,7 @@ _FOUNDER_TEXT_SKILLS = (
     "vc-raise-plan",
     "vc-pass-debrief",
     "vc-intro-email",
+    "vc-cap-table-check",
 )
 _PARTNER_MEETING_BAN = 'never a difference, sum or ratio of two figures the founder gave ("from $80k to $120k a month"'
 # The lean refute pass, with {noun} filled by what the skill's lenses raise: an objection, or a question.
