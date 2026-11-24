@@ -32,6 +32,7 @@ founder did not give, looks nothing up, places no company on an axis, and adds n
   - The market's size, built bottom-up: the vc-market-sizing skill (preview).
   - The product decisions behind a difference, and what was said no to: the vc-taste-check skill (preview).
   - Rehearsing the partner meeting, where "what if they copy you?" gets asked: the vc-partner-meeting skill (preview).
+  - A pass that gave competition as its reason: the vc-pass-debrief skill (preview).
 
 ## Inputs
 

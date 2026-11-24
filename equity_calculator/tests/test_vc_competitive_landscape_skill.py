@@ -57,7 +57,7 @@ _HANDOFFS = {
         "Messaging (the one-liner, the story and the say-and-avoid list): the vc-positioning skill (preview)."
     ),
 }
-_OTHER_HANDOFFS = ("vc-market-sizing", "vc-taste-check", "vc-partner-meeting")
+_OTHER_HANDOFFS = ("vc-market-sizing", "vc-taste-check", "vc-partner-meeting", "vc-pass-debrief")
 _LEVELS = ("Direct", "Indirect", "Adjacent", "Substitutes")
 _ADJACENT_KINDS = (
     "a company with the same technology aimed at another use",
