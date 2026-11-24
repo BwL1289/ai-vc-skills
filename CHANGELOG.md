@@ -46,6 +46,12 @@ All notable changes to this repository. Dates are UTC.
   effective pre-money, the founders' ownership and the pool left at the next round, with one evidence line for the
   pool conversation built only from the founder's plan. It never says which pool to accept. Four evals are in
   `evals/vc-option-pool-plan/`.
+- `vc-positioning` asks "what's contrarian?": a twelfth dimension, Contrarian insight (a belief most investors would
+  reject today, who disagrees and why, and the founder's evidence), and a lens named by its test, Is it really
+  contrarian?, which attacks a consensus view dressed up as an insight, a belief with no evidence, and one the business
+  does not depend on. A founder with no such belief is asked once, with two prompts, and never given one; the answer
+  gains a Contrarian insight block with at most two rewrites from the founder's own material; a Company BK eval
+  (unrecorded) checks that a consensus claim is caught.
 - `vc-deck-review` is out of preview after its first run on a real deck, whose founder adopted most of its fix list;
   plugin version 0.2.7.
 - A `vc-deal-math` eval (Company BW, unrecorded) for a SAFE raise whose planned rise has its start month but no
