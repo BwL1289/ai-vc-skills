@@ -29,6 +29,8 @@ from equity_calculator.schemas.equity_dilution import DilutionInput, DilutionRes
 from equity_calculator.schemas.equity_instrument_compare import InstrumentCompareInput, InstrumentCompareResult
 from equity_calculator.schemas.equity_market_sizing import MarketSizingInput, MarketSizingResult
 from equity_calculator.schemas.equity_metrics_check import MetricsCheckInput, MetricsCheckResult
+from equity_calculator.schemas.equity_pool_plan import PoolPlanInput, PoolPlanResult
+from equity_calculator.schemas.equity_raise_pipeline import RaisePipelineInput, RaisePipelineResult
 from equity_calculator.schemas.equity_round import RoundInput, RoundResult
 from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput, RunwayPlanResult
 from equity_calculator.schemas.equity_vesting import VestingInput, VestingResult
@@ -472,6 +474,70 @@ COMPARE_BU: dict[str, object] = {
 def instrument_compare(**fields: object) -> InstrumentCompareResult:
     """The priced-round-or-note comparison for ``fields`` (an ``InstrumentCompareInput``'s fields)."""
     return compute(InstrumentCompareInput.model_validate(fields))
+
+
+# Company CP, made up, worked by exact fractions in test_pool_plan.py: 10,000,000 fully diluted shares, 1,000,000 of
+# them unissued pool and 7,000,000 the founders'; $4,000,000 at a $16,000,000 pre-money; the term sheet asks for a 15%
+# pool. Five hires start by month 18, the next round (G = 1,400,000 shares); a sixth starts in month 24 and is left out.
+# The plan's pool is t = G·V/((V + I)(FD - U + G)) = 7/65, a top-up of P = G - U = 400,000 at p = $20/13.
+POOL_PLAN_CP_HIRES: list[dict[str, object]] = [
+    {"role": "Founding engineer", "start_month": 1, "grant_shares": 400_000},
+    {"role": "Senior engineer", "start_month": 4, "grant_shares": 250_000},
+    {"role": "Senior engineer", "start_month": 6, "grant_shares": 250_000},
+    {"role": "Head of sales", "start_month": 9, "grant_shares": 350_000},
+    {"role": "Designer", "start_month": 12, "grant_shares": 150_000},
+    {"role": "VP engineering", "start_month": 24, "grant_shares": 500_000},
+]
+POOL_PLAN_CP: dict[str, object] = {
+    "fully_diluted_shares": 10_000_000,
+    "unissued_pool_shares": 1_000_000,
+    "founder_shares": 7_000_000,
+    "pre_money": "16000000",
+    "investment": "4000000",
+    "requested_pool_percent": "15",
+    "next_round_month": 18,
+    "hires": POOL_PLAN_CP_HIRES,
+}
+
+
+def pool_plan(**fields: object) -> PoolPlanResult:
+    """The pool plan for ``fields`` (a ``PoolPlanInput``'s fields)."""
+    return compute(PoolPlanInput.model_validate(fields))
+
+
+# Company RA, made up, worked by exact fractions in test_raise_pipeline.py: a $4,000,000 round with a $2,500,000 lead
+# cheque, $500,000 firm and $500,000 soft commitments and $400,000 of pro rata, so the room after the lead and the firm
+# commitments is $1,000,000 and the allocation left $600,000. The funnel: 40 investors with an intro asked (50% to a
+# first meeting), 10 at a first meeting (30% to a partner meeting) and 2 at a partner meeting (25% to a term sheet),
+# so the conversion is 3/80, E = 40·3/80 + 10·3/40 + 2·1/4 = 11/4, and for 3 term sheets T = 80 and M = 7. $1,200,000 in
+# the bank burning $120,000 net a month lasts 10 months; with 6 months to raise, start raising by month 4.
+RAISE_PIPELINE_RA_STAGES: list[dict[str, object]] = [
+    {"name": "Intro asked", "investors": 40, "rate_percent": "50"},
+    {"name": "First meeting", "investors": 10, "rate_percent": "30"},
+    {"name": "Partner meeting", "investors": 2, "rate_percent": "25"},
+]
+RAISE_PIPELINE_RA: dict[str, object] = {
+    "round_size": "4000000",
+    "lead_cheque": "2500000",
+    "commitments": [
+        {"amount": "500000", "kind": "firm"},
+        {"amount": "250000", "kind": "soft"},
+        {"amount": "250000", "kind": "soft"},
+    ],
+    "pro_rata": ["400000"],
+    "stages": RAISE_PIPELINE_RA_STAGES,
+    "term_sheets_wanted": 3,
+    "runway": {
+        "cash_on_hand": "1200000",
+        "phases": [{"from_month": 1, "gross_burn": "150000", "revenue": "30000"}],
+        "months_to_raise": 6,
+    },
+}
+
+
+def raise_pipeline(**fields: object) -> RaisePipelineResult:
+    """The raise pipeline for ``fields`` (a ``RaisePipelineInput``'s fields)."""
+    return compute(RaisePipelineInput.model_validate(fields))
 
 
 # Company CQ, made up, worked by exact fractions in test_cap_table_check.py: two founders' common (4,500,000 and

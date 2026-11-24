@@ -19,6 +19,8 @@ from equity_calculator.investor import compute_investor
 from equity_calculator.market_sizing import compute_market_sizing
 from equity_calculator.metrics_check import compute_metrics_check
 from equity_calculator.pool import compute_pool
+from equity_calculator.pool_plan import compute_pool_plan
+from equity_calculator.raise_pipeline import compute_raise_pipeline
 from equity_calculator.round import compute_round
 from equity_calculator.runway_plan import compute_runway_plan
 from equity_calculator.schemas.equity import (
@@ -39,7 +41,11 @@ from equity_calculator.schemas.equity import (
     MetricsCheckInput,
     MetricsCheckResult,
     PoolInput,
+    PoolPlanInput,
+    PoolPlanResult,
     PoolResult,
+    RaisePipelineInput,
+    RaisePipelineResult,
     RoundInput,
     RoundResult,
     RunwayPlanInput,
@@ -116,6 +122,16 @@ def compute(inputs: InstrumentCompareInput) -> InstrumentCompareResult:
 
 
 @overload
+def compute(inputs: PoolPlanInput) -> PoolPlanResult:
+    ...
+
+
+@overload
+def compute(inputs: RaisePipelineInput) -> RaisePipelineResult:
+    ...
+
+
+@overload
 def compute(inputs: CapTableCheckInput) -> CapTableCheckResult:
     ...
 
@@ -154,6 +170,10 @@ def compute(inputs: ScenarioInput) -> ScenarioResult:
             return compute_market_sizing(inputs)
         case InstrumentCompareInput():
             return compute_instrument_compare(inputs)
+        case PoolPlanInput():
+            return compute_pool_plan(inputs)
+        case RaisePipelineInput():
+            return compute_raise_pipeline(inputs)
         case CapTableCheckInput():
             return compute_cap_table_check(inputs)
         case _:

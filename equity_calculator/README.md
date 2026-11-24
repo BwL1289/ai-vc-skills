@@ -9,15 +9,16 @@
 
 The first of the [AI VC skills](../README.md).
 
-Should we trade stock for this, and what does a round do to the cap table? Thirteen scenarios, worked with exact
+Should we trade stock for this, and what does a round do to the cap table? Fifteen scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
 [`skills/equity-calculator/`](../skills/equity-calculator/SKILL.md), at the repository root, tells an assistant when and
-how to use it. The fifteen founder reviews in the root README's [skills table](../README.md#skills), all in preview,
-take every figure they work out from these scenarios; five were built around one: `deal_check` for `vc-deal-math`,
-`runway_plan` for `vc-round-sizing`, `metrics_check` for `vc-metrics-readiness`, `market_sizing` for
-`vc-market-sizing` and `cap_table_check` for `vc-cap-table-check`.
+how to use it. The twenty founder skills in the root README's [skills table](../README.md#skills), all but
+`vc-deck-review` in preview, take every figure they work out from these scenarios; seven were built around one:
+`deal_check` for `vc-deal-math`, `runway_plan` for `vc-round-sizing`, `metrics_check` for `vc-metrics-readiness`,
+`market_sizing` for `vc-market-sizing`, `pool_plan` for `vc-option-pool-plan`, `raise_pipeline` for `vc-raise-plan`
+and `cap_table_check` for `vc-cap-table-check`.
 
 Built from the original `equity_equation` script this repository started with (it is in the git history, at
 [`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/ai-vc-skills/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation))
@@ -39,6 +40,8 @@ and the option-pool shuffle.
 | `metrics_check`      | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback and burn multiple the deck states agree with their parts?                                                                                                                                                                |
 | `market_sizing`      | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?                                                                                                                                                       |
 | `instrument_compare` | A founder choosing between a priced round now and a convertible note now: who owns what after today and after each next round, and who gets what at each exit, A beside B with B - A, never a pick?                                                                                                                          |
+| `pool_plan`          | A term sheet asks for an option pool. How big a pool does the founder's hiring plan to the next round need, and what does each pool do to the price, the effective pre-money and who owns what, side by side, never a pick?                                                                                                  |
+| `raise_pipeline`     | A founder planning a raise: how much of the round is left after the lead, the firm commitments and pro rata, how many term sheets the funnel is expected to give on the founder's own rates, and when to start raising?                                                                                                      |
 | `cap_table_check`    | A founder's cap table as an investor's counsel will tie it out: do the classes add up to the fully diluted shares, does each stated percent match its shares, is any class past its authorised shares, which SAFEs and notes are still outstanding, and how much do departed holders hold? It never rules on legal validity. |
 
 ## Install
@@ -107,10 +110,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 `equity_calculator_mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
 instead of doing the arithmetic itself.
 
-| Tool                                                                                                                                                                                                                                                                           | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing`, `equity_instrument_compare`, `equity_cap_table_check` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
-| `equity_workbook`                                                                                                                                                                                                                                                              | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
+| Tool                                                                                                                                                                                                                                                                                                                        | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing`, `equity_instrument_compare`, `equity_pool_plan`, `equity_raise_pipeline`, `equity_cap_table_check` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
+| `equity_workbook`                                                                                                                                                                                                                                                                                                           | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
 error that says why. The SDK checks the arguments itself and passes the validation library's text through
@@ -158,8 +161,8 @@ sources, and to quote the labelled assumptions with every answer. In Claude Code
 `equity-calculator`, in its name and folder: the Agent Skills format allows only lowercase letters, digits and
 hyphens in a skill's name, and the folder must carry the same name.
 
-The other skills, the founder reviews, are listed in the root README's [skills table](../README.md#skills), each in
-preview until it has been checked on real decks and meetings.
+The other skills, for founders, are listed in the root README's [skills table](../README.md#skills), each in
+preview until it has been checked on real decks and meetings (`vc-deck-review` has been).
 
 ## Sources
 
@@ -673,6 +676,90 @@ and every exit from the waterfall code; nothing is worked a second way.
 No next round is refused (`no_next_round_given`: the note converts only at one), and so is a comparison with no
 exit. An exit before the next round, while the note is outstanding, is not modelled.
 
+### Pool plan (the option-pool shuffle above; the plan's own conventions unverified)
+
+The pool a term sheet asks for, t_req, beside the pool the founder's hiring plan needs until the next round, t_plan,
+both created in the pre-money and both worked by the option-pool shuffle's own code (the pool in the pre-money,
+above), so no formula of the shuffle is worked a second way.
+
+| Symbol | Meaning                                                                                                  |
+| ------ | -------------------------------------------------------------------------------------------------------- |
+| FD, U  | every share before the round, the unissued pool U included                                               |
+| V, I   | pre-money valuation, investment                                                                          |
+| G      | the grants of the hires starting on or before the next round's month, in shares                          |
+| t_plan | the plan's target: the share of every post-round share that G takes on the plan column's own cap table   |
+| t_req  | the term sheet's requested pool: the unissued pool after the round, as a share of every post-round share |
+
+With the pool in the pre-money, the shuffle's new pool P gives a price p = V/(FD + P) and a total of
+T = (FD + P)·(V + I)/V shares, so the pool after the round is t = (U + P)·V/((FD + P)(V + I)). t_plan is the grants'
+share of the plan column's own total, G/T. When the grants do not fit in today's pool (G > U), the plan's pool holds
+exactly them, U + P = G, so P = G - U and FD + P = FD - U + G; when they fit (G ≤ U), P = 0 and FD + P = FD:
+
+- **grants in shares**: t_plan = G·V/((V + I)(FD - U + G)) with a top-up, and G·V/((V + I)·FD) when the grants fit
+  in today's pool. Put back into the shuffle's P = (t·FD - (1 - r)·U)/(1 - r - t) with r = I/(V + I), the first gives
+  P = G - U again, and the second a needed P that is not positive (t·FD = G·(1 - r) ≤ U·(1 - r)), so P = 0. The tests
+  check that on exact fractions and on seeded random inputs, and that the same plan given in shares and as percents
+  of the same total gives the same t_plan.
+- **grants as percents of the post-round fully diluted shares**: t_plan is their sum, and each column's grants take
+  that sum of its own total T. A plan that gives some grants in shares and some as percents is refused
+  (`grants_mixed_units`): a percent of shares not yet priced cannot be added to a count of shares.
+
+When the grants fit in today's pool (G ≤ U), the shuffle's needed new pool is not positive, so P = 0, p = V/FD and
+today's pool is kept whole (`plan_fits_current_pool`); the plan's pool is then not cut below U, and the pool after the
+round (the option pool's ownership line) is today's pool's share, not t_plan. Each column then gives the shuffle's
+table: P, p, the investor's shares N = I/p, T, who owns what (the founders too, F/T, when `--founder-shares` is
+given), the pool left ungranted at the next round (U + P less the grants' shares, negative when the pool runs short
+before it) and the effective pre-money (FD - U)·p, which is V - t(V + I) when the column tops the pool up (P > 0) and
+(FD - U)·V/FD when it does not. Every difference is requested - plan of the exact values, rounded once.
+
+Flags, never a pick: `no_hires_before_next_round`, `hires_after_next_round_ignored` (a hire starting after the next
+round's month is left out: the next round's own pool would cover it), `plan_fits_current_pool`,
+`requested_met_by_current_pool` (today's pool already meets t_req), `requested_above_plan` and
+`requested_below_plan`. No hire is refused (`no_hiring_plan_given`), and so are percents of the counted hires adding
+up to V/(V + I) or more, which leave no positive price.
+
+### Raise pipeline (unverified arithmetic; the start-raising month is the runway plan's)
+
+A founder's round, the commitments and pro rata against it, and the founder's own funnel of investors. Every amount,
+count and rate is the founder's; nothing is assumed or looked up, and no investor is named.
+
+| Symbol | Meaning                                                                                 |
+| ------ | --------------------------------------------------------------------------------------- |
+| R      | the round size                                                                          |
+| L      | the lead's cheque (0 when none is given)                                                |
+| F, S   | the firm and the soft commitments, each as the founder marks it                         |
+| P      | every pro rata amount, counted in full (0 when none is given)                           |
+| n_k    | the investors at stage k today, each counted once, at the furthest stage it has reached |
+| r_k    | the founder's rate from stage k to the next (from the last stage, to a term sheet)      |
+| W      | the term sheets the founder wants                                                       |
+
+**Allocation.** The room after the lead and the firm commitments is R - L - F and the allocation left is
+R - L - F - P. S is summed and shown on its own line, never counted. Below zero, one cause is named:
+`oversubscribed` when L + F > R (the lead and the firm commitments alone are over the round), else
+`pro_rata_exceeds_left` when L + F ≤ R < L + F + P; `fully_allocated` when the allocation left is exactly zero.
+
+**Funnel.** With `q_k = r_k·r_(k+1)···r_last`, the rate to a term sheet from stage k, the conversion is `q_1` and the
+expected term sheets are `E = Σ n_k·q_k`: walked stage by stage, `e_1 = n_1`, `e_k = n_k + e_(k-1)·r_(k-1)`, and
+`E = e_last·r_last`. With every investor at the first stage, E = n_1·q_1, the targets times the product of the rates.
+E is an expectation from the founder's own rates (each investor moving on independently), not a forecast. The targets
+needed from an empty funnel are T = ceiling(W/q_1), the more needed beyond today's M = ceiling((W - E)/q_1), floored
+at 0, and the investors needed at stage k ceiling(W/q_k). A stage with no rate is refused (`stage_rate_missing`); a
+benchmark rate goes in only with the founder's source (`rate_basis: benchmark`, `benchmark_source`), and is flagged.
+
+**Timing.** With cash, the phases and the months to raise, the start-raising month is the `runway_plan` scenario's own
+row for the plan with no raise: its runway less the months to raise, in months from today. The runway plan's flags
+`cash_never_runs_out` and `start_raising_date_passed` come through. The report shows the cash, the floor and each
+phase's gross burn and revenue a month beside it; a floor or a phase's revenue that was not given is worked as none,
+and its line says `not given: read as none`. Cash and phases with no months to raise are refused
+(`no_months_to_raise_given`).
+
+Flags, never a pick: `no_lead_cheque_given`, `no_pro_rata_given` (none given, so none counted: existing investors'
+pro rata rights would make the allocation left smaller), `soft_commitments_not_counted`, `oversubscribed`,
+`pro_rata_exceeds_left`, `fully_allocated`, `no_funnel_given`, `benchmark_rates_given`, `funnel_short_of_wanted`
+(E < W), `no_runway_given`, `cash_never_runs_out` and `start_raising_date_passed`. A commitment not marked soft or firm
+is refused (`commitment_kind_missing`), and so are term sheets wanted with no funnel (`no_funnel_given`) and a funnel
+with no term sheets wanted (`no_term_sheet_count_given`).
+
 ### Cap table check (Altman for the fully diluted measure; the rest unverified, or a question for the lawyer)
 
 A founder's cap table as they give it: classes numbered in order (common, each preferred series, options granted, the
@@ -1000,6 +1087,71 @@ founders nothing: the preferences ($8M in A, $8.1M in B) take it all. At $20M th
 $8,296,296.29 in B ($8,296,296.30 on its own; the cent goes elsewhere by largest remainder), $663,703.70 less; at
 $100M everyone converts and the payouts follow ownership. The report never says which to take.
 
+**A pool sized from the hiring plan (Company CP, made up).** 10,000,000 fully diluted shares, 1,000,000 of them an
+unissued pool and 7,000,000 the founders'; raising $4,000,000 at a $16,000,000 pre-money, and the term sheet asks for
+a 15% pool. The founder plans five hires before the next round in month 18 (400,000, 250,000, 250,000, 350,000 and
+150,000 shares: G = 1,400,000) and a sixth in month 24:
+
+```
+equity_calculator pool_plan --fully-diluted-shares 10,000,000 --unissued-pool-shares 1,000,000 \
+    --founder-shares 7,000,000 --pre-money 16,000,000 --investment 4,000,000 --requested-pool-percent 15 \
+    --next-round-month 18 --hire "Founding engineer: start-month=1 grant-shares=400000" \
+    --hire "Senior engineer: start-month=4 grant-shares=250000" --hire "Senior engineer: start-month=6 grant-shares=250000" \
+    --hire "Head of sales: start-month=9 grant-shares=350000" --hire "Designer: start-month=12 grant-shares=150000" \
+    --hire "VP engineering: start-month=24 grant-shares=500000"
+  Hire 6: VP engineering, from month 24                           500,000                                                left out: starts after month 18, the next round
+  Shares the counted grants take                                1,400,000                   1,400,000                    G: the counted grants added up
+  Target pool after the round (t)                                10.7692%                    15.0000%           4.2308%  plan: G·V/((V + I)(FD - U + G)), the pool holding exactly G; requested: given
+  New pool shares (P)                                             400,000               1,076,923.077       676,923.077  (t·FD - (1 - r)U)/(1 - r - t), 0 when not positive: the pool scenario's
+  Price per share (p)                                           $1.538462                   $1.444444        $-0.094017  V/(FD + P)
+  Ownership: founders                                            53.8462%                    50.5556%          -3.2906%  F / T (founders are among the existing holders)
+  Pool left ungranted at the next round                                 0                 676,923.077       676,923.077  U + P - the counted grants' shares; below 0, the pool runs short before the next round
+  Effective pre-money                                      $13,846,153.85              $13,000,000.00      $-846,153.85  (FD - U)·p: the holders' shares at the round price
+  Flag                                     hires_after_next_round_ignored                                                1 hire starts after month 18 and is left out of the plan: the next round's own pool would cover it
+  Flag                                               requested_above_plan                                                The requested pool is larger than the plan's: the difference column shows what the larger pool does to the price, the effective pre-money and who owns what
+```
+
+The plan's pool is t_plan = 1,400,000 × 16,000,000/(20,000,000 × 10,400,000) = 7/65, about 10.7692%: a top-up of
+P = G - U = 400,000 shares at $20/13 a share. The requested 15% creates 1,076,923.077 new shares (14,000,000/13
+exactly) at $13/9 a share, so the effective pre-money falls from $13,846,153.85 to $13,000,000.00, $846,153.85 lower
+(11,000,000/13 exactly), and the founders hold 50.5556% instead of 53.8462% (91/180 against 7/13). At the next round
+676,923.077 of the requested pool is still ungranted. The report never says which pool to accept.
+
+**A raise pipeline (Company RA, made up).** A $4,000,000 round with a $2,500,000 lead cheque, $500,000 of firm and
+$500,000 of soft commitments and one $400,000 pro rata. The founder's funnel: 40 investors with an intro asked (half
+reach a first meeting, on the founder's own rate), 10 at a first meeting (30% go on to a partner meeting) and 2 at a
+partner meeting (25% give a term sheet); the founder wants 3 term sheets. $1,200,000 in the bank burning $150,000 a
+month on $30,000 of revenue, and 6 months allowed to raise:
+
+```
+equity_calculator raise_pipeline --round-size 4,000,000 --lead-cheque 2,500,000 --commitment "500000 kind=firm" \
+    --commitment "250000 kind=soft" --commitment "250000 kind=soft" --pro-rata 400000 \
+    --stage "Intro asked: investors=40 rate-percent=50" --stage "First meeting: investors=10 rate-percent=30" \
+    --stage "Partner meeting: investors=2 rate-percent=25" --term-sheets-wanted 3 --cash-on-hand 1,200,000 \
+    --phase "from-month=1 gross-burn=150000 revenue=30000" --months-to-raise 6
+  Soft commitments, never counted (S)                                        $500,000.00  the soft commitments, shown on their own
+  Room after the lead and the firm commitments                             $1,000,000.00  R - L - F; the value when run, not a live formula
+  Allocation left                                                            $600,000.00  R - L - F - P; below 0, more is counted than the round holds; the value when run, not a live formula
+  Stage 3, Partner meeting: needed here for 3 term sheets                             12  ceiling(W / the rate to a term sheet from here)
+  Conversion, first stage to a term sheet                                        3.7500%  the product of every rate
+  Expected term sheets from today's funnel (E)                                      2.75  the sum of each stage's investors × its rate to a term sheet; an expectation from the founder's rates, not a forecast
+  First-stage targets needed, from an empty funnel                                    80  ceiling(W / the conversion)
+  More first-stage targets needed beyond today's funnel                                7  ceiling((W - E) / the conversion); 0 when E >= W
+  Phase 1, from month 1: gross burn a month                                  $150,000.00  given
+  Phase 1, from month 1: revenue a month                                      $30,000.00  given
+  Runway with no raise (the runway plan's)                                  10.00 months  months until cash less the floor goes below zero, on the plan
+  Start raising by (the runway plan's)                                       4.00 months  runway with no raise - months to raise, in months from today
+  Flag                                                      soft_commitments_not_counted  At least one commitment is soft: soft commitments are shown on their own line and never counted against the round
+  Flag                                                            funnel_short_of_wanted  On the founder's rates, today's funnel is expected to give fewer than the 3 term sheets wanted: see the more targets needed line
+```
+
+The lead and the firm commitment leave $1,000,000 of room, and the pro rata takes $400,000 of it: $600,000 is left to
+allocate. The soft $500,000 is shown and never counted. The conversion is 1/2 × 3/10 × 1/4 = 3/80, and today's funnel
+is expected to give E = 40 × 3/80 + 10 × 3/40 + 2 × 1/4 = 11/4 = 2.75 term sheets on those rates, short of 3: from an
+empty funnel 3 term sheets need 80 first-stage targets, and today's funnel needs 7 more. The cash lasts 10 months
+($1,200,000 / $120,000) with no raise, so with 6 months to raise the founder starts by month 4. The report never says
+whom to pitch.
+
 **A cap table tied out (Company CQ, made up).** Two founders hold 4,500,000 and 3,500,000 common and a departed early
 hire 250,000, under 8,000,000 authorised common; the seed preferred holds all of its 1,000,000 authorised shares;
 500,000 options are granted and 250,000 unissued under a 750,000 reserve; 100,000 warrants; one $1,000,000 SAFE at a
@@ -1101,6 +1253,11 @@ equity_calculator instrument_compare --founder-shares F --team-shares T --unissu
     --note-interest-rate-percent R --note-compounding simple|annual|monthly [--note-stub-rule RULE]
     --note-months-to-conversion M [--note-maturity-months M] [--note-interest-paid-in-cash]
     --next-round "TERMS"... --exit E... [--pool-at-exit as_common|left_out]
+equity_calculator pool_plan --fully-diluted-shares FD --unissued-pool-shares U [--founder-shares F]
+    --pre-money V --investment I --requested-pool-percent T --next-round-month M --hire "ROLE: TERMS"...
+equity_calculator raise_pipeline --round-size R [--lead-cheque L] [--commitment "AMOUNT kind=soft|firm"]...
+    [--pro-rata A]... [--stage "NAME: TERMS"]... [--term-sheets-wanted W] [--cash-on-hand C [--cash-floor F]
+    --phase "TERMS"... --months-to-raise M]
 equity_calculator cap_table_check --share-class "TERMS"... [--holder "TERMS"]... [--stated-fully-diluted-shares S]
     [--stated-percent-basis fully_diluted|outstanding] [--option-plan-reserve R]
     [--safe "TERMS" | --note "TERMS"]... [--preview "TERMS"] [--planned-round "TERMS"]... [--tolerance-points P]
@@ -1156,6 +1313,24 @@ unless given), and `--existing-safe` and `--existing-note` take `--safe`'s and `
 only compared with the months to conversion; nothing at maturity is modelled. `--pool-at-exit left_out` gives the pool
 nothing at an exit.
 
+`pool_plan` needs the fully diluted shares before the round, the unissued pool (`0` for none), the pre-money, the
+raise, the term sheet's requested pool and the month the next round is expected (1 to 120 months from today), and at
+least one `--hire` (with none it is refused, `no_hiring_plan_given`). Each `--hire` is the role in the founder's words
+(letters, digits, spaces and `. , & / ( ) ' - + #`, starting with a letter or a digit, at most 40 characters), a
+colon, then its terms. Every grant is given the same way, all in shares or all as percents of the post-round fully
+diluted shares; a hire starting after `--next-round-month` is shown and left out. `--founder-shares`, when given, adds
+the founders' ownership line. Every figure is the founder's own.
+
+`raise_pipeline` needs the round size. Each `--commitment` is an amount and `kind=soft` or `kind=firm`, as the founder
+marks it (with no kind it is refused, `commitment_kind_missing`); each `--pro-rata` is one existing investor's amount.
+Each `--stage` is the stage's name in the founder's words (the same characters as a hire's role; on the command line
+the name ends at its first colon, so it holds no colon there, while a benchmark's source may), a colon, then
+`investors=N` (whole investors at that stage today) and `rate-percent=P` (the founder's rate to the next stage;
+from the last stage, to a term sheet), in the funnel's order; `rate-basis=benchmark benchmark-source=TEXT` marks a
+rate the founder took from a benchmark, the source running to the end of the stage. `--term-sheets-wanted` goes with
+the stages. `--cash-on-hand`, `--cash-floor`, each `--phase` (the same terms as `runway_plan`'s) and
+`--months-to-raise` give the start-raising month. Every figure is the founder's own.
+
 `cap_table_check` needs at least one `--share-class`, in the table's order (the first is class 1), each with its
 `kind` and, unless its `--holder` lines give them, its `shares`; a class with both takes `holder-lines=complete` or
 `holder-lines=partial` as the founder says. Each `--holder` names its class by number and is marked `founder` or
@@ -1167,9 +1342,10 @@ next round the founder gives, and needs at least one; `--planned-round` takes `d
 `founder` line, and with a `--preview` gives only the rounds after it. `authorised-shares` is for common and preferred only; the plan's reserve is `--option-plan-reserve`.
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
-`--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure or sensitivity
-row, given as one quoted string of `key=value` terms and
-bare flags in any order, after the amount for a SAFE or the principal for a note, which comes first:
+`--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure, sensitivity
+row, hire, commitment or stage, given as one quoted string of `key=value` terms and bare flags in any order, after the
+amount for a SAFE, the principal for a note, the role and a colon for a hire, the amount for a commitment or the name
+and a colon for a stage, which comes first:
 
 | Flag                  | Terms                                                                                                                                                                                                                                                                                       |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1184,6 +1360,9 @@ bare flags in any order, after the amount for a SAFE or the principal for a note
 | `--sensitivity`       | `field=F segment=K values=V1/V2/...` (F one of `customers`, `price`, `units-per-customer`, `take-rate-percent`, `serviceable-percent`, `obtainable-percent`, `obtainable-customers`; 1 to 4 values)                                                                                         |
 | `--priced-preference` | `standard [rank=K]` or `preference-multiple=M participation=none\|full\|capped [cap-multiple=C] [rank=K]`                                                                                                                                                                                   |
 | `--next-round`        | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]` and the series' terms as `--priced-preference` takes them                                                                                                                                            |
+| `--hire`              | `ROLE: start-month=M (grant-shares=S \| grant-percent=P)`: the role and a colon first, the grant in shares or as a percent of the post-round fully diluted shares                                                                                                                           |
+| `--commitment`        | `AMOUNT kind=soft\|firm`: the amount first                                                                                                                                                                                                                                                  |
+| `--stage`             | `NAME: investors=N rate-percent=P [rate-basis=own\|benchmark] [benchmark-source=TEXT]`: the name and a colon first, the source last, running to the end                                                                                                                                     |
 | `--share-class`       | `kind=common\|preferred\|options_granted\|options_unissued\|warrants [shares=S] [authorised-shares=A] [stated-percent=P] [holder-lines=complete\|partial]`                                                                                                                                  |
 | `--holder`            | `share-class=K shares=S [stated-percent=P] [founder] [departed]` (K is 1 for the first `--share-class`)                                                                                                                                                                                     |
 | `--preview`           | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]`                                                                                                                                                                                                      |
@@ -1243,7 +1422,10 @@ its months are at most 600 and its months to raise at most 60. A metrics check c
 months, and its customer counts are whole numbers below 1e16. A market size takes at most 8 segments, 3 top-down
 figures and 6 sensitivity rows of 1 to 4 values each; a price covers at most 120 months and the SOM horizon is 1 to
 20 years. A comparison takes at most 6 existing series, 4 existing SAFEs and notes, 4 next rounds and 6 exits; its
-note converts within 600 months, an existing note's months plus those included.
+note converts within 600 months, an existing note's months plus those included. A pool plan takes at most 40 hires,
+each starting within 120 months, and its next round comes within the same. A raise pipeline takes at most 40
+commitments, 20 pro rata amounts and 8 stages of at most 10,000 investors each, and at most 100 term sheets wanted;
+its runway takes the runway plan's limits.
 A note runs at most 600 months, or at most 18,262 days (about 50 years) between its dates; a vesting schedule, its
 cliff and every month asked about are at most 600 months. These limits keep every exact step small: the largest
 inputs compute in well under a second, and a value like `1e999999999` is refused at once instead of tying up the
@@ -1260,7 +1442,8 @@ tools do not check it.
 ## The Excel workbook
 
 There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` for the round, `Dilution`, `Vesting`,
-`Waterfall`, `Deal check`, `Runway plan`, `Metrics check`, `Market sizing`, `Priced vs note` or `Cap table check`):
+`Waterfall`, `Deal check`, `Runway plan`, `Metrics check`, `Market sizing`, `Priced vs note`, `Pool plan`,
+`Raise pipeline` or `Cap table check`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
@@ -1284,7 +1467,7 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
   does not calculate, such as a file preview or openpyxl's `data_only` read, shows them empty.
 - Totals are live `=SUM` formulas, so editing a part re-totals: the investor's post-money, total shares, total
   ownership and post-money (pool and round), the stake lost in all (dilution), vested in all and the grant (vesting), the total paid out
-  (waterfall), the pre-money split and use-of-funds totals (deal check), each raise's use-of-funds total (runway plan), a market size's totals across its segments (customers, gross spend, TAM, SAM and SOM), and a cap table's fully diluted shares and its SAFE and note amounts. A live total adds the rounded cells, so it can differ from the model's exact total in the last place
+  (waterfall), the pre-money split and use-of-funds totals (deal check), each raise's use-of-funds total (runway plan), a market size's totals across its segments (customers, gross spend, TAM, SAM and SOM), the firm, soft and pro rata totals (raise pipeline), and a cap table's fully diluted shares and its SAFE and note amounts. A line worked from a total is still a value: a raise pipeline's room after the lead and the firm commitments and its allocation left keep the figures of the run when a commitment is edited, and their how-column says so. A live total adds the rounded cells, so it can differ from the model's exact total in the last place
   kept: a cent on the investor's post-money, a thousandth of a share on the pool's total shares, 0.000001 on its total
   ownership. The number formats hide that difference.
 - The pool's and the round's value rows, the waterfall's payouts, a deal check's pre-money split and percent
@@ -1496,6 +1679,31 @@ these (`standard_preference` only when a series is given as standard):
 | `pool_at_exit`              | the pool takes part as common                                                               | `--pool-at-exit left_out`                         | method                                      |
 | `money_split`               | largest remainder within each option                                                        | fixed                                             | display convention                          |
 | `difference_rounding`       | B - A of the exact values, rounded once                                                     | fixed                                             | display convention                          |
+
+The `pool_plan` scenario carries the pool's `target_pool`, `price_basis` and `money_split` rows word for word, and
+these:
+
+| Key                 | Default                                                                                             | How to change it                                        | Source                                    |
+| ------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------- |
+| `pool_timing`       | both columns create the pool in the pre-money                                                       | fixed (the `pool` scenario works the post-money timing) | unverified (common term-sheet practice)   |
+| `plan_pool`         | the plan's pool holds exactly the grants to the next round, U + P = G; no top-up when they fit in U | fixed                                                   | unverified (this calculator's convention) |
+| `next_round_cutoff` | a hire starting on or before the next round's month counts                                          | `--next-round-month`                                    | unverified                                |
+| `grant_unit`        | every grant in shares, or every grant as a percent of the post-round fully diluted shares           | each `--hire`'s grant                                   | unverified                                |
+| `share_rounding`    | exact fractions of shares                                                                           | fixed                                                   | unverified                                |
+| `difference`        | requested - plan of the exact values, rounded once; neither column is a recommendation              | fixed                                                   | display convention                        |
+
+The `raise_pipeline` scenario has these rows, each only when its input is given, and with cash and burn the runway
+plan's own rows (`runway_rule`, `phase_rule`, ...) word for word after them:
+
+| Key                    | Default                                                                     | How to change it                       | Source                                    |
+| ---------------------- | --------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------------- |
+| `allocation_rule`      | left = R - L - firm - pro rata; a soft commitment shown, never counted      | each `--commitment`'s `kind=`          | unverified (standard arithmetic)          |
+| `pro_rata_rule`        | each pro rata amount counted in full                                        | `--pro-rata`                           | unverified (a planning convention)        |
+| `stage_counting`       | each investor counted once, at the furthest stage it has reached            | fixed                                  | unverified (a modelling choice)           |
+| `expected_term_sheets` | E = Σ investors × the rate to a term sheet from their stage; not a forecast | fixed                                  | unverified (expected values)              |
+| `rate_basis`           | every rate the founder's own                                                | `rate-basis=benchmark` with its source | the founder                               |
+| `targets_needed`       | each count needed rounded up to whole investors                             | fixed                                  | unverified (standard arithmetic)          |
+| `start_raising_rule`   | the runway plan's runway with no raise less the months to raise             | `--months-to-raise`                    | unverified (the runway plan's arithmetic) |
 
 The `cap_table_check` scenario adds these (`preferred_as_converted` only with a preferred class, `warrants_as_exercised`
 only with warrants, the rest only when the input uses them, `legal_validity` always), then the nested round's and

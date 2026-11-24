@@ -29,6 +29,10 @@ adds a figure the founder did not give: no burn, growth rate, haircut, valuation
   - One scenario on its own (a pool, a SAFE's conversion, a stake through later rounds): the equity-calculator skill.
   - Whether the metrics are ready for the next round (ARR, retention, churn, CAC payback, burn multiple): the
     vc-metrics-readiness skill (preview).
+  - Running the raise once the amount is set (tiering the investor list, meeting batches, the start-raising month,
+    what is left of the round): the vc-raise-plan skill (preview).
+  - The option pool the hiring plan needs, beside the pool a term sheet asks for: the vc-option-pool-plan skill
+    (preview).
 
 ## Inputs
 

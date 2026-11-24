@@ -1,5 +1,6 @@
 """The repeated-flag readers: ``--safe``, ``--note``, ``--round``, ``--class``, ``--use-of-funds``, a runway plan's,
-a market size's, a priced-round-or-note comparison's and a cap table check's.
+a market size's, a priced-round-or-note comparison's, a pool plan's ``--hire``, a raise pipeline's ``--commitment`` and
+``--stage``, and a cap table check's.
 
 A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a note's principal) and goes on with
 ``name=value`` terms named like the model fields, hyphens for underscores, plus bare flags; a ``--round`` or a
@@ -23,6 +24,11 @@ A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a n
     --priced-preference "standard"   (a comparison's series terms: standard, 1x non-participating, only when so said)
     --priced-preference "preference-multiple=1 participation=none rank=1"
     --next-round "pre-money=27000000 investment=6000000 target-pool-percent=10 standard"
+    --hire "Senior engineer: start-month=4 grant-shares=250000"   (a pool plan's hire: its role, a colon, then terms)
+    --hire "Head of sales: start-month=9 grant-percent=1.5"
+    --commitment "500000 kind=firm"   (a raise pipeline's commitment: its amount, then soft or firm)
+    --stage "First meeting: investors=10 rate-percent=30"   (a funnel stage: its name, a colon, then terms)
+    --stage "Partner meeting: investors=2 rate-percent=25 rate-basis=benchmark benchmark-source=A survey, 2025"
     --share-class "kind=preferred shares=2000000 authorised-shares=2000000 stated-percent=20"   (a cap table's class)
     --share-class "kind=common shares=8000000 holder-lines=partial"   (its --holder lines are only some of its holders)
     --holder "share-class=1 shares=4000000 stated-percent=40 founder"   (a holder line; also the bare flag departed)
@@ -33,7 +39,9 @@ repeated or malformed term is refused naming the term; which terms go together i
 (``equity_calculator.schemas.equity_round``, ``equity_calculator.schemas.equity_dilution``,
 ``equity_calculator.schemas.equity_waterfall``, ``equity_calculator.schemas.equity_runway_plan``,
 ``equity_calculator.schemas.equity_market_sizing``, ``equity_calculator.schemas.equity_instrument_compare``,
-``equity_calculator.schemas.equity_cap_table_check``).
+``equity_calculator.schemas.equity_pool_plan``, ``equity_calculator.schemas.equity_raise_pipeline``,
+``equity_calculator.schemas.equity_cap_table_check``). A ``--stage``'s ``benchmark-source=`` term comes last and takes
+the rest of the argument, spaces included.
 """
 
 from __future__ import annotations
@@ -43,10 +51,18 @@ from collections.abc import Callable
 from datetime import date
 from typing import get_args
 
-from equity_calculator.cli_numbers import parse_decimal, parse_months, parse_percent, parse_rank, parse_whole
+from equity_calculator.cli_numbers import (
+    parse_count,
+    parse_decimal,
+    parse_months,
+    parse_percent,
+    parse_rank,
+    parse_whole,
+)
 from equity_calculator.schemas.equity_cap_table_check import HolderLines, ShareClassKind
 from equity_calculator.schemas.equity_common import MAX_NUMBER_TEXT, PoolTiming
 from equity_calculator.schemas.equity_market_sizing import PERCENT_FIELDS, CompareTo, SegmentField
+from equity_calculator.schemas.equity_raise_pipeline import CommitmentKind, RateBasis
 from equity_calculator.schemas.equity_round import DayCount, NoteCompounding, StubRule
 from equity_calculator.schemas.equity_runway_plan import RunwayFrom
 from equity_calculator.schemas.equity_waterfall import Participation
@@ -54,7 +70,9 @@ from equity_calculator.schemas.equity_waterfall import Participation
 __all__ = [
     "parse_cap_class",
     "parse_class",
+    "parse_commitment",
     "parse_funds_line",
+    "parse_hire",
     "parse_holder",
     "parse_next_round",
     "parse_note",
@@ -66,6 +84,7 @@ __all__ = [
     "parse_safe",
     "parse_segment",
     "parse_sensitivity",
+    "parse_stage",
     "parse_series",
     "parse_top_down",
 ]
@@ -148,6 +167,24 @@ _NEXT_ROUND_TERMS: dict[str, _Reader] = {
     "pool_timing": _choice(get_args(PoolTiming)),
 }
 _PREFERENCE = "preference"
+# A pool plan's hire: the role (free words) before the first colon, then its start month and one grant.
+_ROLE_SEPARATOR = ":"
+_HIRE_TERMS: dict[str, _Reader] = {
+    "start_month": parse_months,
+    "grant_shares": parse_whole,
+    "grant_percent": parse_percent,
+}
+# A raise pipeline's commitment: its amount first, then whether it is soft or firm. A funnel stage: its name (free
+# words) before the first colon, then its investors today, the founder's rate and where the rate comes from; a
+# benchmark's source is the last term and runs to the end of the argument.
+_COMMITMENT_AMOUNT = "amount"
+_COMMITMENT_TERMS: dict[str, _Reader] = {"kind": _choice(get_args(CommitmentKind))}
+_STAGE_TERMS: dict[str, _Reader] = {
+    "investors": parse_count,
+    "rate_percent": parse_percent,
+    "rate_basis": _choice(get_args(RateBasis)),
+}
+_SOURCE_TERM = "benchmark-source="
 _PHASE_TERMS: dict[str, _Reader] = {
     "from_month": parse_months,
     "gross_burn": parse_decimal,
@@ -312,6 +349,44 @@ def parse_next_round(raw: str) -> dict[str, object]:
     round_terms = {name: value for name, value in terms.items() if name in _NEXT_ROUND_TERMS}
     series = {name: value for name, value in terms.items() if name not in _NEXT_ROUND_TERMS}
     return {**round_terms, _PREFERENCE: series}
+
+
+def parse_hire(raw: str) -> dict[str, object]:
+    """argparse type for ``--hire``: ``ROLE: start-month=M (grant-shares=S | grant-percent=P)``, the role in the
+    founder's words before the first colon (the model checks its characters)."""
+    role, separator, terms = _checked_length(raw).partition(_ROLE_SEPARATOR)
+    if not separator:
+        raise argparse.ArgumentTypeError(
+            f"starts with the role and a colon ('Senior engineer: start-month=4 grant-shares=250000'), got {raw!r}"
+        )
+
+    return _named_terms(terms.split(), {"role": role.strip()}, _HIRE_TERMS, ())
+
+
+def parse_commitment(raw: str) -> dict[str, object]:
+    """argparse type for ``--commitment``: ``AMOUNT kind=soft|firm``, the amount in dollars first."""
+    first, *rest = _checked_length(raw).split() or [""]
+    if not first:
+        raise argparse.ArgumentTypeError(f"starts with the amount in dollars ('500000 kind=firm'), got {raw!r}")
+
+    return _named_terms(rest, {_COMMITMENT_AMOUNT: parse_decimal(first)}, _COMMITMENT_TERMS, ())
+
+
+def parse_stage(raw: str) -> dict[str, object]:
+    """argparse type for ``--stage``: ``NAME: investors=N rate-percent=P [rate-basis=own|benchmark]
+    [benchmark-source=TEXT]``, the name in the founder's words before the first colon and a benchmark's source, last,
+    running to the end (the model checks the characters of both)."""
+    name, separator, terms = _checked_length(raw).partition(_ROLE_SEPARATOR)
+    if not separator:
+        raise argparse.ArgumentTypeError(
+            f"starts with the stage's name and a colon ('First meeting: investors=10 rate-percent=30'), got {raw!r}"
+        )
+    head, marker, source = terms.partition(_SOURCE_TERM)
+    stage: dict[str, object] = {"name": name.strip()}
+    if marker:
+        stage["benchmark_source"] = source.strip()
+
+    return _named_terms(head.split(), stage, _STAGE_TERMS, ())
 
 
 def parse_cap_class(raw: str) -> dict[str, object]:

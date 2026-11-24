@@ -110,6 +110,41 @@ def employee_assumptions(inputs: EmployeeInput) -> tuple[EquityAssumption, ...]:
     return tuple(rows)
 
 
+POOL_TIMING_SOURCE = f"{UNVERIFIED} (common term-sheet practice; neither PG's essay nor Altman's post covers pools)"
+
+
+def target_pool_assumption() -> EquityAssumption:
+    """What a pool target measures: the unissued pool after the round, of every post-round share (pool and plan)."""
+    return _assumption(
+        "target_pool",
+        "unissued pool after the round",
+        "The target is the unissued pool's share of the fully diluted shares after the round (old and new "
+        "unissued options together).",
+        UNVERIFIED,
+    )
+
+
+def price_basis_assumption() -> EquityAssumption:
+    """How the round price divides the pre-money: over every pre-round share, the unissued pool included."""
+    return _assumption(
+        "price_basis",
+        "fully diluted",
+        "The price per share divides the pre-money valuation by every pre-round share, the unissued pool "
+        "included (and, pool pre-money, the new pool shares too).",
+        ALTMAN_FULLY_DILUTED_SOURCE,
+    )
+
+
+def money_split_assumption() -> EquityAssumption:
+    """How a cap table's dollar values are rounded: to the cent, by largest remainder."""
+    return _assumption(
+        "money_split",
+        "largest remainder",
+        "Each row's dollar value is rounded to the cent so the rows add up to the rounded total exactly.",
+        "display convention",
+    )
+
+
 def pool_assumptions(inputs: PoolInput) -> tuple[EquityAssumption, ...]:
     """The option-pool shuffle's assumptions, with this run's pool timing and share rounding."""
     return (
@@ -118,22 +153,10 @@ def pool_assumptions(inputs: PoolInput) -> tuple[EquityAssumption, ...]:
             inputs.pool_timing,
             "Which way the deal counts the pool: pre_money (created inside the pre-money valuation, diluting only "
             "the existing holders) or post_money (diluting the investor too). Both are computed; this one is the deal.",
-            f"{UNVERIFIED} (common term-sheet practice; neither PG's essay nor Altman's post covers pools)",
+            POOL_TIMING_SOURCE,
         ),
-        _assumption(
-            "target_pool",
-            "unissued pool after the round",
-            "The target is the unissued pool's share of the fully diluted shares after the round (old and new "
-            "unissued options together).",
-            UNVERIFIED,
-        ),
-        _assumption(
-            "price_basis",
-            "fully diluted",
-            "The price per share divides the pre-money valuation by every pre-round share, the unissued pool "
-            "included (and, pool pre-money, the new pool shares too).",
-            ALTMAN_FULLY_DILUTED_SOURCE,
-        ),
+        target_pool_assumption(),
+        price_basis_assumption(),
         _assumption(
             "share_rounding",
             inputs.share_rounding,
@@ -141,10 +164,5 @@ def pool_assumptions(inputs: PoolInput) -> tuple[EquityAssumption, ...]:
             "exact price and reports the cash left unconverted.",
             UNVERIFIED,
         ),
-        _assumption(
-            "money_split",
-            "largest remainder",
-            "Each row's dollar value is rounded to the cent so the rows add up to the rounded total exactly.",
-            "display convention",
-        ),
+        money_split_assumption(),
     )

@@ -2,9 +2,8 @@
 
 ``sheet_for`` picks the scenario's sheet builder (``layout_pg``, ``layout_pool``, …, ``layout_deal_check``,
 ``layout_runway_plan``, ``layout_metrics_check``, ``layout_market_sizing``, ``layout_instrument_compare``,
-``layout_cap_table_check``); the parts
-a sheet is built from (``Line``, ``Sheet``) live in ``sheet_parts`` and are re-exported here for callers that read a
-report.
+``layout_pool_plan``, ``layout_raise_pipeline``, ``layout_cap_table_check``); the parts a sheet is built from (``Line``,
+``Sheet``) live in ``sheet_parts`` and are re-exported here for callers that read a report.
 """
 
 from __future__ import annotations
@@ -19,6 +18,8 @@ from equity_calculator.layout_market_sizing import market_sizing_sheet
 from equity_calculator.layout_metrics_check import metrics_check_sheet
 from equity_calculator.layout_pg import employee_sheet, investor_sheet
 from equity_calculator.layout_pool import pool_sheet
+from equity_calculator.layout_pool_plan import pool_plan_sheet
+from equity_calculator.layout_raise_pipeline import raise_pipeline_sheet
 from equity_calculator.layout_round import round_sheet
 from equity_calculator.layout_runway_plan import runway_plan_sheet
 from equity_calculator.layout_vesting import vesting_sheet
@@ -32,7 +33,9 @@ from equity_calculator.schemas.equity import (
     InvestorResult,
     MarketSizingResult,
     MetricsCheckResult,
+    PoolPlanResult,
     PoolResult,
+    RaisePipelineResult,
     RoundResult,
     RunwayPlanResult,
     ScenarioResult,
@@ -71,6 +74,10 @@ def sheet_for(result: ScenarioResult) -> Sheet:
             return market_sizing_sheet(result)
         case InstrumentCompareResult():
             return instrument_compare_sheet(result)
+        case PoolPlanResult():
+            return pool_plan_sheet(result)
+        case RaisePipelineResult():
+            return raise_pipeline_sheet(result)
         case CapTableCheckResult():
             return cap_table_check_sheet(result)
         case _:

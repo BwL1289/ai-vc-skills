@@ -41,6 +41,8 @@ from equity_calculator.schemas.equity_pool import (
     PoolResult,
     PoolScenario,
 )
+from equity_calculator.schemas.equity_pool_plan import PoolPlanInput, PoolPlanResult
+from equity_calculator.schemas.equity_raise_pipeline import RaisePipelineInput, RaisePipelineResult
 from equity_calculator.schemas.equity_round import RoundInput, RoundResult
 from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput, RunwayPlanResult
 from equity_calculator.schemas.equity_vesting import VestingInput, VestingResult
@@ -78,9 +80,13 @@ __all__ = [
     "MetricsCheckResult",
     "PoolCapTable",
     "PoolInput",
+    "PoolPlanInput",
+    "PoolPlanResult",
     "PoolResult",
     "PoolScenario",
     "PoolTiming",
+    "RaisePipelineInput",
+    "RaisePipelineResult",
     "RoundInput",
     "RoundResult",
     "RunwayPlanInput",
@@ -248,6 +254,8 @@ ScenarioInput = (
     | MetricsCheckInput
     | MarketSizingInput
     | InstrumentCompareInput
+    | PoolPlanInput
+    | RaisePipelineInput
     | CapTableCheckInput
 )
 ScenarioResult = (
@@ -263,6 +271,8 @@ ScenarioResult = (
     | MetricsCheckResult
     | MarketSizingResult
     | InstrumentCompareResult
+    | PoolPlanResult
+    | RaisePipelineResult
     | CapTableCheckResult
 )
 

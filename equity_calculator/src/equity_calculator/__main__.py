@@ -2,7 +2,9 @@
 """``equity_calculator`` — an equity question: PG's two tests, the option pool, a round, dilution, vesting, an exit,
 a fundraising ask checked before a VC reads it, how long a raise lasts on a founder's plan, a founder's traction
 metrics checked against their parts, a founder's market size built bottom-up, a priced round now set beside a
-convertible note now, or a founder's cap table checked against itself.
+convertible note now, the option pool a hiring plan needs set beside the pool a term sheet asks for, a raise's
+pipeline: the allocation left, the term sheets a founder's funnel is expected to give and when to start raising, or a
+founder's cap table checked against itself.
 
     equity_calculator investor (--equity-percent N | --pre-money V --investment I)
         (--outcome-multiplier M | --growth-percent G) [--holder-percent H]
@@ -52,6 +54,11 @@ convertible note now, or a founder's cap table checked against itself.
         --note-interest-rate-percent R --note-compounding simple|annual|monthly [--note-stub-rule RULE]
         --note-months-to-conversion M [--note-maturity-months M] [--note-interest-paid-in-cash]
         (--next-round "TERMS")... (--exit E)... [--pool-at-exit as_common|left_out]
+    equity_calculator pool_plan --fully-diluted-shares FD --unissued-pool-shares U [--founder-shares F]
+        --pre-money V --investment I --requested-pool-percent T --next-round-month M (--hire "ROLE: TERMS")...
+    equity_calculator raise_pipeline --round-size R [--lead-cheque L] [--commitment "AMOUNT kind=soft|firm"]...
+        [--pro-rata AMOUNT]... [(--stage "NAME: TERMS")... --term-sheets-wanted W]
+        [--cash-on-hand C [--cash-floor F] (--phase "TERMS")... --months-to-raise T]
     equity_calculator cap_table_check (--share-class "TERMS")... [--holder "TERMS"]...
         [--stated-fully-diluted-shares S] [--stated-percent-basis fully_diluted|outstanding]
         [--option-plan-reserve R] [--safe "TERMS" | --note "TERMS"]... [--preview "TERMS"]
@@ -69,10 +76,11 @@ any folders on its path that do not exist yet; while saving, the Excel library a
 file in the system's temporary folder (``TMPDIR`` if set), so that folder must be writable. The number readers are
 ``equity_calculator.cli_numbers``; each scenario's flags are ``equity_calculator.cli_arguments``; a ``--safe``,
 ``--note``, ``--round``, ``--class``, ``--use-of-funds``, ``--phase``, ``--raise``, ``--raise-use-of-funds``,
-``--segment``, ``--top-down``, ``--sensitivity``, ``--priced-preference``, ``--next-round``, ``--share-class``,
-``--holder``, ``--preview`` or ``--planned-round`` is one argument of
+``--segment``, ``--top-down``, ``--sensitivity``, ``--priced-preference``, ``--next-round``, ``--hire``,
+``--commitment``, ``--stage``, ``--share-class``, ``--holder``, ``--preview`` or ``--planned-round`` is one argument of
 terms (``equity_calculator.cli_instruments``); a runway plan's flags become its cases and raises in
-``equity_calculator.cli_runway_plan``. A refusal names the flag,
+``equity_calculator.cli_runway_plan``, and a raise pipeline's cash and burn flags its runway in
+``equity_calculator.cli_raise_pipeline``. A refusal names the flag,
 or a repeated flag's item as ``--note #2`` (the second instrument in the order given) and its term.
 """
 
@@ -96,12 +104,15 @@ from equity_calculator.cli_arguments import (
     market_sizing_arguments,
     metrics_check_arguments,
     pool_arguments,
+    pool_plan_arguments,
+    raise_pipeline_arguments,
     round_arguments,
     runway_plan_arguments,
     vesting_arguments,
     waterfall_arguments,
 )
 from equity_calculator.cli_numbers import parse_workbook_path
+from equity_calculator.cli_raise_pipeline import raise_pipeline_fields
 from equity_calculator.cli_runway_plan import Places, runway_plan_fields
 from equity_calculator.errors import EquityComputeError
 from equity_calculator.layout import sheet_for
@@ -116,6 +127,8 @@ from equity_calculator.schemas.equity import (
     MarketSizingInput,
     MetricsCheckInput,
     PoolInput,
+    PoolPlanInput,
+    RaisePipelineInput,
     RoundInput,
     RunwayPlanInput,
     ScenarioInput,
@@ -142,10 +155,15 @@ _INPUT_MODELS: dict[str, type[ScenarioInput]] = {
     "metrics_check": MetricsCheckInput,
     "market_sizing": MarketSizingInput,
     "instrument_compare": InstrumentCompareInput,
+    "pool_plan": PoolPlanInput,
+    "raise_pipeline": RaisePipelineInput,
     "cap_table_check": CapTableCheckInput,
 }
 # A scenario whose flags do not map one to one onto its model's fields: the fields they make, and where each came from.
-_SHAPES: dict[str, Callable[[dict[str, Any]], tuple[dict[str, object], Places]]] = {"runway_plan": runway_plan_fields}
+_SHAPES: dict[str, Callable[[dict[str, Any]], tuple[dict[str, object], Places]]] = {
+    "runway_plan": runway_plan_fields,
+    "raise_pipeline": raise_pipeline_fields,
+}
 _OUTPUT_FLAGS = ("json", "xlsx")
 _FIRST = 0
 _TOO_SHORT = "too_short"
@@ -201,6 +219,18 @@ def _build_parser() -> argparse.ArgumentParser:
             "A priced round now beside a convertible note now: who owns what after today and after each next "
             "round, and who gets what at each exit, B - A; never a recommendation",
             instrument_compare_arguments,
+        ),
+        (
+            "pool_plan",
+            "The option pool your hiring plan needs to the next round beside the pool the term sheet asks for: "
+            "price, effective pre-money and who owns what at each, requested - plan; never a recommendation",
+            pool_plan_arguments,
+        ),
+        (
+            "raise_pipeline",
+            "Your raise's pipeline: the allocation left after the lead, firm commitments and pro rata, the term "
+            "sheets your funnel is expected to give on your own rates, the targets needed, and when to start raising",
+            raise_pipeline_arguments,
         ),
         (
             "cap_table_check",
