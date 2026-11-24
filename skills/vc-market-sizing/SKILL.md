@@ -23,7 +23,7 @@ looks up a market figure, and never adds a count, price, share, adoption rate or
   come as a file the agent can read in this session.
 - Hand off:
   - Every claim in the materials checked, market size among them, with no sizing asked for: the vc-claims-check skill.
-  - The deck as a whole, slide by slide: the vc-deck-review skill (preview).
+  - The deck as a whole, slide by slide: the vc-deck-review skill.
   - The story, the one-liner and the say-and-avoid list: the vc-positioning skill.
   - The ask's arithmetic (valuation, ownership, runway): the vc-deal-math skill. One scenario on its own: the
     equity-calculator skill.
