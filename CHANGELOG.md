@@ -6,6 +6,8 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- `vc-deck-review` is out of preview after its first run on a real deck, whose founder adopted most of its fix list;
+  plugin version 0.2.7.
 - A `vc-deal-math` eval (Company BW, unrecorded) for a SAFE raise whose planned rise has its start month but no
   monthly spend, marked "not checked: waiting for [the planned monthly spend from that month]". It and the Company BV
   eval also expect the `equity_round` offer for the SAFE's ownership while the runway waits.

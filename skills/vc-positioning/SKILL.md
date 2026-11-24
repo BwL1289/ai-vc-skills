@@ -30,7 +30,7 @@ adds a fact about the company that the founder did not give.
     skill), and its runway and use of funds `equity_runway_plan`. A stake through later rounds: `equity_dilution`.
   - Each claim's evidence, and figures that disagree across the deck, one-pager and narrative: the vc-claims-check
     skill (preview). Point the founder to it when they give more than one document or a claim has no evidence named.
-  - A slide-by-slide deck review: the vc-deck-review skill (preview). Point the founder to it when they share a whole
+  - A slide-by-slide deck review: the vc-deck-review skill. Point the founder to it when they share a whole
     deck.
   - Rehearsing the partner meeting: the vc-partner-meeting skill (preview).
   - The decisions behind the product and what was said no to: the vc-taste-check skill (preview).

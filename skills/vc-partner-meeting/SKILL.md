@@ -26,7 +26,7 @@ company, its round or its investors that the founder did not give.
   - The story, the one-liner and the phrases to drop: the vc-positioning skill. Suggest it first when the pitch has
     no one-liner or no ask; a rehearsal of an unclear story drills the wrong things.
   - Each claim's evidence, and figures that disagree across documents: the vc-claims-check skill.
-  - A slide-by-slide read of the whole deck before the meeting: the vc-deck-review skill (preview).
+  - A slide-by-slide read of the whole deck before the meeting: the vc-deck-review skill.
   - The ask's arithmetic (valuation, percent sold, ownership after the round, the pool, runway, use of funds): the
     vc-deal-math skill, which calls `equity_deal_check`. New money on a SAFE or note: `equity_round` (the
     equity-calculator skill). Runway with no raise, or on a SAFE or note raise: `equity_runway_plan`. A stake through

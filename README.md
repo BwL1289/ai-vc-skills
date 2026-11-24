@@ -127,7 +127,7 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 | [`vc-market-sizing`](skills/vc-market-sizing/SKILL.md)                             | For founders: builds your market size bottom-up (who buys, how many, what each pays, how many you can win), every assumption with your source, checked against the deck and any top-down figure, with sensitivity on the shakiest assumption and an adversarial review of inflation, a SOM with no path and double counting.                                         | 🧪 Preview   |
 | [`vc-prospective-investor-update`](skills/vc-prospective-investor-update/SKILL.md) | For founders: writes or reviews the short update you send the investors you hope to raise from, so they see a line, not a dot: the same metrics and definitions every time, each earlier value side by side as stated, last update's promises tied out, one ask, runway from the calculator when you show it, and a reader pass that flags spin and moved goalposts. | 🧪 Preview   |
 
-`vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-deck-review`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-current-investor-update`, `vc-metrics-readiness`, `vc-investor-memo`, `vc-market-sizing` and `vc-prospective-investor-update` are in preview until they have been checked on
+`vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-current-investor-update`, `vc-metrics-readiness`, `vc-investor-memo`, `vc-market-sizing` and `vc-prospective-investor-update` are in preview until they have been checked on
 real decks and meetings. The calculator's arithmetic is tested; the reviews' wording may change. The `vc-positioning` and
 `vc-claims-check` evals were run in live Claude Code sessions on 2026-11-22, and each file holds an excerpt of its
 recorded answer with a verdict against its pass sentence: two passed and five passed in part. Pass means every clause
@@ -267,8 +267,8 @@ The formulas, their sources, every flag and a worked example per scenario are in
       with an existing investor (preview)
 - [ ] `vc-claims-check`: founders check every claim's evidence and that their figures agree, with a skeptic and a
       refute pass (preview)
-- [ ] `vc-deck-review`: founders see how a partner is likely to read their deck, dimension by dimension, with a ranked
-      fix list (preview)
+- [x] `vc-deck-review`: founders see how a partner is likely to read their deck, dimension by dimension, with a ranked
+      fix list
 - [ ] `vc-partner-meeting`: founders rehearse a partner meeting, drilled on the questions their material leaves open,
       with a debrief (preview)
 - [ ] `vc-taste-check`: founders show the judgment behind their product decisions, stress-tested by an adversarial

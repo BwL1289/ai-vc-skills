@@ -30,7 +30,7 @@ firm would, never scores taste, and never adds a decision, a reason, a customer 
     vc-metrics-readiness skill (preview).
   - The ask's figures (amount, valuation, ownership, runway): the vc-deal-math skill, which uses the equity-calculator
     skill's tools. This skill does no arithmetic and calls no calculator tool.
-  - A slide-by-slide deck review: the vc-deck-review skill (preview). Rehearsing the partner meeting, where these
+  - A slide-by-slide deck review: the vc-deck-review skill. Rehearsing the partner meeting, where these
     decisions get asked about: the vc-partner-meeting skill (preview).
 
 ## Inputs

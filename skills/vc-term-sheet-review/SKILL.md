@@ -35,7 +35,7 @@ the founder did not give. It always tells the founder to have a lawyer review th
     conversion goes to `equity_round` as vc-deal-math step 2 says, once the founder gives the next priced round they
     expect; explain its terms in plain words and send the founder to their lawyer.
   - The story and the say-and-avoid list for the next round: the vc-positioning skill. Claims in a deck: the
-    vc-claims-check skill. The deck as a whole: the vc-deck-review skill (preview).
+    vc-claims-check skill. The deck as a whole: the vc-deck-review skill.
   - How much to raise and what it buys: the vc-round-sizing skill (preview).
   - Diligence after the term sheet, with a data-room checklist: the vc-diligence-questions skill (preview).
 
