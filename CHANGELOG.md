@@ -6,6 +6,13 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- A live re-run of the `vc-deal-math` eval for Company DX on plugin 0.3.7 (Claude Code 2.1.331), recorded in its eval in
+  place of the run on plugin 0.3.5, which the file now describes: Pass, with shortfalls against the expected answer
+  noted. Its session again loaded the `equity-calculator` skill, never `vc-deal-math`, and answered from that skill's
+  own copy of step 7's rules: the mode said in words, B - A beside the founders' and the investors' ownership and every
+  sale row, no figure of its own and no option chosen. It did not lead with the summary, name the flags by their codes
+  or mark the assumptions `unverified`, as the `equity-calculator` skill's own steps ask. The hand-off to `vc-deal-math`
+  has fired in neither recorded run; no skill text changed with this recording.
 - Plugin version 0.3.8 (the plugin's, the marketplace's and the `equity_calculator` package's), so an installed copy
   picks up the `runway_plan` report fix and the `vc-partner-meeting` "Draft taken" label, listed under Changed.
 - Plugin version 0.3.7 (the plugin's, the marketplace's and the `equity_calculator` package's), so an installed copy

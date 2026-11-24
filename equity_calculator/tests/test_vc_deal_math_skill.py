@@ -412,11 +412,18 @@ def test_a_founder_who_expects_no_next_round_is_asked_for_the_note_s_own_maturit
     assert compute(_INPUT_MODELS["instrument_compare"].model_validate(inputs)).mode == "no_next_round"
     assert "it says in words that the comparison runs with no next round (`no_next_round_given`)" in answer
     assert "It never picks an option or calls one better" in answer
-    # The live run is recorded as a Fail: its session loaded the equity-calculator skill, so step 7 never reached it.
+    # The recorded run, the third, is a Pass, yet its session again loaded the equity-calculator skill and answered from
+    # that skill's copy of step 7's rules; the second run, a Fail for the same load, is described beside it.
     recorded = _unwrapped(_section(_RECORDED, text))
-    assert "**Fail: three of the five clauses met only in part.**" in recorded
-    assert "The session loaded the equity-calculator skill, never this one" in recorded
-    assert "This skill's own text is unchanged." in recorded
+    verdict, earlier = recorded.split(" The second run, ", 1)
+    assert "**Pass, with shortfalls against the expected answer.** It met every clause of the pass sentence" in verdict
+    assert "the session again loaded the equity-calculator skill, never this one" in verdict
+    assert "Since this run neither skill's text has changed: the hand-off to this skill did not fire in it" in verdict
+    assert "on plugin 0.3.5 the same day, failed with three of the five clauses met only in part" in earlier
+    assert "its session too loaded the equity-calculator skill, never this one" in earlier
+    assert "After it the equity-calculator skill sent a priced round weighed against a note to this skill's step 7" in (
+        earlier
+    )
 
 
 def test_the_comparison_step_carries_every_flag_s_meaning() -> None:
