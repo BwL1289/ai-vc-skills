@@ -129,8 +129,9 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 
 `vc-deal-math`, `vc-positioning`, `vc-claims-check`, `vc-partner-meeting`, `vc-taste-check`, `vc-round-sizing`, `vc-term-sheet-review`, `vc-diligence-questions`, `vc-current-investor-update`, `vc-metrics-readiness`, `vc-investor-memo`, `vc-market-sizing` and `vc-prospective-investor-update` are in preview until they have been checked on
 real decks and meetings. The calculator's arithmetic is tested; the reviews' wording may change. The `vc-positioning` and
-`vc-claims-check` evals were run in live Claude Code sessions on 2026-11-22, and each file holds an excerpt of its
-recorded answer with a verdict against its pass sentence: two passed and five passed in part. Pass means every clause
+`vc-claims-check` evals, all but the newer Company BK one, were run in live Claude Code sessions on 2026-11-22, and
+each of those files holds an excerpt of its recorded answer with a verdict against its pass sentence: two passed and
+five passed in part. Pass means every clause
 of that sentence was met, Partial that exactly one was missed or met only in part, and Fail that two or more were
 missed. When a pass sentence changed after its run, the verdict counts the clauses it had then, and the file says
 which clauses changed and how the run reads against today's sentence.
