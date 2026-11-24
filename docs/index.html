@@ -734,15 +734,15 @@
               meeting.
             </p>
             <p class="lede">
-              Twenty skills for Claude and any MCP client that work through the
-              money and the story of a fundraise from the founder's side of the
-              table: equity math done exactly, your deck's ask checked against
-              itself, your raise planned from your own investor list, your intro
-              emails drafted, your passes debriefed, your option pool sized from
-              your hiring plan, and skeptical reviews of your deck, messaging,
-              claims, competition, metrics, market size, round, term sheet and
-              investor updates that keep only the objections your own material
-              cannot answer.
+              Twenty-one skills for Claude and any MCP client that work through
+              the money and the story of a fundraise from the founder's side of
+              the table: equity math done exactly, your deck's ask checked
+              against itself, your cap table tied out, your raise planned from
+              your own investor list, your intro emails drafted, your passes
+              debriefed, your option pool sized from your hiring plan, and
+              skeptical reviews of your deck, messaging, claims, competition,
+              metrics, market size, round, term sheet and investor updates that
+              keep only the objections your own material cannot answer.
             </p>
             <div class="cta">
               <a class="button primary" href="#install">Install the plugin</a>
@@ -891,16 +891,17 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
                 <span class="badge available">Available</span>
               </div>
               <p>
-                Works fourteen equity questions exactly: whether a stake is
-                worth selling, what a hire's grant is worth, the option-pool
-                shuffle, SAFEs and notes converting in a priced round, dilution
-                over several rounds, vesting, exit waterfalls, a check of a
-                raise's numbers, how long a raise lasts on a plan, a check of
-                traction metrics, a market size built bottom-up, a priced round
-                now set beside a convertible note now, the pool a hiring plan
-                needs beside a term sheet's ask, and what is left of a round
-                with the term sheets a funnel is expected to give. You get the
-                formula and the source behind every line.
+                Works fifteen equity questions exactly: whether a stake is worth
+                selling, what a hire's grant is worth, the option-pool shuffle,
+                SAFEs and notes converting in a priced round, dilution over
+                several rounds, vesting, exit waterfalls, a check of a raise's
+                numbers, how long a raise lasts on a plan, a check of traction
+                metrics, a market size built bottom-up, a priced round now set
+                beside a convertible note now, the pool a hiring plan needs
+                beside a term sheet's ask, what is left of a round with the term
+                sheets a funnel is expected to give, and a cap table tied out
+                against itself. You get the formula and the source behind every
+                line.
               </p>
               <p class="asks-label">Try asking</p>
               <ul>
@@ -1191,10 +1192,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
               <p>
                 Checks your traction metrics before a VC does: ARR against
                 run-rate, gross and net retention, logo and revenue churn, CAC
-                payback and burn multiple, each ratio from the calculator;
-                whether the deck, model and update agree; which metrics your
-                stage expects; and a ranked fix list from an adversarial review.
-                No score.
+                payback, burn multiple, LTV and LTV/CAC, the Rule of 40 and the
+                magic number, each ratio from the calculator; whether the deck,
+                model and update agree; which metrics your stage expects; and a
+                ranked fix list from an adversarial review. No score.
               </p>
               <p class="asks-label">Try asking</p>
               <ul>
@@ -1415,6 +1416,33 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
                 >
               </p>
             </article>
+            <article class="card">
+              <div class="card-head">
+                <h3><code>vc-cap-table-check</code></h3>
+                <span class="badge preview">Preview</span>
+              </div>
+              <p>
+                Ties out your cap table before an investor's lawyers do: every
+                class added up to the fully diluted shares, each class's and
+                holder's percent beside the shares behind it, issued against
+                authorised shares, the SAFEs and notes not yet converted and the
+                share held by people who have left, every figure from the
+                calculator. It never rules on legal validity; it lists the
+                questions for your lawyer.
+              </p>
+              <p class="asks-label">Try asking</p>
+              <ul>
+                <li>Check my cap table.</li>
+                <li>Does our cap table add up?</li>
+                <li>How much dead equity do we have?</li>
+              </ul>
+              <p class="more">
+                <a
+                  href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-cap-table-check/SKILL.md"
+                  >Read the SKILL.md</a
+                >
+              </p>
+            </article>
           </div>
           <p class="preview-note">
             Preview means the skill has not yet been checked on real decks and
@@ -1424,7 +1452,7 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
             of those files holds an excerpt of its recorded answer with a
             verdict against its pass sentence: two passed and five passed in
             part. On 2026-11-23 one eval of every other review skill then in the
-            pack except vc-deal-math was run live too; the five skills added on
+            pack except vc-deal-math was run live too; the six skills added on
             2026-11-24 have not been run live yet. An eval file whose first
             paragraph says a live run is recorded holds an excerpt of it with
             its verdict. One run each is a small sample.
@@ -1884,6 +1912,12 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000</code></pre>
               <a
                 href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-option-pool-plan/SKILL.md"
                 >vc-option-pool-plan<span>SKILL.md, preview</span></a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/BwL1289/ai-vc-skills/blob/main/skills/vc-cap-table-check/SKILL.md"
+                >vc-cap-table-check<span>SKILL.md, preview</span></a
               >
             </li>
             <li>

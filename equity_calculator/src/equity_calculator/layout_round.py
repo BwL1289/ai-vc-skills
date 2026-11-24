@@ -2,7 +2,8 @@
 
 One value column. Each instrument gets a block of lines (what converts, its cap and discount prices, the price it
 took and its shares); the round's price, Company Capitalization and new shares follow, then the cap table with live
-totals of shares, ownership and value.
+totals of shares, ownership and value. The cap table check's preview reuses the lines a round converts with
+(``converting_lines``) and its pool's (``pool_target_lines``, ``new_pool_line``, ``pool_met_line``).
 """
 
 from __future__ import annotations
@@ -11,7 +12,13 @@ from decimal import Decimal
 
 from equity_calculator.exact import fraction, quantity
 from equity_calculator.schemas.equity_common import EquityQuantity
-from equity_calculator.schemas.equity_round import ConversionRow, RoundCapTableRow, RoundResult
+from equity_calculator.schemas.equity_round import (
+    AMOUNT_LABELS,
+    ConversionRow,
+    RoundCapTableRow,
+    RoundInput,
+    RoundResult,
+)
 from equity_calculator.sheet_parts import GIVEN, Line, Sheet, given, given_percent, yes_no
 
 _TITLE = "Convertibles"
@@ -33,15 +40,12 @@ def _instrument_name(kind: str, index: int) -> str:
     return f"{_KIND_NAMES[kind]} {index}"
 
 
-def _conversion_lines(row: ConversionRow) -> list[Line]:
-    """One instrument's block: amount, interest, what converts, its prices, the one it took, its shares."""
+def converting_lines(row: ConversionRow, prefix: str = "") -> list[Line]:
+    """What an instrument converts: a note's accrued interest, then the amount converting. ``prefix`` starts each key,
+    for a sheet that holds these lines beside its own (the cap table check's preview)."""
     name = _instrument_name(row.kind, row.index)
-    key = f"{row.kind}_{row.index}"
-    lines = [
-        Line(
-            f"{key}_amount", f"{name}: {'purchase amount' if row.kind == 'safe' else 'principal'}", (row.amount,), GIVEN
-        )
-    ]
+    key = f"{prefix}{row.kind}_{row.index}"
+    lines = []
     if row.accrued_interest is not None:
         how = "owed at the round (to the cent) - principal" + (
             "; fractional-power stub, approximate" if row.interest_approximate else ""
@@ -55,6 +59,44 @@ def _conversion_lines(row: ConversionRow) -> list[Line]:
             "the amount, plus interest unless paid in cash",
         )
     )
+
+    return lines
+
+
+def pool_target_lines(inputs: RoundInput, prefix: str = "") -> list[Line]:
+    """The pool target after the round and where its top-up is counted, as given (0 and the pre-money unless set)."""
+    target = given_percent(inputs.target_pool_percent)
+    return [
+        Line(f"{prefix}target_pool", "Target pool after the round (t)", (target,), GIVEN),
+        Line(f"{prefix}pool_timing", "Pool counted in the", (inputs.pool_timing.replace("_", "-"),), GIVEN),
+    ]
+
+
+def new_pool_line(result: RoundResult, prefix: str = "") -> Line:
+    """The new pool shares the round makes (0 when the unissued pool already meets the target)."""
+    return Line(
+        f"{prefix}new_pool_shares",
+        "New pool shares (P)",
+        (result.new_pool_shares,),
+        "pre: t(V + I)/p - U; post: (t(C + N) - U)/(1 - t); 0 when not positive",
+    )
+
+
+def pool_met_line(result: RoundResult, prefix: str = "") -> Line:
+    """Whether the unissued pool already meets the target, so the round makes no new pool shares."""
+    return Line(
+        f"{prefix}pool_already_large_enough",
+        "Unissued pool already meets the target",
+        (yes_no(result.pool_already_large_enough),),
+        "then P = 0",
+    )
+
+
+def _conversion_lines(row: ConversionRow) -> list[Line]:
+    """One instrument's block: amount, interest, what converts, its prices, the one it took, its shares."""
+    name = _instrument_name(row.kind, row.index)
+    key = f"{row.kind}_{row.index}"
+    lines = [Line(f"{key}_amount", f"{name}: {AMOUNT_LABELS[row.kind]}", (row.amount,), GIVEN), *converting_lines(row)]
     if row.cap_price is not None:
         lines.append(Line(f"{key}_cap_price", f"{name}: cap price", (row.cap_price,), _CAP_HOW[row.kind]))
     if row.discount_price is not None:
@@ -146,10 +188,8 @@ def round_sheet(result: RoundResult) -> Sheet:
         ),
         ("pre_money", "Pre-money valuation (V)", given("money", inputs.pre_money), GIVEN),
         ("investment", "Investment (I)", given("money", inputs.investment), GIVEN),
-        ("target_pool", "Target pool after the round (t)", given_percent(inputs.target_pool_percent), GIVEN),
-        ("pool_timing", "Pool counted in the", inputs.pool_timing.replace("_", "-"), GIVEN),
     )
-    lines = [Line(key, label, (value,), how) for key, label, value, how in values]
+    lines = [*(Line(key, label, (value,), how) for key, label, value, how in values), *pool_target_lines(inputs)]
     for row in result.conversions:
         lines += _conversion_lines(row)
     lines += [
@@ -165,12 +205,7 @@ def round_sheet(result: RoundResult) -> Sheet:
             (result.company_capitalization,),
             "(FD + F + D/p)/(1 - sigma)",
         ),
-        Line(
-            "new_pool_shares",
-            "New pool shares (P)",
-            (result.new_pool_shares,),
-            "pre: t(V + I)/p - U; post: (t(C + N) - U)/(1 - t); 0 when not positive",
-        ),
+        new_pool_line(result),
         Line("price_per_share", "Price per share (p)", (result.price_per_share,), _TIMING_HOW[inputs.pool_timing]),
         Line("investor_shares", "Investor shares (N)", (result.investor_shares,), "I/p"),
         Line(
@@ -180,14 +215,6 @@ def round_sheet(result: RoundResult) -> Sheet:
             "at most one more than the capped instruments",
         ),
     ]
-    lines += _cap_table_lines(result)
-    lines.append(
-        Line(
-            "pool_already_large_enough",
-            "Unissued pool already meets the target",
-            (yes_no(result.pool_already_large_enough),),
-            "then P = 0",
-        )
-    )
+    lines += [*_cap_table_lines(result), pool_met_line(result)]
 
     return Sheet(_TITLE, _HEADING, _COLUMNS, tuple(lines), result.assumptions)

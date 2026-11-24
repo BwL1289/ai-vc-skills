@@ -81,10 +81,11 @@ class ClassTerms(Protocol):
 
 
 class ExitTerms(Protocol):
-    """What the waterfall reads of an exit: a ``WaterfallInput``, or the same terms with exact share counts."""
+    """What the waterfall reads of an exit: a ``WaterfallInput``, or the same terms with exact share counts (and an
+    exact amount: what is left of a sale after a note is paid, ``equity_calculator.instrument_compare``)."""
 
     @property
-    def exit_amount(self) -> Decimal:
+    def exit_amount(self) -> Decimal | Fraction:
         ...
 
     @property

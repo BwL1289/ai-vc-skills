@@ -9,16 +9,16 @@
 
 The first of the [AI VC skills](../README.md).
 
-Should we trade stock for this, and what does a round do to the cap table? Fourteen scenarios, worked with exact
+Should we trade stock for this, and what does a round do to the cap table? Fifteen scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
 [`skills/equity-calculator/`](../skills/equity-calculator/SKILL.md), at the repository root, tells an assistant when and
-how to use it. The nineteen founder skills in the root README's [skills table](../README.md#skills), all but
-`vc-deck-review` in preview, take every figure they work out from these scenarios; six were built around one:
+how to use it. The twenty founder skills in the root README's [skills table](../README.md#skills), all but
+`vc-deck-review` in preview, take every figure they work out from these scenarios; seven were built around one:
 `deal_check` for `vc-deal-math`, `runway_plan` for `vc-round-sizing`, `metrics_check` for `vc-metrics-readiness`,
-`market_sizing` for `vc-market-sizing`, `pool_plan` for `vc-option-pool-plan` and `raise_pipeline` for
-`vc-raise-plan`.
+`market_sizing` for `vc-market-sizing`, `pool_plan` for `vc-option-pool-plan`, `raise_pipeline` for `vc-raise-plan`
+and `cap_table_check` for `vc-cap-table-check`.
 
 Built from the original `equity_equation` script this repository started with (it is in the git history, at
 [`src/equity_equation/` in commit 8748071](https://github.com/BwL1289/ai-vc-skills/tree/87480719db0871c6b467a16437919d1df84055ed/src/equity_equation))
@@ -26,22 +26,23 @@ and the essay it implements. That script's own TODO
 list asked for Pydantic models and cell formatting (percent, numbers); both are here, along with the employee formula
 and the option-pool shuffle.
 
-| Scenario             | The question it answers                                                                                                                                                                                                     |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `investor`           | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                                                                                              |
-| `employee`           | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                                                                                          |
-| `pool`               | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?                                                                                 |
-| `round`              | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards?                                                                     |
-| `dilution`           | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                                                                                              |
-| `vesting`            | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                                                                                       |
-| `waterfall`          | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                                                                        |
-| `deal_check`         | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                                                                     |
-| `runway_plan`        | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there?                                             |
-| `metrics_check`      | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback and burn multiple the deck states agree with their parts?                                                               |
-| `market_sizing`      | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?                                                      |
-| `instrument_compare` | A founder choosing between a priced round now and a convertible note now: who owns what after today and after each next round, and who gets what at each exit, A beside B with B - A, never a pick?                         |
-| `pool_plan`          | A term sheet asks for an option pool. How big a pool does the founder's hiring plan to the next round need, and what does each pool do to the price, the effective pre-money and who owns what, side by side, never a pick? |
-| `raise_pipeline`     | A founder planning a raise: how much of the round is left after the lead, the firm commitments and pro rata, how many term sheets the funnel is expected to give on the founder's own rates, and when to start raising?     |
+| Scenario             | The question it answers                                                                                                                                                                                                                                                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `investor`           | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                                                                                                                                                                                               |
+| `employee`           | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                                                                                                                                                                                           |
+| `pool`               | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?                                                                                                                                                                                  |
+| `round`              | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards?                                                                                                                                                                      |
+| `dilution`           | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                                                                                                                                                                                               |
+| `vesting`            | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                                                                                                                                                                                        |
+| `waterfall`          | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                                                                                                                                                                         |
+| `deal_check`         | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                                                                                                                                                                      |
+| `runway_plan`        | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there?                                                                                                                                              |
+| `metrics_check`      | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback, burn multiple, LTV, Rule of 40 and magic number the deck states agree with their parts?                                                                                                                                 |
+| `market_sizing`      | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?                                                                                                                                                       |
+| `instrument_compare` | A founder choosing between a priced round now and a convertible note now: who owns what after today and after each next round (or, with none, the note at its maturity), and who gets what at each exit, A beside B with B - A, never a pick?                                                                                |
+| `pool_plan`          | A term sheet asks for an option pool. How big a pool does the founder's hiring plan to the next round need, and what does each pool do to the price, the effective pre-money and who owns what, side by side, never a pick?                                                                                                  |
+| `raise_pipeline`     | A founder planning a raise: how much of the round is left after the lead, the firm commitments and pro rata, how many term sheets the funnel is expected to give on the founder's own rates, and when to start raising?                                                                                                      |
+| `cap_table_check`    | A founder's cap table as an investor's counsel will tie it out: do the classes add up to the fully diluted shares, does each stated percent match its shares, is any class past its authorised shares, which SAFEs and notes are still outstanding, and how much do departed holders hold? It never rules on legal validity. |
 
 ## Install
 
@@ -109,10 +110,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 `equity_calculator_mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
 instead of doing the arithmetic itself.
 
-| Tool                                                                                                                                                                                                                                                                                              | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing`, `equity_instrument_compare`, `equity_pool_plan`, `equity_raise_pipeline` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
-| `equity_workbook`                                                                                                                                                                                                                                                                                 | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
+| Tool                                                                                                                                                                                                                                                                                                                        | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing`, `equity_instrument_compare`, `equity_pool_plan`, `equity_raise_pipeline`, `equity_cap_table_check` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
+| `equity_workbook`                                                                                                                                                                                                                                                                                                           | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
 error that says why. The SDK checks the arguments itself and passes the validation library's text through
@@ -196,7 +197,13 @@ preview until it has been checked on real decks and meetings (`vc-deck-review` h
   multiple, its 3x line and the multiple approaching 0 as burn reaches 0; and David Skok's ["SaaS Metrics 2.0"](https://www.forentrepreneurs.com/saas-metrics-2/)
   (no date on the page) for net revenue churn above 2% a month. The three lines are benchmarks, not rules: each
   raises a question, never an error, and each is an input. The period rule, the cohort rule, leaving new customers
-  out of retention, the exact payback formula and the tolerances are unverified.
+  out of retention, the exact payback formula and the tolerances are unverified. LTV rests on item 5 of a16z's
+  "16 Startup Metrics", paraphrased, not quoted: LTV on contribution margin rather than on revenue or gross margin,
+  worked as one month's contribution margin per customer times a lifetime of one over the monthly churn, and a
+  contribution-margin LTV set against CAC. Ours, unverified: the churn it divides by (gross revenue churn by
+  default), periods longer than a month, leaving out discounting and taking blended CAC. The Rule of 40 and the
+  magic number are common definitions for which no source was read: none is credited or quoted, both are marked
+  unverified, and no benchmark is set for either, nor for LTV or LTV/CAC.
 - **Market size**: the market sizing quotes two Y Combinator pages word for word in its assumptions:
   ["How to Pitch Your Company"](https://www.ycombinator.com/library/4b-how-to-pitch-your-company)
   (the YC pitch guide; no date on the page; read in full on 23 November 2026), for building the market from customers
@@ -539,7 +546,26 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    zero burn, and none for a negative burn or net new ARR, is ours (unverified). On new ARR alone it is worked
    whenever a multiple is stated, to test whether the stated figure used new ARR. Concentration = the largest
    customer's revenue / the period's revenue (a16z), with no benchmark.
-5. **Checks.** Each stated figure is checked with `deal_check`'s tolerances (0.5 points for a percent, 2% of the
+5. **Lifetime value.** With a, the founder's average revenue per account (ARPA) in the recurring unit, the period's
+   units P/u (u = 1 month for a monthly unit, 12 for an annual one), m the contribution margin when given (a16z works
+   LTV on contribution margin, not on revenue or gross margin; paraphrased) and the gross margin otherwise, and c the
+   period's churn on `ltv_churn_basis` (gross revenue churn by default, or net revenue or logo churn, the founder's
+   choice): LTV = a·(P/u)·m / c, with no discounting. Over one month this is a16z's own shape, a month's margin per
+   account over the monthly churn (paraphrased); the churn basis, longer periods and leaving out discounting are ours,
+   unverified. LTV/CAC = LTV / blended CAC (a16z sets a contribution-margin LTV against CAC; blended CAC is ours).
+   On revenue alone, LTV = a·(P/u) / c and its LTV/CAC are worked whenever an LTV or LTV/CAC is stated, to test
+   whether the stated figure left the margin out; with a contribution margin and a gross margin g both given, LTV on
+   the gross margin, a·(P/u)·g / c, is worked whenever an LTV is stated, to test whether it used the gross margin.
+   ARPA with no margin is refused (LTV is never worked on revenue alone), and so is a churn at or below zero: with no
+   churn the lifetime has no end.
+6. **Growth and efficiency.** Three parts stand outside the period, each the founder's own: the revenue growth
+   percent g, the profit margin percent q and its basis (EBITDA, operating, free cash flow or net; not named, it is
+   flagged). The Rule of 40 = g + q, as given (a common SaaS rule of thumb, unverified). The magic number = 4·(Q - Q')
+   / M', with Q this quarter's revenue, Q' the prior quarter's and M' the prior quarter's sales and marketing spend;
+   given as the ending ARR of the two quarters A and A' instead, it is (A - A') / M', already a year's worth, with
+   no 4 (a common definition, unverified). Without the 4, (Q - Q') / M' is worked whenever a magic number on revenue
+   is stated. Each may fall below zero. No benchmark is set for LTV, LTV/CAC, the Rule of 40 or the magic number.
+7. **Checks.** Each stated figure is checked with `deal_check`'s tolerances (0.5 points for a percent, 2% of the
    computed value for the rest, each an input, the edge included); a mismatch whose difference shows as equal to the
    tolerance says it is just over it. A stated percent, months or multiple is also consistent, whatever the
    tolerance, when it is the computed figure rounded half away from zero to the places it is written with, since
@@ -558,11 +584,15 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    one is given. A stated burn multiple with no multiple to work (step 4) comes back
    `not_checked`, with no computed figure. The verdict: mismatch if any figure is, else not_checked if none was
    checked or one was left unchecked, else consistent.
-6. **Flags**, never errors. Beside a mismatch, the likely cause: `stated_arr_matches_run_rate`,
+8. **Flags**, never errors. Beside a mismatch, the likely cause: `stated_arr_matches_run_rate`,
    `stated_nrr_includes_new` (ending over starting recurring revenue), `stated_payback_not_margin_adjusted` and
    `stated_burn_multiple_uses_new_not_net_arr` (also beside a multiple left unchecked), each only when the stated
-   figure lands within tolerance of that other definition (the tolerance alone: the rounding rule of step 5 decides a
-   verdict, never a cause; the run-rate one also only when the latest month has one-time or usage revenue).
+   figure lands within tolerance of that other definition (the tolerance alone: the rounding rule of step 7 decides a
+   verdict, never a cause; the run-rate one also only when the latest month has one-time or usage revenue);
+   `stated_ltv_uses_revenue_not_margin` (a stated LTV or LTV/CAC within tolerance of the figure on revenue alone),
+   `stated_ltv_uses_gross_margin` (a stated LTV within tolerance of the figure on the gross margin, when a contribution
+   margin is given), `stated_rule_of_40_uses_gross_margin` (within tolerance of growth + the gross margin) and
+   `stated_magic_number_not_annualised` (within tolerance of the change without the 4).
    `consistent_beyond_rounding`: a figure consistent by the tolerance alone, not the computed figure
    rounded to its places, such as a monthly churn of 1.7% against 2.1%, so a VC recomputing gets another figure. With
    or without a mismatch:
@@ -572,7 +602,10 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    alone), `blended_cac_only` (no paid-channel count),
    `payback_not_margin_adjusted` (no gross margin), `burn_multiple_not_defined` (net new ARR at or below zero) and
    `no_net_burn` (a net burn at or below zero); each of these two says the overall verdict cannot be consistent only
-   when a multiple is stated. The benchmarks, each an input: `payback_above_band` (at or above
+   when a multiple is stated; `ltv_on_gross_margin` (no contribution margin, so LTV is on the gross margin),
+   `contribution_margin_above_gross_margin` (a contribution margin above the gross margin, which takes out fewer
+   costs, so most often a swapped or mislabelled margin: a question, never a refusal) and
+   `rule_of_40_margin_basis_unlabelled` (the margin's basis not named). The benchmarks, each an input: `payback_above_band` (at or above
    Bessemer's target for the customer segment, under 12 months for SMB, 18 for mid-market and 24 for enterprise, or
    the founder's own band), `burn_multiple_above_band` (3x or more, Sacks) and `net_revenue_churn_above_band` (above
    2% in a one-month period, Skok; not asked over a longer period, since nothing is compounded).
@@ -585,7 +618,11 @@ everything the period had (the start, new and expansion, so ARR at the end is ne
 its total, the starting customers' contraction and churn above the start (each the period's total when its `cohort_*`
 figure is not given, so retention is never below 0), the latest month's parts without its total or above it, customers lost or
 paid-channel customers without or above their total, the largest customer without or above the period's revenue, a
-stated figure without what it needs to be checked, and a churn basis without a stated churn or its inputs.
+stated figure without what it needs to be checked, and a churn basis without a stated churn or its inputs; for the
+later metrics, ARPA without a margin or a churn above zero on its basis, a contribution margin or `ltv_churn_basis`
+without ARPA, growth without a margin or a margin without growth, a margin basis without a margin, one quarter
+without the other, the magic number's quarters as both revenue and ARR, and its quarters without the prior quarter's
+spend or that spend without them.
 
 ### Market sizing (YC's pitch guide for customers × price and the seed guide for TAM as revenue; the rest unverified)
 
@@ -669,11 +706,43 @@ and every exit from the waterfall code; nothing is worked a second way.
    `next_round_below_priced_round_price` (a down round for A's investors; no anti-dilution is applied),
    `priced_round_below_existing_series_price` (A's price today is below what an existing series paid per share, its
    amount invested over its shares: a down round for that series; no anti-dilution is applied) and
-   `existing_mfn_safe_beside_note` (an existing MFN SAFE converts on the terms given for it under both options; whether
-   it may take B's note's cap or discount is in the SAFE's own terms, not modelled).
+   `existing_mfn_safe_beside_note` (with a next round, an existing MFN SAFE converts on the terms given for it under
+   both options; whether it may take B's note's cap or discount is in the SAFE's own terms, not modelled).
 
-No next round is refused (`no_next_round_given`: the note converts only at one), and so is a comparison with no
-exit. An exit before the next round, while the note is outstanding, is not modelled.
+A comparison with no exit is refused. With a next round, every exit follows it; a sale before it, while the note is
+outstanding, is worked only with no next round given.
+
+**With no next round** (the founder hopes today's raise is the only one), the comparison says so (mode
+`no_next_round`, flag `no_next_round_given`) and the note never converts at a priced round. Leave
+`--next-round` and `--note-months-to-conversion` out (the months are refused with no round to convert at); the terms
+below are the note's own, each asked for, never assumed, and each refused with a next round:
+
+1. **Today**, as above: A's ownership after its round, B's with the note unconverted, and what the note owes
+   (principal plus interest, to the cent) at each month in `--note-owed-month`.
+2. **At maturity** (`--note-maturity-months`), the repayment: what the note owes then. With a conversion valuation
+   (`--note-maturity-conversion-valuation`, taken over FD as the cap is) or a price a share
+   (`--note-maturity-conversion-price`) from the founder, it also converts what it owes (the principal alone when the
+   interest is paid in cash) at that price, beside A right after today; with neither, only what it owes is shown, as
+   whether it converts is in its own terms (`maturity_conversion_not_given`).
+3. **Each exit is a sale before any priced round.** A's sale is the waterfall over A's cap table after today. B's
+   note is paid its change-of-control term: a multiple of its principal (`--note-change-of-control-multiple`, the
+   principal alone), paid before any share and never more than the sale, with the rest to the shares; or, converting
+   at its cap (`--note-change-of-control-at-cap`, with `--note-months-to-exit`), what it owes then at the cap price
+   into common shares, through the round code's conversion row (interest paid in cash at that conversion is not
+   taken off the sale and is in no payout line). B is not worked at a sale, its term is not shown, and the row says
+   why, when no term is given (`no_change_of_control_term`, or `uncapped_no_change_of_control_term` when the note has
+   no cap to convert at) or when existing SAFEs or notes are still outstanding under B
+   (`existing_instruments_outstanding`). A multiple with interest added, or the greater of two terms, is not
+   modelled.
+4. **Flags** of this mode: `no_next_round_given`, `discount_unused_without_round` (the discount comes off a priced
+   round's price, so it changes no figure), `cap_unused_without_round` (the cap sets a price only at a sale worked on
+   the converts-at-its-cap term, so without one it changes no figure), `maturity_conversion_not_given`,
+   `change_of_control_not_given`, `existing_instruments_outstanding` (they hold no shares under B, and B is not
+   worked at a sale), `exit_after_maturity` (B is worked at sales that come after the note matures; its sale lines
+   take it as still outstanding) and `note_paid_below_owed_at_sale` (converted at its cap, the note is paid less than
+   it owes at one sale or more, any interest paid in cash counted; a right to be repaid instead is not modelled),
+   beside `cap_below_round_price_now`, `note_interest_converts`, `note_interest_paid_in_cash` and
+   `maturity_not_given`. `existing_mfn_safe_beside_note` is not raised: under B the SAFE never converts.
 
 ### Pool plan (the option-pool shuffle above; the plan's own conventions unverified)
 
@@ -758,6 +827,57 @@ pro rata rights would make the allocation left smaller), `soft_commitments_not_c
 (E < W), `no_runway_given`, `cash_never_runs_out` and `start_raising_date_passed`. A commitment not marked soft or firm
 is refused (`commitment_kind_missing`), and so are term sheets wanted with no funnel (`no_funnel_given`) and a funnel
 with no term sheets wanted (`no_term_sheet_count_given`).
+
+### Cap table check (Altman for the fully diluted measure; the rest unverified, or a question for the lawyer)
+
+A founder's cap table as they give it: classes numbered in order (common, each preferred series, options granted, the
+unissued pool, warrants), holder lines numbered in order, each in one class, and the SAFEs and notes outstanding. It
+checks the arithmetic of those figures against each other; whether any share was validly issued is for the company's
+lawyer, and the report says what to ask.
+
+1. **Totals.** A class's shares are its stated shares, else its holder lines' sum. With both, the founder says
+   whether the lines are every holder of the class (`holder-lines=complete|partial`, required then, never assumed):
+   complete lines are checked against the stated shares (equal or a mismatch), partial ones leave the rest printed
+   as shares in no line (never an "everyone else" line of its own) and are checked only when they add up to more;
+   the stated shares are used either way. The fully diluted shares FD are
+   every class added up: each preferred share counts as one common share, each warrant share as exercised, and the
+   unissued pool is included (Altman measures grants as "what percentage of the fully-diluted shares"). The
+   outstanding stock O is common plus preferred. SAFEs and notes hold no shares until they convert, so they are in
+   neither.
+2. **Shares.** Each class and holder line holds shares/FD, and each common or preferred one shares/O, exactly. The
+   founders' share is the founder lines over FD; the departed holders' share (vested shares held by people who have
+   left, sometimes called dead equity) is the departed lines over FD. A line may carry both marks and then counts in
+   each. When a class's holder lines add up to more than its stated shares, the founders' and departed holders'
+   shares, the preview's lines for them and the founders' path rest on a total that does not hold those lines, so
+   they are left out and flagged.
+3. **Stated figures.** `--stated-percent-basis` says what the table's percents are a share of (FD or O); it is
+   required with any stated percent and never assumed. A stated percent is consistent when it is the computed share
+   rounded half away from zero to the places it is written with (the deal check's rounding test), or within
+   `--tolerance-points` (0 by default). A column of stated percents, the classes' own when every class states one and
+   the table read line by line (each class's holder lines when every line states one and they are not a partial
+   list, else the class's own), is set
+   against 100%: consistent when the gap is at most half a unit in the last place of each percent added (what their
+   rounding can explain: three thirds written 33.33 add up to 99.99, inside 0.015 points), plus the tolerance for
+   each. The stated fully diluted total is consistent only when it is FD.
+4. **Authorised shares.** Each common or preferred class's shares are set against its authorised shares (what is
+   left, below 0 when over), the options granted and unissued against the plan's reserve, and authorised common (every
+   common class's) against FD, every share of which would be common once converted or exercised.
+5. **Instruments.** Each SAFE and note is listed with its amount, cap and discount, and their amounts are totalled.
+   `--preview` converts them at the next round the founder gives (its pre-money and raise, any pool top-up), through
+   the round scenario above on FD and the unissued pool, and reads every line back as a share of the shares after it,
+   with the round's own lines for the pool target, its timing and the new pool shares, and for what each instrument
+   converts (a note's accrued interest included). No price is ever assumed: with no `--preview` nothing converts.
+6. **Founders' path.** Each `--planned-round` (the dilution scenario's terms) keeps 1 - n - p of the founders'
+   share. With a `--preview` the path starts from the founders' share after it (its SAFEs and notes converted), so the
+   planned rounds are the rounds after the preview and must not repeat it (it would be counted twice); without one it
+   starts from their share of FD today and converts no SAFE or note, and says so.
+7. **Flags**, never a ruling: `holder_lines_exceed_class` (a class's lines add up to more than its stated shares),
+   `percents_do_not_sum` (a column cannot be roundings of shares that add up to 100%),
+   `consistent_beyond_rounding` (a percent holds by the tolerance alone), `over_authorised` (a class past its
+   authorised shares, or the plan past its reserve), `common_authorised_below_fully_diluted`,
+   `unconverted_instruments_present`, `departed_holders_share` and `path_leaves_out_instruments` (a path from today
+   with SAFEs or notes outstanding and no preview). Each one's words
+   name the question, and the ones only a lawyer can settle say to ask the company's lawyer.
 
 </details>
 
@@ -951,6 +1071,42 @@ ARR is 12 × $100k = $1,200,000; the $1.5M is the run-rate, with the fees in it.
 `stated_arr_matches_run_rate`, `run_rate_includes_non_recurring`, `stated_nrr_includes_new`,
 `stated_burn_multiple_uses_new_not_net_arr` and `burn_multiple_above_band` as what a VC is likely to ask about.
 
+**LTV, the Rule of 40 and the magic number (Company DL, made up).** In one month, monthly recurring revenue went from
+$200k with $20k new, $2k expansion, $1k downgrades and $3k cancelled; 25 new customers, 10 of them from paid channels,
+for $150k of sales and marketing. Gross margin is 80%, contribution margin 60%, and the average account pays $2k a
+month. The founder's own figures: revenue grew 70% over the year, the EBITDA margin is -35%, and quarterly revenue went
+from $510k to $600k on $450k of sales and marketing in the earlier quarter. The deck says LTV $100k, LTV/CAC 10x, Rule
+of 40 35% and a magic number of 0.2:
+
+```
+equity_calculator metrics_check --period-months 1 --starting-recurring 200000 --new-recurring 20000 \
+    --expansion-recurring 2000 --contraction-recurring 1000 --churned-recurring 3000 --customers-new 25 \
+    --customers-new-paid 10 --sales-marketing-spend 150000 --gross-margin-percent 80 --arpa 2000 \
+    --contribution-margin-percent 60 --revenue-growth-percent 70 --profit-margin-percent=-35 \
+    --profit-margin-basis ebitda --quarter-revenue 600000 --prior-quarter-revenue 510000 \
+    --prior-quarter-sales-marketing-spend 450000 --stated-ltv 100000 --stated-ltv-to-cac 10 \
+    --stated-rule-of-40-percent 35 --stated-magic-number 0.2
+  LTV (contribution margin)                                              $60,000.00  ARPA × the period's units × margin / gross revenue churn
+  LTV on revenue alone                                                  $100,000.00  ARPA × the period's units / gross revenue churn
+  LTV on gross margin                                                    $80,000.00  ARPA × the period's units × gross margin / gross revenue churn
+  LTV/CAC                                                                10.000000x  LTV / blended CAC
+  Rule of 40 (growth + EBITDA margin)                                      35.0000%  revenue growth + margin, as given
+  Magic number (on revenue)                                               0.800000x  4·(quarter revenue - prior quarter's) / prior quarter's spend
+  Magic number without the 4                                              0.200000x  (quarter revenue - prior quarter's) / prior quarter's spend
+  LTV: verdict                                                             mismatch  within the tolerance is consistent
+  LTV/CAC: verdict                                                       consistent  within the tolerance, or rounding to the deck's, is consistent
+  Rule of 40: verdict                                                    consistent  within the tolerance, or rounding to the deck's, is consistent
+  Magic number: verdict                                                    mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Overall verdict                                                          mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
+```
+
+Gross revenue churn is ($1k + $3k) / $200k = 2% for the month, so LTV is $2k × 60% / 2% = $60,000; the deck's $100k is
+the same sum with no margin taken out, which `stated_ltv_uses_revenue_not_margin` names. LTV/CAC is $60,000 / $6,000 =
+10x, consistent: the deck's 10x is on margin, though its LTV is not. The Rule of 40 is 70% - 35% = 35%, consistent,
+and no line is set for it. The magic number is 4 × $90k / $450k = 0.8; the deck's 0.2 leaves out the 4 that turns the
+quarter's change into a year's, which `stated_magic_number_not_annualised` names. No benchmark is set for any of the
+four.
+
 **A market built bottom-up (Company AW, made up).** Software for vet clinics: 18,000 independent clinics at $400 a
 month, 60% of them reachable today, 900 to win and 45 customers now; and 400 multi-site groups, 15 locations each at
 $300 a location a month, 50% reachable, 10% of those to win and 2 customers now. An analyst's figure of $2.1B a
@@ -1035,6 +1191,49 @@ founders nothing: the preferences ($8M in A, $8.1M in B) take it all. At $20M th
 $8,296,296.29 in B ($8,296,296.30 on its own; the cent goes elsewhere by largest remainder), $663,703.70 less; at
 $100M everyone converts and the payouts follow ownership. The report never says which to take.
 
+**A priced round now or a note now, with no next round (Company DX, made up).** 9,000,000 founder shares, 500,000 for
+the team and a 500,000-share unissued pool, raising $1,500,000; the founder hopes it is the only round. Option A prices
+it at a $6,000,000 pre-money on standard terms (the founder said so). Option B is a note with no cap, a 20% discount and
+6% simple interest, maturing in 24 months: then it is repaid or converts at a $5,000,000 valuation, and at a sale
+before that it is paid 2x its principal. The founder asks what it owes at 12 and 24 months, and about a sale for $3M,
+$10M or $40M:
+
+```
+equity_calculator instrument_compare --founder-shares 9,000,000 --team-shares 500,000 \
+    --unissued-pool-shares 500,000 --investment 1,500,000 --priced-pre-money 6,000,000 --priced-preference standard \
+    --note-discount-percent 20 --note-interest-rate-percent 6 --note-compounding simple \
+    --note-owed-month 12 --note-owed-month 24 --note-maturity-months 24 \
+    --note-maturity-conversion-valuation 5,000,000 --note-change-of-control-multiple 2 \
+    --exit 3,000,000 --exit 10,000,000 --exit 40,000,000
+  Mode                                                                     no next round     no next round                  no next round given: the note is never converted at a priced round here; ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
+  Today: price per share                                                       $0.600000                                    p = V/(FD + converted + new pool)
+  Note owed at month 12                                                                      $1,590,000.00                  principal + interest, to the cent
+  Note owed at month 24                                                                      $1,680,000.00                  principal + interest, to the cent
+  Today: founders                                                               72.0000%          90.0000%        18.0000%  group's shares / total shares
+  At maturity (month 24): note owed                                                          $1,680,000.00                  principal + interest, to the cent; repaid if its terms say so
+  At maturity (month 24): converts at                                                            $0.500000                  the maturity valuation / FD
+  At maturity (month 24): note's shares                                                          3,360,000                  amount converting / price
+  At maturity (month 24): founders                                              72.0000%          67.3653%        -4.6347%  group's shares / total shares (A: right after today)
+  At a sale: note's claim                                                                    $3,000,000.00                  the multiple x the principal, paid before any share, up to the sale
+  Sale before any round, $3,000,000.00: founders                           $1,350,000.00             $0.00  $-1,350,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $3,000,000.00: new money                          $1,500,000.00     $3,000,000.00   $1,500,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $10,000,000.00: founders                          $7,200,000.00     $6,300,000.00    $-900,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $10,000,000.00: new money                         $2,000,000.00     $3,000,000.00   $1,000,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $40,000,000.00: founders                         $28,800,000.00    $33,300,000.00   $4,500,000.00  the waterfall, every preference honoured; B's note on its own term
+  Flag                                                               no_next_round_given                                    No next round was given, so the note never converts at a priced round here: the comparison shows ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
+  Flag                                                            note_interest_converts                                    The note's interest converts too, so it gets shares for more than the raise
+  Flag                                                     discount_unused_without_round                                    The note's discount comes off a priced round's price, and no next round is given: it changes no figure here
+```
+
+With no next round the note never converts at a priced round, and the report says so on its first line. Right after
+today the founders hold 72% in A and 90% in B. The note owes $1,680,000.00 at its maturity: the repayment, or, at the
+$5M valuation over today's 10,000,000 shares ($0.50 a share), 3,360,000 shares, leaving the founders 67.3653% against
+72% in A (-387/8350 exactly). At a sale before any priced round the note is owed 2x its $1.5M principal, $3M, before
+any share: at $3M it takes the whole sale and the founders get nothing in B against $1,350,000.00 in A (A's $1.5M
+preference stays, as converting would pay its 20% only $600,000); at $10M they get $6,300,000.00 against
+$7,200,000.00; at $40M $33,300,000.00 against $28,800,000.00, as the claim is fixed while A's investors convert to 20%.
+The discount, which comes off a priced round's price, changes nothing here. The report never says which to take.
+
 **A pool sized from the hiring plan (Company CP, made up).** 10,000,000 fully diluted shares, 1,000,000 of them an
 unissued pool and 7,000,000 the founders'; raising $4,000,000 at a $16,000,000 pre-money, and the term sheet asks for
 a 15% pool. The founder plans five hires before the next round in month 18 (400,000, 250,000, 250,000, 350,000 and
@@ -1100,6 +1299,56 @@ empty funnel 3 term sheets need 80 first-stage targets, and today's funnel needs
 ($1,200,000 / $120,000) with no raise, so with 6 months to raise the founder starts by month 4. The report never says
 whom to pitch.
 
+**A cap table tied out (Company CQ, made up).** Two founders hold 4,500,000 and 3,500,000 common and a departed early
+hire 250,000, under 8,000,000 authorised common; the seed preferred holds all of its 1,000,000 authorised shares;
+500,000 options are granted and 250,000 unissued under a 750,000 reserve; 100,000 warrants; one $1,000,000 SAFE at a
+$12,000,000 cap. The table says 10,000,000 fully diluted shares, with every percent to two places:
+
+```
+equity_calculator cap_table_check --share-class "kind=common authorised-shares=8,000,000" \
+    --share-class "kind=preferred shares=1,000,000 authorised-shares=1,000,000 stated-percent=10.00" \
+    --share-class "kind=options_granted shares=500,000 stated-percent=5.00" \
+    --share-class "kind=options_unissued shares=250,000 stated-percent=2.50" \
+    --share-class "kind=warrants shares=100,000 stated-percent=1.00" \
+    --holder "share-class=1 shares=4,500,000 stated-percent=45.00 founder" \
+    --holder "share-class=1 shares=3,500,000 stated-percent=35.00 founder" \
+    --holder "share-class=1 shares=250,000 stated-percent=2.50 departed" \
+    --stated-fully-diluted-shares 10,000,000 --stated-percent-basis fully_diluted --option-plan-reserve 750,000 \
+    --safe "1,000,000 valuation-cap=12,000,000"
+  Class 1 (common): shares                                                                            8,250,000  its holder lines added up
+  Class 1 (common): authorised left                                                                    -250,000  authorised - shares (below 0: over)
+  Fully diluted shares (FD)                                                                          10,100,000  every class
+  Holder line 1 (class 1, common): of fully diluted                                                    44.5545%  shares/FD
+  Founders' lines: of fully diluted                                                                    79.2079%  founder lines' shares/FD
+  Departed holders: of fully diluted                                                                    2.4752%  departed lines' shares/FD
+  Authorised common left over FD                                                                     -2,100,000  authorised common - FD
+  Fully diluted shares: the table says                                                               10,000,000  given
+  Fully diluted shares: difference                                                                      100,000  computed - stated
+  Fully diluted shares: verdict                                                                        mismatch  consistent only when equal
+  Holder line 1 (class 1, common) percent: the table says                                              45.0000%  given
+  Holder line 1 (class 1, common) percent: the calculator gives                                        44.5545%  shares/FD
+  Holder line 1 (class 1, common) percent: rounds to the table's "45.00"                                     no  the computed figure, rounded half away from zero to the places the table writes, is the table's
+  Holder line 1 (class 1, common) percent: verdict                                                     mismatch  within the tolerance, or rounding to the table's, is consistent
+  Percent column, line by line: the table says                                                        101.0000%  given
+  Percent column, line by line: what rounding explains                                                  0.0350%  half the last place of each
+  Percent column, line by line: verdict                                                                mismatch  a gap within what rounding explains, plus the tolerance for each, is consistent
+  Flag                                                                                      percents_do_not_sum  The stated percents cannot all be roundings of shares that add up to 100%: a line is missing, counted twice, or on another basis; find it before the table goes to an investor
+  Flag                                                                                          over_authorised  A class has issued more shares than the authorised figure given, or the option plan has granted and reserved more than its reserve; ask the company's lawyer whether the charter or the plan was amended to cover them
+  Flag                                                                    common_authorised_below_fully_diluted  Authorised common is below the fully diluted shares, all of which would be common once converted or exercised; ask the company's lawyer whether the charter reserves enough common
+  Flag                                                                          unconverted_instruments_present  SAFEs or notes are outstanding and hold no shares yet, so every percent here falls when they convert; list them for investors, and ask the company's lawyer to confirm their terms
+  Flag                                                                                   departed_holders_share  People who have left hold shares (the lines marked departed); investors often ask about it, and the company's lawyer can say whether any repurchase right or unvested shares were handled
+  Overall verdict                                                                                      mismatch  mismatch if any check is; consistent if all are; not_checked with none
+```
+
+The classes add up to 10,100,000 shares, not the table's 10,000,000. Each stated percent is its shares over the
+table's 10,000,000, so every one misses at two places against the classes' total (the first founder holds 44.5545%,
+not 45.00%), and the column, read line by line, adds up to 101.00%, past the 0.035 points that rounding seven percents
+to two places can explain; the report does not say which line is the extra one. Common is
+250,000 shares past its authorised 8,000,000, and authorised common is 2,100,000 short of the fully diluted shares;
+both are questions for the company's lawyer, and the report never says whether a share was validly issued. The
+departed hire holds 2.4752%, and the SAFE is listed outstanding: no percent here counts it until a `--preview` round
+converts it.
+
 ## Using it
 
 ```
@@ -1136,9 +1385,14 @@ equity_calculator metrics_check --period-months P [--recurring-unit monthly|annu
     [--cohort-churned-recurring X]] [--month-total-revenue T [--month-one-time-revenue O]
     [--month-usage-revenue U]] [--customers-start S [--customers-lost L]] [--customers-new N
     [--customers-new-paid P]] [--sales-marketing-spend M [--gross-margin-percent G]] [--net-burn B]
-    [--largest-customer-revenue L --period-revenue R] [--stated-arr A] [--stated-nrr-percent N]
+    [--largest-customer-revenue L --period-revenue R] [--arpa A [--contribution-margin-percent M]
+    [--ltv-churn-basis BASIS]] [--revenue-growth-percent G --profit-margin-percent M
+    [--profit-margin-basis BASIS]] [(--quarter-revenue Q --prior-quarter-revenue Q' |
+    --quarter-ending-arr A --prior-quarter-ending-arr A') --prior-quarter-sales-marketing-spend S]
+    [--stated-arr A] [--stated-nrr-percent N]
     [--stated-grr-percent G] [--stated-churn-percent C [--stated-churn-basis BASIS]] [--stated-cac C]
     [--stated-cac-payback-months M] [--stated-burn-multiple X] [--stated-concentration-percent C]
+    [--stated-ltv L] [--stated-ltv-to-cac X] [--stated-rule-of-40-percent R] [--stated-magic-number M]
     [--tolerance-points P] [--tolerance-percent Q] [--customer-segment smb|mid_market|enterprise]
     [--payback-band-months B] [--burn-multiple-band X] [--net-revenue-churn-band-percent C]
 equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
@@ -1149,13 +1403,18 @@ equity_calculator instrument_compare --founder-shares F --team-shares T --unissu
     --priced-pre-money V [--priced-target-pool-percent T] [--priced-pool-timing pre_money|post_money]
     --priced-preference "TERMS" [--note-valuation-cap K] [--note-discount-percent D]
     --note-interest-rate-percent R --note-compounding simple|annual|monthly [--note-stub-rule RULE]
-    --note-months-to-conversion M [--note-maturity-months M] [--note-interest-paid-in-cash]
-    --next-round "TERMS"... --exit E... [--pool-at-exit as_common|left_out]
+    [--note-maturity-months M] [--note-interest-paid-in-cash] [--note-owed-month M]...
+    [--note-months-to-conversion M --next-round "TERMS"... | [--note-maturity-conversion-valuation V |
+    --note-maturity-conversion-price P] [--note-change-of-control-multiple X | --note-change-of-control-at-cap]
+    [--note-months-to-exit M]] --exit E... [--pool-at-exit as_common|left_out]
 equity_calculator pool_plan --fully-diluted-shares FD --unissued-pool-shares U [--founder-shares F]
     --pre-money V --investment I --requested-pool-percent T --next-round-month M --hire "ROLE: TERMS"...
 equity_calculator raise_pipeline --round-size R [--lead-cheque L] [--commitment "AMOUNT kind=soft|firm"]...
     [--pro-rata A]... [--stage "NAME: TERMS"]... [--term-sheets-wanted W] [--cash-on-hand C [--cash-floor F]
     --phase "TERMS"... --months-to-raise M]
+equity_calculator cap_table_check --share-class "TERMS"... [--holder "TERMS"]... [--stated-fully-diluted-shares S]
+    [--stated-percent-basis fully_diluted|outstanding] [--option-plan-reserve R]
+    [--safe "TERMS" | --note "TERMS"]... [--preview "TERMS"] [--planned-round "TERMS"]... [--tolerance-points P]
 ```
 
 `deal_check` needs `--investment` and at least one of `--pre-money`, `--post-money` and `--stated-investor-percent`.
@@ -1183,6 +1442,13 @@ are there, and `--stated-churn-basis` (`logo`, `gross_revenue`, `net_revenue` or
 `--stated-churn-percent -3` reads as a number, but `-3%` needs the `=` form, `--stated-churn-percent=-3%`. A stated retention or churn figure is checked over
 `--period-months` and never annualised, so give the period the document's figure covers (1 for a monthly churn, 12
 for an annual NRR) and run once per period when the document mixes them. A stated CAC is checked as blended CAC.
+`--arpa` is the average revenue per account in `--recurring-unit`, and LTV needs a margin with it
+(`--contribution-margin-percent`, else `--gross-margin-percent`) and a churn above zero on `--ltv-churn-basis`.
+`--revenue-growth-percent` and `--profit-margin-percent` are the founder's own figures for the Rule of 40, with
+`--profit-margin-basis` (`ebitda`, `operating`, `free_cash_flow`, `net` or `unlabelled`) naming the margin; a
+negative margin written with a percent sign needs the `=` form (`--profit-margin-percent=-35%`), while `-35` reads as
+a number. The magic number takes two consecutive
+quarters' revenue, or their ending ARR, and the earlier quarter's sales and marketing spend.
 
 `market_sizing` needs at least one `--segment`, one group of buying customers with no overlap between groups. Each
 count, price and share is the founder's own figure: a price is given with the months it covers
@@ -1197,16 +1463,22 @@ every segment.
 
 `instrument_compare` needs today's founder shares, the team's shares and the unissued pool (`0` for none: today's
 fully diluted shares are built from them), the raise, option A's pre-money and series terms, option B's
-interest rate, compounding and months until it converts, at least one `--next-round` (with none it is refused,
-`no_next_round_given`, as the note converts only at a next round) and at least one `--exit`. Each `--next-round` is
-an alternative for the one round after today, worked from today, never after the one before. Every term is the
+interest rate and compounding, and at least one `--exit`. With one or more `--next-round` it also needs
+`--note-months-to-conversion`, the months until the note converts there. Each `--next-round` is
+an alternative for the one round after today, worked from today, never after the one before. With none, the
+comparison runs with no next round and says so (`no_next_round_given`): `--note-months-to-conversion` is refused, and
+the note's own maturity and sale terms come in instead (`--note-maturity-conversion-valuation` or
+`--note-maturity-conversion-price`, `--note-change-of-control-multiple` or `--note-change-of-control-at-cap` with
+`--note-months-to-exit`), each refused with a next round. `--note-owed-month` (up to 6) shows what the note owes at
+that month in either mode. Every term is the
 founder's own figure: `--priced-preference standard` (and `standard` in a `--next-round`) only when the founder says
 the terms are standard, 1x non-participating; otherwise give the multiple and participation. `--existing-series` takes
 `--class`'s terms with `preference-multiple=` and `participation=` always given (that series' own terms; rank is 1
 unless given), and `--existing-safe` and `--existing-note` take `--safe`'s and `--note`'s, an existing note with
-`months-outstanding=` as of today (dates are refused) and `compounding=` always given. `--note-maturity-months` is
-only compared with the months to conversion; nothing at maturity is modelled. `--pool-at-exit left_out` gives the pool
-nothing at an exit.
+`months-outstanding=` as of today (dates are refused) and `compounding=` always given. With a next round,
+`--note-maturity-months` is only compared with the months to conversion and nothing at maturity is modelled; with none,
+it is when the note is repaid or converts on the terms given. `--pool-at-exit left_out` gives the pool nothing at an
+exit.
 
 `pool_plan` needs the fully diluted shares before the round, the unissued pool (`0` for none), the pre-money, the
 raise, the term sheet's requested pool and the month the next round is expected (1 to 120 months from today), and at
@@ -1225,6 +1497,16 @@ from the last stage, to a term sheet), in the funnel's order; `rate-basis=benchm
 rate the founder took from a benchmark, the source running to the end of the stage. `--term-sheets-wanted` goes with
 the stages. `--cash-on-hand`, `--cash-floor`, each `--phase` (the same terms as `runway_plan`'s) and
 `--months-to-raise` give the start-raising month. Every figure is the founder's own.
+
+`cap_table_check` needs at least one `--share-class`, in the table's order (the first is class 1), each with its
+`kind` and, unless its `--holder` lines give them, its `shares`; a class with both takes `holder-lines=complete` or
+`holder-lines=partial` as the founder says. Each `--holder` names its class by number and is marked `founder` or
+`departed` (vested shares held by someone who has left) as the founder says, or both (it then counts in the founders'
+share, the path and the departed holders' share); the unissued pool has no holder lines. A stated percent needs `--stated-percent-basis`, never assumed, and on `outstanding` only common
+and preferred lines carry one. Give each stated percent with the places the table writes (`stated-percent=45.00` for
+"45.00%"). `--safe` and `--note` take `round`'s terms and are listed, never counted; `--preview` converts them at the
+next round the founder gives, and needs at least one; `--planned-round` takes `dilution`'s `--round` terms and needs a
+`founder` line, and with a `--preview` gives only the rounds after it. `authorised-shares` is for common and preferred only; the plan's reserve is `--option-plan-reserve`.
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
 `--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure, sensitivity
@@ -1248,6 +1530,10 @@ and a colon for a stage, which comes first:
 | `--hire`              | `ROLE: start-month=M (grant-shares=S \| grant-percent=P)`: the role and a colon first, the grant in shares or as a percent of the post-round fully diluted shares                                                                                                                           |
 | `--commitment`        | `AMOUNT kind=soft\|firm`: the amount first                                                                                                                                                                                                                                                  |
 | `--stage`             | `NAME: investors=N rate-percent=P [rate-basis=own\|benchmark] [benchmark-source=TEXT]`: the name and a colon first, the source last, running to the end                                                                                                                                     |
+| `--share-class`       | `kind=common\|preferred\|options_granted\|options_unissued\|warrants [shares=S] [authorised-shares=A] [stated-percent=P] [holder-lines=complete\|partial]`                                                                                                                                  |
+| `--holder`            | `share-class=K shares=S [stated-percent=P] [founder] [departed]` (K is 1 for the first `--share-class`)                                                                                                                                                                                     |
+| `--preview`           | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]`                                                                                                                                                                                                      |
+| `--planned-round`     | `--round`'s terms (with `--preview`, the rounds after it)                                                                                                                                                                                                                                   |
 
 A note that names no `compounding` compounds `annual`, and one that names no `stub-rule` uses `fractional_power`.
 An unknown term, a term given twice, or a value that is not a number is refused, naming the flag.
@@ -1296,7 +1582,8 @@ as `"a"`) and `rounded` is the display value as a decimal string.
 Every decimal input has at most 28 significant digits, trailing zeros included, and a nonzero value at least 1e-15
 and under 1e16 in size. A share count is a whole number below 1e16. Number text is at most 100 characters. A round takes at
 most 50 SAFEs and notes, a dilution at most 20 rounds, a waterfall at most 12 preferred classes, ranked 1 to 12, and a
-deal check at most 50 SAFEs and notes and 20 use-of-funds lines. A runway plan takes at most 3 cases (the plan, a
+deal check at most 50 SAFEs and notes and 20 use-of-funds lines, and a cap table check at most 20 classes, 100 holder lines, 50
+SAFEs and notes and 20 planned rounds. A runway plan takes at most 3 cases (the plan, a
 downside and a lean case) of at most 12 phases, 6 raises of at most 20 use-of-funds lines each, and 10 milestones;
 its months are at most 600 and its months to raise at most 60. A metrics check covers one period of 1 to 36
 months, and its customer counts are whole numbers below 1e16. A market size takes at most 8 segments, 3 top-down
@@ -1322,8 +1609,8 @@ tools do not check it.
 ## The Excel workbook
 
 There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` for the round, `Dilution`, `Vesting`,
-`Waterfall`, `Deal check`, `Runway plan`, `Metrics check`, `Market sizing`, `Priced vs note`, `Pool plan` or
-`Raise pipeline`):
+`Waterfall`, `Deal check`, `Runway plan`, `Metrics check`, `Market sizing`, `Priced vs note`, `Pool plan`,
+`Raise pipeline` or `Cap table check`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
@@ -1347,7 +1634,7 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
   does not calculate, such as a file preview or openpyxl's `data_only` read, shows them empty.
 - Totals are live `=SUM` formulas, so editing a part re-totals: the investor's post-money, total shares, total
   ownership and post-money (pool and round), the stake lost in all (dilution), vested in all and the grant (vesting), the total paid out
-  (waterfall), the pre-money split and use-of-funds totals (deal check), each raise's use-of-funds total (runway plan), a market size's totals across its segments (customers, gross spend, TAM, SAM and SOM), and the firm, soft and pro rata totals (raise pipeline). A line worked from a total is still a value: a raise pipeline's room after the lead and the firm commitments and its allocation left keep the figures of the run when a commitment is edited, and their how-column says so. A live total adds the rounded cells, so it can differ from the model's exact total in the last place
+  (waterfall), the pre-money split and use-of-funds totals (deal check), each raise's use-of-funds total (runway plan), a market size's totals across its segments (customers, gross spend, TAM, SAM and SOM), the firm, soft and pro rata totals (raise pipeline), and a cap table's fully diluted shares and its SAFE and note amounts. A line worked from a total is still a value: a raise pipeline's room after the lead and the firm commitments and its allocation left keep the figures of the run when a commitment is edited, and their how-column says so. A live total adds the rounded cells, so it can differ from the model's exact total in the last place
   kept: a cent on the investor's post-money, a thousandth of a share on the pool's total shares, 0.000001 on its total
   ownership. The number formats hide that difference.
 - The pool's and the round's value rows, the waterfall's payouts, a deal check's pre-money split and percent
@@ -1356,7 +1643,7 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
   rounding too: when it is not the typed count (0.335 shows 0.34 in one segment and 0.33 in the next), its
   how-column says "given, shown rounded so the segments add up to the total".
 - Verdict cells are coloured by conditional formatting: green for accept, grant and in the money, amber for break
-  even and at the money, red for reject, no grant and underwater. A deal check's, a runway plan's, a metrics check's and a market size's verdicts are
+  even and at the money, red for reject, no grant and underwater. A deal check's, a runway plan's, a metrics check's, a market size's and a cap table check's verdicts are
   green for consistent, red for mismatch and amber for not checked; a runway plan's milestones are green when covered and red
   when short. A waterfall choice is blue when the class converts
   and grey when it stays: neither is good or bad. The investor verdict recolours itself when an input changes;
@@ -1508,21 +1795,24 @@ The `runway_plan` scenario adds these, each only when the input uses it:
 
 The `metrics_check` scenario adds these, each only when the input uses it:
 
-| Key                      | Default                                                                                                                                                          | How to change it                              | Source                                                                                                                      |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `period_rule`            | every flow is for the one period; nothing annualised or compounded                                                                                               | `--period-months`                             | unverified (a modelling choice)                                                                                             |
-| `arr_rule`               | ARR = k × recurring revenue (the movement's); ARR from the latest month = 12 × its recurring revenue; run-rate = 12 × its whole revenue: only the figures worked | `--recurring-unit`                            | a16z ("16 More Startup Metrics", item 2)                                                                                    |
-| `retention_rule`         | GRR = (S - C - X)/S; NRR = (S + E - C - X)/S; new customers left out (primed, C' and so on, once a starting-customers figure is given)                           | fixed                                         | Bessemer for the definitions; leaving new customers out unverified                                                          |
-| `cohort_rule`            | the period's totals; with `--cohort-*` figures, which movements are the starting customers' own and which are totals                                             | the `--cohort-*` figures                      | unverified (a modelling choice)                                                                                             |
-| `churn_rule`             | logo, gross and net revenue churn over the period                                                                                                                | fixed                                         | a16z ("16 Startup Metrics", item 11; per month)                                                                             |
-| `cac_rule`               | blended = spend / new customers; paid = spend / paid-channel customers                                                                                           | fixed                                         | a16z ("16 Startup Metrics", item 8)                                                                                         |
-| `payback_rule`           | spend / (new monthly recurring revenue × gross margin)                                                                                                           | `--gross-margin-percent`                      | Bessemer (on gross margin); the formula unverified                                                                          |
-| `burn_multiple_rule`     | net burn / net new ARR; none at or below zero, a stated one not checked                                                                                          | fixed                                         | Sacks (the formula, no ratio before revenue, and approaching 0 as burn reaches 0); working none at zero or below unverified |
-| `concentration_rule`     | largest customer / the period's revenue; no benchmark                                                                                                            | fixed                                         | a16z ("16 More Startup Metrics", item 14)                                                                                   |
-| `tolerance`              | 0.5 points; 2% relative; a percent, months or multiple that is the computed figure rounded to its places also holds; one flag beside it                          | `--tolerance-points`, `--tolerance-percent`   | unverified (the rounding test is standard arithmetic)                                                                       |
-| `payback_band`           | the segment's target: 12, 18 or 24 months; with no margin, set against the revenue-only payback as a floor                                                       | `--customer-segment`, `--payback-band-months` | Bessemer (a benchmark, not a rule)                                                                                          |
-| `burn_multiple_band`     | 3x                                                                                                                                                               | `--burn-multiple-band`                        | Sacks (a benchmark, not a rule)                                                                                             |
-| `net_revenue_churn_band` | 2% a month, one-month periods only                                                                                                                               | `--net-revenue-churn-band-percent`            | Skok (a benchmark, not a rule)                                                                                              |
+| Key                      | Default                                                                                                                                                             | How to change it                                     | Source                                                                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `period_rule`            | every flow is for the one period; nothing annualised or compounded                                                                                                  | `--period-months`                                    | unverified (a modelling choice)                                                                                                      |
+| `arr_rule`               | ARR = k × recurring revenue (the movement's); ARR from the latest month = 12 × its recurring revenue; run-rate = 12 × its whole revenue: only the figures worked    | `--recurring-unit`                                   | a16z ("16 More Startup Metrics", item 2)                                                                                             |
+| `retention_rule`         | GRR = (S - C - X)/S; NRR = (S + E - C - X)/S; new customers left out (primed, C' and so on, once a starting-customers figure is given)                              | fixed                                                | Bessemer for the definitions; leaving new customers out unverified                                                                   |
+| `cohort_rule`            | the period's totals; with `--cohort-*` figures, which movements are the starting customers' own and which are totals                                                | the `--cohort-*` figures                             | unverified (a modelling choice)                                                                                                      |
+| `churn_rule`             | logo, gross and net revenue churn over the period                                                                                                                   | fixed                                                | a16z ("16 Startup Metrics", item 11; per month)                                                                                      |
+| `cac_rule`               | blended = spend / new customers; paid = spend / paid-channel customers                                                                                              | fixed                                                | a16z ("16 Startup Metrics", item 8)                                                                                                  |
+| `payback_rule`           | spend / (new monthly recurring revenue × gross margin)                                                                                                              | `--gross-margin-percent`                             | Bessemer (on gross margin); the formula unverified                                                                                   |
+| `burn_multiple_rule`     | net burn / net new ARR; none at or below zero, a stated one not checked                                                                                             | fixed                                                | Sacks (the formula, no ratio before revenue, and approaching 0 as burn reaches 0); working none at zero or below unverified          |
+| `concentration_rule`     | largest customer / the period's revenue; no benchmark                                                                                                               | fixed                                                | a16z ("16 More Startup Metrics", item 14)                                                                                            |
+| `ltv_rule`               | ARPA × the period's units × the contribution margin (else the gross margin) / the period's churn on its basis; no discounting; LTV/CAC on blended CAC; no benchmark | `--contribution-margin-percent`, `--ltv-churn-basis` | a16z ("16 Startup Metrics", item 5, paraphrased: margin / monthly churn); the churn basis, longer periods, no discounting unverified |
+| `rule_of_40_rule`        | the founder's revenue growth + profit margin, as given, the margin's basis named; no line set                                                                       | `--profit-margin-basis`                              | unverified (a common rule of thumb; its sources not read)                                                                            |
+| `magic_number_rule`      | 4 × the quarter's revenue change / the prior quarter's sales and marketing spend; on ARR, the change with no 4; no benchmark                                        | `--quarter-ending-arr`, `--prior-quarter-ending-arr` | unverified (a common definition; its sources not read)                                                                               |
+| `tolerance`              | 0.5 points; 2% relative; a percent, months or multiple that is the computed figure rounded to its places also holds; one flag beside it                             | `--tolerance-points`, `--tolerance-percent`          | unverified (the rounding test is standard arithmetic)                                                                                |
+| `payback_band`           | the segment's target: 12, 18 or 24 months; with no margin, set against the revenue-only payback as a floor                                                          | `--customer-segment`, `--payback-band-months`        | Bessemer (a benchmark, not a rule)                                                                                                   |
+| `burn_multiple_band`     | 3x                                                                                                                                                                  | `--burn-multiple-band`                               | Sacks (a benchmark, not a rule)                                                                                                      |
+| `net_revenue_churn_band` | 2% a month, one-month periods only                                                                                                                                  | `--net-revenue-churn-band-percent`                   | Skok (a benchmark, not a rule)                                                                                                       |
 
 The `market_sizing` scenario adds these: `bottom_up_rule`, `annual_rule` and `sam_rule` always, the rest only when
 the input uses them:
@@ -1560,6 +1850,23 @@ these (`standard_preference` only when a series is given as standard):
 | `money_split`               | largest remainder within each option                                                        | fixed                                             | display convention                          |
 | `difference_rounding`       | B - A of the exact values, rounded once                                                     | fixed                                             | display convention                          |
 
+With no next round, `note_price_rule` and `exit_after_next_round` are left out, and so are the round rows of a
+conversion that never happens: `note_cap_basis` when neither B's note nor an existing note has a cap,
+`interest_conversion` when no note converts (B's only at its maturity on a conversion term or at a worked sale at its
+cap, an existing note in A's round today), and `tie_rule` and `search` when no existing SAFE or note converts in A's
+round today. `comparison_rule`, `note_outstanding_today`, `note_interest_terms`, `maturity_rule`,
+`existing_instruments_rule` and `series_terms` say what that mode does instead, the waterfall's
+`exit_is_shared_amount` is worded for both options, and these are added (`note_cap_rule` only when a cap is given,
+`note_discount_rule` only when a discount is given):
+
+| Key                     | Default                                                                                                              | How to change it                                                                                     | Source                                   |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `maturity_rule`         | at maturity the repayment, and a conversion only at the founder's valuation (over FD) or price                       | `--note-maturity-months`, `--note-maturity-conversion-valuation`, `--note-maturity-conversion-price` | unverified (the note's own terms decide) |
+| `exit_before_any_round` | every exit is a sale before any priced round; B's note paid its multiple of principal first, or converted at its cap | `--note-change-of-control-multiple`, `--note-change-of-control-at-cap`                               | unverified (the note's own terms decide) |
+| `exit_is_shared_amount` | A: nothing ahead of the shareholders; B: only the note's own claim, a multiple of its principal paid first           | give each exit net of anything else paid first                                                       | unverified (usual preferred-stock terms) |
+| `note_cap_rule`         | the cap sets a price only at a priced round or a sale worked on the converts-at-its-cap term                         | fixed                                                                                                | unverified (notes have no standard form) |
+| `note_discount_rule`    | the discount comes off a priced round's price, so it changes no figure here                                          | fixed                                                                                                | unverified (notes have no standard form) |
+
 The `pool_plan` scenario carries the pool's `target_pool`, `price_basis` and `money_split` rows word for word, and
 these:
 
@@ -1584,6 +1891,23 @@ plan's own rows (`runway_rule`, `phase_rule`, ...) word for word after them:
 | `rate_basis`           | every rate the founder's own                                                | `rate-basis=benchmark` with its source | the founder                               |
 | `targets_needed`       | each count needed rounded up to whole investors                             | fixed                                  | unverified (standard arithmetic)          |
 | `start_raising_rule`   | the runway plan's runway with no raise less the months to raise             | `--months-to-raise`                    | unverified (the runway plan's arithmetic) |
+
+The `cap_table_check` scenario adds these (`preferred_as_converted` only with a preferred class, `warrants_as_exercised`
+only with warrants, the rest only when the input uses them, `legal_validity` always), then the nested round's and
+dilution's own rows that it does not already list:
+
+| Key                      | Default                                                         | How to change it                              | Source                                                      |
+| ------------------------ | --------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------- |
+| `fully_diluted_basis`    | every class, the unissued pool included                         | fixed                                         | unverified; Altman's fully-diluted measure                  |
+| `class_shares`           | a class's stated shares, else its holder lines' sum             | `shares=`, `holder-lines=`                    | method                                                      |
+| `preferred_as_converted` | one common share per preferred share                            | fixed                                         | unverified (the charter decides; a question for the lawyer) |
+| `warrants_as_exercised`  | one share per warrant share                                     | fixed                                         | unverified (the warrant decides; a question for the lawyer) |
+| `outstanding_basis`      | common and preferred only                                       | `--stated-percent-basis`                      | unverified (the founder named the basis)                    |
+| `tolerance`              | 0 points beyond rounding                                        | `--tolerance-points`                          | unverified (the rounding test is standard arithmetic)       |
+| `authorised_shares`      | the founder's authorised figures, class by class                | `authorised-shares=`, `--option-plan-reserve` | unverified (the charter decides; a question for the lawyer) |
+| `instruments_outside`    | SAFEs and notes are not in FD until they convert                | `--preview`                                   | unverified                                                  |
+| `founder_path`           | the founders' share, from the preview or today, times each kept | `--planned-round`, `--preview`                | unverified                                                  |
+| `legal_validity`         | not checked                                                     | fixed                                         | method                                                      |
 
 </details>
 

@@ -17,6 +17,7 @@ from equity_calculator.schemas.equity import (
     PoolInput,
     PoolResult,
 )
+from equity_calculator.schemas.equity_cap_table_check import CapTableCheckInput, CapTableCheckResult
 from equity_calculator.schemas.equity_common import (
     MAX_ADJUSTED_EXPONENT,
     MAX_SIGNIFICANT_DIGITS,
@@ -366,6 +367,35 @@ METRICS_AN_DECK: dict[str, object] = {
     "stated_cac_payback_months": "7.2",
 }
 METRICS_AN_MODEL: dict[str, object] = {**METRICS_AN_PARTS, "stated_cac_payback_months": "9.6"}
+# Company DL, one month: $200k MRR at the start, $20k new, $2k expansion, $1k downgrades, $3k cancelled; 25 new
+# customers (10 from paid channels) for $150k of sales and marketing; 80% gross margin, 60% contribution margin, $2k
+# ARPA a month. The founder's own figures: 70% revenue growth and a -35% EBITDA margin; quarter revenue $510k then
+# $600k, with $450k of sales and marketing in the earlier quarter. Its deck says LTV $100k, LTV/CAC 10x, Rule of 40
+# 35% and a magic number of 0.2.
+METRICS_DL: dict[str, object] = {
+    "period_months": 1,
+    "starting_recurring": "200000",
+    "new_recurring": "20000",
+    "expansion_recurring": "2000",
+    "contraction_recurring": "1000",
+    "churned_recurring": "3000",
+    "customers_new": 25,
+    "customers_new_paid": 10,
+    "sales_marketing_spend": "150000",
+    "gross_margin_percent": "80",
+    "arpa": "2000",
+    "contribution_margin_percent": "60",
+    "revenue_growth_percent": "70",
+    "profit_margin_percent": "-35",
+    "profit_margin_basis": "ebitda",
+    "quarter_revenue": "600000",
+    "prior_quarter_revenue": "510000",
+    "prior_quarter_sales_marketing_spend": "450000",
+    "stated_ltv": "100000",
+    "stated_ltv_to_cac": "10",
+    "stated_rule_of_40_percent": "35",
+    "stated_magic_number": "0.2",
+}
 
 
 def metrics_check(**fields: object) -> MetricsCheckResult:
@@ -470,6 +500,27 @@ COMPARE_BU: dict[str, object] = {
 }
 
 
+# Company DX (made up): a founder who hopes today's raise is the only one and offers no cap. The note has a 20%
+# discount, 6% simple interest, a 24-month maturity at which it converts at a $5M valuation, and 2x its principal at a
+# sale.
+COMPARE_DX: dict[str, object] = {
+    "founder_shares": 9_000_000,
+    "team_shares": 500_000,
+    "unissued_pool_shares": 500_000,
+    "investment": "1500000",
+    "priced_pre_money": "6000000",
+    "priced_preference": {"standard": True},
+    "note_discount_percent": "20",
+    "note_interest_rate_percent": "6",
+    "note_compounding": "simple",
+    "note_owed_months": [12, 24],
+    "note_maturity_months": 24,
+    "note_maturity_conversion_valuation": "5000000",
+    "note_change_of_control_multiple": "2",
+    "exit_amounts": ["3000000", "10000000", "40000000"],
+}
+
+
 def instrument_compare(**fields: object) -> InstrumentCompareResult:
     """The priced-round-or-note comparison for ``fields`` (an ``InstrumentCompareInput``'s fields)."""
     return compute(InstrumentCompareInput.model_validate(fields))
@@ -537,3 +588,86 @@ RAISE_PIPELINE_RA: dict[str, object] = {
 def raise_pipeline(**fields: object) -> RaisePipelineResult:
     """The raise pipeline for ``fields`` (a ``RaisePipelineInput``'s fields)."""
     return compute(RaisePipelineInput.model_validate(fields))
+
+
+# Company CQ, made up, worked by exact fractions in test_cap_table_check.py: two founders' common (4,500,000 and
+# 3,500,000) and a departed early hire's 250,000, under 8,000,000 authorised common; 1,000,000 seed preferred (all of
+# its 1,000,000 authorised); 500,000 options granted and a 250,000 unissued pool under a 750,000 reserve; 100,000
+# warrants; and a $1,000,000 SAFE at a $12,000,000 cap. The table states 10,000,000 fully diluted shares and percents
+# to two places that were worked on it, before the warrants: they add up to 101.00%, against 10,100,000 shares.
+CAP_TABLE_CQ: dict[str, object] = {
+    "classes": [
+        {"kind": "common", "authorised_shares": 8_000_000},
+        {"kind": "preferred", "shares": 1_000_000, "authorised_shares": 1_000_000, "stated_percent": "10.00"},
+        {"kind": "options_granted", "shares": 500_000, "stated_percent": "5.00"},
+        {"kind": "options_unissued", "shares": 250_000, "stated_percent": "2.50"},
+        {"kind": "warrants", "shares": 100_000, "stated_percent": "1.00"},
+    ],
+    "holders": [
+        {"share_class": 1, "shares": 4_500_000, "stated_percent": "45.00", "founder": True},
+        {"share_class": 1, "shares": 3_500_000, "stated_percent": "35.00", "founder": True},
+        {"share_class": 1, "shares": 250_000, "stated_percent": "2.50", "departed": True},
+    ],
+    "stated_fully_diluted_shares": 10_000_000,
+    "stated_percent_basis": "fully_diluted",
+    "option_plan_reserve": 750_000,
+    "instruments": [{"kind": "safe", "purchase_amount": "1000000", "valuation_cap": "12000000"}],
+}
+
+# Company CR, made up: two founders' common (5,000,000 and 3,000,000) and a departed co-founder's 500,000 (marked
+# departed only: the founder counts just the two of them as founders), 1,000,000 options granted and a 500,000
+# unissued pool (10,000,000 fully diluted), two SAFEs ($1,000,000 at a $10,000,000 cap; $500,000 at an $8,000,000 cap
+# and a 20% discount), the founder's next round ($4,000,000 at an $18,000,000 pre-money) and the two rounds planned
+# after it (20% sold with a 5% new pool, then 20% sold).
+CAP_TABLE_CR: dict[str, object] = {
+    "classes": [
+        {"kind": "common"},
+        {"kind": "options_granted", "shares": 1_000_000},
+        {"kind": "options_unissued", "shares": 500_000},
+    ],
+    "holders": [
+        {"share_class": 1, "shares": 5_000_000, "stated_percent": "50", "founder": True},
+        {"share_class": 1, "shares": 3_000_000, "stated_percent": "30", "founder": True},
+        {"share_class": 1, "shares": 500_000, "stated_percent": "5", "departed": True},
+    ],
+    "stated_percent_basis": "fully_diluted",
+    "instruments": [
+        {"kind": "safe", "purchase_amount": "1000000", "valuation_cap": "10000000"},
+        {"kind": "safe", "purchase_amount": "500000", "valuation_cap": "8000000", "discount_percent": "20"},
+    ],
+    "conversion_preview": {"pre_money": "18000000", "investment": "4000000"},
+    "planned_rounds": [{"investor_percent": "20", "pool_percent": "5"}, {"investor_percent": "20"}],
+}
+# Company CR as the command takes it.
+CAP_TABLE_CR_ARGV = [
+    "cap_table_check",
+    "--share-class",
+    "kind=common",
+    "--share-class",
+    "kind=options_granted shares=1,000,000",
+    "--share-class",
+    "kind=options_unissued shares=500,000",
+    "--holder",
+    "share-class=1 shares=5,000,000 stated-percent=50 founder",
+    "--holder",
+    "share-class=1 shares=3,000,000 stated-percent=30 founder",
+    "--holder",
+    "share-class=1 shares=500,000 stated-percent=5 departed",
+    "--stated-percent-basis",
+    "fully_diluted",
+    "--safe",
+    "1,000,000 valuation-cap=10,000,000",
+    "--safe",
+    "500,000 valuation-cap=8,000,000 discount-percent=20",
+    "--preview",
+    "pre-money=18,000,000 investment=4,000,000",
+    "--planned-round",
+    "investor-percent=20 pool-percent=5",
+    "--planned-round",
+    "investor-percent=20",
+]
+
+
+def cap_table_check(**fields: object) -> CapTableCheckResult:
+    """The cap table check for ``fields`` (a ``CapTableCheckInput``'s fields)."""
+    return compute(CapTableCheckInput.model_validate(fields))

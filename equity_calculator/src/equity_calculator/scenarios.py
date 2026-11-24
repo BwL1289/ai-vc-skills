@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import assert_never, overload
 
+from equity_calculator.cap_table_check import compute_cap_table_check
 from equity_calculator.deal_check import compute_deal_check
 from equity_calculator.dilution import compute_dilution
 from equity_calculator.employee import compute_employee
@@ -23,6 +24,8 @@ from equity_calculator.raise_pipeline import compute_raise_pipeline
 from equity_calculator.round import compute_round
 from equity_calculator.runway_plan import compute_runway_plan
 from equity_calculator.schemas.equity import (
+    CapTableCheckInput,
+    CapTableCheckResult,
     DealCheckInput,
     DealCheckResult,
     DilutionInput,
@@ -128,12 +131,17 @@ def compute(inputs: RaisePipelineInput) -> RaisePipelineResult:
     ...
 
 
+@overload
+def compute(inputs: CapTableCheckInput) -> CapTableCheckResult:
+    ...
+
+
 def compute(inputs: ScenarioInput) -> ScenarioResult:
     """The worked result of ``inputs``' scenario.
 
     Raises an ``equity_calculator.errors.EquityComputeError`` (a ``ValueError``) when a valid input has no answer: a
     round (or a deal check's or comparison's nested round) with no positive price or whose conversions never settle
-    (``RoundHasNoPrice``, ``ConversionDidNotSettle``), or
+    (``RoundHasNoPrice``, ``ConversionDidNotSettle``; a cap table check's conversion preview too), or
     an exit waterfall (or a comparison's exit) whose convert-or-stay search finds no stable choice
     (``NoConversionEquilibrium``).
     """
@@ -166,5 +174,7 @@ def compute(inputs: ScenarioInput) -> ScenarioResult:
             return compute_pool_plan(inputs)
         case RaisePipelineInput():
             return compute_raise_pipeline(inputs)
+        case CapTableCheckInput():
+            return compute_cap_table_check(inputs)
         case _:
             assert_never(inputs)

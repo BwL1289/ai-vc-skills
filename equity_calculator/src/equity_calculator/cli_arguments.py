@@ -1,5 +1,5 @@
 """Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check|``
-``runway_plan|metrics_check|market_sizing|instrument_compare|pool_plan|raise_pipeline``).
+``runway_plan|metrics_check|market_sizing|instrument_compare|pool_plan|raise_pipeline|cap_table_check``).
 
 The number readers are ``cli_numbers``; a repeated flag's one-argument terms are ``cli_instruments``.
 """
@@ -10,13 +10,16 @@ import argparse
 from typing import get_args
 
 from equity_calculator.cli_instruments import (
+    parse_cap_class,
     parse_class,
     parse_commitment,
     parse_funds_line,
     parse_hire,
+    parse_holder,
     parse_next_round,
     parse_note,
     parse_phase,
+    parse_preview,
     parse_raise,
     parse_raise_funds_line,
     parse_round,
@@ -37,8 +40,15 @@ from equity_calculator.cli_numbers import (
     parse_years,
 )
 from equity_calculator.schemas.equity import PoolTiming, ShareRounding
+from equity_calculator.schemas.equity_cap_table_check import PercentBasis
 from equity_calculator.schemas.equity_instrument_compare import PoolAtExit
-from equity_calculator.schemas.equity_metrics_check import CustomerSegment, RecurringUnit, StatedChurnBasis
+from equity_calculator.schemas.equity_metrics_check import (
+    ChurnBasis,
+    CustomerSegment,
+    ProfitMarginBasis,
+    RecurringUnit,
+    StatedChurnBasis,
+)
 from equity_calculator.schemas.equity_round import NoteCompounding, StubRule
 from equity_calculator.schemas.equity_vesting import Acceleration, AccelerationBase
 
@@ -460,6 +470,50 @@ def _metrics_parts_arguments(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument("--largest-customer-revenue", type=parse_decimal, help="The largest customer's revenue.")
     parser.add_argument("--period-revenue", type=parse_decimal, help="Total revenue in the period.")
+    _metrics_later_parts_arguments(parser)
+
+
+def _metrics_later_parts_arguments(parser: argparse.ArgumentParser) -> None:
+    """LTV's parts, the Rule of 40's two percents and the magic number's two quarters."""
+    parser.add_argument(
+        "--arpa",
+        type=parse_decimal,
+        help="Average recurring revenue per account, in --recurring-unit; LTV is worked from it.",
+    )
+    parser.add_argument(
+        "--contribution-margin-percent",
+        type=parse_percent,
+        help="Contribution margin, in percent; LTV uses it over --gross-margin-percent.",
+    )
+    parser.add_argument(
+        "--ltv-churn-basis",
+        choices=get_args(ChurnBasis),
+        help="The period's churn LTV divides by (default gross_revenue).",
+    )
+    parser.add_argument(
+        "--revenue-growth-percent",
+        type=parse_percent,
+        help="Revenue growth for the Rule of 40, in percent, as you state it (below 0 as --revenue-growth-percent=-5).",
+    )
+    parser.add_argument(
+        "--profit-margin-percent",
+        type=parse_percent,
+        help="Profit margin for the Rule of 40, in percent (below 0 as --profit-margin-percent=-20).",
+    )
+    parser.add_argument(
+        "--profit-margin-basis",
+        choices=get_args(ProfitMarginBasis),
+        help="Which margin --profit-margin-percent is (default unlabelled, which is flagged).",
+    )
+    quarters = (
+        ("--quarter-revenue", "The latest quarter's revenue (Q), for the magic number."),
+        ("--prior-quarter-revenue", "The quarter before's revenue (Q')."),
+        ("--quarter-ending-arr", "ARR at the latest quarter's end (A), for the magic number on ARR."),
+        ("--prior-quarter-ending-arr", "ARR at the end of the quarter before (A')."),
+        ("--prior-quarter-sales-marketing-spend", "Sales and marketing spend in the quarter before, every cost."),
+    )
+    for flag, words in quarters:
+        parser.add_argument(flag, type=parse_decimal, help=words)
 
 
 def metrics_check_arguments(parser: argparse.ArgumentParser) -> None:
@@ -487,6 +541,10 @@ def metrics_check_arguments(parser: argparse.ArgumentParser) -> None:
         ("--stated-cac-payback-months", parse_decimal, "The CAC payback it states, in months."),
         ("--stated-burn-multiple", parse_decimal, "The burn multiple it states (2.5 for 2.5x)."),
         ("--stated-concentration-percent", parse_percent, "The largest customer's share of revenue it states."),
+        ("--stated-ltv", parse_decimal, "The LTV it states, in dollars."),
+        ("--stated-ltv-to-cac", parse_decimal, "The LTV/CAC it states (3 for 3x)."),
+        ("--stated-rule-of-40-percent", parse_percent, "The Rule of 40 it states, in percent (45 for 45%%)."),
+        ("--stated-magic-number", parse_decimal, "The magic number it states (0.8 for 0.8)."),
         (
             "--tolerance-points",
             parse_percent,
@@ -652,17 +710,62 @@ def _note_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--note-months-to-conversion",
         type=parse_months,
-        required=True,
-        help="B: months from today until the note converts at the next round.",
+        help="B: months from today until the note converts at the next round (needed with --next-round; left out "
+        "with none).",
     )
     parser.add_argument(
-        "--note-maturity-months", type=parse_months, help="B: the note's maturity in months (compared only)."
+        "--note-maturity-months",
+        type=parse_months,
+        help="B: the note's maturity in months (with a next round, compared only; with none, its maturity is shown).",
     )
     parser.add_argument(
         "--note-interest-paid-in-cash",
         action="store_true",
         default=None,
         help="B: the interest is paid in cash, so only the principal converts.",
+    )
+    parser.add_argument(
+        "--note-owed-month",
+        type=parse_months,
+        action="append",
+        dest="note_owed_months",
+        metavar="M",
+        help="B: a month at which to show what the note owes, principal plus interest (its maturity, say). Repeat "
+        "for each (at most 6).",
+    )
+    _no_round_note_arguments(parser)
+
+
+def _no_round_note_arguments(parser: argparse.ArgumentParser) -> None:
+    """Option B's own terms for no next round: its conversion at maturity, and what it is paid at a sale before any
+    priced round. Each is the note's own term, from the founder; with a --next-round each is refused."""
+    parser.add_argument(
+        "--note-maturity-conversion-valuation",
+        type=parse_decimal,
+        help="B, no next round: the valuation the note converts at on maturity, over today's FD, from its own terms.",
+    )
+    parser.add_argument(
+        "--note-maturity-conversion-price",
+        type=parse_decimal,
+        help="B, no next round: the price a share the note converts at on maturity, from its own terms.",
+    )
+    parser.add_argument(
+        "--note-change-of-control-multiple",
+        type=parse_decimal,
+        help="B, no next round: at a sale before any priced round the note is paid this multiple of its principal, "
+        "before any share, from its own terms.",
+    )
+    parser.add_argument(
+        "--note-change-of-control-at-cap",
+        action="store_true",
+        default=None,
+        help="B, no next round: at a sale before any priced round the note converts at its cap price into common, "
+        "from its own terms (needs --note-valuation-cap and --note-months-to-exit).",
+    )
+    parser.add_argument(
+        "--note-months-to-exit",
+        type=parse_months,
+        help="B, no next round: months from today to the sales, for the interest the note owes then.",
     )
 
 
@@ -700,8 +803,8 @@ def instrument_compare_arguments(parser: argparse.ArgumentParser) -> None:
         metavar=_TERMS,
         help="The next priced round, the same for both options: 'pre-money=V investment=I [target-pool-percent=T] "
         f"[pool-timing=pre_money|post_money]' and its series' terms, {_SERIES_HELP}. Repeat for each alternative "
-        "(at most 4): each is worked from today, never after the one before. At least one is needed, as the note "
-        "converts only there.",
+        "(at most 4): each is worked from today, never after the one before. With none, the comparison runs with no "
+        "next round: ownership today, the note at its maturity and each exit as a sale before any priced round.",
     )
     parser.add_argument(
         "--exit",
@@ -709,8 +812,8 @@ def instrument_compare_arguments(parser: argparse.ArgumentParser) -> None:
         action="append",
         dest="exit_amounts",
         metavar="E",
-        help="What the company sells for after the next round, in dollars. Repeat for each (at most 6); at least "
-        "one is needed.",
+        help="What the company sells for after the next round (with no --next-round, before any priced round), in "
+        "dollars. Repeat for each (at most 6); at least one is needed.",
     )
     parser.add_argument(
         "--pool-at-exit",
@@ -812,4 +915,69 @@ def raise_pipeline_arguments(parser: argparse.ArgumentParser) -> None:
         "--months-to-raise",
         type=parse_months,
         help="Months the founder allows to raise; the start-raising month is the runway less these.",
+    )
+
+
+def cap_table_check_arguments(parser: argparse.ArgumentParser) -> None:
+    """A cap table's flags: one ``--share-class`` per class and one ``--holder`` per holder line, in order, then the
+    stated total and basis, the plan's reserve, the SAFEs and notes, and the founder's next round and planned rounds."""
+    parser.add_argument(
+        "--share-class",
+        type=parse_cap_class,
+        action="append",
+        dest=_CLASSES,
+        required=True,
+        metavar=_TERMS,
+        help="One class: 'kind=common|preferred|options_granted|options_unissued|warrants [shares=S] "
+        "[authorised-shares=A] [stated-percent=P] [holder-lines=complete|partial]'; shares may be left to its holder "
+        "lines. With both shares and --holder lines, holder-lines says whether the lines are every holder of the "
+        "class (complete: checked against shares) or only some (partial); it is required then, never assumed. "
+        "Repeat for each class, in the table's order (the first is class 1).",
+    )
+    parser.add_argument(
+        "--holder",
+        type=parse_holder,
+        action="append",
+        dest="holders",
+        metavar=_TERMS,
+        help="One holder line: 'share-class=K shares=S [stated-percent=P] [founder] [departed]', K the class's number; "
+        "departed marks shares held by someone who has left. A line with both marks counts in the founders' share, "
+        "the founders' path and the departed holders' share. Repeat for each line.",
+    )
+    parser.add_argument(
+        "--stated-fully-diluted-shares", type=parse_whole, help="The table's own fully diluted total, to check."
+    )
+    parser.add_argument(
+        "--stated-percent-basis",
+        choices=get_args(PercentBasis),
+        help="What the table's percents are a share of; required with any stated-percent, never assumed.",
+    )
+    parser.add_argument(
+        "--option-plan-reserve", type=parse_whole, help="The option plan's authorised reserve (granted + unissued)."
+    )
+    parser.add_argument("--safe", type=parse_safe, action="append", dest=_INSTRUMENTS, metavar=_TERMS, help=_SAFE_HELP)
+    parser.add_argument("--note", type=parse_note, action="append", dest=_INSTRUMENTS, metavar=_TERMS, help=_NOTE_HELP)
+    parser.add_argument(
+        "--preview",
+        type=parse_preview,
+        dest="conversion_preview",
+        metavar=_TERMS,
+        help="The next priced round as the founder gives it, to convert the SAFEs and notes: 'pre-money=V "
+        "investment=I [target-pool-percent=T] [pool-timing=pre_money|post_money]'. Never assumed.",
+    )
+    parser.add_argument(
+        "--planned-round",
+        type=parse_round,
+        action="append",
+        dest="planned_rounds",
+        metavar=_TERMS,
+        help="One planned round for the founders' path, as --round takes it in dilution: '(investor-percent=N | "
+        "pre-money=V investment=I) [pool-percent=P]'. Repeat for each round, in order. With --preview the path "
+        "starts after the preview's round, so these are the rounds after it: never repeat the preview here (it "
+        "would be counted twice).",
+    )
+    parser.add_argument(
+        "--tolerance-points",
+        type=parse_percent,
+        help="How far a stated percent may sit from the computed one beyond rounding, in points (default 0).",
     )

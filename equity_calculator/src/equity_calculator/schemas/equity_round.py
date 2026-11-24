@@ -33,6 +33,7 @@ from equity_calculator.schemas.equity_common import (
 from pydantic import BaseModel, Field, model_validator
 
 __all__ = [
+    "AMOUNT_LABELS",
     "MAX_INSTRUMENTS",
     "MAX_NOTE_DAYS",
     "MAX_NOTE_MONTHS",
@@ -50,6 +51,7 @@ __all__ = [
     "SafeKind",
     "SafeTerms",
     "StubRule",
+    "instrument_amount",
     "refuse_caps_over_whole",
     "refuse_pool_too_large",
 ]
@@ -152,6 +154,17 @@ class NoteTerms(BaseModel):
 
 
 Instrument = Annotated[SafeTerms | NoteTerms, Field(discriminator="kind")]
+
+# What each kind of instrument holds before interest, as every report names it.
+AMOUNT_LABELS: dict[str, str] = {"safe": "purchase amount", "note": "principal"}
+
+
+def instrument_amount(item: SafeTerms | NoteTerms) -> tuple[Decimal, str]:
+    """What ``item`` holds before interest, and its name: a SAFE's purchase amount, a note's principal."""
+    if isinstance(item, SafeTerms):
+        return item.purchase_amount, AMOUNT_LABELS[item.kind]
+
+    return item.principal, AMOUNT_LABELS[item.kind]
 
 
 class RoundInput(BaseModel):

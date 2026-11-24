@@ -23,7 +23,9 @@ from equity_calculator.result_range import OUT_OF_RANGE_REASON
 from equity_calculator.scenarios import compute
 from openpyxl import load_workbook
 from tests.support import (
+    CAP_TABLE_CQ,
     COMPARE_BU,
+    COMPARE_DX,
     DEAL_B,
     DILUTION_ROUNDS,
     MARKET_AW,
@@ -136,6 +138,7 @@ _SAMPLES: dict[str, dict[str, object]] = {
     "instrument_compare": COMPARE_BU,
     "pool_plan": POOL_PLAN_CP,
     "raise_pipeline": RAISE_PIPELINE_RA,
+    "cap_table_check": CAP_TABLE_CQ,
 }
 # $1M in at a $1M pre-money with a 25% pre-money pool target and a $250k SAFE at a 50% discount: the pooled price is
 # exactly zero, so the round has no price (the same case as test_round_pool.py).
@@ -182,7 +185,7 @@ async def test_one_read_only_tool_per_scenario_and_no_workbook_tool_without_a_fo
     tools = await _tools(mcp_server.build_server())
 
     assert sorted(tool.name for tool in tools) == sorted(f"equity_{scenario}" for scenario in _INPUT_MODELS)
-    assert len(tools) == len(_SAMPLES) == 14
+    assert len(tools) == len(_SAMPLES) == 15
     for tool in tools:
         assert tool.annotations.readOnlyHint is True
         assert tool.annotations.openWorldHint is False
@@ -199,18 +202,52 @@ async def test_each_tool_returns_the_scenario_result_as_json(scenario: str) -> N
 
 
 async def test_the_comparison_tool_schema_names_both_options_the_next_rounds_and_the_exits() -> None:
-    """The tool's input schema carries every field of both options; a missing next round is a tool error saying so."""
+    """The tool's input schema carries every field of both options and of the no-next-round mode; with no next round
+    the tool runs that mode, and a conversion month given with no next round is a tool error naming it."""
     tools = await _tools(mcp_server.build_server())
     tool = next(tool for tool in tools if tool.name == "equity_instrument_compare")
     schema = json.dumps(tool.inputSchema)
 
-    for field in ("priced_pre_money", "priced_preference", "note_valuation_cap", "next_rounds", "exit_amounts"):
+    fields = (
+        "priced_pre_money",
+        "priced_preference",
+        "note_valuation_cap",
+        "next_rounds",
+        "exit_amounts",
+        "note_owed_months",
+        "note_maturity_conversion_valuation",
+        "note_change_of_control_multiple",
+        "note_change_of_control_at_cap",
+        "note_months_to_exit",
+    )
+    for field in fields:
         assert f'"{field}"' in schema, field
     assert "never a pick" in (tool.title or "")
+    assert "mode no_next_round" in (tool.description or "")
     without = {key: value for key, value in COMPARE_BU.items() if key != "next_rounds"}
     refused = await _call(mcp_server.build_server(), "equity_instrument_compare", {"inputs": without})
     assert refused.isError is True
-    assert "no_next_round_given" in _text(refused)
+    assert "no_next_round_given: note_months_to_conversion" in _text(refused)
+    only_round = await _call(mcp_server.build_server(), "equity_instrument_compare", {"inputs": COMPARE_DX})
+    assert only_round.isError is False
+    assert _text(only_round) == _expected("instrument_compare", COMPARE_DX)
+    assert json.loads(_text(only_round))["mode"] == "no_next_round"
+
+
+async def test_the_cap_table_tool_schema_names_its_fields_and_a_percent_with_no_basis_is_a_tool_error() -> None:
+    """The tool's input schema carries the table's fields; a stated percent sent with no basis is refused naming it."""
+    tools = await _tools(mcp_server.build_server())
+    tool = next(tool for tool in tools if tool.name == "equity_cap_table_check")
+    schema = json.dumps(tool.inputSchema)
+
+    fields = ("classes", "holders", "holder_lines", "stated_percent_basis", "conversion_preview", "planned_rounds")
+    for field in fields:
+        assert f'"{field}"' in schema, field
+    assert "must not repeat it" in (tool.description or "")
+    without = {key: value for key, value in CAP_TABLE_CQ.items() if key != "stated_percent_basis"}
+    refused = await _call(mcp_server.build_server(), "equity_cap_table_check", {"inputs": without})
+    assert refused.isError is True
+    assert "stated_percent_basis" in _text(refused)
 
 
 @pytest.mark.parametrize(("segment", "flagged"), [({}, True), ({"price_period_months": 12}, False)])
@@ -275,8 +312,8 @@ async def test_the_metrics_tool_holds_a_figure_sent_as_text_that_is_the_computed
 
 
 async def test_the_metrics_tool_schema_says_to_send_each_rounded_figure_as_text() -> None:
-    """The six stated percent, months and multiple fields say, in the tool's own input schema, to send text with the
-    document's places (a JSON number drops or adds one); the two money fields keep the tolerance alone and say
+    """The nine stated percent, months and multiple fields say, in the tool's own input schema, to send text with the
+    document's places (a JSON number drops or adds one); the three money fields keep the tolerance alone and say
     nothing."""
     tools = {tool.name: tool for tool in await _tools(mcp_server.build_server())}
     fields = tools["equity_metrics_check"].inputSchema["$defs"]["MetricsCheckInput"]["properties"]
@@ -287,12 +324,16 @@ async def test_the_metrics_tool_schema_says_to_send_each_rounded_figure_as_text(
         "stated_cac_payback_months",
         "stated_burn_multiple",
         "stated_concentration_percent",
+        "stated_ltv_to_cac",
+        "stated_rule_of_40_percent",
+        "stated_magic_number",
     )
 
     for name in written:
         assert "Send it as text with exactly the places the document writes" in fields[name]["description"], name
     assert "description" not in fields["stated_arr"]
     assert "description" not in fields["stated_cac"]
+    assert "description" not in fields["stated_ltv"]
 
 
 async def test_the_investor_tool_answers_what_the_cli_prints_with_json() -> None:

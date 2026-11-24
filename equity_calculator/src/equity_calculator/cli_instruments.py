@@ -1,6 +1,6 @@
 """The repeated-flag readers: ``--safe``, ``--note``, ``--round``, ``--class``, ``--use-of-funds``, a runway plan's,
-a market size's, a priced-round-or-note comparison's, a pool plan's ``--hire`` and a raise pipeline's
-``--commitment`` and ``--stage``.
+a market size's, a priced-round-or-note comparison's, a pool plan's ``--hire``, a raise pipeline's ``--commitment`` and
+``--stage``, and a cap table check's.
 
 A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a note's principal) and goes on with
 ``name=value`` terms named like the model fields, hyphens for underscores, plus bare flags; a ``--round`` or a
@@ -29,14 +29,19 @@ A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a n
     --commitment "500000 kind=firm"   (a raise pipeline's commitment: its amount, then soft or firm)
     --stage "First meeting: investors=10 rate-percent=30"   (a funnel stage: its name, a colon, then terms)
     --stage "Partner meeting: investors=2 rate-percent=25 rate-basis=benchmark benchmark-source=A survey, 2025"
+    --share-class "kind=preferred shares=2000000 authorised-shares=2000000 stated-percent=20"   (a cap table's class)
+    --share-class "kind=common shares=8000000 holder-lines=partial"   (its --holder lines are only some of its holders)
+    --holder "share-class=1 shares=4000000 stated-percent=40 founder"   (a holder line; also the bare flag departed)
+    --preview "pre-money=20000000 investment=5000000"   (the next round a cap table check converts its SAFEs at)
 
 Numbers read as every other flag's do (``equity_calculator.cli_numbers``); a date is ``YYYY-MM-DD``. An unknown,
 repeated or malformed term is refused naming the term; which terms go together is the model's check
 (``equity_calculator.schemas.equity_round``, ``equity_calculator.schemas.equity_dilution``,
 ``equity_calculator.schemas.equity_waterfall``, ``equity_calculator.schemas.equity_runway_plan``,
 ``equity_calculator.schemas.equity_market_sizing``, ``equity_calculator.schemas.equity_instrument_compare``,
-``equity_calculator.schemas.equity_pool_plan``, ``equity_calculator.schemas.equity_raise_pipeline``). A
-``--stage``'s ``benchmark-source=`` term comes last and takes the rest of the argument, spaces included.
+``equity_calculator.schemas.equity_pool_plan``, ``equity_calculator.schemas.equity_raise_pipeline``,
+``equity_calculator.schemas.equity_cap_table_check``). A ``--stage``'s ``benchmark-source=`` term comes last and takes
+the rest of the argument, spaces included.
 """
 
 from __future__ import annotations
@@ -54,6 +59,7 @@ from equity_calculator.cli_numbers import (
     parse_rank,
     parse_whole,
 )
+from equity_calculator.schemas.equity_cap_table_check import HolderLines, ShareClassKind
 from equity_calculator.schemas.equity_common import MAX_NUMBER_TEXT, PoolTiming
 from equity_calculator.schemas.equity_market_sizing import PERCENT_FIELDS, CompareTo, SegmentField
 from equity_calculator.schemas.equity_raise_pipeline import CommitmentKind, RateBasis
@@ -62,13 +68,16 @@ from equity_calculator.schemas.equity_runway_plan import RunwayFrom
 from equity_calculator.schemas.equity_waterfall import Participation
 
 __all__ = [
+    "parse_cap_class",
     "parse_class",
     "parse_commitment",
     "parse_funds_line",
     "parse_hire",
+    "parse_holder",
     "parse_next_round",
     "parse_note",
     "parse_phase",
+    "parse_preview",
     "parse_raise",
     "parse_raise_funds_line",
     "parse_round",
@@ -219,17 +228,40 @@ def _sensitivity_field(raw: str) -> object:
     return raw.replace("-", "_")
 
 
-def _segment_number(raw: str) -> object:
-    """A segment's number in a ``--sensitivity`` row: a whole number, 1 for the first ``--segment``."""
-    try:
-        return int(raw)
-    except ValueError:
-        raise argparse.ArgumentTypeError(
-            f"must be a segment's number (1 for the first --segment), got {raw!r}"
-        ) from None
+def _item_number(item: str, flag: str) -> _Reader:
+    """A reader of another flag's item by its number: a whole number, 1 for the first ``flag`` (a sensitivity row's
+    segment, a holder line's class)."""
+
+    def read(raw: str) -> object:
+        try:
+            return int(raw)
+        except ValueError:
+            message = f"must be a {item}'s number (1 for the first {flag}), got {raw!r}"
+            raise argparse.ArgumentTypeError(message) from None
+
+    return read
 
 
-_SENSITIVITY_TERMS: dict[str, _Reader] = {"field": _sensitivity_field, "segment": _segment_number, _VALUES: str}
+_SENSITIVITY_TERMS: dict[str, _Reader] = {
+    "field": _sensitivity_field,
+    "segment": _item_number("segment", "--segment"),
+    _VALUES: str,
+}
+
+# A cap table's class and holder line; a stated percent keeps the places it is typed with, as every stated figure does.
+_CAP_CLASS_TERMS: dict[str, _Reader] = {
+    "kind": _choice(get_args(ShareClassKind)),
+    "shares": parse_whole,
+    "authorised_shares": parse_whole,
+    "stated_percent": parse_percent,
+    "holder_lines": _choice(get_args(HolderLines)),
+}
+_HOLDER_TERMS: dict[str, _Reader] = {
+    "share_class": _item_number("class", "--share-class"),
+    "shares": parse_whole,
+    "stated_percent": parse_percent,
+}
+_HOLDER_FLAGS = ("founder", "departed")
 
 
 def _as_term(field: str) -> str:
@@ -355,6 +387,25 @@ def parse_stage(raw: str) -> dict[str, object]:
         stage["benchmark_source"] = source.strip()
 
     return _named_terms(head.split(), stage, _STAGE_TERMS, ())
+
+
+def parse_cap_class(raw: str) -> dict[str, object]:
+    """argparse type for a cap table check's ``--share-class``: ``kind=common|preferred|options_granted|``
+    ``options_unissued|warrants [shares=S] [authorised-shares=A] [stated-percent=P]``
+    ``[holder-lines=complete|partial]``."""
+    return _named_terms(_checked_length(raw).split(), {}, _CAP_CLASS_TERMS, ())
+
+
+def parse_holder(raw: str) -> dict[str, object]:
+    """argparse type for a cap table check's ``--holder``: ``share-class=K shares=S [stated-percent=P] [founder]
+    [departed]`` (K is 1 for the first ``--share-class``)."""
+    return _named_terms(_checked_length(raw).split(), {}, _HOLDER_TERMS, _HOLDER_FLAGS)
+
+
+def parse_preview(raw: str) -> dict[str, object]:
+    """argparse type for a cap table check's ``--preview``: ``pre-money=V investment=I [target-pool-percent=T]
+    [pool-timing=pre_money|post_money]``, the next round as the founder gives it."""
+    return _named_terms(_checked_length(raw).split(), {}, _NEXT_ROUND_TERMS, ())
 
 
 def parse_phase(raw: str) -> dict[str, object]:

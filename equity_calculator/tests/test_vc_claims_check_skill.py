@@ -438,7 +438,8 @@ def test_metrics_and_market_sizes_go_to_their_skills_and_growth_and_ltv_stay_unc
 
     assert "ARR, retention, churn, CAC payback and burn multiple are checked by the vc-metrics-readiness skill" in steps
     assert "a market size by the vc-market-sizing skill" in steps
-    assert 'Growth rates and LTV: no tool computes them; quote them with "not checked: no tool computes this"' in steps
+    assert "LTV, LTV/CAC, the Rule of 40 and the magic number go to the vc-metrics-readiness skill too" in steps
+    assert 'Growth rates: no tool computes them; quote them with "not checked: no tool computes this"' in steps
     assert "have no tool here" not in steps
 
 

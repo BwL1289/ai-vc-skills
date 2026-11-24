@@ -5,11 +5,11 @@
 Each scenario is one tool, ``equity_<scenario>`` (``equity_investor``, ``equity_employee``, ``equity_pool``,
 ``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``,
 ``equity_runway_plan``, ``equity_metrics_check``, ``equity_market_sizing``, ``equity_instrument_compare``,
-``equity_pool_plan``, ``equity_raise_pipeline``). A tool takes one argument, ``inputs``: that scenario's input model
-(``equity_calculator.schemas``). It returns exactly the text ``equity_calculator <scenario> --json`` prints: the
-result model as JSON, exact fractions and labelled assumptions included. An input the model refuses, or one it accepts
-that has no answer (``equity_calculator.errors``), comes back as a tool error that says why. The arithmetic runs on
-a worker thread, so a large round never stalls the server.
+``equity_pool_plan``, ``equity_raise_pipeline``, ``equity_cap_table_check``). A tool takes one argument, ``inputs``:
+that scenario's input model (``equity_calculator.schemas``). It returns exactly the text ``equity_calculator <scenario>
+--json`` prints: the result model as JSON, exact fractions and labelled assumptions included. An input the model
+refuses, or one it accepts that has no answer (``equity_calculator.errors``), comes back as a tool error that says
+why. The arithmetic runs on a worker thread, so a large round never stalls the server.
 
 With ``--output-dir DIR`` the server adds one more tool, ``equity_workbook``: it works a scenario and writes its
 formatted workbook as a NEW ``.xlsx`` file inside DIR. The file name must be a bare name (no folder, no ``..``, no
@@ -53,6 +53,7 @@ from equity_calculator.errors import EquityComputeError
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity import (
+    CapTableCheckInput,
     DealCheckInput,
     DilutionInput,
     EmployeeInput,
@@ -185,7 +186,7 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
     ),
     "metrics_check": (
         MetricsCheckInput,
-        "Metrics check (ARR, retention, churn, CAC payback, burn multiple)",
+        "Metrics check (ARR, retention, churn, CAC payback, burn multiple, LTV, Rule of 40, magic number)",
         "A founder's traction metrics worked exactly from their parts over one period_months, and each figure the "
         "document states checked. Recurring revenue in recurring_unit (monthly or annual; k = 12 or 1, the only "
         "conversion): starting_recurring S and the period's new N, expansion E, contraction C and churned X. ARR at "
@@ -195,7 +196,14 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "never annualised; gross revenue churn (C + X)/S, net (C + X - E)/S, logo churn customers_lost / "
         "customers_start. CAC = sales_marketing_spend / customers_new (paid: / customers_new_paid); CAC payback = "
         "spend / (new monthly recurring x gross margin), and on revenue only; burn multiple = net_burn / net new "
-        "ARR (none at or below zero); concentration = largest_customer_revenue / period_revenue. Each stated_* "
+        "ARR (none at or below zero); concentration = largest_customer_revenue / period_revenue. LTV = arpa (in "
+        "recurring_unit, scaled to the period) x the contribution_margin_percent, else gross_margin_percent (flagged), "
+        "/ the period's churn on ltv_churn_basis (gross_revenue unless given; a churn at or below 0, or no margin, is "
+        "refused); LTV/CAC = LTV / blended CAC. Rule of 40 = revenue_growth_percent + profit_margin_percent, both the "
+        "founder's, added as given, with profit_margin_basis naming the margin (unlabelled is flagged). Magic number "
+        "= 4 x (quarter_revenue - prior_quarter_revenue) / prior_quarter_sales_marketing_spend, or on ARR "
+        "(quarter_ending_arr - prior_quarter_ending_arr) / that spend with no 4; magic_number_variant names which. No "
+        "benchmark for LTV/CAC, the Rule of 40 or the magic number. Each stated_* "
         "figure comes back consistent or a mismatch, or not_checked for a stated burn multiple with no multiple to "
         "work (the overall verdict is then never consistent); a stated ARR against the movement's ending ARR or the "
         "latest month's, whichever it is within the tolerance of (arr_basis names it); a churn with no basis once per "
@@ -205,7 +213,8 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "months or multiple row also says whether the stated figure is the computed one rounded half away from zero to "
         "the places it is typed with, which makes it consistent even past the tolerance (send it as text, those "
         "places as the document writes them). Flags name the likely cause of a mismatch (a run-rate called ARR, new "
-        "customers in NRR, payback on revenue, new not net new ARR), a figure consistent by the tolerance alone, a "
+        "customers in NRR, payback on revenue, new not net new ARR, an LTV or LTV/CAC on revenue, a Rule of 40 on "
+        "gross margin, a magic number without its 4), a figure consistent by the tolerance alone, a "
         "movement and latest month that disagree, "
         "and three benchmark questions (payback by customer_segment, burn multiple 3x, monthly net revenue churn "
         "2%), never errors. Every part is the founder's figure: never assume one.",
@@ -249,7 +258,15 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "series gives its own preference_multiple and participation, and an existing note its compounding. Flags "
         "(the note on its cap or discount, a cap below today's price, interest converting or paid in cash, maturity "
         "not given or before conversion, a next round below A's price, A's price below an existing series', an "
-        "existing MFN SAFE beside the note) never pick an option. No next round is refused (no_next_round_given). "
+        "existing MFN SAFE beside the note) never pick an option. With no next_rounds (the founder hopes this is the "
+        "only round) it runs in mode no_next_round (flag no_next_round_given) and leaves note_months_to_conversion "
+        "out: ownership right after today with the note unconverted and what it owes at each note_owed_months; the "
+        "note at note_maturity_months, its repayment and, only with a note_maturity_conversion_valuation (over "
+        "today's fully diluted shares) or note_maturity_conversion_price, its conversion and ownership then; each "
+        "exit as a sale before any priced round, A through the waterfall and B's note paid its own change-of-control "
+        "term first (note_change_of_control_multiple of the principal, or note_change_of_control_at_cap with "
+        "note_months_to_exit). A sale with no such term, or with existing SAFEs or notes outstanding under B, gives "
+        "B as not worked with note_refusal and its reason in words. Those terms are refused with a next round. "
         "Every term is the founder's: never assume one.",
     ),
     "pool_plan": (
@@ -289,6 +306,37 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "start_raising_by (its runway less months_to_raise). Investors are never named: amounts and counts only. "
         "Every amount, count and rate is the founder's: never assume or look one up.",
     ),
+    "cap_table_check": (
+        CapTableCheckInput,
+        "Cap table check (totals, exact percents, authorised shares, instruments, departed holders)",
+        "A founder's cap table checked against itself, exactly. classes (one to 20, numbered in order, no names) each "
+        "have a kind (common, preferred, options_granted, options_unissued for the unissued pool, warrants), shares "
+        "(or left to their holder lines), any authorised_shares (common and preferred only) and stated_percent; "
+        "holders (up to 100, numbered in order) each sit in share_class (1 is the first class) with shares, any "
+        "stated_percent, and the founder and departed marks (a line with both counts in the founders' share, the "
+        "path and the departed holders' share). A class's shares are its stated shares, else its holder lines' sum; "
+        "a class giving both needs holder_lines, the founder's word on whether the lines are every holder of it "
+        "(complete: checked against its shares) or only some (partial: the rest shown as in no line), never "
+        "assumed. FD = every class added up (preferred one to one, "
+        "warrants as exercised, the unissued pool included, SAFEs and notes left out); O = common + preferred. Each "
+        "class and holder line comes back as shares/FD and, for stock, shares/O. Each stated_percent is checked "
+        "against the basis stated_percent_basis names (fully_diluted or outstanding: required with any stated "
+        "percent, never assumed), consistent when it is the computed share rounded half away from zero to the places "
+        "it is typed with (send it as text, those places as the table writes them) or within tolerance_points "
+        "(default 0); a column of stated percents (the classes', and the table line by line) is checked against 100% "
+        "within half a unit in the last place of each; stated_fully_diluted_shares and a class's shares against its "
+        "lines only when equal. Issued shares against authorised_shares per class, the options against "
+        "option_plan_reserve, authorised common against FD. instruments (the round's SAFE and note terms) are listed "
+        "with their amount; conversion_preview (pre_money, investment, any target_pool_percent and pool_timing, the "
+        "founder's next round, never assumed) converts them through the round scenario and reads every line back "
+        "after it. Departed holders' share of FD, the founders' share, and with planned_rounds (the dilution "
+        "scenario's rounds) the founders' path: from today, or, with conversion_preview, from the founders' share "
+        "after it, so planned_rounds are then the rounds AFTER the preview and must not repeat it (it would be "
+        "counted twice). Flags (holder lines past their class's shares, percents that cannot sum to 100%, a figure "
+        "consistent only by the tolerance, over authorised, authorised common below FD, unconverted instruments, "
+        "departed holders' shares, a path from today without the instruments) are questions, some for the company's "
+        "lawyer, never a ruling on legal validity. Every figure is the founder's: never assume one.",
+    ),
 }
 
 _INSTRUCTIONS = (
@@ -298,15 +346,18 @@ _INSTRUCTIONS = (
     "equity_waterfall (who gets what of an exit), equity_deal_check (a founder's raise checked: valuation, ownership "
     "after the round, runway, the deck's own figures), equity_runway_plan (how long each raise lasts on a phased "
     "plan and a downside, which milestones it reaches, the smallest raise that gets there), equity_metrics_check "
-    "(a founder's ARR, retention, churn, CAC payback, burn multiple and concentration worked from their parts and "
-    "checked against the document's figures), equity_market_sizing (a founder's TAM, SAM and SOM built bottom-up "
-    "from their own segments, checked against the deck, set beside any top-down figure, with ranges), "
+    "(a founder's ARR, retention, churn, CAC payback, burn multiple, concentration, LTV, LTV/CAC, Rule of 40 and magic "
+    "number worked from their parts and checked against the document's figures), equity_market_sizing (a founder's "
+    "TAM, SAM and SOM built bottom-up from their own segments, checked against the deck, set beside any top-down "
+    "figure, with ranges), "
     "equity_instrument_compare (a priced round now beside a convertible note now: ownership after today and after "
     "each next round, and each exit's payouts, side by side, never a pick), equity_pool_plan (the option pool a "
     "founder's hiring plan needs to the next round beside the pool a term sheet asks for, side by side, never a "
     "pick), equity_raise_pipeline (a founder's round: the allocation left after the lead, firm commitments and pro "
     "rata, the term sheets their funnel is expected to give on their own rates, the targets needed, and when to "
-    "start raising). Pass the "
+    "start raising), equity_cap_table_check (a founder's cap table checked against itself: totals, each class's and "
+    "holder's exact percent, authorised shares, SAFEs and notes outstanding, departed holders, never a ruling on "
+    "legal validity). Pass the "
     "scenario's fields in `inputs`; give money and percents as JSON strings to keep every digit. Quote the result's "
     "numbers and its labelled assumptions; never round them further without saying so. A value whose unit is "
     "fraction is a share of the whole: show it as a percent by moving the decimal point of its rounded value two "
@@ -478,7 +529,7 @@ def build_server(output_dir: Path | None = None) -> FastMCP:
                 f"existing file, a link or an answer too large for a workbook is refused. `inputs` is any "
                 f'scenario\'s input with its `scenario` tag set ("investor", "employee", "pool", "round", "dilution", '
                 f'"vesting", "waterfall", "deal_check", "runway_plan", "metrics_check", "market_sizing", '
-                f'"instrument_compare", "pool_plan" or "raise_pipeline"). Returns '
+                f'"instrument_compare", "pool_plan", "raise_pipeline" or "cap_table_check"). Returns '
                 f"the path written. {_DIGITS_ADVICE}"
             ),
             annotations=ToolAnnotations(

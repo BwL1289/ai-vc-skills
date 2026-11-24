@@ -6,6 +6,38 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- The calculator's fifteenth scenario, `cap_table_check` (MCP tool `equity_cap_table_check`, a command and a
+  `Cap table check` workbook sheet): a founder's cap table by class and holder line added up to the fully diluted
+  shares, each class's and holder's exact percent set beside the percent the table states (rounding-aware, as in
+  `deal_check`), each percent column against 100%, issued against authorised shares, the SAFEs and notes outstanding,
+  and the departed holders' share. A class that gives both its shares and holder lines says whether the lines are
+  every holder of it (`holder_lines`), never assumed. On the founder's own next round it previews the conversions
+  through `round`, and on their planned rounds it follows the founders through `dilution`, from their share after
+  that preview when there is one. It never rules on legal validity: its flags name the questions for the company's
+  lawyer. The new `vc-cap-table-check` skill (preview, four evals) runs it.
+- `metrics_check` (MCP tool `equity_metrics_check`) now works LTV on contribution margin (ARPA × the period's units ×
+  margin / the churn the founder names, the gross margin flagged when no contribution margin is given, a churn at or
+  below zero refused), LTV/CAC on blended CAC, the Rule of 40 from the founder's own growth and margin percents with the
+  margin's basis named, and the magic number on revenue (4 × the quarter's change / the prior quarter's sales and
+  marketing spend) or on ARR, and checks a deck's stated figures for each; seven new flags name an LTV on gross margin,
+  a contribution margin above the gross margin, a stated LTV on revenue alone or on gross margin, an unnamed Rule of 40
+  margin, a stated Rule of 40 on gross margin and a stated magic number without its 4. No benchmark is set for any of
+  them. `vc-metrics-readiness` (and the skills that quoted LTV as unchecked) now send these to the tool, with a Company
+  DL eval (unrecorded).
+- `instrument_compare` runs with no next round, for a founder who hopes today's raise is the only one (mode
+  `no_next_round`, flag `no_next_round_given`, in place of the refusal): ownership today with the note unconverted,
+  what the note owes at each month named, the note at its maturity (the repayment, and a conversion only at a valuation
+  or price the founder gives), and each exit as a sale before any priced round, option A through the waterfall and
+  option B on the note's own change-of-control term (a multiple of its principal, or conversion at its cap). A sale
+  with no such term, or with existing SAFEs or notes outstanding, gives option B as not worked with the reason; an
+  uncapped note works in both modes. The mode flags a cap that sets no price there (`cap_unused_without_round`) and a
+  note converted at its cap that a sale pays less than it owes (`note_paid_below_owed_at_sale`). `vc-deal-math` step 7
+  asks for those terms and a Company DX eval runs the mode.
+- Plugin version 0.3.1, so an installed copy picks up the `vc-cap-table-check` skill, the calculator's fifteenth
+  scenario, the new metrics in `metrics_check` and the no-next-round mode of `instrument_compare`; the README, the
+  website, the plugin and marketplace descriptions and AGENTS.md list them, `vc-cap-table-check` hands the pool to the
+  now-built `vc-option-pool-plan`, and the README's roadmap adds `vc-retention-cohorts` (planned: retention by customer
+  cohort and where the curve flattens, with the deck's retention claims checked).
 - Plugin version 0.3.0, so an installed copy picks up the five new skills and the calculator's two new scenarios;
   the README, the website, the plugin and marketplace descriptions and AGENTS.md list them, and the existing skills
   hand the topics they own to them.

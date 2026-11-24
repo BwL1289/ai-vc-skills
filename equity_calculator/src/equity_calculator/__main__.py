@@ -2,8 +2,9 @@
 """``equity_calculator`` — an equity question: PG's two tests, the option pool, a round, dilution, vesting, an exit,
 a fundraising ask checked before a VC reads it, how long a raise lasts on a founder's plan, a founder's traction
 metrics checked against their parts, a founder's market size built bottom-up, a priced round now set beside a
-convertible note now, the option pool a hiring plan needs set beside the pool a term sheet asks for, or a raise's
-pipeline: the allocation left, the term sheets a founder's funnel is expected to give and when to start raising.
+convertible note now, the option pool a hiring plan needs set beside the pool a term sheet asks for, a raise's
+pipeline: the allocation left, the term sheets a founder's funnel is expected to give and when to start raising, or a
+founder's cap table checked against itself.
 
     equity_calculator investor (--equity-percent N | --pre-money V --investment I)
         (--outcome-multiplier M | --growth-percent G) [--holder-percent H]
@@ -38,9 +39,14 @@ pipeline: the allocation left, the term sheets a founder's funnel is expected to
         [--cohort-churned-recurring X]] [--month-total-revenue T [--month-one-time-revenue O]
         [--month-usage-revenue U]] [--customers-start S [--customers-lost L]] [--customers-new N
         [--customers-new-paid P]] [--sales-marketing-spend M [--gross-margin-percent G]] [--net-burn B]
-        [--largest-customer-revenue L --period-revenue R] [--stated-arr A] [--stated-nrr-percent N]
+        [--largest-customer-revenue L --period-revenue R] [--arpa A [--contribution-margin-percent M]
+        [--ltv-churn-basis BASIS]] [--revenue-growth-percent G --profit-margin-percent M
+        [--profit-margin-basis BASIS]] [(--quarter-revenue Q --prior-quarter-revenue Q' |
+        --quarter-ending-arr A --prior-quarter-ending-arr A') --prior-quarter-sales-marketing-spend S]
+        [--stated-arr A] [--stated-nrr-percent N]
         [--stated-grr-percent G] [--stated-churn-percent C [--stated-churn-basis BASIS]] [--stated-cac C]
         [--stated-cac-payback-months M] [--stated-burn-multiple X] [--stated-concentration-percent C]
+        [--stated-ltv L] [--stated-ltv-to-cac X] [--stated-rule-of-40-percent R] [--stated-magic-number M]
         [--tolerance-points P] [--tolerance-percent Q] [--customer-segment smb|mid_market|enterprise]
         [--payback-band-months B] [--burn-multiple-band X] [--net-revenue-churn-band-percent C]
     equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
@@ -51,13 +57,19 @@ pipeline: the allocation left, the term sheets a founder's funnel is expected to
         --priced-pre-money V [--priced-target-pool-percent T] [--priced-pool-timing pre_money|post_money]
         --priced-preference "TERMS" [--note-valuation-cap K] [--note-discount-percent D]
         --note-interest-rate-percent R --note-compounding simple|annual|monthly [--note-stub-rule RULE]
-        --note-months-to-conversion M [--note-maturity-months M] [--note-interest-paid-in-cash]
-        (--next-round "TERMS")... (--exit E)... [--pool-at-exit as_common|left_out]
+        [--note-maturity-months M] [--note-interest-paid-in-cash] [--note-owed-month M]...
+        [--note-months-to-conversion M (--next-round "TERMS")... | [--note-maturity-conversion-valuation V |
+        --note-maturity-conversion-price P] [--note-change-of-control-multiple X | --note-change-of-control-at-cap]
+        [--note-months-to-exit M]] (--exit E)... [--pool-at-exit as_common|left_out]
     equity_calculator pool_plan --fully-diluted-shares FD --unissued-pool-shares U [--founder-shares F]
         --pre-money V --investment I --requested-pool-percent T --next-round-month M (--hire "ROLE: TERMS")...
     equity_calculator raise_pipeline --round-size R [--lead-cheque L] [--commitment "AMOUNT kind=soft|firm"]...
         [--pro-rata AMOUNT]... [(--stage "NAME: TERMS")... --term-sheets-wanted W]
         [--cash-on-hand C [--cash-floor F] (--phase "TERMS")... --months-to-raise T]
+    equity_calculator cap_table_check (--share-class "TERMS")... [--holder "TERMS"]...
+        [--stated-fully-diluted-shares S] [--stated-percent-basis fully_diluted|outstanding]
+        [--option-plan-reserve R] [--safe "TERMS" | --note "TERMS"]... [--preview "TERMS"]
+        [--planned-round "TERMS"]... [--tolerance-points P]
 
 Every scenario also takes ``--json`` (print the whole result model, exact fractions included, instead of the
 report) and ``--xlsx PATH`` (also write the formatted workbook to PATH; the report then names it). The report is
@@ -72,9 +84,10 @@ file in the system's temporary folder (``TMPDIR`` if set), so that folder must b
 ``equity_calculator.cli_numbers``; each scenario's flags are ``equity_calculator.cli_arguments``; a ``--safe``,
 ``--note``, ``--round``, ``--class``, ``--use-of-funds``, ``--phase``, ``--raise``, ``--raise-use-of-funds``,
 ``--segment``, ``--top-down``, ``--sensitivity``, ``--priced-preference``, ``--next-round``, ``--hire``,
-``--commitment`` or ``--stage`` is one argument of terms (``equity_calculator.cli_instruments``); a runway plan's flags
-become its cases and raises in ``equity_calculator.cli_runway_plan``, and a raise pipeline's cash and burn flags its
-runway in ``equity_calculator.cli_raise_pipeline``. A refusal names the flag,
+``--commitment``, ``--stage``, ``--share-class``, ``--holder``, ``--preview`` or ``--planned-round`` is one argument of
+terms (``equity_calculator.cli_instruments``); a runway plan's flags become its cases and raises in
+``equity_calculator.cli_runway_plan``, and a raise pipeline's cash and burn flags its runway in
+``equity_calculator.cli_raise_pipeline``. A refusal names the flag,
 or a repeated flag's item as ``--note #2`` (the second instrument in the order given) and its term.
 """
 
@@ -89,6 +102,7 @@ from pathlib import Path
 from typing import Any, get_args
 
 from equity_calculator.cli_arguments import (
+    cap_table_check_arguments,
     deal_check_arguments,
     dilution_arguments,
     employee_arguments,
@@ -111,6 +125,7 @@ from equity_calculator.errors import EquityComputeError
 from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity import (
+    CapTableCheckInput,
     DealCheckInput,
     DilutionInput,
     EmployeeInput,
@@ -149,6 +164,7 @@ _INPUT_MODELS: dict[str, type[ScenarioInput]] = {
     "instrument_compare": InstrumentCompareInput,
     "pool_plan": PoolPlanInput,
     "raise_pipeline": RaisePipelineInput,
+    "cap_table_check": CapTableCheckInput,
 }
 # A scenario whose flags do not map one to one onto its model's fields: the fields they make, and where each came from.
 _SHAPES: dict[str, Callable[[dict[str, Any]], tuple[dict[str, object], Places]]] = {
@@ -196,7 +212,8 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
         (
             "metrics_check",
-            "Check your traction metrics before a VC does: ARR, retention, churn, CAC payback, burn multiple",
+            "Check your traction metrics before a VC does: ARR, retention, churn, CAC payback, burn multiple, LTV, "
+            "Rule of 40, magic number",
             metrics_check_arguments,
         ),
         (
@@ -208,7 +225,8 @@ def _build_parser() -> argparse.ArgumentParser:
         (
             "instrument_compare",
             "A priced round now beside a convertible note now: who owns what after today and after each next "
-            "round, and who gets what at each exit, B - A; never a recommendation",
+            "round (or, with none, the note at its maturity), and who gets what at each exit, B - A; never a "
+            "recommendation",
             instrument_compare_arguments,
         ),
         (
@@ -222,6 +240,12 @@ def _build_parser() -> argparse.ArgumentParser:
             "Your raise's pipeline: the allocation left after the lead, firm commitments and pro rata, the term "
             "sheets your funnel is expected to give on your own rates, the targets needed, and when to start raising",
             raise_pipeline_arguments,
+        ),
+        (
+            "cap_table_check",
+            "Check your cap table before a VC does: totals, each class's and holder's exact percent, authorised "
+            "shares, SAFEs and notes outstanding, departed holders; never a ruling on legal validity",
+            cap_table_check_arguments,
         ),
     )
     for name, summary, add_arguments in scenarios_help:

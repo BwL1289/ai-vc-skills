@@ -16,6 +16,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Annotated, Literal
 
+from equity_calculator.schemas.equity_cap_table_check import CapTableCheckInput, CapTableCheckResult
 from equity_calculator.schemas.equity_common import (
     MODEL_CONFIG,
     WHOLE_PERCENT,
@@ -59,6 +60,8 @@ __all__ = [
     "EmployeeResult",
     "EmployeeRuleOfThumb",
     "EmployeeScenario",
+    "CapTableCheckInput",
+    "CapTableCheckResult",
     "EquityAssumption",
     "EquityInput",
     "EquityQuantity",
@@ -253,6 +256,7 @@ ScenarioInput = (
     | InstrumentCompareInput
     | PoolPlanInput
     | RaisePipelineInput
+    | CapTableCheckInput
 )
 ScenarioResult = (
     InvestorResult
@@ -269,6 +273,7 @@ ScenarioResult = (
     | InstrumentCompareResult
     | PoolPlanResult
     | RaisePipelineResult
+    | CapTableCheckResult
 )
 
 EquityInput = Annotated[ScenarioInput, Field(discriminator="scenario")]

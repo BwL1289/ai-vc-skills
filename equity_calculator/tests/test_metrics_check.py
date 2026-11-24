@@ -10,6 +10,10 @@ Pure arithmetic: no DB, no network, nothing written. Expected values are exact f
   1/50, so an unlabelled 2% holds only as net revenue churn. CAC payback 36k/(5k·3/4) = 48/5 months on gross margin,
   36/5 on revenue: the deck's 7.2 is the revenue figure, the model's 9.6 the margin one. Blended CAC 36k/45 = 800,
   paid 36k/20 = 1,800.
+- Company DL, one month: gross revenue churn (1k + 3k)/200k = 1/50, so LTV on the 60% contribution margin is
+  2k·(3/5)/(1/50) = 60k, 80k on the 80% gross margin, and 100k on revenue alone: the deck's $100k. Blended CAC
+  150k/25 = 6k, so LTV/CAC 10 (the deck's 10x) and 50/3 on revenue. Rule of 40 70% - 35% = 7/20 (the deck's 35). Magic
+  number 4·(600k - 510k)/450k = 4/5; the deck's 0.2 is 90k/450k = 1/5, the change without the 4.
 """
 
 from __future__ import annotations
@@ -36,7 +40,7 @@ from equity_calculator.schemas.equity_metrics_check import (
     MetricsFlag,
 )
 from pydantic import ValidationError
-from tests.support import METRICS_AM, METRICS_AN_DECK, METRICS_AN_MODEL, metrics_check
+from tests.support import METRICS_AM, METRICS_AN_DECK, METRICS_AN_MODEL, METRICS_DL, metrics_check
 
 _SEED = 20261123
 _CASES = 200
@@ -128,13 +132,235 @@ def test_company_an_an_unlabelled_churn_and_a_payback_the_deck_and_model_state_d
     assert model.verdict == "consistent"
 
 
+def test_company_dl_an_ltv_on_revenue_and_a_magic_number_without_its_4() -> None:
+    result = metrics_check(**METRICS_DL)
+
+    assert _exact(result, "ltv") == 60_000
+    assert result.ltv_margin_basis == "contribution"
+    assert _exact(result, "ltv_on_revenue") == 100_000
+    assert _exact(result, "gross_margin_ltv") == 80_000
+    assert _exact(result, "ltv_to_cac") == 10
+    assert _exact(result, "ltv_to_cac_on_revenue") == Fraction(50, 3)
+    assert _exact(result, "rule_of_40") == Fraction(7, 20)
+    assert _exact(result, "magic_number") == Fraction(4, 5)
+    assert result.magic_number_variant == "revenue"
+    assert _exact(result, "magic_number_unannualised") == Fraction(1, 5)
+    assert _checks(result) == {
+        ("ltv", None): (Fraction(100_000), Fraction(60_000), "mismatch"),
+        ("ltv_to_cac", None): (Fraction(10), Fraction(10), "consistent"),
+        ("rule_of_40", None): (Fraction(7, 20), Fraction(7, 20), "consistent"),
+        ("magic_number", None): (Fraction(1, 5), Fraction(4, 5), "mismatch"),
+    }
+    assert result.flags == ("stated_ltv_uses_revenue_not_margin", "stated_magic_number_not_annualised")
+    assert result.verdict == "mismatch"
+
+
+def test_the_new_figures_are_none_without_their_parts() -> None:
+    result = metrics_check(**METRICS_AN_DECK)
+
+    for name in (
+        "ltv",
+        "ltv_margin_basis",
+        "ltv_on_revenue",
+        "gross_margin_ltv",
+        "ltv_to_cac",
+        "ltv_to_cac_on_revenue",
+        "rule_of_40",
+        "magic_number",
+        "magic_number_variant",
+        "magic_number_unannualised",
+    ):
+        assert getattr(result, name) is None, name
+
+
+# LTV's minimal parts: 100 MRR at the start, 5 cancelled (gross revenue churn 1/20), $10 ARPA and a 50% gross margin.
+_LTV_PARTS: dict[str, object] = {
+    "starting_recurring": "100",
+    "churned_recurring": "5",
+    "arpa": "10",
+    "gross_margin_percent": "50",
+}
+
+
+def test_ltv_is_on_the_contribution_margin_when_given_else_the_gross_margin() -> None:
+    gross = metrics_check(period_months=1, **_LTV_PARTS)
+    contribution = metrics_check(period_months=1, **_LTV_PARTS, contribution_margin_percent="40")
+
+    assert _exact(gross, "ltv") == 100 and gross.ltv_margin_basis == "gross"
+    assert _exact(contribution, "ltv") == 80 and contribution.ltv_margin_basis == "contribution"
+    assert "ltv_on_gross_margin" in gross.flags and "ltv_on_gross_margin" not in contribution.flags
+    # LTV/CAC is worked only with a blended CAC; the revenue figures only beside a stated one.
+    assert gross.ltv_to_cac is None and gross.ltv_on_revenue is None
+
+
+def test_ltv_on_gross_margin_is_worked_only_beside_a_stated_ltv_on_a_contribution_margin() -> None:
+    """With a stated LTV and both margins, LTV on the 50% gross margin is 100 beside 80 on the 40% contribution margin;
+    with no stated LTV, or no contribution margin, it is not worked."""
+    both = metrics_check(period_months=1, **_LTV_PARTS, contribution_margin_percent="40", stated_ltv="80")
+    unstated = metrics_check(period_months=1, **_LTV_PARTS, contribution_margin_percent="40")
+    gross_only = metrics_check(period_months=1, **_LTV_PARTS, stated_ltv="100")
+
+    assert _exact(both, "gross_margin_ltv") == 100
+    assert unstated.gross_margin_ltv is None and gross_only.gross_margin_ltv is None
+    # The stated 80 holds on the contribution margin, so no LTV flag; the 5% month's churn raises its benchmark alone.
+    assert both.flags == ("net_revenue_churn_above_band",)
+
+
+@pytest.mark.parametrize(
+    ("basis", "parts", "ltv"),
+    [
+        # Logo churn 2/40 = 1/20: 10·(1/2)/(1/20) = 100.
+        ("logo", {"customers_start": 40, "customers_lost": 2}, Fraction(100)),
+        # Net revenue churn (5 - 1)/100 = 1/25: 10·(1/2)/(1/25) = 125.
+        ("net_revenue", {"expansion_recurring": "1"}, Fraction(125)),
+    ],
+)
+def test_ltv_divides_by_the_churn_the_founder_picks(basis: str, parts: dict[str, object], ltv: Fraction) -> None:
+    result = metrics_check(period_months=1, **_LTV_PARTS, **parts, ltv_churn_basis=basis)
+
+    assert _exact(result, "ltv") == ltv
+    assert {row.key: row for row in result.assumptions}["ltv_rule"].setting.endswith(
+        f"/ {basis.replace('_', ' ')} churn over 1 month"
+    )
+
+
+def test_ltv_scales_arpa_to_the_period_in_either_unit() -> None:
+    """Over 6 months a monthly ARPA counts 6 times and an annual one half: the same business, the same LTV."""
+    monthly = metrics_check(period_months=6, **_LTV_PARTS)
+    annual = metrics_check(period_months=6, recurring_unit="annual", **{**_LTV_PARTS, "arpa": "120"})
+
+    assert _exact(monthly, "ltv") == _exact(annual, "ltv") == 600
+    settings = [{row.key: row for row in result.assumptions}["ltv_rule"].setting for result in (monthly, annual)]
+    assert settings == [
+        "monthly ARPA × 6 months × 50% gross margin / gross revenue churn over 6 months",
+        "annual ARPA × 1/2 of a year × 50% gross margin / gross revenue churn over 6 months",
+    ]
+
+
+@pytest.mark.parametrize(("months", "units"), [(12, "1 year"), (24, "2 years")])
+def test_an_annual_arpa_over_whole_years_names_the_years(months: int, units: str) -> None:
+    result = metrics_check(period_months=months, recurring_unit="annual", **{**_LTV_PARTS, "arpa": "120"})
+
+    assert _exact(result, "ltv") == 120 * (months // 12) * Fraction(1, 2) / Fraction(1, 20)
+    assert {row.key: row for row in result.assumptions}["ltv_rule"].setting.startswith(f"annual ARPA × {units} ×")
+
+
+def test_an_ltv_to_cac_on_revenue_alone_is_named() -> None:
+    """LTV/CAC 100/50 = 2 on margin, 200/50 = 4 on revenue: a stated 4 is a mismatch the flag explains."""
+    result = metrics_check(
+        period_months=1, **_LTV_PARTS, sales_marketing_spend="500", customers_new=10, stated_ltv_to_cac="4"
+    )
+
+    assert _checks(result) == {("ltv_to_cac", None): (Fraction(4), Fraction(2), "mismatch")}
+    assert _exact(result, "ltv_to_cac_on_revenue") == 4
+    assert "stated_ltv_uses_revenue_not_margin" in result.flags
+
+
+@pytest.mark.parametrize(
+    ("growth", "margin", "stated", "computed"),
+    [("-10", "-20", "-30", Fraction(-3, 10)), ("120", "-95.5", "24.5", Fraction(49, 200))],
+    ids=["both-below-zero", "fast-growth-deep-loss"],
+)
+def test_the_rule_of_40_adds_the_founders_two_percents_of_either_sign(
+    growth: str, margin: str, stated: str, computed: Fraction
+) -> None:
+    result = metrics_check(
+        period_months=1,
+        revenue_growth_percent=growth,
+        profit_margin_percent=margin,
+        profit_margin_basis="free_cash_flow",
+        stated_rule_of_40_percent=stated,
+    )
+
+    assert _exact(result, "rule_of_40") == computed
+    assert _checks(result) == {("rule_of_40", None): (computed, computed, "consistent")}
+    assert result.flags == ()
+
+
+def test_the_magic_number_on_arr_has_no_4_and_may_fall_below_zero() -> None:
+    """ARR from 100 to 90 on 50 of spend: -1/5. A stated -0.196 holds by the tolerance (2% of the size, 0.004), not
+    as a rounding of -0.200, so the tolerance reads the size of a figure below zero."""
+    result = metrics_check(
+        period_months=1,
+        quarter_ending_arr="90",
+        prior_quarter_ending_arr="100",
+        prior_quarter_sales_marketing_spend="50",
+        stated_magic_number="-0.196",
+    )
+
+    assert _exact(result, "magic_number") == Fraction(-1, 5)
+    assert result.magic_number_variant == "arr"
+    assert result.magic_number_unannualised is None
+    assert _checks(result) == {("magic_number", None): (Fraction(-49, 250), Fraction(-1, 5), "consistent")}
+    assert result.flags == ("consistent_beyond_rounding",)
+    rows = {row.key: row for row in result.assumptions}
+    assert rows["magic_number_rule"].setting.startswith("(ARR at this quarter's end - at the prior quarter's end)")
+
+
+def test_a_magic_number_on_revenue_with_none_stated_works_no_figure_without_the_4() -> None:
+    """4·(110 - 100)/50 = 4/5. With no stated figure there is nothing to test, so the change without the 4 is not
+    worked, and with no check at all the verdict is not_checked."""
+    result = metrics_check(
+        period_months=1, quarter_revenue="110", prior_quarter_revenue="100", prior_quarter_sales_marketing_spend="50"
+    )
+
+    assert _exact(result, "magic_number") == Fraction(4, 5)
+    assert result.magic_number_variant == "revenue"
+    assert result.magic_number_unannualised is None
+    assert result.checks == ()
+    assert result.verdict == "not_checked"
+
+
+def test_the_later_rows_print_a_percent_in_exponent_form_as_its_digits() -> None:
+    """A percent sent as "5E+1" through the MCP tool or the Python API prints as 50%, never 5E+1%; one typed with a
+    place keeps it (60.0%)."""
+    exponent = metrics_check(
+        period_months=1,
+        starting_recurring="100",
+        churned_recurring="5",
+        new_recurring="1E+1",
+        sales_marketing_spend="500",
+        arpa="10",
+        gross_margin_percent="5E+1",
+        revenue_growth_percent="7E+1",
+        profit_margin_percent="-3.5E+1",
+        profit_margin_basis="ebitda",
+    )
+    placed = metrics_check(period_months=1, **{**_LTV_PARTS, "contribution_margin_percent": "60.0"})
+
+    rows = {row.key: row.setting for row in exponent.assumptions}
+    assert rows["ltv_rule"] == "monthly ARPA × 1 month × 50% gross margin / gross revenue churn over 1 month"
+    assert rows["rule_of_40_rule"] == "revenue growth 70% + EBITDA margin -35%"
+    assert rows["payback_rule"] == "spend / (new monthly recurring revenue × 50% gross margin)"
+    assert {row.key: row.setting for row in placed.assumptions}["ltv_rule"].startswith(
+        "monthly ARPA × 1 month × 60.0% contribution margin /"
+    )
+
+
+def test_the_later_rules_cite_what_was_read_and_quote_nothing_unread() -> None:
+    rows = {row.key: row for row in metrics_check(**METRICS_DL).assumptions}
+
+    setting = "monthly ARPA × 1 month × 60% contribution margin / gross revenue churn over 1 month"
+    assert rows["ltv_rule"].setting == setting
+    assert "item 5, paraphrased" in rows["ltv_rule"].source and "unverified" in rows["ltv_rule"].source
+    assert rows["rule_of_40_rule"].setting == "revenue growth 70% + EBITDA margin -35%"
+    assert rows["magic_number_rule"].setting.startswith("4 × (this quarter's revenue - the prior quarter's)")
+    for key in ("rule_of_40_rule", "magic_number_rule"):
+        assert rows[key].source.startswith("unverified") and '"' not in rows[key].source, key
+        # With no source read, no person or firm is credited either: a name is no citation.
+        assert rows[key].source.endswith("no source was read for it, so none is credited or quoted"), key
+        assert "no benchmark" in rows[key].statement or "No line is set" in rows[key].statement, key
+    assert "outside this period" in rows["period_rule"].statement
+    assert "outside this period" not in metrics_check(**METRICS_AN_DECK).assumptions[0].statement
+
+
 def _random_input(rng: random.Random) -> dict[str, object]:
     start = rng.randint(1, 10**6)
     contraction = rng.randint(0, start)
     churned = rng.randint(0, start - contraction)
     new = rng.randint(1, 10**6)
     expansion = rng.randint(0, 10**5)
-    return {
+    fields: dict[str, object] = {
         "period_months": rng.randint(1, MAX_PERIOD_MONTHS),
         "starting_recurring": str(start),
         "new_recurring": str(new),
@@ -144,7 +370,12 @@ def _random_input(rng: random.Random) -> dict[str, object]:
         "sales_marketing_spend": str(rng.randint(1, 10**7)),
         "gross_margin_percent": str(rng.randint(1, 100)),
         "net_burn": str(rng.randint(-(10**6), 10**7)),
+        "customers_new": rng.randint(1, 1000),
     }
+    # LTV needs a churn above zero to divide by, so ARPA and its margin come only when something was lost.
+    if contraction + churned > 0:
+        fields |= {"arpa": str(rng.randint(1, 10**4)), "contribution_margin_percent": str(rng.randint(1, 100))}
+    return fields
 
 
 def test_property_the_metrics_hold_their_identities() -> None:
@@ -168,6 +399,15 @@ def test_property_the_metrics_hold_their_identities() -> None:
             assert _exact(result, "burn_multiple") == burn / net_new
         else:
             assert result.burn_multiple is None
+        # LTV times the churn is the period's ARPA after margin; LTV/CAC times CAC is LTV; no churn, no LTV.
+        if "arpa" not in fields:
+            assert result.ltv is None and result.ltv_to_cac is None
+            continue
+        months = Fraction(int(str(fields["period_months"])))
+        contribution = Fraction(str(fields["contribution_margin_percent"])) / 100
+        arpa = Fraction(str(fields["arpa"]))
+        assert _exact(result, "ltv") * _exact(result, "gross_revenue_churn") == arpa * months * contribution
+        assert _exact(result, "ltv_to_cac") * _exact(result, "blended_cac") == _exact(result, "ltv")
 
 
 def test_annual_and_monthly_units_give_the_same_business() -> None:
@@ -317,6 +557,17 @@ def test_an_unlabelled_churn_matching_no_basis_is_one_mismatch() -> None:
 
 
 # Each flag: a minimal input that sets it, and its nearest neighbour that does not.
+_RULE_OF_40_PARTS: dict[str, object] = {
+    "revenue_growth_percent": "30",
+    "profit_margin_percent": "10",
+    "profit_margin_basis": "operating",
+    "gross_margin_percent": "70",
+}
+_MAGIC_PARTS: dict[str, object] = {
+    "quarter_revenue": "110",
+    "prior_quarter_revenue": "100",
+    "prior_quarter_sales_marketing_spend": "50",
+}
 _FLAG_CASES: dict[MetricsFlag, tuple[dict[str, object], dict[str, object]]] = {
     "stated_arr_matches_run_rate": (
         {"month_total_revenue": "100", "month_one_time_revenue": "20", "stated_arr": "1200"},
@@ -412,6 +663,33 @@ _FLAG_CASES: dict[MetricsFlag, tuple[dict[str, object], dict[str, object]]] = {
     "arr_movement_and_month_disagree": (
         {"starting_recurring": "100", "month_total_revenue": "110"},
         {"starting_recurring": "100", "month_total_revenue": "101"},
+    ),
+    "ltv_on_gross_margin": (_LTV_PARTS, {**_LTV_PARTS, "contribution_margin_percent": "40"}),
+    # A 60% contribution margin above the 50% gross margin; equal margins are not above.
+    "contribution_margin_above_gross_margin": (
+        {**_LTV_PARTS, "contribution_margin_percent": "60"},
+        {**_LTV_PARTS, "contribution_margin_percent": "50"},
+    ),
+    # On the 40% contribution margin LTV is 10·(2/5)/(1/20) = 80; on the 50% gross margin 100.
+    "stated_ltv_uses_gross_margin": (
+        {**_LTV_PARTS, "contribution_margin_percent": "40", "stated_ltv": "100"},
+        {**_LTV_PARTS, "contribution_margin_percent": "40", "stated_ltv": "90"},
+    ),
+    # LTV 10·(1/2)/(1/20) = 100 on margin, 200 on revenue alone.
+    "stated_ltv_uses_revenue_not_margin": ({**_LTV_PARTS, "stated_ltv": "200"}, {**_LTV_PARTS, "stated_ltv": "150"}),
+    "rule_of_40_margin_basis_unlabelled": (
+        {"revenue_growth_percent": "30", "profit_margin_percent": "10"},
+        {"revenue_growth_percent": "30", "profit_margin_percent": "10", "profit_margin_basis": "ebitda"},
+    ),
+    # Growth 30 + operating margin 10 = 40; growth 30 + gross margin 70 = 100.
+    "stated_rule_of_40_uses_gross_margin": (
+        {**_RULE_OF_40_PARTS, "stated_rule_of_40_percent": "100"},
+        {**_RULE_OF_40_PARTS, "stated_rule_of_40_percent": "90"},
+    ),
+    # 4·(110 - 100)/50 = 0.8 with the 4, 0.2 without it.
+    "stated_magic_number_not_annualised": (
+        {**_MAGIC_PARTS, "stated_magic_number": "0.2"},
+        {**_MAGIC_PARTS, "stated_magic_number": "0.5"},
     ),
     # Net revenue churn 2.1%: a stated 1.7% is within 0.5 points but no rounding of it; a stated 2% is both.
     "consistent_beyond_rounding": (
@@ -996,6 +1274,12 @@ def test_assumption_rows_appear_only_when_used() -> None:
         "payback_band",
         "net_revenue_churn_band",
     }
+    assert {row.key for row in metrics_check(**METRICS_DL).assumptions} >= {
+        "ltv_rule",
+        "rule_of_40_rule",
+        "magic_number_rule",
+    }
+    assert not {"ltv_rule", "rule_of_40_rule", "magic_number_rule"} & full
 
 
 _NEEDS = "to check it"
@@ -1114,6 +1398,71 @@ _NEEDS = "to check it"
             {"customers_start": 5, "customers_lost": 1, "stated_churn_percent": "-0.5"},
             "stated_churn_percent is below 0, which only net revenue churn can be (expansion above the revenue lost)",
         ),
+        ({"contribution_margin_percent": "50"}, "contribution_margin_percent needs arpa"),
+        ({"ltv_churn_basis": "logo"}, "ltv_churn_basis needs arpa"),
+        (
+            {"starting_recurring": "100", "churned_recurring": "5", "arpa": "10"},
+            "arpa needs contribution_margin_percent or gross_margin_percent: LTV is worked on a margin, never on "
+            "revenue alone",
+        ),
+        (
+            {"starting_recurring": "100", "arpa": "10", "gross_margin_percent": "50"},
+            "arpa needs gross revenue churn above 0 in the period to work LTV (starting_recurring above 0 and some "
+            "contraction or churn; ltv_churn_basis picks another churn): with no churn the lifetime has no end, so "
+            "LTV does not compute",
+        ),
+        (
+            {"arpa": "10", "gross_margin_percent": "50"},
+            "arpa needs gross revenue churn above 0 in the period to work LTV",
+        ),
+        (
+            {**_LTV_PARTS, "expansion_recurring": "5", "ltv_churn_basis": "net_revenue"},
+            "arpa needs net revenue churn above 0 in the period to work LTV (starting_recurring above 0 and "
+            "contraction plus churn above expansion;",
+        ),
+        (
+            {**_LTV_PARTS, "customers_start": 10, "customers_lost": 0, "ltv_churn_basis": "logo"},
+            "arpa needs logo churn above 0 in the period to work LTV (customers_start above 0 and customers_lost "
+            "above 0;",
+        ),
+        (
+            {"arpa": "10", "gross_margin_percent": "50", "ltv_churn_basis": "logo"},
+            "arpa needs logo churn above 0 in the period to work LTV",
+        ),
+        ({**_LTV_PARTS, "contribution_margin_percent": "0"}, "greater than 0"),
+        ({"revenue_growth_percent": "30"}, "revenue_growth_percent needs profit_margin_percent: the Rule of 40 adds"),
+        ({"profit_margin_percent": "10"}, "profit_margin_percent needs revenue_growth_percent"),
+        ({"profit_margin_basis": "net"}, "profit_margin_basis needs profit_margin_percent"),
+        ({"revenue_growth_percent": "-100.5", "profit_margin_percent": "1"}, "greater than or equal to -100"),
+        (
+            {"quarter_revenue": "1"},
+            "quarter_revenue needs prior_quarter_revenue: the magic number compares two consecutive quarters",
+        ),
+        ({"prior_quarter_ending_arr": "1"}, "prior_quarter_ending_arr needs quarter_ending_arr"),
+        (
+            {**_MAGIC_PARTS, "quarter_ending_arr": "1", "prior_quarter_ending_arr": "1"},
+            "give the magic number's quarters as revenue (quarter_revenue, prior_quarter_revenue) or as ARR "
+            "(quarter_ending_arr, prior_quarter_ending_arr), not both",
+        ),
+        (
+            {"quarter_ending_arr": "2", "prior_quarter_ending_arr": "1"},
+            "quarter_ending_arr needs prior_quarter_sales_marketing_spend",
+        ),
+        (
+            {"prior_quarter_sales_marketing_spend": "1"},
+            "prior_quarter_sales_marketing_spend needs quarter_revenue and prior_quarter_revenue, or "
+            "quarter_ending_arr and prior_quarter_ending_arr",
+        ),
+        ({"stated_ltv": "1"}, f"stated_ltv needs arpa {_NEEDS}"),
+        (
+            {**_LTV_PARTS, "stated_ltv_to_cac": "3"},
+            f"stated_ltv_to_cac needs arpa, sales_marketing_spend and customers_new above 0 {_NEEDS}",
+        ),
+        (
+            {"stated_rule_of_40_percent": "40"},
+            f"stated_rule_of_40_percent needs revenue_growth_percent and profit_margin_percent {_NEEDS}",
+        ),
+        ({"stated_magic_number": "1"}, "stated_magic_number needs quarter_revenue and prior_quarter_revenue, or"),
     ],
     ids=[
         "movement-without-start",
@@ -1149,6 +1498,28 @@ _NEEDS = "to check it"
         "customers-negative",
         "churn-above-100",
         "churn-below-0-without-revenue",
+        "contribution-margin-without-arpa",
+        "ltv-churn-basis-without-arpa",
+        "arpa-without-a-margin",
+        "arpa-with-no-churn",
+        "arpa-with-nothing-at-the-start",
+        "arpa-with-net-churn-at-zero",
+        "arpa-with-no-logo-lost",
+        "arpa-with-no-customer-counts",
+        "contribution-margin-zero",
+        "growth-without-margin",
+        "margin-without-growth",
+        "margin-basis-without-margin",
+        "growth-below-minus-100",
+        "quarter-without-prior",
+        "prior-arr-without-quarter-arr",
+        "both-magic-number-variants",
+        "quarters-without-spend",
+        "spend-without-quarters",
+        "ltv-without-arpa",
+        "ltv-to-cac-without-cac",
+        "rule-of-40-without-parts",
+        "magic-number-without-quarters",
     ],
 )
 def test_each_refusal_names_its_fields(fields: dict[str, object], message: str) -> None:

@@ -185,8 +185,9 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
      command line's report prints. That is a change of notation, not a calculation; never round it.
    - ARR, retention, churn, CAC payback and burn multiple are checked by the vc-metrics-readiness skill
      (`equity_metrics_check`), and a market size by the vc-market-sizing skill (`equity_market_sizing`): quote each as
-     stated and name the skill that checks it in its fix. Growth rates and LTV: no tool computes them; quote them as
-     stated with "not checked: no tool computes this". Of all these figures, never compute, convert or round one.
+     stated and name the skill that checks it in its fix. LTV, LTV/CAC, the Rule of 40 and the magic number go to the
+     vc-metrics-readiness skill too. Growth rates: no tool computes them; quote them as stated with "not checked: no
+     tool computes this". Of all these figures, never compute, convert or round one.
 5. **Competition.** Fill the four levels from the deck's own lines, as the section above says.
 6. **Mark each dimension** Present, Missing or Contradicted by the rules above, quoting the deciding line, with one
    fix that uses only the founder's facts or a bracketed ask (`[the milestone the raise reaches]`).
@@ -386,8 +387,8 @@ Lead with what to fix, in order, then the evidence behind it.
    with no label, both readings side by side), and each flag as a question a partner is likely to ask, with its
    meaning; a runway with no raise or on a SAFE or note raise, and that raise's use-of-funds lines, with
    `equity_runway_plan`'s rows, or quoted as stated beside the ask for cash and burn when they were not given; each
-   metric or market size with the skill that checks it; growth rates and LTV quoted as stated with "not checked: no
-   tool computes this".
+   metric (LTV, the Rule of 40 and the magic number included) or market size with the skill that checks it; growth
+   rates quoted as stated with "not checked: no tool computes this".
 7. **Claims:** the vc-claims-check claims table, Contradicted first.
 8. **Which investors the story fits:** one short paragraph, with the deciding lines quoted and the judgment marked
    unverified.
@@ -419,8 +420,8 @@ two-stage review (attack, then refute with the founder's own material) is this r
 - It never names a firm or person the deck fits, never role-plays or speaks as a named investor, firm or author, and
   does no investor research: no target lists, fund look-ups, contact details or outreach.
 - It never invents or strengthens traction, customers, partners, credentials or figures, in a fix or in a refute pass.
-- No arithmetic outside the equity calculator's tools. Growth rates and LTV are quoted; metrics and market sizes are
-  checked by the vc-metrics-readiness and vc-market-sizing skills.
+- No arithmetic outside the equity calculator's tools. Growth rates are quoted; metrics (LTV, the Rule of 40 and the
+  magic number included) and market sizes are checked by the vc-metrics-readiness and vc-market-sizing skills.
 - It reads text. It does not judge visual design, and reads no figure off a chart the founder did not state.
 - The review predicts likely objections from the deck's text; a real partner may raise others.
 - It works from the founder's material and sends nothing anywhere.

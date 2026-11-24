@@ -157,35 +157,72 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
    `deal_check`. Ask, by name and in one message, for both sets of terms: today's shares by holder group (founders,
    team and pool, existing investors: each existing series with its shares, amount invested, preference multiple,
    participation and rank, each SAFE, and each existing note with its rate, simple or compounding interest and months
-   outstanding), the raise, the priced round's pre-money, any pool top-up and its liquidation terms,
-   and the note's cap, discount, interest rate, simple or compounding
-   interest and months until it converts. Pass `{"standard": true}` only when the founder says the terms are standard
-   (1x, non-participating); otherwise ask for the multiple and the participation. Ask too for the next priced round
-   the founder expects (pre-money, raise, any pool top-up, series terms) and one or more exit values, and never
-   assume one: with no next round the tool refuses (`no_next_round_given`), so ask for it rather than run. Each
-   `next_rounds` entry is an alternative for that one round after today, worked from today's cap table, never after
-   the one before: a Series A and then a Series B is not modelled, so say so and pass only the round after today.
-   Call `equity_instrument_compare` and show the side-by-side table with the tool's figures: ownership by group right
-   after today (the note outstanding, with no shares), after each next round, and each group's payout at each exit,
-   under option A, option B and B - A, the founders' lines first, then the flags and the assumptions the answer leans
-   on. The MCP result gives flag codes only; relay each in these words: `cap_below_round_price_now` (the note's cap
+   outstanding), the raise, the priced round's pre-money, any pool top-up and its liquidation terms, and the note's
+   cap (none is fine: an uncapped note runs), discount, interest rate, simple or compounding interest and maturity.
+   Pass `{"standard": true}` only when the founder says the terms are standard (1x, non-participating); otherwise ask
+   for the multiple and the participation. Ask too whether the founder expects a next priced round, and never assume
+   one either way:
+
+   - **A next round expected:** ask for it (pre-money, raise, any pool top-up, series terms), the months until the
+     note converts there and one or more exit values. Each `next_rounds` entry is an alternative for that one round
+     after today, worked from today's cap table, never after the one before: a Series A and then a Series B is not
+     modelled, so say so and pass only the round after today.
+   - **No next round expected** (the founder hopes this raise is the only one): leave `next_rounds` and
+     `note_months_to_conversion` out, and the tool runs its no-next-round mode and says so (flag
+     `no_next_round_given`). Say what the mode shows in one line: the note never converts at a priced round here, so
+     the table gives ownership right after today with the note unconverted, the note at its maturity, and each exit as
+     a sale before any priced round. Ask, from the note's own terms and never assumed: its maturity in months
+     (`note_maturity_months`) and what happens then, repaid, or converted at a valuation (passed as
+     `note_maturity_conversion_valuation`, which the tool takes over today's fully diluted shares, as the cap is) or at
+     a price a share (`note_maturity_conversion_price`), only when the note names one; the months at which to show
+     what the note owes (`note_owed_months`, its maturity, say); what the note is paid at a sale before any priced
+     round, its change-of-control term: a multiple of its principal (`note_change_of_control_multiple`) or conversion
+     at its cap (`note_change_of_control_at_cap`, with the months to the sale, `note_months_to_exit`); and one or more
+     sale values. A term the note words differently (interest added to the multiple, the holder taking the greater of
+     the two) is not modelled: say so rather than pass it as another. A sale whose term is not given still runs: its
+     row gives option B as not worked, with `note_refusal` and its reason in words (`no_change_of_control_term`, or
+     `uncapped_no_change_of_control_term` when the note has no cap to convert at, or
+     `existing_instruments_outstanding` when existing SAFEs or notes are still outstanding under B). Relay the reason
+     and ask for the term.
+
+   With no next round the tool refuses `note_months_to_conversion` (`no_next_round_given`), and with one it refuses the
+   maturity and sale terms above, so pass each only in its own mode. Call `equity_instrument_compare` and show the
+   side-by-side table with the tool's figures: ownership by group right after today (the note outstanding, with no
+   shares), then after each next round and each group's payout at each exit, or with no next round the note at its
+   maturity and each group's payout at each sale, under option A, option B and B - A, the founders' lines first, then
+   the flags and the assumptions the answer leans on. The MCP result gives flag codes only; relay each in these words:
+   `no_next_round_given` (no next round was given, so the note never converts at a priced round here: the table shows
+   ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round);
+   `cap_below_round_price_now` (the note's cap
    price is below option A's price today, so at its cap the note buys shares for less than A's investors pay);
    `note_converts_at_cap`, `note_converts_at_discount` and `note_converts_at_round_price` (the price the note took in
    at least one next round: its cap price, its discount price, or the round price when neither gave a lower one);
    `note_interest_converts` (the interest converts too, so the note gets shares for more than the raise);
    `note_interest_paid_in_cash` (option B pays the note's interest in cash when it converts, so that cash is in no
    payout line, and option A pays none);
-   `maturity_not_given` (no maturity was given, and what happens if the next round comes late is in the note's own
-   terms, not modelled); `converts_after_maturity` (the note matures before it converts, and what happens at maturity
+   `maturity_not_given` (no maturity was given: with a next round, what happens if it comes late is in the note's own
+   terms, not modelled; with none, what the note owes at maturity and whether it is then repaid or converts are in its
+   own terms, not shown); `converts_after_maturity` (the note matures before it converts, and what happens at maturity
    is in the note's own terms, not modelled); `next_round_below_priced_round_price` (a next round prices below option
    A's price today, a down round for A's investors, and any anti-dilution in their terms is not modelled);
    `priced_round_below_existing_series_price` (option A's price today is below what an existing series paid per share,
    a down round for that series, and any anti-dilution in its terms is not modelled; option B prices no round today);
-   `existing_mfn_safe_beside_note` (an existing MFN SAFE converts on the terms given for it under both options, and
-   whether it may take option B's note's cap or discount is in the SAFE's own terms, not modelled). Never pick
+   `existing_mfn_safe_beside_note` (with a next round, an existing MFN SAFE converts on the terms given for it under
+   both options, and whether it may take option B's note's cap or discount is in the SAFE's own terms, not modelled);
+   `discount_unused_without_round` (the note's discount comes off a priced round's price, so with no next round it
+   changes no figure); `cap_unused_without_round` (the note's cap sets a price only where the note converts at it, a
+   priced round or a sale on a converts-at-its-cap term, so with no next round and no such sale worked it changes no
+   figure); `maturity_conversion_not_given` (a maturity but no conversion term: only what the note owes
+   then is shown, and whether it converts is in its own terms); `change_of_control_not_given` (no term for a sale
+   before any priced round, so option B is not worked at the sales); `existing_instruments_outstanding` (with no
+   priced round the existing SAFEs and notes never convert under option B: they hold no shares there, and option B is
+   not worked at a sale); `exit_after_maturity` (the sales come after the note matures: what happened at maturity is
+   in its own terms, and option B's sale lines take the note as still outstanding); `note_paid_below_owed_at_sale`
+   (at one sale or more the note, converted at its cap, is paid less than it owes then, any interest paid in cash
+   counted, and whether the holder may be repaid instead is in the note's own terms, not modelled). Never pick
    one for them or call one better: the table shows what each does on the founder's own figures. Hand the legal terms
-   (the note's maturity and what happens at it, the preference and anti-dilution wording, the conversion mechanics)
-   to their lawyer.
+   (the note's maturity and what happens at it, its change-of-control wording, the preference and anti-dilution
+   wording, the conversion mechanics) to their lawyer.
 
 ## Answering
 
@@ -244,8 +281,9 @@ the three `runway_plan` flags; the runway plan's `consistent_beyond_rounding` me
   line or a table cell unless the founder's material states it or a tool returned it; quote both figures as stated
   instead ("from 2,000 to 4,500", never "more than doubled"). A figure outside the deal terms goes to the skill built
   for it: ARR, retention, churn, CAC payback and burn multiple to the vc-metrics-readiness skill
-  (`equity_metrics_check`), a market size to the vc-market-sizing skill (`equity_market_sizing`). Growth rates and LTV
-  are quoted as stated with "not checked: no tool computes this".
+  (`equity_metrics_check`), a market size to the vc-market-sizing skill (`equity_market_sizing`). LTV, LTV/CAC, the
+  Rule of 40 and the magic number go to the vc-metrics-readiness skill as well. Growth rates are quoted as stated with
+  "not checked: no tool computes this".
 - It checks the arithmetic of the figures the founder gives, pasted or in a file the agent can read in this session. It
   opens no folder of files, reads no figure off a chart or a picture, and sends nothing anywhere. A term sheet goes to
   the vc-term-sheet-review skill.

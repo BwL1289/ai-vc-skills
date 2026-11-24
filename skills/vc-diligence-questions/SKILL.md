@@ -165,9 +165,9 @@ the bank or the checklist; step 3 then starts at the quote check.
      the round), which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
    - This skill computes no metric. ARR, retention, churn, CAC payback and burn multiple go to the
      vc-metrics-readiness skill, which checks them against their parts with the calculator, and a market size to the
-     vc-market-sizing skill; here they are quoted as stated. Growth rates and LTV are quoted with "not checked: no
-     tool computes this". For each, check only that it has a definition, a period and a record behind it, and never
-     compute, convert or round one.
+     vc-market-sizing skill; here they are quoted as stated. LTV, LTV/CAC, the Rule of 40 and the magic number go to
+     the vc-metrics-readiness skill too. Growth rates are quoted with "not checked: no tool computes this". For each,
+     check only that it has a definition, a period and a record behind it, and never compute, convert or round one.
 3. **Run the adversarial review** (next section): attack, check the quotes, refute, rank.
 4. **Read the bank and the checklist,** only now. Word each kept question with a bank row's Question, or a row of
    this skill's own question table, when one asks the same thing, and cite its ID; otherwise keep the lens's

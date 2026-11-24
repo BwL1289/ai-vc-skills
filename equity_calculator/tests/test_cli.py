@@ -15,10 +15,12 @@ import sys
 from pathlib import Path
 
 import pytest
-from equity_calculator.__main__ import main, run
+from equity_calculator.__main__ import _INPUT_MODELS, main, run
 from equity_calculator.schemas.equity import EquityAssumption
 from openpyxl import load_workbook
 from tests.support import (
+    CAP_TABLE_CR,
+    CAP_TABLE_CR_ARGV,
     COMPARE_BU,
     DEAL_A,
     MARKET_AX,
@@ -27,6 +29,7 @@ from tests.support import (
     POOL_PLAN_CP,
     RAISE_PIPELINE_RA,
     RUNWAY_Y,
+    cap_table_check,
     deal_check,
     employee,
     instrument_compare,
@@ -306,6 +309,7 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
         (_COMPARE_BU, instrument_compare(**COMPARE_BU).assumptions),
         (_POOL_PLAN_CP, pool_plan(**POOL_PLAN_CP).assumptions),
         (_RAISE_PIPELINE_RA, raise_pipeline(**RAISE_PIPELINE_RA).assumptions),
+        (CAP_TABLE_CR_ARGV, cap_table_check(**CAP_TABLE_CR).assumptions),
     ],
     ids=[
         "investor",
@@ -318,6 +322,7 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
         "instrument_compare",
         "pool_plan",
         "raise_pipeline",
+        "cap_table_check",
     ],
 )
 async def test_every_assumption_prints_with_its_setting_statement_and_source(
@@ -431,6 +436,17 @@ async def test_bad_arguments_exit_2_with_argparse_usage(
 
     assert caught.value.code == _ARGPARSE_EXIT
     assert message in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("scenario", sorted(_INPUT_MODELS))
+async def test_each_scenario_lists_its_flags(scenario: str, capsys: pytest.CaptureFixture[str]) -> None:
+    """``<scenario> --help`` prints the flags and exits 0: argparse formats help text with %, so a bare % in one
+    flag's words (``45%`` where ``45%%`` is meant) would crash the whole listing."""
+    with pytest.raises(SystemExit) as stopped:
+        await run([scenario, "--help"])
+
+    assert stopped.value.code == 0
+    assert f"usage: equity_calculator {scenario}" in capsys.readouterr().out
 
 
 async def test_an_unwritable_workbook_exits_with_a_clean_message(tmp_path: Path) -> None:

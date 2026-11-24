@@ -4,7 +4,8 @@ The JSON example must be a valid ``equity_deal_check`` call, the ``equity_calcul
 line of the output excerpt that follows it must be a line the command really prints, so no figure in the skill is
 typed by hand. The same holds for each eval prompt in evals/vc-deal-math/: its tool call is valid for the tool it
 names (``equity_deal_check``, or ``equity_instrument_compare`` for a founder choosing between a priced round and a
-note) and its excerpt is lines of the report that call prints. An eval whose right answer is no ``equity_deal_check``
+note, with a next round or, for a founder who hopes today's raise is the only one, with none) and its excerpt is lines
+of the report that call prints. An eval whose right answer is no ``equity_deal_check``
 call (a raise on a SAFE) says so under its tool-call heading and carries no call or excerpt to check, and so do the two
 evals whose runway call waits for a planned spend's start month or its monthly spend (no ``equity_runway_plan`` call
 yet). Every flag code has a row in the skill's flag table, since the tool's JSON gives the codes only. The fully
@@ -41,7 +42,7 @@ def _headings(path: Path) -> set[str]:
     return {opening for opening in (_NO_CALL, _HELD_FOR_MONTH, _HELD_FOR_SPEND) if opening in text}
 
 
-_EVAL_COUNT = 7
+_EVAL_COUNT = 8
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_deal_check` call."
 # A SAFE raise's runway held for the month its planned spend starts, or for that spend once the month is given: no call
 # yet, and the runway line says why. "the month the" keeps the first opening from matching the second's "monthly".
@@ -292,7 +293,8 @@ def test_figures_outside_the_deal_terms_go_to_the_skills_built_for_them() -> Non
 
     assert "ARR, retention, churn, CAC payback and burn multiple to the vc-metrics-readiness skill" in limits
     assert "a market size to the vc-market-sizing skill" in limits
-    assert f'Growth rates and LTV are quoted as stated with "{_NO_TOOL}"' in limits
+    assert "LTV, LTV/CAC, the Rule of 40 and the magic number go to the vc-metrics-readiness skill as well" in limits
+    assert f'Growth rates are quoted as stated with "{_NO_TOOL}"' in limits
     assert "(a growth rate, a market size, unit economics)" not in limits
 
 
@@ -303,6 +305,7 @@ def test_one_eval_calls_the_comparison_tool_and_the_rest_deal_check() -> None:
         "deal_check",
         "deal_check",
         "deal_check",
+        "instrument_compare",
         "instrument_compare",
     ]
 
@@ -316,7 +319,7 @@ def test_a_founder_choosing_between_a_priced_round_and_a_note_goes_to_the_compar
     assert "has not chosen between a priced round now and a convertible note now** goes to" in steps
     assert "`equity_instrument_compare`" in steps and "never to `deal_check`" in steps
     assert 'Pass `{"standard": true}` only when the founder says the terms are standard' in steps
-    assert "with no next round the tool refuses (`no_next_round_given`)" in steps
+    assert "Ask too whether the founder expects a next priced round, and never assume one either way" in steps
     assert "never assume one" in steps
     assert "Never pick one for them or call one better" in steps
     assert "to their lawyer" in steps
@@ -325,6 +328,39 @@ def test_a_founder_choosing_between_a_priced_round_and_a_note_goes_to_the_compar
     assert "It passes the two next rounds as alternatives for the one round after today" in answer
     assert "It never picks an option or calls one better" in answer
     assert "It does not call `equity_deal_check`" in answer
+
+
+def test_a_founder_who_expects_no_next_round_is_asked_for_the_note_s_own_maturity_and_sale_terms() -> None:
+    """With no next round the tool runs its no-next-round mode: the step explains it and asks for the maturity, what
+    happens then and the change-of-control term, never assumed; the Company DX eval runs it with an uncapped note."""
+    step = _unwrapped(_TEXT.split(_COMPARE_STEP, 1)[1].split("\n## ", 1)[0])
+    (company_dx,) = (path for path in _EVALS if path.name.startswith("company-dx-"))
+    text = company_dx.read_text(encoding="utf-8")
+    (example,) = _fences("json", text)
+    inputs = json.loads(example)["inputs"]
+    answer = _unwrapped(_section("## Expected answer", text))
+
+    assert "**No next round expected** (the founder hopes this raise is the only one)" in step
+    assert "leave `next_rounds` and `note_months_to_conversion` out" in step
+    assert "the tool runs its no-next-round mode and says so (flag `no_next_round_given`)" in step
+    for field in (
+        "note_maturity_months",
+        "note_maturity_conversion_valuation",
+        "note_maturity_conversion_price",
+        "note_owed_months",
+        "note_change_of_control_multiple",
+        "note_change_of_control_at_cap",
+        "note_months_to_exit",
+    ):
+        assert f"`{field}`" in step, field
+    assert "Ask, from the note's own terms and never assumed" in step
+    for code in ("no_change_of_control_term", "uncapped_no_change_of_control_term", "existing_instruments_outstanding"):
+        assert f"`{code}`" in step, code
+    assert "next_rounds" not in inputs and "note_months_to_conversion" not in inputs
+    assert "note_valuation_cap" not in inputs
+    assert compute(_INPUT_MODELS["instrument_compare"].model_validate(inputs)).mode == "no_next_round"
+    assert "it says in words that the comparison runs with no next round (`no_next_round_given`)" in answer
+    assert "It never picks an option or calls one better" in answer
 
 
 def test_the_comparison_step_carries_every_flag_s_meaning() -> None:

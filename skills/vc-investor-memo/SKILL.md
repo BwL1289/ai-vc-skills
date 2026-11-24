@@ -110,9 +110,9 @@ Rules for the text:
   revenue, a platform that could add the feature) is in it, whether or not the founder listed it, in the founder's
   words. A mitigation is what is being done and what shows it; a hope is labelled as a plan.
 - **Metrics and market size.** This skill computes neither. ARR, retention, churn, CAC payback and burn multiple are
-  checked against their parts by the vc-metrics-readiness skill, and a market size is built bottom-up by the
-  vc-market-sizing skill; here they are quoted as stated, with that skill named. Growth rates and LTV are quoted as
-  stated, with "not checked: no tool computes this". None is computed, converted or rounded.
+  checked against their parts by the vc-metrics-readiness skill, as are LTV, LTV/CAC, the Rule of 40 and the magic
+  number; a market size is built bottom-up by the vc-market-sizing skill; here all are quoted, with the skill named.
+  Growth rates are quoted as stated, with "not checked: no tool computes this". None is computed, converted or rounded.
 - **Figures as stated, everywhere.** In the memo, the fix list and the biggest fixes, a figure is quoted as the founder
   states it (45%), never restated in words ("nearly half", "most").
 
@@ -457,8 +457,8 @@ Lead with the biggest fixes, then the memo, then the full fix list.
    from the flag table; the outcome table (Exit value, the founder's reason, each class's payout, Converts?, Common's
    payout; never the amount invested) with the `exit_is_shared_amount` statement quoted under it; the stake after the
    founder's assumed later rounds; the assumption rows the figures lean on; metrics and market sizes quoted as stated,
-   with the skill that checks them named; growth rates, LTV and every other figure quoted as stated with "not checked:
-   no tool computes this".
+   with the skill that checks them named (LTV and the magic number among them); growth rates and every other figure
+   quoted as stated with "not checked: no tool computes this".
 5. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
 6. **Sources:** the guides used, with links, and which points are this skill's own judgment.
 7. **Close:** this is not investment, legal or tax advice; the champion decides what to use and writes the firm's
@@ -492,7 +492,7 @@ review (attack, then refute with the founder's own material) is this repository'
 - No fund math: no fund size, no share of a fund, no multiple on invested, no return rate, no "returns the fund".
 - It never invents or strengthens traction, customers, team credentials, risks' mitigations or exit values.
 - No arithmetic outside the equity calculator's tools. Metrics and market sizes are quoted here and checked by the
-  vc-metrics-readiness and vc-market-sizing skills; growth rates and LTV are quoted; a later round's payout at an exit
-  is not checked.
+  vc-metrics-readiness and vc-market-sizing skills (LTV and the Rule of 40 included); growth rates are quoted; a
+  later round's payout at an exit is not checked.
 - The dissent pass predicts likely objections from the memo's text; a real partnership may raise others.
 - It works from the founder's material and sends nothing anywhere.
