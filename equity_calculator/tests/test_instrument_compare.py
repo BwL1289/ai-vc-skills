@@ -320,12 +320,16 @@ def test_a_round_with_no_price_is_refused_naming_it() -> None:
         instrument_compare(**_bu(note_valuation_cap=None, next_rounds=[no_price]))
 
 
-def test_a_missing_next_round_is_refused() -> None:
-    with pytest.raises(ValidationError, match="no_next_round_given"):
+def test_no_next_round_with_a_conversion_month_is_refused_and_without_one_switches_mode() -> None:
+    """The month the note converts at a next round has no round to belong to: refused, naming the mode. Left out, the
+    comparison runs with no next round (``test_instrument_compare_no_round.py``)."""
+    with pytest.raises(ValidationError, match="no_next_round_given: note_months_to_conversion"):
         InstrumentCompareInput.model_validate(_bu(next_rounds=[]))
-    without = {key: value for key, value in COMPARE_BU.items() if key != "next_rounds"}
-    with pytest.raises(ValidationError, match="no_next_round_given"):
-        InstrumentCompareInput.model_validate(without)
+    without = {
+        key: value for key, value in COMPARE_BU.items() if key not in ("next_rounds", "note_months_to_conversion")
+    }
+    assert instrument_compare(**without).mode == "no_next_round"
+    assert instrument_compare(**COMPARE_BU).mode == "next_round"
 
 
 @pytest.mark.parametrize(

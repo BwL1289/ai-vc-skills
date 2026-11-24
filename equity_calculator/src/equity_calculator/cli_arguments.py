@@ -710,17 +710,62 @@ def _note_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--note-months-to-conversion",
         type=parse_months,
-        required=True,
-        help="B: months from today until the note converts at the next round.",
+        help="B: months from today until the note converts at the next round (needed with --next-round; left out "
+        "with none).",
     )
     parser.add_argument(
-        "--note-maturity-months", type=parse_months, help="B: the note's maturity in months (compared only)."
+        "--note-maturity-months",
+        type=parse_months,
+        help="B: the note's maturity in months (with a next round, compared only; with none, its maturity is shown).",
     )
     parser.add_argument(
         "--note-interest-paid-in-cash",
         action="store_true",
         default=None,
         help="B: the interest is paid in cash, so only the principal converts.",
+    )
+    parser.add_argument(
+        "--note-owed-month",
+        type=parse_months,
+        action="append",
+        dest="note_owed_months",
+        metavar="M",
+        help="B: a month at which to show what the note owes, principal plus interest (its maturity, say). Repeat "
+        "for each (at most 6).",
+    )
+    _no_round_note_arguments(parser)
+
+
+def _no_round_note_arguments(parser: argparse.ArgumentParser) -> None:
+    """Option B's own terms for no next round: its conversion at maturity, and what it is paid at a sale before any
+    priced round. Each is the note's own term, from the founder; with a --next-round each is refused."""
+    parser.add_argument(
+        "--note-maturity-conversion-valuation",
+        type=parse_decimal,
+        help="B, no next round: the valuation the note converts at on maturity, over today's FD, from its own terms.",
+    )
+    parser.add_argument(
+        "--note-maturity-conversion-price",
+        type=parse_decimal,
+        help="B, no next round: the price a share the note converts at on maturity, from its own terms.",
+    )
+    parser.add_argument(
+        "--note-change-of-control-multiple",
+        type=parse_decimal,
+        help="B, no next round: at a sale before any priced round the note is paid this multiple of its principal, "
+        "before any share, from its own terms.",
+    )
+    parser.add_argument(
+        "--note-change-of-control-at-cap",
+        action="store_true",
+        default=None,
+        help="B, no next round: at a sale before any priced round the note converts at its cap price into common, "
+        "from its own terms (needs --note-valuation-cap and --note-months-to-exit).",
+    )
+    parser.add_argument(
+        "--note-months-to-exit",
+        type=parse_months,
+        help="B, no next round: months from today to the sales, for the interest the note owes then.",
     )
 
 
@@ -758,8 +803,8 @@ def instrument_compare_arguments(parser: argparse.ArgumentParser) -> None:
         metavar=_TERMS,
         help="The next priced round, the same for both options: 'pre-money=V investment=I [target-pool-percent=T] "
         f"[pool-timing=pre_money|post_money]' and its series' terms, {_SERIES_HELP}. Repeat for each alternative "
-        "(at most 4): each is worked from today, never after the one before. At least one is needed, as the note "
-        "converts only there.",
+        "(at most 4): each is worked from today, never after the one before. With none, the comparison runs with no "
+        "next round: ownership today, the note at its maturity and each exit as a sale before any priced round.",
     )
     parser.add_argument(
         "--exit",
@@ -767,8 +812,8 @@ def instrument_compare_arguments(parser: argparse.ArgumentParser) -> None:
         action="append",
         dest="exit_amounts",
         metavar="E",
-        help="What the company sells for after the next round, in dollars. Repeat for each (at most 6); at least "
-        "one is needed.",
+        help="What the company sells for after the next round (with no --next-round, before any priced round), in "
+        "dollars. Repeat for each (at most 6); at least one is needed.",
     )
     parser.add_argument(
         "--pool-at-exit",
