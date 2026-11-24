@@ -6,6 +6,15 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- A live re-run of the `vc-deal-math` eval for Company DX on plugin 0.3.9 (Claude Code 2.1.331), recorded in its eval in
+  place of the run on plugin 0.3.7, which the file now describes beside the 0.3.5 run: Pass, with shortfalls against
+  the expected answer noted. Its session loaded `vc-deal-math` with its first tool call and never loaded the
+  `equity-calculator` skill, the first of the eval's four runs to do so, so the hand-off fix listed under Changed fired.
+  It made the one `instrument_compare` call with no next round, said so in words, set B - A beside every group's
+  ownership and every sale row, gave no figure of its own and chose no option. Though step 7 now reached it, it did not
+  lead with the summary or relay the flags in step 7's words, as step 7 asks, or say which assumptions are
+  `unverified`, as the skill's "Answering" section asks, and it named no flag by its code; no skill text changed with
+  this recording.
 - Plugin version 0.3.9 (the plugin's, the marketplace's and the `equity_calculator` package's), so an installed copy
   picks up the `vc-deal-math` hand-off fix listed under Changed.
 - A live re-run of the `vc-deal-math` eval for Company DX on plugin 0.3.7 (Claude Code 2.1.331), recorded in its eval in
@@ -319,9 +328,8 @@ All notable changes to this repository. Dates are UTC.
   Its body now opens, before the scenario table, with a bold line in step 7's own words: load `vc-deal-math` and
   answer from its step 7, never from this skill, and answer here only if that skill cannot be loaded. Its own copy of
   step 7's rules now also asks for each flag by its code with its meaning in step 7's words and each assumption by
-  name, marked `unverified` where the result says so, which the 0.3.7 run missed. The Company DX eval's record says
-  what changed since its run and that it has not been run on 0.3.9, so whether the hand-off now fires is not yet
-  known. New tests pin each change.
+  name, marked `unverified` where the result says so, which the 0.3.7 run missed. The Company DX eval, run again on
+  0.3.9 and listed under Added, loaded `vc-deal-math` this time. New tests pin each change.
 - `runway_plan`'s report says "not given: read as none" beside a phase's revenue a month that was left out, in the
   plan or in a downside or lean case given its own phases, where it printed "$0.00 given" as if the founder had stated
   0; a revenue given as 0 still reads "given", and the runway is the same either way. The words and the test of a null
