@@ -4,8 +4,10 @@ Every calculator tool the skill names must be a tool the MCP server serves, and 
 must be a folder in skills/. The adversarial review must keep both stages: independent attack lenses named by what
 they test (never by a person or firm), each objection quoting the founder's own line; a refute pass that may use only
 the founder's material and records why each dropped objection fell; and the ranked survivors, with quotes, in the
-answer. Each eval in evals/vc-positioning/ has a prompt, an expected tool call and an expected answer; the one eval
-with an ``equity_deal_check`` call carries a valid call and an excerpt that is lines of the report that call prints.
+answer. The contrarian row and its lens ask for a belief most investors would reject today, test whether it is one,
+and never write one for the founder. Each eval in evals/vc-positioning/ has a prompt, an expected tool call and an
+expected answer; the one eval with an ``equity_deal_check`` call carries a valid call and an excerpt that is lines of
+the report that call prints.
 """
 
 from __future__ import annotations
@@ -27,7 +29,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 _SKILL = _ROOT / "skills" / "vc-positioning" / "SKILL.md"
 _TEXT = _SKILL.read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-positioning").glob("*.md"))
-_EVAL_COUNT = 4
+_EVAL_COUNT = 5
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_deal_check` call."
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
@@ -61,10 +63,23 @@ _TRIGGERS = (
     "how should we position this round",
     "what should I not say to VCs",
     "prep me before we go out to raise",
+    "what is our contrarian insight",
+    "what do we believe that others don't",
 )
 _PHRASES = ("no competitors", "we only need 1% of the market", "our projections are conservative")
 # Names a lens must never carry: the skill tests frameworks, never people or firms.
-_PEOPLE_AND_FIRMS = ("sequoia", "a16z", "andreessen", "y combinator", "yc", "graham", "dixon", "stebbings", "20vc")
+_PEOPLE_AND_FIRMS = (
+    "sequoia",
+    "a16z",
+    "andreessen",
+    "y combinator",
+    "yc",
+    "graham",
+    "dixon",
+    "thiel",
+    "stebbings",
+    "20vc",
+)
 _MIN_LENSES = 5
 _LENS_HEAD = re.compile(r"^\|\s*Lens\s*\|\s*What it tests\s*\|\s*Dimensions\s*\|$", re.MULTILINE)
 _ROW = re.compile(r"^\|\s*([^|]+?)\s*\|", re.MULTILINE)
@@ -72,6 +87,13 @@ _SURVIVOR_COLUMNS = re.compile(
     r"Rank, Tier, Lens, The founder's line \(quoted\), Why a partner reads it that way,\s+Rewrite"
 )
 _DOUBLE_QUOTED = re.compile(r'"([^"]+)"')
+_CONTRARIAN_LENS = "Is it really contrarian?"
+_CONTRARIAN_PROMPTS = (
+    '"What do you believe about this market that most investors would reject?" and "What did you see first-hand that'
+    ' others have not?"'
+)
+_CONTRARIAN_ASK = "`[the belief about this market that most investors would reject today, in one sentence]`"
+_CONSENSUS_CLAIM = "AI is going to transform how insurance claims are handled."
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -430,3 +452,105 @@ def test_each_figure_an_eval_answer_takes_from_the_calculator_is_what_it_prints(
         assert figure in reports, figure
     for fraction in _JSON_FRACTION.findall(answer):
         assert f'"rounded":"{fraction}"' in dumps, fraction
+
+
+def _dimension_row(name: str) -> list[str]:
+    """The cells of the dimension table's row called ``name``."""
+    for row in _section("## The dimensions").splitlines():
+        cells = [cell.strip() for cell in row.strip().strip("|").split("|")]
+        if re.match(r"^\|\s*\d+\s*\|", row) and cells[1] == name:
+            return cells
+    raise AssertionError(name)
+
+
+def test_the_contrarian_row_asks_for_a_belief_most_reject_with_who_disagrees_and_the_evidence() -> None:
+    number, _, clear, source, lens = _dimension_row("Contrarian insight")
+    dimensions = _unwrapped(_section("## The dimensions"))
+    sources = _unwrapped(_section("## Sources"))
+
+    assert number == "12" and lens == _CONTRARIAN_LENS
+    for part in ("One-sentence belief most people reject today", "who disagrees and why", "the evidence"):
+        assert part in clear, part
+    # A published question is cited by its source, never played as a person; the evidence test is the skill's own.
+    assert 'Thiel, "Zero to One"' in source and 'YC "How to Apply"' in source
+    assert "https://fortune.com/2014/09/04/peter-thiels-the-challenge-of-the-future" in sources
+    assert "Row 12 is not row 5" in dimensions and "That evidence test is this skill's own framing." in dimensions
+
+
+def test_the_contrarian_lens_tests_consensus_evidence_and_dependence_by_its_brief() -> None:
+    table = _section("### Stage A: attack")
+    attack = _unwrapped(table)
+    (row,) = (row for row in table.splitlines() if row.startswith(f"| {_CONTRARIAN_LENS} "))
+
+    assert row.rstrip(" |").rsplit("|", 1)[1].strip() == "12"
+    assert "its brief carries this paragraph as its test" in attack
+    assert "(for Is it really contrarian?, the whole paragraph above)" in attack
+    for question in (
+        "would reject today, and does the founder say who disagrees and why they are wrong?",
+        "Or is it a consensus view reworded",
+        "or a side already taken in a well-known argument",
+        "That is a partner's likely reading of the founder's line, not an outside fact",
+        "Does the material show evidence the belief is right",
+        "Contrarian with no evidence is only a guess",
+        "And does the business depend on it?",
+    ):
+        assert question in attack, question
+    # The refute pass sees only its brief, so the brief says a consensus objection rests on a reading, not a fact.
+    refute = _unwrapped(_section("### Stage B: refute"))
+    assert "or that a belief stated as contrarian is one most investors already hold, rests on that reading" in refute
+
+
+def test_a_founder_with_no_contrarian_belief_is_asked_once_and_never_given_one() -> None:
+    dimensions = _unwrapped(_section("## The dimensions"))
+    attack = _unwrapped(_section("### Stage A: attack"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "Row 12 is a question, not a required box: many good companies have no contrarian story." in dimensions
+    assert "mark the row Not stated, never Missing, keep it out of the survivors and the biggest issues" in dimensions
+    assert (
+        f"ask for it once, in the message that asks for the missing inputs, with two prompts: {_CONTRARIAN_PROMPTS}"
+        in dimensions
+    )
+    fallen = "When a belief is stated as contrarian and the lens's objection to it survives, ask the same two prompts"
+    assert fallen in dimensions
+    assert "Never write a contrarian belief for the founder, in a rewrite, the narrative or a refute pass" in dimensions
+    assert "When no line of the material puts a belief forward as contrarian, or as one others reject" in attack
+    assert "the lens raises no objection and returns one gap" in attack
+    assert "it never writes a belief for the founder" in attack
+    assert "(Not stated for row 12)" in answering
+
+
+def test_the_answer_has_a_contrarian_block_with_at_most_two_rewrites_from_the_founders_material() -> None:
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "**Contrarian insight:** the belief as the founder stated it, quoted word for word" in answering
+    assert "the surviving objections of the Is it really contrarian? lens, or that none survived" in answering
+    assert "up to two rewrites of the one-sentence belief, each using only the founder's material" in answering
+    assert (
+        f"Up to two includes none: with no sharper belief in the material, give the bracketed ask {_CONTRARIAN_ASK}"
+        in answering
+    )
+    assert "never a belief written for the founder" in answering
+    # The prompts are asked once: one item in the open asks, which the block points to rather than repeats.
+    assert "the two prompts from row 12 go to the open asks once, as one item with that bracketed ask" in answering
+
+
+def test_one_eval_catches_a_contrarian_claim_most_investors_already_hold() -> None:
+    (path,) = (path for path in _EVALS if _CONTRARIAN_LENS in path.read_text(encoding="utf-8"))
+    text = path.read_text(encoding="utf-8")
+    prompt = _unwrapped(_section("## Prompt", text))
+    answer = _unwrapped(_section("## Expected answer", text))
+    others_act = (
+        "Every large insurer now has an AI claims team, and four funded startups sell AI claims tools to insurers."
+    )
+
+    assert _NO_CALL in text
+    # The objection quotes the founder's line, and the founder's own slide shows the belief is shared.
+    assert _CONSENSUS_CLAIM in prompt and f'"{_CONSENSUS_CLAIM}"' in answer
+    assert others_act in prompt and f'"{others_act}"' in answer
+    assert "That objection survives the refute pass." in answer
+    assert "does not drop it as resting on an outside fact" in answer
+    assert "The answer writes no contrarian belief the founder did not state." in answer
+    assert _CONTRARIAN_ASK in answer
+    assert "It asks once, in one message, with the two prompts" in answer
+    assert "not every good company needs a contrarian story" in answer

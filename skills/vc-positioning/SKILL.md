@@ -1,6 +1,6 @@
 ---
 name: vc-positioning
-description: Helps a founder tune a raise's messaging and positioning before VCs see it. It reads the founder's one-liner, narrative, ask and metrics, checks them against public frameworks (YC's seven pitch questions and seed guides, Sequoia's outline), and runs an adversarial review in which independent skeptical lenses list the strongest reasons a VC would pass, each quoting the founder's own line, and a refute pass drops every objection the founder's material answers. It flags phrases that cost credibility, such as no competitors, our projections are conservative, or we only need 1% of the market, and returns surviving objections with rewrites, a tightened narrative, a say-and-avoid list and a prep-session script for an existing investor. Use when a founder says tighten my pitch, stress-test my pitch, check our story and our ask, how should we position this round, what should I not say to VCs, or prep me before we go out to raise. Never invents traction; the ask's figures go to the calculator. Not investment advice.
+description: Helps a founder tune a raise's messaging before VCs see it. It checks a founder's pitch and ask against public frameworks (YC's pitch questions, Sequoia's outline) and runs an adversarial review in which lenses list the strongest reasons a VC would pass, each quoting the founder's line, and a refute pass drops each objection the material answers. One lens tests whether a contrarian insight is non-consensus and has evidence. It flags phrases that cost credibility (no competitors, our projections are conservative, we only need 1% of the market) and returns surviving objections with rewrites, a tighter narrative, a say-and-avoid list and a prep script. Use when a founder says tighten my pitch, stress-test my pitch, check our story and our ask, how should we position this round, what is our contrarian insight, what do we believe that others don't, what should I not say to VCs, or prep me before we go out to raise. Never invents traction; the ask's figures go to the calculator. Not investment advice.
 ---
 
 # VC positioning
@@ -71,19 +71,33 @@ Each row is a question a partner answers about the company whether or not they a
 are this skill's own terms, not headings in the sources; every other row follows a named public source. The last
 column names the adversarial lens that attacks the row.
 
-| #   | Dimension          | What a clear answer does                                                              | Source                                                                        | Lens                   |
-| --- | ------------------ | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------- |
-| 1   | What you do        | One matter-of-fact sentence a reader could describe back; "X for Y" is fine           | YC seven questions (1); Sequoia "Company purpose"; YC "How to Apply"          | Clarity and problem    |
-| 2   | Category           | Tells the partner which known kind of company this is, so they know how to compare it | Our term; YC "How to Apply" (a variant of something known)                    | Clarity and problem    |
-| 3   | Problem            | Whose pain, how it is handled today, why that falls short                             | Sequoia "Problem"; YC seed deck guide                                         | Clarity and problem    |
-| 4   | Why now            | What changed that makes this possible or needed now, and why it was not built before  | Sequoia "Why now?"; YC seed fundraising guide (the solution slide)            | Market and why now     |
-| 5   | Insight and wedge  | What the founders know that others do not, and the narrow first market they win from  | YC seven questions (4); YC "How to Apply" (insight, a toehold); wedge is ours | Competition and wedge  |
-| 6   | Traction           | Period-by-period numbers with definitions; progress for the time spent                | YC seven questions (3); YC seed deck guide; a16z "16 Startup Metrics"         | Traction and proof     |
-| 7   | Market             | Who exactly buys, how many, what they pay: bottom-up, with evidence                   | YC seven questions (2); YC seed fundraising guide                             | Market and why now     |
-| 8   | Competition        | Direct and indirect alternatives, earlier attempts, and why customers pick this       | Sequoia "Competition / alternatives"; Dixon "The idea maze"                   | Competition and wedge  |
-| 9   | Business model     | One simple way the company makes money, owned plainly                                 | YC seven questions (5); Sequoia "Business model"                              | Traction and proof     |
-| 10  | Team               | Why these founders: one specific achievement each, founders before advisors           | YC seven questions (6); YC "How to Apply"; YC seed deck guide                 | Team and why you       |
-| 11  | Ask and milestones | How much, on what instrument, and what it gets the company to                         | YC seven questions (7); YC seed deck guide; YC seed fundraising guide         | The ask and milestones |
+| #   | Dimension          | What a clear answer does                                                              | Source                                                                        | Lens                     |
+| --- | ------------------ | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------ |
+| 1   | What you do        | One matter-of-fact sentence a reader could describe back; "X for Y" is fine           | YC seven questions (1); Sequoia "Company purpose"; YC "How to Apply"          | Clarity and problem      |
+| 2   | Category           | Tells the partner which known kind of company this is, so they know how to compare it | Our term; YC "How to Apply" (a variant of something known)                    | Clarity and problem      |
+| 3   | Problem            | Whose pain, how it is handled today, why that falls short                             | Sequoia "Problem"; YC seed deck guide                                         | Clarity and problem      |
+| 4   | Why now            | What changed that makes this possible or needed now, and why it was not built before  | Sequoia "Why now?"; YC seed fundraising guide (the solution slide)            | Market and why now       |
+| 5   | Insight and wedge  | What the founders know that others do not, and the narrow first market they win from  | YC seven questions (4); YC "How to Apply" (insight, a toehold); wedge is ours | Competition and wedge    |
+| 6   | Traction           | Period-by-period numbers with definitions; progress for the time spent                | YC seven questions (3); YC seed deck guide; a16z "16 Startup Metrics"         | Traction and proof       |
+| 7   | Market             | Who exactly buys, how many, what they pay: bottom-up, with evidence                   | YC seven questions (2); YC seed fundraising guide                             | Market and why now       |
+| 8   | Competition        | Direct and indirect alternatives, earlier attempts, and why customers pick this       | Sequoia "Competition / alternatives"; Dixon "The idea maze"                   | Competition and wedge    |
+| 9   | Business model     | One simple way the company makes money, owned plainly                                 | YC seven questions (5); Sequoia "Business model"                              | Traction and proof       |
+| 10  | Team               | Why these founders: one specific achievement each, founders before advisors           | YC seven questions (6); YC "How to Apply"; YC seed deck guide                 | Team and why you         |
+| 11  | Ask and milestones | How much, on what instrument, and what it gets the company to                         | YC seven questions (7); YC seed deck guide; YC seed fundraising guide         | The ask and milestones   |
+| 12  | Contrarian insight | One-sentence belief most people reject today; who disagrees and why; the evidence     | Thiel, "Zero to One"; YC "How to Apply" (best ideas seem crazy at first)      | Is it really contrarian? |
+
+Row 12 is not row 5: row 5 is what the founders know, row 12 is a belief the business rests on that most people,
+investors included, would reject today. One line may serve both; quote it under each. Contrarian and wrong is only
+wrong, so the row is clear only when the founder names their evidence: customer behaviour, data, a technical result, or
+their own unusual first-hand experience. That evidence test is this skill's own framing.
+
+Row 12 is a question, not a required box: many good companies have no contrarian story. When the founder states no
+such belief, mark the row Not stated, never Missing, keep it out of the survivors and the biggest issues, and ask for it
+once, in the message that asks for the missing inputs, with two prompts: "What do you believe about this market that
+most investors would reject?" and "What did you see first-hand that others have not?" When a belief is stated as
+contrarian and the lens's objection to it survives, ask the same two prompts once, so the founder can give a sharper
+one. Never write a contrarian belief for the founder, in a rewrite, the narrative or a refute pass: a belief the founder
+did not state is an invented one, however well the material seems to support it.
 
 ## Steps
 
@@ -158,16 +172,30 @@ objections that material does not answer reach the founder. The founder then see
 Each lens tests one thing and is named by it. The lenses are frameworks, never people: none is a named investor, firm
 or author, and none speaks in the first person as an investor.
 
-| Lens                   | What it tests                                                                                             | Dimensions |
-| ---------------------- | --------------------------------------------------------------------------------------------------------- | ---------- |
-| Clarity and problem    | Could a partner say back what the company does, which known kind of company it is, and whose pain it ends | 1, 2, 3    |
-| Market and why now     | Who exactly buys, how many there are, and what changed to make this the moment                            | 4, 7       |
-| Traction and proof     | Whether the numbers show progress, each with a definition and a period, and how the company makes money   | 6, 9       |
-| Competition and wedge  | The alternatives (doing nothing included), earlier attempts, the insight, and the narrow first market     | 5, 8       |
-| Team and why you       | Why these founders, shown by specific achievements rather than adjectives                                 | 10         |
-| The ask and milestones | The amount, the instrument, what the money reaches, and whether the obvious risk is named                 | 11         |
+| Lens                     | What it tests                                                                                             | Dimensions |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- | ---------- |
+| Clarity and problem      | Could a partner say back what the company does, which known kind of company it is, and whose pain it ends | 1, 2, 3    |
+| Market and why now       | Who exactly buys, how many there are, and what changed to make this the moment                            | 4, 7       |
+| Traction and proof       | Whether the numbers show progress, each with a definition and a period, and how the company makes money   | 6, 9       |
+| Competition and wedge    | The alternatives (doing nothing included), earlier attempts, the insight, and the narrow first market     | 5, 8       |
+| Team and why you         | Why these founders, shown by specific achievements rather than adjectives                                 | 10         |
+| The ask and milestones   | The amount, the instrument, what the money reaches, and whether the obvious risk is named                 | 11         |
+| Is it really contrarian? | Whether the founder's contrarian belief is held by few, shown right, and needed by the business (below)   | 12         |
 
-Every lens gets the same brief, with its own name and test filled in:
+**Is it really contrarian?** tests one thing, whether the founder's contrarian belief holds up, through four
+questions, and its brief carries this paragraph as its test. Is the belief the founder states as contrarian one that
+most people, investors included, would reject today, and does the founder say who disagrees and why they are wrong?
+Or is it a consensus view reworded: a trend most investors already expect (such as "AI will change X"), or a side
+already taken in a well-known argument? That is a partner's likely reading of the founder's line, not an outside
+fact; tie it to that line, and to any line of the material that shows others already act on the belief. Does the
+material show evidence the belief is right (customer behaviour, data, a technical result, the founder's unusual
+first-hand experience)? Contrarian with no evidence is only a guess. And does the business depend on it? When no line
+of the material puts a belief forward as contrarian, or as one others reject, the lens raises no objection and returns
+one gap, what the founder believes about this market that most investors would reject and what they saw first-hand
+that others have not; it never writes a belief for the founder.
+
+Every lens gets the same brief, with its own name and test filled in (for Is it really contrarian?, the whole
+paragraph above):
 
 - You test one thing: the lens's name and what it tests. Write in the third person ("a partner is likely to pass
   because ..."); you are not an investor and do not speak as one, named or not.
@@ -229,8 +257,8 @@ The refute brief:
 - Use only the founder's material given here. Bring in no outside fact about the company, its market or its
   competitors, and do no arithmetic: no totals, conversions or growth rates worked out from the founder's figures.
 - How a partner is likely to read a line is not an outside fact. An objection that letters of intent are not revenue,
-  or that a market's ceiling is small, rests on that reading: judge whether the material answers it, and never drop
-  it as not grounded for that reason.
+  that a market's ceiling is small, or that a belief stated as contrarian is one most investors already hold, rests on
+  that reading: judge whether the material answers it, and never drop it as not grounded for that reason.
 - A line that itself matches a phrase or pattern in the list you were given never answers an objection.
 - Return one verdict from the three below, with the founder's line quoted word for word where the verdict needs one.
   When you cannot decide, return Kept.
@@ -363,19 +391,26 @@ Lead with what to fix, then the material to take into the prep session.
      than separate subagents.
    - When the refute pass ran per lens (lean mode), say so, say it is less independent than one subagent per objection,
      and say the founder may ask for the full pass.
-3. **Dimension table:** Dimension, What you say (quoted), Clear / Needs work / Missing, Fix.
-4. **Say and avoid:** each flagged phrase quoted, what a partner is likely to hear, the rewrite, the source.
-5. **Numbers:** the `equity_deal_check` verdict with each mismatch row in the tool's values (for a valuation with no
+3. **Dimension table:** Dimension, What you say (quoted), Clear / Needs work / Missing (Not stated for row 12), Fix.
+4. **Contrarian insight:** the belief as the founder stated it, quoted word for word, or "not stated"; the surviving
+   objections of the Is it really contrarian? lens, or that none survived; and up to two rewrites of the one-sentence
+   belief, each using only the founder's material, with the evidence it lacks as a bracketed ask. Up to two includes
+   none: with no sharper belief in the material, give the bracketed ask
+   `[the belief about this market that most investors would reject today, in one sentence]`, never a belief written
+   for the founder. When the belief is not stated, or its objection survives, the two prompts from row 12 go to the
+   open asks once, as one item with that bracketed ask and the lens's gap, and this block points to it.
+5. **Say and avoid:** each flagged phrase quoted, what a partner is likely to hear, the rewrite, the source.
+6. **Numbers:** the `equity_deal_check` verdict with each mismatch row in the tool's values (for a valuation with no
    label, both readings side by side), and each flag as a question a partner is likely to ask, with its meaning; a
    runway with no raise or on a SAFE or note raise, and that raise's use-of-funds lines, with `equity_runway_plan`'s
    rows, or quoted as stated beside the ask for cash and burn when they were not given; each metric or market size
    with the skill that checks it; growth rates and LTV quoted as stated with "not checked: no tool computes this";
    and any figure that lacks a definition or a period.
-6. **Tightened narrative:** one-liner options, a 30-second version, the section order with bracketed asks.
-7. **Prep script,** filled in with the founder's material and the top survivors.
-8. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
-9. **Sources:** the frameworks used, with links, and which points rest on an unverified source.
-10. **Close:** this is not investment, legal or tax advice; a lawyer should review fundraising materials before they
+7. **Tightened narrative:** one-liner options, a 30-second version, the section order with bracketed asks.
+8. **Prep script,** filled in with the founder's material and the top survivors.
+9. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
+10. **Sources:** the frameworks used, with links, and which points rest on an unverified source.
+11. **Close:** this is not investment, legal or tax advice; a lawyer should review fundraising materials before they
     are posted publicly or sent widely, and customers or partners named in a deck should have agreed to be named.
 
 ## Sources
@@ -389,6 +424,9 @@ Lead with what to fix, then the material to take into the prep session.
 - Sequoia Capital, "Writing a Business Plan": https://www.sequoiacap.com/article/writing-a-business-plan/
 - Andreessen Horowitz, "16 Startup Metrics" (2015): https://a16z.com/16-startup-metrics/
 - Chris Dixon, "The idea maze" (2013): https://cdixon.org/2013/08/04/the-idea-maze
+- Peter Thiel with Blake Masters, "Zero to One" (2014), its interview question asking for an important truth few
+  others accept, read in the excerpt Fortune published:
+  https://fortune.com/2014/09/04/peter-thiels-the-challenge-of-the-future
 
 Several of these guides are years old. They describe how investors read a pitch, which changes slowly, but say their
 dates when a founder leans on one. The adversarial review's two-stage method (attack, then refute with the founder's
