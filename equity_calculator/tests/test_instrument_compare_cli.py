@@ -364,6 +364,7 @@ async def test_with_no_next_round_the_report_says_so_and_shows_the_note_at_matur
     assert "no next round" in mode and "the note is never converted at a priced round here" in mode
     assert "no next round" in _line(report, "B: months until it converts")
     assert "2x the principal" in _line(report, "B: at a sale before any round")
+    assert "B: months to the sales" not in report  # needed only to convert at the cap, and not given
     assert "$1,590,000.00" in _line(report, "Note owed at month 12")
     assert "$1,680,000.00" in _line(report, "At maturity (month 24): note owed")
     assert "$0.500000" in _line(report, "At maturity (month 24): converts at")

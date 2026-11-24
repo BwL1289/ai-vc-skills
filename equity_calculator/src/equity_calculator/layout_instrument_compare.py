@@ -128,17 +128,22 @@ def _sale_term(inputs: InstrumentCompareInput) -> str:
 
 
 def _no_round_given_lines(inputs: InstrumentCompareInput) -> list[Line]:
-    """Option B's terms for no next round: its maturity conversion, its change-of-control term, the months to a sale."""
+    """Option B's terms for no next round: its maturity conversion, its change-of-control term, and the months to a
+    sale when given (needed only to convert at the cap)."""
     how = GIVEN
     if inputs.note_maturity_conversion_valuation is not None:
         how = "given: a valuation, taken over FD as the cap is"
     elif inputs.note_maturity_conversion_price is not None:
         how = "given: a price a share"
-    return [
+    lines = [
         _note("note_maturity_conversion", "B: converts at maturity at", _maturity_term(inputs), how),
         _note("note_change_of_control", "B: at a sale before any round", _sale_term(inputs), "the note's own term"),
-        _note("note_months_to_exit", "B: months to the sales", _months_text(inputs.note_months_to_exit, _NOT_GIVEN)),
     ]
+    if inputs.note_months_to_exit is not None:
+        lines.append(
+            _note("note_months_to_exit", "B: months to the sales", given("months", Decimal(inputs.note_months_to_exit)))
+        )
+    return lines
 
 
 def _given_lines(result: InstrumentCompareResult) -> list[Line]:
