@@ -144,11 +144,12 @@ of that sentence was met, Partial that exactly one was missed or met only in par
 missed. When a pass sentence changed after its run, the verdict counts the clauses it had then, and the file says
 which clauses changed and how the run reads against today's sentence.
 Two were run again after a skill fix, as their files say. One run each is a small sample. On 2026-11-23 one
-eval of every other review skill then in the pack except `vc-deal-math` was run live too; the six skills added on
-2026-11-24 (`vc-competitive-landscape`, `vc-raise-plan`, `vc-intro-email`, `vc-pass-debrief`, `vc-option-pool-plan` and
-`vc-cap-table-check`) have not been run live yet. An eval file whose first paragraph says a live run is recorded holds
-an excerpt of it with its verdict; every other eval, the `vc-deal-math` ones and the new six's included, states the
-expected behaviour only.
+eval of every other review skill then in the pack except `vc-deal-math` was run live too. On 2026-11-24 one eval each
+of five of the six skills added that day (`vc-competitive-landscape`, `vc-raise-plan`, `vc-intro-email`,
+`vc-pass-debrief` and `vc-option-pool-plan`) was run live and recorded: four passed, each with a shortfall against its
+expected answer noted, and one passed in part; no live run of the sixth, `vc-cap-table-check`, is recorded yet. An eval
+file whose first paragraph says a live run is recorded holds an excerpt of it with its verdict; every other eval, the
+`vc-deal-math` and `vc-cap-table-check` ones included, states the expected behaviour only.
 
 The `equity-calculator` skill covers fifteen scenarios:
 

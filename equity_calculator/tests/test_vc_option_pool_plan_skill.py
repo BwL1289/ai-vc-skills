@@ -53,9 +53,14 @@ _CALL_EVALS = [path for path in _EVALS if _ONE_CALL in path.read_text(encoding="
 _NO_CALL_EVALS = [path for path in _EVALS if _NO_CALL in path.read_text(encoding="utf-8")]
 _EVAL_OPENING = (
     "The company is made up.",
-    "this eval has not been run in a live session.",
     "A run passes when",
 )
+# An eval with no recorded run says it has not been run; one with a recorded run says so and holds the run's excerpt
+# after the expected answer, opening with its verdict.
+_UNRECORDED = "this eval has not been run in a live session."
+_RECORDED = "## Recorded answer"
+_RECORDED_OPENING = '"Recorded answer" is an excerpt of a recorded run'
+_VERDICT_LINE = re.compile(r"\*\*(?:Pass|Partial|Fail)\b[^*]*\*\*")
 
 
 def _section(heading: str, text: str = _TEXT) -> str:
@@ -189,6 +194,10 @@ def test_the_limits_keep_the_founder_as_the_user() -> None:
     assert "it quotes no benchmark pool size: none is applied" in limits
     assert "It never role-plays or speaks as a named investor or firm, and never names a firm as a fit" in limits
     assert "looks nothing up, and sends nothing anywhere" in limits
+    # A live run with no tool built the plan and difference columns from the worked example's figures.
+    no_tool = "When neither `equity_pool_plan` nor its command line runs in the session, say so and give no figure"
+    assert no_tool in limits
+    assert "never one from the worked example in step 3" in limits
 
 
 def test_there_are_four_evals_one_per_made_up_company() -> None:
@@ -202,6 +211,14 @@ def test_there_are_four_evals_one_per_made_up_company() -> None:
         for words in _EVAL_OPENING:
             assert words in opening, (path.name, words)
         assert "## Prompt" in text and "## Expected answer" in text
+        recorded = f"\n{_RECORDED}\n" in text
+        assert (_UNRECORDED in opening) is not recorded and (_RECORDED_OPENING in opening) is recorded, path.name
+        if recorded:
+            section = _section(_RECORDED, text)
+            assert text.index(f"\n{_RECORDED}\n") > text.index("\n## Expected answer\n"), path.name
+            assert _VERDICT_LINE.match(section.strip("\n").split("\n\n")[1]), path.name
+            assert "Since this run" in _unwrapped(section), path.name
+            assert _fences("json", section) == [] and _fences("text", section) == [], path.name
 
 
 def test_two_evals_call_the_tool_and_two_ask_or_decline_with_no_call() -> None:

@@ -1,11 +1,15 @@
 # Eval 1: Company RA, "plan our raise" from the founder's own list
 
-A test prompt for the `vc-raise-plan` skill. The company is made up, and so is every investor on its list. The answer
-states the expected behaviour; it is not a recorded run, and this eval has not been run in a live session. Every
-figure under "Expected answer" is pasted from what `equity_calculator raise_pipeline` printed for these inputs; none is
-typed by hand. A run passes when it makes the one tool call below (field order free, money and percents as strings),
-tiers the founder's list by the founder's rules with every attribute's source or `unverified`, places the batches from
-the printed start-raising month, keeps the tracker, never names a firm as a fit and computes nothing in its own text.
+A test prompt for the `vc-raise-plan` skill. The company is made up, and so is every investor on its list. "Expected
+answer" states the expected behaviour, and "Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.331 on
+2026-11-24). Every figure under "Expected answer" is pasted from what `equity_calculator raise_pipeline` printed for
+these inputs; none is typed by hand. A run passes when it makes the one tool call below (field order free, money and
+percents as strings), tiers the founder's list by the founder's rules with every attribute's source or `unverified`,
+places the batches from the printed start-raising month, keeps the tracker, never names a firm as a fit and computes
+nothing in its own text. The verdict is Pass when every clause of that sentence is met, Partial when exactly one clause
+is missed or met only in part, and Fail when two or more are missed; a shortfall against the other points of the
+expected answer is noted but does not change the verdict. The recorded run is a Partial. The skill was changed after
+that run (see "Recorded answer").
 
 ## Prompt
 
@@ -106,3 +110,79 @@ the printed start-raising month, keeps the tracker, never names a firm as a fit 
 - It looks no investor up, adds none to the list, corrects no attribute, names no firm as a fit and sends nothing; it
   closes as not investment, legal or tax advice.
 - It adds, subtracts or divides none of the tool's or the founder's figures in its own text.
+
+## Recorded answer
+
+Recorded with Claude Code 2.1.331 on 2026-11-24, with the plugin loaded from this repository and no user settings. This
+is the second attempt, made minutes after the first, which reached an out-of-date build of the calculator's server with
+no `equity_raise_pipeline` and is not graded: with no tool, it presented the skill's worked example's figures as "the
+calculator's printed output for these exact inputs, taken from its reference example". The answer is trimmed; [...]
+marks each cut.
+
+**Partial: one clause met only in part.** It made the one `equity_raise_pipeline` call with the expected arguments and
+no other, and quoted every figure as the tool printed it. It tiered the founder's list by the founder's rules, quoting
+the rule that placed each investor: Fund B in tier 1, Fund C in tier 2, Fund F in tier 2 provisionally with its stage
+`unverified`, Fund E and Angel G in tier 3, and Fund D and Fund H off the plan for the portfolio conflict and the stage.
+It kept the tracker, one row per investor with its next step handed to the vc-intro-email skill, named no firm as a fit
+and computed nothing in its own text. The batches clause is met only in part: it placed the five investors in tier
+order, at most three a week, with their intro asks two weeks before their week, but numbered the weeks "from when you
+open the window" rather than from month 4, and proposed a start of its own ("I recommend now, not month 4") that the
+founder never named. Read strictly, two more clauses would be met only in part, which would make the run a Fail: the
+attributes with no source carry one blanket line saying they are `unverified` rather than the mark in each cell, and two
+lines set the founder's figures against each other in words ("The soft angels nearly fill the room"; "far more than 3 a
+week for 3 weeks holds"). Its one use of "fit" is about cheque size against the room left. Short of the expected answer:
+it gave no Flags section, so neither `soft_commitments_not_counted` nor `funnel_short_of_wanted` is named though both
+meanings are given, it did not quote the start-raising rule among the assumptions, and it added one of its own ("no cash
+floor"). Since this run the skill never proposes an earlier start month of its own, keeping every week's label from the
+printed month until the founder names one, and when neither the tool nor its command line runs it says so and gives no
+figure, never one from its worked example. The eval has not been run again.
+
+> **You have $600,000.00 of the $4M left to allocate, and today's funnel is expected to give 2.75 term sheets against the 3 you want.** You need 7 more intro asks to close that gap, and this list adds 5 names that pass your rules. The cash says to start raising by month 4 at the latest.
+>
+> ## Coverage
+>
+> | Line                                       | Value           |
+> | ------------------------------------------ | --------------- |
+> | Round                                      | $4,000,000.00   |
+> | Fund A lead cheque                         | $2,500,000.00   |
+> | Firm commitments (signed angel)            | $500,000.00     |
+> | Room after the lead and firm commitments   | $1,000,000.00   |
+> | Seed investor pro rata, counted in full    | $400,000.00     |
+> | **Allocation left**                        | **$600,000.00** |
+> | Soft commitments (two angels), not counted | $500,000.00     |
+>
+> [...]
+>
+> The 2.75 is an expectation from your own rates, not a forecast; the term sheets that arrive can be more or fewer.
+>
+> ## Tiers
+>
+> | Investor | Stage                                    | Lead or follow | Cheque            | Sector         | Conflict                                             | Warm path                                          | Tier               | Rule that placed it                                          |
+> | -------- | ---------------------------------------- | -------------- | ----------------- | -------------- | ---------------------------------------------------- | -------------------------------------------------- | ------------------ | ------------------------------------------------------------ |
+> | Fund B   | seed                                     | leads          | fits lead size    | devtools       | none                                                 | yes, via a founder they backed (from that founder) | **1**              | "leads at seed in devtools with a warm path and no conflict" |
+> | Fund C   | seed (their site, checked last week)     | leads          | fits (their site) | infrastructure | none                                                 | none                                               | **2**              | "leads at seed with no warm path or outside devtools"        |
+> | Fund F   | seed, `unverified` ("I think… not sure") | leads          | fits              | devtools       | none                                                 | none                                               | **2, provisional** | Same tier 2 rule, if the stage holds                         |
+> | Fund E   | seed                                     | follows only   | follow-size       | devtools       | none                                                 | yes, via your advisor                              | **3**              | "tier 3 follows"                                             |
+> | Angel G  | seed                                     | follows        | small             | devtools       | none                                                 | yes, via your angel                                | **3**              | "tier 3 follows"                                             |
+> | Fund D   | seed                                     | leads          | fits              | devtools       | **backs a direct competitor** (their portfolio page) | not given                                          | **Off plan**       | "Anyone with a portfolio conflict… stays off the plan"       |
+> | Fund H   | **Series A only** (their site)           | leads          | not given         | devtools       | not given                                            | not given                                          | **Off plan**       | "…or not at seed, stays off the plan"                        |
+>
+> Attributes with no source beside them are `unverified`: you stated them but did not say where they come from. I looked no one up.
+>
+> ## Batches and tracker
+>
+> All five fit inside your 3-week window at 3 first meetings a week, in your tier order. Weeks are numbered from when you open the window, and intro asks go out 2 weeks before each meeting week.
+>
+> [...]
+>
+> **When to open the window:** I recommend now, not month 4. Month 4 is the latest start your cash allows, and you already have a lead yes and 40 intro asks out, which will not hold for four months. The month is your call.
+>
+> ## Things to resolve before sending
+>
+> [...]
+>
+> - **The soft angels nearly fill the room:** their $500,000.00 sits against the $600,000.00 left. If both firm up, there is little space for Fund E or Angel G, so ask whether either has firmed and I will re-run.
+>
+> [...]
+>
+> This is not investment, legal or tax advice. I contacted no one, and I am not saying which investor to pick.

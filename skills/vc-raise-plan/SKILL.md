@@ -157,7 +157,9 @@ offer.
    for first meetings opens at the start-raising month as printed (`start_raising_by`), and its weeks are numbered
    from there (month 4, week 1): no calendar date is worked out. That month is the latest start on the founder's plan,
    so say so: a founder who names an earlier month opens the window there, labelled as the founder's, with the printed
-   month quoted beside it. Place the tiered investors in the founder's tier
+   month quoted beside it. Outside the two flags at the end of this step, never propose an earlier start of your own
+   ("I recommend now, not month 4"): until the founder names a month, every week keeps the printed month's label.
+   Place the tiered investors in the founder's tier
    order into the window's weeks, never more in one week than the founder's first meetings a week, so the first
    meetings land within the founder's window. Each batch's intro asks go out the founder's lead time before its week,
    written as that lead time ("2 weeks before month 4, week 1"). An investor who does not fit in the window is listed
@@ -229,6 +231,8 @@ a change of notation, not a calculation.
   a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a line or a table cell unless the founder's
   material states it or a tool returned it; quote both figures as stated instead ("from 2,000 to 4,500", never "more
   than doubled"). The allocation left, the expected term sheets and the targets needed come from the tool only.
+- When neither `equity_raise_pipeline` nor its command line runs in the session, say so and give no figure in its
+  place: never one from the worked example in step 4, which is one made-up company's result, not the founder's.
 - Every amount, count, rate and month is the founder's. It supplies no typical conversion rate, cheque size or time to
   raise, and quotes no benchmark unless the founder gives one with its source: none is applied.
 - The expected term sheets are an expectation from the founder's own rates, not a forecast: the term sheets that
