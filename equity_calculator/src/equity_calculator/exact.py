@@ -50,8 +50,9 @@ def fraction(value: Decimal | int | Fraction) -> Fraction:
     return Fraction(value)
 
 
-def from_percent(value: Decimal) -> Fraction:
-    """A percent field (``7`` for 7%) as the exact fraction it names (7/100)."""
+def from_percent(value: Decimal | Fraction) -> Fraction:
+    """A percent field (``7`` for 7%) as the exact fraction it names (7/100); an exact ``Fraction`` of percent points
+    (a pool plan's target) converts the same way."""
     return Fraction(value) / HUNDRED
 
 

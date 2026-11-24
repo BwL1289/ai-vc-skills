@@ -29,6 +29,7 @@ from tests.support import (
     MARKET_AW,
     METRICS_AM,
     POOL_EXAMPLE,
+    POOL_PLAN_CP,
     ROUND_EXAMPLE,
     ROUND_NOTE,
     ROUND_SAFES,
@@ -132,6 +133,7 @@ _SAMPLES: dict[str, dict[str, object]] = {
     "metrics_check": METRICS_AM,
     "market_sizing": MARKET_AW,
     "instrument_compare": COMPARE_BU,
+    "pool_plan": POOL_PLAN_CP,
 }
 # $1M in at a $1M pre-money with a 25% pre-money pool target and a $250k SAFE at a 50% discount: the pooled price is
 # exactly zero, so the round has no price (the same case as test_round_pool.py).
@@ -178,7 +180,7 @@ async def test_one_read_only_tool_per_scenario_and_no_workbook_tool_without_a_fo
     tools = await _tools(mcp_server.build_server())
 
     assert sorted(tool.name for tool in tools) == sorted(f"equity_{scenario}" for scenario in _INPUT_MODELS)
-    assert len(tools) == len(_SAMPLES) == 12
+    assert len(tools) == len(_SAMPLES) == 13
     for tool in tools:
         assert tool.annotations.readOnlyHint is True
         assert tool.annotations.openWorldHint is False

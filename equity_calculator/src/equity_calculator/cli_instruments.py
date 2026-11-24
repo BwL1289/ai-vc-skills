@@ -1,5 +1,5 @@
 """The repeated-flag readers: ``--safe``, ``--note``, ``--round``, ``--class``, ``--use-of-funds``, a runway plan's,
-a market size's and a priced-round-or-note comparison's.
+a market size's, a priced-round-or-note comparison's and a pool plan's ``--hire``.
 
 A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a note's principal) and goes on with
 ``name=value`` terms named like the model fields, hyphens for underscores, plus bare flags; a ``--round`` or a
@@ -23,12 +23,15 @@ A ``--safe`` or ``--note`` starts with the amount (a SAFE's purchase amount, a n
     --priced-preference "standard"   (a comparison's series terms: standard, 1x non-participating, only when so said)
     --priced-preference "preference-multiple=1 participation=none rank=1"
     --next-round "pre-money=27000000 investment=6000000 target-pool-percent=10 standard"
+    --hire "Senior engineer: start-month=4 grant-shares=250000"   (a pool plan's hire: its role, a colon, then terms)
+    --hire "Head of sales: start-month=9 grant-percent=1.5"
 
 Numbers read as every other flag's do (``equity_calculator.cli_numbers``); a date is ``YYYY-MM-DD``. An unknown,
 repeated or malformed term is refused naming the term; which terms go together is the model's check
 (``equity_calculator.schemas.equity_round``, ``equity_calculator.schemas.equity_dilution``,
 ``equity_calculator.schemas.equity_waterfall``, ``equity_calculator.schemas.equity_runway_plan``,
-``equity_calculator.schemas.equity_market_sizing``, ``equity_calculator.schemas.equity_instrument_compare``).
+``equity_calculator.schemas.equity_market_sizing``, ``equity_calculator.schemas.equity_instrument_compare``,
+``equity_calculator.schemas.equity_pool_plan``).
 """
 
 from __future__ import annotations
@@ -48,6 +51,7 @@ from equity_calculator.schemas.equity_waterfall import Participation
 __all__ = [
     "parse_class",
     "parse_funds_line",
+    "parse_hire",
     "parse_next_round",
     "parse_note",
     "parse_phase",
@@ -139,6 +143,13 @@ _NEXT_ROUND_TERMS: dict[str, _Reader] = {
     "pool_timing": _choice(get_args(PoolTiming)),
 }
 _PREFERENCE = "preference"
+# A pool plan's hire: the role (free words) before the first colon, then its start month and one grant.
+_ROLE_SEPARATOR = ":"
+_HIRE_TERMS: dict[str, _Reader] = {
+    "start_month": parse_months,
+    "grant_shares": parse_whole,
+    "grant_percent": parse_percent,
+}
 _PHASE_TERMS: dict[str, _Reader] = {
     "from_month": parse_months,
     "gross_burn": parse_decimal,
@@ -280,6 +291,18 @@ def parse_next_round(raw: str) -> dict[str, object]:
     round_terms = {name: value for name, value in terms.items() if name in _NEXT_ROUND_TERMS}
     series = {name: value for name, value in terms.items() if name not in _NEXT_ROUND_TERMS}
     return {**round_terms, _PREFERENCE: series}
+
+
+def parse_hire(raw: str) -> dict[str, object]:
+    """argparse type for ``--hire``: ``ROLE: start-month=M (grant-shares=S | grant-percent=P)``, the role in the
+    founder's words before the first colon (the model checks its characters)."""
+    role, separator, terms = _checked_length(raw).partition(_ROLE_SEPARATOR)
+    if not separator:
+        raise argparse.ArgumentTypeError(
+            f"starts with the role and a colon ('Senior engineer: start-month=4 grant-shares=250000'), got {raw!r}"
+        )
+
+    return _named_terms(terms.split(), {"role": role.strip()}, _HIRE_TERMS, ())
 
 
 def parse_phase(raw: str) -> dict[str, object]:

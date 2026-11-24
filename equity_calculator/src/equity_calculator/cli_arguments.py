@@ -1,5 +1,5 @@
 """Each scenario's CLI flags (``equity_calculator investor|employee|pool|round|dilution|vesting|waterfall|deal_check|``
-``runway_plan|metrics_check|market_sizing|instrument_compare``).
+``runway_plan|metrics_check|market_sizing|instrument_compare|pool_plan``).
 
 The number readers are ``cli_numbers``; a repeated flag's one-argument terms are ``cli_instruments``.
 """
@@ -12,6 +12,7 @@ from typing import get_args
 from equity_calculator.cli_instruments import (
     parse_class,
     parse_funds_line,
+    parse_hire,
     parse_next_round,
     parse_note,
     parse_phase,
@@ -712,4 +713,44 @@ def instrument_compare_arguments(parser: argparse.ArgumentParser) -> None:
         "--pool-at-exit",
         choices=get_args(PoolAtExit),
         help="as_common (default: the pool counted as exercised, as in the ownership lines) or left_out.",
+    )
+
+
+def pool_plan_arguments(parser: argparse.ArgumentParser) -> None:
+    """A pool sized from the hiring plan beside the term sheet's: today's shares, the round, the requested pool, the
+    next round's month and one ``--hire`` per planned hire."""
+    parser.add_argument(
+        "--fully-diluted-shares",
+        type=parse_whole,
+        required=True,
+        help="Every pre-round share, granted options and the unissued pool included (FD).",
+    )
+    parser.add_argument(
+        "--unissued-pool-shares", type=parse_whole, required=True, help="The unissued pool today (U, 0 for none)."
+    )
+    parser.add_argument(
+        "--founder-shares", type=parse_whole, help="The founders' own shares among FD, for their ownership line."
+    )
+    parser.add_argument("--pre-money", type=parse_decimal, required=True, help="The term sheet's pre-money (V).")
+    parser.add_argument("--investment", type=parse_decimal, required=True, help="The round's new money (I).")
+    parser.add_argument(
+        "--requested-pool-percent",
+        type=parse_percent,
+        required=True,
+        help="The term sheet's pool: the unissued pool after the round, in percent, created in the pre-money.",
+    )
+    parser.add_argument(
+        "--next-round-month",
+        type=parse_months,
+        required=True,
+        help="When the next round is expected, in whole months from today; hires starting after it are left out.",
+    )
+    parser.add_argument(
+        "--hire",
+        type=parse_hire,
+        action="append",
+        dest="hires",
+        metavar='"ROLE: TERMS"',
+        help="A planned hire: 'ROLE: start-month=M (grant-shares=S | grant-percent=P)', the grant in shares or as a "
+        "percent of the post-round fully diluted shares, every hire the same way. Repeat for each (at most 40).",
     )

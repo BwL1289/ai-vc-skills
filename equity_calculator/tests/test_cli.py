@@ -24,6 +24,7 @@ from tests.support import (
     MARKET_AX,
     METRICS_AN_DECK,
     POOL_EXAMPLE,
+    POOL_PLAN_CP,
     RUNWAY_Y,
     deal_check,
     employee,
@@ -32,6 +33,7 @@ from tests.support import (
     market_sizing,
     metrics_check,
     pool,
+    pool_plan,
     runway_plan,
 )
 
@@ -164,6 +166,36 @@ _COMPARE_BU = [
     "--exit",
     "100000000",
 ]
+# Company CP (tests.support.POOL_PLAN_CP) as flags: the hiring plan to month 18 beside a 15% pool ask.
+_POOL_PLAN_CP = [
+    "pool_plan",
+    "--fully-diluted-shares",
+    "10,000,000",
+    "--unissued-pool-shares",
+    "1,000,000",
+    "--founder-shares",
+    "7,000,000",
+    "--pre-money",
+    "$16,000,000",
+    "--investment",
+    "4000000",
+    "--requested-pool-percent",
+    "15%",
+    "--next-round-month",
+    "18",
+    "--hire",
+    "Founding engineer: start-month=1 grant-shares=400000",
+    "--hire",
+    "Senior engineer: start-month=4 grant-shares=250000",
+    "--hire",
+    "Senior engineer: start-month=6 grant-shares=250000",
+    "--hire",
+    "Head of sales: start-month=9 grant-shares=350000",
+    "--hire",
+    "Designer: start-month=12 grant-shares=150000",
+    "--hire",
+    "VP engineering: start-month=24 grant-shares=500000",
+]
 _EMPLOYEE = [
     "employee",
     "--gain-percent",
@@ -240,6 +272,7 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
         (_METRICS_AN, metrics_check(**METRICS_AN_DECK).assumptions),
         (_MARKET_AX, market_sizing(**MARKET_AX).assumptions),
         (_COMPARE_BU, instrument_compare(**COMPARE_BU).assumptions),
+        (_POOL_PLAN_CP, pool_plan(**POOL_PLAN_CP).assumptions),
     ],
     ids=[
         "investor",
@@ -250,6 +283,7 @@ async def test_pool_report_has_both_timings_and_names_the_deal() -> None:
         "metrics_check",
         "market_sizing",
         "instrument_compare",
+        "pool_plan",
     ],
 )
 async def test_every_assumption_prints_with_its_setting_statement_and_source(

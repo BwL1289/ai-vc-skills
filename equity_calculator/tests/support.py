@@ -28,6 +28,7 @@ from equity_calculator.schemas.equity_dilution import DilutionInput, DilutionRes
 from equity_calculator.schemas.equity_instrument_compare import InstrumentCompareInput, InstrumentCompareResult
 from equity_calculator.schemas.equity_market_sizing import MarketSizingInput, MarketSizingResult
 from equity_calculator.schemas.equity_metrics_check import MetricsCheckInput, MetricsCheckResult
+from equity_calculator.schemas.equity_pool_plan import PoolPlanInput, PoolPlanResult
 from equity_calculator.schemas.equity_round import RoundInput, RoundResult
 from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput, RunwayPlanResult
 from equity_calculator.schemas.equity_vesting import VestingInput, VestingResult
@@ -471,3 +472,32 @@ COMPARE_BU: dict[str, object] = {
 def instrument_compare(**fields: object) -> InstrumentCompareResult:
     """The priced-round-or-note comparison for ``fields`` (an ``InstrumentCompareInput``'s fields)."""
     return compute(InstrumentCompareInput.model_validate(fields))
+
+
+# Company CP, made up, worked by exact fractions in test_pool_plan.py: 10,000,000 fully diluted shares, 1,000,000 of
+# them unissued pool and 7,000,000 the founders'; $4,000,000 at a $16,000,000 pre-money; the term sheet asks for a 15%
+# pool. Five hires start by month 18, the next round (G = 1,400,000 shares); a sixth starts in month 24 and is left out.
+# The plan's pool is t = G·V/((V + I)(FD - U + G)) = 7/65, a top-up of P = G - U = 400,000 at p = $20/13.
+POOL_PLAN_CP_HIRES: list[dict[str, object]] = [
+    {"role": "Founding engineer", "start_month": 1, "grant_shares": 400_000},
+    {"role": "Senior engineer", "start_month": 4, "grant_shares": 250_000},
+    {"role": "Senior engineer", "start_month": 6, "grant_shares": 250_000},
+    {"role": "Head of sales", "start_month": 9, "grant_shares": 350_000},
+    {"role": "Designer", "start_month": 12, "grant_shares": 150_000},
+    {"role": "VP engineering", "start_month": 24, "grant_shares": 500_000},
+]
+POOL_PLAN_CP: dict[str, object] = {
+    "fully_diluted_shares": 10_000_000,
+    "unissued_pool_shares": 1_000_000,
+    "founder_shares": 7_000_000,
+    "pre_money": "16000000",
+    "investment": "4000000",
+    "requested_pool_percent": "15",
+    "next_round_month": 18,
+    "hires": POOL_PLAN_CP_HIRES,
+}
+
+
+def pool_plan(**fields: object) -> PoolPlanResult:
+    """The pool plan for ``fields`` (a ``PoolPlanInput``'s fields)."""
+    return compute(PoolPlanInput.model_validate(fields))

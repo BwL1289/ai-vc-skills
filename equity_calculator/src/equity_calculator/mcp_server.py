@@ -4,11 +4,12 @@
 
 Each scenario is one tool, ``equity_<scenario>`` (``equity_investor``, ``equity_employee``, ``equity_pool``,
 ``equity_round``, ``equity_dilution``, ``equity_vesting``, ``equity_waterfall``, ``equity_deal_check``,
-``equity_runway_plan``, ``equity_metrics_check``, ``equity_market_sizing``, ``equity_instrument_compare``). A tool takes
-one argument, ``inputs``: that scenario's input model (``equity_calculator.schemas``). It returns exactly the text
-``equity_calculator <scenario> --json`` prints: the result model as JSON, exact fractions and labelled assumptions
-included. An input the model refuses, or one it accepts that has no answer (``equity_calculator.errors``), comes back
-as a tool error that says why. The arithmetic runs on a worker thread, so a large round never stalls the server.
+``equity_runway_plan``, ``equity_metrics_check``, ``equity_market_sizing``, ``equity_instrument_compare``,
+``equity_pool_plan``). A tool takes one argument, ``inputs``: that scenario's input model
+(``equity_calculator.schemas``). It returns exactly the text ``equity_calculator <scenario> --json`` prints: the
+result model as JSON, exact fractions and labelled assumptions included. An input the model refuses, or one it accepts
+that has no answer (``equity_calculator.errors``), comes back as a tool error that says why. The arithmetic runs on
+a worker thread, so a large round never stalls the server.
 
 With ``--output-dir DIR`` the server adds one more tool, ``equity_workbook``: it works a scenario and writes its
 formatted workbook as a NEW ``.xlsx`` file inside DIR. The file name must be a bare name (no folder, no ``..``, no
@@ -61,6 +62,7 @@ from equity_calculator.schemas.equity import (
     MarketSizingInput,
     MetricsCheckInput,
     PoolInput,
+    PoolPlanInput,
     RoundInput,
     RunwayPlanInput,
     ScenarioInput,
@@ -249,6 +251,23 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "existing MFN SAFE beside the note) never pick an option. No next round is refused (no_next_round_given). "
         "Every term is the founder's: never assume one.",
     ),
+    "pool_plan": (
+        PoolPlanInput,
+        "Option pool from a hiring plan vs the term sheet's pool (side by side, never a pick)",
+        "A founder's hiring plan to the next round set beside the pool a term sheet asks for "
+        "(requested_pool_percent: the unissued pool after the round, created in the pre-money), from "
+        "fully_diluted_shares, unissued_pool_shares, any founder_shares, pre_money and investment. Each of hires is "
+        "{role, start_month, grant_shares or grant_percent} (a percent of the post-round fully diluted shares; every "
+        "grant the same way, else refused: grants_mixed_units); hires starting on or before next_round_month count. "
+        "The plan's pool holds exactly their grants G after the round: t_plan = G·V/((V + I)(FD - U + G)) for "
+        "shares, the percents' sum for percents; no top-up when they fit in today's pool. Works the pool scenario's "
+        "pre-money table at t_plan and at the requested percent: the price, new pool, who owns what (the founders "
+        "too when founder_shares is given), the pool left at the next round and the effective pre-money, with "
+        "requested - plan. Flags (the plan fits today's pool, the requested pool met by it, requested above or "
+        "below the plan, hires after the next round left out, none before it) never say which pool to accept. No "
+        "hire given is refused (no_hiring_plan_given). Every count, month and grant is the founder's: never assume "
+        "one.",
+    ),
 }
 
 _INSTRUCTIONS = (
@@ -262,7 +281,9 @@ _INSTRUCTIONS = (
     "checked against the document's figures), equity_market_sizing (a founder's TAM, SAM and SOM built bottom-up "
     "from their own segments, checked against the deck, set beside any top-down figure, with ranges), "
     "equity_instrument_compare (a priced round now beside a convertible note now: ownership after today and after "
-    "each next round, and each exit's payouts, side by side, never a pick). Pass the "
+    "each next round, and each exit's payouts, side by side, never a pick), equity_pool_plan (the option pool a "
+    "founder's hiring plan needs to the next round beside the pool a term sheet asks for, side by side, never a "
+    "pick). Pass the "
     "scenario's fields in `inputs`; give money and percents as JSON strings to keep every digit. Quote the result's "
     "numbers and its labelled assumptions; never round them further without saying so. A value whose unit is "
     "fraction is a share of the whole: show it as a percent by moving the decimal point of its rounded value two "
@@ -433,8 +454,8 @@ def build_server(output_dir: Path | None = None) -> FastMCP:
                 f"dot, no control, format or surrogate character), and a name that would land outside the folder, an "
                 f"existing file, a link or an answer too large for a workbook is refused. `inputs` is any "
                 f'scenario\'s input with its `scenario` tag set ("investor", "employee", "pool", "round", "dilution", '
-                f'"vesting", "waterfall", "deal_check", "runway_plan", "metrics_check", "market_sizing" or '
-                f'"instrument_compare"). Returns '
+                f'"vesting", "waterfall", "deal_check", "runway_plan", "metrics_check", "market_sizing", '
+                f'"instrument_compare" or "pool_plan"). Returns '
                 f"the path written. {_DIGITS_ADVICE}"
             ),
             annotations=ToolAnnotations(

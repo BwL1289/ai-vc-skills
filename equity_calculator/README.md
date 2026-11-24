@@ -9,7 +9,7 @@
 
 The first of the [AI VC skills](../README.md).
 
-Should we trade stock for this, and what does a round do to the cap table? Twelve scenarios, worked with exact
+Should we trade stock for this, and what does a round do to the cap table? Thirteen scenarios, worked with exact
 arithmetic, printed as a report, as JSON, or as a formatted Excel workbook with live formulas. It comes three ways: a
 command, `equity_calculator`; an MCP server, `equity_calculator_mcp`, that gives an AI assistant one tool per
 scenario; and a Python package, `equity_calculator`. An agent skill in
@@ -25,20 +25,21 @@ and the essay it implements. That script's own TODO
 list asked for Pydantic models and cell formatting (percent, numbers); both are here, along with the employee formula
 and the option-pool shuffle.
 
-| Scenario             | The question it answers                                                                                                                                                                             |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `investor`           | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                                                                      |
-| `employee`           | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                                                                  |
-| `pool`               | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?                                                         |
-| `round`              | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards?                                             |
-| `dilution`           | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                                                                      |
-| `vesting`            | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                                                               |
-| `waterfall`          | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                                                |
-| `deal_check`         | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                                             |
-| `runway_plan`        | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there?                     |
-| `metrics_check`      | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback and burn multiple the deck states agree with their parts?                                       |
-| `market_sizing`      | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?                              |
-| `instrument_compare` | A founder choosing between a priced round now and a convertible note now: who owns what after today and after each next round, and who gets what at each exit, A beside B with B - A, never a pick? |
+| Scenario             | The question it answers                                                                                                                                                                                                     |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `investor`           | An investor wants n of the company. Is the deal worth it, given what it does to the company's average outcome?                                                                                                              |
+| `employee`           | How much of the company is a hire worth at most, and what would Paul Graham's rule of thumb offer?                                                                                                                          |
+| `pool`               | A priced round asks for a bigger option pool. What is the real price per share, how many new shares are made, and who owns what afterwards?                                                                                 |
+| `round`              | A priced round converts post-money SAFEs and convertible notes. At what price does each convert, what is the round price, and who owns what afterwards?                                                                     |
+| `dilution`           | A holder owns h of the company. What is left after a series of rounds, each selling a stake and adding a pool?                                                                                                              |
+| `vesting`            | How much of a grant has vested at a given month, with a cliff, a termination and acceleration, and what is it worth above the strike?                                                                                       |
+| `waterfall`          | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                                                                        |
+| `deal_check`         | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                                                                     |
+| `runway_plan`        | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there?                                             |
+| `metrics_check`      | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback and burn multiple the deck states agree with their parts?                                                               |
+| `market_sizing`      | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?                                                      |
+| `instrument_compare` | A founder choosing between a priced round now and a convertible note now: who owns what after today and after each next round, and who gets what at each exit, A beside B with B - A, never a pick?                         |
+| `pool_plan`          | A term sheet asks for an option pool. How big a pool does the founder's hiring plan to the next round need, and what does each pool do to the price, the effective pre-money and who owns what, side by side, never a pick? |
 
 ## Install
 
@@ -106,10 +107,10 @@ print(result.verdict, result.value_ratio.exact)  # accept 1023/1000
 `equity_calculator_mcp` serves the calculator over MCP on stdio, so an AI assistant can work a scenario exactly
 instead of doing the arithmetic itself.
 
-| Tool                                                                                                                                                                                                                                                 | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing`, `equity_instrument_compare` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
-| `equity_workbook`                                                                                                                                                                                                                                    | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
+| Tool                                                                                                                                                                                                                                                                     | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equity_investor`, `equity_employee`, `equity_pool`, `equity_round`, `equity_dilution`, `equity_vesting`, `equity_waterfall`, `equity_deal_check`, `equity_runway_plan`, `equity_metrics_check`, `equity_market_sizing`, `equity_instrument_compare`, `equity_pool_plan` | One per scenario, read-only. It takes one argument, `inputs`, holding that scenario's fields (the names `--json` shows under `inputs`), and returns exactly the text `equity_calculator <scenario> --json` prints.                                                                                                                                                                                                                                                                                                                                                  |
+| `equity_workbook`                                                                                                                                                                                                                                                        | Only when the server runs with `--output-dir DIR`. It works any scenario (`inputs` with its `scenario` tag) and writes the workbook as a new `.xlsx` file in DIR. `file_name` must be a bare name with no control, format or surrogate character; a name that would land outside DIR, an existing file and a link are refused, and so is an answer too large for a workbook cell (no file is made). While saving, the Excel library also writes and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable. |
 
 An input the model refuses, or a valid one with no answer (a round with no positive price, say), comes back as a tool
 error that says why. The SDK checks the arguments itself and passes the validation library's text through
@@ -672,6 +673,44 @@ and every exit from the waterfall code; nothing is worked a second way.
 No next round is refused (`no_next_round_given`: the note converts only at one), and so is a comparison with no
 exit. An exit before the next round, while the note is outstanding, is not modelled.
 
+### Pool plan (the option-pool shuffle above; the plan's own conventions unverified)
+
+The pool a term sheet asks for, t_req, beside the pool the founder's hiring plan needs until the next round, t_plan,
+both created in the pre-money and both worked by the option-pool shuffle's own code (the pool in the pre-money,
+above), so no formula of the shuffle is worked a second way.
+
+| Symbol | Meaning                                                                                                     |
+| ------ | ----------------------------------------------------------------------------------------------------------- |
+| FD, U  | every share before the round, the unissued pool U included                                                  |
+| V, I   | pre-money valuation, investment                                                                             |
+| G      | the grants of the hires starting on or before the next round's month, in shares                             |
+| t_plan | the pool the plan needs: the unissued pool after the round, as a share of every post-round share, holding G |
+| t_req  | the term sheet's requested pool, the same measure                                                           |
+
+With the pool in the pre-money, the shuffle's new pool P gives a price p = V/(FD + P) and a total of
+T = (FD + P)·(V + I)/V shares, so the pool after the round is t = (U + P)·V/((FD + P)(V + I)). The plan's pool holds
+exactly the grants, U + P = G, so P = G - U and FD + P = FD - U + G:
+
+- **grants in shares**: t_plan = G·V/((V + I)(FD - U + G)). Put back into the shuffle's
+  P = (t·FD - (1 - r)·U)/(1 - r - t) with r = I/(V + I), it gives P = G - U again; the tests check that on exact
+  fractions and on seeded random inputs.
+- **grants as percents of the post-round fully diluted shares**: t_plan is their sum, and each column's grants take
+  that sum of its own total T. A plan that gives some grants in shares and some as percents is refused
+  (`grants_mixed_units`): a percent of shares not yet priced cannot be added to a count of shares.
+
+When the grants fit in today's pool (G ≤ U), the shuffle's needed new pool is not positive, so P = 0, p = V/FD and
+today's pool is kept whole (`plan_fits_current_pool`); the plan's pool is then not cut below U. Each column then gives
+the shuffle's table: P, p, the investor's shares N = I/p, T, who owns what (the founders too, F/T, when
+`--founder-shares` is given), the pool left ungranted at the next round (U + P less the grants' shares, negative when
+the pool runs short before it) and the effective pre-money (FD - U)·p = V - t(V + I). Every difference is
+requested - plan of the exact values, rounded once.
+
+Flags, never a pick: `no_hires_before_next_round`, `hires_after_next_round_ignored` (a hire starting after the next
+round's month is left out: the next round's own pool would cover it), `plan_fits_current_pool`,
+`requested_met_by_current_pool` (today's pool already meets t_req), `requested_above_plan` and
+`requested_below_plan`. No hire is refused (`no_hiring_plan_given`), and so are percents of the counted hires adding
+up to V/(V + I) or more, which leave no positive price.
+
 </details>
 
 ## Worked examples
@@ -948,6 +987,36 @@ founders nothing: the preferences ($8M in A, $8.1M in B) take it all. At $20M th
 $8,296,296.29 in B ($8,296,296.30 on its own; the cent goes elsewhere by largest remainder), $663,703.70 less; at
 $100M everyone converts and the payouts follow ownership. The report never says which to take.
 
+**A pool sized from the hiring plan (Company CP, made up).** 10,000,000 fully diluted shares, 1,000,000 of them an
+unissued pool and 7,000,000 the founders'; raising $4,000,000 at a $16,000,000 pre-money, and the term sheet asks for
+a 15% pool. The founder plans five hires before the next round in month 18 (400,000, 250,000, 250,000, 350,000 and
+150,000 shares: G = 1,400,000) and a sixth in month 24:
+
+```
+equity_calculator pool_plan --fully-diluted-shares 10,000,000 --unissued-pool-shares 1,000,000 \
+    --founder-shares 7,000,000 --pre-money 16,000,000 --investment 4,000,000 --requested-pool-percent 15 \
+    --next-round-month 18 --hire "Founding engineer: start-month=1 grant-shares=400000" \
+    --hire "Senior engineer: start-month=4 grant-shares=250000" --hire "Senior engineer: start-month=6 grant-shares=250000" \
+    --hire "Head of sales: start-month=9 grant-shares=350000" --hire "Designer: start-month=12 grant-shares=150000" \
+    --hire "VP engineering: start-month=24 grant-shares=500000"
+  Hire 6: VP engineering, from month 24                           500,000                                                left out: starts after month 18, the next round
+  Shares the counted grants take                                1,400,000                   1,400,000                    G: the counted grants added up
+  Pool after the round (t)                                       10.7692%                    15.0000%           4.2308%  plan: G·V/((V + I)(FD - U + G)), the pool holding exactly G; requested: given
+  New pool shares (P)                                             400,000               1,076,923.077       676,923.077  (t·FD - (1 - r)U)/(1 - r - t), 0 when not positive: the pool scenario's
+  Price per share (p)                                           $1.538462                   $1.444444        $-0.094017  V/(FD + P)
+  Ownership: founders                                            53.8462%                    50.5556%          -3.2906%  F / T (founders are among the existing holders)
+  Pool left ungranted at the next round                                 0                 676,923.077       676,923.077  U + P - the counted grants' shares; below 0, the pool runs short before the next round
+  Effective pre-money                                      $13,846,153.85              $13,000,000.00      $-846,153.85  (FD - U)·p: the holders' shares at the round price
+  Flag                                     hires_after_next_round_ignored                                                1 hire starts after month 18 and is left out of the plan: the next round's own pool would cover it
+  Flag                                               requested_above_plan                                                The requested pool is larger than the plan's: the difference column shows what the larger pool does to the price, the effective pre-money and who owns what
+```
+
+The plan's pool is t_plan = 1,400,000 × 16,000,000/(20,000,000 × 10,400,000) = 7/65, about 10.7692%: a top-up of
+P = G - U = 400,000 shares at $20/13 a share. The requested 15% creates 1,076,923.077 new shares (14,000,000/13
+exactly) at $13/9 a share, so the effective pre-money falls from $13,846,153.85 to $13,000,000.00, $846,153.85 lower
+(11,000,000/13 exactly), and the founders hold 50.5556% instead of 53.8462% (91/180 against 7/13). At the next round
+676,923.077 of the requested pool is still ungranted. The report never says which pool to accept.
+
 ## Using it
 
 ```
@@ -999,6 +1068,8 @@ equity_calculator instrument_compare --founder-shares F --team-shares T --unissu
     --note-interest-rate-percent R --note-compounding simple|annual|monthly [--note-stub-rule RULE]
     --note-months-to-conversion M [--note-maturity-months M] [--note-interest-paid-in-cash]
     --next-round "TERMS"... --exit E... [--pool-at-exit as_common|left_out]
+equity_calculator pool_plan --fully-diluted-shares FD --unissued-pool-shares U [--founder-shares F]
+    --pre-money V --investment I --requested-pool-percent T --next-round-month M --hire "ROLE: TERMS"...
 ```
 
 `deal_check` needs `--investment` and at least one of `--pre-money`, `--post-money` and `--stated-investor-percent`.
@@ -1051,10 +1122,19 @@ unless given), and `--existing-safe` and `--existing-note` take `--safe`'s and `
 only compared with the months to conversion; nothing at maturity is modelled. `--pool-at-exit left_out` gives the pool
 nothing at an exit.
 
+`pool_plan` needs the fully diluted shares before the round, the unissued pool (`0` for none), the pre-money, the
+raise, the term sheet's requested pool and the month the next round is expected (1 to 120 months from today), and at
+least one `--hire` (with none it is refused, `no_hiring_plan_given`). Each `--hire` is the role in the founder's words
+(letters, digits, spaces and `. , & / ( ) ' - + #`, starting with a letter or a digit, at most 40 characters), a
+colon, then its terms. Every grant is given the same way, all in shares or all as percents of the post-round fully
+diluted shares; a hire starting after `--next-round-month` is shown and left out. `--founder-shares`, when given, adds
+the founders' ownership line. Every figure is the founder's own.
+
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
-`--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure or sensitivity
-row, given as one quoted string of `key=value` terms and
-bare flags in any order, after the amount for a SAFE or the principal for a note, which comes first:
+`--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure, sensitivity
+row or hire, given as one quoted string of `key=value` terms and
+bare flags in any order, after the amount for a SAFE, the principal for a note or the role and a colon for a hire,
+which comes first:
 
 | Flag                  | Terms                                                                                                                                                                                                                                                                                       |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1069,6 +1149,7 @@ bare flags in any order, after the amount for a SAFE or the principal for a note
 | `--sensitivity`       | `field=F segment=K values=V1/V2/...` (F one of `customers`, `price`, `units-per-customer`, `take-rate-percent`, `serviceable-percent`, `obtainable-percent`, `obtainable-customers`; 1 to 4 values)                                                                                         |
 | `--priced-preference` | `standard [rank=K]` or `preference-multiple=M participation=none\|full\|capped [cap-multiple=C] [rank=K]`                                                                                                                                                                                   |
 | `--next-round`        | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]` and the series' terms as `--priced-preference` takes them                                                                                                                                            |
+| `--hire`              | `ROLE: start-month=M (grant-shares=S \| grant-percent=P)`: the role and a colon first, the grant in shares or as a percent of the post-round fully diluted shares                                                                                                                           |
 
 A note that names no `compounding` compounds `annual`, and one that names no `stub-rule` uses `fractional_power`.
 An unknown term, a term given twice, or a value that is not a number is refused, naming the flag.
@@ -1123,7 +1204,8 @@ its months are at most 600 and its months to raise at most 60. A metrics check c
 months, and its customer counts are whole numbers below 1e16. A market size takes at most 8 segments, 3 top-down
 figures and 6 sensitivity rows of 1 to 4 values each; a price covers at most 120 months and the SOM horizon is 1 to
 20 years. A comparison takes at most 6 existing series, 4 existing SAFEs and notes, 4 next rounds and 6 exits; its
-note converts within 600 months, an existing note's months plus those included.
+note converts within 600 months, an existing note's months plus those included. A pool plan takes at most 40 hires,
+each starting within 120 months, and its next round comes within the same.
 A note runs at most 600 months, or at most 18,262 days (about 50 years) between its dates; a vesting schedule, its
 cliff and every month asked about are at most 600 months. These limits keep every exact step small: the largest
 inputs compute in well under a second, and a value like `1e999999999` is refused at once instead of tying up the
@@ -1140,7 +1222,7 @@ tools do not check it.
 ## The Excel workbook
 
 There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` for the round, `Dilution`, `Vesting`,
-`Waterfall`, `Deal check`, `Runway plan`, `Metrics check`, `Market sizing` or `Priced vs note`):
+`Waterfall`, `Deal check`, `Runway plan`, `Metrics check`, `Market sizing`, `Priced vs note` or `Pool plan`):
 
 - Row 1 is a bold header, frozen in place: `Line`, one value column (two for the pool, one per timing) and
   `How it is computed`.
@@ -1376,6 +1458,18 @@ these (`standard_preference` only when a series is given as standard):
 | `pool_at_exit`              | the pool takes part as common                                                               | `--pool-at-exit left_out`                         | method                                      |
 | `money_split`               | largest remainder within each option                                                        | fixed                                             | display convention                          |
 | `difference_rounding`       | B - A of the exact values, rounded once                                                     | fixed                                             | display convention                          |
+
+The `pool_plan` scenario carries the pool's `target_pool`, `price_basis` and `money_split` rows word for word, and
+these:
+
+| Key                 | Default                                                                                             | How to change it                                        | Source                                    |
+| ------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------- |
+| `pool_timing`       | both columns create the pool in the pre-money                                                       | fixed (the `pool` scenario works the post-money timing) | unverified (common term-sheet practice)   |
+| `plan_pool`         | the plan's pool holds exactly the grants to the next round, U + P = G; no top-up when they fit in U | fixed                                                   | unverified (this calculator's convention) |
+| `next_round_cutoff` | a hire starting on or before the next round's month counts                                          | `--next-round-month`                                    | unverified                                |
+| `grant_unit`        | every grant in shares, or every grant as a percent of the post-round fully diluted shares           | each `--hire`'s grant                                   | unverified                                |
+| `share_rounding`    | exact fractions of shares                                                                           | fixed                                                   | unverified                                |
+| `difference`        | requested - plan of the exact values, rounded once; neither column is a recommendation              | fixed                                                   | display convention                        |
 
 </details>
 
