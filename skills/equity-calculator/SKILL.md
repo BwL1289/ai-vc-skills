@@ -269,6 +269,6 @@ most 50 SAFEs and notes and 20 use-of-funds lines, and a runway plan at most 3 c
 use-of-funds lines each), 10 milestones, months up to 600 and 60 months to raise; a metrics check covers one
 period of 1 to 36 months; a market size takes at most 8 segments, 3 top-down figures and 6 sensitivity rows of
 up to 4 values each; a comparison takes at most 6 existing series, 4 existing SAFEs and notes, 4 next rounds and 6
-exits; a raise pipeline at most 40 commitments, 20 pro rata amounts and 8 stages of up to 10,000 investors each, and
-100 term sheets wanted. Anything past a
-limit is refused with a message naming the field.
+exits; a pool plan at most 40 hires, each starting within 120 months; a raise pipeline at most 40 commitments, 20
+pro rata amounts and 8 stages of up to 10,000 investors each, and 100 term sheets wanted. Anything past a limit is
+refused with a message naming the field.

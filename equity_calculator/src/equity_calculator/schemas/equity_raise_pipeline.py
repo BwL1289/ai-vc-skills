@@ -68,15 +68,17 @@ RateBasis = Literal["own", "benchmark"]
 
 # Facts the pipeline turns up. They never change a number and never say whom to pitch; their plain words are in
 # ``equity_calculator.layout_raise_pipeline``. ``no_lead_cheque_given``: no lead cheque, so none is counted.
-# ``soft_commitments_not_counted``: at least one soft commitment, shown on its own. ``oversubscribed``: the lead's
-# cheque and the firm commitments alone come to more than the round. ``pro_rata_exceeds_left``: those fit, but the pro
-# rata is larger than the room they leave. ``fully_allocated``: nothing is left, exactly. ``no_funnel_given``: no
-# stage, so no expected term sheets. ``benchmark_rates_given``: a rate is the founder's benchmark, not their own.
-# ``funnel_short_of_wanted``: the funnel today is expected to give fewer term sheets than wanted. ``no_runway_given``:
-# no cash and burn, so no start-raising month. ``cash_never_runs_out`` and ``start_raising_date_passed``: the runway
-# plan's own flags of the same names, on its plan with no raise.
+# ``no_pro_rata_given``: no pro rata amount, so none is counted (the founder may have said there is none; the input
+# cannot tell). ``soft_commitments_not_counted``: at least one soft commitment, shown on its own. ``oversubscribed``:
+# the lead's cheque and the firm commitments alone come to more than the round. ``pro_rata_exceeds_left``: those fit,
+# but the pro rata is larger than the room they leave. ``fully_allocated``: nothing is left, exactly.
+# ``no_funnel_given``: no stage, so no expected term sheets. ``benchmark_rates_given``: a rate is the founder's
+# benchmark, not their own. ``funnel_short_of_wanted``: the funnel today is expected to give fewer term sheets than
+# wanted. ``no_runway_given``: no cash and burn, so no start-raising month. ``cash_never_runs_out`` and
+# ``start_raising_date_passed``: the runway plan's own flags of the same names, on its plan with no raise.
 RaisePipelineFlag = Literal[
     "no_lead_cheque_given",
+    "no_pro_rata_given",
     "soft_commitments_not_counted",
     "oversubscribed",
     "pro_rata_exceeds_left",

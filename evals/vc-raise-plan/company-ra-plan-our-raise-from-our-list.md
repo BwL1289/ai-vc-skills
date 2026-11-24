@@ -69,8 +69,8 @@ the printed start-raising month, keeps the tracker, never names a firm as a fit 
 
 ```text
   Soft commitments, never counted (S)                                        $500,000.00  the soft commitments, shown on their own
-  Room after the lead and the firm commitments                             $1,000,000.00  R - L - F
-  Allocation left                                                            $600,000.00  R - L - F - P; below 0, more is counted than the round holds
+  Room after the lead and the firm commitments                             $1,000,000.00  R - L - F; the value when run, not a live formula
+  Allocation left                                                            $600,000.00  R - L - F - P; below 0, more is counted than the round holds; the value when run, not a live formula
   Conversion, first stage to a term sheet                                        3.7500%  the product of every rate
   Expected term sheets from today's funnel (E)                                      2.75  the sum of each stage's investors × its rate to a term sheet; an expectation from the founder's rates, not a forecast
   First-stage targets needed, from an empty funnel                                    80  ceiling(W / the conversion)

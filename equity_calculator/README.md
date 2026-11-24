@@ -726,7 +726,7 @@ count and rate is the founder's; nothing is assumed or looked up, and no investo
 | R      | the round size                                                                          |
 | L      | the lead's cheque (0 when none is given)                                                |
 | F, S   | the firm and the soft commitments, each as the founder marks it                         |
-| P      | every pro rata amount, counted in full                                                  |
+| P      | every pro rata amount, counted in full (0 when none is given)                           |
 | n_k    | the investors at stage k today, each counted once, at the furthest stage it has reached |
 | r_k    | the founder's rate from stage k to the next (from the last stage, to a term sheet)      |
 | W      | the term sheets the founder wants                                                       |
@@ -736,20 +736,23 @@ R - L - F - P. S is summed and shown on its own line, never counted. Below zero,
 `oversubscribed` when L + F > R (the lead and the firm commitments alone are over the round), else
 `pro_rata_exceeds_left` when L + F ≤ R < L + F + P; `fully_allocated` when the allocation left is exactly zero.
 
-**Funnel.** With q*k = r_k·r*(k+1)···r*last, the rate to a term sheet from stage k, the conversion is q_1 and the
-expected term sheets are E = Σ n_k·q_k: walked stage by stage, e_1 = n_1, e_k = n_k + e*(k-1)·r\_(k-1), and
-E = e_last·r_last. With every investor at the first stage, E = n_1·q_1, the targets times the product of the rates.
+**Funnel.** With `q_k = r_k·r_(k+1)···r_last`, the rate to a term sheet from stage k, the conversion is `q_1` and the
+expected term sheets are `E = Σ n_k·q_k`: walked stage by stage, `e_1 = n_1`, `e_k = n_k + e_(k-1)·r_(k-1)`, and
+`E = e_last·r_last`. With every investor at the first stage, E = n_1·q_1, the targets times the product of the rates.
 E is an expectation from the founder's own rates (each investor moving on independently), not a forecast. The targets
 needed from an empty funnel are T = ceiling(W/q_1), the more needed beyond today's M = ceiling((W - E)/q_1), floored
 at 0, and the investors needed at stage k ceiling(W/q_k). A stage with no rate is refused (`stage_rate_missing`); a
 benchmark rate goes in only with the founder's source (`rate_basis: benchmark`, `benchmark_source`), and is flagged.
 
 **Timing.** With cash, the phases and the months to raise, the start-raising month is the `runway_plan` scenario's own
-row for the plan with no raise: its runway less the months to raise, in months from today. Its flags
-`cash_never_runs_out` and `start_raising_date_passed` come through. Cash and phases with no months to raise are
-refused (`no_months_to_raise_given`).
+row for the plan with no raise: its runway less the months to raise, in months from today. The runway plan's flags
+`cash_never_runs_out` and `start_raising_date_passed` come through. The report shows the cash, the floor and each
+phase's gross burn and revenue a month beside it; a floor or a phase's revenue that was not given is worked as none,
+and its line says `not given: read as none`. Cash and phases with no months to raise are refused
+(`no_months_to_raise_given`).
 
-Flags, never a pick: `no_lead_cheque_given`, `soft_commitments_not_counted`, `oversubscribed`,
+Flags, never a pick: `no_lead_cheque_given`, `no_pro_rata_given` (none given, so none counted: existing investors'
+pro rata rights would make the allocation left smaller), `soft_commitments_not_counted`, `oversubscribed`,
 `pro_rata_exceeds_left`, `fully_allocated`, `no_funnel_given`, `benchmark_rates_given`, `funnel_short_of_wanted`
 (E < W), `no_runway_given`, `cash_never_runs_out` and `start_raising_date_passed`. A commitment not marked soft or firm
 is refused (`commitment_kind_missing`), and so are term sheets wanted with no funnel (`no_funnel_given`) and a funnel
@@ -1074,13 +1077,15 @@ equity_calculator raise_pipeline --round-size 4,000,000 --lead-cheque 2,500,000 
     --stage "Partner meeting: investors=2 rate-percent=25" --term-sheets-wanted 3 --cash-on-hand 1,200,000 \
     --phase "from-month=1 gross-burn=150000 revenue=30000" --months-to-raise 6
   Soft commitments, never counted (S)                                        $500,000.00  the soft commitments, shown on their own
-  Room after the lead and the firm commitments                             $1,000,000.00  R - L - F
-  Allocation left                                                            $600,000.00  R - L - F - P; below 0, more is counted than the round holds
+  Room after the lead and the firm commitments                             $1,000,000.00  R - L - F; the value when run, not a live formula
+  Allocation left                                                            $600,000.00  R - L - F - P; below 0, more is counted than the round holds; the value when run, not a live formula
   Stage 3, Partner meeting: needed here for 3 term sheets                             12  ceiling(W / the rate to a term sheet from here)
   Conversion, first stage to a term sheet                                        3.7500%  the product of every rate
   Expected term sheets from today's funnel (E)                                      2.75  the sum of each stage's investors × its rate to a term sheet; an expectation from the founder's rates, not a forecast
   First-stage targets needed, from an empty funnel                                    80  ceiling(W / the conversion)
   More first-stage targets needed beyond today's funnel                                7  ceiling((W - E) / the conversion); 0 when E >= W
+  Phase 1, from month 1: gross burn a month                                  $150,000.00  given
+  Phase 1, from month 1: revenue a month                                      $30,000.00  given
   Runway with no raise (the runway plan's)                                  10.00 months  months until cash less the floor goes below zero, on the plan
   Start raising by (the runway plan's)                                       4.00 months  runway with no raise - months to raise, in months from today
   Flag                                                      soft_commitments_not_counted  At least one commitment is soft: soft commitments are shown on their own line and never counted against the round
@@ -1212,8 +1217,9 @@ the founders' ownership line. Every figure is the founder's own.
 
 `raise_pipeline` needs the round size. Each `--commitment` is an amount and `kind=soft` or `kind=firm`, as the founder
 marks it (with no kind it is refused, `commitment_kind_missing`); each `--pro-rata` is one existing investor's amount.
-Each `--stage` is the stage's name in the founder's words (the same characters as a hire's role, plus `:`), a colon,
-then `investors=N` (whole investors at that stage today) and `rate-percent=P` (the founder's rate to the next stage;
+Each `--stage` is the stage's name in the founder's words (the same characters as a hire's role; on the command line
+the name ends at its first colon, so it holds no colon there, while a benchmark's source may), a colon, then
+`investors=N` (whole investors at that stage today) and `rate-percent=P` (the founder's rate to the next stage;
 from the last stage, to a term sheet), in the funnel's order; `rate-basis=benchmark benchmark-source=TEXT` marks a
 rate the founder took from a benchmark, the source running to the end of the stage. `--term-sheets-wanted` goes with
 the stages. `--cash-on-hand`, `--cash-floor`, each `--phase` (the same terms as `runway_plan`'s) and
@@ -1221,9 +1227,9 @@ the stages. `--cash-on-hand`, `--cash-floor`, each `--phase` (the same terms as 
 
 `round` needs at least one `--safe` or `--note`, `dilution` at least one `--round` and `waterfall` at least one
 `--class`. Each repeated flag is one instrument, round, class, phase, raise, segment, top-down figure, sensitivity
-row or hire, given as one quoted string of `key=value` terms and
-bare flags in any order, after the amount for a SAFE, the principal for a note or the role and a colon for a hire,
-which comes first:
+row, hire, commitment or stage, given as one quoted string of `key=value` terms and bare flags in any order, after the
+amount for a SAFE, the principal for a note, the role and a colon for a hire, the amount for a commitment or the name
+and a colon for a stage, which comes first:
 
 | Flag                  | Terms                                                                                                                                                                                                                                                                                       |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1239,6 +1245,8 @@ which comes first:
 | `--priced-preference` | `standard [rank=K]` or `preference-multiple=M participation=none\|full\|capped [cap-multiple=C] [rank=K]`                                                                                                                                                                                   |
 | `--next-round`        | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]` and the series' terms as `--priced-preference` takes them                                                                                                                                            |
 | `--hire`              | `ROLE: start-month=M (grant-shares=S \| grant-percent=P)`: the role and a colon first, the grant in shares or as a percent of the post-round fully diluted shares                                                                                                                           |
+| `--commitment`        | `AMOUNT kind=soft\|firm`: the amount first                                                                                                                                                                                                                                                  |
+| `--stage`             | `NAME: investors=N rate-percent=P [rate-basis=own\|benchmark] [benchmark-source=TEXT]`: the name and a colon first, the source last, running to the end                                                                                                                                     |
 
 A note that names no `compounding` compounds `annual`, and one that names no `stub-rule` uses `fractional_power`.
 An unknown term, a term given twice, or a value that is not a number is refused, naming the flag.
@@ -1338,7 +1346,7 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
   does not calculate, such as a file preview or openpyxl's `data_only` read, shows them empty.
 - Totals are live `=SUM` formulas, so editing a part re-totals: the investor's post-money, total shares, total
   ownership and post-money (pool and round), the stake lost in all (dilution), vested in all and the grant (vesting), the total paid out
-  (waterfall), the pre-money split and use-of-funds totals (deal check), each raise's use-of-funds total (runway plan), and a market size's totals across its segments (customers, gross spend, TAM, SAM and SOM). A live total adds the rounded cells, so it can differ from the model's exact total in the last place
+  (waterfall), the pre-money split and use-of-funds totals (deal check), each raise's use-of-funds total (runway plan), a market size's totals across its segments (customers, gross spend, TAM, SAM and SOM), and the firm, soft and pro rata totals (raise pipeline). A line worked from a total is still a value: a raise pipeline's room after the lead and the firm commitments and its allocation left keep the figures of the run when a commitment is edited, and their how-column says so. A live total adds the rounded cells, so it can differ from the model's exact total in the last place
   kept: a cent on the investor's post-money, a thousandth of a share on the pool's total shares, 0.000001 on its total
   ownership. The number formats hide that difference.
 - The pool's and the round's value rows, the waterfall's payouts, a deal check's pre-money split and percent

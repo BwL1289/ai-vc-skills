@@ -201,6 +201,7 @@ def _flags(
     runway_flags = () if timing is None else timing.runway_flags
     holds: dict[RaisePipelineFlag, bool] = {
         "no_lead_cheque_given": inputs.lead_cheque is None,
+        "no_pro_rata_given": not inputs.pro_rata,
         "soft_commitments_not_counted": any(item.kind == "soft" for item in inputs.commitments),
         "oversubscribed": over,
         "pro_rata_exceeds_left": not over and sums.left < ZERO,

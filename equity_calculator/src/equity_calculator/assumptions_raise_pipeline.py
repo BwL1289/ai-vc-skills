@@ -1,7 +1,7 @@
 """The labelled assumptions a raise pipeline rests on: its own conventions, unverified, and the runway plan's rows.
 
-No primary source says how to count a round's allocation or a fundraising funnel; the rules here (soft commitments
-never counted, pro rata counted in full, one investor at one stage, each moving on independently at the founder's
+No primary source says how to count a round's allocation or a fundraising funnel; the rules here (soft commitments never
+counted, pro rata counted in full when given, one investor at one stage, each moving on independently at the founder's
 rate) are this calculator's, marked unverified. The start-raising month is the runway plan scenario's, so its own
 assumption rows follow, word for word, whenever cash and burn are given.
 """
@@ -22,23 +22,29 @@ def _assumption(key: str, setting: str, statement: str, source: str) -> EquityAs
 
 
 def _allocation_rows(inputs: RaisePipelineInput) -> list[EquityAssumption]:
+    """The allocation's rule, and the pro rata rule only when a pro rata amount is given."""
     lead = "L = the lead's cheque" if inputs.lead_cheque is not None else "L = 0: no lead cheque given"
-    return [
+    pro_rata = "" if inputs.pro_rata else "; pro rata = 0: none given"
+    rows = [
         _assumption(
             "allocation_rule",
-            f"left = R - L - firm - pro rata; {lead}",
+            f"left = R - L - firm - pro rata; {lead}{pro_rata}",
             "The allocation left is the round less the lead's cheque, the firm commitments and the pro rata amounts. "
             "A soft commitment is summed and shown on its own, never counted against the round.",
             f"{UNVERIFIED} (standard arithmetic; soft or firm as the founder marks each)",
         ),
-        _assumption(
-            "pro_rata_rule",
-            "each pro rata amount counted in full",
-            "Each existing investor's pro rata amount, as the founder gives it, is counted as taken, whether or not "
-            "that investor has said it will use it.",
-            f"{UNVERIFIED} (a planning convention)",
-        ),
     ]
+    if inputs.pro_rata:
+        rows.append(
+            _assumption(
+                "pro_rata_rule",
+                "each pro rata amount counted in full",
+                "Each existing investor's pro rata amount, as the founder gives it, is counted as taken, whether or "
+                "not that investor has said it will use it.",
+                f"{UNVERIFIED} (a planning convention)",
+            )
+        )
+    return rows
 
 
 def _funnel_rows(inputs: RaisePipelineInput) -> list[EquityAssumption]:

@@ -221,15 +221,31 @@ def test_seeded_rounds_flag_an_overfull_round_once() -> None:
         assert left == 4_000_000 - taken
 
 
-def test_with_no_lead_no_funnel_and_no_runway_each_is_flagged() -> None:
+def test_with_no_lead_no_pro_rata_no_funnel_and_no_runway_each_is_flagged() -> None:
     result = raise_pipeline(round_size="2000000")
 
     assert result.funnel is None and result.timing is None
     assert result.allocation.lead_cheque is None
     assert result.allocation.allocation_left.exact == 2_000_000
-    assert result.flags == ("no_lead_cheque_given", "no_funnel_given", "no_runway_given")
-    assert [item.key for item in result.assumptions] == ["allocation_rule", "pro_rata_rule"]
+    assert result.flags == ("no_lead_cheque_given", "no_pro_rata_given", "no_funnel_given", "no_runway_given")
+    # No pro rata was given, so no row says each amount is counted in full.
+    assert [item.key for item in result.assumptions] == ["allocation_rule"]
     assert "L = 0: no lead cheque given" in result.assumptions[0].setting
+    assert "pro rata = 0: none given" in result.assumptions[0].setting
+
+
+def test_pro_rata_left_out_is_flagged_never_read_as_counted() -> None:
+    """With no pro rata amount, none is counted, the flag says so and no row claims an amount counted in full; with one,
+    the flag goes and the rule comes back."""
+    without = raise_pipeline(**_with(pro_rata=[]))
+    given = raise_pipeline(**RAISE_PIPELINE_RA)
+
+    assert "no_pro_rata_given" in without.flags and "no_pro_rata_given" not in given.flags
+    assert without.allocation.pro_rata_total.exact == 0
+    assert without.allocation.allocation_left.exact == without.allocation.room_after_lead_and_firm.exact
+    assert "pro_rata_rule" not in [item.key for item in without.assumptions]
+    assert "pro_rata_rule" in [item.key for item in given.assumptions]
+    assert "none given" not in given.assumptions[0].setting
 
 
 def test_a_benchmark_rate_is_flagged_and_its_source_kept() -> None:
@@ -335,6 +351,7 @@ def test_every_flag_is_reachable() -> None:
     cases = [
         RAISE_PIPELINE_RA,
         {"round_size": "1000"},
+        _with(pro_rata=[]),
         {"round_size": "1000", "lead_cheque": "900", "commitments": [{"amount": "200", "kind": "firm"}]},
         {"round_size": "1000", "lead_cheque": "900", "pro_rata": ["200"]},
         {"round_size": "1000", "lead_cheque": "900", "pro_rata": ["100"]},

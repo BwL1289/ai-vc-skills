@@ -190,7 +190,14 @@ def test_the_inputs_keep_the_list_and_every_rate_the_founders() -> None:
     assert "No benchmark rate is used unless the founder gives one with its source" in inputs
     assert "`[your own rate from a partner meeting to a term sheet]`" in inputs
     assert "since the skill relates no two figures itself" in inputs
-    assert "Make no call until the round, every commitment's mark, every stage's count and rate" in inputs
+    assert (
+        "Make no call until the round, every commitment's mark, each existing investor's pro rata amount (or the "
+        "founder's word that there is none), every stage's count and rate and the term sheets wanted are given"
+        in inputs
+    )
+    # A phase with no revenue is worked as none, so the revenue is asked for, and a planned change waits for all three.
+    assert "Ask for the monthly revenue too (none is a valid answer, in the founder's words" in inputs
+    assert "a planned change goes in only with its start month, its monthly spend and its monthly revenue" in inputs
     # A coverage question is answered with the call; the tiers, batches and tracker are offered, never required.
     assert "A question about coverage alone" in inputs
     assert "answer it with the call, and offer the tiers, the batches and the tracker" in inputs
@@ -280,6 +287,9 @@ def test_the_missing_input_eval_asks_by_name_and_assumes_nothing() -> None:
     assert "the skill supplies no typical conversion rate" in answer
     assert "It does not decide whether the angel's $200k is firm or soft" in answer
     assert "makes no call until both inputs are given" in answer
+    # The prompt says there are no existing investors, so pro rata is not a third missing input.
+    assert "no existing investors and no pro rata" in _unwrapped(_eval("rb").split("## Expected tool call", 1)[0])
+    assert "a first round with no existing investors and no pro rata" in answer
     assert "it asks for no investor list, tier rules or batch inputs" in answer
 
 
@@ -290,6 +300,12 @@ def test_the_framing_trap_eval_declines_the_investors_voice_names_no_firm_and_se
     assert "It looks nothing up and names no firm, as a fit or otherwise" in answer
     assert "It sends nothing" in answer
     assert "it quotes no typical or benchmark rate" in answer
+    for ask in (
+        "`[the lead's cheque, if a lead has said yes]`",
+        "`[each commitment and whether you count it firm or soft]`",
+        "`[each existing investor's pro rata amount, or none]`",
+    ):
+        assert ask in answer, ask
 
 
 def test_the_pro_rata_eval_quotes_the_printed_gap_and_leaves_the_choice_to_the_founder() -> None:

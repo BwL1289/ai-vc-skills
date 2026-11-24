@@ -159,6 +159,38 @@ async def test_a_benchmark_s_source_runs_to_the_end_of_the_stage() -> None:
     assert "benchmark_rates_given" in _flag_lines(report)
 
 
+async def test_the_timing_block_shows_the_burn_the_start_month_rests_on() -> None:
+    """The cash, the floor and each phase print beside the runway; a revenue or a floor not given says it was read as
+    none, while a revenue given as 0 reads as given."""
+    report = await run(_COMPANY_RA)
+
+    assert "$1,200,000.00" in _line(report, "Cash on hand")
+    assert "not given: read as none" in _line(report, "Cash floor")
+    assert "$150,000.00" in _line(report, "Phase 1, from month 1: gross burn a month")
+    revenue = _line(report, "Phase 1, from month 1: revenue a month")
+    assert "$30,000.00" in revenue and revenue.endswith("given")
+
+    phases = ["--phase", "from-month=1 gross-burn=150000", "--phase", "from-month=4 gross-burn=180000 revenue=0"]
+    argv = [*_ROUND, "--cash-on-hand", "1,200,000", "--cash-floor", "100000", *phases, "--months-to-raise", "6"]
+    report = await run(argv)
+
+    assert "not given: read as none" in _line(report, "Phase 1, from month 1: revenue a month")
+    later = _line(report, "Phase 2, from month 4: revenue a month")
+    assert "$0.00" in later and later.endswith("given") and "not given" not in later
+    floor = _line(report, "Cash floor")
+    assert "$100,000.00" in floor and "not given" not in floor
+
+
+async def test_the_room_and_the_allocation_left_say_they_are_values_not_live_formulas() -> None:
+    """Outside the investor sheet only totals are live, so the two lines worked from the totals say so."""
+    report = await run(_COMPANY_RA)
+
+    for label in ("Room after the lead and the firm commitments", "Allocation left"):
+        assert _line(report, label).endswith("the value when run, not a live formula"), label
+    lines = {line.key: line for line in sheet_for(raise_pipeline(**RAISE_PIPELINE_RA)).lines}
+    assert not lines["room_after_lead_and_firm"].formula and not lines["allocation_left"].formula
+
+
 async def test_xlsx_writes_the_raise_pipeline_sheet(tmp_path: Path) -> None:
     target = tmp_path / "raise_pipeline.xlsx"
     report = await run([*_COMPANY_RA, "--xlsx", str(target)])

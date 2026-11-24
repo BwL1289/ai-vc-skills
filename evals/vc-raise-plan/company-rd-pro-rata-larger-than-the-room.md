@@ -49,8 +49,8 @@ the founder, asks for no investor list (the question is about coverage alone), a
 ```text
   Soft commitments, never counted (S)                                        $400,000.00  the soft commitments, shown on their own
   Pro rata (P)                                                               $600,000.00  every pro rata amount
-  Room after the lead and the firm commitments                               $500,000.00  R - L - F
-  Allocation left                                                           $-100,000.00  R - L - F - P; below 0, more is counted than the round holds
+  Room after the lead and the firm commitments                               $500,000.00  R - L - F; the value when run, not a live formula
+  Allocation left                                                           $-100,000.00  R - L - F - P; below 0, more is counted than the round holds; the value when run, not a live formula
   Expected term sheets from today's funnel (E)                                      2.40  the sum of each stage's investors × its rate to a term sheet; an expectation from the founder's rates, not a forecast
   More first-stage targets needed beyond today's funnel                                0  ceiling((W - E) / the conversion); 0 when E >= W
   Start raising by (the runway plan's)                                       3.00 months  runway with no raise - months to raise, in months from today

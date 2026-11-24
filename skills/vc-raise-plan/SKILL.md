@@ -61,10 +61,12 @@ you already read.
    founder's experience, and the order of the tiers.
 
 A missing input becomes a named gap, written as a bracketed ask: `[the months you allow to raise]`,
-`[soft or firm, for the commitment from the angel]`. Make no call until the round, every commitment's mark, every
-stage's count and rate and the term sheets wanted are given. Without cash and burn there is no start-raising month:
-ask for them, and run without them only when the founder names a start month of their own, which the plan then
-labels as the founder's.
+`[soft or firm, for the commitment from the angel]`. Make no call until the round, every commitment's mark, each
+existing investor's pro rata amount (or the founder's word that there is none), every stage's count and rate and the
+term sheets wanted are given. Without cash and burn there is no start-raising month: ask for them, and run without
+them only when the founder names a start month of their own, which the plan then labels as the founder's. Ask for
+the monthly revenue too (none is a valid answer, in the founder's words, sent as `0` so the report shows it as
+given); a planned change goes in only with its start month, its monthly spend and its monthly revenue.
 
 A question about coverage alone (how much of the round is left, how many investors to talk to, when to start raising)
 needs only the round, the funnel and the cash, burn and months to raise: answer it with the call, and offer the tiers,
@@ -124,8 +126,8 @@ offer.
 
    ```text
      Soft commitments, never counted (S)                                        $500,000.00  the soft commitments, shown on their own
-     Room after the lead and the firm commitments                             $1,000,000.00  R - L - F
-     Allocation left                                                            $600,000.00  R - L - F - P; below 0, more is counted than the round holds
+     Room after the lead and the firm commitments                             $1,000,000.00  R - L - F; the value when run, not a live formula
+     Allocation left                                                            $600,000.00  R - L - F - P; below 0, more is counted than the round holds; the value when run, not a live formula
      Conversion, first stage to a term sheet                                        3.7500%  the product of every rate
      Expected term sheets from today's funnel (E)                                      2.75  the sum of each stage's investors × its rate to a term sheet; an expectation from the founder's rates, not a forecast
      First-stage targets needed, from an empty funnel                                    80  ceiling(W / the conversion)
@@ -141,7 +143,9 @@ offer.
 
 5. **Read the result before answering**: `allocation` (the totals, the room and the allocation left), `funnel` (each
    stage's row, the conversion, `expected_term_sheets`, `targets_needed`, `more_targets_needed`), `timing`
-   (`runway_months`, `start_raising_by`), every code in `flags`, and `assumptions`. The expected term sheets are an
+   (`runway_months`, `start_raising_by`), every code in `flags`, and `assumptions`. The report prints the cash, the
+   floor and each phase the start-raising month rests on; a line that says `not given: read as none` is a figure the
+   founder did not give, so ask for it before quoting the month. The expected term sheets are an
    expectation from the founder's own rates, never a forecast: say so each time the figure is quoted. A refusal or a
    tool error is the answer for those inputs: relay its reason and what to change (`stage_rate_missing`: ask for the
    founder's rate; `commitment_kind_missing`: ask whether it is firm or soft; `no_months_to_raise_given`: ask for the
@@ -175,6 +179,7 @@ same meaning beside each flag; the MCP result does not. None says which investor
 | Flag                           | What it means for the founder                                                                                 | What to prepare                                                                                |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `no_lead_cheque_given`         | No lead cheque was given, so the allocation left still holds the lead's part of the round.                    | Say the allocation left includes the lead's part until a lead says yes.                        |
+| `no_pro_rata_given`            | No pro rata amount was given, so none is counted: with pro rata rights, the allocation left is smaller.       | Ask whether any existing investor holds pro rata rights, and for each amount.                  |
 | `soft_commitments_not_counted` | At least one commitment is soft, so it is shown on its own line and never counted against the round.          | Ask whether any soft commitment has firmed up; re-run when one does.                           |
 | `oversubscribed`               | The lead's cheque and the firm commitments alone come to more than the round.                                 | Quote the allocation left as printed; the round size is the founder's call.                    |
 | `pro_rata_exceeds_left`        | The lead's cheque and the firm commitments fit, but the pro rata is larger than the room they leave.          | Quote the room and the allocation left as printed; how much pro rata to take is the founder's. |
@@ -205,10 +210,10 @@ a change of notation, not a calculation.
 4. **The tracker** from step 7.
 5. **Flags,** one line per code in `flags`, with its meaning from the table above.
 6. **Assumptions** the answer leans on, quoted from the result with their sources: soft commitments never counted
-   and pro rata counted in full (`allocation_rule`, `pro_rata_rule`), each investor counted once at its furthest
-   stage (`stage_counting`), the expected term sheets as an expectation (`expected_term_sheets`), the rates' basis
-   (`rate_basis`) and the start-raising month (`start_raising_rule`). Say plainly that each is `unverified` where the
-   result says so.
+   and pro rata counted in full (`allocation_rule`, and `pro_rata_rule` when pro rata is given), each investor counted
+   once at its furthest stage (`stage_counting`), the expected term sheets as an expectation (`expected_term_sheets`),
+   the rates' basis (`rate_basis`) and the start-raising month (`start_raising_rule`). Say plainly that each is
+   `unverified` where the result says so.
 7. **Open asks:** every bracketed gap still open.
 8. **Close:** this is not investment, legal or tax advice; the skill looked no one up, sent nothing, and does not say
    which investor to pick.
