@@ -15,7 +15,7 @@ import os
 import random
 import subprocess
 import sys
-from decimal import ROUND_HALF_EVEN, Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from fractions import Fraction
 from typing import NamedTuple
 
@@ -180,7 +180,8 @@ def test_seeded_exits_up_to_twelve_classes_pay_non_negative_amounts_that_add_up_
 
         assert all(payout.exact >= 0 and payout.rounded >= 0 for payout in payouts), seed
         assert sum(payout.exact for payout in payouts) == Fraction(inputs.exit_amount) == result.total.exact, seed
-        assert sum(payout.rounded for payout in payouts) == inputs.exit_amount.quantize(_CENT, ROUND_HALF_EVEN), seed
+        # Decimal's ROUND_HALF_UP is half away from zero, the calculator's display rounding.
+        assert sum(payout.rounded for payout in payouts) == inputs.exit_amount.quantize(_CENT, ROUND_HALF_UP), seed
         assert result.passes <= len(inputs.classes) + 1, seed
         for item, row in zip(inputs.classes, result.rows, strict=True):
             chosen = row.payout_if_converts if row.converts else row.payout_if_stays

@@ -2,7 +2,8 @@
 context.
 
 Every input is converted with ``Fraction(Decimal)``, which is exact, and every output is rounded from the exact
-fraction by integer half-even rounding (``round`` on a ``Fraction``) and rebuilt as a ``Decimal`` from a string. No
+fraction half away from zero by integers (``round_half_away_whole``, the rule the rounding test of a document's figure
+uses too, so a printed 12.13 is what the check compares) and rebuilt as a ``Decimal`` from a string. No
 step reads or changes the global ``decimal`` context, so a caller's precision or rounding mode cannot change a
 result. Money split across rows uses largest-remainder rounding so the cents add up to the rounded total exactly.
 """
@@ -15,7 +16,7 @@ from decimal import Decimal
 from fractions import Fraction
 
 from equity_calculator.schemas.equity import EquityQuantity, EquityUnit
-from equity_calculator.schemas.equity_common import MIN_ADJUSTED_EXPONENT
+from equity_calculator.schemas.equity_common import MIN_ADJUSTED_EXPONENT, round_half_away_whole
 
 # Decimal places each unit is rounded to for display. A fraction is shown as a percent, so 6 places of the
 # fraction are 4 places of the percent (7.5269%); multipliers and share prices keep 6 places (1.075269x,
@@ -55,8 +56,9 @@ def from_percent(value: Decimal) -> Fraction:
 
 
 def round_to_places(value: Fraction, places: int) -> Decimal:
-    """``value`` rounded half-even to ``places`` decimal places, built from an integer and a string."""
-    scaled = round(value * _DECIMAL_BASE**places)
+    """``value`` rounded half away from zero to ``places`` decimal places (0.125 to 0.13, -0.125 to -0.13), built from
+    an integer and a string."""
+    scaled = round_half_away_whole(value * _DECIMAL_BASE**places)
     return Decimal(f"{scaled}E-{places}")
 
 
@@ -74,7 +76,7 @@ def split_cents(parts: Sequence[Fraction]) -> tuple[int, ...]:
     if any(part < ZERO for part in parts):
         raise ValueError("split_cents takes non-negative parts only")
 
-    total_cents = round(sum(parts, ZERO) * _CENTS_PER_DOLLAR)
+    total_cents = round_half_away_whole(sum(parts, ZERO) * _CENTS_PER_DOLLAR)
     exact_cents = [part * _CENTS_PER_DOLLAR for part in parts]
     floors = [math.floor(cents) for cents in exact_cents]
     leftover = total_cents - sum(floors)

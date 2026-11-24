@@ -1,4 +1,5 @@
-"""Exactness: half-even rounding by integers, largest-remainder cents, the models' refusals, no global decimal context.
+"""Exactness: rounding half away from zero by integers, largest-remainder cents, the models' refusals, no global
+decimal context.
 
 Pure arithmetic: no DB, no network. Every result carries an exact ``Fraction`` and a ``Decimal`` rounded from it; a
 caller's ``decimal.localcontext()`` must not change either, so the same inputs are worked inside a hostile context
@@ -15,15 +16,18 @@ from fractions import Fraction
 import pytest
 from equity_calculator.exact import DISPLAY_PLACES, quantity, round_to_places, split_cents
 from equity_calculator.layout import sheet_for
+from equity_calculator.rounding import round_half_away, rounds_to
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity import (
     EmployeeInput,
     EquityQuantity,
     EquityResult,
+    EquityUnit,
     InvestorInput,
     PoolInput,
     ScenarioInput,
 )
+from equity_calculator.schemas.equity_common import round_half_away_whole
 from equity_calculator.schemas.equity_deal_check import DealCheckInput
 from equity_calculator.schemas.equity_dilution import DilutionInput
 from equity_calculator.schemas.equity_market_sizing import MarketSizingInput
@@ -292,20 +296,45 @@ _EXAMPLE_IDS = [
 @pytest.mark.parametrize(
     ("value", "places", "expected"),
     [
-        (Fraction(1, 8), 2, "0.12"),  # 12.5 cents rounds to the even 12
-        (Fraction(3, 8), 2, "0.38"),  # 37.5 rounds to the even 38
-        (Fraction(-1, 8), 2, "-0.12"),
+        (Fraction(1, 8), 2, "0.13"),  # 12.5 cents rounds away from zero to 13, never to the even 12
+        (Fraction(3, 8), 2, "0.38"),  # 37.5 rounds to 38
+        (Fraction(-1, 8), 2, "-0.13"),
+        (Fraction(97, 8), 2, "12.13"),  # 12.125 prints 12.13, as the rounding test rounds it
+        (Fraction(-97, 8), 2, "-12.13"),
+        (Fraction(5, 2), 0, "3"),
+        (Fraction(-5, 2), 0, "-3"),
+        (Fraction(-1, 1000), 2, "0.00"),  # a negative that rounds to nothing prints a plain zero
         (Fraction(2, 3), 6, "0.666667"),
         (Fraction(5), 2, "5.00"),
         (Fraction(19_000_000, 7), 3, "2714285.714"),
     ],
 )
-def test_round_to_places_is_half_even_with_fixed_places(value: Fraction, places: int, expected: str) -> None:
-    """Rounding is half-even on the exact fraction, and the result always carries exactly ``places`` places."""
+def test_round_to_places_is_half_away_from_zero_with_fixed_places(value: Fraction, places: int, expected: str) -> None:
+    """Rounding is half away from zero on the exact fraction, and the result always carries exactly ``places``
+    places."""
     rounded = round_to_places(value, places)
 
     assert str(rounded) == expected
     assert rounded.as_tuple().exponent == -places
+
+
+@pytest.mark.parametrize(
+    "value",
+    [Fraction(97, 8), Fraction(-97, 8), Fraction(1, 2), Fraction(-1, 2), Fraction(5, 10**7), Fraction(-5, 10**7)],
+    ids=["12.125", "minus-12.125", "0.5", "minus-0.5", "a-half-at-the-seventh-place", "minus-that"],
+)
+@pytest.mark.parametrize("unit", sorted(DISPLAY_PLACES))
+def test_every_printed_figure_is_what_the_rounding_test_rounds_to(unit: EquityUnit, value: Fraction) -> None:
+    """A figure the report prints is the computed one rounded half away from zero, the rule ``rounds_to`` applies to a
+    document's figure, so a deck that copies the report's figure (12.13 for 12.125, not 12.12) holds."""
+    shown = quantity(unit, value)
+    # The figure as the report prints it, its unit's marks taken off: "12.13 months", "$12.13", "-12.1250%".
+    printed = Decimal(display(shown).removesuffix(" months").strip("$%x").replace(",", ""))
+    percent = unit == "fraction"
+
+    assert Fraction(shown.rounded) == round_half_away(value, DISPLAY_PLACES[unit])
+    assert Fraction(printed) == round_half_away(value * 100 if percent else value, DISPLAY_PLACES[unit] - 2 * percent)
+    assert rounds_to(printed, unit, value) is (None if unit == "money" else True)
 
 
 def test_each_unit_rounds_to_its_display_places() -> None:
@@ -339,6 +368,7 @@ def test_a_fraction_prints_as_its_rounded_value_with_the_point_moved_two_places(
     [
         ((Fraction(1, 3),) * 3, (34, 33, 33)),  # a tie goes to the earlier part
         ((Fraction(1, 200), Fraction(1, 200)), (1, 0)),  # half a cent each: one cent in all
+        ((Fraction(1, 400), Fraction(1, 400)), (1, 0)),  # half a cent in all rounds away from zero to one cent
         ((Fraction(7_600_000), Fraction(3_200_000, 3), Fraction(2_000_000)), (760_000_000, 106_666_667, 200_000_000)),
         ((), ()),
     ],
@@ -361,7 +391,7 @@ def test_property_cents_add_up_and_stay_within_a_cent() -> None:
         parts = [Fraction(rng.randint(0, 10**9), rng.randint(1, 997)) for _ in range(rng.randint(1, 6))]
         cents = split_cents(parts)
 
-        assert sum(cents) == round(sum(parts) * 100)
+        assert sum(cents) == round_half_away_whole(sum(parts) * 100)
         assert all(abs(cent - part * 100) < 1 for cent, part in zip(cents, parts, strict=True))
 
 

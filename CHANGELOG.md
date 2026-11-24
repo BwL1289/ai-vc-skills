@@ -6,6 +6,12 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- Plugin version 0.2.6: every printed figure now rounds half away from zero (12.125 prints 12.13, -12.125 prints
+  -12.13), the rule the rounding test of a deck's stated figure uses, so a deck that copies the report's figure holds;
+  a note's interest keeps its own half-even rounding to the cent. The shared SAFE runway sentence also holds a planned
+  change that has its start month but no amount, marking the runway line "not checked: waiting for [the planned monthly
+  spend from that month]"; `vc-claims-check` names that held runway, and one held for its month, Needs a source; a
+  `vc-deal-math` eval (Company BV) checks the month hold; and `vc-metrics-readiness` says what stays out of its tool.
 - Plugin version 0.2.5: the priced-round-or-note comparison reaches installed copies, and `vc-deal-math` now triggers on "should we raise a priced round or a note".
 - The calculator's twelfth scenario, `instrument_compare` (MCP tool `equity_instrument_compare`, a command and a
   `Priced vs note` workbook sheet): a founder choosing between a priced round now and a convertible note now gives

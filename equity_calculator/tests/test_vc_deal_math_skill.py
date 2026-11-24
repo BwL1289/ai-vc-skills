@@ -5,7 +5,8 @@ line of the output excerpt that follows it must be a line the command really pri
 typed by hand. The same holds for each eval prompt in evals/vc-deal-math/: its tool call is valid for the tool it
 names (``equity_deal_check``, or ``equity_instrument_compare`` for a founder choosing between a priced round and a
 note) and its excerpt is lines of the report that call prints. An eval whose right answer is no ``equity_deal_check``
-call (a raise on a SAFE) says so under its tool-call heading and carries no call or excerpt to check. Every flag code
+call (a raise on a SAFE) says so under its tool-call heading and carries no call or excerpt to check, and so does the
+eval whose runway call waits for the month a planned spend starts (no ``equity_runway_plan`` call yet). Every flag code
 has a row in the skill's flag table, since the tool's JSON gives the codes only. The fully diluted count the tool
 takes leaves SAFEs and notes out, so step 2 asks which way the founder's total counts them; runway with no raise, or
 on a SAFE or note raise, goes to ``equity_runway_plan``, whose flags the skill explains in words too.
@@ -31,12 +32,24 @@ from equity_calculator.text import render_sheet
 _ROOT = Path(__file__).resolve().parents[2]
 _SKILL = _ROOT / "skills" / "vc-deal-math" / "SKILL.md"
 _EVALS = sorted((_ROOT / "evals" / "vc-deal-math").glob("*.md"))
-_EVAL_COUNT = 5
+
+
+def _headings(path: Path) -> set[str]:
+    """Which of the no-call openings the eval's tool-call heading starts with (none for an eval with a call)."""
+    text = path.read_text(encoding="utf-8")
+    return {opening for opening in (_NO_CALL, _HELD) if opening in text}
+
+
+_EVAL_COUNT = 6
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_deal_check` call."
+# A SAFE raise's runway held for the month its planned spend starts: no call yet, and the runway line says why.
+_HELD = "## Expected tool call\n\nNone yet: no `equity_runway_plan` call until the founder gives the month"
+_WAITING_FOR_MONTH = '"not checked: waiting for [the month the planned spend starts]"'
 # The tool an eval's call goes to, named first under its tool-call heading ("`equity_deal_check`, once:").
 _CALLED_TOOL = re.compile(r"^## Expected tool call\n\n`equity_([a-z_]+)`, once:$", re.MULTILINE)
-_CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
-_NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
+_CALL_EVALS = [path for path in _EVALS if not {_NO_CALL, _HELD} & _headings(path)]
+_NO_CALL_EVALS = [path for path in _EVALS if _NO_CALL in _headings(path)]
+_HELD_EVALS = [path for path in _EVALS if _HELD in _headings(path)]
 _TEXT = _SKILL.read_text(encoding="utf-8")
 _FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 # A fence inside a list item is indented; the indent is captured so it can be taken off each line.
@@ -147,6 +160,25 @@ def test_one_eval_expects_no_deal_check_call() -> None:
 
     assert _fences("json", text) == [] and _fences("text", text) == []
     assert "equity_round" in text
+
+
+def test_one_eval_holds_a_safe_raises_runway_until_its_planned_spend_has_a_start_month() -> None:
+    """The founder gives the planned spend but not its month: no call, no runway figure, the month asked for by name,
+    and the runway line marked with the shared hold sentence's label, which the skill's step 2 carries."""
+    (path,) = _HELD_EVALS
+    text = path.read_text(encoding="utf-8")
+    answer = _unwrapped(_section("## Expected answer", text))
+    steps = _unwrapped(_section("## Steps"))
+
+    assert path.name.startswith("company-bv-")
+    assert _fences("json", text) == [] and _fences("text", text) == []
+    assert "no `equity_deal_check` call" in _unwrapped(_section("## Expected tool call", text))
+    assert f"marks the runway line {_WAITING_FOR_MONTH}" in answer
+    assert _WAITING_FOR_MONTH in steps
+    assert "It gives no runway figure" in answer and "It never assumes the month" in answer
+    assert "`[planned monthly spend and revenue, from which month]` with only the month missing" in answer
+    # No runway figure of any kind: the only months in the answer are the deck's own 24 and the phases' month 1.
+    assert re.findall(r"(\d[\d.,]*) months?\b", answer) == ["24", "24"]
 
 
 def test_every_flag_code_has_a_row_in_the_skills_flag_table() -> None:

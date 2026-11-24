@@ -1186,8 +1186,9 @@ There is one sheet per scenario (`Investor`, `Employee`, `Pool`, `Convertibles` 
 
 Inside, every number is a `Fraction`. Inputs arrive as `Decimal` (the models refuse NaN and infinity, and hold every
 number to the limits above) and share counts as plain integers (a bool, a float or a numeric string is refused, never
-read as a count). The output carries both the exact fraction and a `Decimal` rounded half-even at a fixed number of
-places: 6 places for ratios and prices, 2 for money and months, 3 for shares. Three exceptions: a market's unit price
+read as a count). The output carries both the exact fraction and a `Decimal` rounded half away from zero at a fixed
+number of places (12.125 months prints 12.13, the figure the rounding test of a document's stated figure gives too):
+6 places for ratios and prices, 2 for money and months, 3 for shares. Three exceptions: a market's unit price
 the founder typed (a segment's price, a sensitivity base or value) is shown exactly, to the cent at least, with no
 trailing zeros past it ($400.00, $0.0075, $0.00000125, $0.3333333); a break-even price, which is worked, shows
 the fewest places from 2 that give the same figure as 6 (a price under $0.00001 keeps two significant digits, up to 15

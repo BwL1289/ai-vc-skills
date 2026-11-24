@@ -24,6 +24,7 @@ stays far below 1e308, the largest number a spreadsheet cell or a JSON float hol
 
 from __future__ import annotations
 
+import math
 from decimal import Decimal
 from fractions import Fraction
 from typing import Annotated, Literal
@@ -52,6 +53,7 @@ WHOLE_PERCENT = 100  # a stake is below 100% of the company; a fall in outcome i
 ONE_HUNDRED = Fraction(WHOLE_PERCENT)
 
 _MESSAGE_PERCENT_PLACES = 4
+_HALF = Fraction(1, 2)
 
 # The bounds every decimal input meets (see the module docstring). 28 digits is Decimal's default precision; the
 # size limits keep each exact Fraction small: 1e-15 is far below any share, price or rate step, 1e16 far above any
@@ -65,13 +67,20 @@ _CEILING_TEXT = f"under 1e{MAX_ADJUSTED_EXPONENT + 1} in size"
 _BOUNDS_TEXT = f"at least 1e{MIN_ADJUSTED_EXPONENT} and {_CEILING_TEXT}"
 
 
+def round_half_away_whole(value: Fraction) -> int:
+    """``value`` rounded half away from zero to a whole number, by integers (2.5 to 3, -2.5 to -3): the one rule every
+    printed figure and every rounding check of a document's figure uses (``equity_calculator.rounding``)."""
+    whole = math.floor(abs(value) + _HALF)
+    return whole if value >= 0 else -whole
+
+
 def percent_text(value: Fraction) -> str:
-    """``value`` as a percent with four places, rounded half-even, without the global decimal context.
+    """``value`` as a percent with four places, rounded half away from zero, without the global decimal context.
 
     A nonzero value that rounds to zero reads ``under 0.0001%`` (``between -0.0001% and 0%`` below zero), never
     ``0.0000%``, so a message never states a bound of zero that is not zero.
     """
-    scaled = round(value * ONE_HUNDRED * 10**_MESSAGE_PERCENT_PLACES)
+    scaled = round_half_away_whole(value * ONE_HUNDRED * 10**_MESSAGE_PERCENT_PLACES)
     if scaled == 0 and value != 0:
         smallest = Decimal(f"1E-{_MESSAGE_PERCENT_PLACES}")
         return f"between -{smallest}% and 0%" if value < 0 else f"under {smallest}%"
@@ -145,7 +154,7 @@ def exactly_one(names: tuple[str, ...], values: tuple[object, ...]) -> None:
 
 
 class EquityQuantity(BaseModel):
-    """One computed number: its exact value and that value rounded half-even for display
+    """One computed number: its exact value and that value rounded half away from zero for display
     (``equity_calculator.exact``)."""
 
     model_config = MODEL_CONFIG
