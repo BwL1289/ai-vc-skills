@@ -162,6 +162,24 @@ def test_a_requested_pool_below_the_plan_runs_short_before_the_next_round() -> N
     assert result.flags == ("hires_after_next_round_ignored", "requested_met_by_current_pool", "requested_below_plan")
 
 
+@pytest.mark.parametrize(("percent", "side"), [("11", "requested_below_plan"), ("11.5", "requested_above_plan")])
+def test_when_today_s_pool_holds_the_plan_an_ask_it_also_meets_moves_nothing(percent: str, side: str) -> None:
+    """U = 1,500,000 holds the 1,400,000 shares of grants (t_plan = 56/495, about 11.31%), and 11% or 11.5% is met by
+    today's pool too: no top-up either way, the same price, and 100,000 shares left in both columns."""
+    result = pool_plan(**_with(unissued_pool_shares=1_500_000, requested_pool_percent=percent))
+
+    assert result.flags == (
+        "hires_after_next_round_ignored",
+        "plan_fits_current_pool",
+        "requested_met_by_current_pool",
+        side,
+    )
+    assert result.plan.cap_table.new_pool_shares.exact == result.requested.cap_table.new_pool_shares.exact == 0
+    assert result.plan.pool_left_at_next_round.exact == result.requested.pool_left_at_next_round.exact == 100_000
+    assert result.requested_minus_plan.effective_pre_money.exact == 0
+    assert result.requested_minus_plan.price_per_share.exact == 0
+
+
 def test_flags_come_in_the_order_the_literal_lists_them() -> None:
     order = get_args(PoolPlanFlag)
     for changes in ({}, {"requested_pool_percent": "5"}, {"unissued_pool_shares": 1_500_000, "founder_shares": None}):

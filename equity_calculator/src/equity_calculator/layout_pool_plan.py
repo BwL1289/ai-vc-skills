@@ -128,7 +128,7 @@ def _round_lines(result: PoolPlanResult) -> list[Line]:
         ),
         Line(
             "target_pool",
-            "Pool after the round (t)",
+            "Target pool after the round (t)",
             pair(plan.target_pool, requested.target_pool, difference.target_pool),
             _TARGET_HOW[unit],
         ),
@@ -217,6 +217,8 @@ def _flag_words(flag: PoolPlanFlag, result: PoolPlanResult) -> str:
     """What a flag means for the founder, in plain words; none says which pool to accept."""
     month = result.inputs.next_round_month
     left_out = result.hires_left_out
+    requested_adds_nothing = result.requested.cap_table.new_pool_shares.exact == 0
+    runs_short = result.requested.pool_left_at_next_round.exact < 0
     words: dict[PoolPlanFlag, str] = {
         "no_hires_before_next_round": f"No hire starts on or before month {month}, so the plan needs no pool before "
         "the next round",
@@ -229,10 +231,20 @@ def _flag_words(flag: PoolPlanFlag, result: PoolPlanResult) -> str:
         "plan_fits_current_pool": "The plan's grants fit in today's unissued pool, so the plan needs no top-up",
         "requested_met_by_current_pool": "Today's unissued pool already meets the requested percent, so the term "
         "sheet's pool needs no top-up either",
-        "requested_above_plan": "The requested pool is larger than the plan's: the difference column shows what the "
-        "larger pool does to the price, the effective pre-money and who owns what",
-        "requested_below_plan": "The requested pool is smaller than the plan's: the plan's grants would run short of "
-        "it before the next round (see the pool left line)",
+        "requested_above_plan": (
+            "The requested pool's target is above the plan's, but today's unissued pool already meets it, so it adds "
+            "no shares and moves no price"
+            if requested_adds_nothing
+            else "The requested pool is larger than the plan's: the difference column shows what the larger pool does "
+            "to the price, the effective pre-money and who owns what"
+        ),
+        "requested_below_plan": (
+            "The requested pool is smaller than the plan's: the plan's grants would run short of it before the next "
+            "round (see the pool left line)"
+            if runs_short
+            else "The requested pool's target is below the plan's, but today's unissued pool already holds the plan's "
+            "grants (see the pool left line)"
+        ),
     }
     return words[flag]
 

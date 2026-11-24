@@ -59,13 +59,18 @@ def _line(report: str, label: str) -> str:
     return next(line for line in report.splitlines() if line.strip().startswith(label))
 
 
+def _flag_lines(report: str) -> dict[str, str]:
+    """Each printed flag's code and its whole line."""
+    return {line.split()[1]: line for line in report.splitlines() if line.startswith("  Flag ")}
+
+
 async def test_the_report_sets_the_plan_beside_the_requested_pool_with_the_difference() -> None:
     report = await run(_COMPANY_CP)
 
     header = report.splitlines()[1]
     for column in _COLUMNS:
         assert column in header
-    target = _line(report, "Pool after the round (t)")
+    target = _line(report, "Target pool after the round (t)")
     assert "10.7692%" in target and "15.0000%" in target and "4.2308%" in target
     price = _line(report, "Price per share (p)")
     assert "$1.538462" in price and "$1.444444" in price and "$-0.094017" in price
@@ -93,6 +98,41 @@ async def test_every_flag_prints_with_its_plain_words() -> None:
     assert tuple(printed) == flags
     assert set(flags) <= set(get_args(PoolPlanFlag))
     assert "1 hire starts after month 18 and is left out of the plan" in _line(report, "Flag  ")
+
+
+@pytest.mark.parametrize(
+    ("percent", "flag", "words", "never"),
+    [
+        ("5", "requested_below_plan", "the plan's grants would run short of it", "already holds the plan's grants"),
+        ("16", "requested_above_plan", "the difference column shows what the larger pool does", "adds no shares"),
+    ],
+)
+async def test_a_pool_that_tops_up_or_runs_short_says_so(percent: str, flag: str, words: str, never: str) -> None:
+    report = await run([*_COMPANY_CP, "--requested-pool-percent", percent])
+    flags = _flag_lines(report)
+
+    assert words in flags[flag] and never not in flags[flag]
+
+
+@pytest.mark.parametrize(
+    ("percent", "flag", "words", "never"),
+    [
+        ("11", "requested_below_plan", "today's unissued pool already holds the plan's grants", "run short"),
+        ("11.5", "requested_above_plan", "already meets it, so it adds no shares and moves no price", "larger pool"),
+    ],
+)
+async def test_when_today_s_pool_holds_the_plan_the_flags_say_nothing_runs_short_or_moves(
+    percent: str, flag: str, words: str, never: str
+) -> None:
+    """With U = 1,500,000 the plan's 1,400,000 shares of grants fit today's pool (t_plan = 56/495, about 11.31%), and
+    an 11% or 11.5% ask is met by it too: no top-up either way, so neither flag claims a shortfall or a price move."""
+    argv = [*_COMPANY_CP, "--unissued-pool-shares", "1,500,000", "--requested-pool-percent", percent]
+    report = await run(argv)
+    flags = _flag_lines(report)
+
+    assert words in flags[flag] and never not in flags[flag]
+    assert "plan_fits_current_pool" in flags and "requested_met_by_current_pool" in flags
+    assert "100,000" in _line(report, "Pool left ungranted at the next round")
 
 
 async def test_the_command_line_and_the_model_give_the_same_result() -> None:

@@ -1001,7 +1001,7 @@ equity_calculator pool_plan --fully-diluted-shares 10,000,000 --unissued-pool-sh
     --hire "VP engineering: start-month=24 grant-shares=500000"
   Hire 6: VP engineering, from month 24                           500,000                                                left out: starts after month 18, the next round
   Shares the counted grants take                                1,400,000                   1,400,000                    G: the counted grants added up
-  Pool after the round (t)                                       10.7692%                    15.0000%           4.2308%  plan: G·V/((V + I)(FD - U + G)), the pool holding exactly G; requested: given
+  Target pool after the round (t)                                10.7692%                    15.0000%           4.2308%  plan: G·V/((V + I)(FD - U + G)), the pool holding exactly G; requested: given
   New pool shares (P)                                             400,000               1,076,923.077       676,923.077  (t·FD - (1 - r)U)/(1 - r - t), 0 when not positive: the pool scenario's
   Price per share (p)                                           $1.538462                   $1.444444        $-0.094017  V/(FD + P)
   Ownership: founders                                            53.8462%                    50.5556%          -3.2906%  F / T (founders are among the existing holders)
