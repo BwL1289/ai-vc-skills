@@ -153,8 +153,10 @@ run live and recorded: three passed, each with shortfalls against its expected a
 failed, with three clauses met only in part, because its session loaded the `equity-calculator` skill instead. Run
 again on plugin 0.3.7 after a fix to the `equity-calculator` skill, that `vc-deal-math` eval passed, with shortfalls
 noted, though its session again loaded the `equity-calculator` skill and answered from that skill's own copy of the
-comparison's rules; its file records the new run and describes the failed one. An eval file whose first paragraph says
-a live run is recorded holds an excerpt of it with its verdict; every other eval states the expected behaviour only.
+comparison's rules. Run once more on plugin 0.3.9, after a fix to the hand-off between the two skills, it passed again,
+with shortfalls noted, and its session loaded `vc-deal-math` for the first time; its file records that run and
+describes the two before it. An eval file whose first paragraph says a live run is recorded holds an excerpt of it with
+its verdict; every other eval states the expected behaviour only.
 
 The `equity-calculator` skill covers fifteen scenarios:
 

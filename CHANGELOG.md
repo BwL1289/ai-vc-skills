@@ -6,6 +6,22 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- A live re-run of the `vc-deal-math` eval for Company DX on plugin 0.3.9 (Claude Code 2.1.331), recorded in its eval in
+  place of the run on plugin 0.3.7, which the file now describes beside the 0.3.5 run: Pass, with shortfalls against the
+  expected answer noted. Its session loaded `vc-deal-math` with its first tool call and never loaded the
+  `equity-calculator` skill, the first of the eval's four runs to do so, so the hand-off fix listed under Changed fired;
+  the calculator skill's new opening line and fallback copy, never loaded, were not exercised. It made the one
+  `instrument_compare` call with no next round, said so in words, set B - A beside every group's ownership and every
+  sale row, gave no figure of its own and chose no option. Though step 7 now reached it, it did not lead with the
+  summary or relay the flags in step 7's words, as step 7 asks, or say which assumptions are `unverified`, as the
+  skill's "Answering" section asks, and it named no flag by its code; no skill text changed with this recording; the
+  changes made after it are listed under Changed.
+- Plugin version 0.3.10 (the plugin's, the marketplace's and the `equity_calculator` package's), so an installed copy
+  picks up the two skill fixes made after the 0.3.9 recording, listed under Changed: the `equity-calculator` skill's
+  fallback for a flag's meaning and the `vc-deal-math` rule for a SAFE weighed against a priced round. The recording
+  keeps naming 0.3.9, the text its run loaded.
+- Plugin version 0.3.9 (the plugin's, the marketplace's and the `equity_calculator` package's), so an installed copy
+  picks up the `vc-deal-math` hand-off fix listed under Changed.
 - A live re-run of the `vc-deal-math` eval for Company DX on plugin 0.3.7 (Claude Code 2.1.331), recorded in its eval in
   place of the run on plugin 0.3.5, which the file now describes: Pass, with shortfalls against the expected answer
   noted. Its session again loaded the `equity-calculator` skill, never `vc-deal-math`, and answered from that skill's
@@ -306,6 +322,32 @@ All notable changes to this repository. Dates are UTC.
 
 ### Changed
 
+- `equity-calculator`'s fallback copy of step 7's rules, used only when `vc-deal-math` cannot be loaded, now says where
+  a flag's meaning comes from in that case: as the report prints it beside the flag when the call ran as the
+  command-line fallback, and otherwise the code with its meaning said to be unread, never a meaning of the agent's own.
+  It had asked only for step 7's words, which a copy of this skill installed by itself cannot read (the calculator
+  README's "Agent skill" says how to install it so), and the MCP result gives the codes alone. Each assumption is quoted
+  by its name, the result's `key`. Made after the 0.3.9 recording, whose session never loaded this skill, so no live run
+  has exercised it; its test pins the new sentences.
+- `vc-deal-math`'s step 2 says a SAFE the founder weighs against a priced round now has no side-by-side tool:
+  `equity_instrument_compare`'s option B is a note, with a note's interest, maturity and cap, so a SAFE is never passed
+  to it as one; the SAFE is worked with `equity_round` on the next priced round the founder expects, or with none
+  expected its share is "not computed: set at the next priced round". The skill's description names a SAFE among the
+  ways to raise in its first sentence, and no step had said where that comparison goes. Made after the 0.3.9 recording,
+  whose prompt is a note, so no live run has exercised it; a new assert pins it.
+- A founder weighing a priced round now against a convertible note now is sent to `vc-deal-math` more plainly. In both
+  recorded live runs of the Company DX eval the session loaded the `equity-calculator` skill and answered from it,
+  never loading `vc-deal-math`, though the calculator skill sent the question there; the likely cause is that the
+  calculator skill's description led with convertible notes while `vc-deal-math`'s named the choice deep in its
+  trigger list. `vc-deal-math`'s description now says in its first sentence that it weighs one way to raise against
+  another (a priced round, a convertible note or a SAFE), with `instrument_compare` beside `deal_check`. The
+  `equity-calculator` skill's description says in its second sentence that a priced round weighed against a
+  convertible note goes to `vc-deal-math`, keeping its own triggers (some reworded to fit the 1,024-character cap).
+  Its body now opens, before the scenario table, with a bold line in step 7's own words: load `vc-deal-math` and
+  answer from its step 7, never from this skill, and answer here only if that skill cannot be loaded. Its own copy of
+  step 7's rules now also asks for each flag by its code with its meaning in step 7's words and each assumption by
+  name, marked `unverified` where the result says so, which the 0.3.7 run missed. The Company DX eval, run again on
+  0.3.9 and listed under Added, loaded `vc-deal-math` this time. New tests pin each change.
 - `runway_plan`'s report says "not given: read as none" beside a phase's revenue a month that was left out, in the
   plan or in a downside or lean case given its own phases, where it printed "$0.00 given" as if the founder had stated
   0; a revenue given as 0 still reads "given", and the runway is the same either way. The words and the test of a null

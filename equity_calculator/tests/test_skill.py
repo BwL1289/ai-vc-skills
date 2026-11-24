@@ -126,6 +126,65 @@ def test_a_priced_round_against_a_note_goes_to_the_deal_math_skill_and_its_answe
     assert "vc-deal-math's step 7 for `instrument_compare`" in text
 
 
+def test_the_comparison_s_hand_off_opens_the_skill_and_its_description_and_keeps_the_skill_s_own_triggers() -> None:
+    """Two more live runs of a priced round against a note still loaded this skill, never vc-deal-math: the hand-off sat
+    below the scenario table and the description led with convertible notes. The hand-off is now the body's first
+    instruction, before the table, and the description's second sentence, before its own triggers, which it keeps."""
+    match = _FRONTMATTER.match(_TEXT)
+    assert match is not None
+    description = dict(line.split(": ", 1) for line in match.group(1).splitlines())["description"]
+    body = _TEXT[match.end() :]
+    routing = (
+        "**A founder who has not chosen between a priced round now and a convertible note now goes to the vc-deal-math"
+        " skill: load it and answer from its step 7, never from this skill.** Only if that skill cannot be loaded,"
+        " answer here, by the rules for `instrument_compare` under Answering, step 1."
+    )
+    first_paragraph = " ".join(body.split("\n\n")[1].split())
+
+    handoff = "A priced round weighed against a convertible note goes to the vc-deal-math skill (instrument_compare)."
+    assert handoff in description
+    assert description.index(handoff) < description.index("Use when")
+    for trigger in (
+        "Paul Graham's equity equation",
+        "how much equity to offer a hire",
+        "the option-pool shuffle",
+        "how SAFEs or notes convert in a priced round (caps, discounts, MFN, interest)",
+        "how a stake dilutes",
+        "how many shares have vested",
+        "liquidation preferences, participation, caps",
+        "deal_check",
+        "runway_plan",
+        "metrics_check",
+        "market_sizing",
+        "instrument_compare",
+        "pool_plan",
+        "raise_pipeline",
+        "cap_table_check",
+        "Never do arithmetic by hand.",
+    ):
+        assert trigger in description, trigger
+    assert body.startswith("\n# Equity calculator\n\n")
+    assert first_paragraph == routing
+    assert body.index("vc-deal-math") < body.index("## Which scenario answers which question")
+
+
+def test_its_own_copy_of_step_7_s_rules_names_the_flag_codes_and_marks_the_unverified_assumptions() -> None:
+    """The live run that answered from this skill named no flag by its code and marked no assumption ``unverified``.
+    Installed alone, this skill cannot read step 7's words, so a flag's meaning then comes from the report of a call
+    that ran as the command-line fallback, or is said to be unread: never one of the agent's own."""
+    text = " ".join(line.strip() for line in _TEXT.splitlines())
+    rules = (
+        "and never say which option to take. Then give the flags and the assumptions the answer leans on: the MCP"
+        " result gives flag codes only, so name each flag by its code with its meaning in vc-deal-math step 7's words,"
+        " or, when that skill cannot be read and the call ran as the command-line fallback, as its report prints it"
+        " beside the flag; with neither, give the code and say its meaning was not read, never a meaning of your own."
+        " Quote each assumption by its name (the result's `key`) with its source, marking it `unverified` where the"
+        " result says so. For `pool_plan`"
+    )
+
+    assert rules in text
+
+
 def test_the_field_table_names_every_input_field_and_nothing_else() -> None:
     rows = _table_rows()
 

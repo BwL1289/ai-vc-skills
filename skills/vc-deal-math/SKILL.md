@@ -1,6 +1,6 @@
 ---
 name: vc-deal-math
-description: Helps a founder check the numbers in their own fundraising ask before a VC does, with the equity calculator's deal_check tool. It tests whether the pre-money, post-money and percent sold agree, what the round really does to the founders' ownership once SAFEs, convertible notes and an option-pool top-up are counted, the effective pre-money after the option-pool shuffle, how many months of runway the raise buys at the planned burn, and whether the use-of-funds lines add up to the raise. Use when a founder says check my deck's numbers, is our raise reasonable, what does this round do to my ownership, how much runway does this buy, should we raise a priced round or a note, will a VC question our valuation, or pastes their ask, SAFE stack or use-of-funds slide. Every figure comes from the calculator. Not investment, legal or tax advice. For the story and the ask together use vc-positioning. For one scenario on its own (an option pool, vesting, an exit waterfall) use the equity-calculator skill.
+description: Helps a founder check the numbers in their own fundraising ask before a VC does, and weigh one way to raise against another (a priced round, a convertible note or a SAFE), with the equity calculator's deal_check and instrument_compare tools. It tests whether the pre-money, post-money and percent sold agree, the founders' ownership once SAFEs, notes and a pool top-up are counted, the effective pre-money after the option-pool shuffle, the runway the raise buys, and whether the use-of-funds lines add up. Use when a founder says should we raise a priced round or a note, check my deck's numbers, is our raise reasonable, what does this round do to my ownership, how much runway does this buy, will a VC question our valuation, or pastes their ask, SAFE stack or use-of-funds slide. Every figure comes from the calculator. Not investment, legal or tax advice. For the story and the ask together use vc-positioning. For one scenario on its own (an option pool, vesting, an exit waterfall) use the equity-calculator skill.
 ---
 
 # VC deal math
@@ -49,10 +49,14 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
      equity-calculator skill), with the new SAFE or note as one more instrument and the next priced round the founder
      expects (its size, pre-money and pool target) as the round; say the figures depend on that round. A note the
      founder weighs against a priced round now goes to step 7 instead, capped or not, and with no next round expected in
-     its no-next-round mode. With no next round expected and nothing to weigh it against, `equity_round` cannot run (it
-     needs that round): the SAFE's or note's share is "not computed: set at the next priced round". An uncapped note
-     with that next round given still runs in `equity_round`, converting at its discount price. The raise's runway claim
-     and use-of-funds lines go to `equity_runway_plan` (the runway bullet below).
+     its no-next-round mode. A SAFE the founder weighs against a priced round now has no side-by-side tool:
+     `equity_instrument_compare`'s option B is a note, with a note's interest, maturity and cap, so never pass a SAFE to
+     it as one. Say so, and work the SAFE with `equity_round` on the next priced round the founder expects, as above;
+     with none expected its share is "not computed: set at the next priced round". With no next round expected and
+     nothing to weigh it against, `equity_round` cannot run (it needs that round): the SAFE's or note's share is "not
+     computed: set at the next priced round". An uncapped note with that next round given still runs in `equity_round`,
+     converting at its discount price. The raise's runway claim and use-of-funds lines go to `equity_runway_plan` (the
+     runway bullet below).
    - SAFEs, notes or a pool top-up need the fully diluted share count before the round (every share, granted options
      and the unissued pool included, SAFEs and notes left out, since the tool converts them itself) and the unissued
      pool, as shares (`unissued_pool_shares`) or as a percent of the fully diluted shares (`unissued_pool_percent`).

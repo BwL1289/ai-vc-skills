@@ -34,7 +34,10 @@ These sentences are copied into several skills and must stay identical there:
   expecting no next round, got no route (``equity_round`` refuses with no round). ``equity_instrument_compare`` works
   that choice, capped or uncapped, with or without a next round, but it needs the priced round's terms; with no next
   round and nothing to weigh the note against, no tool works the instrument, and the skill says so. Each of the four
-  says it in one sentence, word for word, and the deal-math hub says it in its own words.
+  says it in one sentence, word for word, and the deal-math hub says it in its own words. Two live runs of that choice
+  still loaded the calculator skill, never the deal-math one, so both skills' descriptions now name the hand-off near
+  their front, the calculator skill opens with it in step 7's own words, and its fallback copy of step 7's rules asks
+  for each flag by its code and each assumption marked ``unverified``, as step 7 and the deal-math Answering do.
 - A priced round on a phased plan. A real deck run's priced round had spend planned to rise after the raise:
   ``equity_deal_check``'s one flat burn called the deck's runway a mismatch that ``equity_runway_plan``, on the
   founder's phases, called consistent. Each skill that checks a runway claim says, right after the phases rule, that
@@ -717,7 +720,40 @@ def test_the_deal_math_hub_sends_a_weighed_note_to_step_7_and_says_where_equity_
     assert '"not computed: set at the next priced round"' in step_2
     # equity_round needs only a next round, not a cap: an uncapped note converts there at its discount price.
     assert "An uncapped note with that next round given still runs in `equity_round`" in step_2
+    # The comparison tool's option B is a note: a SAFE weighed against a priced round is worked in equity_round instead.
+    assert "never pass a SAFE to it as one" in step_2
     assert "a note weighed against a priced round now goes to `equity_instrument_compare`, step 7" in limits
+
+
+def test_both_skills_hand_a_priced_round_weighed_against_a_note_to_the_deal_math_skill_in_the_same_words() -> None:
+    """Two live runs of that comparison loaded the calculator skill, never vc-deal-math, and so missed step 7's rules.
+    The two descriptions and the calculator skill's first line now name the hand-off, the first line in step 7's own
+    words, and the calculator skill's fallback copy of step 7's rules asks for what step 7 and its Answering ask."""
+    descriptions = {
+        name: re.search(r"^description: (.*)$", (_SKILLS / name / "SKILL.md").read_text(encoding="utf-8"), re.M)
+        for name in ("vc-deal-math", "equity-calculator")
+    }
+    deal_math, calculator = (match.group(1) if match else "" for match in descriptions.values())
+    choice = "A founder who has not chosen between a priced round now and a convertible note now"
+    step_7 = _unwrapped("vc-deal-math").split(f"7. **{choice}**", 1)[1].split(" ## ", 1)[0]
+    calculator_text = _unwrapped("equity-calculator")
+    opening = calculator_text.split(" # Equity calculator ", 1)[1].lstrip()
+    answering = _section("vc-deal-math", "## Answering")
+
+    assert (
+        "weigh one way to raise against another (a priced round, a convertible note or a SAFE)"
+        in (deal_math.split(". ", 1)[0])
+    )
+    assert "A priced round weighed against a convertible note goes to the vc-deal-math skill" in calculator
+    assert opening.startswith(f"**{choice} goes to the vc-deal-math skill: load it and answer from its step 7")
+    # The fallback copy asks, in step 7's words, for each flag by its code and, in Answering's, for the unverified mark.
+    assert "The MCP result gives flag codes only; relay each in these words" in step_7
+    fallback_flags = (
+        "the MCP result gives flag codes only, so name each flag by its code with its meaning in vc-deal-math"
+    )
+    assert f"{fallback_flags} step 7's words" in calculator_text
+    assert "Say plainly which are `unverified`" in answering
+    assert "marking it `unverified` where the result says so" in calculator_text
 
 
 @pytest.mark.parametrize("name", [name for name in _SAFE_RUNWAY_SKILLS if name != "vc-deal-math"])
