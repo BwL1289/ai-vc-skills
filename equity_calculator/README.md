@@ -699,7 +699,8 @@ lawyer, and the report says what to ask.
    required with any stated percent and never assumed. A stated percent is consistent when it is the computed share
    rounded half away from zero to the places it is written with (the deal check's rounding test), or within
    `--tolerance-points` (0 by default). A column of stated percents, the classes' own when every class states one and
-   the table read line by line (each class's holder lines when every line states one, else the class's own), is set
+   the table read line by line (each class's holder lines when every line states one and they are not a partial
+   list, else the class's own), is set
    against 100%: consistent when the gap is at most half a unit in the last place of each percent added (what their
    rounding can explain: three thirds written 33.33 add up to 99.99, inside 0.015 points), plus the tolerance for
    each. The stated fully diluted total is consistent only when it is FD.
@@ -1183,10 +1184,10 @@ bare flags in any order, after the amount for a SAFE or the principal for a note
 | `--sensitivity`       | `field=F segment=K values=V1/V2/...` (F one of `customers`, `price`, `units-per-customer`, `take-rate-percent`, `serviceable-percent`, `obtainable-percent`, `obtainable-customers`; 1 to 4 values)                                                                                         |
 | `--priced-preference` | `standard [rank=K]` or `preference-multiple=M participation=none\|full\|capped [cap-multiple=C] [rank=K]`                                                                                                                                                                                   |
 | `--next-round`        | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]` and the series' terms as `--priced-preference` takes them                                                                                                                                            |
-| `--share-class`       | `kind=common\|preferred\|options_granted\|options_unissued\|warrants [shares=S] [authorised-shares=A] [stated-percent=P]`                                                                                                                                                                   |
+| `--share-class`       | `kind=common\|preferred\|options_granted\|options_unissued\|warrants [shares=S] [authorised-shares=A] [stated-percent=P] [holder-lines=complete\|partial]`                                                                                                                                  |
 | `--holder`            | `share-class=K shares=S [stated-percent=P] [founder] [departed]` (K is 1 for the first `--share-class`)                                                                                                                                                                                     |
 | `--preview`           | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]`                                                                                                                                                                                                      |
-| `--planned-round`     | `--round`'s terms                                                                                                                                                                                                                                                                           |
+| `--planned-round`     | `--round`'s terms (with `--preview`, the rounds after it)                                                                                                                                                                                                                                   |
 
 A note that names no `compounding` compounds `annual`, and one that names no `stub-rule` uses `fractional_power`.
 An unknown term, a term given twice, or a value that is not a number is refused, naming the flag.

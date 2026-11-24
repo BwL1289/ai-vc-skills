@@ -107,7 +107,7 @@ PercentBasis = Literal["fully_diluted", "outstanding"]
 # Which stated figure a check is about: the table's fully diluted total, a class's total against its holder lines, a
 # class's or a holder line's percent, or a column of stated percents against 100%: the classes' own
 # (``class_percent_total``), or the table read line by line (``line_percent_total``: each class's holder lines where
-# every one states a percent, the class's own percent where not).
+# every one states a percent and they are not a partial list, the class's own percent where not).
 CapCheckKey = Literal[
     "fully_diluted_total",
     "class_shares",

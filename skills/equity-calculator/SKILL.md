@@ -260,8 +260,8 @@ page). Everything else is standard arithmetic, labelled `unverified` in the resu
   included, SAFEs and notes left out until they convert) and O is common plus preferred. Each class and holder line
   holds shares/FD, and stock shares/O. A stated percent is consistent when it is the computed share rounded half away
   from zero to the places it is written with, or within `tolerance_points` (0 by default), so send each as text with
-  the table's places; a column of stated percents (the classes', or the table line by line: each class's holder lines,
-  else its own percent) is consistent when its gap from 100% is at most half a unit in the last place of each percent
+  the table's places; a column of stated percents (the classes', or the table line by line: each class's holder lines
+  unless they are a partial list, else its own percent) is consistent when its gap from 100% is at most half a unit in the last place of each percent
   added, plus the tolerance for each. A share count is consistent only when equal. Issued shares are set against
   each class's authorised shares, the options against the plan's reserve and authorised common against FD. The
   departed holders' share is their lines over FD. The conversion preview is the round scenario on FD, the unissued
