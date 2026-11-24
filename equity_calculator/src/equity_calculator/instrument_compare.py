@@ -29,8 +29,9 @@ shown instead, each from the note's own terms as the founder gives them and neve
 - **Each sale before any priced round.** Option A's cap table after today through the waterfall. Under B the note is
   paid its change-of-control term first: a multiple of its principal, paid before any share and never more than the
   sale, with the rest split among the shares; or what it owes at the sale converted at its cap price (cap / FD) into
-  common shares that share the rest with the founders, the team and the pool. With no term given, or with existing
-  SAFEs or notes outstanding, B is not worked at that sale and the row says why.
+  common shares that share the rest with the founders, the team and the pool (the round code's conversion at a cap,
+  on option A's round today). With no term given, or with existing SAFEs or notes outstanding, B is not worked at that
+  sale, its term is not shown, and the row says why.
 
 Ownership is each group's shares over the total; payouts are split to the cent by largest remainder within each
 option, so each adds up to the exit. B - A is worked on the exact values and rounded once.
@@ -45,7 +46,7 @@ from fractions import Fraction
 from typing import get_args
 
 from equity_calculator.assumptions_instrument_compare import instrument_compare_assumptions
-from equity_calculator.convertibles import Convertible, Priced, convertibles, settle
+from equity_calculator.convertibles import Convertible, Priced, cap_price, convertibles, settle
 from equity_calculator.errors import RoundHasNoPrice
 from equity_calculator.exact import ZERO, fraction, money_split, quantity
 from equity_calculator.interest import NoteInterest, note_interest
@@ -86,7 +87,8 @@ _FIRST_INDEX = 1
 _EXTRA_PASSES = 1
 # The exit the assumptions are listed for: only its classes are read, never its amount.
 ZERO_AMOUNT = Decimal(0)
-# Option B's note in the round rows of the assumptions when no next round is given: only its kind is read.
+# Option B's note at no age: only its kind and cap are read (its cap price, and the round rows of the assumptions when
+# no next round is given).
 _NO_MONTHS = 0
 
 # Why option B is not worked at a sale before any priced round, in the words the result and the report give.
@@ -396,12 +398,14 @@ class _NoteSale:
 
 @dataclass(frozen=True)
 class _NoRound:
-    """The no-next-round mode worked: the note at maturity, at a sale, each sale both ways, and what converts."""
+    """The no-next-round mode worked: the note at maturity, at a sale (only when the sales are worked), each sale both
+    ways, what converts, and whether the note, converted at its cap, is paid less than it converts at some sale."""
 
     maturity: MaturityOutcome | None
     note_at_exit: NoteAtExit | None
     exits: tuple[ExitBeforeRoundComparison, ...]
     converted: tuple[NoteInterest, ...]
+    paid_below_owed: bool = False
 
 
 def _interest_at(inputs: InstrumentCompareInput, months: int) -> NoteInterest:
@@ -457,28 +461,38 @@ def _maturity(
     return MaturityOutcome(owed=owed, conversion=converted), interest
 
 
+def _note_item(inputs: InstrumentCompareInput, today_shape: RoundShape, months: int) -> Convertible:
+    """Option B's note ``months`` old as the round code reads it beside option A's round today: its cap, what it
+    converts and its interest (``convertibles``)."""
+    (item,) = convertibles(replace(today_shape, instruments=(option_b_note(inputs, months),)))
+    return item
+
+
 def _note_sale(
-    inputs: InstrumentCompareInput, note_cap: Fraction | None
+    inputs: InstrumentCompareInput, today_shape: RoundShape, priced: Priced
 ) -> tuple[NoteAtExit | None, _NoteSale | None, NoteInterest | None]:
-    """The note's change-of-control term worked (``None`` when none is given), and its interest when it converts."""
+    """The note's change-of-control term worked (``None`` when none is given), and its interest when it converts: at
+    its cap, the round code's conversion row on option A's round today (``priced``), on its cap."""
     multiple = inputs.note_change_of_control_multiple
     if multiple is not None:
         claim = fraction(multiple) * fraction(inputs.investment)
         return NoteAtExit(rule="multiple", claim=quantity("money", claim)), _NoteSale("multiple", claim, ZERO), None
     months = inputs.note_months_to_exit
-    if not inputs.note_change_of_control_at_cap or note_cap is None or months is None:
+    if not inputs.note_change_of_control_at_cap or inputs.note_valuation_cap is None or months is None:
         return None, None, None
 
-    interest = _interest_at(inputs, months)
-    shares = interest.converting / note_cap
+    item = _note_item(inputs, today_shape, months)
+    if item.interest is None:
+        raise ValueError("a note carries what it owes (convertibles works it with note_interest)")
+    row = conversion_row(item, True, priced, fraction(today_shape.fully_diluted_shares))
     at_exit = NoteAtExit(
         rule="converts_at_cap",
-        owed=_owed_row(months, interest),
-        converting_amount=quantity("money", interest.converting),
-        conversion_price=quantity("price", note_cap),
-        shares=quantity("shares", shares),
+        owed=_owed_row(months, item.interest),
+        converting_amount=row.converting_amount,
+        conversion_price=row.conversion_price,
+        shares=row.shares,
     )
-    return at_exit, _NoteSale("converts_at_cap", ZERO, shares), interest
+    return at_exit, _NoteSale("converts_at_cap", ZERO, row.shares.exact), item.interest
 
 
 def _sale_refusal(inputs: InstrumentCompareInput, sale: _NoteSale | None) -> NoteExitRefusal | None:
@@ -548,26 +562,40 @@ def _exit_before_round(
     )
 
 
+def _note_paid(item: ExitBeforeRoundComparison) -> Fraction:
+    """What option B's note is paid at a worked sale, exact: the new money's payout under B."""
+    payout = next(payout for payout in item.payouts if payout.group == "new_money")
+    if payout.note is None:
+        raise ValueError("only a sale option B is worked at has a payout for the note")
+    return payout.note.exact
+
+
 def _no_round(
     inputs: InstrumentCompareInput,
     tables: tuple[_Table, _Table],
     groups: Sequence[HolderGroup],
-    fully_diluted: Fraction,
-    note_cap: Fraction | None,
+    today_shape: RoundShape,
+    priced: Priced,
 ) -> _NoRound:
     """The no-next-round mode: the note at its maturity, its change-of-control term, and each sale both ways."""
     priced_now, note_now = tables
-    maturity, at_maturity = _maturity(inputs, priced_now, note_now, fully_diluted)
-    at_exit, sale, at_sale = _note_sale(inputs, note_cap)
+    maturity, at_maturity = _maturity(inputs, priced_now, note_now, fraction(today_shape.fully_diluted_shares))
+    at_exit, sale, at_sale = _note_sale(inputs, today_shape, priced)
     refusal = _sale_refusal(inputs, sale)
     term: _NoteSale | NoteExitRefusal | None = refusal if refusal is not None else sale
     if term is None:
         raise ValueError("a sale is worked with the note's term or refused with a reason (_sale_refusal sees to it)")
     pool = inputs.pool_at_exit == "as_common"
     exits = tuple(_exit_before_round(tables, groups, amount, pool, term) for amount in inputs.exit_amounts)
-    # The note converts at its maturity when that term is given, and at the sales only when they are worked.
-    converted = tuple(item for item in (at_maturity, None if refusal else at_sale) if item is not None)
-    return _NoRound(maturity, at_exit, exits, converted)
+    if refusal is not None:
+        # No sale is worked, so nothing converts at one and the note's term for it is not shown.
+        return _NoRound(maturity, None, exits, tuple(item for item in (at_maturity,) if item is not None))
+
+    converted = tuple(item for item in (at_maturity, at_sale) if item is not None)
+    # Converted at its cap, the note is paid at a sale what its shares fetch: less than it converts (what it owes, or
+    # the principal when the interest is paid in cash) at some sale is flagged.
+    below = at_sale is not None and any(_note_paid(item) < at_sale.converting for item in exits)
+    return _NoRound(maturity, at_exit, exits, converted, below)
 
 
 def _flags(
@@ -576,9 +604,11 @@ def _flags(
     note_cap: Fraction | None,
     converted: Sequence[NoteInterest],
     rounds: Sequence[NextRoundComparison],
+    paid_below_owed: bool,
 ) -> tuple[InstrumentFlag, ...]:
     """The flags that hold, in the order ``InstrumentFlag`` lists them; ``converted`` is each place the note converts
-    (its next-round conversion, or with no next round its maturity and sale conversions)."""
+    (its next-round conversion, or with no next round its maturity and sale conversions), ``paid_below_owed`` whether
+    the note, converted at its cap at a worked sale, is paid less than it converts there."""
     bases = {comparison.note_conversion.basis for comparison in rounds}
     maturity = inputs.note_maturity_months
     no_round = not inputs.next_rounds
@@ -591,6 +621,8 @@ def _flags(
         inputs.note_maturity_conversion_valuation is not None or inputs.note_maturity_conversion_price is not None
     )
     sale_term = inputs.note_change_of_control_multiple is not None or inputs.note_change_of_control_at_cap
+    # With no next round option B is worked at the sales only with a term and no existing SAFE or note outstanding.
+    sales_worked = sale_term and not inputs.existing_instruments
     holds: dict[InstrumentFlag, bool] = {
         "no_next_round_given": no_round,
         "cap_below_round_price_now": note_cap is not None and note_cap < price_now,
@@ -607,15 +639,22 @@ def _flags(
         "priced_round_below_existing_series_price": any(
             price_now < fraction(item.invested) / fraction(item.shares) for item in inputs.existing_series
         ),
-        "existing_mfn_safe_beside_note": mfn_safe and note_has_terms,
+        # With no next round the SAFE never converts under option B, so the flag's "under both options" is untrue.
+        "existing_mfn_safe_beside_note": mfn_safe and note_has_terms and not no_round,
         "discount_unused_without_round": no_round and inputs.note_discount_percent is not None,
+        # The cap sets a price with no next round only at a worked sale on the converts-at-its-cap term.
+        "cap_unused_without_round": no_round
+        and note_cap is not None
+        and not (sales_worked and inputs.note_change_of_control_at_cap),
         "maturity_conversion_not_given": no_round and maturity is not None and not maturity_converts,
         "change_of_control_not_given": no_round and not sale_term,
         "existing_instruments_outstanding": no_round and bool(inputs.existing_instruments),
         "exit_after_maturity": no_round
+        and sales_worked
         and maturity is not None
         and months_to_exit is not None
         and months_to_exit > maturity,
+        "note_paid_below_owed_at_sale": paid_below_owed,
     }
     return tuple(flag for flag in get_args(InstrumentFlag) if holds[flag])
 
@@ -655,8 +694,9 @@ def compute_instrument_compare(inputs: InstrumentCompareInput) -> InstrumentComp
     )
     note_now = _Table(founders, team, unissued, series_now)
     stakes_now = _stakes(priced_now, note_now)
-    # A note's cap price is its pre-money cap over today's FD, the same in every next round and at a sale.
-    note_cap = None if inputs.note_valuation_cap is None else fraction(inputs.note_valuation_cap) / fully_diluted
+    # A note's cap price is its pre-money cap over today's FD (the round code's), the same in every next round and at a
+    # sale.
+    note_cap = cap_price(_note_item(inputs, today_shape, _NO_MONTHS), today.priced, fully_diluted)
     price_now = today.priced.price
     owed = tuple(_owed_row(months, _interest_at(inputs, months)) for months in inputs.note_owed_months)
 
@@ -679,7 +719,7 @@ def compute_instrument_compare(inputs: InstrumentCompareInput) -> InstrumentComp
         tables = [table for pair in pairs for table in (pair.priced_after, pair.note_after)]
     else:
         groups: tuple[HolderGroup, ...] = tuple(stake.group for stake in stakes_now)
-        no_round = _no_round(inputs, (priced_now, note_now), groups, fully_diluted, note_cap)
+        no_round = _no_round(inputs, (priced_now, note_now), groups, today_shape, today.priced)
         converted = no_round.converted
         # The round rows of the assumptions read option A's round today with option B's note beside it (its kind only).
         note_round = replace(today_shape, instruments=(*inputs.existing_instruments, option_b_note(inputs, _NO_MONTHS)))
@@ -705,7 +745,7 @@ def compute_instrument_compare(inputs: InstrumentCompareInput) -> InstrumentComp
             "maturity": no_round.maturity,
             "note_at_exit": no_round.note_at_exit,
             "exits_before_any_round": no_round.exits,
-            "flags": _flags(inputs, price_now, note_cap, converted, rounds),
+            "flags": _flags(inputs, price_now, note_cap, converted, rounds, no_round.paid_below_owed),
             "assumptions": instrument_compare_assumptions(
                 inputs,
                 note_round,

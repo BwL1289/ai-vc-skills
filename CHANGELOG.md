@@ -12,7 +12,9 @@ All notable changes to this repository. Dates are UTC.
   or price the founder gives), and each exit as a sale before any priced round, option A through the waterfall and
   option B on the note's own change-of-control term (a multiple of its principal, or conversion at its cap). A sale
   with no such term, or with existing SAFEs or notes outstanding, gives option B as not worked with the reason; an
-  uncapped note works in both modes. `vc-deal-math` step 7 asks for those terms and a Company DX eval runs the mode.
+  uncapped note works in both modes. The mode flags a cap that sets no price there (`cap_unused_without_round`) and a
+  note converted at its cap that a sale pays less than it owes (`note_paid_below_owed_at_sale`). `vc-deal-math` step 7
+  asks for those terms and a Company DX eval runs the mode.
 - `vc-deck-review` is out of preview after its first run on a real deck, whose founder adopted most of its fix list;
   plugin version 0.2.7.
 - A `vc-deal-math` eval (Company BW, unrecorded) for a SAFE raise whose planned rise has its start month but no

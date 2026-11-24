@@ -297,8 +297,10 @@ def test_the_flags_of_the_mode() -> None:
         "cap_below_round_price_now",
         "maturity_not_given",
         "discount_unused_without_round",
+        "cap_unused_without_round",
         "change_of_control_not_given",
     )
+    # At the $5M sale the note's 3.5M of 13.5M common shares fetch $1,296,296.30, under the $2.1M it owes.
     late = instrument_compare(**_bu(**_AT_CAP, note_maturity_months=6, note_discount_percent=None))
     assert late.flags == (
         "no_next_round_given",
@@ -306,13 +308,234 @@ def test_the_flags_of_the_mode() -> None:
         "note_interest_converts",
         "maturity_conversion_not_given",
         "exit_after_maturity",
+        "note_paid_below_owed_at_sale",
     )
     safe = {"kind": "safe", "purchase_amount": "500000", "valuation_cap": "10000000"}
     held = instrument_compare(**_bu(**_AT_CAP, existing_instruments=[safe]))
-    assert "existing_instruments_outstanding" in held.flags
+    assert "existing_instruments_outstanding" in held.flags and "cap_unused_without_round" in held.flags
     assert "note_interest_converts" not in held.flags  # option B is not worked at the sales, so nothing converts there
+    assert "note_paid_below_owed_at_sale" not in held.flags
     on_time = instrument_compare(**_bu(**_AT_CAP, note_maturity_months=24))
     assert "exit_after_maturity" not in on_time.flags
+    # Months to a sale past the maturity, but option B worked at no sale: its sale lines take the note as nothing.
+    no_term = instrument_compare(**_bu(note_maturity_months=24, note_months_to_exit=30))
+    assert "exit_after_maturity" not in no_term.flags and "change_of_control_not_given" in no_term.flags
+    worked = _bu(note_maturity_months=24, note_months_to_exit=30, note_change_of_control_multiple="2")
+    assert "exit_after_maturity" in instrument_compare(**worked).flags
+    assert "exit_after_maturity" not in instrument_compare(**{**worked, "existing_instruments": [safe]}).flags
+
+
+def test_an_existing_mfn_safe_with_no_next_round_is_outstanding_not_converted_on_both_sides() -> None:
+    """Under option B the SAFE never converts, so the flag that says it converts under both options is not raised."""
+    mfn = {"kind": "safe", "purchase_amount": "500000", "mfn": True}
+    result = instrument_compare(**_bu(existing_instruments=[mfn]))
+
+    assert "existing_instruments_outstanding" in result.flags
+    assert "existing_mfn_safe_beside_note" not in result.flags
+    assert _stake(result.stakes_now, "existing_investors").note.exact == 0
+
+
+def test_a_sale_option_b_is_not_worked_at_shows_no_term_for_the_note() -> None:
+    """Existing SAFEs outstanding: the 2x claim is not shown, as no sale pays it."""
+    safe = {"kind": "safe", "purchase_amount": "500000", "valuation_cap": "10000000"}
+    result = instrument_compare(**_bu(existing_instruments=[safe], note_change_of_control_multiple="2"))
+
+    assert result.note_at_exit is None
+    assert all(item.note_refusal == "existing_instruments_outstanding" for item in result.exits_before_any_round)
+    assert instrument_compare(**_bu(note_change_of_control_multiple="2")).note_at_exit is not None
+
+
+def test_a_cap_that_sets_no_price_with_no_next_round_is_flagged() -> None:
+    """Paid a multiple, a note's cap changes no figure: a $6M and a $60M cap give the same ownership and sales."""
+    multiple = {"note_change_of_control_multiple": "2", "note_maturity_months": 24, "note_discount_percent": None}
+    low = instrument_compare(**_bu(**multiple))
+    high = instrument_compare(**_bu(**multiple, note_valuation_cap="60000000"))
+
+    assert "cap_unused_without_round" in low.flags and "cap_unused_without_round" in high.flags
+    assert low.exits_before_any_round == high.exits_before_any_round
+    assert low.stakes_now == high.stakes_now and low.maturity == high.maturity
+    rule = next(row for row in low.assumptions if row.key == "note_cap_rule")
+    assert "with no next round it changes a figure here only at a sale worked on that term" in rule.statement
+    at_cap = instrument_compare(**_bu(**_AT_CAP))
+    assert "cap_unused_without_round" not in at_cap.flags
+    assert any(row.key == "note_cap_rule" for row in at_cap.assumptions)
+    assert not any(row.key == "note_cap_rule" for row in instrument_compare(**COMPARE_DX).assumptions)
+
+
+def test_a_note_converted_at_its_cap_and_paid_less_than_it_owes_is_flagged() -> None:
+    """BU, no discount, at its cap 12 months on: owed $2.1M, 2.1M / (3/5) = 3.5M common shares of 13.5M. A $1.5M sale
+    pays $1/9 a share: founders 8M/9 and the note 3.5M/9 = $388,888.89; under A the series' $2M preference takes it."""
+    result = instrument_compare(**_bu(**_AT_CAP, note_discount_percent=None, exit_amounts=["1500000"]))
+    (sale,) = result.exits_before_any_round
+
+    assert result.note_at_exit is not None and result.note_at_exit.owed is not None
+    assert result.note_at_exit.owed.owed.exact == Fraction(21, 10) * _M
+    assert _paid(sale, "founders") == (0, Fraction(8 * _M, 9), Fraction(8 * _M, 9))
+    assert _paid(sale, "new_money") == (Fraction(3, 2) * _M, Fraction(7 * _M, 18), Fraction(7 * _M, 18) - 1_500_000)
+    assert "note_paid_below_owed_at_sale" in result.flags
+    paid_in_full = instrument_compare(**_bu(**_AT_CAP, note_discount_percent=None, exit_amounts=["100000000"]))
+    assert "note_paid_below_owed_at_sale" not in paid_in_full.flags
+
+
+def test_a_participating_existing_series_beside_a_multiple_matches_the_hand_working() -> None:
+    """FD 10M: 6M founders, 1M team, 1M pool and a 2M-share series owed $1M with full participation. A: $2M at $0.80,
+    2.5M shares owed $2M. B: 8% simple, owed $2.24M at month 18, and a claim of 1.5 × $2M = $3M before any share.
+
+    At $3.5M: A pays the $3M of preferences, then $0.05 a share on the 10M participating shares (the new money stays,
+    as converting would pay it $0.5M); B pays the $3M claim, and the series takes the $0.5M left of its $1M preference.
+    At $10M: A pays $0.70 a share after the preferences; B pays the claim, the series' $1M, then $0.60 a share.
+    """
+    series = {"shares": 2_000_000, "invested": "1000000", "preference_multiple": "1", "participation": "full"}
+    result = instrument_compare(
+        founder_shares=6_000_000,
+        team_shares=1_000_000,
+        unissued_pool_shares=1_000_000,
+        existing_series=[series],
+        investment="2000000",
+        priced_pre_money="8000000",
+        priced_preference={"standard": True},
+        note_interest_rate_percent="8",
+        note_compounding="simple",
+        note_maturity_months=18,
+        note_change_of_control_multiple="1.5",
+        exit_amounts=["3500000", "10000000"],
+    )
+    low, high = result.exits_before_any_round
+    groups: tuple[HolderGroup, ...] = ("founders", "existing_investors", "new_money")
+
+    assert result.maturity is not None and result.maturity.owed.owed.exact == 2_240_000
+    assert result.note_at_exit is not None and result.note_at_exit.claim is not None
+    assert result.note_at_exit.claim.exact == 3 * _M
+    assert [_paid(low, group)[:2] for group in groups] == [(300_000, 0), (1_100_000, 500_000), (2 * _M, 3 * _M)]
+    assert [_paid(high, group)[:2] for group in groups] == [
+        (4_200_000, 3_600_000),
+        (2_400_000, 2_200_000),
+        (2 * _M, 3 * _M),
+    ]
+
+
+_CASH_AT_CAP: dict[str, Any] = {
+    "founder_shares": 7_000_000,
+    "team_shares": 0,
+    "unissued_pool_shares": 3_000_000,
+    "investment": "1000000",
+    "priced_pre_money": "9000000",
+    "priced_preference": {"standard": True},
+    "note_valuation_cap": "5000000",
+    "note_interest_rate_percent": "10",
+    "note_compounding": "annual",
+    "note_interest_paid_in_cash": True,
+    "note_maturity_months": 36,
+    "note_maturity_conversion_price": "0.25",
+    "note_change_of_control_at_cap": True,
+    "note_months_to_exit": 24,
+    "pool_at_exit": "left_out",
+    "exit_amounts": ["1000000.01", "7000000"],
+}
+
+
+def test_at_its_cap_with_the_interest_paid_in_cash_and_the_pool_left_out_matches_the_hand_working() -> None:
+    """FD 10M: 7M founders and a 3M pool, left out of a sale. A: $1M at $0.90, 10M/9 shares owed $1M. B: a $5M cap
+    (price 1/2), 10% annual paid in cash; 24 months to the sale: owed $1.21M, and the $1M principal converts into 2M
+    common shares beside the founders' 7M, the $210,000 interest outside every payout line.
+
+    At $1,000,000.01: A's founders get the cent left after the $1M preference; B's get 7/9 of the sale. At $7M: A's
+    founders get $6M, B's 49M/9, B - A exactly -5M/9. At maturity (36 months, at $0.25 a share): owed $1,331,000, the
+    principal into 4M shares, founders 7/14 against 7M / (10M + 10M/9) = 63/100.
+    """
+    result = instrument_compare(**_CASH_AT_CAP)
+    cent, seven = result.exits_before_any_round
+    at_exit = result.note_at_exit
+    maturity = result.maturity
+
+    assert at_exit is not None and at_exit.owed is not None and at_exit.owed.owed.exact == 1_210_000
+    assert at_exit.converting_amount is not None and at_exit.converting_amount.exact == 1 * _M
+    assert at_exit.shares is not None and at_exit.shares.exact == 2 * _M
+    assert _payout(cent, "founders").priced.exact == Fraction(1, 100)
+    founders_b, new_money_b = _payout(cent, "founders").note, _payout(cent, "new_money").note
+    assert founders_b is not None and founders_b.rounded == Decimal("777777.79")
+    assert new_money_b is not None and new_money_b.rounded == Decimal("222222.22")
+    assert _paid(seven, "founders") == (6 * _M, Fraction(49 * _M, 9), Fraction(-5 * _M, 9))
+    assert _paid(seven, "new_money")[1] == Fraction(14 * _M, 9)
+    assert maturity is not None and maturity.conversion is not None
+    assert maturity.owed.owed.exact == 1_331_000 and maturity.conversion.shares.exact == 4 * _M
+    founders = _stake(maturity.conversion.stakes, "founders")
+    assert (founders.priced.exact, founders.note.exact) == (Fraction(63, 100), Fraction(1, 2))
+    assert {"note_interest_paid_in_cash", "note_paid_below_owed_at_sale"} <= set(result.flags)
+    sale_rule = next(row for row in result.assumptions if row.key == "exit_before_any_round")
+    assert "interest paid in cash at that conversion is not taken off the sale" in sale_rule.statement
+
+
+def test_the_cash_interest_counts_toward_what_the_note_is_paid_at_a_sale() -> None:
+    """At $5M the note's 2M of 9M common shares fetch $1,111,111.11: under the $1.21M owed, but with the $210,000 paid
+    in cash it is paid in full, so the flag is not raised."""
+    result = instrument_compare(**{**_CASH_AT_CAP, "exit_amounts": ["5000000"]})
+
+    assert _paid(result.exits_before_any_round[_FIRST], "new_money")[1] == Fraction(10 * _M, 9)
+    assert "note_paid_below_owed_at_sale" not in result.flags
+
+
+def test_an_approximate_stub_at_maturity_and_a_sale_with_no_term_match_the_hand_working() -> None:
+    """FD 10M. A: $500k at $0.45, founders 8M / (10M + 10M/9) = 72%. B: 12% annual with a fractional-power stub for 18
+    months, $500k × 1.12^1.5 = $592,648.29 (approximate); at $0.30 a share 59,264,829/30 = 1,975,494.3 shares. The
+    note has no cap and no sale term, so B is not worked at the $2M sale; A's founders get 8/10 of the $1.5M left
+    after the $500k preference."""
+    result = instrument_compare(
+        founder_shares=8_000_000,
+        team_shares=1_000_000,
+        unissued_pool_shares=1_000_000,
+        investment="500000",
+        priced_pre_money="4500000",
+        priced_preference={"standard": True},
+        note_interest_rate_percent="12",
+        note_compounding="annual",
+        note_maturity_months=18,
+        note_maturity_conversion_price="0.30",
+        exit_amounts=["2000000"],
+    )
+    maturity = result.maturity
+    assert maturity is not None and maturity.conversion is not None
+    (sale,) = result.exits_before_any_round
+
+    assert maturity.owed.approximate and maturity.owed.owed.exact == Fraction(59_264_829, 100)
+    assert maturity.conversion.shares.exact == Fraction(59_264_829, 30)
+    founders = _stake(maturity.conversion.stakes, "founders")
+    assert founders.priced.exact == Fraction(18, 25) and founders.note.rounded == Decimal("0.668031")
+    assert sale.note_refusal == "uncapped_no_change_of_control_term"
+    assert _payout(sale, "founders").priced.exact == 1_200_000
+
+
+def test_with_no_next_round_the_exit_row_names_the_note_s_claim_ahead_of_the_shares() -> None:
+    """The waterfall's row says nothing comes ahead of the shareholders; under B a multiple is paid first."""
+    rows = {row.key: row for row in instrument_compare(**COMPARE_DX).assumptions}
+
+    assert not any("no debt, fees" in row.statement for row in rows.values())
+    assert rows["exit_is_shared_amount"].setting == (
+        "option A: nothing ahead of the shareholders; option B: only the note's own claim"
+    )
+    assert "is paid out of the exit amount first" in rows["exit_is_shared_amount"].statement
+    with_round = {row.key: row for row in instrument_compare(**COMPARE_BU).assumptions}
+    assert "no debt, fees" in with_round["exit_is_shared_amount"].statement
+
+
+def test_with_no_next_round_only_the_round_rows_of_a_conversion_that_happens_are_listed() -> None:
+    """Company DX: no cap, nothing converts in option A's round today, the note converts only at its maturity."""
+    keys = {row.key for row in instrument_compare(**COMPARE_DX).assumptions}
+    assert {"interest_conversion", "note_interest", "converted_shares_in_pre_money", "fractional_shares"} <= keys
+    assert keys.isdisjoint({"note_cap_basis", "tie_rule", "search"})
+
+    uncapped = {"note_valuation_cap": None, "note_change_of_control_multiple": "2"}
+    assert "interest_conversion" not in {row.key for row in instrument_compare(**_bu(**uncapped)).assumptions}
+    note = {
+        "kind": "note",
+        "principal": "200000",
+        "interest_rate_percent": "5",
+        "months_outstanding": 6,
+        "compounding": "simple",
+        "valuation_cap": "4000000",
+    }
+    beside = {row.key for row in instrument_compare(**_bu(**uncapped, existing_instruments=[note])).assumptions}
+    assert {"note_cap_basis", "interest_conversion", "tie_rule", "search"} <= beside
 
 
 def test_existing_instruments_convert_in_option_a_and_hold_no_shares_under_b() -> None:

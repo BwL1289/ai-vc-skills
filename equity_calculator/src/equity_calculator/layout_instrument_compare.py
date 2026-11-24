@@ -130,7 +130,7 @@ def _sale_term(inputs: InstrumentCompareInput) -> str:
 def _no_round_given_lines(inputs: InstrumentCompareInput) -> list[Line]:
     """Option B's terms for no next round: its maturity conversion, its change-of-control term, and the months to a
     sale when given (needed only to convert at the cap)."""
-    how = GIVEN
+    how = "not given: the note's own terms decide"
     if inputs.note_maturity_conversion_valuation is not None:
         how = "given: a valuation, taken over FD as the cap is"
     elif inputs.note_maturity_conversion_price is not None:
@@ -186,7 +186,12 @@ def _given_lines(result: InstrumentCompareResult) -> list[Line]:
         _note("note_discount", "B: discount", "none" if discount is None else given_percent(discount)),
         _note("note_rate", "B: interest rate a year", given_percent(inputs.note_interest_rate_percent)),
         _note("note_compounding", "B: how interest accrues", _interest_text(result)),
-        _note("note_months", "B: months until it converts", _months_text(months, "no next round")),
+        _note(
+            "note_months",
+            "B: months until it converts",
+            _months_text(months, "no next round"),
+            GIVEN if months is not None else "no next round was given",
+        ),
         _note("note_maturity", "B: maturity", _months_text(maturity, _NOT_GIVEN)),
         _note("note_cash", "B: interest paid in cash", yes_no(inputs.note_interest_paid_in_cash)),
     ]
@@ -394,8 +399,12 @@ def _maturity_lines(result: InstrumentCompareResult, maturity: MaturityOutcome |
             "A: right after today; B: FD + the note's shares",
         ),
     ]
+    stakes_how = "group's shares / total shares (A: right after today)"
+    if result.inputs.existing_instruments:
+        # Under B the existing SAFEs and notes are still owed at maturity, but they hold no shares to count.
+        stakes_how += "; B: the existing SAFEs and notes still outstanding, no shares"
     stakes = _stake_lines("maturity", label, conversion.stakes)
-    return lines + [replace(line, how="group's shares / total shares (A: right after today)") for line in stakes]
+    return lines + [replace(line, how=stakes_how) for line in stakes]
 
 
 def _note_at_exit_lines(at_exit: NoteAtExit | None, cash: bool) -> list[Line]:
@@ -495,6 +504,9 @@ def _flag_words(flag: InstrumentFlag, result: InstrumentCompareResult) -> str:
         "terms is in the SAFE's own terms, not modelled here",
         "discount_unused_without_round": "The note's discount comes off a priced round's price, and no next round is "
         "given: it changes no figure here",
+        "cap_unused_without_round": "The note's cap sets a price only where the note converts at it (a priced round, "
+        "or a sale on a converts-at-its-cap term): with no next round and no such sale worked, it changes no figure "
+        "here",
         "maturity_conversion_not_given": "No conversion term at maturity was given: the note's maturity shows only "
         "what it owes then; whether it converts, and at what price, is in its own terms",
         "change_of_control_not_given": "No change-of-control term was given for the note: what it is paid at a sale "
@@ -505,6 +517,9 @@ def _flag_words(flag: InstrumentFlag, result: InstrumentCompareResult) -> str:
         "exit_after_maturity": f"The sales are at month {inputs.note_months_to_exit}, after the note matures (month "
         f"{inputs.note_maturity_months}): what happened at maturity is in the note's own terms, and option B's sale "
         "lines take the note as still outstanding",
+        "note_paid_below_owed_at_sale": "At at least one sale the note, converted at its cap, is paid less than it "
+        "owes then (principal plus interest, any interest paid in cash counted): whether the holder may be repaid "
+        "instead is in the note's own terms, not modelled here",
     }
     return words[flag]
 

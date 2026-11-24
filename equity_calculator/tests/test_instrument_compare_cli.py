@@ -413,6 +413,27 @@ async def test_a_sale_option_b_cannot_be_worked_for_says_why_on_its_row() -> Non
     assert "change_of_control_not_given" in _flags(report)
 
 
+async def test_the_no_next_round_input_lines_say_given_only_beside_a_given_value() -> None:
+    """No months to conversion and no maturity conversion term: their lines say why, never "given"."""
+    report = await run([*_TODAY[:-2], *_EXITS])
+
+    assert _line(report, "B: months until it converts").rstrip().endswith("no next round was given")
+    assert _line(report, "B: converts at maturity at").rstrip().endswith("not given: the note's own terms decide")
+    given = _line(await run(_COMPANY_DX), "B: converts at maturity at").rstrip()
+    assert given.endswith("given: a valuation, taken over FD as the cap is")
+
+
+async def test_at_maturity_the_existing_instruments_still_owed_under_b_are_named() -> None:
+    """Under B an existing SAFE holds no shares at maturity, but it is still outstanding: the ownership lines say so."""
+    maturity = ["--note-maturity-months", "24", "--note-maturity-conversion-valuation", "5,000,000"]
+    report = await run([*_TODAY[:-2], "--existing-safe", "500000 valuation-cap=5000000", *maturity, *_EXITS])
+
+    for group in ("founders", "existing investors"):
+        line = _line(report, f"At maturity (month 24): {group}").rstrip()
+        assert line.endswith("; B: the existing SAFEs and notes still outstanding, no shares"), group
+    assert "still outstanding" not in _line(await run(_COMPANY_DX), "At maturity (month 24): founders")
+
+
 async def test_with_no_next_round_the_command_line_and_the_model_give_the_same_result(tmp_path: Path) -> None:
     printed = json.loads(await run([*_COMPANY_DX, "--json"]))
 

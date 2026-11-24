@@ -127,12 +127,14 @@ MaturityBasis = Literal["valuation", "price"]
 # ``maturity_not_given`` / ``converts_after_maturity``: the note's maturity is unknown, or comes before the next round.
 # ``next_round_below_priced_round_price``: a next round prices below option A's round today (a down round for A).
 # ``priced_round_below_existing_series_price``: option A's round today prices below what an existing series paid per
-# share. ``existing_mfn_safe_beside_note``: an existing MFN SAFE converts on its given terms under both options,
-# although option B's note is a later instrument with a cap or discount. With no next round: ``no_next_round_given``
-# (the mode switch), ``discount_unused_without_round`` (a discount applies only at a priced round),
+# share. ``existing_mfn_safe_beside_note``: with a next round, an existing MFN SAFE converts on its given terms under
+# both options, although option B's note is a later instrument with a cap or discount. With no next round:
+# ``no_next_round_given`` (the mode switch), ``discount_unused_without_round`` (a discount applies only at a priced
+# round), ``cap_unused_without_round`` (the cap sets a price only at a worked sale on the converts-at-its-cap term),
 # ``maturity_conversion_not_given`` (a maturity but no conversion term), ``change_of_control_not_given`` (no term for a
 # sale before any priced round), ``existing_instruments_outstanding`` (under B the existing SAFEs and notes never
-# convert) and ``exit_after_maturity`` (the months to the sale pass the note's maturity).
+# convert), ``exit_after_maturity`` (B is worked at sales whose months pass the note's maturity) and
+# ``note_paid_below_owed_at_sale`` (converted at its cap, the note is paid less than it owes at some sale).
 InstrumentFlag = Literal[
     "no_next_round_given",
     "cap_below_round_price_now",
@@ -147,10 +149,12 @@ InstrumentFlag = Literal[
     "priced_round_below_existing_series_price",
     "existing_mfn_safe_beside_note",
     "discount_unused_without_round",
+    "cap_unused_without_round",
     "maturity_conversion_not_given",
     "change_of_control_not_given",
     "existing_instruments_outstanding",
     "exit_after_maturity",
+    "note_paid_below_owed_at_sale",
 ]
 
 # The list caps. With every existing series and instrument, an exit has 6 + 4 classes plus option A's two new series
@@ -565,7 +569,8 @@ class InstrumentCompareResult(BaseModel):
 
     In the no-next-round mode (``mode`` ``no_next_round``) nothing converts at a next round, so ``next_rounds`` is
     empty and the ``note_*_at_conversion`` fields are ``None``; ``maturity`` is the note at its maturity (``None``
-    when no maturity is given), ``note_at_exit`` its change-of-control term (``None`` when none is given) and
+    when no maturity is given), ``note_at_exit`` its change-of-control term (``None`` when none is given, or when
+    option B is not worked at the sales because existing SAFEs or notes are outstanding) and
     ``exits_before_any_round`` each sale before any priced round.
     """
 

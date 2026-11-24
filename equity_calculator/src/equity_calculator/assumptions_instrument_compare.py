@@ -5,8 +5,10 @@ the note rows, the round's price rule, ties, exact shares and the search) and th
 scenario's rows (``waterfall_assumptions``). The rows of the comparison itself follow: what the two options share,
 how the note converts and what of its maturity is modelled, which series terms converted shares take, who takes
 part in an exit, and how B - A is rounded. With no next round given, the comparison's own rows say what that mode
-shows instead: the note at its maturity and at a sale before any priced round, each on the note's own terms. No source
-was read for the comparison's own conventions, so they are marked unverified or named as a display convention.
+shows instead: the note at its maturity and at a sale before any priced round, each on the note's own terms; the round
+rows for a conversion that never happens are left out, and the waterfall's exit row is worded for both options (option
+B's note may be paid out of a sale first). No source was read for the comparison's own conventions, so they are marked
+unverified or named as a display convention.
 """
 
 from __future__ import annotations
@@ -19,6 +21,7 @@ from equity_calculator.assumptions_waterfall import waterfall_assumptions
 from equity_calculator.convertibles import RoundTerms
 from equity_calculator.schemas.equity_common import EquityAssumption
 from equity_calculator.schemas.equity_instrument_compare import InstrumentCompareInput, SeriesTerms
+from equity_calculator.schemas.equity_round import NoteTerms
 
 if TYPE_CHECKING:  # instrument_compare imports this module, the waterfall protocol is read for type checks only
     from equity_calculator.waterfall import ExitTerms
@@ -27,6 +30,9 @@ if TYPE_CHECKING:  # instrument_compare imports this module, the waterfall proto
 # payouts, not the holders' value at a round price, are what is split to the cent.
 _REWORDED_ROUND_ROWS = frozenset({"pool_timing", "money_split"})
 _FIRST = 1
+# The waterfall's row this scenario words its own way with no next round: option B's note may be paid out of a sale
+# before the shareholders share the rest.
+_EXIT_ROW = "exit_is_shared_amount"
 
 
 def _assumption(key: str, setting: str, statement: str, source: str) -> EquityAssumption:
@@ -134,17 +140,30 @@ def _sale_setting(inputs: InstrumentCompareInput) -> str:
 
 
 def _discount_rows(inputs: InstrumentCompareInput) -> list[EquityAssumption]:
-    """With no next round, a note's discount has no price to come off: one row when a discount is given."""
-    if inputs.note_discount_percent is None:
-        return []
-    return [
-        _assumption(
-            "note_discount_rule",
-            "applies only at a priced round",
-            "A note's discount comes off a priced round's price; with no next round it changes no figure here.",
-            f"{UNVERIFIED} (notes have no standard form; terms vary)",
+    """With no next round, a note's discount has no price to come off, and its cap sets a price only at a sale on the
+    converts-at-its-cap term: one row each for a discount and a cap given."""
+    rows = []
+    if inputs.note_valuation_cap is not None:
+        rows.append(
+            _assumption(
+                "note_cap_rule",
+                "applies only where the note converts at it",
+                "A note's cap price (cap / FD) sets the price it converts at only at a priced round (where it is "
+                "below the discount price) or at a sale on a converts-at-its-cap term; with no next round it changes "
+                "a figure here only at a sale worked on that term.",
+                f"{UNVERIFIED} (notes have no standard form; terms vary)",
+            )
         )
-    ]
+    if inputs.note_discount_percent is not None:
+        rows.append(
+            _assumption(
+                "note_discount_rule",
+                "applies only at a priced round",
+                "A note's discount comes off a priced round's price; with no next round it changes no figure here.",
+                f"{UNVERIFIED} (notes have no standard form; terms vary)",
+            )
+        )
+    return rows
 
 
 def _no_round_rows(inputs: InstrumentCompareInput) -> list[EquityAssumption]:
@@ -192,10 +211,11 @@ def _no_round_rows(inputs: InstrumentCompareInput) -> list[EquityAssumption]:
             "the founder: a multiple of its principal (the principal alone, no interest), paid before any share and "
             "never more than the sale, with the rest split among the shares; or what it owes at the sale (the "
             "principal alone when the interest is paid in cash) converted at its cap price (cap / FD) into common "
-            "shares, which share the rest with the founders, the team and the pool after any preference. With no "
-            "term given, or with existing SAFEs or notes still outstanding, option B is not worked at that sale and "
-            "the row says why. A term that adds interest to the multiple, or gives the holder the greater of the "
-            "two, is not modelled.",
+            "shares, which share the rest with the founders, the team and the pool after any preference; interest "
+            "paid in cash at that conversion is not taken off the sale and is in no payout line. With no term given, "
+            "or with existing SAFEs or notes still outstanding, option B is not worked at that sale and the row says "
+            "why. A term that adds interest to the multiple, or gives the holder the greater of the two, is not "
+            "modelled.",
             f"{UNVERIFIED} (the note's own terms decide)",
         ),
         *_discount_rows(inputs),
@@ -283,6 +303,37 @@ def _rounding_rows() -> list[EquityAssumption]:
     ]
 
 
+def _exit_amount_row(row: EquityAssumption) -> EquityAssumption:
+    """The waterfall's exit row worded for both options with no next round, its key and source kept."""
+    return row.model_copy(
+        update={
+            "setting": "option A: nothing ahead of the shareholders; option B: only the note's own claim",
+            "statement": "Under option A the exit amount is what the shareholders share. Under option B the note's "
+            "change-of-control claim, when it is a multiple of the principal, is paid out of the exit amount first "
+            "and the shareholders share the rest. Nothing else is taken out first under either option: no other "
+            "debt, fees, escrow, accrued dividends or option exercise cash.",
+        }
+    )
+
+
+def _no_round_round_rows(inputs: InstrumentCompareInput, rows: list[EquityAssumption]) -> list[EquityAssumption]:
+    """With no next round, the round rows for a conversion that happens: only option A's round today converts the
+    existing SAFEs and notes, and option B's note converts only at its maturity or at a worked sale at its cap."""
+    existing_notes = [item for item in inputs.existing_instruments if isinstance(item, NoteTerms)]
+    maturity_converts = (
+        inputs.note_maturity_conversion_valuation is not None or inputs.note_maturity_conversion_price is not None
+    )
+    sale_converts = inputs.note_change_of_control_at_cap and not inputs.existing_instruments
+    keep = {
+        "note_cap_basis": inputs.note_valuation_cap is not None
+        or any(item.valuation_cap is not None for item in existing_notes),
+        "interest_conversion": maturity_converts or sale_converts or bool(existing_notes),
+        "tie_rule": bool(inputs.existing_instruments),
+        "search": bool(inputs.existing_instruments),
+    }
+    return [row for row in rows if keep.get(row.key, True)]
+
+
 def instrument_compare_assumptions(
     inputs: InstrumentCompareInput, note_round: RoundTerms, exits: ExitTerms, pass_limit: int
 ) -> tuple[EquityAssumption, ...]:
@@ -302,12 +353,18 @@ def instrument_compare_assumptions(
         "topped up after the round, diluting that round's investor too. A round with no top-up target adds no pool.",
         UNVERIFIED,
     )
-    comparison_rows = _comparison_rows(inputs) if inputs.next_rounds else _no_round_rows(inputs)
+    exit_rows = waterfall_assumptions(exits, pass_limit)
+    if inputs.next_rounds:
+        comparison_rows = _comparison_rows(inputs)
+    else:
+        round_rows = _no_round_round_rows(inputs, round_rows)
+        comparison_rows = _no_round_rows(inputs)
+        exit_rows = tuple(_exit_amount_row(row) if row.key == _EXIT_ROW else row for row in exit_rows)
     return (
         *round_rows,
         pool_row,
         *comparison_rows,
         *_series_rows(inputs),
         *_rounding_rows(),
-        *waterfall_assumptions(exits, pass_limit),
+        *exit_rows,
     )

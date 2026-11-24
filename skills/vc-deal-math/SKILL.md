@@ -205,15 +205,19 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
    A's price today, a down round for A's investors, and any anti-dilution in their terms is not modelled);
    `priced_round_below_existing_series_price` (option A's price today is below what an existing series paid per share,
    a down round for that series, and any anti-dilution in its terms is not modelled; option B prices no round today);
-   `existing_mfn_safe_beside_note` (an existing MFN SAFE converts on the terms given for it under both options, and
-   whether it may take option B's note's cap or discount is in the SAFE's own terms, not modelled);
+   `existing_mfn_safe_beside_note` (with a next round, an existing MFN SAFE converts on the terms given for it under
+   both options, and whether it may take option B's note's cap or discount is in the SAFE's own terms, not modelled);
    `discount_unused_without_round` (the note's discount comes off a priced round's price, so with no next round it
-   changes no figure); `maturity_conversion_not_given` (a maturity but no conversion term: only what the note owes
+   changes no figure); `cap_unused_without_round` (the note's cap sets a price only where the note converts at it, a
+   priced round or a sale on a converts-at-its-cap term, so with no next round and no such sale worked it changes no
+   figure); `maturity_conversion_not_given` (a maturity but no conversion term: only what the note owes
    then is shown, and whether it converts is in its own terms); `change_of_control_not_given` (no term for a sale
    before any priced round, so option B is not worked at the sales); `existing_instruments_outstanding` (with no
    priced round the existing SAFEs and notes never convert under option B: they hold no shares there, and option B is
    not worked at a sale); `exit_after_maturity` (the sales come after the note matures: what happened at maturity is
-   in its own terms, and option B's sale lines take the note as still outstanding). Never pick
+   in its own terms, and option B's sale lines take the note as still outstanding); `note_paid_below_owed_at_sale`
+   (at one sale or more the note, converted at its cap, is paid less than it owes then, any interest paid in cash
+   counted, and whether the holder may be repaid instead is in the note's own terms, not modelled). Never pick
    one for them or call one better: the table shows what each does on the founder's own figures. Hand the legal terms
    (the note's maturity and what happens at it, its change-of-control wording, the preference and anti-dilution
    wording, the conversion mechanics) to their lawyer.

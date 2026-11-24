@@ -666,8 +666,8 @@ and every exit from the waterfall code; nothing is worked a second way.
    `next_round_below_priced_round_price` (a down round for A's investors; no anti-dilution is applied),
    `priced_round_below_existing_series_price` (A's price today is below what an existing series paid per share, its
    amount invested over its shares: a down round for that series; no anti-dilution is applied) and
-   `existing_mfn_safe_beside_note` (an existing MFN SAFE converts on the terms given for it under both options; whether
-   it may take B's note's cap or discount is in the SAFE's own terms, not modelled).
+   `existing_mfn_safe_beside_note` (with a next round, an existing MFN SAFE converts on the terms given for it under
+   both options; whether it may take B's note's cap or discount is in the SAFE's own terms, not modelled).
 
 A comparison with no exit is refused. With a next round, every exit follows it; a sale before it, while the note is
 outstanding, is worked only with no next round given.
@@ -688,15 +688,21 @@ below are the note's own, each asked for, never assumed, and each refused with a
    note is paid its change-of-control term: a multiple of its principal (`--note-change-of-control-multiple`, the
    principal alone), paid before any share and never more than the sale, with the rest to the shares; or, converting
    at its cap (`--note-change-of-control-at-cap`, with `--note-months-to-exit`), what it owes then at the cap price
-   into common shares. B is not worked at a sale, and the row says why, when no term is given
-   (`no_change_of_control_term`, or `uncapped_no_change_of_control_term` when the note has no cap to convert at) or
-   when existing SAFEs or notes are still outstanding under B (`existing_instruments_outstanding`). A multiple with
-   interest added, or the greater of two terms, is not modelled.
+   into common shares, through the round code's conversion row (interest paid in cash at that conversion is not
+   taken off the sale and is in no payout line). B is not worked at a sale, its term is not shown, and the row says
+   why, when no term is given (`no_change_of_control_term`, or `uncapped_no_change_of_control_term` when the note has
+   no cap to convert at) or when existing SAFEs or notes are still outstanding under B
+   (`existing_instruments_outstanding`). A multiple with interest added, or the greater of two terms, is not
+   modelled.
 4. **Flags** of this mode: `no_next_round_given`, `discount_unused_without_round` (the discount comes off a priced
-   round's price, so it changes no figure), `maturity_conversion_not_given`, `change_of_control_not_given`,
-   `existing_instruments_outstanding` (they hold no shares under B, and B is not worked at a sale) and
-   `exit_after_maturity` (the sales come after the note matures; B's sale lines take it as still outstanding), beside
-   `cap_below_round_price_now`, `note_interest_converts`, `note_interest_paid_in_cash` and `maturity_not_given`.
+   round's price, so it changes no figure), `cap_unused_without_round` (the cap sets a price only at a sale worked on
+   the converts-at-its-cap term, so without one it changes no figure), `maturity_conversion_not_given`,
+   `change_of_control_not_given`, `existing_instruments_outstanding` (they hold no shares under B, and B is not
+   worked at a sale), `exit_after_maturity` (B is worked at sales that come after the note matures; its sale lines
+   take it as still outstanding) and `note_paid_below_owed_at_sale` (converted at its cap, the note is paid less than
+   it owes at one sale or more, any interest paid in cash counted; a right to be repaid instead is not modelled),
+   beside `cap_below_round_price_now`, `note_interest_converts`, `note_interest_paid_in_cash` and
+   `maturity_not_given`. `existing_mfn_safe_beside_note` is not raised: under B the SAFE never converts.
 
 </details>
 
@@ -1454,14 +1460,21 @@ these (`standard_preference` only when a series is given as standard):
 | `money_split`               | largest remainder within each option                                                        | fixed                                             | display convention                          |
 | `difference_rounding`       | B - A of the exact values, rounded once                                                     | fixed                                             | display convention                          |
 
-With no next round, `note_price_rule` and `exit_after_next_round` are left out; `comparison_rule`,
-`note_outstanding_today`, `note_interest_terms`, `maturity_rule`, `existing_instruments_rule` and `series_terms` say
-what that mode does instead, and these are added (`note_discount_rule` only when a discount is given):
+With no next round, `note_price_rule` and `exit_after_next_round` are left out, and so are the round rows of a
+conversion that never happens: `note_cap_basis` when neither B's note nor an existing note has a cap,
+`interest_conversion` when no note converts (B's only at its maturity on a conversion term or at a worked sale at its
+cap, an existing note in A's round today), and `tie_rule` and `search` when no existing SAFE or note converts in A's
+round today. `comparison_rule`, `note_outstanding_today`, `note_interest_terms`, `maturity_rule`,
+`existing_instruments_rule` and `series_terms` say what that mode does instead, the waterfall's
+`exit_is_shared_amount` is worded for both options, and these are added (`note_cap_rule` only when a cap is given,
+`note_discount_rule` only when a discount is given):
 
 | Key                     | Default                                                                                                              | How to change it                                                                                     | Source                                   |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | `maturity_rule`         | at maturity the repayment, and a conversion only at the founder's valuation (over FD) or price                       | `--note-maturity-months`, `--note-maturity-conversion-valuation`, `--note-maturity-conversion-price` | unverified (the note's own terms decide) |
 | `exit_before_any_round` | every exit is a sale before any priced round; B's note paid its multiple of principal first, or converted at its cap | `--note-change-of-control-multiple`, `--note-change-of-control-at-cap`                               | unverified (the note's own terms decide) |
+| `exit_is_shared_amount` | A: nothing ahead of the shareholders; B: only the note's own claim, a multiple of its principal paid first           | give each exit net of anything else paid first                                                       | unverified (usual preferred-stock terms) |
+| `note_cap_rule`         | the cap sets a price only at a priced round or a sale worked on the converts-at-its-cap term                         | fixed                                                                                                | unverified (notes have no standard form) |
 | `note_discount_rule`    | the discount comes off a priced round's price, so it changes no figure here                                          | fixed                                                                                                | unverified (notes have no standard form) |
 
 </details>
