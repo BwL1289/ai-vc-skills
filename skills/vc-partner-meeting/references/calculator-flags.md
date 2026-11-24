@@ -1,8 +1,9 @@
 # Calculator flags
 
-The vc-partner-meeting skill reads this file when a tool returns a mismatch or a flag; its own "Calculator flags"
-section links here. Where each mismatch and flag goes in the drill comes first; then, since a tool call returns each
-flag as a bare code, what each code means, as a question a partner is likely to ask.
+The vc-partner-meeting skill reads this file when a tool returns a mismatch or a flag, and when it writes the answer's
+Numbers; its own "Calculator flags" section and its Answering section link here. Where each mismatch and flag goes in
+the drill comes first; then what the answer's Numbers hold; then, since a tool call returns each flag as a bare code,
+what each code means, as a question a partner is likely to ask.
 
 ## Where the calculator's mismatches and flags go
 
@@ -13,6 +14,13 @@ the computed runway understates it, so it does not head the drill; the founder m
 and it goes in the minor tier at most. A percent sold or use-of-funds total below the tool's figure is still a mismatch.
 Each flag is added as weakens it, with its meaning from the tables below. Neither goes through the quote check or the
 refute pass: the calculator computed it, and its quote is the tool's row.
+
+## Numbers in the answer
+
+Each tool's verdict with each mismatch row in the tool's values (the runway with no new money, and on a SAFE or note
+raise the runway claim and use-of-funds lines, from `equity_runway_plan`); each flag, one line, with its meaning from
+the tables below and a benchmark flag's band quoted from its assumption row with the source that row gives; every other
+figure quoted as stated.
 
 ## What each flag code means
 

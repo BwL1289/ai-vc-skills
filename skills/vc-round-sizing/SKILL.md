@@ -108,7 +108,8 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
    }
    ```
 
-   The same plan from the command line, `equity_calculator runway_plan`:
+   Only when the tool is not in the session (search for it by name first), the same call from the command line
+   with `equity_calculator runway_plan`:
 
    ```
    equity_calculator runway_plan --cash-on-hand 500000 --phase "from-month=1 gross-burn=120000 revenue=10000" --phase "from-month=4 gross-burn=220000 revenue=25000" --phase "from-month=13 gross-burn=300000 revenue=60000" --downside-revenue-percent 50 --raise "amount=3000000" --raise "amount=4000000" --milestone 15 --months-to-raise 6
@@ -406,6 +407,8 @@ this skill's own judgment, unverified.
   fundraising guide's framework, as a framework, and the skeptic's review, and keeps the founder as the user.
 - No arithmetic outside the equity calculator's tools: no months added, runways subtracted or amounts divided by hand,
   and no gap to a required raise or difference between two options stated, in prose, a table or an ask.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - It never builds a case the founder did not state, by merging two of theirs or by a second call.
 - The plan is a model: spend and revenue are flat inside each phase, the raise lands at once, and fees, interest and
   late payments are left out. Say so beside the results.

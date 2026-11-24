@@ -148,15 +148,16 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
    (compared as stated, never converted) and the discount patterns. Set each claim's verdict by that skill's order,
    without its skeptic: this skill's lenses do the attacking. The claims table feeds the marks in step 6.
 4. **The ask.** The deal terms are checked once, in claims-check step 5, which follows the vc-deal-math skill:
-   - A priced round: `equity_deal_check` (from the command line, `equity_calculator deal_check`), money and percents as
-     strings (a stated percent or runway with the deck's own places, since one that is the tool's figure rounded to them
-     is consistent), every stated figure, use-of-funds lines included, and the runway claim (not on a phased plan:
-     below); one call per document's version of the ask. A valuation with no label: call twice, once as `pre_money`,
-     once as `post_money`. Show both readings side by side, as vc-deal-math step 4 does, and say a partner will ask
-     which one is meant. A check that is a mismatch under one reading only is not a calculator mismatch: it becomes one
-     fix, to label the valuation pre- or post-money, quoting both readings in the tool's values. Only a check that is a
-     mismatch under every reading is the calculator's mismatch. In the claims table, such a claim is not Contradicted
-     either: mark it Needs a source, with both readings in its fix, since no single reading gives a verdict.
+   - A priced round: `equity_deal_check` (command-line fallback, after a search for the tool by name:
+     `equity_calculator deal_check`), money and percents as strings (a stated percent or runway with the deck's own
+     places, since one that is the tool's figure rounded to them is consistent), every stated figure, use-of-funds lines
+     included, and the runway claim (not on a phased plan: below); one call per document's version of the ask. A
+     valuation with no label: call twice, once as `pre_money`, once as `post_money`. Show both readings side by side, as
+     vc-deal-math step 4 does, and say a partner will ask which one is meant. A check that is a mismatch under one
+     reading only is not a calculator mismatch: it becomes one fix, to label the valuation pre- or post-money, quoting
+     both readings in the tool's values. Only a check that is a mismatch under every reading is the calculator's
+     mismatch. In the claims table, such a claim is not Contradicted either: mark it Needs a source, with both readings
+     in its fix, since no single reading gives a verdict.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
      which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask for the
@@ -443,6 +444,8 @@ two-stage review (attack, then refute with the founder's own material) is this r
 - It never invents or strengthens traction, customers, partners, credentials or figures, in a fix or in a refute pass.
 - No arithmetic outside the equity calculator's tools. Growth rates are quoted; metrics (LTV, the Rule of 40 and the
   magic number included) and market sizes are checked by the vc-metrics-readiness and vc-market-sizing skills.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - It reads text. It does not judge visual design, and reads no figure off a chart the founder did not state.
 - The review predicts likely objections from the deck's text; a real partner may raise others.
 - It works from the founder's material and sends nothing anywhere.

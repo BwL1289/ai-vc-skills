@@ -158,6 +158,20 @@ async def test_the_command_runs_and_prints_every_line_of_the_excerpt() -> None:
         assert line in printed, line
 
 
+def test_the_sentence_after_the_excerpt_quotes_the_excerpts_own_figures() -> None:
+    """The worked example's summary and its notation example are typed by hand: each figure must be one printed."""
+    (excerpt,) = _fences("text")
+    summary = _TEXT.split(excerpt.splitlines()[-1], 1)[1].split("```", 1)[1].strip().split("\n\n", 1)[0]
+    figures = re.findall(r"\$?\d[\d,]*\.\d+%?", summary)
+    notation = re.search(r"\((0\.\d+) is (\d+\.\d+%)\)", _TEXT)
+
+    assert len(figures) >= 3
+    for figure in figures:
+        assert figure in excerpt, figure
+    assert notation is not None and notation.group(2) in excerpt
+    assert notation.group(1) == f"0.0{notation.group(2).replace('.', '').rstrip('%')}"
+
+
 async def test_the_command_and_the_json_example_are_the_same_call() -> None:
     (example,) = _fences("json")
     (command,) = _fences("")
@@ -249,10 +263,13 @@ def test_the_limits_keep_the_founder_as_the_user() -> None:
     assert "an expectation from the founder's own rates, not a forecast" in limits
     assert "It never role-plays or speaks as a named investor or firm, and never names a firm as a fit" in limits
     assert "looks nothing up, and sends nothing anywhere" in limits
-    # A live run with no tool quoted the worked example's figures as the calculator's output for the founder.
-    no_tool = "When neither `equity_raise_pipeline` nor its command line runs in the session, say so and give no figure"
+    # A live run with no tool quoted the worked example's figures as the calculator's output for the founder: the pack's
+    # shared sentence (test_pack_shared_rules) rules out a figure worked by hand or taken from a worked example.
+    no_tool = (
+        "When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give"
+    )
     assert no_tool in limits
-    assert "never one from the worked example in step 4" in limits
+    assert "none worked by hand and none from a worked example, a made-up company's result." in limits
 
 
 def test_there_are_four_evals_one_per_made_up_company() -> None:

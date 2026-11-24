@@ -1,6 +1,6 @@
 ---
 name: equity-calculator
-description: Exact startup equity arithmetic with the equity_calculator command or MCP tools. Use when someone asks if a fundraise or a stake is worth it (Paul Graham's equity equation), how much equity to offer a hire, how big an option pool to add (the option-pool shuffle), how SAFEs or convertible notes convert in a priced round (caps, discounts, MFN, interest), how a stake dilutes over several rounds, how many shares have vested, or who gets what at an exit (liquidation preferences, participation, caps). deal_check checks a raise's valuation, percent sold, ownership and runway; runway_plan shows how long each raise lasts and which milestones it reaches; metrics_check checks traction metrics, LTV and the Rule of 40 too; market_sizing builds TAM, SAM and SOM bottom-up; instrument_compare sets a priced round beside a note; pool_plan sizes a pool from a hiring plan; raise_pipeline works the room left in a round and a funnel's term sheets; cap_table_check ties out a cap table. Run it instead of doing arithmetic by hand.
+description: Exact startup equity arithmetic with the equity_calculator MCP tools (command as fallback). Use when someone asks if a fundraise or a stake is worth it (Paul Graham's equity equation), how much equity to offer a hire, how big an option pool to add (the option-pool shuffle), how SAFEs or convertible notes convert in a priced round (caps, discounts, MFN, interest), how a stake dilutes over several rounds, how many shares have vested, or who gets what at an exit (liquidation preferences, participation, caps). deal_check checks a raise's valuation, percent sold, ownership and runway; runway_plan shows how long each raise lasts and which milestones it reaches; metrics_check checks traction metrics, LTV and the Rule of 40 too; market_sizing builds TAM, SAM and SOM bottom-up; instrument_compare sets a priced round beside a note; pool_plan sizes a pool from a hiring plan; raise_pipeline works the room left in a round and a funnel's term sheets; cap_table_check ties out a cap table. Never do arithmetic by hand.
 ---
 
 # Equity calculator
@@ -39,8 +39,10 @@ the vc-cap-table-check skill (preview). This skill answers one scenario on its o
 
 ## Running it
 
-**MCP tools** (`equity_calculator_mcp`). Each scenario tool takes one argument, `inputs`, an object with that
-scenario's fields, and returns the same JSON text as `equity_calculator <scenario> --json`:
+**MCP tools** (`equity_calculator_mcp`), always the first way to run a scenario. Where tools load on demand, search
+for the scenario's tool by name (`equity_pool_plan`, say) before deciding it is missing. Each scenario tool takes one
+argument, `inputs`, an object with that scenario's fields, and returns the same JSON text as
+`equity_calculator <scenario> --json`:
 
 ```json
 { "inputs": { "equity_percent": "7", "outcome_multiplier": "1.10" } }
@@ -85,7 +87,8 @@ format or surrogate character, and writes a new file in DIR; it never overwrites
 workbook cell (a value of 1e300 or more) is refused and no file is made. While saving, the Excel library also writes
 and deletes a short-lived file in the system's temporary folder (`TMPDIR` if set), so that folder must be writable.
 
-**Command line** (`equity_calculator`). The same scenarios as subcommands with flags, for example:
+**Command line** (`equity_calculator`), only when the MCP tools are not in the session (search for them by name first).
+The same scenarios as subcommands with flags, for example:
 
 ```
 equity_calculator investor --equity-percent 7 --outcome-multiplier 1.10
@@ -320,3 +323,6 @@ exits; a pool plan at most 40 hires, each starting within 120 months; a raise pi
 rata amounts and 8 stages of up to 10,000 investors each, and 100 term sheets wanted; a cap table check takes at most 20
 classes, 100 holder lines, 50 SAFEs and notes and 20 planned rounds. Anything past a limit is refused with a message
 naming the field.
+
+When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure in
+that tool's place: none worked by hand and none from a worked example, a made-up company's result.

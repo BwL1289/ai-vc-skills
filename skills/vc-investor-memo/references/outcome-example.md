@@ -23,7 +23,7 @@ counts from `equity_pool` (step 2) and the new series as its one class (step 4):
 }
 ```
 
-The same call from the command line:
+Only when the tool is not in the session (search for it by name first), the same call from the command line:
 
 ```
 equity_calculator waterfall --exit-amount 150000000 --common-shares 9500000 --class "shares=2714285 invested=3000000 preference-multiple=1 rank=1 participation=none"

@@ -95,11 +95,10 @@ Short, bullet points, the same sections in the same order every time, so a reade
 | Cash and runway, optional | Cash with its date and the runway as the calculator gives it, when the founder chooses to show it                            | Mercury guide (burn rate and cash runway)                                                          |
 | Definitions               | Every metric's definition, word for word the same each time; a change says so                                                | The shared rules file                                                                              |
 
-The section names are this skill's own. Two of the sources describe updates to investors already on the cap table;
-one of those notes that sending updates to potential investors has been suggested as a fundraising tactic. The third
-(about meetings, not written updates) describes showing potential investors progress over time. Using the update's
-shape for prospects, the line table, the one ask and the "Last time we said" section are this skill's own judgment,
-unverified.
+The section names are this skill's own. Two of the sources describe updates to investors already on the cap table; one
+of those notes that sending updates to potential investors has been suggested as a fundraising tactic. The third (about
+meetings, not written updates) describes showing potential investors progress over time. Using the update's shape for
+prospects, the line table, the one ask and the "Last time we said" section are this skill's own judgment, unverified.
 
 ## The line
 
@@ -110,9 +109,8 @@ The section that makes the update a line and not a dot.
   columns, and always the first update's column, so a reader who joined late still sees where the line started.
 - **Each cell as the founder stated it** in that update, with its period. A cell is empty with "not reported" when that
   update did not give the metric; a period with no update says "no update sent".
-- **No arithmetic.** No growth rate, no change, no total, no average, no conversion and no chart drawn from the
-  figures. A growth rate the founder states goes in the cell as stated, with its method and period, or a bracketed ask
-  for them.
+- **No arithmetic.** No growth rate, no change, no total, no average, no conversion and no chart drawn from the figures.
+  A growth rate the founder states goes in the cell as stated, with its method and period, or a bracketed ask for them.
 - **Status, against the last update,** in a column of the tie-out table in the answer, not in the update itself: one of
   the shared file's six metric statuses. What the update does for each:
   - **Same:** nothing more; this period's value sits beside the earlier ones.
@@ -203,8 +201,8 @@ draft written at step 8.
 ## Runway
 
 Whether an update to prospects shows runway is the founder's choice; with no runway in it, this skill asks for no cash
-or burn. When the update shows a runway, it goes to `equity_runway_plan` (from the command line,
-`equity_calculator runway_plan`), as the founder's plan with no raise:
+or burn. When the update shows a runway, it goes to `equity_runway_plan` (command-line fallback, after a search for the
+tool by name: `equity_calculator runway_plan`), as the founder's plan with no raise:
 
 - `cash_on_hand`: cash at the update's date. Money as strings.
 - One `plan` case: the first phase is today's monthly spend (`gross_burn`) and `revenue`, from month 1 (the month after
@@ -226,10 +224,9 @@ or burn. When the update shows a runway, it goes to `equity_runway_plan` (from t
 
 **A claim stated as a floor** ("30+ months", "over 30 months", "at least 30 months") is passed as its number, but the
 tool's verdict row does not decide it: the tool calls a figure within its tolerance either way, or one that rounds to
-it, consistent. Compare the
-tool's printed runway with that number as written, saying only which is larger. A printed runway at or above the number
-keeps the claim: the update may keep it or state the printed runway, and it goes in no tier. A printed runway below the
-number is a fix before sending, even when the verdict row says consistent.
+it, consistent. Compare the tool's printed runway with that number as written, saying only which is larger. A printed
+runway at or above the number keeps the claim: the update may keep it or state the printed runway, and it goes in no
+tier. A printed runway below the number is a fix before sending, even when the verdict row says consistent.
 
 ```json
 {
@@ -249,7 +246,7 @@ number is a fix before sending, even when the verdict row says consistent.
 }
 ```
 
-The same check from the command line:
+Only when the tool is not in the session (search for it by name first), the same call from the command line:
 
 ```
 equity_calculator runway_plan --cash-on-hand 2600000 --phase "from-month=1 gross-burn=150000 revenue=40000" --stated-runway-months 30 --months-to-raise 6
@@ -493,6 +490,8 @@ pattern table gives their sources, not re-read for this one, so here they are un
   in their own edit. A target is never written as a result.
 - No arithmetic outside the equity calculator's tools: no growth rates, changes, totals, conversions or charts. Stated
   figures are compared as written.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - The runway is the founder's plan worked by the tool: flat spend and revenue within each phase, no fees, interest or
   collection lag. It applies no runway benchmark of its own.
 - It never role-plays or speaks as a named investor, firm or author; asked to, it offers the public guides above.

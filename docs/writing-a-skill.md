@@ -36,8 +36,13 @@ skills/<skill-name>/
 
 ## The rules every skill here follows
 
-1. **Numbers come from tools.** Call the `equity_calculator` MCP tools (or the command) for every figure; never let
-   the model do arithmetic in its head. Quote figures from a user's document as the document states them.
+1. **Numbers come from tools.** Call the `equity_calculator` MCP tools for every figure; never let the model do
+   arithmetic in its head. Show the MCP call first and the command only as the fallback, labelled "Only when the tool is
+   not in the session (search for it by name first), the same call from the command line". A skill that calls the
+   calculator also carries, in its Limits, the pack's sentence for a session where neither runs (pinned in
+   `equity_calculator/tests/test_pack_shared_rules.py`), and a new worked example uses made-up inputs no eval uses, so a
+   figure from it cannot pass for a tool's output (that test lists the older examples that still share an eval's
+   inputs). Quote figures from a user's document as the document states them.
 2. **Ask, never guess.** A missing input is asked for, by name.
 3. **Show the working.** Answer with the verdict, then the numbers, then the assumptions and their sources.
 4. **Frameworks, not people.** A review lens is a named framework (YC's application questions, a standard term-sheet

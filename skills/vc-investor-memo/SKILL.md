@@ -162,17 +162,18 @@ mode) or at the quote check (review mode).
 
 The round's figures are checked once, as the vc-deal-math skill describes:
 
-- **A priced round:** `equity_deal_check` (from the command line, `equity_calculator deal_check`), money and percents as
-  strings (a stated percent or runway with the document's own places), share counts as integers, with every figure the
-  memo states: the raise, the valuation and its label, the percent sold (`stated_investor_percent`), the founders'
-  percent after (`holder_shares`, `stated_holder_percent`), each SAFE or note converting in this round as `instruments`
-  (its terms as the founder gives them; left out, the founders' percent comes out too high), cash, burn and revenue as
-  planned (`planned_monthly_gross_burn`, `planned_monthly_revenue`) and today's (`current_monthly_gross_burn`,
-  `current_monthly_revenue`) only when the founder gives a different figure for today, the runway claim (not on a phased
-  plan: below) and the use-of-funds lines. One call per document that states the round differently. A valuation with no
-  label: call twice, once as `pre_money`, once as `post_money`, and show both readings side by side, as vc-deal-math
-  step 4 does. A mismatch that appears under only one reading is not listed as a computed mismatch: its fix is "say
-  whether the valuation is pre- or post-money", with both readings quoted.
+- **A priced round:** `equity_deal_check` (command-line fallback, after a search for the tool by name:
+  `equity_calculator deal_check`), money and percents as strings (a stated percent or runway with the document's own
+  places), share counts as integers, with every figure the memo states: the raise, the valuation and its label, the
+  percent sold (`stated_investor_percent`), the founders' percent after (`holder_shares`, `stated_holder_percent`), each
+  SAFE or note converting in this round as `instruments` (its terms as the founder gives them; left out, the founders'
+  percent comes out too high), cash, burn and revenue as planned (`planned_monthly_gross_burn`,
+  `planned_monthly_revenue`) and today's (`current_monthly_gross_burn`, `current_monthly_revenue`) only when the founder
+  gives a different figure for today, the runway claim (not on a phased plan: below) and the use-of-funds lines. One
+  call per document that states the round differently. A valuation with no label: call twice, once as `pre_money`, once
+  as `post_money`, and show both readings side by side, as vc-deal-math step 4 does. A mismatch that appears under only
+  one reading is not listed as a computed mismatch: its fix is "say whether the valuation is pre- or post-money", with
+  both readings quoted.
 - **A SAFE or note:** not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round`, with the next
   priced round the founder expects, labelled the founder's assumption in the memo. A note the founder weighs against a
   priced round now goes to `equity_instrument_compare` as vc-deal-math step 7 says (its flags' meanings too), capped or
@@ -295,7 +296,7 @@ same question from the founder's side: "If all goes well, what will you have bui
    founder's assumed later rounds (calculator); what the stake pays at an exit is not checked: no tool computes this."
    Never multiply a stake by an exit value.
 
-One worked call, for Company BM at the founder's plan exit, with the same call from the command line and part of what
+One worked call, for Company BM at the founder's plan exit, with the same call's command-line fallback and part of what
 it prints, is in [`references/outcome-example.md`](references/outcome-example.md).
 
 The class's payout is not its cap-table percent times the exit: the unissued pool takes no part in a sale (step 3), so
@@ -490,5 +491,7 @@ review (attack, then refute with the founder's own material) is this repository'
 - No arithmetic outside the equity calculator's tools. Metrics and market sizes are quoted here and checked by the
   vc-metrics-readiness and vc-market-sizing skills (LTV and the Rule of 40 included); growth rates are quoted; a
   later round's payout at an exit is not checked.
+- When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
+  in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - The dissent pass predicts likely objections from the memo's text; a real partnership may raise others.
 - It works from the founder's material and sends nothing anywhere.

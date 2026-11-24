@@ -6,6 +6,16 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- Plugin version 0.3.5, and the `equity_calculator` package now carries the plugin's version (it had stayed at 0.1.0):
+  the plugin starts the calculator's server with `uvx` from the package's folder, and uv kept serving its cached build
+  of that folder until the package's `pyproject.toml` changed, so live runs, which loaded the plugin from one clone
+  pulled in place, met an old server with 8 of today's 15 tools, the seven from `equity_runway_plan` to
+  `equity_cap_table_check` missing (a plugin installed from the marketplace gets a new folder with each version, and so
+  a new build). A test now fails when the package's, the plugin's and the marketplace's versions differ, and
+  CONTRIBUTING.md has a Releasing section that says every release bumps all three. The package's `[tool.uv]` cache keys
+  name `pyproject.toml` and `src/**/*.py`, so an edited or added module rebuilds the server between releases too; both
+  cures were checked on uv 0.11.16 with a private cache, each on its own (a source-only edit kept the old build without
+  them).
 - `vc-deal-math`, `vc-round-sizing`, `vc-market-sizing`, `vc-positioning`, `vc-investor-memo`, `vc-taste-check`,
   `vc-diligence-questions` and `vc-partner-meeting` are out of preview: each was run on a real deck, and the deck's
   founder agreed with its output; plugin version 0.3.4.
@@ -277,6 +287,25 @@ All notable changes to this repository. Dates are UTC.
 
 ### Changed
 
+- Every calculator-backed skill puts the MCP tool first. Each command line a skill prints follows the MCP call it
+  repeats and is labelled "Only when the tool is not in the session (search for it by name first), the same call from
+  the command line" (the `equity-calculator` skill, which prints several, labels them in its own words); a command named
+  in a sentence is the "command-line fallback, after a search for the tool by name", so the six skills whose own
+  SKILL.md prints no command line but names one in a sentence still say to search first; and the `equity-calculator`
+  skill's description and "Running it" section name the MCP tools first and say to search for a tool by name where
+  tools load on demand. Live runs whose server lacked a tool had gone to the printed command line, which the session's
+  shell refused. Pinned in `test_pack_shared_rules.py`.
+- The no-tool rule, which `vc-raise-plan` and `vc-option-pool-plan` had in their own words, is one sentence in every
+  skill that calls the calculator (17 skills) and in the template: when neither the tool nor its command line runs, say
+  so and give no figure in the tool's place, none worked by hand and none from a worked example (a run without the tool
+  added up a cap table by hand). Pinned in `test_pack_shared_rules.py`. To keep `vc-partner-meeting` under its 350-line
+  cap, how its answer lays out the Numbers moved into its `references/calculator-flags.md`, the one change in wording
+  being "the calculator flags table", which reads "the tables below" there.
+- The worked examples in `vc-option-pool-plan` (now Company PW) and `vc-raise-plan` (now Company RW) use made-up
+  inputs no eval uses, with fresh calculator output, so a figure quoted from them can no longer match an eval's answer
+  without a tool run; `vc-raise-plan`'s batch-planning step follows its example's start month. Six older worked
+  examples still use an eval's inputs (`vc-cap-table-check`, `vc-current-investor-update`, `vc-deal-math`,
+  `vc-investor-memo`, `vc-market-sizing`, `vc-prospective-investor-update`); a test lists them, so none can be added.
 - Skill fixes from the 2026-11-24 live runs. `vc-competitive-landscape` keeps an objection to a line that matches a
   pattern in its patterns table until the founder replaces the line, whatever other line would answer it, and quotes
   that line in the fix (a run had dropped the objection to "the only" line as answered by other lines).

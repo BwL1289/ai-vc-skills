@@ -8,7 +8,7 @@ AI VC skills: agent skills that help a founder get a raise ready (exact equity m
 claims, competition, metrics, round and term sheet, and help planning the raise, writing intro emails, reading passes,
 sizing the option pool and tying out the cap table), shipped as one Claude Code plugin. Skills live in
 `skills/<name>/SKILL.md`; the exact math lives in the `equity_calculator` Python package, which the skills call through
-its command or its MCP server.
+its MCP server first, with its command as the fallback.
 
 ## Layout
 
@@ -30,6 +30,9 @@ its command or its MCP server.
   sends a user's document anywhere.
 - Keep `SKILL.md` under 500 lines; move long reference material to files beside it and link them.
 - A new skill gets a row in the README's skills table (the validator checks) and a line in CHANGELOG.md.
+- A release bumps the plugin's, the marketplace's and the `equity_calculator` package's versions together
+  (CONTRIBUTING.md, "Releasing"): where the plugin is loaded from one folder that is updated in place, uv serves its
+  cached build of the server until a file in the package's cache keys changes.
 - Use underscores in Python names and hyphens only in skill names and command-line flags (README, "Names").
 
 ## Before you finish

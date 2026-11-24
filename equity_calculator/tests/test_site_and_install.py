@@ -5,6 +5,12 @@ there are, and counts the calculator's scenarios as the root README does. Its tw
 output, so every line each one shows must appear in what its command prints today. docs/install.md tells a manual
 install to load every folder under skills/ and repeats the README's two load-both-folders lines, because two skills
 read a file in another skill's folder. The plugin and marketplace descriptions promise no skill as still to come.
+
+The plugin starts the calculator's server with uvx from the package's own folder, and uv reused its cached build of
+that folder while the package's pyproject.toml stayed the same: with the package at 0.1.0 through every plugin release,
+a live run that loaded the plugin from one folder updated in place met an old server with eight tools. So the package
+carries the plugin's version, the marketplace's too, and uv's cache keys name the package's source, so an edited or
+added module rebuilds the server between releases.
 """
 
 from __future__ import annotations
@@ -13,6 +19,7 @@ import html
 import json
 import re
 import shlex
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -22,6 +29,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 _SITE = _ROOT / "docs" / "index.html"
 _INSTALL = _ROOT / "docs" / "install.md"
 _README = _ROOT / "README.md"
+_PACKAGE = _ROOT / "equity_calculator" / "pyproject.toml"
 _SKILLS = sorted(path.parent.name for path in (_ROOT / "skills").glob("*/SKILL.md"))
 _ONES = "zero one two three four five six seven eight nine".split()
 _NUMBER_WORDS = {
@@ -144,8 +152,29 @@ def test_every_image_the_site_shows_is_served_from_its_own_folder() -> None:
         assert (_SITE.parent / source).is_file(), source
 
 
-def test_the_plugin_and_its_marketplace_entry_carry_the_same_version() -> None:
+def test_the_plugin_its_marketplace_entry_and_the_calculator_package_carry_the_same_version() -> None:
     plugin = json.loads((_ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
     marketplace = json.loads((_ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))
+    package = tomllib.loads(_PACKAGE.read_text(encoding="utf-8"))
 
     assert marketplace["metadata"]["version"] == plugin["version"]
+    assert package["project"]["version"] == plugin["version"]
+
+
+def test_the_plugin_starts_the_server_from_the_package_whose_version_it_carries() -> None:
+    """The version and cache keys checked here only matter if uvx builds this very package."""
+    plugin = json.loads((_ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    server = plugin["mcpServers"]["equity_calculator"]
+
+    assert server["command"] == "uvx"
+    assert server["args"] == ["--from", "${CLAUDE_PLUGIN_ROOT}/equity_calculator[mcp]", "equity_calculator_mcp"]
+    folder = server["args"][1].removeprefix("${CLAUDE_PLUGIN_ROOT}/").removesuffix("[mcp]")
+    assert _ROOT / folder / "pyproject.toml" == _PACKAGE
+
+
+def test_an_edited_module_rebuilds_the_server_before_a_release() -> None:
+    """uv rebuilds a local package when a cache-key file changes: the package's pyproject.toml and every module."""
+    keys = tomllib.loads(_PACKAGE.read_text(encoding="utf-8"))["tool"]["uv"]["cache-keys"]
+
+    assert {"file": "pyproject.toml"} in keys
+    assert {"file": "src/**/*.py"} in keys
