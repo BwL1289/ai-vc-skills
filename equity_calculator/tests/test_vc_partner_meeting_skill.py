@@ -7,11 +7,14 @@ person or firm. The adversarial review keeps both stages (lenses that quote the 
 that may use only the founder's material), the standing prep questions are never refuted, and the debrief builds each
 stronger answer only from the founder's material. The question bank in references/ is one table per category with
 fixed columns, no figures and no names, competition rows at four fixed levels, and the standing prep questions word
-for word. The calculator flags table, the standing prep table and the debrief's full shape live in references/ beside
-the bank, so the skill stays under its line cap with its lines wrapped like the rest; the skill links each, keeps the
-rules that bind it, and the checks on each read it there. Each eval in evals/vc-partner-meeting/ has a prompt, an
-expected tool call and an expected answer; the one eval with calculator calls carries valid calls and excerpts that are
-lines of the reports those calls print.
+for word. The calculator flags table, the standing prep table, the debrief's full shape and how the live drill runs
+live in references/ beside the bank, so the skill stays under its line cap with its lines wrapped like the rest; the
+skill links each, keeps the rules that bind it, and the checks on each read it there. The skill's first live drill left
+five rules, each pinned here: the top questions are answered in the founder's own words before any draft is shown; a
+follow-up uses the founder's everyday words; a draft whose figure changed is marked stale and redone; a spoken answer
+weaker than the material's own line gets a tiered rewrite; and each short standing answer gets one next step. Each eval
+in evals/vc-partner-meeting/ has a prompt, an expected tool call and an expected answer; the one eval with calculator
+calls carries valid calls and excerpts that are lines of the reports those calls print.
 """
 
 from __future__ import annotations
@@ -42,10 +45,12 @@ _STANDING_LINK = "[`references/standing-prep.md`](references/standing-prep.md)"
 _STANDING_PREP = (_FOLDER / "references" / "standing-prep.md").read_text(encoding="utf-8")
 _DEBRIEF_LINK = "[`references/debrief.md`](references/debrief.md)"
 _DEBRIEF = (_FOLDER / "references" / "debrief.md").read_text(encoding="utf-8")
+_DRILL_LINK = "[`references/drill.md`](references/drill.md)"
+_DRILL = (_FOLDER / "references" / "drill.md").read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _EVAL_DIR = _ROOT / "evals" / "vc-partner-meeting"
 _EVALS = sorted(_EVAL_DIR.glob("*.md"))
-_EVAL_COUNT = 4
+_EVAL_COUNT = 5
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_deal_check` call."
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
@@ -109,6 +114,14 @@ _THIRD_PERSON = "A partner is likely to ask ..."
 _SKILL_MARKS = {_NOT_REHEARSED, _YOUR_QUESTION, _NOT_COMPUTED, _THIRD_PERSON}
 # The one sentence every attack brief in the pack carries since a live run's attacker judged the material for itself.
 _RAISE_IT_ANYWAY = "raise it anyway, however short the material, and the refute pass decides"
+# The questions a founder answers in their own words before any draft is shown: with a one-click draft on every
+# question, a founder may rehearse few answers in their own words.
+_OWN_WORDS_FIRST = (
+    "The first three questions, and every one in the ends-the-meeting tier, are answered in the founder's own words"
+    " before any draft is shown"
+)
+# The mark a draft takes when a figure it cites changes mid-session; no square brackets, which mark an ask.
+_STALE = "\"stale\" followed by the figure's name in the founder's words"
 # An eval's call: a line that starts with the tool's name and ends with a colon, then its JSON fence.
 _LABELLED_CALL = re.compile(r"^`equity_([a-z_]+)`[^\n]*:\n\n```json\n(.*?)^```$", re.MULTILINE | re.DOTALL)
 _REFUTE_VERDICTS = ("Dropped, answered:", "Dropped, not grounded:", "Kept:")
@@ -593,7 +606,7 @@ def test_the_sources_are_ones_the_authors_read_and_the_credit_took_no_text() -> 
     assert set(_URL.findall(_TEXT))
     assert set(_BARE_LINK.findall(_TEXT)) == _BARE_LINKS_ALLOWED
     assert not _BARE_LINK.search(_BANK)
-    for reference in (_FLAGS, _STANDING_PREP, _DEBRIEF):
+    for reference in (_FLAGS, _STANDING_PREP, _DEBRIEF, _DRILL):
         assert not _URL.search(reference) and not _BARE_LINK.search(reference)
     assert "github.com/xiapeli/vc-skills" in sources and "MIT-licensed" in sources
     assert "no text was taken" in sources
@@ -605,7 +618,7 @@ def test_no_person_or_firm_is_named_outside_sources_or_in_any_eval_answer() -> N
     outside = (_TEXT[:sources_start] + _TEXT[sources_end:]).lower()
     answers = [_section("## Expected answer", path.read_text(encoding="utf-8")).lower() for path in _EVALS]
 
-    for text in (outside, _FLAGS.lower(), _STANDING_PREP.lower(), _DEBRIEF.lower(), *answers):
+    for text in (outside, _FLAGS.lower(), _STANDING_PREP.lower(), _DEBRIEF.lower(), _DRILL.lower(), *answers):
         for name in _PEOPLE_AND_FIRMS:
             assert not re.search(rf"\b{re.escape(name)}\b", text), name
 
@@ -617,6 +630,155 @@ def test_every_line_an_eval_answer_quotes_is_in_its_prompt_or_is_a_mark_of_the_s
 
     for quoted in _DOUBLE_QUOTED.findall(_unwrapped(_section("## Expected answer", text))):
         assert quoted in prompt or quoted in _SKILL_MARKS, quoted
+
+
+def test_the_top_questions_are_answered_in_the_founders_own_words_before_any_draft_is_shown() -> None:
+    """With a one-click draft offered on every question, a founder may rehearse few answers in their own words. "Top"
+    is by the drill's order, so a calculator mismatch, which heads the drill with no tier, is among them."""
+    steps = _unwrapped(_section("## Steps"))
+    drill = _unwrapped(_DRILL)
+
+    assert _OWN_WORDS_FIRST in steps and _DRILL_LINK in steps and "read it before question 1" in steps
+    assert steps.index("6. **Drill.**") < steps.index(_OWN_WORDS_FIRST) < steps.index("One-message mode")
+    assert "ask for the founder's own answer with no draft shown and no draft to pick" in drill
+    assert "Once the founder has answered, or skipped it, the draft may be shown beside the answer" in drill
+    assert "Every other question may offer the draft from the start" in drill
+    # A founder's request for a draft on every question does not lift the rule on the top ones.
+    assert "When the founder asks for a draft on every question, the rule still holds on these" in drill
+    assert "say in one line that the draft comes right after their answer or a skip" in drill
+    # A draft fills no gap the material leaves open, and a taken draft is never the founder's answer.
+    assert (
+        "A draft is built as a stronger answer is: only from the founder's material and tool results, every gap a"
+        " bracketed ask, no figure worked out by hand" in drill
+    )
+    assert "A draft the founder takes is the skill's text, not the founder's answer" in drill
+    assert "it adds nothing to the founder's material" in drill
+    assert "the debrief says the draft was taken, never that the answer held up" in drill
+    # The first turn's rule moved here whole, so the skill and its drill page never give two versions of it.
+    assert "The first turn** names the lenses and puts question 1" in drill and "The first turn names" not in _TEXT
+    assert "so the kept list is not shown before the drill" in drill
+
+
+def test_a_follow_up_is_in_the_founders_everyday_words_never_the_skills_or_investors_terms() -> None:
+    """A follow-up worded in the skill's own terms or investors' jargon leaves a founder asking for plain language."""
+    drill = _unwrapped(_DRILL)
+
+    assert "Ask at most one follow-up per question" in drill and "Ask at most one follow-up" not in _TEXT
+    assert "only when the answer leaves out the specific thing the question asked for" in drill
+    assert "Word it in the founder's everyday words, never this skill's terms" in drill
+    assert "(a lens, a tier, a kept question) or investors' jargon" in drill
+    # The good form: a plain question, then what is enough to answer it.
+    assert "a plain question, then what is enough to answer it" in drill and "rough timing is enough" in drill
+    assert "a follow-up in the founder's everyday words" in _unwrapped(_section("## Steps"))
+    # The skill puts every partner question in the third person; a follow-up is the moderator's own.
+    assert "A follow-up is the moderator's own question, put to the founder directly" in drill
+    assert "it is never worded as a partner's" in drill
+
+
+def test_a_draft_that_cites_a_figure_the_founder_changes_is_marked_stale_and_redone_through_the_tool() -> None:
+    """A figure can change mid-session, and every draft that cites it is then redone from the new figure."""
+    drill = _unwrapped(_DRILL)
+
+    assert "When the founder changes a figure mid-session" in drill
+    assert "mark every draft that cites the old one, in the drill, the standing prep or a stronger answer" in drill
+    assert f"a stronger answer, {_STALE}, then redo each from the new figure" in drill
+    # A computed figure is computed again, never patched or worked out by hand.
+    assert "A figure a tool computed goes through that tool again" in drill
+    assert "a new call with the new figure as step 3 says" in drill
+    assert "never an edit of the old result or the new figure worked out by hand" in drill
+    assert "Make one call per version of the ask" in _unwrapped(_section("## Steps"))
+    assert "a draft redone when a figure changes" in _unwrapped(_section("## Steps"))
+    # Only the founder's word makes a figure changed; a figure that merely differs is the debrief's disagreement.
+    assert "A figure has changed only when the founder says the new one replaces one they gave" in drill
+    assert (
+        "an answer whose figure differs from the material's with no such word is a disagreement for the debrief"
+        in drill
+    )
+    assert "a bracketed ask asks which stands before anything is redone" in drill
+    assert "The old line stays quoted as written and is no longer a disagreement" in drill
+    assert "bringing it up to date is one open ask" in drill
+    assert "For the changed figure the new call replaces the old one" in drill
+    assert "its verdict, mismatches and flags are the ones the drill's order, the kept table" in drill
+    assert "the kept table and the answer's Numbers use" in drill
+    # The rule reaches one-message mode too, through the page both modes read.
+    assert "When the founder changes a figure after an answer was drafted or debriefed" in _unwrapped(_DEBRIEF)
+    assert '"A figure that changes" in [drill.md](drill.md) applies, in either mode' in _unwrapped(_DEBRIEF)
+
+
+def test_a_spoken_answer_weaker_than_the_materials_own_line_gets_a_tiered_rewrite() -> None:
+    """A spoken answer weaker than the material's own line is rewritten: checkable items first, the rest plainly."""
+    shape = _unwrapped(_DEBRIEF)
+
+    assert "it claims less than the material's own line on the same point (both quoted)" in shape
+    assert "When the spoken answer claims less than the material's own line, the stronger answer is tiered" in shape
+    assert "it leads with the strongest items a partner can check, each with its label" in shape
+    assert "then says the rest plainly for what it is" in shape and "never dressed up as more" in shape
+    assert "the stronger answer is tiered within the same four sentences" in shape
+    # A lower figure, or a claim taken back, is a disagreement: the founder's spoken answer may be the truer one.
+    assert (
+        "Where the answer gives a different figure, count or date than the line, or takes the claim back, it is a"
+        " disagreement, as above, and the stronger answer never restores the bigger claim: its bracketed ask asks"
+        " which stands" in shape
+    )
+    # The tiered rewrite is still a stronger answer: built only from the material, every gap a bracketed ask.
+    assert shape.index("built only from the founder's material") < shape.index("the stronger answer is tiered")
+
+
+def test_each_short_standing_answer_gets_one_specific_next_step_and_a_silent_one_its_bracketed_ask() -> None:
+    """A standing question the material says nothing on keeps its bracketed ask, and each short answer gets one specific
+    next step, the one that gets the answer ready before the meeting."""
+    rows = _table("## The questions", _STANDING_PREP)
+    steps = {row[0]: row[2] for row in rows}
+    prep = _unwrapped(_STANDING_PREP)
+    shape = _unwrapped(_DEBRIEF)
+    standing = _unwrapped(_section("## Standing prep questions"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert all(len(row) == 3 and row[2] for row in rows)
+    others = steps["Which other investors are you meeting, and who has committed?"]
+    # Spoken interest is not a yes, so the step covers both and treats neither as a commitment.
+    assert "in writing" in others and "whose interest or yes is only spoken" in others
+    assert "today's cash, spend and revenue" in steps["What happens if this round does not close?"]
+    assert "Line up the references" in steps["Whom will the partner call, on your list and off it?"]
+    assert "today's runway in months" in steps["What happens if this round does not close?"]
+    assert "`equity_runway_plan`" in steps["What happens if this round does not close?"]
+    assert "Where the material says nothing on a standing question, its bracketed ask carries it" in prep
+    assert "a next step never assumes an answer the founder did not give" in prep
+    # Short means not yet ready, wherever the answer came from; a brief, complete answer gets no step.
+    assert (
+        "An answer is short when it does not yet give what the middle column says the founder should have ready,"
+        " whether it came with the material or in the drill; a brief answer that gives it gets no next step" in prep
+    )
+    assert "The sixth question's step always shows, since it is the founder's to ask" in prep
+    # The step is written once, in the answer's Standing prep.
+    assert "written once, in the answer's Standing prep" in prep
+    assert "It is written once, in the answer's Standing prep, not again in this question's debrief" in shape
+    assert "putting spoken interest in writing" in shape and "spoken yes" not in shape
+    assert "**One next step,** for a standing question only" in _DEBRIEF
+    assert "where the founder's answer is short, it gets the one specific next step that file names for it" in shape
+    assert "the one next step a short answer gets" in standing and "and a short answer's next step" in answering
+
+
+def test_the_drill_eval_asks_for_the_founders_own_words_first_and_gives_each_short_answer_a_next_step() -> None:
+    text = _eval("dm").read_text(encoding="utf-8")
+    first = _unwrapped(text.split("\n## ", 1)[0])
+    prompt = _unwrapped(_section("## Prompt", text))
+    answer = _unwrapped(_section("## Expected answer", text))
+
+    assert _eval("dm") in _NO_CALL_EVALS and "## Recorded answer" not in text
+    assert "came from the skill's first live drill" in first
+    assert "offer me a draft answer I can pick on every question" in prompt
+    assert "no draft shown and no draft to pick" in answer and "Once the founder answers or skips" in answer
+    # The run is scripted over several turns, so one run can show both the own-words rule and the standing prep.
+    assert "the tester answers question 1 in a sentence, skips question 2, answers question 3 in a sentence" in first
+    assert "then says stop" in first and "on the three questions put before the stop" in first
+    assert "I don't have the cap or our cash figures today, so go on without them" in prompt
+    assert "On the first three questions, and on every one in the ends-the-meeting tier" in answer
+    # Each of the five short answers on the round so far is quoted with its own next step.
+    short = [quoted for quoted in _DOUBLE_QUOTED.findall(answer) if quoted in prompt]
+    assert len(short) == 5 and "each of the five short answers is quoted and gets one specific next step" in answer
+    assert "in writing" in answer and "line up references" in answer and "`[cash in the bank today]`" in answer
+    assert "never calls either keen fund committed" in answer
 
 
 def test_the_readme_badge_counts_the_skill_folders() -> None:

@@ -6,6 +6,8 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- Plugin version 0.3.7 (the plugin's, the marketplace's and the `equity_calculator` package's), so an installed copy
+  picks up the `vc-partner-meeting` fixes from its first live drill, listed under Changed.
 - Live runs of four more evals on plugin 0.3.5 (Claude Code 2.1.331), each recorded in its eval with an excerpt and a
   verdict under the README's rule: `vc-positioning` (Company BK), `vc-metrics-readiness` (Company DL) and
   `vc-cap-table-check` (Company CQ) passed, each with shortfalls against its expected answer noted, and `vc-deal-math`
@@ -295,6 +297,24 @@ All notable changes to this repository. Dates are UTC.
 
 ### Changed
 
+- `vc-partner-meeting` takes five rules from its first live drill, each pinned in its test. The first three
+  questions, and every one in the ends-the-meeting tier, are answered in the founder's own words before any draft is
+  shown, even when the founder asks for a draft on every question (with a one-click draft on every question, a founder
+  may rehearse few answers in their own words); a draft is built as a stronger answer is, and one the founder takes is
+  the skill's text, never debriefed as the founder's answer. A follow-up is the moderator's own question in the
+  founder's everyday words, never the skill's terms or investors' jargon: a plain question, then what is enough to
+  answer it. When the founder says a new figure replaces one they gave, every draft that cites the old one is marked
+  stale and redone from the new figure, through the calculator again where a tool computed it, and the new call's
+  results replace the old call's; a figure that only differs from the material's is a disagreement for the debrief. A
+  spoken answer that claims less than the material's own line gets a tiered rewrite in the debrief, within its four
+  sentences: the strongest items a partner can check first, the rest said plainly, never restoring a figure the answer
+  changed or took back. Where the material says nothing on a standing question its bracketed ask carries it, and each
+  short answer to one (one that does not yet give what the founder should have ready) gets one specific next step, now
+  a column of the standing prep table (put spoken interest in writing, line up references before the meetings, have
+  today's runway in months ready from `equity_runway_plan`). To keep the skill under its 350-line cap, the drill's
+  first-turn and follow-up rules moved into a new `references/drill.md` beside the new ones, which step 6 links, the
+  one change in wording being "below", which reads "in the skill's Answering section" there. A new eval, Company DM
+  (made up, unrecorded), exercises the own-words rule and the next steps over scripted tester turns.
 - Skill fixes from the four live runs on plugin 0.3.5, each pinned by a test:
   - `equity-calculator` sends a priced round weighed against a convertible note (`instrument_compare`) to
     `vc-deal-math`'s step 7, and says to load the review skill a question belongs to and answer from it. When it answers
