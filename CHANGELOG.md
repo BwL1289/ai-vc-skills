@@ -6,6 +6,8 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- Plugin version 0.3.9 (the plugin's, the marketplace's and the `equity_calculator` package's), so an installed copy
+  picks up the `vc-deal-math` hand-off fix listed under Changed.
 - A live re-run of the `vc-deal-math` eval for Company DX on plugin 0.3.7 (Claude Code 2.1.331), recorded in its eval in
   place of the run on plugin 0.3.5, which the file now describes: Pass, with shortfalls against the expected answer
   noted. Its session again loaded the `equity-calculator` skill, never `vc-deal-math`, and answered from that skill's
@@ -306,6 +308,20 @@ All notable changes to this repository. Dates are UTC.
 
 ### Changed
 
+- A founder weighing a priced round now against a convertible note now is sent to `vc-deal-math` more plainly. In both
+  recorded live runs of the Company DX eval the session loaded the `equity-calculator` skill and answered from it,
+  never loading `vc-deal-math`, though the calculator skill sent the question there; the likely cause is that the
+  calculator skill's description led with convertible notes while `vc-deal-math`'s named the choice deep in its
+  trigger list. `vc-deal-math`'s description now says in its first sentence that it weighs one way to raise against
+  another (a priced round, a convertible note or a SAFE), with `instrument_compare` beside `deal_check`. The
+  `equity-calculator` skill's description says in its second sentence that a priced round weighed against a
+  convertible note goes to `vc-deal-math`, keeping its own triggers (some reworded to fit the 1,024-character cap).
+  Its body now opens, before the scenario table, with a bold line in step 7's own words: load `vc-deal-math` and
+  answer from its step 7, never from this skill, and answer here only if that skill cannot be loaded. Its own copy of
+  step 7's rules now also asks for each flag by its code with its meaning in step 7's words and each assumption by
+  name, marked `unverified` where the result says so, which the 0.3.7 run missed. The Company DX eval's record says
+  what changed since its run and that it has not been run on 0.3.9, so whether the hand-off now fires is not yet
+  known. New tests pin each change.
 - `runway_plan`'s report says "not given: read as none" beside a phase's revenue a month that was left out, in the
   plan or in a downside or lean case given its own phases, where it printed "$0.00 given" as if the founder had stated
   0; a revenue given as 0 still reads "given", and the runway is the same either way. The words and the test of a null

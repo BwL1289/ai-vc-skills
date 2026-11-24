@@ -1,9 +1,13 @@
 ---
 name: equity-calculator
-description: Exact startup equity arithmetic with the equity_calculator MCP tools (command as fallback). Use when someone asks if a fundraise or a stake is worth it (Paul Graham's equity equation), how much equity to offer a hire, how big an option pool to add (the option-pool shuffle), how SAFEs or convertible notes convert in a priced round (caps, discounts, MFN, interest), how a stake dilutes over several rounds, how many shares have vested, or who gets what at an exit (liquidation preferences, participation, caps). deal_check checks a raise's valuation, percent sold, ownership and runway; runway_plan shows how long each raise lasts and which milestones it reaches; metrics_check checks traction metrics, LTV and the Rule of 40 too; market_sizing builds TAM, SAM and SOM bottom-up; instrument_compare sets a priced round beside a note; pool_plan sizes a pool from a hiring plan; raise_pipeline works the room left in a round and a funnel's term sheets; cap_table_check ties out a cap table. Never do arithmetic by hand.
+description: Exact startup equity math with the equity_calculator MCP tools (command as fallback). A priced round weighed against a convertible note goes to the vc-deal-math skill (instrument_compare). Use when someone asks if a raise or a stake is worth it (Paul Graham's equity equation), how much equity to offer a hire, how big an option pool to add (the option-pool shuffle), how SAFEs or notes convert in a priced round (caps, discounts, MFN, interest), how a stake dilutes over rounds, how many shares have vested, or who gets what at an exit (liquidation preferences, participation, caps). deal_check checks a raise's valuation, percent sold, ownership and runway; runway_plan shows each raise's runway and the milestones reached; metrics_check checks traction metrics, LTV and the Rule of 40; market_sizing builds TAM, SAM and SOM bottom-up; pool_plan sizes a pool from a hiring plan; raise_pipeline works the room left in a round and a funnel's term sheets; cap_table_check ties out a cap table. Never do arithmetic by hand.
 ---
 
 # Equity calculator
+
+**A founder who has not chosen between a priced round now and a convertible note now goes to the vc-deal-math skill:
+load it and answer from its step 7, never from this skill.** Only if that skill cannot be loaded, answer here, by the
+rules for `instrument_compare` under Answering, step 1.
 
 The calculator works fifteen scenarios exactly (rational arithmetic, no floating point) and returns every value, the
 exact fractions, and the assumptions each result rests on, each with its source. Use it for the numbers; do not
@@ -145,7 +149,10 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
    change-of-control terms, which are asked for, never assumed (vc-deal-math's step 7). Lead with the result's
    `summary`, say in words which mode ran (with no next round, that the note never converts at a priced round here),
    show A, B and B - A as the tool gives them for every row that has them, ownership included, and never say which
-   option to take. For `pool_plan`, never assume one: the share counts, the round, the
+   option to take. Then give the flags and the assumptions the answer leans on: the MCP result gives flag codes only,
+   so name each flag by its code with its meaning in vc-deal-math step 7's words, and quote each assumption by its
+   name with its source, marking it `unverified` where the result says so. For `pool_plan`, never assume one: the
+   share counts, the round, the
    requested pool, the next round's month and every hire's start month and grant are the founder's own figures, so ask
    for them; with no hire the tool refuses (`no_hiring_plan_given`). Show the plan, the requested pool and requested -
    plan as the tool gives them and never say which pool to accept. For `raise_pipeline`, never assume one: the round,

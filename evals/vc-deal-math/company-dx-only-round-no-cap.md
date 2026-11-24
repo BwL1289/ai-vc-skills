@@ -136,10 +136,14 @@ over who chooses at maturity and a sale after maturity, but the 2x change-of-con
 and the conversion mechanics are not handed over by name. It asks the founder for nothing more, does not call
 `equity_deal_check`, says the $5M is taken over today's 10,000,000 fully diluted shares, and says the note's own terms
 decide whether it is repaid, converted or extended. The session's first line listed the calculator's server as still
-starting, with none of its tools; the run found the tool by searching for it by name and called it once. Since this run
-neither skill's text has changed: the hand-off to this skill did not fire in it, and the equity-calculator skill's steps
-3 and 5, which ask for each assumption that is `unverified` and for each flag by its code with its meaning from this
-skill's step 7, were not followed; how to make the hand-off fire is open. The eval has not been run again.
+starting, with none of its tools; the run found the tool by searching for it by name and called it once. The hand-off
+to this skill did not fire in it, and the equity-calculator skill's steps 3 and 5, which ask for each assumption that is
+`unverified` and for each flag by its code with its meaning from this skill's step 7, were not followed. Since this run
+plugin 0.3.9 changed both skills for the hand-off: this skill's description names weighing a priced round against a
+note or a SAFE in its first sentence, the equity-calculator skill's description sends a priced round weighed against a
+note here, that skill opens with a line to load this one and answer from step 7, and its own copy of step 7's rules
+asks for each flag by its code and each assumption marked `unverified` where the result says so. Whether the hand-off
+now fires is not yet known: the eval has not been run on 0.3.9.
 
 The second run, on plugin 0.3.5 the same day, failed with three of the five clauses met only in part; its session too
 loaded the equity-calculator skill, never this one, as the first run's had. It made the same one call, but never said in

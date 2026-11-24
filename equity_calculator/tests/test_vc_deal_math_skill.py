@@ -132,6 +132,19 @@ def test_the_frontmatter_names_the_skill_and_the_founders_questions() -> None:
     assert "founder" in fields["description"]
 
 
+def test_the_description_names_weighing_one_way_to_raise_against_another_in_its_first_sentence() -> None:
+    """Two live runs of a priced round against a note loaded the equity-calculator skill, never this one: the comparison
+    sat deep in this description's trigger list. It is now in the first sentence, with the tool that works it."""
+    description = _frontmatter()["description"]
+    first_sentence = description.split(". ", 1)[0]
+
+    assert (
+        "and weigh one way to raise against another (a priced round, a convertible note or a SAFE), with the equity"
+        " calculator's deal_check and instrument_compare tools"
+    ) in first_sentence
+    assert description.index("should we raise a priced round or a note") < description.index("check my deck's numbers")
+
+
 def test_the_json_example_is_a_valid_deal_check_call() -> None:
     (example,) = _fences("json")
     inputs = json.loads(example)["inputs"]
@@ -418,7 +431,12 @@ def test_a_founder_who_expects_no_next_round_is_asked_for_the_note_s_own_maturit
     verdict, earlier = recorded.split(" The second run, ", 1)
     assert "**Pass, with shortfalls against the expected answer.** It met every clause of the pass sentence" in verdict
     assert "the session again loaded the equity-calculator skill, never this one" in verdict
-    assert "Since this run neither skill's text has changed: the hand-off to this skill did not fire in it" in verdict
+    assert "The hand-off to this skill did not fire in it" in verdict
+    assert (
+        "Since this run plugin 0.3.9 changed both skills for the hand-off: this skill's description names weighing a"
+        " priced round against a note or a SAFE in its first sentence"
+    ) in verdict
+    assert "Whether the hand-off now fires is not yet known: the eval has not been run on 0.3.9." in verdict
     assert "on plugin 0.3.5 the same day, failed with three of the five clauses met only in part" in earlier
     assert "its session too loaded the equity-calculator skill, never this one" in earlier
     assert "After it the equity-calculator skill sent a priced round weighed against a note to this skill's step 7" in (
