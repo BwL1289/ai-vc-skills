@@ -556,3 +556,42 @@ def test_the_named_firm_eval_declines_the_voice_and_the_growth_rate() -> None:
     assert "labelled as a framework" in answer and "declines to assume a growth rate" in answer
     assert "five intake questions in one message" in answer
     assert "no round size and no recommendation" in answer
+
+
+def test_the_table_says_what_a_start_raising_by_cell_holds_when_the_tool_printed_none() -> None:
+    """With no months to raise the tool prints no start raising by, yet the table requires the column."""
+    steps = _unwrapped(_section("## Steps"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert (
+        'With no months to raise the tool prints no start raising by, so the cell reads "not computed: give'
+        in answering
+    )
+    assert '(with `self_funding`, "not computed: no follow-on round")' in answering
+    # Months to raise given, and the row's cash never runs out: the tool prints none either, and the cause differs.
+    assert (
+        "when the months were given and the row's cash never runs out, the tool also prints none, and the cell reads "
+        '"none: the cash never runs out"'
+    ) in answering
+    assert "or item 2's text for why the tool printed none" in steps
+
+
+def test_a_case_whose_rows_are_the_plans_is_said_once_and_not_repeated() -> None:
+    """A revenue downside on a plan with $0.00 revenue prints the plan's rows again, row for row."""
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "A case whose rows are the plan's, row for row as printed" in answering
+    assert "\"the downside's rows are the plan's, as printed\", and not repeated" in answering
+
+
+def test_the_tools_own_difference_row_is_quoted_and_step_ones_list_has_a_heading() -> None:
+    """The no-gap rule did not say whether the runway check's printed difference may be quoted, and step 1's quoted
+    figures had no heading in the answer."""
+    steps = _unwrapped(_section("## Steps"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "A difference the tool prints itself (a deck claim's `difference` row, `computed - stated`)" in steps
+    assert "not a gap worked by hand: quote it as printed, with its label" in steps
+    assert "The list leads Answering item 5" in steps
+    assert "**Deck claims:** first step 1's list of what the founder states, word for word" in answering
+    assert "(with the tool's own difference row as printed)" in answering

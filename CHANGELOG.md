@@ -33,6 +33,9 @@ All notable changes to this repository. Dates are UTC.
   uncapped note works in both modes. The mode flags a cap that sets no price there (`cap_unused_without_round`) and a
   note converted at its cap that a sale pays less than it owes (`note_paid_below_owed_at_sale`). `vc-deal-math` step 7
   asks for those terms and a Company DX eval runs the mode.
+- Plugin version 0.3.2, so an installed copy picks up the fixes a real deck run's feedback asked for: the phased
+  runway, the instrument comparison's summary, the market-sizing paths, lean mode without a subagent tool, and the
+  per-skill rules listed under Changed.
 - Plugin version 0.3.1, so an installed copy picks up the `vc-cap-table-check` skill, the calculator's fifteenth
   scenario, the new metrics in `metrics_check` and the no-next-round mode of `instrument_compare`; the README, the
   website, the plugin and marketplace descriptions and AGENTS.md list them, `vc-cap-table-check` hands the pool to the
@@ -264,6 +267,128 @@ All notable changes to this repository. Dates are UTC.
 
 ### Changed
 
+- Per-skill fixes from a real deck run's feedback (the figures and wording of that deck are in no file):
+  - `vc-deal-math`: an instrument comparison leads with the result's `summary`, read first over MCP, before the
+    side-by-side table.
+  - `vc-investor-memo`: the `exit_is_shared_amount` statement is quoted only under an outcome table a waterfall made;
+    a computed mismatch has no tier, with its two exceptions (an understated runway, a one-reading valuation) each
+    said to sit in a tier; the Risks left out lens returns every left-out risk, however many, and Top risks holds
+    them all; a milestone counted from another start than today keeps its own clock and is never set against the
+    runway.
+  - `vc-diligence-questions`: a fourth checklist status, Unknown: ask, for a row the founder has not been asked about
+    (Missing now needs the founder's list); a listed row cites only the bank questions of the founder's stage (a test
+    proves the rule is needed); an HTML file's alt text and a PDF's text layer count as read.
+  - `vc-partner-meeting`: one cap rule for how many questions a lens returns, carried in the Stage A brief; a question
+    answered in part stays one kept question and counts once; with no cash given, no runway call runs and each runway
+    line reads "not computed", never 0.00 months (a zero the founder states is still sent). Where the calculator's
+    mismatches and flags go moved to the skill's flags file, beside the codes' meanings.
+  - `vc-round-sizing`: the Start raising by cell says "not computed" when the tool printed none for want of months to
+    raise, and "none: the cash never runs out" when the months were given and the row's cash never runs out; a case
+    whose rows are the plan's is said once; the tool's own difference row may be quoted; step 1's list leads the Deck
+    claims heading.
+  - `vc-taste-check`: decisions are numbered T1, T2, so a founder log's own D numbers never clash; a log of mostly
+    layout detail, or partly written by assistant sessions, keeps only the founder's decisions; Usefulness counts a
+    customer's trust, so an honesty choice can be Clear; a new Claimed quality flag; "needs a story" is defined and
+    the deck and the meeting share one bar.
+  - `vc-market-sizing`: the no-market-count path quotes "not worked" and sends no stated TAM or SAM, or a population,
+    and a SOM in units sends no customers today; a deck figure built from a top-down one is checked by the tool's
+    comparable part, sent after every true top-down figure, and that row's share, difference, flag and break-even are
+    never put to the founder as findings; the tool varies nine segment fields (the second line and the units to win
+    too), and a SOM in units does not move with the count, the share served or the units per customer; the shakiest
+    pick sits beside the founder's highest value, not an assumed high one; a horizon in months stays in months in the
+    ledger; the answer keeps its ten sections.
+  - `vc-deal-math`: on a priced round on a phased plan, `deal_check` gets the spend and revenue of the phase the round
+    lands in, and a `runway_below_band` it raises is the quick check's, never the plan's.
+  - `vc-positioning`: "What is our contrarian insight?" and "What do we believe that others don't?" are listed under
+    When to use it, as they already were in the description.
+  - `vc-intro-email` and `vc-pass-debrief`: a hand-off back to the vc-raise-plan skill, for the investor list and the
+    tracker.
+- A priced round on a phased plan: `equity_deal_check`'s one flat burn can call a deck's runway a mismatch that
+  `equity_runway_plan`, on the founder's phases, calls consistent. The claims-check, deck-review,
+  diligence-questions, investor-memo, metrics-readiness, partner-meeting and positioning skills now say, right
+  after their phases rule, that such a round goes to `equity_deal_check` without its runway claim, the plan's
+  runway and the claim's check come from `equity_runway_plan` (the round's amount as one `raises` entry), and both
+  runways are quoted, each named; the vc-deal-math step 2 says to leave the claim out of the `deal_check` call. A
+  phased plan is a change from a later month the founder names: spend planned from the round on stays
+  `deal_check`'s planned burn. Each skill's own priced-round sentence that lists the runway claim now says "not on
+  a phased plan". The vc-deal-math step 2 also says an uncapped note with the next round given still runs in
+  `equity_round`, at its discount price. The
+  investor-memo skill's round section had two lines Prettier had left unindented after an inline code span was
+  split across them; it is rewrapped with each span whole.
+- A note weighed against a priced round, or a SAFE or note with no next round: the investor-memo, partner-meeting,
+  positioning and diligence-questions skills sent every SAFE or note to `equity_round`, which needs the next priced
+  round. Each now says, in one sentence, that a note the founder weighs against a priced round now goes to
+  `equity_instrument_compare` (vc-deal-math step 7, capped or not, in its no-next-round mode when no next round is
+  expected), and that with no next round and nothing to weigh it against the instrument's share is "not computed:
+  set at the next priced round". The vc-deal-math step 2 and its Limits say the same; the memo and diligence
+  skills now name `equity_instrument_compare` among their tools.
+- Lean mode with no subagent tool: every skill whose lenses feed a one-per-item refute pass now ends its lean
+  paragraph by saying lean mode still applies past eight items, lens by lens in one agent, each item with a verdict
+  of its own, the answer saying so and the full pass then one item at a time. The claims-check and round-sizing
+  skills, whose one skeptic raises at most three attacks, each say in one sentence that lean mode never applies
+  there. The deck-review and positioning skills no longer tell a no-subagent run to keep the lenses blind to tables
+  in their own file, which the agent has already read: they say so, and that such lenses are less independent. The
+  market-sizing check before answering now covers the no-subagent path too. The prospective-update skill drops a
+  sentence its Runway bullet repeated from its "Built from" section, to stay under its line cap.
+- Every skill with an intake (each Inputs section, the deal-math and cap-table steps that ask, and the calculator
+  skill's first step) now says what to do when the founder cannot answer now: go on with what was given, keep any
+  call or step that waits for an input waiting, invent nothing, list each ask in brackets under "Needs from the
+  founder" (the open asks under that name), and keep a live drill for the founder. One sentence, word for word,
+  pinned by the shared-rules test.
+- To keep two skills under their line caps, the investor-memo skill's worked waterfall call (its JSON, the same
+  command and part of what it prints) moves to `references/outcome-example.md`, and the partner-meeting skill's
+  debrief shape and where its standing prep topics came from move to `references/debrief.md` and
+  `references/standing-prep.md`; each skill links the file and keeps the rules that bind it, and their tests read
+  the moved parts there.
+- `market_sizing` takes a second revenue line from the same buyer (`second_line_percent`, `second-line-percent=`):
+  a share of the main bill, kept whole and added to the take rate (annual revenue from one customer = the main bill
+  × (take rate + second line)); the gross spend includes it; a `second_line_rule` assumption, a given line, a
+  sensitivity field of its own, and break-evens on the take rate or the second line that hold the other fixed (a
+  break-even at or below zero is out of range). The `equity_market_sizing` tool description now names the no-count
+  path, `obtainable_units` and the second line.
+- `raise_pipeline` keeps a cash floor or a phase's revenue left out as "not given: read as none" when a result's
+  echoed inputs are read back from JSON (sent again, or to the workbook tool): a field left out is now null, not 0,
+  in the inputs of both `raise_pipeline` and `runway_plan`, and a stated 0 stays "given".
+- `market_sizing`'s `units_rule` row names the second line when a units segment has one; the `--sensitivity` help
+  lists all nine fields; the `runway_plan` usage line names `--milestone-type`; the `runway_plan` and
+  `instrument_compare` MCP descriptions name the run-rate, the milestone type, a raise of any instrument and the
+  summary; the README's market-sizing assumptions table has the three new rule rows.
+- `market_sizing` takes a SOM in the price's own unit (`obtainable_units`, `obtainable-units=`; seats, locations,
+  licences): units × one unit's year × (the take rate + any second line), with no SOM customers, a `som_units` row, a
+  `units_rule` assumption, a sensitivity field of its own, and refusals for units above the serviceable units or
+  beside today's customers. Units no longer have to be typed as fractional customers.
+- `market_sizing` has a path for a founder with only the customers to win and no count of the market: a segment
+  with `customers` left out (its `obtainable_customers` then required), or given equal to the customers to win,
+  works its SOM and leaves TAM and SAM unworked, with the totals, shares, top-down comparison and its break-even
+  built on them, instead of printing the SOM again as a TAM. New flag `no_market_count` (and a row in
+  vc-market-sizing's flag table), a `no_market_count_rule` assumption, "not worked" lines saying why, and refusals
+  for what needs a market count (a stated TAM or SAM, a population, a share to win, a serviceable share, a
+  sensitivity row on its customers or serviceable share).
+- A `market_sizing` sensitivity row says where its SOM low and high come from: the field's value at each end and
+  whether it is the base or one of the founder's values (`value_at_som_low`, `value_at_som_high`, `som_low_at`,
+  `som_high_at`; a tie goes to the founder's value). With every value below the base, the report adds a line saying
+  the SOM high is the base's, and vc-market-sizing's step 6 then quotes the SOM at the founder's highest value.
+- `market_sizing` takes the SOM horizon in months (`som_months`, `--som-months`, 1 to 240) beside whole years: a
+  30-month horizon is 5/2 years in the straight-line path, exactly; the years path is unchanged, and both at once is
+  refused.
+- `instrument_compare` opens with a short summary, in the report and as the JSON's `summary` (right after
+  `scenario`): the founders' and the new money's ownership today and after each next round (or at the note's maturity
+  conversion), then the founders' payout at each exit or sale, each under A, B and B - A and each a copy of a full
+  row, with B "not worked" where a sale's term is missing. The full detail follows unchanged; the README and
+  vc-deal-math eval excerpts are re-synced to the wider label column.
+- `runway_plan` takes a phase's revenue as an annualised run-rate (`revenue_run_rate`, CLI `revenue-run-rate=`),
+  divided by 12 exactly, with a `run_rate_rule` row saying so; and a `milestone_type` (`--milestone-type`): the
+  default `next_round`, or `self_funding` for a founder's only round, where each milestone is checked at its own
+  month, months to raise are refused, `no_time_to_raise_given` never fires and the milestone rule cites no source.
+  `raise_pipeline`'s phases take the run-rate too.
+- A runway-plan raise is cash of any instrument: a priced round, a SAFE or a note adds its amount at its month and
+  converts nothing, as its `landing_rule` row and `--raise` help now say. `deal_check`'s `runway_rule` row names its
+  runway as one flat burn, a quick check, and `vc-deal-math` sends a priced round on a phased plan to `runway_plan`
+  for the plan's runway, quoting both runways by name.
+- Every skill table that gives a scenario's flags their meaning now covers every code that scenario returns: the
+  deal-math, positioning, deck-review and partner-meeting skills, which listed only the three runway-plan codes a call
+  with no milestone returns, each keep a full `equity_runway_plan` table, and a new test registers every flag table
+  against the schemas' flag lists.
 - Every printed figure (the report, the JSON's `rounded`, workbook values, split cents and a message's percents) now
   rounds half away from zero, where it rounded half to even: 12.125 prints 12.13, not 12.12. No exact value, verdict
   or flag changes; a note's interest keeps its half-even rounding to the cent.

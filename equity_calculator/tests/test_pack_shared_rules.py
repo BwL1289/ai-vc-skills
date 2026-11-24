@@ -1,6 +1,6 @@
 """Rules the review skills share word for word, so one founder input gets the same treatment whichever skill runs.
 
-Four sentences are copied into several skills and must stay identical there:
+These sentences are copied into several skills and must stay identical there:
 
 - Which monthly spend goes into ``equity_runway_plan`` for a runway claim on a SAFE or note raise, and what happens
   while a planned change's start month, its monthly spend or its monthly revenue is missing. When the skills
@@ -24,13 +24,35 @@ Four sentences are copied into several skills and must stay identical there:
   objections as if it were the only one, with a verdict of its own; one no lens raised gets its own subagent, and one
   that comes back without its own verdict stays Kept. The section the answer is composed from says, in the same words
   in every such skill, that a lean pass is less independent and that the founder may ask for the full pass. The claims
-  and round-sizing skills are not on the list: one skeptic raises at most three attacks there, and a test says so. The
-  lean paragraph stands as its own paragraph, wrapped like the rest, so no line cap is met by joining lines.
+  and round-sizing skills are not on the list: one skeptic raises at most three attacks there, and each says, in one
+  sentence of its own, that lean mode never applies. The lean paragraph stands as its own paragraph, wrapped like the
+  rest, so no line cap is met by joining lines. A real deck run had no subagent tool and more than eight objections:
+  the lean paragraph now ends, in every such skill, by saying lean mode still applies there, lens by lens in one agent,
+  with each item's own verdict, the answer saying so and the full pass then one item at a time.
+- A note weighed against a priced round, or a SAFE or note with no next round. Four skills sent every SAFE or note
+  to ``equity_round``, which needs the next priced round, so a founder choosing between a note and a priced round, or
+  expecting no next round, got no route (``equity_round`` refuses with no round). ``equity_instrument_compare`` works
+  that choice, capped or uncapped, with or without a next round, but it needs the priced round's terms; with no next
+  round and nothing to weigh the note against, no tool works the instrument, and the skill says so. Each of the four
+  says it in one sentence, word for word, and the deal-math hub says it in its own words.
+- A priced round on a phased plan. A real deck run's priced round had spend planned to rise after the raise:
+  ``equity_deal_check``'s one flat burn called the deck's runway a mismatch that ``equity_runway_plan``, on the
+  founder's phases, called consistent. Each skill that checks a runway claim says, right after the phases rule, that
+  such a round goes to ``equity_deal_check`` without its runway claim and the plan's runway and the claim's check
+  come from ``equity_runway_plan``; the deal-math hub says it in its own words.
+- A lens run without a subagent tool is not blind to this skill. Two skills told the agent to run the lenses without
+  consulting tables in the same file, which an agent that loaded the skill has already read; each now says so, and
+  that such lenses are less independent, instead.
 - A file the founder gives is read, never pasted. Every skill with an Inputs section, and the deal-math skill's first
   step, reads a file the agent can open (a PDF, HTML, a slides export, Markdown), lists what it holds place by place in
   the file's own words, lists a place it could not read as not read and asks for it, never reads a figure off a chart
   or a picture, and never asks for a paste of what it read; and every "When to use it" bullet that names pasted
   material says it may come as a file. No line of those two sections is wider than 120 characters.
+- A founder who cannot answer now. Every skill asks for what is missing and waits, so a run whose founder was away
+  (a real deck session, run while the founder could not reply) had no stated path: wait, stop, or fill the gaps. Every
+  skill with an intake (an Inputs section, the deal-math and cap-table steps that ask, the calculator skill's first
+  step) now says, word for word, to go on with what was given, keep waiting any call or step that waits for an input,
+  invent nothing, list each ask in brackets under one heading, and keep a live drill for the founder.
 
 A refute pass checks its answering line as the quote check does, spacing and line breaks aside: a line that wraps in
 the founder's file is still the founder's line, and a line that is not there does not drop the item.
@@ -126,6 +148,14 @@ _PLAN_PHASES = (
     ' planned monthly spend from that month]" while the month is given and the spend is missing, or "not checked:'
     ' waiting for [the planned monthly revenue from that month]" while only the revenue is missing.'
 )
+# The sentence that follows the phases rule in every skill above but the deal-math hub, which says it in its own bullet.
+_PRICED_PHASED = (
+    "A priced round on a phased plan (spend or revenue that changes from a later month the founder names; spend"
+    " planned from the round on is `deal_check`'s planned burn) goes to `equity_deal_check` without its runway"
+    " claim, since its one flat burn could call the plan's runway a mismatch; the plan's runway and the claim's check"
+    " come from `equity_runway_plan`, the round's amount as one `raises` entry on phases built, and waited for, as"
+    " above, and both runways are quoted, each named, as vc-deal-math step 2 says."
+)
 # The three labels the runway line takes while a planned change waits: for its start month, then for its monthly
 # spend, then for its monthly revenue.
 _WAITING_FOR_MONTH = '"not checked: waiting for [the month the planned spend starts]"'
@@ -181,6 +211,12 @@ _LEAN_ANSWER = (
     " and say the founder may ask for the full pass."
 )
 _LEAN_PARAGRAPH = "\n\n**Lean mode,** the one exception:"
+# How lean mode runs with no subagent tool: the lean paragraph's last sentence, with {noun} filled as above.
+_LEAN_NO_SUBAGENT = (
+    "Without a subagent tool, lean mode still applies past eight {noun}s: go lens by lens, in order, and judge each"
+    " lens's {noun}s in one pass under that instruction, each with a verdict of its own; the answer says so, as above,"
+    " and that the full pass then takes them one at a time."
+)
 _LINE_WIDTH = 120
 _LEAN_REFUTE_SKILLS = {
     "vc-competitive-landscape": "objection",
@@ -237,8 +273,42 @@ _ANSWER_SPACING = re.compile(
     r"|check every answering line the same way as the (?:objections' )?quotes: an answering line that is not in the"
     r" material word for word does not drop the (?:objection|question)"
 )
+# Where a note weighed against a priced round, or a SAFE or note with no next round, goes.
+_NOTE_ROUTE = (
+    "A note the founder weighs against a priced round now goes to `equity_instrument_compare` as vc-deal-math step 7"
+    " says (its flags' meanings too), capped or not, and with no next round expected in that tool's no-next-round mode,"
+    " never to `equity_round`. With no next round expected and no priced round to weigh it against, `equity_round`"
+    " cannot run (it needs that round): the SAFE's or note's share is \"not computed: set at the next priced round\"."
+)
+_NOTE_ROUTE_SKILLS = ("vc-diligence-questions", "vc-investor-memo", "vc-partner-meeting", "vc-positioning")
+# What a skill does when the founder cannot answer now: one sentence, in every skill with an intake.
+_FOUNDER_AWAY = (
+    "When the founder cannot answer now, do not wait for them: go on with what was given (a call or step that waits for"
+    " an input still waits), invent nothing in a gap's place, and list each ask in brackets under **Needs from the"
+    " founder**, the open asks under that name; a live drill waits for the founder."
+)
+# The skills with no Inputs section whose intake is a step, with the heading of the section that step sits in.
+_FOUNDER_AWAY_STEP = {
+    "equity-calculator": "## Answering",
+    "vc-cap-table-check": "## Steps",
+    "vc-deal-math": "## Steps",
+}
 # The skills with one skeptic and at most three attacks, whose refute pass is small enough to need no lean mode.
 _NO_LEAN_SKILLS = ("vc-claims-check", "vc-round-sizing")
+_NO_LEAN = (
+    "One skeptic raises at most three attacks here, so the refute pass never has more than eight and lean mode, which"
+    " other review skills use past eight, never applies, with or without a subagent tool."
+)
+# The skills whose lens brief withholds a table that sits in the skill's own file: with no subagent tool the agent has
+# read it already, so the lenses cannot be blind to it and the skill says so, with the rule it used to break.
+_NOT_BLIND = {
+    "vc-deck-review": "without consulting the dimension table or any mark",
+    "vc-positioning": "without consulting the dimension table, the phrase table or any dimension mark",
+}
+_UNREAD = (
+    "This agent has already read this skill, its tables included, so lenses run this way are not blind to them: they"
+    " are less independent than subagents, and the same agent then judges them in Stage B, so the answer says so."
+)
 
 
 def _unwrapped(name: str) -> str:
@@ -346,7 +416,28 @@ def test_a_skill_with_one_skeptic_and_at_most_three_attacks_has_no_lean_mode(nam
     text = _unwrapped(name)
 
     assert "Return at most three attacks" in text and "never put two attacks in one subagent" in text
-    assert "Lean mode" not in text and "one subagent per lens" not in text
+    assert "**Lean mode,**" not in text and "one subagent per lens" not in text
+    # It says, in one sentence, why lean mode never applies, so an agent with no subagent tool does not look for it.
+    assert _NO_LEAN in text
+
+
+@pytest.mark.parametrize("name", sorted(_LEAN_REFUTE_SKILLS))
+def test_lean_mode_still_applies_without_a_subagent_tool_and_the_answer_says_so(name: str) -> None:
+    """The sentence ends the lean paragraph itself, so it can never be read apart from the rule it qualifies."""
+    raw = (_SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+    paragraph = " ".join(line.strip() for line in raw.split(_LEAN_PARAGRAPH, 1)[1].split("\n\n", 1)[0].splitlines())
+
+    assert paragraph.endswith(_LEAN_NO_SUBAGENT.format(noun=_LEAN_REFUTE_SKILLS[name]))
+
+
+@pytest.mark.parametrize("name", sorted(_NOT_BLIND))
+def test_a_lens_run_without_subagents_is_never_told_to_be_blind_to_this_skill(name: str) -> None:
+    text = _unwrapped(name)
+    answering = _section(name, "## Answering")
+
+    assert _NOT_BLIND[name] not in text
+    assert _UNREAD in text
+    assert "less independent than separate subagents and were not blind to this skill's tables" in answering
 
 
 @pytest.mark.parametrize("name", [*sorted(_LEAN_REFUTE_SKILLS), "vc-claims-check"])
@@ -499,3 +590,90 @@ def test_every_when_to_use_bullet_that_names_pasted_material_says_it_may_come_as
     assert len(pasted) == _PASTE_BULLETS
     for name, line in pasted:
         assert _FILE_TOO_OWN_WORDING.get(name, _FILE_TOO) in line, name
+
+
+def _section(name: str, heading: str) -> str:
+    """The skill's section under ``heading``, its line breaks taken out."""
+    text = (_SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+    section = text.split(f"\n{heading}\n", 1)[1].split("\n## ", 1)[0]
+    return " ".join(line.strip() for line in section.splitlines())
+
+
+def test_the_skills_that_say_what_to_do_when_the_founder_cannot_answer_are_every_skill_with_an_intake() -> None:
+    """A new skill with an Inputs section, or a new asking step, joins the list and so gets the sentence."""
+    carrying = {
+        path.parent.name for path in _SKILLS.glob("*/SKILL.md") if _FOUNDER_AWAY in _unwrapped(path.parent.name)
+    }
+
+    assert carrying == set(_READ_THE_FILE_SKILLS) | set(_FOUNDER_AWAY_STEP)
+
+
+@pytest.mark.parametrize("name", _READ_THE_FILE_SKILLS)
+def test_an_intake_says_what_to_do_when_the_founder_cannot_answer_now(name: str) -> None:
+    inputs = _inputs(name)
+
+    # It comes with the instruction to ask, before the list of what to ask for, so an agent reads it before it waits.
+    assert _FOUNDER_AWAY in inputs and inputs.index(_FOUNDER_AWAY) < inputs.index("1. ")
+
+
+@pytest.mark.parametrize("name", sorted(_FOUNDER_AWAY_STEP))
+def test_a_step_that_asks_says_what_to_do_when_the_founder_cannot_answer_now(name: str) -> None:
+    assert _FOUNDER_AWAY in _section(name, _FOUNDER_AWAY_STEP[name])
+
+
+def test_a_founder_away_run_waits_where_a_call_waits_and_invents_nothing() -> None:
+    """Going on never sends a call that waits for an input, and the asks keep one list under one heading."""
+    assert "a call or step that waits for an input still waits" in _FOUNDER_AWAY
+    assert (
+        "invent nothing" in _FOUNDER_AWAY
+        and "**Needs from the founder**, the open asks under that name" in _FOUNDER_AWAY
+    )
+    assert "a live drill waits for the founder" in _FOUNDER_AWAY
+
+
+def test_the_skills_that_route_a_weighed_note_to_the_comparison_tool_are_the_ones_listed() -> None:
+    """A skill that starts routing a note through vc-deal-math step 7 joins the list, and so gets the whole sentence."""
+    routing = {
+        path.parent.name
+        for path in _SKILLS.glob("*/SKILL.md")
+        if "`equity_instrument_compare` as vc-deal-math step 7 says" in _unwrapped(path.parent.name)
+    }
+
+    assert routing == set(_NOTE_ROUTE_SKILLS)
+
+
+@pytest.mark.parametrize("name", _NOTE_ROUTE_SKILLS)
+def test_a_weighed_note_goes_to_the_comparison_tool_and_no_round_is_not_computed(name: str) -> None:
+    text = _unwrapped(name)
+
+    assert _NOTE_ROUTE in text
+    # It follows the skill's own sentence that sends a SAFE or note to equity_round, so it reads as that rule's limit.
+    assert text.index("vc-deal-math step 2") < text.index(_NOTE_ROUTE)
+
+
+def test_the_deal_math_hub_sends_a_weighed_note_to_step_7_and_says_where_equity_round_cannot_run() -> None:
+    steps = _section("vc-deal-math", "## Steps")
+    limits = _section("vc-deal-math", "## Limits")
+    step_2 = steps.split("2. **Ask the founder for what is missing", 1)[1].split(" 3. **", 1)[0]
+
+    assert "A note the founder weighs against a priced round now goes to step 7 instead, capped or not" in step_2
+    assert '"not computed: set at the next priced round"' in step_2
+    # equity_round needs only a next round, not a cap: an uncapped note converts there at its discount price.
+    assert "An uncapped note with that next round given still runs in `equity_round`" in step_2
+    assert "a note weighed against a priced round now goes to `equity_instrument_compare`, step 7" in limits
+
+
+@pytest.mark.parametrize("name", [name for name in _SAFE_RUNWAY_SKILLS if name != "vc-deal-math"])
+def test_a_priced_rounds_runway_on_a_phased_plan_comes_from_the_runway_plan_not_one_flat_burn(name: str) -> None:
+    """Right after the phases rule, so "as above" names the phases and their waits."""
+    text = _unwrapped(name)
+
+    assert f"{_PLAN_PHASES} {_PRICED_PHASED}" in text
+    # The skill's own earlier sentence that sends a priced round's runway claim to deal_check points to the exception.
+    assert text.index("not on a phased plan: below") < text.index(_PRICED_PHASED)
+
+
+def test_the_deal_math_hub_leaves_a_phased_plans_runway_claim_out_of_the_deal_check_call() -> None:
+    steps = _section("vc-deal-math", "## Steps")
+
+    assert "its runway at one flat burn is a quick check: leave the runway claim out of that call" in steps

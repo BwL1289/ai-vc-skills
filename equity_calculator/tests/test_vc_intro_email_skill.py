@@ -151,6 +151,12 @@ def test_every_skill_it_hands_off_to_exists_and_the_brief_s_hand_offs_are_there(
         assert f"the {name} skill" in when, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
     assert "the vc-pass-debrief skill (preview)" in when
+    # Back to the skill that keeps the investor list and the tracker, once the email is written.
+    assert (
+        "The investor list and the tracker (who to write to next, who passed and why, what is left of the round): the "
+        "vc-raise-plan skill (preview)."
+    ) in when
+    assert (_ROOT / "skills" / "vc-raise-plan" / "SKILL.md").is_file()
 
 
 def test_it_names_no_calculator_tool_and_cites_no_source() -> None:

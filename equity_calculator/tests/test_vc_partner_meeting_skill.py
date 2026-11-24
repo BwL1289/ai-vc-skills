@@ -7,10 +7,11 @@ person or firm. The adversarial review keeps both stages (lenses that quote the 
 that may use only the founder's material), the standing prep questions are never refuted, and the debrief builds each
 stronger answer only from the founder's material. The question bank in references/ is one table per category with
 fixed columns, no figures and no names, competition rows at four fixed levels, and the standing prep questions word
-for word. The calculator flags table and the standing prep table live in references/ beside the bank, so the skill
-stays under its line cap with its lines wrapped like the rest; the skill links both, and the checks on each table
-read it there. Each eval in evals/vc-partner-meeting/ has a prompt, an expected tool call and an expected answer; the
-one eval with calculator calls carries valid calls and excerpts that are lines of the reports those calls print.
+for word. The calculator flags table, the standing prep table and the debrief's full shape live in references/ beside
+the bank, so the skill stays under its line cap with its lines wrapped like the rest; the skill links each, keeps the
+rules that bind it, and the checks on each read it there. Each eval in evals/vc-partner-meeting/ has a prompt, an
+expected tool call and an expected answer; the one eval with calculator calls carries valid calls and excerpts that are
+lines of the reports those calls print.
 """
 
 from __future__ import annotations
@@ -26,7 +27,7 @@ from equity_calculator.layout import sheet_for
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity import ScenarioInput, ScenarioResult
 from equity_calculator.schemas.equity_deal_check import DealFlag
-from equity_calculator.schemas.equity_runway_plan import RunwayPlanInput
+from equity_calculator.schemas.equity_runway_plan import RunwayPlanFlag, RunwayPlanInput
 from equity_calculator.text import render_sheet
 from tests.test_vc_claims_check_skill import _READ_SOURCES
 
@@ -39,6 +40,8 @@ _FLAGS_LINK = "[`references/calculator-flags.md`](references/calculator-flags.md
 _FLAGS = (_FOLDER / "references" / "calculator-flags.md").read_text(encoding="utf-8")
 _STANDING_LINK = "[`references/standing-prep.md`](references/standing-prep.md)"
 _STANDING_PREP = (_FOLDER / "references" / "standing-prep.md").read_text(encoding="utf-8")
+_DEBRIEF_LINK = "[`references/debrief.md`](references/debrief.md)"
+_DEBRIEF = (_FOLDER / "references" / "debrief.md").read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _EVAL_DIR = _ROOT / "evals" / "vc-partner-meeting"
 _EVALS = sorted(_EVAL_DIR.glob("*.md"))
@@ -278,21 +281,62 @@ def test_the_refute_stage_judges_with_only_the_material_and_moves_answered_quest
 
 
 def test_the_calculators_mismatches_head_the_drill_with_no_tier_and_its_flags_open_their_tier() -> None:
+    """Where each mismatch and flag goes lives in the flags file beside the codes' meanings, so the skill stays under
+    its line cap; the skill keeps the rule that none goes through the review and points to that file."""
     rank = _unwrapped(_section("### Rank what survives"))
     attack = _unwrapped(_section("### Stage A: attack"))
+    placed = _unwrapped(_section("## Where the calculator's mismatches and flags go", _FLAGS))
 
     assert rank.strip().startswith("The calculator's mismatches head the drill, ahead of the tiers")
     assert "the calculator's flags come first, in the order the tool reports them, ahead of everything else" in rank
-    assert "flags open weakens it" in rank and "ends the meeting, quoting" not in attack
+    assert "flags open weakens it" in rank and "ends the meeting, quoting" not in attack + placed
     assert rank.index("the calculator's flags come first") < rank.index("raised by more than one lens")
-    assert "It carries no tier: how much a gap hurts depends on its size" in attack
+    assert "It carries no tier: how much a gap hurts depends on its size" in placed
     # Only a runway below the computed one understates; a percent sold or use of funds below the tool's is a mismatch.
-    assert "a runway claim below the computed runway understates it, so it does not head the drill" in attack
-    assert "minor tier at most" in attack and "below the tool's figure understates it" not in _TEXT
-    assert "A percent sold or use-of-funds total below the tool's figure is still a mismatch" in attack
+    assert "a runway claim below the computed runway understates it, so it does not head the drill" in placed
+    assert "minor tier at most" in placed and "below the tool's figure understates it" not in _TEXT + _FLAGS
+    assert "A percent sold or use-of-funds total below the tool's figure is still a mismatch" in placed
     assert "(an understated runway goes in minor)" in rank and "an understated one" not in rank
-    assert "Neither goes through the quote check or the refute pass" in attack
+    assert "Neither goes through the quote check or the refute pass" in placed
+    assert "go through neither the lenses, the quote check nor the refute pass" in attack
+    assert '"Calculator flags" above' in attack and "a mismatch or a flag" in _unwrapped(_FLAGS)
+    assert "read it when a tool returns either" in _unwrapped(_section("## Calculator flags"))
     assert _RAISE_IT_ANYWAY in attack and "rather than a weak question" not in attack
+
+
+def test_one_cap_rule_sets_how_many_questions_each_lens_returns() -> None:
+    """The skill had two caps, three per lens in the brief and two per background lens in the lens section; a lens
+    subagent sees only its brief, so the brief now carries the cap it is given."""
+    lenses = _unwrapped(_section("## The lenses"))
+    attack = _unwrapped(_section("### Stage A: attack"))
+
+    assert "with its own name, test and cap filled in. The cap is the one rule for how many questions a lens" in attack
+    assert "three, or two for each background lens run because the background is unknown" in attack
+    assert "Return at most [the cap: three, or two] questions" in attack and "Return at most three" not in attack
+    assert "with at most two questions each (the Stage A brief's cap)" in lenses
+
+
+def test_a_question_answered_in_part_is_kept_whole_and_counted_once() -> None:
+    """A question answered in part had no rule: it could be split into a kept and a dropped part and counted twice."""
+    refute = _unwrapped(_section("### Stage B: refute"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert "stays Kept, whole, never split into a kept and a dropped part" in refute
+    assert "the part left is the bracketed ask" in refute
+    assert (
+        "counts only the lens questions, each once (two lenses' merged question is one, and so is one answered in"
+        " part)" in answering
+    )
+
+
+def test_no_runway_call_runs_on_a_cash_figure_the_founder_did_not_give() -> None:
+    """A $0 sent for cash the founder had not given makes the no-raise runway row read 0.00 months."""
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "Never send cash the founder did not give (no stand-in zero)" in steps
+    assert '"not computed: waiting for [cash in the bank today]", never 0.00 months' in steps
+    # A zero the founder states is a real input, so its runway is the tool's, as printed.
+    assert "A zero the founder states is theirs: send it, and quote the tool's runway as printed" in steps
 
 
 def test_one_message_mode_debriefs_every_pasted_answer_even_one_no_lens_kept() -> None:
@@ -319,8 +363,11 @@ def test_the_standing_prep_questions_are_not_refuted_and_invent_nothing() -> Non
 def test_the_debrief_builds_only_from_the_material_and_never_predicts_a_decision() -> None:
     debrief = _unwrapped(_section("## The debrief"))
     answering = _unwrapped(_section("## Answering"))
+    shape = _unwrapped(_DEBRIEF)
 
-    assert "never an argument about which assumptions would make the stated figure true" in debrief
+    assert _DEBRIEF_LINK in debrief
+    assert "never an argument about which assumptions would make the stated figure true" in shape
+    assert "built only from the founder's material" in shape and "never say a partner or a" in shape
     assert f'in the third person ("{_THIRD_PERSON}")' in answering
     assert '"from the calculator; not refuted"' in answering and "counts only the lens questions" in answering
 
@@ -373,7 +420,8 @@ def test_every_flag_the_calculator_raises_is_relayed_and_a_benchmark_band_is_nev
     answering = _unwrapped(_section("## Answering"))
 
     flags = _FLAGS
-    rows = re.findall(r"^\| `([a-z_]+)` +\|", flags, re.MULTILINE)
+    deal, runway = flags.split("\n| Flag (`equity_runway_plan`)", 1)
+    rows = re.findall(r"^\| `([a-z_]+)` +\|", deal, re.MULTILINE)
 
     assert _FLAGS_LINK in _section("## Calculator flags")
 
@@ -383,7 +431,11 @@ def test_every_flag_the_calculator_raises_is_relayed_and_a_benchmark_band_is_nev
     # Over MCP a tool returns bare codes, so the skill carries each code's meaning itself, with no band of its own.
     assert rows == list(get_args(DealFlag))
     assert "`cash_never_runs_out`" in flags and "18 months" not in flags and "25%" not in flags
-    assert "and `consistent_beyond_rounding` (its row above)" in _unwrapped(flags)
+    # Every runway-plan code has its row: a call with a milestone brings codes past the three a plain call returns.
+    assert re.findall(r"^\| `([a-z_]+)` +\|", runway, re.MULTILINE) == list(get_args(RunwayPlanFlag))
+    assert "only `cash_never_runs_out`, `runway_below_band` and `consistent_beyond_rounding` come back" in _unwrapped(
+        flags
+    )
     for code in ("`runway_below_band`", "`dilution_above_band`", "`runway_band`", "`dilution_band`"):
         assert code in steps, code
     # The runway plan's band row cites a guide and the deal check's does not, so the skill quotes whichever source the
@@ -538,7 +590,7 @@ def test_the_sources_are_ones_the_authors_read_and_the_credit_took_no_text() -> 
     assert set(_URL.findall(_TEXT))
     assert set(_BARE_LINK.findall(_TEXT)) == _BARE_LINKS_ALLOWED
     assert not _BARE_LINK.search(_BANK)
-    for reference in (_FLAGS, _STANDING_PREP):
+    for reference in (_FLAGS, _STANDING_PREP, _DEBRIEF):
         assert not _URL.search(reference) and not _BARE_LINK.search(reference)
     assert "github.com/xiapeli/vc-skills" in sources and "MIT-licensed" in sources
     assert "no text was taken" in sources
@@ -550,7 +602,7 @@ def test_no_person_or_firm_is_named_outside_sources_or_in_any_eval_answer() -> N
     outside = (_TEXT[:sources_start] + _TEXT[sources_end:]).lower()
     answers = [_section("## Expected answer", path.read_text(encoding="utf-8")).lower() for path in _EVALS]
 
-    for text in (outside, _FLAGS.lower(), _STANDING_PREP.lower(), *answers):
+    for text in (outside, _FLAGS.lower(), _STANDING_PREP.lower(), _DEBRIEF.lower(), *answers):
         for name in _PEOPLE_AND_FIRMS:
             assert not re.search(rf"\b{re.escape(name)}\b", text), name
 

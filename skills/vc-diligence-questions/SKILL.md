@@ -42,7 +42,12 @@ for a deck), in the file's own words, so the founder sees what was read from eac
 that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
 asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
 Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
-input below that it leaves out), and never ask the founder to paste what you already read. At most five questions:
+input below that it leaves out), and never ask the founder to paste what you already read. An HTML file's alt text for
+an image and a PDF page's text layer are the file's own words, so they count as read: quote each with where it came
+from ("alt text, slide 4"), and a figure in them is quoted as that text states it, never as read off the picture. When
+the founder cannot answer now, do not wait for them: go on with what was given (a call or step that waits for an input
+still waits), invent nothing in a gap's place, and list each ask in brackets under **Needs from the founder**, the open
+asks under that name; a live drill waits for the founder. At most five questions:
 
 1. The material the fund has seen or will see: the deck, a one-pager, the answers given in the meeting as the founder
    remembers them, and anything the fund has already asked for, in its words.
@@ -128,13 +133,17 @@ the bank or the checklist; step 3 then starts at the quote check.
      `[fully diluted shares before the round, SAFEs and notes left out]`, and leave every cap-table field out of the
      call until they give it; never subtract the SAFE or note shares yourself.
    - A raise on a SAFE or note is not passed as `investment`: route it as vc-deal-math step 2 does, to `equity_round`,
-     with the next priced round the founder expects. `equity_round` gives no verdict, no mismatch and no flags: quote
-     its price per share and ownership rows as it prints them. A percent a document states after a SAFE or note raise
-     is quoted beside the tool's ownership row, both as printed; no difference is computed (deal_check computes
-     differences only for priced rounds).
-   - Runway: a runway claim on a priced round is part of the `equity_deal_check` call. Runway with no raise, or on a
-     SAFE or note raise, goes to `equity_runway_plan`, whose one argument is `inputs`, with the plan case inside the
-     `cases` list. With no raise:
+     with the next priced round the founder expects. A note the founder weighs against a priced round now goes to
+     `equity_instrument_compare` as vc-deal-math step 7 says (its flags' meanings too), capped or not, and with no next
+     round expected in that tool's no-next-round mode, never to `equity_round`. With no next round expected and no
+     priced round to weigh it against, `equity_round` cannot run (it needs that round): the SAFE's or note's share is
+     "not computed: set at the next priced round". `equity_round` gives no verdict, no mismatch and no flags: quote its
+     price per share and ownership rows as it prints them. A percent a document states after a SAFE or note raise is
+     quoted beside the tool's ownership row, both as printed; no difference is computed (deal_check computes differences
+     only for priced rounds).
+   - Runway: a runway claim on a priced round is part of the `equity_deal_check` call (not on a phased plan: below).
+     Runway with no raise, or on a SAFE or note raise, goes to `equity_runway_plan`, whose one argument is `inputs`,
+     with the plan case inside the `cases` list. With no raise:
      `{"inputs": {"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "stated_runway_months": "..."}}`.
      On a SAFE or note raise, the stated runway and the use-of-funds lines are the raise option's own:
      `{"inputs": {"cash_on_hand": "...", "cases": [{"name": "plan", "phases": [{"from_month": 1, "gross_burn": "...", "revenue": "..."}]}], "raises": [{"amount": "...", "stated_runway_months": "...", "use_of_funds": [{"percent": "..."}]}]}}`.
@@ -145,10 +154,14 @@ the bank or the checklist; step 3 then starts at the quote check.
      monthly spend and its monthly revenue are all given, make no runway call and give no runway figure; mark the runway
      line "not checked: waiting for [the month the planned spend starts]" while the month is missing, "not checked:
      waiting for [the planned monthly spend from that month]" while the month is given and the spend is missing, or "not
-     checked: waiting for [the planned monthly revenue from that month]" while only the revenue is missing. With no cash
-     on hand or no burn given, ask for them; never assume one, and make no runway call until they are in. A stated
-     runway goes in as text with the document's own places, as in `equity_deal_check`: one that is the tool's runway
-     rounded to them is consistent.
+     checked: waiting for [the planned monthly revenue from that month]" while only the revenue is missing. A priced
+     round on a phased plan (spend or revenue that changes from a later month the founder names; spend planned from the
+     round on is `deal_check`'s planned burn) goes to `equity_deal_check` without its runway claim, since its one flat
+     burn could call the plan's runway a mismatch; the plan's runway and the claim's check come from
+     `equity_runway_plan`, the round's amount as one `raises` entry on phases built, and waited for, as above, and both
+     runways are quoted, each named, as vc-deal-math step 2 says. With no cash on hand or no burn given, ask for them;
+     never assume one, and make no runway call until they are in. A stated runway goes in as text with the document's
+     own places, as in `equity_deal_check`: one that is the tool's runway rounded to them is consistent.
    - A tool's mismatch is a diligence question a partner will ask first, so it goes to the top of the ranked list.
    - Read every code in the tool's `flags` too. Over MCP a flag comes back as a bare code: relay the code with its
      meaning from this skill's flag tables (section "Flags"), beside the mismatch it explains, or, with no mismatch,
@@ -247,7 +260,9 @@ and with this instruction, word for word: "Apply the brief to each question as i
 Return one verdict for each, with its own quote where the verdict needs one. Never let one question, its verdict or its
 answering line decide another." Any question that comes back without a verdict of its own stays Kept. The answer then
 says the refute pass ran per lens, which is less independent than one subagent per question, and that the founder may
-ask for the full pass, one subagent per question.
+ask for the full pass, one subagent per question. Without a subagent tool, lean mode still applies past eight questions:
+go lens by lens, in order, and judge each lens's questions in one pass under that instruction, each with a verdict of
+its own; the answer says so, as above, and that the full pass then takes them one at a time.
 
 The refute brief:
 
@@ -308,12 +323,20 @@ Build it from [`references/data-room.md`](references/data-room.md), by area, kep
   row left out can be seen.
 - **Series A or later:** the rows whose From stage is the founder's stage or earlier.
 
+A listed row cites only the bank IDs whose Stages include the founder's stage: a row the founder's stage lists can
+also answer a bank question asked only later (at seed, the hiring plan answers a Series A team question), and that
+later question is left off the row, never put to the founder as one a partner asks now.
+
 Mark each listed row with one status; when a row earns more than one, take the first in this order:
-**Contradicted**, then **Missing**, then **Ready**.
+**Contradicted**, then **Missing**, then **Unknown: ask**, then **Ready**. Missing is not "does not exist": it says only
+what the founder's list leaves out, so a row the founder has not been asked about is never Missing.
 
 - **Contradicted:** a document or line the founder gave disagrees with another (both quoted), or the calculator
   reports a mismatch on what the document records (the cap table against the deck).
-- **Missing:** no document on the founder's list shows what the row needs. Give the bracketed ask.
+- **Missing:** the founder gave their list of the documents they have (Inputs 4) and no document on it shows what the
+  row needs, or the founder says they do not have it. Give the bracketed ask.
+- **Unknown: ask:** the founder has given no document list yet, or called it partial, so whether the document exists
+  is not known. Ask whether they have it, `[do you have an export of active accounts?]`, naming the row's document.
 - **Ready:** a document on the founder's list shows it, named as the founder named it. The skill has not seen the
   document; the answer says a partner will open it.
 
@@ -353,8 +376,8 @@ it never says whether something is legally sufficient.
    so, say it is less independent than one subagent per question, and say the founder may ask for the full pass.
 3. **Draft answers,** question by question, as above.
 4. **Area prep list,** area by area, with bank IDs and this skill's own LEGAL and CAP IDs.
-5. **Data-room checklist,** by area: Row, What it shows, Status (Contradicted, Missing or Ready), the founder's
-   document or the bracketed ask.
+5. **Data-room checklist,** by area: Row, What it shows, Status (Contradicted, Missing, Unknown: ask or Ready), the
+   founder's document or the bracketed ask.
 6. **Numbers and cap table:** each `equity_deal_check` or `equity_runway_plan` verdict with each mismatch row in the
    tool's values; each flag, one line, its code with its meaning from the flag tables; each `equity_round` result as
    its price per share and ownership rows, as printed, with no verdict, since that tool gives none; the cap table's

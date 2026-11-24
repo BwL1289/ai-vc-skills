@@ -189,6 +189,7 @@ _PHASE_TERMS: dict[str, _Reader] = {
     "from_month": parse_months,
     "gross_burn": parse_decimal,
     "revenue": parse_decimal,
+    "revenue_run_rate": parse_decimal,
 }
 _RAISE_TERMS: dict[str, _Reader] = {
     "amount": parse_decimal,
@@ -203,9 +204,11 @@ _SEGMENT_TERMS: dict[str, _Reader] = {
     "price_period_months": parse_months,
     "units_per_customer": parse_decimal,
     "take_rate_percent": parse_percent,
+    "second_line_percent": parse_percent,
     "serviceable_percent": parse_percent,
     "obtainable_percent": parse_percent,
     "obtainable_customers": parse_decimal,
+    "obtainable_units": parse_decimal,
     "customers_today": parse_decimal,
 }
 _TOP_DOWN_TERMS: dict[str, _Reader] = {
@@ -410,7 +413,7 @@ def parse_preview(raw: str) -> dict[str, object]:
 
 def parse_phase(raw: str) -> dict[str, object]:
     """argparse type for a runway plan's ``--phase`` (and ``--downside-phase``, ``--lean-phase``):
-    ``from-month=M gross-burn=G [revenue=R]``."""
+    ``from-month=M gross-burn=G [revenue=R | revenue-run-rate=Y]``."""
     return _named_terms(_checked_length(raw).split(), {}, _PHASE_TERMS, ())
 
 

@@ -42,7 +42,10 @@ for a deck), in the file's own words, so the founder sees what was read from eac
 that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
 asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
 Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
-input below that it leaves out), and never ask the founder to paste what you already read.
+input below that it leaves out), and never ask the founder to paste what you already read. When the founder cannot
+answer now, do not wait for them: go on with what was given (a call or step that waits for an input still waits), invent
+nothing in a gap's place, and list each ask in brackets under **Needs from the founder**, the open asks under that name;
+a live drill waits for the founder.
 
 1. Every document with metrics in it (deck, model or KPI tab, investor update, one-pager), each named and with its
    places marked (slide, tab, paragraph), so every metric can be quoted with where it appears.
@@ -184,19 +187,24 @@ parts]`.
      of its `rounded` value two places to the right, keeping every digit (0.950000 is 95.0000%, 0.875000 is 87.5000%),
      which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
      A multiple keeps its six decimals (7.500000x) and money its cents ($1,200,000.00), never abbreviated ($1.2M).
-   - Deal terms of a priced round (the raise, valuation, percent sold, use of funds and the runway it buys) go to
-     `equity_deal_check` as the vc-deal-math skill says. A runway with no raise, a runway on a SAFE or note raise and
-     that raise's use-of-funds lines go to `equity_runway_plan` (the no-raise row, or the raise as a raise option that
-     carries its stated runway and its use-of-funds lines), as the vc-round-sizing skill calls it; with no cash or burn
-     given, ask for them. On a SAFE or note raise, the `plan` case's phases are the founder's own figures: today's
-     monthly spend and revenue as the first phase, from month 1, and each change the founder plans (more spend after the
-     raise, say) as a later phase from the month the founder names, each asked for by name when missing
-     (`[planned monthly spend and revenue, from which month]`), never assumed. Until a planned change's start month, its
-     monthly spend and its monthly revenue are all given, make no runway call and give no runway figure; mark the runway
-     line "not checked: waiting for [the month the planned spend starts]" while the month is missing, "not checked:
-     waiting for [the planned monthly spend from that month]" while the month is given and the spend is missing, or "not
-     checked: waiting for [the planned monthly revenue from that month]" while only the revenue is missing. No deal
-     term, runway or use-of-funds line goes to this tool, `equity_metrics_check`.
+   - Deal terms of a priced round (the raise, valuation, percent sold, use of funds and the runway it buys, not on a
+     phased plan: below) go to `equity_deal_check` as the vc-deal-math skill says. A runway with no raise, a runway on a
+     SAFE or note raise and that raise's use-of-funds lines go to `equity_runway_plan` (the no-raise row, or the raise
+     as a raise option that carries its stated runway and its use-of-funds lines), as the vc-round-sizing skill calls
+     it; with no cash or burn given, ask for them. On a SAFE or note raise, the `plan` case's phases are the founder's
+     own figures: today's monthly spend and revenue as the first phase, from month 1, and each change the founder plans
+     (more spend after the raise, say) as a later phase from the month the founder names, each asked for by name when
+     missing (`[planned monthly spend and revenue, from which month]`), never assumed. Until a planned change's start
+     month, its monthly spend and its monthly revenue are all given, make no runway call and give no runway figure; mark
+     the runway line "not checked: waiting for [the month the planned spend starts]" while the month is missing, "not
+     checked: waiting for [the planned monthly spend from that month]" while the month is given and the spend is
+     missing, or "not checked: waiting for [the planned monthly revenue from that month]" while only the revenue is
+     missing. A priced round on a phased plan (spend or revenue that changes from a later month the founder names; spend
+     planned from the round on is `deal_check`'s planned burn) goes to `equity_deal_check` without its runway claim,
+     since its one flat burn could call the plan's runway a mismatch; the plan's runway and the claim's check come from
+     `equity_runway_plan`, the round's amount as one `raises` entry on phases built, and waited for, as above, and both
+     runways are quoted, each named, as vc-deal-math step 2 says. No deal term, runway or use-of-funds line goes to this
+     tool, `equity_metrics_check`.
    - A market size goes to `equity_market_sizing` as the vc-market-sizing skill says, never to this tool.
    - LTV, LTV/CAC, the Rule of 40 and the magic number go to this tool from the founder's parts, never worked by
      hand: `arpa` in `recurring_unit`, with `contribution_margin_percent` (else `gross_margin_percent`, which
@@ -326,7 +334,9 @@ and with this instruction, word for word: "Apply the brief to each objection as 
 Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
 answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
 says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
-ask for the full pass, one subagent per objection.
+ask for the full pass, one subagent per objection. Without a subagent tool, lean mode still applies past eight
+objections: go lens by lens, in order, and judge each lens's objections in one pass under that instruction, each with a
+verdict of its own; the answer says so, as above, and that the full pass then takes them one at a time.
 
 The refute brief:
 

@@ -120,6 +120,39 @@ def test_company_bu_exit_between_the_preferences_matches_the_hand_working() -> N
     assert _paid(twenty, "next_round_investors")[:2] == (6 * _M, 6 * _M)
 
 
+def test_the_summary_copies_the_founders_and_new_money_rows_and_each_founders_payout() -> None:
+    """Company BU, two next rounds and three exits: the summary holds today, each round, and each exit after each round,
+    and every value in it is the same object as a full row's."""
+    result = instrument_compare(**COMPARE_BU)
+    summary = result.summary
+    points = [(row.point, row.next_round) for row in summary.ownership]
+
+    assert points == [("today", None), ("next_round", 1), ("next_round", 2)]
+    for row, stakes in zip(
+        summary.ownership, (result.stakes_now, *(item.stakes for item in result.next_rounds)), strict=False
+    ):
+        for group in ("founders", "new_money"):
+            stake = _stake(stakes, group)
+            value = row.founders if group == "founders" else row.new_money
+            assert (value.priced, value.note, value.difference) == (stake.priced, stake.note, stake.difference)
+    assert summary.ownership[0].founders.difference.exact == Fraction(4, 25)
+    assert summary.ownership[0].new_money.note is not None and summary.ownership[0].new_money.note.exact == 0
+    expected = [
+        (item.index, sale.exit_amount, next(p for p in sale.payouts if p.group == "founders"))
+        for item in result.next_rounds
+        for sale in item.exits
+    ]
+    assert len(summary.founders_payouts) == len(expected) == 6
+    for row, (index, amount, payout) in zip(summary.founders_payouts, expected, strict=True):
+        assert (row.next_round, row.exit_amount, row.note_refusal) == (index, amount, None)
+        assert (row.founders.priced, row.founders.note, row.founders.difference) == (
+            payout.priced,
+            payout.note,
+            payout.difference,
+        )
+    assert list(result.model_dump())[:3] == ["scenario", "summary", "inputs"]
+
+
 def test_the_cap_branch_and_the_discount_branch() -> None:
     """Round 1 puts the note on its cap; round 2's lower price puts it on its discount (51/80 × 80%)."""
     result = instrument_compare(**COMPARE_BU)

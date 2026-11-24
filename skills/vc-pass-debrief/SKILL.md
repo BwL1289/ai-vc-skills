@@ -36,6 +36,8 @@ reason, figure or event the founder did not give.
   - Questions the founder could not answer in the meeting: the vc-partner-meeting skill (preview).
   - Product decisions that read as generic: the vc-taste-check skill (preview).
   - Keeping a fund that said "come back later" up to date: the vc-prospective-investor-update skill (preview).
+- Back to the raise, a hand-off with no group of its own: the investor list and the tracker (who to write to next, who
+  passed and why, what is left of the round): the vc-raise-plan skill (preview).
 
 ## Inputs
 
@@ -46,7 +48,9 @@ from each. A place you could not read (a slide that is only a picture, a page wh
 opened only in part) is listed as not read and asked for, never filled in from its title or the places around it, and a
 figure is never read off a chart or a picture. Ask only for what you could not read and what the file does not show
 (speaker notes, the figures behind a chart, an input below that it leaves out), and never ask the founder to paste what
-you already read.
+you already read. When the founder cannot answer now, do not wait for them: go on with what was given (a call or step
+that waits for an input still waits), invent nothing in a gap's place, and list each ask in brackets under **Needs from
+the founder**, the open asks under that name; a live drill waits for the founder.
 
 1. **Each pass, word for word:** the email as received, or the founder's own notes from the call, marked as notes; who
    it came from, as the founder writes it (a first name and a fund, say); its date; and how far the process got (a

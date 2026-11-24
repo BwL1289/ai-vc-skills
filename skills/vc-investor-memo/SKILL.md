@@ -53,7 +53,10 @@ for a deck), in the file's own words, so the founder sees what was read from eac
 that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
 asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
 Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
-input below that it leaves out), and never ask the founder to paste what you already read.
+input below that it leaves out), and never ask the founder to paste what you already read. When the founder cannot
+answer now, do not wait for them: go on with what was given (a call or step that waits for an input still waits), invent
+nothing in a gap's place, and list each ask in brackets under **Needs from the founder**, the open asks under that name;
+a live drill waits for the founder.
 
 1. The founder's material, each document named and its places marked (slide, page or paragraph), so every line the
    memo uses can be quoted with where it comes from. In review mode, the memo draft too.
@@ -79,18 +82,18 @@ Bullet points and short paragraphs, in this order. The shape is this skill's own
 skill's authors read describes a venture firm's internal memo, and each firm has its own. It follows the founder
 guides below, so the partner gets the material in the order those guides use, and can re-cut it for their firm.
 
-| Section                   | What it holds                                                                                             | Source                                                                                      |
-| ------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Summary                   | Three to five points the case rests on, each one a fact from the sections below                           | YC seed guide (deck part 11, "3-5 key takeaways")                                           |
-| The company               | What it does in one declarative sentence, for whom                                                        | Sequoia "Company purpose"; YC seed guide (deck part 1)                                      |
-| Why now                   | What changed that makes this possible or needed now                                                       | Sequoia "Why now?"; YC seed guide (deck part 5)                                             |
-| Market and competition    | Who buys, how many, what each pays, with the founder's evidence; the alternatives at four levels          | Sequoia "Market potential", "Competition / alternatives"; YC seed guide (6, 7)              |
-| Traction                  | Period-by-period figures with their definitions, as the founder states them                               | YC seed guide (deck part 8); Sequoia "Financials"; periods and definitions ours, unverified |
-| Team                      | Why these founders, one specific achievement each, and roles                                              | Sequoia "Team"; YC seed guide (deck part 10); one achievement each ours, unverified         |
-| The round                 | Amount, instrument, valuation with its label, ownership sold, what the money reaches, from the calculator | YC seed guide (deck part 12, "Fundraising"); the calculator                                 |
-| Top risks and mitigations | The three to five risks most likely to stop the case, each with the founder's mitigation and its evidence | Ours, unverified                                                                            |
-| The outcome case          | What the round's stake pays at the founder's own exit values, from the calculator, labelled assumptions   | Graham, "Black Swan Farming"; Sequoia "Vision"; the calculator                              |
-| Open questions            | What the material does not answer yet, each as a bracketed ask                                            | Ours, unverified                                                                            |
+| Section                   | What it holds                                                                                                                                                 | Source                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Summary                   | Three to five points the case rests on, each one a fact from the sections below                                                                               | YC seed guide (deck part 11, "3-5 key takeaways")                                           |
+| The company               | What it does in one declarative sentence, for whom                                                                                                            | Sequoia "Company purpose"; YC seed guide (deck part 1)                                      |
+| Why now                   | What changed that makes this possible or needed now                                                                                                           | Sequoia "Why now?"; YC seed guide (deck part 5)                                             |
+| Market and competition    | Who buys, how many, what each pays, with the founder's evidence; the alternatives at four levels                                                              | Sequoia "Market potential", "Competition / alternatives"; YC seed guide (6, 7)              |
+| Traction                  | Period-by-period figures with their definitions, as the founder states them                                                                                   | YC seed guide (deck part 8); Sequoia "Financials"; periods and definitions ours, unverified |
+| Team                      | Why these founders, one specific achievement each, and roles                                                                                                  | Sequoia "Team"; YC seed guide (deck part 10); one achievement each ours, unverified         |
+| The round                 | Amount, instrument, valuation with its label, ownership sold, what the money reaches, from the calculator                                                     | YC seed guide (deck part 12, "Fundraising"); the calculator                                 |
+| Top risks and mitigations | The three to five risks most likely to stop the case, then every other risk the founder's material shows, each with the founder's mitigation and its evidence | Ours, unverified                                                                            |
+| The outcome case          | What the round's stake pays at the founder's own exit values, from the calculator, labelled assumptions                                                       | Graham, "Black Swan Farming"; Sequoia "Vision"; the calculator                              |
+| Open questions            | What the material does not answer yet, each as a bracketed ask                                                                                                | Ours, unverified                                                                            |
 
 Rules for the text:
 
@@ -108,13 +111,17 @@ Rules for the text:
 - **Risks are the hard ones.** A risks section that lists only what the founder already has an answer for reads as
   spin. Each risk the founder's material shows (a lost customer, a slipped launch, one customer making up most of
   revenue, a platform that could add the feature) is in it, whether or not the founder listed it, in the founder's
-  words. A mitigation is what is being done and what shows it; a hope is labelled as a plan.
+  words, however many that makes. A mitigation is what is being done and what shows it; a hope is labelled as a plan.
 - **Metrics and market size.** This skill computes neither. ARR, retention, churn, CAC payback and burn multiple are
   checked against their parts by the vc-metrics-readiness skill, as are LTV, LTV/CAC, the Rule of 40 and the magic
   number; a market size is built bottom-up by the vc-market-sizing skill; here all are quoted, with the skill named.
   Growth rates are quoted as stated, with "not checked: no tool computes this". None is computed, converted or rounded.
 - **Figures as stated, everywhere.** In the memo, the fix list and the biggest fixes, a figure is quoted as the founder
   states it (45%), never restated in words ("nearly half", "most").
+- **Each milestone on its own clock.** The runway counts months from today. A milestone the founder counts from another
+  start (an ARR figure a year after first revenue, a launch six months after a hire) is quoted with that start, never
+  set against the runway as if both counted from today and never moved onto today's clock by hand: what the round
+  reaches is then `[the month from today that milestone falls in]`, an open question until the founder gives it.
 
 ## Steps
 
@@ -131,7 +138,7 @@ mode) or at the quote check (review mode).
    same form, for the same period, with different values is a contradiction: both lines go to the fix list. Lines in
    different forms (MRR against ARR, a month against a quarter) are never compared or converted: ask for one figure,
    in one form, with its period. For every claim's evidence, the founder runs the vc-claims-check skill.
-4. **The round** (below): `equity_deal_check` or `equity_round`, and the runway claim.
+4. **The round** (below): `equity_deal_check`, `equity_round` or `equity_instrument_compare`, and the runway claim.
 5. **The outcome case** (below): `equity_pool` for whole share counts, `equity_waterfall` once per exit value, and
    `equity_dilution` for the founder's assumed later rounds.
 6. **Draft or revise.** Draft mode: write the memo in the shape above from the founder's material and the tools'
@@ -144,8 +151,10 @@ mode) or at the quote check (review mode).
    assumption; no fund size, fund share, multiple on invested or return rate appears; no sentence recommends, speaks as
    an investor, names a firm as a voice or claims to know a firm's process; every surviving objection quotes a line that
    is in the material word for word; every risk the founder's material shows is in Top risks; every Summary point is a
-   fact from a section below; the `exit_is_shared_amount` statement is quoted word for word, with its key, directly
-   under the outcome table; the memo's Open questions lists its bracketed asks in full; no figure is restated in words.
+   fact from a section below; when a waterfall ran, the `exit_is_shared_amount` statement is quoted word for word, with
+   its key, directly under the outcome table, and when none ran (a SAFE or note round, or no whole share counts) there
+   is no outcome table and no statement, only the "not run" line; the memo's Open questions lists its bracketed asks in
+   full; no figure is restated in words.
    Never work out how two of the founder's figures relate (a difference, a sum, a ratio or multiple, a share left over,
    "doubled") in a rewrite, a line or a table cell unless the founder's material states it or a tool returned it; quote
    both figures as stated instead ("from 2,000 to 4,500", never "more than doubled").
@@ -160,15 +169,19 @@ The round's figures are checked once, as the vc-deal-math skill describes:
   percent after (`holder_shares`, `stated_holder_percent`), each SAFE or note converting in this round as `instruments`
   (its terms as the founder gives them; left out, the founders' percent comes out too high), cash, burn and revenue as
   planned (`planned_monthly_gross_burn`, `planned_monthly_revenue`) and today's (`current_monthly_gross_burn`,
-  `current_monthly_revenue`) only when the founder gives a different figure for today, the runway claim and the
-  use-of-funds lines. One call per document that states the round differently. A valuation with no label: call twice,
-  once as `pre_money`, once as `post_money`, and show both readings side by side, as vc-deal-math step 4 does. A
-  mismatch that appears under only one reading is not listed as a computed mismatch: its fix is "say whether the
-  valuation is pre- or post-money", with both readings quoted.
-- **A SAFE or note:** not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round`, with the
-  next priced round the founder expects, labelled the founder's assumption in the memo. `equity_round` compares no
-  stated figure, so quote its values beside the memo's, without a verdict. The runway claim and the use-of-funds lines
-  on a SAFE or note raise go to `equity_runway_plan` with the raise as cash only
+  `current_monthly_revenue`) only when the founder gives a different figure for today, the runway claim (not on a phased
+  plan: below) and the use-of-funds lines. One call per document that states the round differently. A valuation with no
+  label: call twice, once as `pre_money`, once as `post_money`, and show both readings side by side, as vc-deal-math
+  step 4 does. A mismatch that appears under only one reading is not listed as a computed mismatch: its fix is "say
+  whether the valuation is pre- or post-money", with both readings quoted.
+- **A SAFE or note:** not passed as `investment`. Route it as vc-deal-math step 2 does, to `equity_round`, with the next
+  priced round the founder expects, labelled the founder's assumption in the memo. A note the founder weighs against a
+  priced round now goes to `equity_instrument_compare` as vc-deal-math step 7 says (its flags' meanings too), capped or
+  not, and with no next round expected in that tool's no-next-round mode, never to `equity_round`. With no next round
+  expected and no priced round to weigh it against, `equity_round` cannot run (it needs that round): the SAFE's or
+  note's share is "not computed: set at the next priced round". `equity_round` compares no stated figure, so quote its
+  values beside the memo's, without a verdict. The runway claim and the use-of-funds lines on a SAFE or note raise go to
+  `equity_runway_plan` with the raise as cash only
   (`raises: [{"amount", "stated_runway_months", "use_of_funds": [{"percent"}]}]`). On a SAFE or note raise, the `plan`
   case's phases are the founder's own figures: today's monthly spend and revenue as the first phase, from month 1, and
   each change the founder plans (more spend after the raise, say) as a later phase from the month the founder names,
@@ -177,7 +190,11 @@ The round's figures are checked once, as the vc-deal-math skill describes:
   runway figure; mark the runway line "not checked: waiting for [the month the planned spend starts]" while the month is
   missing, "not checked: waiting for [the planned monthly spend from that month]" while the month is given and the spend
   is missing, or "not checked: waiting for [the planned monthly revenue from that month]" while only the revenue is
-  missing.
+  missing. A priced round on a phased plan (spend or revenue that changes from a later month the founder names; spend
+  planned from the round on is `deal_check`'s planned burn) goes to `equity_deal_check` without its runway claim, since
+  its one flat burn could call the plan's runway a mismatch; the plan's runway and the claim's check come from
+  `equity_runway_plan`, the round's amount as one `raises` entry on phases built, and waited for, as above, and both
+  runways are quoted, each named, as vc-deal-math step 2 says.
 - **Runway with no raise** (what happens if the round does not close), on any instrument: `equity_runway_plan`, whose
   no-raise row is the figure, with the memo's stated no-raise runway as the top-level `stated_runway_months`. With no
   cash on hand or no burn given, ask for them; make no runway call until they are in.
@@ -279,41 +296,13 @@ same question from the founder's side: "If all goes well, what will you have bui
    founder's assumed later rounds (calculator); what the stake pays at an exit is not checked: no tool computes this."
    Never multiply a stake by an exit value.
 
-```json
-{
-  "inputs": {
-    "exit_amount": "150000000",
-    "common_shares": 9500000,
-    "classes": [
-      {
-        "shares": 2714285,
-        "invested": "3000000",
-        "preference_multiple": "1",
-        "rank": 1,
-        "participation": "none"
-      }
-    ]
-  }
-}
-```
+One worked call, for Company BM at the founder's plan exit, with the same call from the command line and part of what
+it prints, is in [`references/outcome-example.md`](references/outcome-example.md).
 
-The same call from the command line:
-
-```
-equity_calculator waterfall --exit-amount 150000000 --common-shares 9500000 --class "shares=2714285 invested=3000000 preference-multiple=1 rank=1 participation=none"
-```
-
-Part of what it prints for Company BM at the founder's plan exit of $150,000,000:
-
-```text
-  Class 1: choice                                    converts  converts only when that pays strictly more
-  Class 1: payout                              $33,333,326.51  preference paid + part of the rest
-  Common stock's payout                       $116,666,673.49  common shares × per-share part
-```
-
-The class's payout is not its cap-table percent times the exit: the unissued pool takes no part in a sale (step 3),
-so the shares that do take part split the exit among fewer shares. Directly under the outcome table, quote the
-waterfall's `exit_is_shared_amount` statement word for word, in quotation marks, with its key, so no reader takes the
+The class's payout is not its cap-table percent times the exit: the unissued pool takes no part in a sale (step 3), so
+the shares that do take part split the exit among fewer shares. When a waterfall ran, directly under the outcome table,
+quote the waterfall's `exit_is_shared_amount` statement word for word, in quotation marks, with its key (with no
+waterfall run there is no table and no statement to quote), so no reader takes the
 payout for a mismatch: `exit_is_shared_amount`: "The exit amount is what the shareholders share: no debt, fees, escrow, accrued dividends or option exercise cash is taken out first, and common_shares counts every common share that takes part (exercised options included; unexercised options take nothing)."
 
 ## Dissent pass (adversarial review)
@@ -342,9 +331,11 @@ Every lens gets the same brief, with its own name and test filled in:
   deal is likely to say ..."); you are not an investor and do not speak as one, named or not.
 - Read only the memo and the founder's material given here. Bring in no outside fact about the company, its market or
   its competitors, and do no arithmetic.
-- Return at most three objections, strongest first. For each: the memo's line it is about, quoted word for word with
-  its section (for something left out, the founder's line the memo leaves out, with its document and place); why a
-  partner arguing against the deal is likely to use it; and how much it hurts (sinks the case, weakens it, or minor).
+- Return at most three objections, strongest first, with one exception: the Risks left out lens returns one for each
+  risk the founder's material shows that the memo leaves out, however many, since every such risk belongs in Top risks.
+  For each: the memo's line it is about, quoted word for word with its section (for something left out, the founder's
+  line the memo leaves out, with its document and place); why a partner arguing against the deal is likely to use it;
+  and how much it hurts (sinks the case, weakens it, or minor).
 - A reason you cannot tie to a line of the memo or the material is not an objection. List it apart as a gap, worded as
   a question to the founder.
 - Do not judge whether another line answers an objection: raise it anyway, however short the material; the refute
@@ -364,11 +355,12 @@ the drafted memo, each written down before Stage B: every risk on that list is i
 is a fact from a section below (the last pattern in the table). A miss is an objection quoting the memo's line, or
 the founder's line the memo leaves out. The answer says these lenses are less independent than subagents.
 
-**The calculator's mismatches** do not go through the lenses or the refute pass. Each heads the ranked fix list
-under **figures that do not match (computed)**, quoting the memo's figure with the tool's value and difference. It is
-not refuted: the calculator computed it. The one exception is a mismatch under only one reading of a valuation with no
-label, which becomes the fix "The round" gives. A runway mismatch with the claim below the computed runway
-understates it: the memo may keep it or state the computed runway, and it goes in the minor tier at most.
+**The calculator's mismatches** do not go through the lenses or the refute pass: the calculator computed them. Each
+heads the ranked fix list under **figures that do not match (computed)**, with no tier, quoting the memo's figure with
+the tool's value and difference, with two exceptions, neither refuted. A mismatch under only one reading of a
+valuation with no label is not a computed mismatch: it becomes the fix "The round" gives, placed in a tier by
+judgment. A runway mismatch with the claim below the computed runway understates it, so it does not head the list:
+the memo may keep it or state the computed runway, and it goes in the minor tier at most.
 
 ### Check the quotes
 
@@ -390,7 +382,9 @@ and with this instruction, word for word: "Apply the brief to each objection as 
 Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
 answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
 says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
-ask for the full pass, one subagent per objection.
+ask for the full pass, one subagent per objection. Without a subagent tool, lean mode still applies past eight
+objections: go lens by lens, in order, and judge each lens's objections in one pass under that instruction, each with a
+verdict of its own; the answer says so, as above, and that the full pass then takes them one at a time.
 
 The refute brief:
 
@@ -431,13 +425,15 @@ the material word for word does not drop the objection, and neither does one tha
 ### The ranked fix list
 
 Order the kept objections in three tiers, most damaging first: **sinks the case**, **weakens it**, **minor**. The
-calculator's mismatches head the list, ahead of the tiers, under **figures that do not match (computed)**, with no
-tier; the flags follow them, also with no tier, as questions a partner is likely to ask. Within a tier, an objection raised by more than one lens comes first. The tier is a judgment, not a probability:
-give no percentages and no score. Each entry is one fix: the section, the line quoted word for word, why a partner
-arguing against the deal is likely to use it in one or two plain sentences, and the change, using only the founder's
-facts or a bracketed ask. A Kept objection answered in part says so in its Fix cell: it quotes the answering line
-with its place and names the part left as the bracketed ask. A kept objection the founder cannot fix before the
-meeting goes into the memo's Top risks, in the founder's words, and into Open questions.
+calculator's mismatches head the list, ahead of the tiers, under **figures that do not match (computed)**, with no tier
+(an understated runway and a one-reading valuation mismatch excepted, as above, each in a tier); the flags follow them,
+also with no tier, as questions a partner is likely to ask. Within a tier, an objection raised by more than one lens
+comes first. The tier is a judgment, not a probability: give no percentages and no score. Each entry is one fix: the
+section, the line quoted word for word, why a partner arguing against the deal is likely to use it in one or two plain
+sentences, and the change, using only the founder's facts or a bracketed ask. A Kept objection answered in part says so
+in its Fix cell: it quotes the answering line with its place and names the part left as the bracketed ask. A kept
+objection the founder cannot fix before the meeting goes into the memo's Top risks, in the founder's words, and into
+Open questions.
 
 ## Answering
 
@@ -454,11 +450,12 @@ Lead with the biggest fixes, then the memo, then the full fix list.
    per objection); in lean mode, one per lens. When the refute pass ran per lens (lean mode), say so, say it is less
    independent than one subagent per objection, and say the founder may ask for the full pass.
 4. **Numbers:** each tool call's verdict and the rows the memo uses, as printed; each flag as its code with its meaning
-   from the flag table; the outcome table (Exit value, the founder's reason, each class's payout, Converts?, Common's
-   payout; never the amount invested) with the `exit_is_shared_amount` statement quoted under it; the stake after the
-   founder's assumed later rounds; the assumption rows the figures lean on; metrics and market sizes quoted as stated,
-   with the skill that checks them named (LTV and the magic number among them); growth rates and every other figure
-   quoted as stated with "not checked: no tool computes this".
+   from the flag table; when a waterfall ran, the outcome table (Exit value, the founder's reason, each class's payout,
+   Converts?, Common's payout; never the amount invested) with the `exit_is_shared_amount` statement quoted under it,
+   and otherwise the "not run" line in its place; the stake after the founder's assumed later rounds; the assumption
+   rows the figures lean on; metrics and market sizes quoted as stated, with the skill that checks them named (LTV and
+   the magic number among them); growth rates and every other figure quoted as stated with "not checked: no tool
+   computes this".
 5. **Open asks:** every bracketed gap and every lens gap in one list, so the founder can answer them in one sitting.
 6. **Sources:** the guides used, with links, and which points are this skill's own judgment.
 7. **Close:** this is not investment, legal or tax advice; the champion decides what to use and writes the firm's

@@ -6,6 +6,7 @@ directory. The worked values are Company AW and AX from ``test_market_sizing.py`
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from decimal import Decimal
@@ -15,10 +16,11 @@ from typing import get_args
 
 import pytest
 from equity_calculator.__main__ import run
+from equity_calculator.cli_arguments import market_sizing_arguments
 from equity_calculator.exact import DISPLAY_PLACES
 from equity_calculator.layout import sheet_for
 from equity_calculator.schemas.equity_common import EquityQuantity
-from equity_calculator.schemas.equity_market_sizing import MarketSizingFlag
+from equity_calculator.schemas.equity_market_sizing import MarketSizingFlag, SegmentField
 from equity_calculator.workbook import FROZEN_PANE, NUMBER_FORMATS, VERDICT_FILLS, save_workbook
 from openpyxl import load_workbook
 from tests.support import MARKET_AW, MARKET_AX, market_sizing
@@ -149,6 +151,8 @@ async def test_a_price_period_left_out_is_flagged_and_marked_on_its_line(period:
             "--stated-som needs obtainable-percent or obtainable-customers in every segment",
         ),
         (["--som-years", "21"], "--som-years: Input should be less than or equal to 20"),
+        (["--som-months", "241"], "--som-months: Input should be less than or equal to 240"),
+        (["--som-years", "1", "--som-months", "30"], "give --som-years or --som-months, not both"),
         (["--top-down", "amount=0"], "--top-down #1 amount: Input should be greater than 0"),
     ],
     ids=[
@@ -159,6 +163,8 @@ async def test_a_price_period_left_out_is_flagged_and_marked_on_its_line(period:
         "row-on-a-field-not-given",
         "stated-som-without-a-som",
         "horizon-too-long",
+        "months-too-long",
+        "horizon-twice",
         "zero-top-down",
     ],
 )
@@ -216,6 +222,44 @@ async def test_xlsx_writes_the_market_sizing_sheet(tmp_path: Path) -> None:
 
     assert report.endswith(f"Workbook: {target}")
     assert load_workbook(target).sheetnames == ["Market sizing"]
+
+
+def _line(report: str, label: str) -> str:
+    return next(line for line in report.splitlines() if line.strip().startswith(label))
+
+
+async def test_a_segment_with_no_market_count_says_tam_and_sam_are_not_worked(tmp_path: Path) -> None:
+    """The report names the gap on the segment, the totals and the top-down rows, and the workbook still saves."""
+    target = tmp_path / "no-count.xlsx"
+    argv = [
+        "market_sizing",
+        "--segment",
+        "price=50000 price-period-months=12 obtainable-customers=40",
+        "--top-down",
+        "amount=2000000000",
+    ]
+    report = await run([*argv, "--xlsx", str(target)])
+
+    assert "not given" in _line(report, "Segment 1: buying customers")
+    assert "not worked" in _line(report, "Segment 1: TAM and SAM")
+    assert "not worked" in _line(report, "Total TAM and SAM")
+    assert "not worked" in _line(report, "Top-down 1: bottom-up comparison")
+    assert "  Total TAM  " not in report and "  Segment 1: SAM  " not in report
+    equal = await run(["market_sizing", "--segment", "customers=40 price=50000 obtainable-customers=40"])
+    assert "not a market count" in _line(equal, "Segment 1: buying customers")
+    assert load_workbook(target).sheetnames == ["Market sizing"]
+
+
+async def test_a_second_line_prints_its_share_and_a_break_even_that_holds_the_other_share() -> None:
+    segment = "customers=1000 price=10000 price-period-months=12 take-rate-percent=10 second-line-percent=20"
+    argv = ["market_sizing", "--segment", f"{segment} obtainable-customers=100", "--som-target", "400000"]
+    report = await run([*argv, "--sensitivity", "field=take-rate-percent segment=1 values=5"])
+
+    assert "20.0000%" in _line(report, "Segment 1: second line (share of the main bill)")
+    assert "(take rate + second line)" in _line(report, "Segment 1: annual revenue per customer")
+    assert "the other share" in _line(report, "Sensitivity 1: segment 1 take rate at SOM")
+    plain = await run(["market_sizing", "--segment", "customers=10 price=1 obtainable-customers=5"])
+    assert "second line" not in plain
 
 
 @pytest.mark.parametrize("fields", [MARKET_AW, MARKET_AX], ids=["company-aw", "company-ax"])
@@ -284,6 +328,7 @@ _EVERY_FLAG = (
     market_sizing(**MARKET_AX),
     market_sizing(segments=[{"customers": "10", "price": "1"}]),
     market_sizing(segments=[{"customers": "10", "price": "1", "obtainable_customers": "5", "customers_today": "0"}]),
+    market_sizing(segments=[{"price": "1", "obtainable_customers": "5"}]),
     market_sizing(segments=[{"customers": "10", "price": "1", "obtainable_customers": "5", "customers_today": "6"}]),
     market_sizing(
         segments=[{"customers": "10", "price": "1", "obtainable_percent": "50"}],
@@ -298,3 +343,14 @@ def test_every_flag_has_plain_words() -> None:
 
     assert {line.values[_FIRST] for line in flags} == set(get_args(MarketSizingFlag))
     assert all(line.how and "_" not in line.how for line in flags)
+
+
+def test_the_sensitivity_help_names_every_field_the_tool_varies() -> None:
+    """The help listed seven fields after the tool took nine (the second line and the units to win)."""
+    parser = argparse.ArgumentParser()
+    market_sizing_arguments(parser)
+    (action,) = (item for item in parser._actions if "--sensitivity" in item.option_strings)
+    named = re.search(r"\(F one of (.*?); K 1", action.help or "")
+
+    assert named is not None
+    assert named.group(1).split(", ") == [field.replace("_", "-") for field in get_args(SegmentField)]

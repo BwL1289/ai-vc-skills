@@ -181,6 +181,45 @@ async def test_the_timing_block_shows_the_burn_the_start_month_rests_on() -> Non
     assert "$100,000.00" in floor and "not given" not in floor
 
 
+@pytest.mark.parametrize(
+    ("runway", "how"),
+    [
+        ({}, "not given: read as none"),
+        ({"cash_floor": "0", "revenue": "0"}, "given"),
+    ],
+    ids=["left-out", "stated-zero"],
+)
+def test_a_floor_and_a_revenue_keep_given_or_not_when_the_echoed_inputs_are_read_back(
+    runway: dict[str, str], how: str
+) -> None:
+    """Given or not was read from the fields set, which a result's inputs lose through JSON: fed back (as an agent sends
+    them to the workbook tool), a floor and a revenue left out read "given", as if the founder had stated $0."""
+    phase = {"from_month": 1, "gross_burn": "150000"} | ({"revenue": runway["revenue"]} if runway else {})
+    floor = {"cash_floor": runway["cash_floor"]} if runway else {}
+    first = raise_pipeline(
+        round_size="4000000",
+        runway={"cash_on_hand": "1200000", **floor, "phases": [phase], "months_to_raise": 6},
+    )
+    again = raise_pipeline(**json.loads(first.inputs.model_dump_json()))
+
+    for result in (first, again):
+        lines = {line.key: line for line in sheet_for(result).lines}
+        assert lines["cash_floor"].how == how and lines["phase_1_revenue"].how == how
+        assert lines["cash_floor"].values[0].exact == 0 and lines["phase_1_revenue"].values[0].exact == 0
+
+
+async def test_a_phase_given_as_a_run_rate_shows_the_run_rate_and_the_month_the_runway_takes() -> None:
+    """An annualised run-rate is divided by 12 by the runway plan; the report shows both, and its rule row."""
+    phases = ["--phase", "from-month=1 gross-burn=150000 revenue-run-rate=360000"]
+    report = await run([*_ROUND, "--cash-on-hand", "1,200,000", *phases, "--months-to-raise", "6"])
+
+    run_rate = _line(report, "Phase 1, from month 1: revenue run-rate, a year")
+    assert "$360,000.00" in run_rate and run_rate.endswith("given")
+    revenue = _line(report, "Phase 1, from month 1: revenue a month")
+    assert "$30,000.00" in revenue and revenue.endswith("the run-rate / 12")
+    assert "run_rate_rule = revenue a month = the annualised run-rate / 12" in report
+
+
 async def test_the_room_and_the_allocation_left_say_they_are_values_not_live_formulas() -> None:
     """Outside the investor sheet only totals are live, so the two lines worked from the totals say so."""
     report = await run(_COMPANY_RA)

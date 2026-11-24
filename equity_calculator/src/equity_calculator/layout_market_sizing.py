@@ -41,14 +41,22 @@ _FIELD_NAMES: dict[SegmentField, str] = {
     "price": "price",
     "units_per_customer": "units per customer",
     "take_rate_percent": "take rate",
+    "second_line_percent": "second line",
     "serviceable_percent": "serviceable share",
     "obtainable_percent": "share to win",
     "obtainable_customers": "customers to win",
+    "obtainable_units": "units to win",
 }
 _CROSS_CHECK_NOTE = "; a cross-check with the top-down figure, not a target"
 _UNDER_SMALLEST_SHARE = "under 0.0001%"
 _PERIOD_DEFAULT = "not given: read as a yearly price (give 1 for a monthly one)"
 _CUSTOMERS_SPLIT = "given, shown rounded so the segments add up to the total"
+_PER_YEAR_HOW = "(SOM customers - customers today) / years, a straight line"
+_NOT_WORKED = "not worked"
+# The two fields that add up to the share of the main bill the company books.
+_SHARE_FIELDS = ("take_rate_percent", "second_line_percent")
+_NO_COUNT_HOW = "no market count (none given, or one equal to the customers to win): TAM and SAM would be the SOM again"
+_PER_YEAR_MONTHS_HOW = "(SOM customers - customers today) / (months / 12), a straight line"
 _REACH_WORDS = {
     "value": "reaches it exactly",
     "met_without_it": "met already with this field at its base",
@@ -88,6 +96,9 @@ def _flag_words(flag: MarketSizingFlag) -> str:
         "a number past the calculator's range; a VC is likely to ask which assumptions together close the gap",
         "price_period_defaulted": "A segment gives no months for its price, so the price is read as a yearly one; if "
         "it is a monthly price, that segment's TAM, SAM and SOM are 12 times too small: give the months it covers",
+        "no_market_count": "A segment gives the customers to win and no count of its whole market (none, or one equal "
+        "to the customers to win), so its TAM and SAM are not worked, nor the totals and comparisons built on them; "
+        "a VC is likely to ask how many buyers there are in all",
     }
     return words[flag]
 
@@ -98,13 +109,28 @@ def _segment_given_lines(row: SegmentRow, segment: MarketSegment) -> list[Line]:
     whose figure is not the typed count says it was rounded so."""
     name = f"Segment {row.segment}"
     key = f"segment_{row.segment}"
-    customers_how = GIVEN if fraction(row.customers.rounded) == fraction(segment.customers) else _CUSTOMERS_SPLIT
-    customers = Line(f"{key}_customers", f"{name}: buying customers", (row.customers,), customers_how)
+    if row.customers is not None and segment.customers is not None:
+        customers_how = GIVEN if fraction(row.customers.rounded) == fraction(segment.customers) else _CUSTOMERS_SPLIT
+        customers = Line(f"{key}_customers", f"{name}: buying customers", (row.customers,), customers_how)
+    elif segment.customers is not None:
+        how = "given, equal to what you plan to win: not a market count"
+        customers = Line(f"{key}_customers", f"{name}: buying customers", (given("count", segment.customers),), how)
+    else:
+        customers = Line(f"{key}_customers", f"{name}: buying customers", ("not given",), "no count of the market")
     shown: list[tuple[str, str, EquityQuantity | str | None]] = [
         (f"{key}_price", f"{name}: price per unit", given_price(segment.price)),
         (f"{key}_units", f"{name}: units per customer", given("count", segment.units_per_customer)),
         (f"{key}_take_rate", f"{name}: take rate", given_percent(segment.take_rate_percent)),
-        (f"{key}_serviceable", f"{name}: serviceable share", given_percent(segment.serviceable_percent)),
+        (
+            f"{key}_second_line",
+            f"{name}: second line (share of the main bill)",
+            None if segment.second_line_percent is None else given_percent(segment.second_line_percent),
+        ),
+        (
+            f"{key}_serviceable",
+            f"{name}: serviceable share",
+            given_percent(segment.serviceable_percent) if row.market_counted else None,
+        ),
         (
             f"{key}_obtainable_percent",
             f"{name}: share of serviceable customers to win",
@@ -114,6 +140,11 @@ def _segment_given_lines(row: SegmentRow, segment: MarketSegment) -> list[Line]:
             f"{key}_obtainable_customers",
             f"{name}: customers to win",
             None if segment.obtainable_customers is None else given("count", segment.obtainable_customers),
+        ),
+        (
+            f"{key}_obtainable_units",
+            f"{name}: units to win (the price's unit)",
+            None if segment.obtainable_units is None else given("count", segment.obtainable_units),
         ),
         (
             f"{key}_customers_today",
@@ -153,6 +184,7 @@ def _given_lines(result: MarketSizingResult) -> list[Line]:
         ("population", "Population the segments come from", _maybe("count", inputs.population)),
         ("annual_revenue_today", "Annual revenue today", _maybe("money", inputs.annual_revenue_today)),
         ("som_years", "Years to reach the SOM", None if inputs.som_years is None else _years(inputs.som_years)),
+        ("som_months", "Months to reach the SOM", None if inputs.som_months is None else _months(inputs.som_months)),
         ("som_target", "Revenue the plan needs from this market", _maybe("money", inputs.som_target)),
         ("stated_tam", "TAM as stated", _maybe("money", inputs.stated_tam)),
         ("stated_sam", "SAM as stated", _maybe("money", inputs.stated_sam)),
@@ -174,23 +206,33 @@ def _share_how(how: str, share: EquityQuantity | None) -> str:
     return how
 
 
-def _segment_lines(row: SegmentRow) -> list[Line]:
+def _segment_lines(row: SegmentRow, per_year_how: str, *, second_line: bool = False) -> list[Line]:
     """One segment worked: its annual revenue per customer, gross spend, TAM, SAM, SOM, share and path."""
     name = f"Segment {row.segment}"
     key = f"segment_{row.segment}"
+    share = "(take rate + second line)" if second_line else "take rate"
+    gross_how = "customers × price a year × units" + (" × (1 + second line)" if second_line else "")
     shown: list[tuple[str, str, EquityQuantity | None, str]] = [
         (
             "value",
             "annual revenue per customer",
             row.annual_value_per_customer,
-            "price × 12 / months covered × units × take rate",
+            f"price × 12 / months covered × units × {share}",
         ),
-        ("gross_spend", "gross spend (before the take rate)", row.gross_spend, "customers × price a year × units"),
+        ("gross_spend", "gross spend (before the take rate)", row.gross_spend, gross_how),
         ("tam", "TAM", row.tam, "customers × annual revenue per customer"),
         ("sam_customers", "SAM customers", row.sam_customers, "customers × serviceable share"),
         ("sam", "SAM", row.sam, "SAM customers × annual revenue per customer"),
         ("som_customers", "SOM customers", row.som_customers, "customers to win, or SAM customers × share to win"),
-        ("som", "SOM", row.som, "SOM customers × annual revenue per customer"),
+        ("som_units", "SOM units", row.som_units, "units to win, in the price's unit"),
+        (
+            "som",
+            "SOM",
+            row.som,
+            "SOM customers × annual revenue per customer"
+            if row.som_units is None
+            else f"SOM units × price a year × {share}",
+        ),
         (
             "share_of_tam",
             "share of total TAM",
@@ -202,14 +244,17 @@ def _segment_lines(row: SegmentRow) -> list[Line]:
             "new_per_year",
             "new customers a year to SOM",
             row.new_customers_per_year,
-            "(SOM customers - customers today) / years, a straight line",
+            per_year_how,
         ),
     ]
-    return [
+    lines = [
         Line(f"{key}_{suffix}", f"{name}: {label}", (value,), how)
         for suffix, label, value, how in shown
         if value is not None
     ]
+    if not row.market_counted:
+        lines.insert(1, Line(f"{key}_tam_sam", f"{name}: TAM and SAM", (_NOT_WORKED,), _NO_COUNT_HOW))
+    return lines
 
 
 def _total_lines(result: MarketSizingResult) -> list[Line]:
@@ -233,6 +278,9 @@ def _total_lines(result: MarketSizingResult) -> list[Line]:
         for key, label, value, suffix in summed
         if value is not None
     ]
+    if totals.tam is None:
+        how = "a segment has no market count, so TAM, SAM and the shares built on them are not totalled"
+        lines.insert(0, Line("total_tam_sam", "Total TAM and SAM", (_NOT_WORKED,), how))
     shares: list[tuple[str, str, EquityQuantity | None, str]] = [
         (
             "sam_share_of_tam",
@@ -262,6 +310,13 @@ def _top_down_lines(result: MarketSizingResult) -> list[Line]:
     lines = []
     for row in result.top_down:
         name, key, metric = f"Top-down {row.figure}", f"top_down_{row.figure}", _METRIC_NAMES[row.compare_to]
+        if row.bottom_up is None or row.bottom_up_share is None or row.difference is None:
+            how = f"no bottom-up {metric} to compare: a segment has no market count"
+            lines += [
+                Line(f"{key}_comparable", f"{name}: comparable part", (row.comparable,), "figure × share matching"),
+                Line(f"{key}_bottom_up", f"{name}: bottom-up comparison", (_NOT_WORKED,), how),
+            ]
+            continue
         lines += [
             Line(f"{key}_comparable", f"{name}: comparable part", (row.comparable,), "figure × share matching"),
             Line(f"{key}_bottom_up", f"{name}: bottom-up {metric}", (row.bottom_up,), f"total {metric}"),
@@ -289,10 +344,18 @@ def _check_lines(check: MarketCheck) -> list[Line]:
     ]
 
 
-def _break_even_lines(key: str, name: str, field: str, row: BreakEvenRow, note: str = "") -> list[Line]:
+def _break_even_lines(
+    key: str, name: str, field: str, row: BreakEvenRow, note: str = "", *, shares: bool = False
+) -> list[Line]:
     """Where a field takes a total to its target: the value (when there is one) and how it came out; ``note`` ends the
-    value line's words."""
+    value line's words. With ``shares`` the field is one of the take rate and the second line, which add up."""
     metric = _METRIC_NAMES[row.metric]
+    how = f"base × (target - other segments' {metric}) / this segment's {metric}"
+    if shares:
+        how = (
+            f"(base + the other share) × (target - other segments' {metric}) / this segment's {metric} - the other "
+            "share (take rate and second line add up)"
+        )
     target = display(row.target)
     lines = [
         Line(
@@ -308,13 +371,13 @@ def _break_even_lines(key: str, name: str, field: str, row: BreakEvenRow, note: 
                 f"{key}_value",
                 f"{name}: {field} at {metric} = {target}",
                 (row.value,),
-                f"base × (target - other segments' {metric}) / this segment's {metric}{note}",
+                f"{how}{note}",
             )
         )
     return lines
 
 
-def _sensitivity_lines(row: SensitivityResult) -> list[Line]:
+def _sensitivity_lines(row: SensitivityResult, *, shares: bool = False) -> list[Line]:
     """One sensitivity row: the base value, each case's totals, the SOM range and the break-even values."""
     name, key = f"Sensitivity {row.row}", f"sensitivity_{row.row}"
     field = f"segment {row.segment} {_FIELD_NAMES[row.field]}"
@@ -343,23 +406,33 @@ def _sensitivity_lines(row: SensitivityResult) -> list[Line]:
         for suffix, label, value, how in ranges
         if value is not None
     ]
+    ends = (
+        ("low", row.som_low_at, row.value_at_som_low, "above"),
+        ("high", row.som_high_at, row.value_at_som_high, "below"),
+    )
+    for end, at, value, side in ends:
+        if at == "base" and value is not None:
+            how = f"every value you gave is {side} the base, so the SOM {end} is the base's"
+            lines.append(Line(f"{key}_som_{end}_at_base", f"{name}: SOM {end} is at the base", (value,), how))
     if row.at_som_target is not None:
-        lines += _break_even_lines(f"{key}_at_som_target", name, field, row.at_som_target)
+        lines += _break_even_lines(f"{key}_at_som_target", name, field, row.at_som_target, shares=shares)
     if row.at_top_down is not None:
-        lines += _break_even_lines(f"{key}_at_top_down", name, field, row.at_top_down, _CROSS_CHECK_NOTE)
+        lines += _break_even_lines(f"{key}_at_top_down", name, field, row.at_top_down, _CROSS_CHECK_NOTE, shares=shares)
     return lines
 
 
 def market_sizing_sheet(result: MarketSizingResult) -> Sheet:
     """The market size's lines: the inputs, each segment, the totals, cross-checks, checks, ranges, flags, verdict."""
     lines = _given_lines(result)
-    for row in result.segments:
-        lines += _segment_lines(row)
+    per_year_how = _PER_YEAR_HOW if result.inputs.som_months is None else _PER_YEAR_MONTHS_HOW
+    for row, segment in zip(result.segments, result.inputs.segments, strict=True):
+        lines += _segment_lines(row, per_year_how, second_line=segment.second_line_percent is not None)
     lines += [*_total_lines(result), *_top_down_lines(result)]
     for check in result.checks:
         lines += _check_lines(check)
     for row in result.sensitivity:
-        lines += _sensitivity_lines(row)
+        has_second = result.inputs.segments[row.segment - 1].second_line_percent is not None
+        lines += _sensitivity_lines(row, shares=has_second and row.field in _SHARE_FIELDS)
     lines += [Line(f"flag_{flag}", "A VC is likely to ask", (flag,), _flag_words(flag)) for flag in result.flags]
     lines.append(
         Line(

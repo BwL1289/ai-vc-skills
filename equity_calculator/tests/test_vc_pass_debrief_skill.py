@@ -165,6 +165,13 @@ def test_every_skill_it_hands_off_to_exists() -> None:
         suffix = "" if name in _NO_SUFFIX else " (preview)"
         assert f"the {name} skill{suffix}" in when, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
+    # The raise plan keeps the investor list and the tracker; no reason group maps to it, so it sits outside the list
+    # whose skills are each named again in "What to fix".
+    assert (
+        "- Back to the raise, a hand-off with no group of its own: the investor list and the tracker (who to write to "
+        "next, who passed and why, what is left of the round): the vc-raise-plan skill (preview)."
+    ) in when
+    assert (_ROOT / "skills" / "vc-raise-plan" / "SKILL.md").is_file()
 
 
 def test_it_names_no_calculator_tool_and_cites_no_source() -> None:

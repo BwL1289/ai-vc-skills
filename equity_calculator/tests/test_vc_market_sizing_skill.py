@@ -25,7 +25,7 @@ from typing import get_args
 import pytest
 from equity_calculator.__main__ import _INPUT_MODELS, run
 from equity_calculator.layout import sheet_for
-from equity_calculator.market_sizing import _MOVES_SOM_BY_COUNT
+from equity_calculator.market_sizing import _MOVES_SOM_BY_COUNT, _MOVES_SOM_BY_UNITS
 from equity_calculator.scenarios import compute
 from equity_calculator.schemas.equity_market_sizing import (
     _OBTAINABLE,
@@ -378,6 +378,41 @@ def test_the_fields_the_skill_says_cannot_move_a_count_som_are_the_tools() -> No
     assert worked.som_swing is None
 
 
+def test_the_fields_the_skill_says_the_tool_varies_are_every_segment_field() -> None:
+    """The skill listed seven fields after the tool took nine, so an estimated second line or units to win got no
+    range ask; and a SOM in units, which ignores the count, the share served and the units per customer, had no rule."""
+    steps = _unwrapped(_section("## Steps"))
+    fields = get_args(SegmentField)
+    listed = ", ".join(f"`{name}`" for name in fields[:-1]) + f" and `{fields[-1]}`"
+    by_units = sorted(set(fields) - _MOVES_SOM_BY_UNITS - set(_OBTAINABLE))
+
+    assert len(fields) == 9 and f"The tool varies nine segment fields: {listed}." in steps
+    assert by_units == ["customers", "serviceable_percent", "units_per_customer"]
+    assert "where it is a count of units, neither do those two nor `units_per_customer`" in steps
+
+
+def test_the_answer_shape_keeps_ten_sections() -> None:
+    """A formatter pass folded items 4 and 5 into item 3's paragraph, leaving eight items with two 4s and two 5s."""
+    answering = _section("## Answering")
+
+    assert re.findall(r"^(\d+)\. ", answering, re.MULTILINE) == [str(number) for number in range(1, 11)]
+
+
+def test_a_deck_figures_top_down_row_is_its_arithmetic_only_never_a_market_finding() -> None:
+    """The row that checks a deck figure built from a top-down one is also a comparable market to the tool: it can
+    raise bottom_up_above_top_down and set the break-even, none of which is a finding about the market."""
+    steps = _unwrapped(_section("## Steps"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert (
+        "That row checks the deck's arithmetic only: send it after every true top-down figure (the break-even uses the "
+        "first), quote only its comparable part, and do not put its bottom-up share, its difference, a "
+        "`bottom_up_above_top_down` flag that only it raises, or a break-even against it to the founder as a finding; "
+        "say once that the row is the deck's own figure."
+    ) in steps
+    assert "with none of that row's share, difference, flag or break-even put as a finding" in answering
+
+
 def test_the_three_lenses_are_named_by_what_they_test() -> None:
     attack = _unwrapped(_section("### Stage A: attack"))
     lenses = _lens_names()
@@ -430,6 +465,11 @@ def test_the_refute_pass_uses_the_fixed_verdicts() -> None:
     assert path_row[2] == "Name the channel behind the tool's new customers a year; its capacity is a question"
     steps = _unwrapped(_section("## Steps"))
     assert "the number of refute subagents equals the number of objections that passed the quote check" in steps
+    # With no subagent tool there are no subagents to count: every such objection still has a verdict of its own.
+    assert (
+        "without one, every objection that passed the quote check has a verdict of its own, decided one at a time or,"
+        " in lean mode, lens by lens" in steps
+    )
 
 
 def test_computed_findings_skip_the_review_and_survivors_have_tiers() -> None:
@@ -612,3 +652,41 @@ def test_eval_az_declines_a_named_firm_a_verdict_and_assumed_averages() -> None:
     assert "no venture-scale threshold, no fund math" in answer
     assert "declines to assume an industry-average price or adoption rate, and looks none up" in answer
     assert "It computes nothing" in answer
+
+
+def test_the_no_count_path_quotes_not_worked_and_sends_no_stated_tam_or_sam() -> None:
+    """With only the customers to win, the tool prints TAM and SAM "not worked" and refuses a stated TAM, yet the
+    answer's table and its against-the-deck section had no rule for either."""
+    steps = _unwrapped(_section("## Steps"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert 'the top-down comparison print "not worked": quote them so, never as $0.00' in steps
+    assert "never send a stated TAM or SAM, or a population (the tool refuses each with no count)" in steps
+    assert "and then no `customers_today` (the tool refuses customers beside units)" in _unwrapped(
+        _section("## Inputs")
+    )
+    assert '"not worked" included where the tool prints it (no market count)' in answering
+    assert '"not checked: TAM and SAM not worked (no market count)" and the count is asked for' in answering
+    assert 'with no market count, the comparable part and the "not worked" comparison as printed' in answering
+
+
+def test_a_deck_figure_built_from_a_top_down_one_is_checked_by_the_tools_comparable_part() -> None:
+    """A deck figure built as a share of a top-down one had no sanctioned check; the tool's comparable part is it."""
+    inputs = _unwrapped(_section("## Inputs"))
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "sends that top-down figure with the deck's share as its `comparable_percent`" in inputs
+    assert "quoted beside the tool's `comparable part` row, both as printed" in steps
+    assert "never as a market size; the share is never worked out by hand" in steps
+
+
+def test_the_shakiest_pick_uses_the_highest_value_and_a_months_horizon_stays_in_months() -> None:
+    """Every value a founder gives can sit below the base, and a horizon given in months has to stay in months."""
+    steps = _unwrapped(_section("## Steps"))
+    answering = _unwrapped(_section("## Answering"))
+    ledger = _unwrapped(_section("## The assumption ledger"))
+
+    assert "beside the founder's highest value, as step 6 says (that value may be below the base" in steps
+    assert "beside the founder's high value" not in steps + answering
+    assert "`<N> months (founder's)`, never converted to years" in ledger
+    assert "with a subagent tool, give the number of refute subagents run, and without one" in answering

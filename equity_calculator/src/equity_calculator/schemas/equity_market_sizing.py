@@ -51,6 +51,7 @@ __all__ = [
     "MarketSizingResult",
     "MarketSizingScenario",
     "MarketTotals",
+    "RangeEnd",
     "SegmentField",
     "SegmentRow",
     "SensitivityCase",
@@ -68,11 +69,15 @@ SegmentField = Literal[
     "price",
     "units_per_customer",
     "take_rate_percent",
+    "second_line_percent",
     "serviceable_percent",
     "obtainable_percent",
     "obtainable_customers",
+    "obtainable_units",
 ]
-PERCENT_FIELDS: frozenset[SegmentField] = frozenset({"take_rate_percent", "serviceable_percent", "obtainable_percent"})
+PERCENT_FIELDS: frozenset[SegmentField] = frozenset(
+    {"take_rate_percent", "second_line_percent", "serviceable_percent", "obtainable_percent"}
+)
 
 # The three totals a stated figure, a top-down comparison or a break-even value is about.
 MarketMetric = Literal["tam", "sam", "som"]
@@ -87,10 +92,16 @@ CompareTo = Literal["tam", "sam"]
 # the total is reported so even when the target is already met.
 BreakEvenReach = Literal["value", "met_without_it", "does_not_move", "out_of_range"]
 
+# Where a sensitivity row's SOM low or high comes from: ``founder_value`` (one of the founder's values; a tie with the
+# base goes to the founder's value) or ``base`` (every value the founder gave is on the other side of the base, so the
+# base itself is the low or the high).
+RangeEnd = Literal["base", "founder_value"]
+
 # Facts and questions a VC is likely to raise. They never change a verdict; their plain words are in
 # ``equity_calculator.layout_market_sizing``.
 MarketSizingFlag = Literal[
     "price_period_defaulted",
+    "no_market_count",
     "segments_exceed_population",
     "bottom_up_above_top_down",
     "sam_equals_tam",
@@ -113,7 +124,9 @@ MAX_SOM_YEARS = 20
 
 _MONTHS_PER_YEAR = 12
 _HUNDRED = Fraction(WHOLE_PERCENT)
-_OBTAINABLE = ("obtainable_percent", "obtainable_customers")
+_OBTAINABLE = ("obtainable_percent", "obtainable_customers", "obtainable_units")
+# The fields that size a market a segment with no market count does not have.
+_MARKET_FIELDS = ("customers", "serviceable_percent")
 
 
 class MarketSegment(BaseModel):
@@ -122,8 +135,20 @@ class MarketSegment(BaseModel):
     ``price`` is what one unit costs for ``price_period_months`` (1 for a monthly price, 12 for a yearly one, 24 for a
     device that lasts two years); ``units_per_customer`` the seats or locations one customer buys;
     ``take_rate_percent`` the share of the spend the company keeps (100 unless it is a marketplace or a payments
-    business); ``serviceable_percent`` the share of the customers the product can serve and reach today. SOM is
+    business); ``second_line_percent`` a second revenue line from the same buyer (support, services, a second
+    product) as a share of the main bill (the customer's spend on the main line, before the take rate), kept whole
+    by the company and added to the take rate, with no cap (a second line can be larger than the main one);
+    ``serviceable_percent`` the share of the customers the product can serve and reach today. SOM is
     ``obtainable_customers`` (preferred) or ``obtainable_percent`` of the serviceable customers, never both.
+    ``obtainable_units`` is the SOM in the price's own unit (seats, locations, licences), for
+    a plan counted in units rather than customers: its SOM is units × the annual revenue from one unit, and no SOM
+    customers are worked (nor today's customers, which it refuses), so a unit is never shown as a fraction of a
+    customer.
+    ``customers`` is the count of the whole market. A segment with only the customers to win has no market count:
+    ``customers`` left out (``obtainable_customers`` then required, with no share to win and no serviceable share),
+    or given equal to ``obtainable_customers`` (or, in units, with ``customers`` × ``units_per_customer`` equal to
+    ``obtainable_units``). Either way its TAM and SAM are not worked (they would be the SOM
+    again, not a market size) and the segment is flagged ``no_market_count`` (see ``market_counted``).
     ``price_period_months`` left out (or null) reads the price as a yearly one (12) and is flagged
     ``price_period_defaulted``: send 1 for a monthly price. "Not given" is the value none, never an absent key, so a
     result's echoed ``inputs`` fed back keep the flag (``period_months`` is the months the arithmetic uses).
@@ -131,29 +156,73 @@ class MarketSegment(BaseModel):
 
     model_config = MODEL_CONFIG
 
-    customers: BoundedDecimal = Field(gt=0)
+    customers: BoundedDecimal | None = Field(default=None, gt=0)
     price: BoundedDecimal = Field(gt=0)
     price_period_months: int | None = Field(default=None, strict=True, ge=1, le=MAX_PRICE_PERIOD_MONTHS)
     units_per_customer: BoundedDecimal = Field(default=Decimal(1), gt=0)
     take_rate_percent: BoundedDecimal = Field(default=Decimal(WHOLE_PERCENT), gt=0, le=WHOLE_PERCENT)
+    second_line_percent: BoundedDecimal | None = Field(default=None, gt=0)
     serviceable_percent: BoundedDecimal = Field(default=Decimal(WHOLE_PERCENT), gt=0, le=WHOLE_PERCENT)
     obtainable_percent: BoundedDecimal | None = Field(default=None, gt=0, le=WHOLE_PERCENT)
     obtainable_customers: BoundedDecimal | None = Field(default=None, gt=0)
+    obtainable_units: BoundedDecimal | None = Field(default=None, gt=0)
     customers_today: BoundedDecimal | None = Field(default=None, ge=0)
 
     @model_validator(mode="after")
     def _segment_holds_together(self) -> MarketSegment:
         """Refuse both SOM fields, more customers today than in the segment, and a SOM count above the serviceable
-        customers."""
-        if self.obtainable_percent is not None and self.obtainable_customers is not None:
-            raise ValueError("give obtainable_percent or obtainable_customers, not both")
+        customers; with no market count, refuse a missing count to win, a share to win and a serviceable share."""
+        given = [name for name in _OBTAINABLE if getattr(self, name) is not None]
+        if len(given) > 1:
+            raise ValueError("give obtainable_percent or obtainable_customers (or obtainable_units), one only")
+        if self.obtainable_units is not None and self.customers_today is not None:
+            raise ValueError(
+                "customers_today counts customers and obtainable_units counts units: give the SOM as "
+                "obtainable_customers to set it against today's customers"
+            )
+        if self.customers is None:
+            self._no_count_rules()
+            return self
         if self.customers_today is not None and self.customers_today > self.customers:
             raise ValueError("customers_today is above customers")
         if self.obtainable_customers is not None and Fraction(self.obtainable_customers) > self.serviceable_count():
             raise ValueError(
                 "obtainable_customers is above the serviceable customers (customers × serviceable_percent / 100)"
             )
+        units = self.serviceable_count() * Fraction(self.units_per_customer)
+        if self.obtainable_units is not None and Fraction(self.obtainable_units) > units:
+            raise ValueError(
+                "obtainable_units is above the serviceable units (customers × serviceable_percent / 100 × "
+                "units_per_customer)"
+            )
         return self
+
+    def _no_count_rules(self) -> None:
+        """A segment with no market count: the customers to win are needed, as a count, and nothing is taken as a share
+        of a market that is not given."""
+        if self.obtainable_customers is None and self.obtainable_units is None:
+            raise ValueError(
+                "with no customers (the market count), give obtainable_customers, the customers to win (or "
+                "obtainable_units): a share to win needs a market to take it of"
+            )
+        if self.serviceable_percent != WHOLE_PERCENT:
+            raise ValueError("serviceable_percent needs customers (the market count) to take a share of")
+
+    def market_counted(self) -> bool:
+        """Whether the segment counts its whole market: ``customers`` given and not equal to the customers to win (nor,
+        in units, ``customers`` × ``units_per_customer`` equal to the units to win). A count equal to them is the SOM
+        typed again, so its TAM and SAM would only repeat the SOM."""
+        if self.customers is None:
+            return False
+        if self.obtainable_customers is not None and self.customers == self.obtainable_customers:
+            return False
+        units = self.obtainable_units
+        return units is None or Fraction(self.customers) * Fraction(self.units_per_customer) != Fraction(units)
+
+    def revenue_share(self) -> Fraction:
+        """The share of the main bill the company books from one customer: take rate + second line, as a fraction."""
+        second = Fraction(self.second_line_percent) if self.second_line_percent is not None else Fraction(0)
+        return (Fraction(self.take_rate_percent) + second) / _HUNDRED
 
     def period_months(self) -> int:
         """The months the price covers: ``price_period_months``, or 12 (a yearly price) when it was not given."""
@@ -164,12 +233,15 @@ class MarketSegment(BaseModel):
         return self.price_period_months is not None
 
     def serviceable_count(self) -> Fraction:
-        """The customers the product can serve today: customers × serviceable_percent / 100, exactly."""
+        """The customers the product can serve today: customers × serviceable_percent / 100, exactly (the customers to
+        win, with no market count)."""
+        if self.customers is None:
+            return Fraction(self.obtainable_customers or 0)
         return Fraction(self.customers) * Fraction(self.serviceable_percent) / _HUNDRED
 
     def has_som(self) -> bool:
-        """Whether the segment gives a SOM (either obtainable field)."""
-        return self.obtainable_percent is not None or self.obtainable_customers is not None
+        """Whether the segment gives a SOM (any obtainable field)."""
+        return any(getattr(self, name) is not None for name in _OBTAINABLE)
 
 
 class TopDownFigure(BaseModel):
@@ -197,7 +269,8 @@ class MarketSizingInput(BaseModel):
     """A founder's market, bottom-up, as segments; see the module docstring.
 
     ``population`` is the total the segments are drawn from, in the same buying unit; ``annual_revenue_today`` the
-    company's revenue today, to set the SOM against; ``som_years`` the horizon by which the SOM customers are won;
+    company's revenue today, to set the SOM against; ``som_years`` the horizon by which the SOM customers are won, or
+    ``som_months`` for a horizon in months (30, say; one or the other);
     ``som_target`` the annual revenue the founder's own plan needs from this market by then. ``stated_tam``,
     ``stated_sam`` and ``stated_som`` are the deck's figures, each checked within ``tolerance_percent`` of the
     computed one (``deal_check``'s default).
@@ -212,6 +285,7 @@ class MarketSizingInput(BaseModel):
     population: BoundedDecimal | None = Field(default=None, gt=0)
     annual_revenue_today: BoundedDecimal | None = Field(default=None, gt=0)
     som_years: int | None = Field(default=None, strict=True, ge=1, le=MAX_SOM_YEARS)
+    som_months: int | None = Field(default=None, strict=True, ge=1, le=MAX_SOM_YEARS * _MONTHS_PER_YEAR)
     som_target: BoundedDecimal | None = Field(default=None, gt=0)
     stated_tam: BoundedDecimal | None = Field(default=None, gt=0)
     stated_sam: BoundedDecimal | None = Field(default=None, gt=0)
@@ -220,7 +294,17 @@ class MarketSizingInput(BaseModel):
 
     @model_validator(mode="after")
     def _market_can_be_worked(self) -> MarketSizingInput:
-        """Refuse a SOM figure with no SOM to compare it with, and sensitivity rows that name no real value."""
+        """Refuse a horizon given both ways, a SOM figure with no SOM to compare it with, and sensitivity rows that
+        name no real value."""
+        if self.som_years is not None and self.som_months is not None:
+            raise ValueError("give som_years or som_months, not both")
+        if not all(segment.market_counted() for segment in self.segments):
+            for name in ("stated_tam", "stated_sam", "population"):
+                if getattr(self, name) is not None:
+                    raise ValueError(
+                        f"{name} needs a market count (customers, other than the customers to win) in every segment: "
+                        "with none, TAM and SAM are not worked"
+                    )
         if not all(segment.has_som() for segment in self.segments):
             for name in ("stated_som", "som_target"):
                 if getattr(self, name) is not None:
@@ -233,6 +317,12 @@ class MarketSizingInput(BaseModel):
             self._sensitivity_rules(number, row, seen)
         return self
 
+    def horizon_years(self) -> Fraction | None:
+        """The SOM horizon in years, exactly: ``som_years``, or ``som_months`` / 12; none when neither is given."""
+        if self.som_months is not None:
+            return Fraction(self.som_months, _MONTHS_PER_YEAR)
+        return None if self.som_years is None else Fraction(self.som_years)
+
     def _sensitivity_rules(self, number: int, row: SensitivityRow, seen: set[tuple[str, int]]) -> None:
         """Refuse a row past the last segment, on a SOM field the segment leaves out, given twice, or with a value
         that would make its segment invalid (the segment is checked again with each value in place)."""
@@ -240,14 +330,18 @@ class MarketSizingInput(BaseModel):
         if row.segment > len(self.segments):
             raise ValueError(f"{place} names segment {row.segment}, past the last one given ({len(self.segments)})")
         segment = self.segments[row.segment - 1]
-        if row.field in _OBTAINABLE and getattr(segment, row.field) is None:
+        if row.field in (*_OBTAINABLE, "second_line_percent") and getattr(segment, row.field) is None:
             raise ValueError(f"{place}: segment {row.segment} gives no {row.field} to change")
+        if row.field in _MARKET_FIELDS and not segment.market_counted():
+            raise ValueError(f"{place}: segment {row.segment} has no market count, so its {row.field} moves nothing")
         if (row.field, row.segment) in seen:
             raise ValueError(f"{place}: {row.field} of segment {row.segment} is already a row")
         seen.add((row.field, row.segment))
+        # A count that is not a market count (equal to what is won) is no ceiling on a value: check as if left out.
+        fields = segment.model_dump() | ({} if segment.market_counted() else {"customers": None})
         for index, value in enumerate(row.values, start=1):
             try:
-                MarketSegment.model_validate({**segment.model_dump(), row.field: value})
+                MarketSegment.model_validate({**fields, row.field: value})
             except ValidationError as error:
                 reasons = "; ".join(_reason(failure) for failure in error.errors(include_url=False))
                 raise ValueError(f"{place} value #{index} ({value}): {reasons}") from None
@@ -264,50 +358,56 @@ class SegmentRow(BaseModel):
     """One segment worked: the annual revenue from one customer, its gross spend, TAM, SAM and SOM (money and
     customers), its share of the total TAM, and the path from today's customers to its SOM.
 
-    ``som_customers`` and ``som`` are none with no SOM; ``som_multiple_of_today`` is none with no SOM or no customers
-    today (or none of them); ``new_customers_per_year`` is none without ``som_years``, customers today or a SOM.
+    ``som_customers`` and ``som`` are none with no SOM, and ``som_customers`` with a SOM in units (``som_units``,
+    none otherwise); ``som_multiple_of_today`` is none with no SOM or no customers today (or none of them);
+    ``new_customers_per_year`` is none without a horizon (``som_years`` or ``som_months``), customers today or a SOM.
     ``price_period_given`` is false when the segment gave no ``price_period_months`` (the yearly default was used).
+    With no market count (``market_counted`` false) the customers, gross spend, TAM, SAM and share of TAM are none.
     """
 
     model_config = MODEL_CONFIG
 
     segment: int
     price_period_given: bool
+    market_counted: bool = True
     annual_value_per_customer: EquityQuantity
-    customers: EquityQuantity
-    gross_spend: EquityQuantity
-    tam: EquityQuantity
-    sam_customers: EquityQuantity
-    sam: EquityQuantity
+    customers: EquityQuantity | None = None
+    gross_spend: EquityQuantity | None = None
+    tam: EquityQuantity | None = None
+    sam_customers: EquityQuantity | None = None
+    sam: EquityQuantity | None = None
     som_customers: EquityQuantity | None = None
+    som_units: EquityQuantity | None = None
     som: EquityQuantity | None = None
-    share_of_tam: EquityQuantity
+    share_of_tam: EquityQuantity | None = None
     customers_today: EquityQuantity | None = None
     som_multiple_of_today: EquityQuantity | None = None
     new_customers_per_year: EquityQuantity | None = None
 
 
 class MarketTotals(BaseModel):
-    """The segments added up. The SOM total and the shares that use it are none unless every segment gives a SOM;
+    """The segments added up. The SOM total and the shares that use it are none unless every segment gives a SOM, and
+    the customers, gross spend, TAM, SAM and the shares built on them unless every segment counts its market;
     ``som_multiple_of_revenue_today`` needs ``annual_revenue_today``."""
 
     model_config = MODEL_CONFIG
 
-    customers: EquityQuantity
-    gross_spend: EquityQuantity
-    tam: EquityQuantity
-    sam_customers: EquityQuantity
-    sam: EquityQuantity
+    customers: EquityQuantity | None = None
+    gross_spend: EquityQuantity | None = None
+    tam: EquityQuantity | None = None
+    sam_customers: EquityQuantity | None = None
+    sam: EquityQuantity | None = None
     som_customers: EquityQuantity | None = None
     som: EquityQuantity | None = None
-    sam_share_of_tam: EquityQuantity
+    sam_share_of_tam: EquityQuantity | None = None
     som_share_of_sam: EquityQuantity | None = None
     som_multiple_of_revenue_today: EquityQuantity | None = None
 
 
 class TopDownRow(BaseModel):
     """A top-down figure set beside the bottom-up one: its comparable part, the bottom-up TAM or SAM, the bottom-up as
-    a share of the comparable part, and bottom-up minus comparable. A cross-check: never a verdict."""
+    a share of the comparable part, and bottom-up minus comparable. A cross-check: never a verdict. The bottom-up
+    figures are none when a segment has no market count (no TAM or SAM is worked to compare)."""
 
     model_config = MODEL_CONFIG
 
@@ -315,9 +415,9 @@ class TopDownRow(BaseModel):
     amount: EquityQuantity
     comparable: EquityQuantity
     compare_to: CompareTo
-    bottom_up: EquityQuantity
-    bottom_up_share: EquityQuantity
-    difference: EquityQuantity
+    bottom_up: EquityQuantity | None = None
+    bottom_up_share: EquityQuantity | None = None
+    difference: EquityQuantity | None = None
 
 
 class BreakEvenRow(BaseModel):
@@ -338,15 +438,19 @@ class SensitivityCase(BaseModel):
     model_config = MODEL_CONFIG
 
     value: EquityQuantity
-    tam: EquityQuantity
-    sam: EquityQuantity
+    tam: EquityQuantity | None = None
+    sam: EquityQuantity | None = None
     som: EquityQuantity | None = None
     som_change: EquityQuantity | None = None
 
 
 class SensitivityResult(BaseModel):
     """One sensitivity row worked: each case, the lowest and highest SOM over the founder's values and the base, the
-    swing between them, and the break-even values for the SOM target and the first top-down figure."""
+    swing between them, and the break-even values for the SOM target and the first top-down figure.
+
+    ``value_at_som_low`` and ``value_at_som_high`` are the field's values the low and the high come from, and
+    ``som_low_at`` and ``som_high_at`` say whether that is the base or one of the founder's values: with every value
+    the founder gave below the base, the high is the base's, not the founder's best case."""
 
     model_config = MODEL_CONFIG
 
@@ -358,6 +462,10 @@ class SensitivityResult(BaseModel):
     som_low: EquityQuantity | None = None
     som_high: EquityQuantity | None = None
     som_swing: EquityQuantity | None = None
+    value_at_som_low: EquityQuantity | None = None
+    value_at_som_high: EquityQuantity | None = None
+    som_low_at: RangeEnd | None = None
+    som_high_at: RangeEnd | None = None
     at_som_target: BreakEvenRow | None = None
     at_top_down: BreakEvenRow | None = None
 

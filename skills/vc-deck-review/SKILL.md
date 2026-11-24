@@ -46,7 +46,10 @@ for a deck), in the file's own words, so the founder sees what was read from eac
 that is only a picture, a page whose text did not come out, a file that opened only in part) is listed as not read and
 asked for, never filled in from its title or the places around it, and a figure is never read off a chart or a picture.
 Ask only for what you could not read and what the file does not show (speaker notes, the figures behind a chart, an
-input below that it leaves out), and never ask the founder to paste what you already read.
+input below that it leaves out), and never ask the founder to paste what you already read. When the founder cannot
+answer now, do not wait for them: go on with what was given (a call or step that waits for an input still waits), invent
+nothing in a gap's place, and list each ask in brackets under **Needs from the founder**, the open asks under that name;
+a live drill waits for the founder.
 
 1. The deck, slide by slide: its number, its title, every word on it, and for each chart, table or picture what it
    shows, with the figures as the founder would state them. Figures are never read off a picture.
@@ -145,15 +148,15 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
    (compared as stated, never converted) and the discount patterns. Set each claim's verdict by that skill's order,
    without its skeptic: this skill's lenses do the attacking. The claims table feeds the marks in step 6.
 4. **The ask.** The deal terms are checked once, in claims-check step 5, which follows the vc-deal-math skill:
-   - A priced round: `equity_deal_check` (from the command line, `equity_calculator deal_check`), money and percents
-     as strings (a stated percent or runway with the deck's own places, since one that is the tool's figure rounded
-     to them is consistent), every stated figure, use-of-funds lines included; one call per document's version of
-     the ask. A valuation with no label: call twice, once as `pre_money`, once as `post_money`. Show both readings
-     side by side, as vc-deal-math step 4 does, and say a partner will ask which one is meant. A check that is a
-     mismatch under one reading only is not a calculator mismatch: it becomes one fix, to label the valuation pre- or
-     post-money, quoting both readings in the tool's values. Only a check that is a mismatch under every reading is
-     the calculator's mismatch. In the claims table, such a claim is not Contradicted either: mark it Needs a source,
-     with both readings in its fix, since no single reading gives a verdict.
+   - A priced round: `equity_deal_check` (from the command line, `equity_calculator deal_check`), money and percents as
+     strings (a stated percent or runway with the deck's own places, since one that is the tool's figure rounded to them
+     is consistent), every stated figure, use-of-funds lines included, and the runway claim (not on a phased plan:
+     below); one call per document's version of the ask. A valuation with no label: call twice, once as `pre_money`,
+     once as `post_money`. Show both readings side by side, as vc-deal-math step 4 does, and say a partner will ask
+     which one is meant. A check that is a mismatch under one reading only is not a calculator mismatch: it becomes one
+     fix, to label the valuation pre- or post-money, quoting both readings in the tool's values. Only a check that is a
+     mismatch under every reading is the calculator's mismatch. In the claims table, such a claim is not Contradicted
+     either: mark it Needs a source, with both readings in its fix, since no single reading gives a verdict.
    - Fully diluted shares, for the tool, count every share before the round, granted options and the unissued pool
      included and SAFEs and notes excluded. Some cap tables count SAFEs and notes in their fully diluted total; ask
      which way the founder's does, and pass the tool its own basis. If the founder's total counts them, ask for the
@@ -177,9 +180,14 @@ so the lenses do not anchor on the marks; step 7 then starts at the quote check.
      runway call and give no runway figure; mark the runway line "not checked: waiting for [the month the planned spend
      starts]" while the month is missing, "not checked: waiting for [the planned monthly spend from that month]" while
      the month is given and the spend is missing, or "not checked: waiting for [the planned monthly revenue from that
-     month]" while only the revenue is missing. With no cash or burn given, ask for them by name
-     (`[cash on hand, monthly spend and revenue]`) and make no call until they are given; quote the claim as stated
-     meanwhile, and never work it out by hand. Its mismatches are the calculator's mismatches.
+     month]" while only the revenue is missing. A priced round on a phased plan (spend or revenue that changes from a
+     later month the founder names; spend planned from the round on is `deal_check`'s planned burn) goes to
+     `equity_deal_check` without its runway claim, since its one flat burn could call the plan's runway a mismatch; the
+     plan's runway and the claim's check come from `equity_runway_plan`, the round's amount as one `raises` entry on
+     phases built, and waited for, as above, and both runways are quoted, each named, as vc-deal-math step 2 says. With
+     no cash or burn given, ask for them by name (`[cash on hand, monthly spend and revenue]`) and make no call until
+     they are given; quote the claim as stated meanwhile, and never work it out by hand. Its mismatches are the
+     calculator's mismatches.
    - A tool value whose unit is `fraction` is a share of the whole. Show it as a percent by moving the decimal point of
      its `rounded` value two places to the right, keeping every digit (0.166667 is 16.6667%), which is what the
      command line's report prints. That is a change of notation, not a calculation; never round it.
@@ -240,9 +248,10 @@ Every lens gets the same brief, with its own name and test filled in:
 **How to run the lenses.** When the agent has a subagent tool (in Claude Code, the Agent or Task tool), run the lenses
 as parallel subagents, however short the material. Give each one only the founder's material and its lens brief: not
 this skill's other sections, not the marks, not another lens's output. Without a subagent tool, run Stage A first,
-before step 1, without consulting the dimension table or any mark: run the lenses one after another, write each lens's
-objections down in full before reading the next lens's brief, and never revise an earlier list. Lenses run this way are
-less independent than subagents, and the same agent then judges them in Stage B, so the answer says so.
+before step 1, before any mark exists: run the lenses one after another, write each lens's objections down in full
+before reading the next lens's brief, and never revise an earlier list. This agent has already read this skill, its
+tables included, so lenses run this way are not blind to them: they are less independent than subagents, and the same
+agent then judges them in Stage B, so the answer says so.
 
 **The calculator's mismatches** from step 4 do not go through the lenses. Each is added to the ranked fix list ahead
 of the tiers, quoting the deck's figure with the tool's value and difference as the reason. It is not refuted: the
@@ -272,7 +281,9 @@ and with this instruction, word for word: "Apply the brief to each objection as 
 Return one verdict for each, with its own quote where the verdict needs one. Never let one objection, its verdict or its
 answering line decide another." Any objection that comes back without a verdict of its own stays Kept. The answer then
 says the refute pass ran per lens, which is less independent than one subagent per objection, and that the founder may
-ask for the full pass, one subagent per objection.
+ask for the full pass, one subagent per objection. Without a subagent tool, lean mode still applies past eight
+objections: go lens by lens, in order, and judge each lens's objections in one pass under that instruction, each with a
+verdict of its own; the answer says so, as above, and that the full pass then takes them one at a time.
 
 The refute brief:
 
@@ -341,13 +352,11 @@ a threshold.
 
 ## Calculator flags
 
-The MCP result's `flags` holds codes only; the command line's report prints the meaning beside each one. This table,
-the same as the vc-deal-math skill's, gives each `equity_deal_check` flag's meaning, so a flag reaches the founder in
-words. A flag is a question a partner is likely to ask, never an error. From `equity_runway_plan` (no milestone,
-months to raise or landing month passed), three flags can come back: `runway_below_band` (on the plan the raise lasts
-under the runway benchmark, 18 months by default; a common benchmark, not a rule), `cash_never_runs_out` (revenue
-covers the spend before the cash runs out, so there is no runway end and a stated runway is not checked) and
-`consistent_beyond_rounding` (a stated runway holds by the tolerance alone, as the table's row says).
+The MCP result's `flags` holds codes only; the command line's report prints the meaning beside each one. These
+tables, the same as the vc-deal-math skill's, give each `equity_deal_check` and each `equity_runway_plan` flag's
+meaning, so a flag reaches the founder in words. A flag is a question a partner is likely to ask, never an error. With
+no milestone, months to raise or landing month passed, `equity_runway_plan` returns only `runway_below_band`,
+`cash_never_runs_out` and `consistent_beyond_rounding`; a milestone the founder names brings the rest of its table.
 
 | Flag                                  | What it means for the founder                                                                                   | What to change or prepare                                                                      |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
@@ -364,6 +373,18 @@ covers the spend before the cash runs out, so there is no runway end and a state
 | `runway_below_band`                   | Planned net runway is under the runway benchmark (18 months by default).                                        | Be ready to say whether the raise reaches the next milestone (a common benchmark, not a rule). |
 | `dilution_above_band`                 | The investors get more than the dilution benchmark (25% by default) in one round.                               | Be ready to say why so much is sold (a common benchmark, not a rule).                          |
 
+| `equity_runway_plan` flag          | What it means for the founder                                                                              | What to change or prepare                                                    |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `cash_never_runs_out`              | Revenue covers the spend before the cash runs out, so there is no runway end; a stated one is not checked. | Say so; a VC will check the revenue that makes it true.                      |
+| `cash_out_before_raise_lands`      | The cash goes below the floor before a later raise lands.                                                  | That raise needs bridge money or an earlier close; show it.                  |
+| `milestone_short_on_plan`          | A raise does not reach a milestone, with the months to raise after it, even on the plan.                   | See the tool's required raise, or move the milestone.                        |
+| `downside_short_where_plan_covers` | A raise reaches a milestone on the plan but not on the downside.                                           | Be ready to say what you would cut, and when you would know.                 |
+| `covered_without_raise`            | The cash already reaches a milestone with no raise.                                                        | Say what the raise buys beyond it.                                           |
+| `start_raising_date_passed`        | On the cash alone, with the months to raise given, raising should already have started.                    | Say when the raise started or will close.                                    |
+| `no_time_to_raise_given`           | Milestones were checked at their own month, with no time left to raise the next round.                     | Give the months you allow to raise, and re-run.                              |
+| `runway_below_band`                | On the plan a raise lasts under the runway benchmark (18 months by default).                               | Be ready to say which milestone it reaches (a common benchmark, not a rule). |
+| `consistent_beyond_rounding`       | A stated runway holds by the tolerance alone: it is not the tool's runway rounded to its own places.       | Quote the tool's runway; a VC recomputing gets it.                           |
+
 ## Answering
 
 Lead with what to fix, in order, then the evidence behind it.
@@ -376,9 +397,9 @@ Lead with what to fix, in order, then the evidence behind it.
    bracketed ask), even when a lens objection on another line touches the same dimension (keep both rows); so does each
    failed first- or last-slide rule, and each move fix from a Dropped, answered verdict. Then **Dropped,** one line
    each: the objection, its lens, and why it fell (answered, quoting the line that answers it and whether to move it
-   earlier, or not grounded). When the lenses ran in one agent, say they are less independent than separate subagents.
-   When the refute pass ran per lens (lean mode), say so, say it is less independent than one subagent per objection,
-   and say the founder may ask for the full pass.
+   earlier, or not grounded). When the lenses ran in one agent, say they are less independent than separate subagents
+   and were not blind to this skill's tables. When the refute pass ran per lens (lean mode), say so, say it is less
+   independent than one subagent per objection, and say the founder may ask for the full pass.
 3. **Dimension table:** #, Dimension, Slides, What the deck says (quoted), Evidence (Present, Missing or Contradicted),
    Fix.
 4. **First and last slides:** each rule, the line that decides it, the fix.

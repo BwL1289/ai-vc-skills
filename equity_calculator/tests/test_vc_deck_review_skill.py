@@ -527,12 +527,14 @@ def test_one_eval_turns_a_mismatch_under_one_reading_into_a_fix_to_label_the_val
 def test_every_flag_code_has_its_meaning_in_the_skill() -> None:
     """The MCP tool returns flag codes only, so the skill carries each meaning itself (a live run made one up)."""
     table = _section("## Calculator flags")
-    rows = re.findall(r"^\| `([a-z_]+)` +\|", table, re.MULTILINE)
+    deal, runway = table.split("\n| `equity_runway_plan` flag", 1)
     prose = _unwrapped(table.split("\n|", 1)[0])
 
-    assert rows == list(get_args(DealFlag))
-    for flag in ("runway_below_band", "cash_never_runs_out", "consistent_beyond_rounding"):
-        assert flag in get_args(RunwayPlanFlag) and f"`{flag}` (" in prose, flag
+    assert re.findall(r"^\| `([a-z_]+)` +\|", deal, re.MULTILINE) == list(get_args(DealFlag))
+    # Every runway-plan code has its row, as a call with a milestone brings codes past the three a plain call returns.
+    assert re.findall(r"^\| `([a-z_]+)` +\|", runway, re.MULTILINE) == list(get_args(RunwayPlanFlag))
+    plain = "returns only `runway_below_band`, `cash_never_runs_out` and `consistent_beyond_rounding`"
+    assert plain in prose
 
 
 def test_each_uncovered_dimension_failed_slide_rule_and_move_fix_gets_its_own_row() -> None:

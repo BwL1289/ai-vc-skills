@@ -67,6 +67,9 @@ rules on whether a share, a grant or a transfer is legally valid.
      pre-money and raise. Never invent one. With a conversion preview the path starts from the founders' share after
      that round, so `planned_rounds` holds only the rounds after it: never repeat the next round there, or it is
      counted twice.
+   - When the founder cannot answer now, do not wait for them: go on with what was given (a call or step that waits for
+     an input still waits), invent nothing in a gap's place, and list each ask in brackets under **Needs from the
+     founder**, the open asks under that name; a live drill waits for the founder.
 3. **Call `equity_cap_table_check`** with the founder's figures, percents as JSON strings with exactly the places the
    table writes (`"45.00"` for "45.00%"), share counts as integers, and `founder` and `departed` as `true`. Company CQ
    (made up) as an example:

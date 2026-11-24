@@ -427,7 +427,9 @@ the next priced round, so `round` with that round's terms works it).
 4. **Runway.** For the planned and today's burn, each given: net burn = gross burn - revenue, gross runway =
    (cash + I)/gross burn and net runway = (cash + I)/net burn, none when the net burn is not positive. A runway
    claim is checked against the planned net runway, else today's (no plan given, or revenue covering the planned
-   burn); when revenue covers every burn given, it is not checked. No fees, the whole raise lands at once.
+   burn); when revenue covers every burn given, it is not checked. No fees, the whole raise lands at once. That is
+   one flat burn, a quick check: when spend or revenue changes by month, the plan's runway is `runway_plan`'s, with the
+   round as cash in at its month, and the `runway_rule` row says so.
 5. **Use of funds.** Amount lines are added up and checked against I; percent lines are turned into dollars of I,
    split to the cent, and their total checked against 100%.
 6. **Checks.** A stated percent within 0.5 percentage points of the computed one is consistent, and a stated money or
@@ -463,12 +465,15 @@ the nested round.
 ### Runway plan (YC seed guide for the milestone rule and the band; the rest unverified)
 
 Cash only: a founder's plan, its cases and the raises to compare, with no valuation, instrument or ownership (those
-are `deal_check`, `round` and `dilution`). Time t is in elapsed months from today.
+are `deal_check`, `round` and `dilution`). A raise of any instrument, a priced round, a SAFE or a note, is its amount
+of cash in at its month, with nothing converted, so a priced round on a phased plan gets its runway here: this is the
+plan's runway, and `deal_check`'s at one flat burn is a quick check. Time t is in elapsed months from today.
 
 1. **Phases.** A phase starting in month a covers t from a - 1 until the next phase starts; the last runs on. Net burn
    n = gross burn - revenue, flat within a phase. The cumulative net burn S(t) is continuous and piecewise linear.
    A downside or lean case is its own phases, or the plan's with revenue × R/100 and gross burn × G/100 (each 100
-   when left out); the percents are the founder's, with no default.
+   when left out); the percents are the founder's, with no default. A phase's revenue given as an annualised
+   run-rate Y is Y/12 a month, exactly (`run_rate_rule`, shown only when a phase gives one).
 2. **Cash.** A = cash on hand - the floor (cash kept in the bank). A raise of I landing after L whole months adds I
    at t = L (with L = 0, from the start): cash(t) = A - S(t) before L and A + I - S(t) from L on. No fees, interest or
    collection lag; the whole raise lands at once.
@@ -481,7 +486,9 @@ are `deal_check`, `round` and `dilution`). Time t is in elapsed months from toda
 4. **Milestones.** With T = month + `months_to_raise` (the month alone when that is not given), a milestone is covered
    when R ≥ T or there is no R; the slack is R - month, and start raising by is R - `months_to_raise`. The rule
    follows the YC seed guide's "next “fundable” milestone" (for a startup that will need a follow-on round); the
-   months to raise are the founder's, and leaving them is ours, unverified.
+   months to raise are the founder's, and leaving them is ours, unverified. With `milestone_type` `self_funding`
+   (the founder plans this as the only round) no follow-on is assumed: T is the month itself, months to raise are
+   refused, `no_time_to_raise_given` never fires, and the rule row cites no source (unverified).
 5. **Required raise.** For each case, milestone and landing month (0 and every option's): I\* = max(0, the peak of
    S(t) - A over t from L to T), the peak of a piecewise-linear function falling at a breakpoint or an end. There is
    none when S(t) > A somewhere from 0 to the earlier of L and T: the cash runs out before the money lands. An
@@ -512,7 +519,8 @@ are `deal_check`, `round` and `dilution`). Time t is in elapsed months from toda
 
 A refusal names the field: a first case that is not the plan, a plan given as percents, a case named twice, a case
 with both phases and a percent or neither, phases that do not start at month 1 or do not move later, a floor above the
-cash, a milestone given twice, use-of-funds lines that mix amounts and percents, and every list over its cap.
+cash, a milestone given twice, a phase with both revenue and a run-rate, a self-funding milestone type with months to
+raise or with no milestone, use-of-funds lines that mix amounts and percents, and every list over its cap.
 
 ### Metrics check (a16z, Bessemer, Sacks and Skok for the definitions and benchmarks; the rest unverified)
 
@@ -633,13 +641,24 @@ the units one customer buys, the take rate (100% by
 default; a marketplace's or a payments company's fee), the serviceable percent (100% by default) and the SOM, as the
 customers to win (preferred) or a share of the serviceable customers to win, never both.
 
-1. **Per segment.** Annual revenue from one customer = price × 12 / the months covered × units × take rate. TAM =
+1. **Per segment.** Annual revenue from one customer = price × 12 / the months covered × units × take rate. A
+   second revenue line from the same buyer (`second-line-percent`: support, services, a second product), given as a
+   share of the main bill, is kept whole and added to the take rate, and the gross spend includes it
+   (`second_line_rule`); a break-even on the take rate or the second line holds the other one fixed. TAM =
    customers × that; the gross spend (before the take rate) is shown apart. SAM customers = customers × serviceable
    percent, SAM = SAM customers × annual revenue from one. SOM customers = the customers to win, or SAM customers ×
-   the share to win; SOM = SOM customers × annual revenue from one.
+   the share to win; SOM = SOM customers × annual revenue from one. A SOM in the price's own unit
+   (`obtainable-units`: seats, locations, licences) is units × price × 12 / the months covered × (take
+   rate + second line), with no SOM customers and no customers today, so a unit never shows as a fraction of a customer
+   (`units_rule`). A segment with only the customers to win and no
+   count of its market (`customers` left out, or given equal to the customers to win) has no TAM or SAM, which would
+   be the SOM again: its SOM is worked, and the TAM and SAM totals, the shares on them and the top-down comparison
+   and its break-even are not (`no_market_count`; a stated TAM or SAM, a population, a share to win, a serviceable
+   share and a sensitivity row on its customers or serviceable share are refused).
 2. **Totals.** Each is the sum of the segments; SAM as a share of TAM, SOM as a share of SAM and, with today's
    annual revenue, SOM over it. With today's customers and a horizon in years, the new customers a year to reach SOM
-   are a straight line, (SOM customers - today's) / years; no growth rate is compounded.
+   are a straight line, (SOM customers - today's) / years, the years `--som-years` or `--som-months` / 12 (a
+   30-month horizon is 5/2 years); no growth rate is compounded.
 3. **Top-down cross-check.** Each top-down figure's comparable part (the figure × the share that matches the
    founder's definition) is set beside the bottom-up TAM or SAM: the bottom-up as a share of it and the difference.
    It never sets the market size or the verdict (YC's pitch guide prefers its bottom-up, comparable products' sales,
@@ -648,7 +667,9 @@ customers to win (preferred) or a share of the serviceable customers to win, nev
    included). The verdict is mismatch if any is, not_checked with none.
 5. **Sensitivity.** Each row works one field of one segment (`customers`, `price`, `units_per_customer`, the three
    percents or `obtainable_customers`) at each of the founder's values, the rest at base, and gives the SOM low,
-   high and swing. Every total is linear in one field, so the value at which SOM reaches the plan's target, and TAM
+   high and swing over those values and the base, with the field's value at each end and whether it is the base
+   (`som_low_at`, `som_high_at`; a tie goes to the founder's value): with every value below the base, the high is the
+   base's, not the founder's best case, and the report says so on its own line. Every total is linear in one field, so the value at which SOM reaches the plan's target, and TAM
    or SAM the first top-down figure's comparable part (only the first: a second or third figure gets the cross-check
    of step 3, no break-even), is exact: x\* = x0·(T - the other segments' total) / this segment's total. It is
    `does_not_move` when the field is not a factor of that total (tested first, so it is reported even when the
@@ -658,7 +679,8 @@ customers to win (preferred) or a share of the serviceable customers to win, nev
    has: at least 1e-15 and under 1e16), the value still given. The top-down break-even is a cross-check, not a
    target.
 6. **Flags**, never errors: `price_period_defaulted` (a segment left out the months its price covers, so the price
-   was read as a yearly one; a monthly price left out makes that segment 12 times too small),
+   was read as a yearly one; a monthly price left out makes that segment 12 times too small), `no_market_count` (a
+   segment gives the customers to win and no count of its whole market, so no TAM or SAM),
    `segments_exceed_population` (the segments' customers add up to more than the population they come from: a buyer
    counted twice), `bottom_up_above_top_down` (above a top-down figure's comparable part), `sam_equals_tam` (no
    serviceable percent below 100), `som_not_given` (a segment with no SOM, so no SOM total), `som_as_percent_only`,
@@ -711,6 +733,11 @@ and every exit from the waterfall code; nothing is worked a second way.
 
 A comparison with no exit is refused. With a next round, every exit follows it; a sale before it, while the note is
 outstanding, is worked only with no next round given.
+
+**The summary** comes first, in the report and in the JSON (`summary`): the founders' and the new money's ownership
+(today's raise: A's priced shares, B's note once it converts) right after today and after each next round, or at B's
+maturity conversion with no next round, then the founders' payout at each exit or sale, each A, B and B - A. Every
+value is a copy of a full row below it, never worked again; where B is not worked at a sale it says so.
 
 **With no next round** (the founder hopes today's raise is the only one), the comparison says so (mode
 `no_next_round`, flag `no_next_round_given`) and the note never converts at a priced round. Leave
@@ -1163,25 +1190,32 @@ equity_calculator instrument_compare --founder-shares 8,000,000 --team-shares 1,
     --note-valuation-cap 6,000,000 --note-discount-percent 20 --note-interest-rate-percent 5 --note-compounding simple \
     --note-months-to-conversion 12 --next-round "pre-money=27000000 investment=6000000 standard" \
     --exit 5,000,000 --exit 20,000,000 --exit 100,000,000
-  Today: price per share                                                      $0.800000                                    p = V/(FD + converted + new pool)
-  Note owed when it converts                                                                $2,100,000.00                  principal + interest, to the cent
-  Note's cap price                                                                              $0.600000                  cap / FD
-  Today: founders                                                              64.0000%          80.0000%        16.0000%  group's shares / total shares
-  Next round 1: price per share                                               $2.160000         $2.000000                  p = V/(each option's shares + converted + new pool)
-  Next round 1: B's note: converts at                                                           $0.600000                  its cap price, the lower
-  Next round 1: B's note: shares                                                                3,500,000                  amount converting / price
-  Next round 1: founders                                                       52.3636%          48.4848%        -3.8788%  group's shares / total shares
-  Next round 1: exit $5,000,000.00: founders                                      $0.00             $0.00           $0.00  the waterfall, every preference honoured
-  Next round 1: exit $5,000,000.00: new money                             $1,250,000.00     $1,296,296.30      $46,296.30  the waterfall, every preference honoured
-  Next round 1: exit $5,000,000.00: preferences paid                      $5,000,000.00     $5,000,000.00                  classes that stay
-  Next round 1: exit $20,000,000.00: founders                             $8,960,000.00     $8,296,296.29    $-663,703.70  the waterfall, every preference honoured
-  Next round 1: exit $20,000,000.00: new money                            $2,800,000.00     $3,629,629.63     $829,629.63  the waterfall, every preference honoured
-  Next round 1: exit $20,000,000.00: next round's investors               $6,000,000.00     $6,000,000.00           $0.00  the waterfall, every preference honoured
-  Next round 1: exit $100,000,000.00: founders                           $52,363,636.36    $48,484,848.49  $-3,878,787.88  the waterfall, every preference honoured
-  Flag                                                        cap_below_round_price_now                                    The note's cap price is below option A's price per share today: at its cap the note buys shares for less than option A's investors pay today
-  Flag                                                             note_converts_at_cap                                    In at least one next round the note converts at its cap price
-  Flag                                                           note_interest_converts                                    The note's interest converts too, so it gets shares for more than the raise
-  Flag                                                               maturity_not_given                                    No maturity was given for the note: what happens if the next round comes late is in the note's own terms, not modelled here
+  Summary, today: founders                                                        64.0000%          80.0000%        16.0000%  as the Today lines below
+  Summary, today: new money                                                       20.0000%           0.0000%       -20.0000%  as the Today lines below; B's note holds no shares until it converts
+  Summary, after next round 1: founders                                           52.3636%          48.4848%        -3.8788%  as that round's lines below
+  Summary, after next round 1: new money                                          16.3636%          21.2121%         4.8485%  as that round's lines below
+  Summary, next round 1, exit $5,000,000.00: founders' payout                        $0.00             $0.00           $0.00  as the exit's founders line below
+  Summary, next round 1, exit $20,000,000.00: founders' payout               $8,960,000.00     $8,296,296.29    $-663,703.70  as the exit's founders line below
+  Summary, next round 1, exit $100,000,000.00: founders' payout             $52,363,636.36    $48,484,848.49  $-3,878,787.88  as the exit's founders line below
+  Today: price per share                                                         $0.800000                                    p = V/(FD + converted + new pool)
+  Note owed when it converts                                                                   $2,100,000.00                  principal + interest, to the cent
+  Note's cap price                                                                                 $0.600000                  cap / FD
+  Today: founders                                                                 64.0000%          80.0000%        16.0000%  group's shares / total shares
+  Next round 1: price per share                                                  $2.160000         $2.000000                  p = V/(each option's shares + converted + new pool)
+  Next round 1: B's note: converts at                                                              $0.600000                  its cap price, the lower
+  Next round 1: B's note: shares                                                                   3,500,000                  amount converting / price
+  Next round 1: founders                                                          52.3636%          48.4848%        -3.8788%  group's shares / total shares
+  Next round 1: exit $5,000,000.00: founders                                         $0.00             $0.00           $0.00  the waterfall, every preference honoured
+  Next round 1: exit $5,000,000.00: new money                                $1,250,000.00     $1,296,296.30      $46,296.30  the waterfall, every preference honoured
+  Next round 1: exit $5,000,000.00: preferences paid                         $5,000,000.00     $5,000,000.00                  classes that stay
+  Next round 1: exit $20,000,000.00: founders                                $8,960,000.00     $8,296,296.29    $-663,703.70  the waterfall, every preference honoured
+  Next round 1: exit $20,000,000.00: new money                               $2,800,000.00     $3,629,629.63     $829,629.63  the waterfall, every preference honoured
+  Next round 1: exit $20,000,000.00: next round's investors                  $6,000,000.00     $6,000,000.00           $0.00  the waterfall, every preference honoured
+  Next round 1: exit $100,000,000.00: founders                              $52,363,636.36    $48,484,848.49  $-3,878,787.88  the waterfall, every preference honoured
+  Flag                                                           cap_below_round_price_now                                    The note's cap price is below option A's price per share today: at its cap the note buys shares for less than option A's investors pay today
+  Flag                                                                note_converts_at_cap                                    In at least one next round the note converts at its cap price
+  Flag                                                              note_interest_converts                                    The note's interest converts too, so it gets shares for more than the raise
+  Flag                                                                  maturity_not_given                                    No maturity was given for the note: what happens if the next round comes late is in the note's own terms, not modelled here
 ```
 
 Right after today the founders hold 64% in A and 80% in B, as the note has no shares yet. At the next round the note
@@ -1205,27 +1239,34 @@ equity_calculator instrument_compare --founder-shares 9,000,000 --team-shares 50
     --note-owed-month 12 --note-owed-month 24 --note-maturity-months 24 \
     --note-maturity-conversion-valuation 5,000,000 --note-change-of-control-multiple 2 \
     --exit 3,000,000 --exit 10,000,000 --exit 40,000,000
-  Mode                                                                     no next round     no next round                  no next round given: the note is never converted at a priced round here; ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
-  Today: price per share                                                       $0.600000                                    p = V/(FD + converted + new pool)
-  Note owed at month 12                                                                      $1,590,000.00                  principal + interest, to the cent
-  Note owed at month 24                                                                      $1,680,000.00                  principal + interest, to the cent
-  Today: founders                                                               72.0000%          90.0000%        18.0000%  group's shares / total shares
-  At maturity (month 24): note owed                                                          $1,680,000.00                  principal + interest, to the cent; repaid if its terms say so
-  At maturity (month 24): converts at                                                            $0.500000                  the maturity valuation / FD
-  At maturity (month 24): note's shares                                                          3,360,000                  amount converting / price
-  At maturity (month 24): founders                                              72.0000%          67.3653%        -4.6347%  group's shares / total shares (A: right after today)
-  At a sale: note's claim                                                                    $3,000,000.00                  the multiple x the principal, paid before any share, up to the sale
-  Sale before any round, $3,000,000.00: founders                           $1,350,000.00             $0.00  $-1,350,000.00  the waterfall, every preference honoured; B's note on its own term
-  Sale before any round, $3,000,000.00: new money                          $1,500,000.00     $3,000,000.00   $1,500,000.00  the waterfall, every preference honoured; B's note on its own term
-  Sale before any round, $10,000,000.00: founders                          $7,200,000.00     $6,300,000.00    $-900,000.00  the waterfall, every preference honoured; B's note on its own term
-  Sale before any round, $10,000,000.00: new money                         $2,000,000.00     $3,000,000.00   $1,000,000.00  the waterfall, every preference honoured; B's note on its own term
-  Sale before any round, $40,000,000.00: founders                         $28,800,000.00    $33,300,000.00   $4,500,000.00  the waterfall, every preference honoured; B's note on its own term
-  Flag                                                               no_next_round_given                                    No next round was given, so the note never converts at a priced round here: the comparison shows ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
-  Flag                                                            note_interest_converts                                    The note's interest converts too, so it gets shares for more than the raise
-  Flag                                                     discount_unused_without_round                                    The note's discount comes off a priced round's price, and no next round is given: it changes no figure here
+  Summary, today: founders                                                               72.0000%          90.0000%        18.0000%  as the Today lines below
+  Summary, today: new money                                                              20.0000%           0.0000%       -20.0000%  as the Today lines below; B's note holds no shares until it converts
+  Summary, at B's maturity conversion: founders                                          72.0000%          67.3653%        -4.6347%  A as today; B as the maturity lines below
+  Summary, at B's maturity conversion: new money                                         20.0000%          25.1497%         5.1497%  A as today; B as the maturity lines below
+  Summary, sale before any round, $3,000,000.00: founders' payout                   $1,350,000.00             $0.00  $-1,350,000.00  as the sale's lines below
+  Summary, sale before any round, $10,000,000.00: founders' payout                  $7,200,000.00     $6,300,000.00    $-900,000.00  as the sale's lines below
+  Summary, sale before any round, $40,000,000.00: founders' payout                 $28,800,000.00    $33,300,000.00   $4,500,000.00  as the sale's lines below
+  Mode                                                                              no next round     no next round                  no next round given: the note is never converted at a priced round here; ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
+  Today: price per share                                                                $0.600000                                    p = V/(FD + converted + new pool)
+  Note owed at month 12                                                                               $1,590,000.00                  principal + interest, to the cent
+  Note owed at month 24                                                                               $1,680,000.00                  principal + interest, to the cent
+  Today: founders                                                                        72.0000%          90.0000%        18.0000%  group's shares / total shares
+  At maturity (month 24): note owed                                                                   $1,680,000.00                  principal + interest, to the cent; repaid if its terms say so
+  At maturity (month 24): converts at                                                                     $0.500000                  the maturity valuation / FD
+  At maturity (month 24): note's shares                                                                   3,360,000                  amount converting / price
+  At maturity (month 24): founders                                                       72.0000%          67.3653%        -4.6347%  group's shares / total shares (A: right after today)
+  At a sale: note's claim                                                                             $3,000,000.00                  the multiple x the principal, paid before any share, up to the sale
+  Sale before any round, $3,000,000.00: founders                                    $1,350,000.00             $0.00  $-1,350,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $3,000,000.00: new money                                   $1,500,000.00     $3,000,000.00   $1,500,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $10,000,000.00: founders                                   $7,200,000.00     $6,300,000.00    $-900,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $10,000,000.00: new money                                  $2,000,000.00     $3,000,000.00   $1,000,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $40,000,000.00: founders                                  $28,800,000.00    $33,300,000.00   $4,500,000.00  the waterfall, every preference honoured; B's note on its own term
+  Flag                                                                        no_next_round_given                                    No next round was given, so the note never converts at a priced round here: the comparison shows ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
+  Flag                                                                     note_interest_converts                                    The note's interest converts too, so it gets shares for more than the raise
+  Flag                                                              discount_unused_without_round                                    The note's discount comes off a priced round's price, and no next round is given: it changes no figure here
 ```
 
-With no next round the note never converts at a priced round, and the report says so on its first line. Right after
+With no next round the note never converts at a priced round, and the report's Mode line says so. Right after
 today the founders hold 72% in A and 90% in B. The note owes $1,680,000.00 at its maturity: the repayment, or, at the
 $5M valuation over today's 10,000,000 shares ($0.50 a share), 3,360,000 shares, leaving the founders 67.3653% against
 72% in A (-387/8350 exactly). At a sale before any priced round the note is owed 2x its $1.5M principal, $3M, before
@@ -1377,7 +1418,8 @@ equity_calculator deal_check --investment I [--pre-money V] [--post-money P] [--
 equity_calculator runway_plan --cash-on-hand C [--cash-floor F] --phase "TERMS"...
     [--downside-phase "TERMS"... | [--downside-revenue-percent R] [--downside-gross-burn-percent G]]
     [--lean-phase "TERMS"... | [--lean-revenue-percent R] [--lean-gross-burn-percent G]]
-    [--raise "TERMS"]... [--raise-use-of-funds "N AMOUNT|PCT%"]... [--milestone M]... [--months-to-raise T]
+    [--raise "TERMS"]... [--raise-use-of-funds "N AMOUNT|PCT%"]... [--milestone M]...
+    [--milestone-type next_round|self_funding] [--months-to-raise T]
     [--stated-runway-months S] [--tolerance-points P] [--tolerance-percent Q] [--runway-band-months B]
 equity_calculator metrics_check --period-months P [--recurring-unit monthly|annual]
     [--starting-recurring S [--new-recurring N] [--expansion-recurring E] [--contraction-recurring C]
@@ -1396,7 +1438,7 @@ equity_calculator metrics_check --period-months P [--recurring-unit monthly|annu
     [--tolerance-points P] [--tolerance-percent Q] [--customer-segment smb|mid_market|enterprise]
     [--payback-band-months B] [--burn-multiple-band X] [--net-revenue-churn-band-percent C]
 equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
-    [--population N] [--annual-revenue-today R] [--som-years Y] [--som-target T] [--stated-tam A]
+    [--population N] [--annual-revenue-today R] [--som-years Y | --som-months M] [--som-target T] [--stated-tam A]
     [--stated-sam A] [--stated-som A] [--tolerance-percent Q]
 equity_calculator instrument_compare --founder-shares F --team-shares T --unissued-pool-shares U
     [--existing-series "TERMS"]... [--existing-safe "TERMS" | --existing-note "TERMS"]... --investment I
@@ -1429,7 +1471,9 @@ figure that is the computed one rounded to those places is consistent.
 or a lean case is its own `--downside-phase` / `--lean-phase` items or the percents of the plan's revenue and gross
 burn, not both. Each `--raise` is one option to compare, and each `--raise-use-of-funds` is one line of the raise it
 names by number (`1` is the first `--raise`), an amount or a percent of that raise. `--milestone` is a month from
-today; `--stated-runway-months` is the runway stated with no raise.
+today; `--milestone-type self_funding` marks the milestones of an only round, with no follow-on assumed;
+`--stated-runway-months` is the runway stated with no raise. A phase's `revenue-run-rate=Y` is its revenue as an
+annualised run-rate, divided by 12 for you, in place of `revenue=R`.
 
 `metrics_check` needs `--period-months`, the one period every flow figure covers. Each part is the founder's own
 figure: recurring revenue in the unit `--recurring-unit` names (monthly by default), customers as whole numbers,
@@ -1514,26 +1558,26 @@ row, hire, commitment or stage, given as one quoted string of `key=value` terms 
 amount for a SAFE, the principal for a note, the role and a colon for a hire, the amount for a commitment or the name
 and a colon for a stage, which comes first:
 
-| Flag                  | Terms                                                                                                                                                                                                                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--safe`              | `AMOUNT [valuation-cap=X] [discount-percent=D] [mfn]`                                                                                                                                                                                                                                       |
-| `--note`              | `PRINCIPAL interest-rate-percent=R (months-outstanding=M \| issue-date=YYYY-MM-DD conversion-date=YYYY-MM-DD) [compounding=simple\|annual\|monthly] [stub-rule=simple\|fractional_power] [day-count=actual_365\|actual_360] [valuation-cap=X] [discount-percent=D] [interest-paid-in-cash]` |
-| `--round`             | `(investor-percent=N \| pre-money=V investment=I) [pool-percent=P]`                                                                                                                                                                                                                         |
-| `--class`             | `shares=S invested=I [preference-multiple=M] [rank=K] [participation=none\|full\|capped] [cap-multiple=C]` (a cap only with `capped`)                                                                                                                                                       |
-| `--phase`             | `from-month=M gross-burn=G [revenue=R]` (also `--downside-phase` and `--lean-phase`)                                                                                                                                                                                                        |
-| `--raise`             | `amount=I [lands-month=L] [stated-runway-months=M [stated-runway-from=today\|landing]]` (a basis with no stated runway is refused)                                                                                                                                                          |
-| `--segment`           | `customers=N price=P [price-period-months=M] [units-per-customer=U] [take-rate-percent=R] [serviceable-percent=S] [obtainable-percent=O \| obtainable-customers=C] [customers-today=T]`                                                                                                     |
-| `--top-down`          | `amount=A [comparable-percent=C] [compare-to=tam\|sam]`                                                                                                                                                                                                                                     |
-| `--sensitivity`       | `field=F segment=K values=V1/V2/...` (F one of `customers`, `price`, `units-per-customer`, `take-rate-percent`, `serviceable-percent`, `obtainable-percent`, `obtainable-customers`; 1 to 4 values)                                                                                         |
-| `--priced-preference` | `standard [rank=K]` or `preference-multiple=M participation=none\|full\|capped [cap-multiple=C] [rank=K]`                                                                                                                                                                                   |
-| `--next-round`        | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]` and the series' terms as `--priced-preference` takes them                                                                                                                                            |
-| `--hire`              | `ROLE: start-month=M (grant-shares=S \| grant-percent=P)`: the role and a colon first, the grant in shares or as a percent of the post-round fully diluted shares                                                                                                                           |
-| `--commitment`        | `AMOUNT kind=soft\|firm`: the amount first                                                                                                                                                                                                                                                  |
-| `--stage`             | `NAME: investors=N rate-percent=P [rate-basis=own\|benchmark] [benchmark-source=TEXT]`: the name and a colon first, the source last, running to the end                                                                                                                                     |
-| `--share-class`       | `kind=common\|preferred\|options_granted\|options_unissued\|warrants [shares=S] [authorised-shares=A] [stated-percent=P] [holder-lines=complete\|partial]`                                                                                                                                  |
-| `--holder`            | `share-class=K shares=S [stated-percent=P] [founder] [departed]` (K is 1 for the first `--share-class`)                                                                                                                                                                                     |
-| `--preview`           | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]`                                                                                                                                                                                                      |
-| `--planned-round`     | `--round`'s terms (with `--preview`, the rounds after it)                                                                                                                                                                                                                                   |
+| Flag                  | Terms                                                                                                                                                                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--safe`              | `AMOUNT [valuation-cap=X] [discount-percent=D] [mfn]`                                                                                                                                                                                                                                             |
+| `--note`              | `PRINCIPAL interest-rate-percent=R (months-outstanding=M \| issue-date=YYYY-MM-DD conversion-date=YYYY-MM-DD) [compounding=simple\|annual\|monthly] [stub-rule=simple\|fractional_power] [day-count=actual_365\|actual_360] [valuation-cap=X] [discount-percent=D] [interest-paid-in-cash]`       |
+| `--round`             | `(investor-percent=N \| pre-money=V investment=I) [pool-percent=P]`                                                                                                                                                                                                                               |
+| `--class`             | `shares=S invested=I [preference-multiple=M] [rank=K] [participation=none\|full\|capped] [cap-multiple=C]` (a cap only with `capped`)                                                                                                                                                             |
+| `--phase`             | `from-month=M gross-burn=G [revenue=R \| revenue-run-rate=Y]` (also `--downside-phase` and `--lean-phase`)                                                                                                                                                                                        |
+| `--raise`             | `amount=I [lands-month=L] [stated-runway-months=M [stated-runway-from=today\|landing]]` (a basis with no stated runway is refused)                                                                                                                                                                |
+| `--segment`           | `[customers=N] price=P [price-period-months=M] [units-per-customer=U] [take-rate-percent=R] [second-line-percent=L] [serviceable-percent=S] [obtainable-percent=O \| obtainable-customers=C \| obtainable-units=V] [customers-today=T]` (no `customers=` with only the customers or units to win) |
+| `--top-down`          | `amount=A [comparable-percent=C] [compare-to=tam\|sam]`                                                                                                                                                                                                                                           |
+| `--sensitivity`       | `field=F segment=K values=V1/V2/...` (F one of `customers`, `price`, `units-per-customer`, `take-rate-percent`, `second-line-percent`, `serviceable-percent`, `obtainable-percent`, `obtainable-customers`, `obtainable-units`; 1 to 4 values)                                                    |
+| `--priced-preference` | `standard [rank=K]` or `preference-multiple=M participation=none\|full\|capped [cap-multiple=C] [rank=K]`                                                                                                                                                                                         |
+| `--next-round`        | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]` and the series' terms as `--priced-preference` takes them                                                                                                                                                  |
+| `--hire`              | `ROLE: start-month=M (grant-shares=S \| grant-percent=P)`: the role and a colon first, the grant in shares or as a percent of the post-round fully diluted shares                                                                                                                                 |
+| `--commitment`        | `AMOUNT kind=soft\|firm`: the amount first                                                                                                                                                                                                                                                        |
+| `--stage`             | `NAME: investors=N rate-percent=P [rate-basis=own\|benchmark] [benchmark-source=TEXT]`: the name and a colon first, the source last, running to the end                                                                                                                                           |
+| `--share-class`       | `kind=common\|preferred\|options_granted\|options_unissued\|warrants [shares=S] [authorised-shares=A] [stated-percent=P] [holder-lines=complete\|partial]`                                                                                                                                        |
+| `--holder`            | `share-class=K shares=S [stated-percent=P] [founder] [departed]` (K is 1 for the first `--share-class`)                                                                                                                                                                                           |
+| `--preview`           | `pre-money=V investment=I [target-pool-percent=T] [pool-timing=pre_money\|post_money]`                                                                                                                                                                                                            |
+| `--planned-round`     | `--round`'s terms (with `--preview`, the rounds after it)                                                                                                                                                                                                                                         |
 
 A note that names no `compounding` compounds `annual`, and one that names no `stub-rule` uses `fractional_power`.
 An unknown term, a term given twice, or a value that is not a number is refused, naming the flag.
@@ -1781,17 +1825,18 @@ The `deal_check` scenario adds these, each only when the input uses it, then the
 
 The `runway_plan` scenario adds these, each only when the input uses it:
 
-| Key                   | Default                                                                                                                | How to change it                            | Source                                                                      |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
-| `runway_rule`         | cash on hand less the floor, plus the raise, run down by the phased net burn                                           | `--cash-floor`                              | unverified (standard arithmetic)                                            |
-| `phase_rule`          | a phase runs until the next starts; the last runs on                                                                   | fixed                                       | unverified (a modelling choice)                                             |
-| `landing_rule`        | the whole raise lands at once, after its whole months                                                                  | `lands-month=`                              | unverified (a modelling choice)                                             |
-| `derived_case_rule`   | the plan's phases scaled by the case's percents                                                                        | give the case its own phases                | unverified (a modelling choice)                                             |
-| `milestone_rule`      | covered when the cash lasts to the month plus the months to raise                                                      | `--months-to-raise`                         | YC seed guide ("next “fundable” milestone"); the months to raise unverified |
-| `required_raise_rule` | the smallest raise keeping cash at or above the floor to the target                                                    | fixed                                       | unverified (standard arithmetic)                                            |
-| `tolerance`           | 0.5 points; 2% relative; a stated runway that is the computed one rounded to its places also holds; one flag beside it | `--tolerance-points`, `--tolerance-percent` | unverified (the rounding test is standard arithmetic)                       |
-| `runway_band`         | 18 months                                                                                                              | `--runway-band-months`                      | YC seed guide ("usually 12-18"; 18 is its top; a benchmark, not a rule)     |
-| `use_of_funds_rule`   | the lines add up to the raise                                                                                          | fixed                                       | unverified                                                                  |
+| Key                   | Default                                                                                                                | How to change it                            | Source                                                                                         |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `runway_rule`         | cash on hand less the floor, plus the raise, run down by the phased net burn                                           | `--cash-floor`                              | unverified (standard arithmetic)                                                               |
+| `phase_rule`          | a phase runs until the next starts; the last runs on                                                                   | fixed                                       | unverified (a modelling choice)                                                                |
+| `run_rate_rule`       | a phase's revenue a month is its annualised run-rate / 12                                                              | give `revenue=` instead                     | unverified (standard arithmetic)                                                               |
+| `landing_rule`        | the whole raise lands at once, after its whole months                                                                  | `lands-month=`                              | unverified (a modelling choice)                                                                |
+| `derived_case_rule`   | the plan's phases scaled by the case's percents                                                                        | give the case its own phases                | unverified (a modelling choice)                                                                |
+| `milestone_rule`      | covered when the cash lasts to the month plus the months to raise; the month alone for an only round                   | `--months-to-raise`, `--milestone-type`     | YC seed guide ("next “fundable” milestone"); the months to raise and `self_funding` unverified |
+| `required_raise_rule` | the smallest raise keeping cash at or above the floor to the target                                                    | fixed                                       | unverified (standard arithmetic)                                                               |
+| `tolerance`           | 0.5 points; 2% relative; a stated runway that is the computed one rounded to its places also holds; one flag beside it | `--tolerance-points`, `--tolerance-percent` | unverified (the rounding test is standard arithmetic)                                          |
+| `runway_band`         | 18 months                                                                                                              | `--runway-band-months`                      | YC seed guide ("usually 12-18"; 18 is its top; a benchmark, not a rule)                        |
+| `use_of_funds_rule`   | the lines add up to the raise                                                                                          | fixed                                       | unverified                                                                                     |
 
 The `metrics_check` scenario adds these, each only when the input uses it:
 
@@ -1817,17 +1862,20 @@ The `metrics_check` scenario adds these, each only when the input uses it:
 The `market_sizing` scenario adds these: `bottom_up_rule`, `annual_rule` and `sam_rule` always, the rest only when
 the input uses them:
 
-| Key                | Default                                                                    | How to change it                       | Source                                                                     |
-| ------------------ | -------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------- |
-| `bottom_up_rule`   | TAM = customers × annual revenue from one customer, per segment, summed    | fixed                                  | YC pitch guide (question 2)                                                |
-| `annual_rule`      | annual price = price × 12 / the months it covers; no growth or churn       | `price-period-months=`                 | YC pitch guide (the two-year lifecycle); the straight-line year unverified |
-| `revenue_rule`     | TAM = the customers' spend × the take rate (only below 100%)               | `take-rate-percent=`                   | YC seed guide (glossary: TAM)                                              |
-| `sam_rule`         | SAM = TAM × the serviceable percent; 100% when none is given               | `serviceable-percent=`                 | unverified (common usage)                                                  |
-| `som_rule`         | SOM = the customers to win × annual revenue from one; a straight-line path | `obtainable-customers=`, `--som-years` | unverified (common usage)                                                  |
-| `top_down_rule`    | a top-down figure is a cross-check only                                    | fixed                                  | YC pitch guide (question 2)                                                |
-| `population_rule`  | the segments' customers at most the population                             | `--population`                         | unverified (standard arithmetic)                                           |
-| `sensitivity_rule` | one field of one segment at a time, the rest at base                       | fixed                                  | unverified (standard arithmetic)                                           |
-| `tolerance`        | 2% relative                                                                | `--tolerance-percent`                  | unverified                                                                 |
+| Key                    | Default                                                                                      | How to change it                                       | Source                                                                     |
+| ---------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `bottom_up_rule`       | TAM = customers × annual revenue from one customer, per segment, summed                      | fixed                                                  | YC pitch guide (question 2)                                                |
+| `annual_rule`          | annual price = price × 12 / the months it covers; no growth or churn                         | `price-period-months=`                                 | YC pitch guide (the two-year lifecycle); the straight-line year unverified |
+| `revenue_rule`         | TAM = the customers' spend × the take rate (only below 100%)                                 | `take-rate-percent=`                                   | YC seed guide (glossary: TAM)                                              |
+| `no_market_count_rule` | no TAM or SAM for a segment with only the customers to win                                   | give `customers=` (a count of the whole market)        | unverified (a modelling choice)                                            |
+| `sam_rule`             | SAM = TAM × the serviceable percent; 100% when none is given                                 | `serviceable-percent=`                                 | unverified (common usage)                                                  |
+| `som_rule`             | SOM = the customers to win × annual revenue from one; a straight-line path                   | `obtainable-customers=`, `--som-years`, `--som-months` | unverified (common usage)                                                  |
+| `second_line_rule`     | annual revenue from one customer = the main bill × (take rate + second line)                 | `second-line-percent=`                                 | unverified (a modelling choice)                                            |
+| `units_rule`           | SOM = the units to win × the price a year × the take rate (plus the second line, when given) | `obtainable-units=`                                    | unverified (standard arithmetic)                                           |
+| `top_down_rule`        | a top-down figure is a cross-check only                                                      | fixed                                                  | YC pitch guide (question 2)                                                |
+| `population_rule`      | the segments' customers at most the population                                               | `--population`                                         | unverified (standard arithmetic)                                           |
+| `sensitivity_rule`     | one field of one segment at a time, the rest at base                                         | fixed                                                  | unverified (standard arithmetic)                                           |
+| `tolerance`            | 2% relative                                                                                  | `--tolerance-percent`                                  | unverified                                                                 |
 
 The `instrument_compare` scenario carries the round's rows (the SAFE rows when an existing SAFE converts, the note
 rows, `converted_shares_in_pre_money`, `tie_rule`, `fractional_shares`, `search`) and the waterfall's rows, and adds

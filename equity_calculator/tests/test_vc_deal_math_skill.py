@@ -218,10 +218,10 @@ def test_one_eval_holds_a_safe_raises_runway_until_its_planned_change_has_a_mont
 
 
 def test_every_flag_code_has_a_row_in_the_skills_flag_table() -> None:
-    table = _TEXT.split("## Flags", 1)[1].split("\n## ", 1)[0]
-    rows = re.findall(r"^\| `([a-z_]+)` +\|", table, re.MULTILINE)
+    deal, runway = _TEXT.split("## Flags", 1)[1].split("\n## ", 1)[0].split("\n| `equity_runway_plan` flag", 1)
 
-    assert rows == list(get_args(DealFlag))
+    assert re.findall(r"^\| `([a-z_]+)` +\|", deal, re.MULTILINE) == list(get_args(DealFlag))
+    assert re.findall(r"^\| `([a-z_]+)` +\|", runway, re.MULTILINE) == list(get_args(RunwayPlanFlag))
 
 
 @pytest.mark.parametrize("path", _CALL_EVALS, ids=[path.stem for path in _CALL_EVALS])
@@ -280,11 +280,25 @@ def test_runway_with_no_raise_or_on_a_safe_goes_to_the_runway_plan_tool() -> Non
     assert "With no cash or burn given, ask for them by name" in steps
     assert "make no call until they are given" in steps
     assert "`equity_runway_plan`" in handoffs
-    # The MCP result gives flag codes only, so the skill carries the meaning of each flag such a call can raise.
+    # The MCP result gives flag codes only, so the skill carries the meaning of each flag such a call can raise: the
+    # three a call with no milestone raises are named here, and every code has its row under Flags.
+    named = "only `runway_below_band`, `cash_never_runs_out` and `consistent_beyond_rounding` can come back"
+    assert named in steps
+    assert "takes its meaning from the `equity_runway_plan` flag table under Flags" in steps
     for flag in _RUNWAY_FLAGS_WITHOUT_MILESTONES:
         assert flag in get_args(RunwayPlanFlag), flag
-        assert f"`{flag}` (" in steps, flag
     assert "no runway-plan flag" not in steps
+    # A priced round on a phased plan: deal_check's one flat burn is a quick check, the runway plan's is the plan's.
+    assert "**A priced round on a phased plan**" in steps
+    assert "the round's amount as one `raises` entry (cash in at its month; nothing converts there)" in steps
+    assert "the runway plan's is the plan's, and `deal_check`'s is the one-burn quick check" in steps
+    # Its band flag on that flat burn is the quick check's: the plan can clear 18 months while the flat burn does not.
+    assert (
+        "Send `deal_check` the planned monthly spend and revenue of the phase the round lands in, and say which phase; "
+        "a `runway_below_band` it returns is the quick check's, said so beside the flag, and the plan's band flag is "
+        "`equity_runway_plan`'s."
+    ) in steps
+    assert "on a phased plan that round's runway comes from `equity_runway_plan` too" in handoffs
     assert "which today is `unverified`" not in _TEXT
 
 
@@ -330,6 +344,21 @@ def test_a_founder_choosing_between_a_priced_round_and_a_note_goes_to_the_compar
     assert "It does not call `equity_deal_check`" in answer
 
 
+@pytest.mark.parametrize("prefix", ["company-bu-", "company-dx-"])
+def test_each_comparison_eval_leads_with_the_summary_the_report_prints_first(prefix: str) -> None:
+    """The skill leads a comparison's answer with the result's summary, yet neither comparison eval showed or expected
+    it: each excerpt now opens with the report's summary lines, and each answer leads with them."""
+    (path,) = (path for path in _EVALS if path.name.startswith(prefix))
+    text = path.read_text(encoding="utf-8")
+    (excerpt,) = _fences("text", text)
+    answer = _unwrapped(_section("## Expected answer", text))
+    lines = excerpt.splitlines()
+    summary = [line for line in lines if line.lstrip().startswith("Summary, ")]
+
+    assert summary and lines[: len(summary)] == summary
+    assert "It leads with the result's summary, before the side-by-side table" in answer
+
+
 def test_a_founder_who_expects_no_next_round_is_asked_for_the_note_s_own_maturity_and_sale_terms() -> None:
     """With no next round the tool runs its no-next-round mode: the step explains it and asks for the maturity, what
     happens then and the change-of-control term, never assumed; the Company DX eval runs it with an uncapped note."""
@@ -371,3 +400,12 @@ def test_the_comparison_step_carries_every_flag_s_meaning() -> None:
     for flag in get_args(InstrumentFlag):
         assert f"`{flag}`" in step, flag
     assert "the command line's report for `instrument_compare`" not in _TEXT
+
+
+def test_an_instrument_comparison_leads_with_the_tools_summary() -> None:
+    """The full comparison result is long, so the skill reads and shows its summary before any other row."""
+    steps = _unwrapped(_section("## Steps"))
+
+    assert "Call `equity_instrument_compare` and lead the answer with the result's `summary`, before any other" in steps
+    assert "over MCP the key after `scenario`, read first, since the full result is long" in steps
+    assert steps.index("result's `summary`, before any other row") < steps.index("Then show the side-by-side table")

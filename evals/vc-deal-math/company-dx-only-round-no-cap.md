@@ -44,23 +44,30 @@ option to take, and computes nothing in its own text.
 ## What the calculator prints (excerpt)
 
 ```text
-  Mode                                                                     no next round     no next round                  no next round given: the note is never converted at a priced round here; ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
-  Today: price per share                                                       $0.600000                                    p = V/(FD + converted + new pool)
-  Note owed at month 12                                                                      $1,590,000.00                  principal + interest, to the cent
-  Note owed at month 24                                                                      $1,680,000.00                  principal + interest, to the cent
-  Today: founders                                                               72.0000%          90.0000%        18.0000%  group's shares / total shares
-  At maturity (month 24): note owed                                                          $1,680,000.00                  principal + interest, to the cent; repaid if its terms say so
-  At maturity (month 24): converts at                                                            $0.500000                  the maturity valuation / FD
-  At maturity (month 24): note's shares                                                          3,360,000                  amount converting / price
-  At maturity (month 24): founders                                              72.0000%          67.3653%        -4.6347%  group's shares / total shares (A: right after today)
-  At a sale: note's claim                                                                    $3,000,000.00                  the multiple x the principal, paid before any share, up to the sale
-  Sale before any round, $3,000,000.00: founders                           $1,350,000.00             $0.00  $-1,350,000.00  the waterfall, every preference honoured; B's note on its own term
-  Sale before any round, $3,000,000.00: new money                          $1,500,000.00     $3,000,000.00   $1,500,000.00  the waterfall, every preference honoured; B's note on its own term
-  Sale before any round, $10,000,000.00: founders                          $7,200,000.00     $6,300,000.00    $-900,000.00  the waterfall, every preference honoured; B's note on its own term
-  Sale before any round, $40,000,000.00: founders                         $28,800,000.00    $33,300,000.00   $4,500,000.00  the waterfall, every preference honoured; B's note on its own term
-  Flag                                                               no_next_round_given                                    No next round was given, so the note never converts at a priced round here: the comparison shows ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
-  Flag                                                            note_interest_converts                                    The note's interest converts too, so it gets shares for more than the raise
-  Flag                                                     discount_unused_without_round                                    The note's discount comes off a priced round's price, and no next round is given: it changes no figure here
+  Summary, today: founders                                                               72.0000%          90.0000%        18.0000%  as the Today lines below
+  Summary, today: new money                                                              20.0000%           0.0000%       -20.0000%  as the Today lines below; B's note holds no shares until it converts
+  Summary, at B's maturity conversion: founders                                          72.0000%          67.3653%        -4.6347%  A as today; B as the maturity lines below
+  Summary, at B's maturity conversion: new money                                         20.0000%          25.1497%         5.1497%  A as today; B as the maturity lines below
+  Summary, sale before any round, $3,000,000.00: founders' payout                   $1,350,000.00             $0.00  $-1,350,000.00  as the sale's lines below
+  Summary, sale before any round, $10,000,000.00: founders' payout                  $7,200,000.00     $6,300,000.00    $-900,000.00  as the sale's lines below
+  Summary, sale before any round, $40,000,000.00: founders' payout                 $28,800,000.00    $33,300,000.00   $4,500,000.00  as the sale's lines below
+  Mode                                                                              no next round     no next round                  no next round given: the note is never converted at a priced round here; ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
+  Today: price per share                                                                $0.600000                                    p = V/(FD + converted + new pool)
+  Note owed at month 12                                                                               $1,590,000.00                  principal + interest, to the cent
+  Note owed at month 24                                                                               $1,680,000.00                  principal + interest, to the cent
+  Today: founders                                                                        72.0000%          90.0000%        18.0000%  group's shares / total shares
+  At maturity (month 24): note owed                                                                   $1,680,000.00                  principal + interest, to the cent; repaid if its terms say so
+  At maturity (month 24): converts at                                                                     $0.500000                  the maturity valuation / FD
+  At maturity (month 24): note's shares                                                                   3,360,000                  amount converting / price
+  At maturity (month 24): founders                                                       72.0000%          67.3653%        -4.6347%  group's shares / total shares (A: right after today)
+  At a sale: note's claim                                                                             $3,000,000.00                  the multiple x the principal, paid before any share, up to the sale
+  Sale before any round, $3,000,000.00: founders                                    $1,350,000.00             $0.00  $-1,350,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $3,000,000.00: new money                                   $1,500,000.00     $3,000,000.00   $1,500,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $10,000,000.00: founders                                   $7,200,000.00     $6,300,000.00    $-900,000.00  the waterfall, every preference honoured; B's note on its own term
+  Sale before any round, $40,000,000.00: founders                                  $28,800,000.00    $33,300,000.00   $4,500,000.00  the waterfall, every preference honoured; B's note on its own term
+  Flag                                                                        no_next_round_given                                    No next round was given, so the note never converts at a priced round here: the comparison shows ownership today, the note at its maturity on its own terms, and each exit as a sale before any priced round
+  Flag                                                                     note_interest_converts                                    The note's interest converts too, so it gets shares for more than the raise
+  Flag                                                              discount_unused_without_round                                    The note's discount comes off a priced round's price, and no next round is given: it changes no figure here
 ```
 
 ## Expected answer
@@ -68,6 +75,9 @@ option to take, and computes nothing in its own text.
 - It asks for nothing more: the founder gave both sets of terms, the note's maturity and what happens then, its term at
   a sale, the months to show and the sale values, and said the priced terms are standard, so `{"standard": true}`
   goes in. It passes no cap and no next round, as the founder said.
+- It leads with the result's summary, before the side-by-side table: the founders' and the new money's ownership
+  today and at B's maturity conversion, and the founders' payout at each sale before any round, under A, B and B - A,
+  each as printed.
 - It passes no `next_rounds` and no `note_months_to_conversion`, and it says in words that the comparison runs with no
   next round (`no_next_round_given`): the note never converts at a priced round here, so the table shows ownership
   right after today, the note at its maturity and each sale before any priced round.

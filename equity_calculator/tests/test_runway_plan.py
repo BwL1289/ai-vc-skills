@@ -698,6 +698,77 @@ def test_the_tolerance_row_states_the_rounding_rule_and_what_keeps_the_tolerance
     assert rows["tolerance"].source == "unverified (the rounding test is standard arithmetic)"
 
 
+def test_a_priced_round_on_a_phased_plan_is_cash_in_and_its_runway_follows_the_phases() -> None:
+    """Company PR (made up): $500k in the bank, a $3M priced round today; $110k net a month for months 1-3, $180k for
+    months 4-12, then $140k. The round is cash only: (3.5M - 330k - 1.62M)/140k past month 12 is 12 + 155/14 = 323/14
+    months, where deal_check's one flat planned burn of $180k gives 3.5M/180k = 175/9."""
+    phases = (1, "120000", "10000"), (4, "200000", "20000"), (13, "200000", "60000")
+    result = runway_plan(**_plan(*phases, cash_on_hand="500000", raises=[{"amount": "3000000"}]))
+    flat = deal_check(
+        investment="3000000",
+        pre_money="12000000",
+        cash_on_hand="500000",
+        planned_monthly_gross_burn="200000",
+        planned_monthly_revenue="20000",
+    )
+    landing = {row.key: row for row in result.assumptions}["landing_rule"]
+
+    assert _runway(result, "plan", 1) == Fraction(323, 14)
+    assert flat.runway[0].net_runway is not None and flat.runway[0].net_runway.exact == Fraction(175, 9)
+    assert "a priced round, a SAFE or a note adds its amount, and nothing converts here" in landing.statement
+    rule = {row.key: row for row in flat.assumptions}["runway_rule"]
+    assert "one flat burn, a quick check" in rule.statement and "comes from runway_plan" in rule.statement
+
+
+def test_a_run_rate_is_a_twelfth_a_month_exactly_and_a_derived_case_scales_that_month() -> None:
+    """$100,000 a year is 25000/3 a month, never a rounded $8,333.33; a downside at 50% halves that month."""
+    plan = [{"from_month": 1, "gross_burn": "50000", "revenue_run_rate": "100000"}]
+    result = runway_plan(
+        cash_on_hand="100000",
+        cases=[{"name": "plan", "phases": plan}, {"name": "downside", "revenue_percent_of_plan": "50"}],
+    )
+    by_case = {case.name: case.phases[0] for case in result.cases}
+
+    assert by_case["plan"].revenue.exact == Fraction(25000, 3)
+    assert by_case["plan"].revenue_run_rate is not None and by_case["plan"].revenue_run_rate.exact == 100000
+    assert by_case["downside"].revenue.exact == Fraction(12500, 3) and by_case["downside"].revenue_run_rate is None
+    assert _runway(result, "plan", 0) == Fraction(100000) / (50000 - Fraction(25000, 3))
+    rows = {row.key: row for row in result.assumptions}
+    assert rows["run_rate_rule"].setting == "revenue a month = the annualised run-rate / 12"
+    assert rows["run_rate_rule"].source.startswith("unverified")
+    assert "run_rate_rule" not in {row.key for row in runway_plan(**_plan((1, "50000", "1000"))).assumptions}
+
+
+def test_a_phase_takes_revenue_or_a_run_rate_but_a_zero_revenue_beside_a_run_rate_reads_back() -> None:
+    both = [{**_FLAT[0], "revenue": "1", "revenue_run_rate": "12"}]
+    with pytest.raises(ValidationError, match="revenue a month or its revenue_run_rate"):
+        runway_plan(cash_on_hand="1", cases=[{"name": "plan", "phases": both}])
+    echoed = [{**_FLAT[0], "revenue": "0", "revenue_run_rate": "12"}]
+
+    phase = runway_plan(cash_on_hand="1", cases=[{"name": "plan", "phases": echoed}]).cases[0].phases[0]
+
+    assert phase.revenue.exact == 1
+
+
+def test_a_self_funding_milestone_assumes_no_follow_on_and_takes_no_months_to_raise() -> None:
+    """An only round: each milestone is checked at its own month, the rule row cites no source for a follow-on, and
+    no flag asks for months to raise."""
+    result = runway_plan(**_plan((1, "100000", "0"), milestones=[6], milestone_type="self_funding"))
+    rows = {row.key: row for row in result.assumptions}
+
+    assert {row.target_month for row in result.milestones} == {6}
+    assert "no_time_to_raise_given" not in result.flags
+    assert rows["milestone_rule"].setting.endswith("no follow-on round assumed (self-funding)")
+    assert rows["milestone_rule"].source == "unverified (a modelling choice)"
+    assert "is not applied" in rows["milestone_rule"].statement
+    assert list(rows)[-1] == "required_raise_rule"
+    assert "no_time_to_raise_given" in runway_plan(**_plan((1, "100000", "0"), milestones=[6])).flags
+    with pytest.raises(ValidationError, match="assumes no next round"):
+        runway_plan(**_plan((1, "100000", "0"), milestones=[6], milestone_type="self_funding", months_to_raise=3))
+    with pytest.raises(ValidationError, match="needs at least one milestone"):
+        runway_plan(**_plan((1, "100000", "0"), milestone_type="self_funding"))
+
+
 # --- assumption rows ------------------------------------------------------------------------------------------------
 
 

@@ -126,7 +126,10 @@ async def test_a_downside_a_lean_case_a_late_raise_and_funds_lines_come_from_the
     inputs = printed["inputs"]
 
     assert [case["name"] for case in inputs["cases"]] == ["plan", "downside", "lean"]
-    assert inputs["cases"][1]["phases"] == [{"from_month": 1, "gross_burn": "120000", "revenue": "0"}]
+    # A revenue left out echoes as null, not 0, so a result read back from JSON still knows it was not given.
+    assert inputs["cases"][1]["phases"] == [
+        {"from_month": 1, "gross_burn": "120000", "revenue": None, "revenue_run_rate": None}
+    ]
     assert inputs["cases"][2]["gross_burn_percent_of_plan"] == "80"
     assert inputs["raises"][0]["use_of_funds"] == []
     assert inputs["raises"][1]["use_of_funds"] == [
@@ -175,6 +178,15 @@ async def test_a_downside_a_lean_case_a_late_raise_and_funds_lines_come_from_the
         ([*_FLAT, "--cash-floor", "300001"], "--cash-floor is above --cash-on-hand"),
         ([*_FLAT, "--milestone", "601"], "--milestone #1: Input should be less than or equal to 600"),
         ([*_FLAT, "--milestone", "6", "--milestone", "6"], "--milestone: each milestone month may appear once"),
+        (
+            [*_FLAT, "--phase", "from-month=2 gross-burn=1 revenue=1 revenue-run-rate=12"],
+            "--phase #2: give a phase's revenue a month or its revenue-run-rate (annualised), not both",
+        ),
+        (
+            [*_FLAT, "--milestone", "6", "--milestone-type", "self_funding", "--months-to-raise", "3"],
+            "a self-funding --milestone-type assumes no next round: leave --months-to-raise out",
+        ),
+        ([*_FLAT, "--milestone-type", "self_funding"], "a self-funding --milestone-type needs at least one milestone"),
     ],
     ids=[
         "phase-term",
@@ -188,6 +200,9 @@ async def test_a_downside_a_lean_case_a_late_raise_and_funds_lines_come_from_the
         "floor",
         "milestone-bound",
         "milestone-twice",
+        "revenue-twice",
+        "self-funding-months-to-raise",
+        "self-funding-no-milestone",
     ],
 )
 async def test_refusals_name_flags_never_model_fields(argv: list[str], message: str) -> None:
@@ -208,6 +223,7 @@ async def test_refusals_name_flags_never_model_fields(argv: list[str], message: 
         ("--raise-use-of-funds", "first 50%", "starts with the raise's number"),
         ("--raise-use-of-funds", "1", "needs the raise's number and then an amount or a percent"),
         ("--milestone", "12.5", "must be a whole number of months"),
+        ("--milestone-type", "only_round", "invalid choice"),
     ],
 )
 async def test_unreadable_arguments_exit_2(flag: str, raw: str, said: str, capsys: pytest.CaptureFixture[str]) -> None:
@@ -293,6 +309,39 @@ async def test_a_use_of_funds_line_for_a_raise_not_given_counts_the_raises() -> 
         await run(argv)
 
     assert str(caught.value.code) == "--raise-use-of-funds #1: there is no --raise #2 (only 1 was given)"
+
+
+async def test_a_run_rate_phase_and_a_self_funding_milestone_come_from_their_flags() -> None:
+    """Company RR (made up): a $600,000 run-rate is $50,000 a month, divided by the tool; an only round's milestone
+    is checked at its own month, with no months to raise and no flag asking for them."""
+    argv = [
+        "runway_plan",
+        "--cash-on-hand",
+        "900000",
+        "--phase",
+        "from-month=1 gross-burn=100000 revenue-run-rate=600000",
+        "--phase",
+        "from-month=7 gross-burn=120000 revenue-run-rate=900000",
+        "--milestone",
+        "12",
+        "--milestone-type",
+        "self_funding",
+    ]
+    result = json.loads(await run([*argv, "--json"]))
+    report = (await run(argv)).splitlines()
+    phases = result["cases"][0]["phases"]
+
+    assert result["inputs"]["cases"][0]["phases"][0]["revenue_run_rate"] == "600000"
+    assert [phase["revenue"]["rounded"] for phase in phases] == ["50000.00", "75000.00"]
+    assert [phase["revenue_run_rate"]["rounded"] for phase in phases] == ["600000.00", "900000.00"]
+    assert result["inputs"]["milestone_type"] == "self_funding"
+    assert "no_time_to_raise_given" not in result["flags"]
+    assert any(line.endswith("$50,000.00  the run-rate / 12") for line in report)
+    assert any("revenue run-rate, a year" in line and line.endswith("$600,000.00  given") for line in report)
+    assert any(line.startswith("  Milestones are for") and "self-funding, the only round" in line for line in report)
+    # The echoed inputs, revenue 0 beside each run-rate, are taken back as they are and work the same plan.
+    again = runway_plan(**result["inputs"]).model_dump(mode="json")
+    assert again["runway"] == result["runway"] and again["cases"] == result["cases"]
 
 
 def test_a_plan_with_nothing_to_check_says_so() -> None:

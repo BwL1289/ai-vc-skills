@@ -43,7 +43,9 @@ from each. A place you could not read (a slide that is only a picture, a page wh
 opened only in part) is listed as not read and asked for, never filled in from its title or the places around it, and a
 figure is never read off a chart or a picture. Ask only for what you could not read and what the file does not show
 (speaker notes, the figures behind a chart, an input below that it leaves out), and never ask the founder to paste what
-you already read.
+you already read. When the founder cannot answer now, do not wait for them: go on with what was given (a call or step
+that waits for an input still waits), invent nothing in a gap's place, and list each ask in brackets under **Needs from
+the founder**, the open asks under that name; a live drill waits for the founder.
 
 1. **Cash and the plan:** cash in the bank today, and the monthly plan as a few phases (from which month, gross
    spend, revenue). Three to five phases is plenty; a detailed model is not needed.
@@ -64,12 +66,18 @@ A missing input becomes a named gap, written as a bracketed ask: `[months you al
 time to raise given, run anyway and say every milestone was checked at its bare month (the tool's
 `no_time_to_raise_given` flag). With no downside given, run the plan alone and ask for one; never pick a percent.
 
+Revenue the founder states as an annualised run-rate goes in that phase's `revenue_run_rate`, which the tool divides
+by 12: never divide it yourself. Only when the founder says this is the only round they plan, with no follow-on, send
+`"milestone_type": "self_funding"`: each milestone is then checked at its own month, months to raise are refused and
+not asked for, and the tool's milestone rule row says no follow-on round is assumed.
+
 ## Steps
 
 Without a subagent tool, run the skeptic (Adversarial review) first, before step 1, as "How to run it" says.
 
 1. **Quote first.** List what the founder states, word for word: the ask, instrument and valuation, cash, burn,
-   revenue, any runway claim, the use-of-funds lines, the milestones. Do not tidy or correct them yet.
+   revenue, any runway claim, the use-of-funds lines, the milestones. Do not tidy or correct them yet. The list
+   leads Answering item 5, so the founder sees each figure the answer starts from.
 2. **Ask for what is missing** (Inputs), in one message.
 3. **Call `equity_runway_plan` once,** with every option, every case and every milestone; make no second call unless
    the founder asks for another case. Each case is exactly one the founder stated (the plan, their downside, their
@@ -137,14 +145,14 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
      lean rows only for the option the founder ties the plan to, and say so.
 
    What a milestone verdict says: only that the cash lasts to the milestone month plus the months to raise (the tool's
-   `milestone_rule` row). Slack is the runway less the milestone month, so a milestone is covered only when the slack
-   is at least the months to raise; "short" beside a positive slack is no contradiction. Whether the plan reaches the
+   `milestone_rule` row). Slack is the runway less the milestone month, so a milestone is covered only when the slack is
+   at least the months to raise; "short" beside a positive slack is no contradiction. Whether the plan reaches the
    milestone's own figure is quoted as stated and not checked by these calls: an ARR target is checked by the
    vc-metrics-readiness skill (`equity_metrics_check` works ARR out from monthly recurring revenue), and the open asks
    ask for the monthly recurring revenue it stands for; a customer count or a launch is quoted with "not checked: no
-   tool computes this". A revenue milestone the founder gives as revenue a month is set beside the tool's phase revenue row for
-   that month, both as printed; one in other terms is never converted by hand, and its monthly figure goes to the
-   open asks.
+   tool computes this". A revenue milestone the founder gives as revenue a month is set beside the tool's phase revenue
+   row for that month, both as printed; one in other terms is never converted by hand, and its monthly figure goes to
+   the open asks.
 
 4. **Ownership per option,** with the tools that already do it:
    - A priced round: `equity_deal_check` with the option's amount, its valuation and the founders' stake today
@@ -183,11 +191,12 @@ Without a subagent tool, run the skeptic (Adversarial review) first, before step
    figure that is in neither a tool result nor the founder's text: a difference, a total, a gap, a remainder or "points"
    counts, and goes. Every case is one the founder named, from one `equity_runway_plan` call. Every code in each
    result's `flags` appears once, with its table meaning. The no-raise row shows `start_raising_by` as printed, a
-   negative value included. Every attack quotes a founder line word for word and carries its refute verdict; nothing
-   speaks as an investor; no figure, milestone or assumption is the skill's own; the close is item 11's sentence as
-   written. Never work out how two of the founder's figures relate (a difference, a sum, a ratio or multiple, a share
-   left over, "doubled") in a rewrite, a line or a table cell unless the founder's material states it or a tool returned
-   it; quote both figures as stated instead ("from 2,000 to 4,500", never "more than doubled").
+   negative value included, or item 2's text for why the tool printed none. Every attack quotes a founder line
+   word for word and carries its refute verdict; nothing speaks as an investor; no figure, milestone or assumption is
+   the skill's own; the close is item 11's sentence as written. Never work out how two of the founder's figures relate
+   (a difference, a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a line or a table cell unless
+   the founder's material states it or a tool returned it; quote both figures as stated instead ("from 2,000 to 4,500",
+   never "more than doubled").
 
 Tool values: use each value's `rounded` with its unit; never round again or recompute. A value whose unit is
 `fraction` is shown as a percent by moving the decimal point of its `rounded` value two places right, keeping every
@@ -197,7 +206,8 @@ Months to raise and slack are never added or subtracted by hand: the tool gives 
 `runway_from_landing` and `start_raising_by`. Never state the gap between an option's amount and a required raise,
 or between two options' runways or stakes ("short by $X", "clears it by $Y", "N points more"), or what a founder's
 percent leaves over (85% of plan never becomes "the other 15%"): show both values side by side and let the founder
-compare.
+compare. A difference the tool prints itself (a deck claim's `difference` row, `computed - stated`) is the tool's
+value, not a gap worked by hand: quote it as printed, with its label, beside the two figures.
 
 ## Adversarial review
 
@@ -240,8 +250,9 @@ grounded. Questions to the founder go to the open asks.
 
 Each attack gets its own pass. With a subagent tool, launch a subagent per attack, all in a single message, each given
 only the material, that one attack, the Pattern column and this brief; never put two attacks in one subagent. Only
-without a subagent tool, take the attacks one at a time in the same agent and decide each before reading the next.
-Say in the answer which way the refute pass ran.
+without a subagent tool, take the attacks one at a time in the same agent and decide each before reading the next. Say
+in the answer which way the refute pass ran. One skeptic raises at most three attacks here, so the refute pass never has
+more than eight and lean mode, which other review skills use past eight, never applies, with or without a subagent tool.
 
 - You decide whether one attack is grounded in the founder's material. Write in the third person; you are not an
   investor. Use only the material; bring in no outside fact, and do no arithmetic.
@@ -338,13 +349,19 @@ verdict of the skill's own opens the answer.
    stated and not checked: an ARR target with the vc-metrics-readiness skill named as where it is checked, a customer
    count or a launch with "not checked: no tool computes this".
 2. **Table:** Option, Case, Runway, Milestone (month), Covered?, Slack, Start raising by. The no-raise row first, its
-   start raising by as printed (a negative value stays negative, never "already passed").
+   start raising by as printed (a negative value stays negative, never "already passed"). With no months to raise the
+   tool prints no start raising by, so the cell reads "not computed: give months to raise" (with `self_funding`, "not
+   computed: no follow-on round"); when the months were given and the row's cash never runs out, the tool also prints
+   none, and the cell reads "none: the cash never runs out". A case whose rows are the plan's, row for row as printed (a
+   downside cutting a revenue the plan sets at $0.00), is said once, "the downside's rows are the plan's, as printed",
+   and not repeated.
 3. **Ownership per option:** percent sold and the founders' stake after, from `equity_deal_check`; after the next
    round from `equity_dilution`; a SAFE's share from `equity_round`, or "not computed: set at the next priced round".
    The options' values side by side; never their difference.
 4. **Raise now or wait,** when asked: the side-by-side, then what has to be true for each, in the founder's terms.
    No recommendation.
-5. **Deck claims:** each runway and use-of-funds check, the deck's figure and the tool's, consistent or a mismatch.
+5. **Deck claims:** first step 1's list of what the founder states, word for word; then each runway and use-of-funds
+   check, the deck's figure and the tool's (with the tool's own difference row as printed), consistent or a mismatch.
 6. **Adversarial review:** three parts: the calculator's short milestones, mismatches and cash-outs first, as
    computed facts; then each skeptic attack with its refute verdict (Kept, grounded; Dropped, answered; Dropped, not
    grounded) and the founder's line quoted, the kept ones (at most three) with the doubt and the fix, then

@@ -50,6 +50,7 @@ from equity_calculator.schemas.equity_metrics_check import (
     StatedChurnBasis,
 )
 from equity_calculator.schemas.equity_round import NoteCompounding, StubRule
+from equity_calculator.schemas.equity_runway_plan import MilestoneType
 from equity_calculator.schemas.equity_vesting import Acceleration, AccelerationBase
 
 _INSTRUMENTS = "instruments"
@@ -328,7 +329,7 @@ def deal_check_arguments(parser: argparse.ArgumentParser) -> None:
     )
 
 
-_PHASE_TERMS = "'from-month=M gross-burn=G [revenue=R]'"
+_PHASE_TERMS = "'from-month=M gross-burn=G [revenue=R | revenue-run-rate=Y]'"
 
 
 def _case_arguments(parser: argparse.ArgumentParser, case: str) -> None:
@@ -369,7 +370,8 @@ def runway_plan_arguments(parser: argparse.ArgumentParser) -> None:
         required=True,
         metavar=_TERMS,
         help=f"One phase of the plan: {_PHASE_TERMS}, monthly figures from that month until the next phase (the "
-        "last runs on). The first starts at month 1. Repeat for each phase, in order.",
+        "last runs on); Y is an annualised revenue run-rate, divided by 12 for you. The first starts at month 1. "
+        "Repeat for each phase, in order.",
     )
     _case_arguments(parser, "downside")
     _case_arguments(parser, "lean")
@@ -379,8 +381,9 @@ def runway_plan_arguments(parser: argparse.ArgumentParser) -> None:
         action="append",
         dest="raises",
         metavar=_TERMS,
-        help="One raise to compare: 'amount=I [lands-month=L] [stated-runway-months=M] "
-        "[stated-runway-from=today|landing]'; L whole months from today (default 0: now). Repeat for each raise.",
+        help="One raise to compare, of any instrument (a priced round, a SAFE, a note) as cash in: 'amount=I "
+        "[lands-month=L] [stated-runway-months=M] [stated-runway-from=today|landing]'; L whole months from today "
+        "(default 0: now). Repeat for each raise.",
     )
     parser.add_argument(
         "--raise-use-of-funds",
@@ -397,6 +400,12 @@ def runway_plan_arguments(parser: argparse.ArgumentParser) -> None:
         action="append",
         dest="milestones",
         help="A milestone, as a month from today. Repeat for each milestone.",
+    )
+    parser.add_argument(
+        "--milestone-type",
+        choices=get_args(MilestoneType),
+        help="What the milestones are for: next_round (the default; the months to raise count after each) or "
+        "self_funding (this is the only round: no follow-on assumed, no months to raise).",
     )
     parser.add_argument(
         "--months-to-raise",
@@ -590,9 +599,10 @@ def market_sizing_arguments(parser: argparse.ArgumentParser) -> None:
         dest="segments",
         required=True,
         metavar=_TERMS,
-        help="One group of buying customers: 'customers=N price=P [price-period-months=M] [units-per-customer=U] "
-        "[take-rate-percent=T] [serviceable-percent=S] [obtainable-percent=O | obtainable-customers=C] "
-        "[customers-today=D]'. The price is for M months (default 12). Repeat for each segment (at most 8).",
+        help="One group of buying customers: '[customers=N] price=P [price-period-months=M] [units-per-customer=U] "
+        "[take-rate-percent=T] [second-line-percent=L] [serviceable-percent=S] [obtainable-percent=O | "
+        "obtainable-customers=C | obtainable-units=V] [customers-today=D]'. The price is for M months (default 12). "
+        "Leave customers out with only the customers or units to win. Repeat for each segment (at most 8).",
     )
     parser.add_argument(
         "--top-down",
@@ -610,14 +620,20 @@ def market_sizing_arguments(parser: argparse.ArgumentParser) -> None:
         dest="sensitivity",
         metavar=_TERMS,
         help="One field of one segment worked again at your own values: 'field=F segment=K values=V1/V2' (F one of "
-        "customers, price, units-per-customer, take-rate-percent, serviceable-percent, obtainable-percent, "
-        "obtainable-customers; K 1 for the first --segment). Repeat for each (at most 6, 4 values each).",
+        "customers, price, units-per-customer, take-rate-percent, second-line-percent, serviceable-percent, "
+        "obtainable-percent, obtainable-customers, obtainable-units; K 1 for the first --segment). Repeat for each (at "
+        "most 6, 4 values each).",
     )
     parser.add_argument(
         "--population", type=parse_decimal, help="The total the segments are drawn from, in the same buying unit."
     )
     parser.add_argument("--annual-revenue-today", type=parse_decimal, help="The company's annual revenue today.")
     parser.add_argument("--som-years", type=parse_years, help="Years to win the SOM customers (1 to 20).")
+    parser.add_argument(
+        "--som-months",
+        type=parse_months,
+        help="Months to win the SOM customers (1 to 240), for a horizon such as 30 months; or --som-years.",
+    )
     parser.add_argument(
         "--som-target",
         type=parse_decimal,

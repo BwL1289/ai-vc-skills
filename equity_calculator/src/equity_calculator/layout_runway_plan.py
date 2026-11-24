@@ -34,6 +34,8 @@ _HEADING = "How long each raise lasts on the founder's plan and cases, and which
 _COLUMNS = ("This plan",)
 _NEVER = "none: the cash never runs out"
 _NO_AMOUNT = "none: the cash runs out before it lands"
+_SELF_FUNDING = "self-funding, the only round"
+_RUN_RATE_HOW = "the run-rate / 12"
 _CHECK_HOW = {
     "runway_months": "the plan case's runway",
     "use_of_funds_total": "against the raise (or 100%)",
@@ -104,6 +106,8 @@ def _given_lines(result: RunwayPlanResult) -> list[Line]:
         shown.append(
             (f"milestone_{number}", f"Milestone {number}", given("months", Decimal(month)), "months from today")
         )
+    if inputs.milestone_type == "self_funding":
+        shown.append(("milestone_type", "Milestones are for", _SELF_FUNDING, "given: no follow-on round assumed"))
     shown += [
         (
             "tolerance_points",
@@ -158,9 +162,12 @@ def _case_lines(case: RunwayCase, derived: bool) -> list[Line]:
     for number, phase in enumerate(case.phases, start=1):
         name = f"{case.name.capitalize()}, phase {number} ({_phase_months(phase)})"
         key = f"{case.name}_phase_{number}"
+        lines.append(Line(f"{key}_gross", f"{name}: gross burn a month", (phase.gross_burn,), how))
+        if phase.revenue_run_rate is not None:
+            lines.append(Line(f"{key}_run_rate", f"{name}: revenue run-rate, a year", (phase.revenue_run_rate,), how))
+        revenue_how = how if phase.revenue_run_rate is None else _RUN_RATE_HOW
         lines += [
-            Line(f"{key}_gross", f"{name}: gross burn a month", (phase.gross_burn,), how),
-            Line(f"{key}_revenue", f"{name}: revenue a month", (phase.revenue,), how),
+            Line(f"{key}_revenue", f"{name}: revenue a month", (phase.revenue,), revenue_how),
             Line(f"{key}_net", f"{name}: net burn a month", (phase.net_burn,), "gross burn - revenue"),
         ]
     return lines

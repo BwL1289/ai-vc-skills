@@ -52,42 +52,56 @@ A, option B and B - A, never says which option to take, and computes nothing in 
 ## What the calculator prints (excerpt)
 
 ```text
-  Today: price per share                                                                $0.800000                                    p = V/(FD + converted + new pool)
-  Note owed when it converts                                                                          $2,100,000.00                  principal + interest, to the cent
-  Note's cap price                                                                                        $0.600000                  cap / FD
-  Today: founders                                                                        64.0000%          80.0000%        16.0000%  group's shares / total shares
-  Next round 1: price per share                                                         $2.160000         $2.000000                  p = V/(each option's shares + converted + new pool)
-  Next round 1: B's note: converts at                                                                     $0.600000                  its cap price, the lower
-  Next round 1: B's note: shares                                                                          3,500,000                  amount converting / price
-  Next round 1: founders                                                                 52.3636%          48.4848%        -3.8788%  group's shares / total shares
-  Next round 1: exit $5,000,000.00: founders                                                $0.00             $0.00           $0.00  the waterfall, every preference honoured
-  Next round 1: exit $5,000,000.00: preferences paid                                $5,000,000.00     $5,000,000.00                  classes that stay
-  Next round 1: exit $20,000,000.00: founders                                       $8,960,000.00     $8,296,296.29    $-663,703.70  the waterfall, every preference honoured
-  Next round 1: exit $20,000,000.00: preferences paid                               $6,000,000.00     $6,000,000.00                  classes that stay
-  Next round 1: exit $100,000,000.00: founders                                     $52,363,636.36    $48,484,848.49  $-3,878,787.88  the waterfall, every preference honoured
-  Next round 1: exit $100,000,000.00: preferences paid                                      $0.00             $0.00                  classes that stay
-  Next round 2: price per share                                                         $0.720000         $0.637500                  p = V/(each option's shares + converted + new pool)
-  Next round 2: B's note: converts at                                                                     $0.510000                  its discount price, the lower
-  Next round 2: B's note: shares                                                                      4,117,647.059                  amount converting / price
-  Next round 2: founders                                                                 52.3636%          46.3636%        -6.0000%  group's shares / total shares
-  Next round 2: exit $5,000,000.00: founders                                          $800,000.00       $720,000.00     $-80,000.00  the waterfall, every preference honoured
-  Next round 2: exit $5,000,000.00: preferences paid                                $4,000,000.00     $4,100,000.00                  classes that stay
-  Next round 2: exit $20,000,000.00: founders                                      $10,472,727.27     $9,272,727.27  $-1,200,000.00  the waterfall, every preference honoured
-  Next round 2: exit $20,000,000.00: preferences paid                                       $0.00             $0.00                  classes that stay
-  Next round 2: exit $100,000,000.00: founders                                     $52,363,636.36    $46,363,636.36  $-6,000,000.00  the waterfall, every preference honoured
-  Next round 2: exit $100,000,000.00: preferences paid                                      $0.00             $0.00                  classes that stay
-  Flag                                                                  cap_below_round_price_now                                    The note's cap price is below option A's price per share today: at its cap the note buys shares for less than option A's investors pay today
-  Flag                                                                       note_converts_at_cap                                    In at least one next round the note converts at its cap price
-  Flag                                                                  note_converts_at_discount                                    In at least one next round the note converts at its discount price, which is below its cap price there
-  Flag                                                                     note_interest_converts                                    The note's interest converts too, so it gets shares for more than the raise
-  Flag                                                                         maturity_not_given                                    No maturity was given for the note: what happens if the next round comes late is in the note's own terms, not modelled here
-  Flag                                                        next_round_below_priced_round_price                                    A next round prices below option A's price today, a down round for option A's investors: any anti-dilution adjustment in their terms is not modelled here
+  Summary, today: founders                                                                  64.0000%          80.0000%        16.0000%  as the Today lines below
+  Summary, today: new money                                                                 20.0000%           0.0000%       -20.0000%  as the Today lines below; B's note holds no shares until it converts
+  Summary, after next round 1: founders                                                     52.3636%          48.4848%        -3.8788%  as that round's lines below
+  Summary, after next round 1: new money                                                    16.3636%          21.2121%         4.8485%  as that round's lines below
+  Summary, after next round 2: founders                                                     52.3636%          46.3636%        -6.0000%  as that round's lines below
+  Summary, after next round 2: new money                                                    16.3636%          23.8636%         7.5000%  as that round's lines below
+  Summary, next round 1, exit $5,000,000.00: founders' payout                                  $0.00             $0.00           $0.00  as the exit's founders line below
+  Summary, next round 1, exit $20,000,000.00: founders' payout                         $8,960,000.00     $8,296,296.29    $-663,703.70  as the exit's founders line below
+  Summary, next round 1, exit $100,000,000.00: founders' payout                       $52,363,636.36    $48,484,848.49  $-3,878,787.88  as the exit's founders line below
+  Summary, next round 2, exit $5,000,000.00: founders' payout                            $800,000.00       $720,000.00     $-80,000.00  as the exit's founders line below
+  Summary, next round 2, exit $20,000,000.00: founders' payout                        $10,472,727.27     $9,272,727.27  $-1,200,000.00  as the exit's founders line below
+  Summary, next round 2, exit $100,000,000.00: founders' payout                       $52,363,636.36    $46,363,636.36  $-6,000,000.00  as the exit's founders line below
+  Today: price per share                                                                   $0.800000                                    p = V/(FD + converted + new pool)
+  Note owed when it converts                                                                             $2,100,000.00                  principal + interest, to the cent
+  Note's cap price                                                                                           $0.600000                  cap / FD
+  Today: founders                                                                           64.0000%          80.0000%        16.0000%  group's shares / total shares
+  Next round 1: price per share                                                            $2.160000         $2.000000                  p = V/(each option's shares + converted + new pool)
+  Next round 1: B's note: converts at                                                                        $0.600000                  its cap price, the lower
+  Next round 1: B's note: shares                                                                             3,500,000                  amount converting / price
+  Next round 1: founders                                                                    52.3636%          48.4848%        -3.8788%  group's shares / total shares
+  Next round 1: exit $5,000,000.00: founders                                                   $0.00             $0.00           $0.00  the waterfall, every preference honoured
+  Next round 1: exit $5,000,000.00: preferences paid                                   $5,000,000.00     $5,000,000.00                  classes that stay
+  Next round 1: exit $20,000,000.00: founders                                          $8,960,000.00     $8,296,296.29    $-663,703.70  the waterfall, every preference honoured
+  Next round 1: exit $20,000,000.00: preferences paid                                  $6,000,000.00     $6,000,000.00                  classes that stay
+  Next round 1: exit $100,000,000.00: founders                                        $52,363,636.36    $48,484,848.49  $-3,878,787.88  the waterfall, every preference honoured
+  Next round 1: exit $100,000,000.00: preferences paid                                         $0.00             $0.00                  classes that stay
+  Next round 2: price per share                                                            $0.720000         $0.637500                  p = V/(each option's shares + converted + new pool)
+  Next round 2: B's note: converts at                                                                        $0.510000                  its discount price, the lower
+  Next round 2: B's note: shares                                                                         4,117,647.059                  amount converting / price
+  Next round 2: founders                                                                    52.3636%          46.3636%        -6.0000%  group's shares / total shares
+  Next round 2: exit $5,000,000.00: founders                                             $800,000.00       $720,000.00     $-80,000.00  the waterfall, every preference honoured
+  Next round 2: exit $5,000,000.00: preferences paid                                   $4,000,000.00     $4,100,000.00                  classes that stay
+  Next round 2: exit $20,000,000.00: founders                                         $10,472,727.27     $9,272,727.27  $-1,200,000.00  the waterfall, every preference honoured
+  Next round 2: exit $20,000,000.00: preferences paid                                          $0.00             $0.00                  classes that stay
+  Next round 2: exit $100,000,000.00: founders                                        $52,363,636.36    $46,363,636.36  $-6,000,000.00  the waterfall, every preference honoured
+  Next round 2: exit $100,000,000.00: preferences paid                                         $0.00             $0.00                  classes that stay
+  Flag                                                                     cap_below_round_price_now                                    The note's cap price is below option A's price per share today: at its cap the note buys shares for less than option A's investors pay today
+  Flag                                                                          note_converts_at_cap                                    In at least one next round the note converts at its cap price
+  Flag                                                                     note_converts_at_discount                                    In at least one next round the note converts at its discount price, which is below its cap price there
+  Flag                                                                        note_interest_converts                                    The note's interest converts too, so it gets shares for more than the raise
+  Flag                                                                            maturity_not_given                                    No maturity was given for the note: what happens if the next round comes late is in the note's own terms, not modelled here
+  Flag                                                           next_round_below_priced_round_price                                    A next round prices below option A's price today, a down round for option A's investors: any anti-dilution adjustment in their terms is not modelled here
 ```
 
 ## Expected answer
 
 - It asks for nothing more: the founder gave both sets of terms, the next round and the exits, and said the terms are
   standard, so `{"standard": true}` goes in for each series. It assumes no maturity and says none was given.
+- It leads with the result's summary, before the side-by-side table: the founders' and the new money's ownership
+  today and after each next round, and the founders' payout at each exit, under A, B and B - A, each as printed.
 - It passes the two next rounds as alternatives for the one round after today ($6M at $27M pre, or $2M at $9M pre),
   each worked from today, and says so: neither comes after the other.
 - Today: the founders own 64.0000% under the priced round and 80.0000% under the note, which has no shares until the

@@ -44,6 +44,7 @@ from equity_calculator.schemas.equity_market_sizing import (
     MarketSizingFlag,
     MarketSizingInput,
     MarketSizingResult,
+    SensitivityResult,
 )
 from equity_calculator.text import display, render_sheet
 from pydantic import ValidationError
@@ -455,6 +456,7 @@ def test_a_top_down_figure_never_changes_the_verdict() -> None:
 
 _FLAG_CASES: dict[str, tuple[dict[str, object], dict[str, object]]] = {
     "price_period_defaulted": (_with(), _with({"price_period_months": 12})),
+    "no_market_count": (_with({"obtainable_customers": "1000"}), _with({"obtainable_customers": "999"})),
     "segments_exceed_population": (_with(population="999"), _with(population="1000")),
     "bottom_up_above_top_down": (_with(top_down=[{"amount": "99999"}]), _with(top_down=[{"amount": "100000"}])),
     "sam_equals_tam": (_with(), _with({"serviceable_percent": "99"})),
@@ -851,3 +853,297 @@ def test_does_not_move_is_reported_before_met_without_it() -> None:
         "does_not_move",
         "met_without_it",
     ]
+
+
+def test_a_horizon_in_months_is_months_over_12_years_and_a_horizon_in_years_is_unchanged() -> None:
+    """30 months is 5/2 years: (30 - 5) / (5/2) = 10 new customers a year, exactly; the years path keeps its words."""
+    segment = {"customers": "100", "price": "1000", "price_period_months": 12, "obtainable_customers": "30"}
+    months = market_sizing(segments=[{**segment, "customers_today": "5"}], som_months=30)
+    years = market_sizing(segments=[{**segment, "customers_today": "5"}], som_years=2)
+    rows = {row.key: row for row in months.assumptions}
+
+    assert months.segments[0].new_customers_per_year is not None
+    assert months.segments[0].new_customers_per_year.exact == 10
+    assert years.segments[0].new_customers_per_year is not None
+    assert years.segments[0].new_customers_per_year.exact == Fraction(25, 2)
+    assert rows["som_rule"].setting.endswith("in 30 months")
+    assert "no_horizon_given" not in months.flags
+    assert "no_horizon_given" in market_sizing(segments=[segment]).flags
+    one = {row.key: row for row in market_sizing(segments=[segment], som_months=1).assumptions}
+    assert one["som_rule"].setting.endswith("in 1 month")
+    with pytest.raises(ValidationError, match="give som_years or som_months, not both"):
+        market_sizing(segments=[segment], som_years=1, som_months=12)
+
+
+def test_the_som_range_says_when_its_low_or_high_is_the_base_not_a_founder_value() -> None:
+    """Prices of $600 and $800 against a $1,000 base: the high is the base's $30,000, not the founder's best case; a
+    tie with the base (a field that does not move SOM) goes to the founder's value; no SOM total, no range ends."""
+    segment = {"customers": "100", "price": "1000", "price_period_months": 12, "obtainable_customers": "30"}
+
+    def row(field: str, values: list[str], **extra: object) -> SensitivityResult:
+        rows = [{"field": field, "segment": 1, "values": values}]
+        return market_sizing(segments=[{**segment, **extra}], sensitivity=rows).sensitivity[0]
+
+    below = row("price", ["600", "800"])
+    assert (below.som_low_at, below.som_high_at) == ("founder_value", "base")
+    assert below.som_high is not None and below.som_high.exact == 30000
+    assert below.value_at_som_high is not None and below.value_at_som_high.exact == 1000
+    assert below.value_at_som_low is not None and below.value_at_som_low.exact == 600
+    above = row("price", ["1100", "1200"])
+    assert (above.som_low_at, above.som_high_at) == ("base", "founder_value")
+    tie = row("serviceable_percent", ["50", "90"])
+    assert (tie.som_low_at, tie.som_high_at) == ("founder_value", "founder_value")
+    no_som = market_sizing(
+        segments=[{key: value for key, value in segment.items() if key != "obtainable_customers"}],
+        sensitivity=[{"field": "price", "segment": 1, "values": ["600"]}],
+    ).sensitivity[0]
+    assert (no_som.som_low_at, no_som.value_at_som_high) == (None, None)
+
+
+# Company NC (made up): 40 customers to win at $50,000 a year, with no count of the market (left out, or typed equal to
+# the 40), beside a counted segment of 1,000 at $1,000 a year winning 100.
+_NC_TO_WIN = {"price": "50000", "price_period_months": 12, "obtainable_customers": "40"}
+_NC_COUNTED = {"customers": "1000", "price": "1000", "price_period_months": 12, "obtainable_customers": "100"}
+
+
+@pytest.mark.parametrize("to_win", [_NC_TO_WIN, {**_NC_TO_WIN, "customers": "40"}], ids=["left-out", "equal"])
+def test_a_segment_with_no_market_count_works_its_som_and_no_tam_or_sam(to_win: dict[str, object]) -> None:
+    """Its TAM, SAM, customers and share are none, and so are the market totals and the shares on them; the counted
+    segment keeps its own; the SOM is worked and totalled; a sensitivity value never brings TAM back; the top-down
+    comparison and its break-even are not worked; the flag and the rule row say why; the echoed inputs read back."""
+    result = market_sizing(
+        segments=[to_win, _NC_COUNTED],
+        top_down=[{"amount": "2000000000"}],
+        sensitivity=[{"field": "obtainable_customers", "segment": 1, "values": ["30"]}],
+        som_target="3000000",
+    )
+    uncounted, counted = result.segments
+    totals = result.totals
+
+    assert not uncounted.market_counted and counted.market_counted
+    assert (uncounted.customers, uncounted.gross_spend, uncounted.tam, uncounted.sam, uncounted.share_of_tam) == (
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
+    assert counted.tam is not None and counted.tam.exact == 1_000_000 and counted.share_of_tam is None
+    assert uncounted.som is not None and uncounted.som.exact == 2_000_000
+    assert totals.som is not None and totals.som.exact == 2_100_000
+    assert (totals.customers, totals.tam, totals.sam, totals.sam_share_of_tam, totals.som_share_of_sam) == (
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
+    (row,) = result.sensitivity
+    assert row.cases[0].tam is None and row.cases[0].som is not None and row.cases[0].som.exact == 1_600_000
+    assert row.at_top_down is None and row.at_som_target is not None
+    (top,) = result.top_down
+    assert (top.bottom_up, top.bottom_up_share, top.difference) == (None, None, None)
+    assert "no_market_count" in result.flags
+    assert not {"sam_equals_tam", "bottom_up_above_top_down"} & set(result.flags)
+    assert "no_market_count_rule" in {row.key for row in result.assumptions}
+    again = market_sizing(**result.inputs.model_dump(mode="json"))
+    assert again.model_dump() == result.model_dump()
+
+
+def test_a_counted_market_keeps_every_figure_and_raises_no_no_count_flag() -> None:
+    result = market_sizing(segments=[_NC_COUNTED])
+
+    assert result.segments[0].market_counted and result.totals.tam is not None
+    assert "no_market_count" not in result.flags
+    assert "no_market_count_rule" not in {row.key for row in result.assumptions}
+
+
+@pytest.mark.parametrize(
+    ("changes", "message"),
+    [
+        ({"stated_tam": "1"}, "stated_tam needs a market count"),
+        ({"stated_sam": "1"}, "stated_sam needs a market count"),
+        ({"population": "1"}, "population needs a market count"),
+        (
+            {"sensitivity": [{"field": "customers", "segment": 1, "values": ["50"]}]},
+            "segment 1 has no market count, so its customers moves nothing",
+        ),
+        (
+            {"segments": [{"price": "1", "obtainable_percent": "10"}]},
+            "give obtainable_customers, the customers to win",
+        ),
+        (
+            {"segments": [{"price": "1", "obtainable_customers": "4", "serviceable_percent": "50"}]},
+            "serviceable_percent needs customers",
+        ),
+    ],
+    ids=["stated-tam", "stated-sam", "population", "row-on-customers", "share-to-win", "serviceable"],
+)
+def test_with_no_market_count_what_needs_one_is_refused(changes: dict[str, object], message: str) -> None:
+    with pytest.raises(ValidationError, match=message):
+        market_sizing(**{"segments": [{**_NC_TO_WIN, "customers": "40"}], **changes})
+
+
+# Company UC (made up): licences at $40,000 a licence a year, 25 licences to win, with no market count; and a
+# counted market of 40 customers buying 10 seats each at $100,000 a seat a year, winning 25 seats.
+_UC_LICENCES = {"price": "40000", "price_period_months": 12, "obtainable_units": "25"}
+_UC_SEATS = {"customers": "40", "units_per_customer": "10", "price": "100000", "price_period_months": 12}
+
+
+def test_a_som_in_units_is_units_times_one_units_year_and_never_a_fraction_of_a_customer() -> None:
+    """25 licences at $40,000 is $1M with no SOM customers; 25 seats at $100,000 is $2.5M beside a $40M TAM; the units
+    rule row says so; the break-even units, fed back, reach the target exactly; units above the serviceable units are
+    out of range."""
+    result = market_sizing(segments=[_UC_LICENCES, {**_UC_SEATS, "obtainable_units": "25"}], som_target="4500000")
+    licences, seats = result.segments
+
+    assert licences.som_customers is None and licences.som_units is not None
+    assert licences.som_units.exact == 25
+    assert licences.som is not None and licences.som.exact == 1_000_000
+    assert seats.som is not None and seats.som.exact == 2_500_000 and seats.som_customers is None
+    assert seats.tam is not None and seats.tam.exact == 40_000_000
+    assert result.totals.som is not None and result.totals.som_customers is None
+    assert "units_rule" in {row.key for row in result.assumptions}
+    rows = [{"field": "obtainable_units", "segment": 1, "values": ["20"]}]
+    at_target = market_sizing(**{**result.inputs.model_dump(mode="json"), "sensitivity": rows}).sensitivity[0]
+    assert at_target.at_som_target is not None and at_target.at_som_target.value is not None
+    needed = at_target.at_som_target.value.exact
+    assert needed == 50
+    fed_back = [{**rows[0], "values": ["50"]}]
+    moved = market_sizing(**{**result.inputs.model_dump(mode="json"), "sensitivity": fed_back})
+    assert moved.sensitivity[0].cases[0].som is not None and moved.sensitivity[0].cases[0].som.exact == 4_500_000
+    seats_row = [{"field": "obtainable_units", "segment": 1, "values": ["30"]}]
+    over = market_sizing(
+        segments=[{**_UC_SEATS, "obtainable_units": "25"}], som_target="50000000", sensitivity=seats_row
+    )
+    assert over.sensitivity[0].at_som_target is not None and over.sensitivity[0].at_som_target.reach == "out_of_range"
+
+
+@pytest.mark.parametrize(
+    ("segment", "message"),
+    [
+        ({**_UC_SEATS, "obtainable_units": "401"}, "obtainable_units is above the serviceable units"),
+        ({**_UC_SEATS, "obtainable_units": "4", "customers_today": "1"}, "customers_today counts customers"),
+        ({**_UC_SEATS, "obtainable_units": "4", "obtainable_customers": "1"}, "one only"),
+    ],
+    ids=["above-serviceable", "customers-today", "two-soms"],
+)
+def test_a_som_in_units_refuses_what_mixes_units_with_customers(segment: dict[str, object], message: str) -> None:
+    with pytest.raises(ValidationError, match=message):
+        market_sizing(segments=[segment])
+
+
+# Company SL (made up): 1,000 buyers at $10,000 a year on the main bill, a 10% take rate and a second line at 20% of
+# the main bill, winning 100.
+_SL = {
+    "customers": "1000",
+    "price": "10000",
+    "price_period_months": 12,
+    "take_rate_percent": "10",
+    "second_line_percent": "20",
+    "obtainable_customers": "100",
+}
+
+
+def test_a_second_line_adds_its_share_of_the_main_bill_to_the_take_rate() -> None:
+    """One buyer books $10,000 × (10% + 20%) = $3,000; the gross spend is $10,000 × 1.2 a buyer; the rule row says
+    so; with no second line the figures are the take rate's alone."""
+    result = market_sizing(segments=[_SL])
+    (row,) = result.segments
+
+    assert row.annual_value_per_customer.exact == 3_000
+    assert row.gross_spend is not None and row.gross_spend.exact == 12_000_000
+    assert row.tam is not None and row.tam.exact == 3_000_000
+    assert row.som is not None and row.som.exact == 300_000
+    assert "second_line_rule" in {item.key for item in result.assumptions}
+    plain = market_sizing(segments=[{**_SL, "second_line_percent": None}])
+    assert plain.segments[0].annual_value_per_customer.exact == 1_000
+    assert "second_line_rule" not in {item.key for item in plain.assumptions}
+
+
+@pytest.mark.parametrize(
+    ("field", "needed"),
+    [("take_rate_percent", Fraction(20)), ("second_line_percent", Fraction(30))],
+    ids=["take-rate", "second-line"],
+)
+def test_a_break_even_on_one_share_holds_the_other_and_fed_back_reaches_the_target(
+    field: str, needed: Fraction
+) -> None:
+    """SOM = 100 × $10,000 × (take + second): $400,000 needs a take rate of 20% beside the 20% second line, or a second
+    line of 30% beside the 10% take rate; each value, fed back as a sensitivity value, reaches the target exactly."""
+    row = {"field": field, "segment": 1, "values": ["5"]}
+    result = market_sizing(segments=[_SL], som_target="400000", sensitivity=[row])
+    at_target = result.sensitivity[0].at_som_target
+
+    assert at_target is not None and at_target.reach == "value" and at_target.value is not None
+    assert at_target.value.exact * 100 == needed
+    moved = market_sizing(segments=[_SL], sensitivity=[{**row, "values": [str(needed)]}])
+    assert moved.sensitivity[0].cases[0].som is not None and moved.sensitivity[0].cases[0].som.exact == 400_000
+
+
+def test_a_take_rate_break_even_above_the_cap_or_at_or_below_zero_is_out_of_range() -> None:
+    """A take rate above 100% is out of range (a second line has no cap); so is one the second line alone already
+    passes ($200,000 needs a take rate of 0%, which no segment can take)."""
+    row = {"field": "take_rate_percent", "segment": 1, "values": ["5"]}
+    above = market_sizing(segments=[_SL], som_target="1500000", sensitivity=[row]).sensitivity[0].at_som_target
+    second = {"field": "second_line_percent", "segment": 1, "values": ["5"]}
+    big = market_sizing(segments=[_SL], som_target="1500000", sensitivity=[second]).sensitivity[0].at_som_target
+    top_down = [{"amount": "2000000", "compare_to": "tam"}]
+    zero = market_sizing(segments=[_SL], top_down=top_down, sensitivity=[row]).sensitivity[0].at_top_down
+
+    assert above is not None and above.reach == "out_of_range"
+    assert big is not None and big.reach == "value" and big.value is not None and big.value.exact * 100 == 140
+    assert zero is not None and zero.reach == "out_of_range"
+
+
+def test_a_sensitivity_row_on_a_second_line_the_segment_does_not_give_is_refused() -> None:
+    row = {"field": "second_line_percent", "segment": 1, "values": ["5"]}
+
+    with pytest.raises(ValidationError, match="gives no second_line_percent to change"):
+        market_sizing(segments=[{**_SL, "second_line_percent": None}], sensitivity=[row])
+
+
+def test_no_market_count_units_som_months_and_a_second_line_together() -> None:
+    """25 units at $40,000 a year, a 10% second line, over 30 months, with no market count: SOM = 25 × $40,000 × 110%
+    = $1,100,000, with no TAM, SAM or SOM customers, and every rule row present."""
+    segment = {"price": "40000", "price_period_months": 12, "obtainable_units": "25", "second_line_percent": "10"}
+    result = market_sizing(segments=[segment], som_months=30)
+    (row,) = result.segments
+
+    assert row.som is not None and row.som.exact == 1_100_000
+    assert (row.tam, row.sam, row.som_customers, row.new_customers_per_year) == (None, None, None, None)
+    assert {"no_market_count_rule", "units_rule", "second_line_rule"} <= {item.key for item in result.assumptions}
+    assert "no_market_count" in result.flags and "no_horizon_given" not in result.flags
+    # The units rule row says what the SOM line works: with a second line, on the take rate plus that line.
+    rules = {item.key: item.setting for item in result.assumptions}
+    assert rules["units_rule"] == "SOM = the units to win × the price a year × (the take rate + the second line)"
+    plain = market_sizing(segments=[_UC_LICENCES])
+    assert {item.key: item.setting for item in plain.assumptions}["units_rule"] == (
+        "SOM = the units to win × the price a year × the take rate"
+    )
+
+
+def test_a_count_equal_to_what_is_won_is_no_ceiling_on_a_sensitivity_value_or_a_break_even() -> None:
+    """The typed 40 is the SOM again, not a market: a value of 50 is taken, the break-even of 60 for $3,000,000 is a
+    value (not out of range), as with the count left out."""
+    rows = [{"field": "obtainable_customers", "segment": 1, "values": ["30", "50"]}]
+    equal = market_sizing(segments=[{**_NC_TO_WIN, "customers": "40"}], som_target="3000000", sensitivity=rows)
+    left_out = market_sizing(segments=[_NC_TO_WIN], som_target="3000000", sensitivity=rows)
+
+    for result in (equal, left_out):
+        (row,) = result.sensitivity
+        assert row.cases[1].som is not None and row.cases[1].som.exact == 2_500_000
+        assert row.at_som_target is not None and row.at_som_target.reach == "value"
+        assert row.at_som_target.value is not None and row.at_som_target.value.exact == 60
+        assert "som_target_out_of_reach" not in result.flags
+
+
+def test_a_count_whose_units_equal_the_units_to_win_is_no_market_count() -> None:
+    """25 customers of one unit each, winning 25 units, is the SOM typed twice: no TAM or SAM, flagged; 25 customers of
+    10 units each, winning 25 units, counts its market."""
+    twin = market_sizing(segments=[{**_UC_LICENCES, "customers": "25"}])
+    counted = market_sizing(segments=[{**_UC_LICENCES, "customers": "25", "units_per_customer": "10"}])
+
+    assert not twin.segments[0].market_counted and twin.segments[0].tam is None
+    assert "no_market_count" in twin.flags
+    assert counted.segments[0].market_counted and counted.segments[0].tam is not None

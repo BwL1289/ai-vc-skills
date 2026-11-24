@@ -6,7 +6,9 @@ the same next round, given as one or more alternatives for it (``next_rounds``: 
 any pool top-up and its series' terms), each worked from today's cap table and never after the one before, and the
 company is then sold for each of ``exit_amounts``. The result shows, side by
 side, who owns what right after today's financing, after each next round, and who gets what at each exit, with
-B - A for every holder group. It never says which option to take.
+B - A for every holder group. It never says which option to take. A short ``summary`` comes first: the founders' and
+the new money's ownership at each point and the founders' payout at each exit, both ways, copied from the full rows
+after it.
 
 With no next round given (``next_rounds`` empty: the founder hopes today's raise is the only one), the comparison runs
 in its no-next-round mode instead (``mode`` ``no_next_round``, flag ``no_next_round_given``): who owns what right after
@@ -65,6 +67,7 @@ __all__ = [
     "MAX_OWED_MONTHS",
     "STANDARD_MULTIPLE",
     "CompareMode",
+    "CompareSummary",
     "EarlyGroupPayout",
     "ExitBeforeRoundComparison",
     "ExitComparison",
@@ -84,8 +87,12 @@ __all__ = [
     "NoteExitRefusal",
     "NoteExitRule",
     "NoteOwed",
+    "OwnershipSummary",
+    "PayoutSummary",
     "PoolAtExit",
     "SeriesTerms",
+    "SummaryPoint",
+    "SummaryValue",
 ]
 
 InstrumentCompareScenario = Literal["instrument_compare"]
@@ -104,6 +111,10 @@ PoolAtExit = Literal["as_common", "left_out"]
 # it) or ``no_next_round`` (none given: the note stays unconverted, its maturity is shown on its own terms, and every
 # exit is a sale before any priced round).
 CompareMode = Literal["next_round", "no_next_round"]
+
+# Where a summary ownership row stands: right after today's financing, after a next round, or at option B's maturity
+# conversion (no next round; option A as right after today).
+SummaryPoint = Literal["today", "next_round", "maturity"]
 
 # How option B's note is paid at a sale before any priced round, as the founder gives the note's own term: ``multiple``
 # (a multiple of its principal, paid before any share) or ``converts_at_cap`` (converted at its cap price into common).
@@ -558,6 +569,51 @@ class ExitBeforeRoundComparison(BaseModel):
     note_refusal_reason: str | None = None
 
 
+class SummaryValue(BaseModel):
+    """One figure under each option and B - A; option B's and the difference are ``None`` where B is not worked."""
+
+    model_config = MODEL_CONFIG
+
+    priced: EquityQuantity
+    note: EquityQuantity | None = None
+    difference: EquityQuantity | None = None
+
+
+class OwnershipSummary(BaseModel):
+    """The founders' and the new money's ownership at one point (``next_round`` numbers the round, from 1): the same
+    values as that point's ``stakes`` rows. The new money is today's raise: option A's priced shares, option B's note
+    once it converts (none before)."""
+
+    model_config = MODEL_CONFIG
+
+    point: SummaryPoint
+    next_round: int | None = None
+    founders: SummaryValue
+    new_money: SummaryValue
+
+
+class PayoutSummary(BaseModel):
+    """The founders' payout at one exit (after next round ``next_round``, or with ``next_round`` ``None`` at a sale
+    before any priced round): the same values as that exit's founders' payout row; ``note_refusal`` says why option B is
+    not worked there."""
+
+    model_config = MODEL_CONFIG
+
+    next_round: int | None = None
+    exit_amount: EquityQuantity
+    founders: SummaryValue
+    note_refusal: NoteExitRefusal | None = None
+
+
+class CompareSummary(BaseModel):
+    """The comparison in short, both ways: ownership at each point, then the founders' payout at each exit."""
+
+    model_config = MODEL_CONFIG
+
+    ownership: tuple[OwnershipSummary, ...]
+    founders_payouts: tuple[PayoutSummary, ...]
+
+
 class InstrumentCompareResult(BaseModel):
     """The comparison worked: today's financing both ways, then each next round and its exits, flags, assumptions.
 
@@ -572,11 +628,15 @@ class InstrumentCompareResult(BaseModel):
     when no maturity is given), ``note_at_exit`` its change-of-control term (``None`` when none is given, or when
     option B is not worked at the sales because existing SAFEs or notes are outstanding) and
     ``exits_before_any_round`` each sale before any priced round.
+
+    ``summary`` comes first, so a reader meets the short answer before the detail; every value in it is a copy of a
+    full row's.
     """
 
     model_config = MODEL_CONFIG
 
     scenario: InstrumentCompareScenario = "instrument_compare"
+    summary: CompareSummary
     inputs: InstrumentCompareInput
     fully_diluted_shares: EquityQuantity
     priced_price: EquityQuantity

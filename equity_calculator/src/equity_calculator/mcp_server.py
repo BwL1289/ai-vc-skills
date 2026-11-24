@@ -167,22 +167,24 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
     "runway_plan": (
         RunwayPlanInput,
         "Runway plan (how long a raise lasts, and what it buys)",
-        "A founder's runway on their own phased plan, cash only (no valuation or ownership): cases (the plan's "
-        "phases of monthly gross_burn and revenue from each from_month, plus a downside or lean case as its own "
-        "phases or as revenue_percent_of_plan / gross_burn_percent_of_plan), raises (amount landing after "
-        "lands_month whole months) and milestones (months from today). Runway is when cash_on_hand + the raise - "
-        "cash_floor first goes below zero under the phased net burn, worked exactly segment by segment; a no-raise "
-        "row is always included. Each milestone is covered when the runway reaches its month + months_to_raise, "
-        "with the slack; the smallest raise per milestone and landing month is max(0, max cumulative net burn on "
-        "[landing, target] - available cash), none when the cash runs out first. Stated runways (no raise, or per "
-        "raise from today or from landing) and each raise's use_of_funds total come back consistent or a mismatch; "
-        "a runway stated from landing is not checked when the cash runs out before the money lands. Each "
-        "stated_runway_months row also says whether the stated runway is the computed one rounded half away from "
-        "zero to the places it is typed with, which makes it consistent even past the tolerance (send it as text, "
-        "those places as the founder writes them); the use_of_funds total keeps the tolerance alone. The phases, "
-        "percents, milestones, months_to_raise and lands_month are the founder's figures: never assume one. Flags "
-        "name what to be ready to answer, a runway consistent by the tolerance alone among them, and never change a "
-        "verdict.",
+        "A founder's runway on their own phased plan, cash only (no valuation or ownership): cases (the plan's phases "
+        "of monthly gross_burn and revenue from each from_month, plus a downside or lean case as its own phases or as "
+        "revenue_percent_of_plan / gross_burn_percent_of_plan; a phase's revenue may instead be revenue_run_rate, "
+        "annualised, divided by 12 exactly), raises (amount landing after lands_month whole months; a raise is cash "
+        "of any instrument, a priced round, a SAFE or a note, and nothing converts) and milestones (months from "
+        "today; milestone_type self_funding, for a founder planning this as the only round, checks each milestone at "
+        "its own month and refuses months_to_raise). Runway is when cash_on_hand + the raise - cash_floor first goes "
+        "below zero under the phased net burn, worked exactly segment by segment; a no-raise row is always included. "
+        "Each milestone is covered when the runway reaches its month + months_to_raise, with the slack; the smallest "
+        "raise per milestone and landing month is max(0, max cumulative net burn on [landing, target] - available "
+        "cash), none when the cash runs out first. Stated runways (no raise, or per raise from today or from landing) "
+        "and each raise's use_of_funds total come back consistent or a mismatch; a runway stated from landing is not "
+        "checked when the cash runs out before the money lands. Each stated_runway_months row also says whether the "
+        "stated runway is the computed one rounded half away from zero to the places it is typed with, which makes it "
+        "consistent even past the tolerance (send it as text, those places as the founder writes them); the "
+        "use_of_funds total keeps the tolerance alone. The phases, percents, milestones, months_to_raise and "
+        "lands_month are the founder's figures: never assume one. Flags name what to be ready to answer, a runway "
+        "consistent by the tolerance alone among them, and never change a verdict.",
     ),
     "metrics_check": (
         MetricsCheckInput,
@@ -223,22 +225,27 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         MarketSizingInput,
         "Market sizing (TAM, SAM and SOM bottom-up, with a cross-check and sensitivity)",
         "A founder's market size worked exactly from their own segments (one to eight, numbered in order, no names). "
-        "Per segment: value = price x 12 / price_period_months x units_per_customer x take_rate_percent/100 (the "
-        "annual revenue from one buying customer; price_period_months left out is 12, a yearly price, and is flagged: "
-        "send 1 for a monthly price); gross spend = customers x price x 12 / price_period_months x units_per_customer "
-        "(before the take rate); TAM = customers x value; SAM = customers x serviceable_percent/100 x value; SOM = "
-        "obtainable_customers (preferred) or SAM customers x obtainable_percent/100, x value. Totals are sums (SOM "
-        "only when every segment gives one). The path: SOM customers / customers_today and (SOM customers - "
-        "customers_today) / som_years a year, a straight line, no compound rate. Each top_down figure (amount x "
-        "comparable_percent/100) is set beside the bottom-up TAM or SAM as a cross-check, never a verdict. stated_tam, "
-        "stated_sam and stated_som come back consistent or a mismatch within tolerance_percent. Each sensitivity row "
-        "works one field of one segment at the founder's own values, the rest at base, with the SOM range and swing "
-        "and the exact value at which SOM reaches som_target (does_not_move first, for a field that is no factor of "
-        "SOM; else met_without_it when the base SOM already reaches it) and the total reaches the first top-down "
-        "figure. A unit price prints to the cent when exact, else with the places it needs ($0.0075). Flags name a "
-        "price period left out, double counting, a SOM given only as a share, no horizon, a SOM below the target and "
-        "a target no row reaches, never errors. Every count, price, share and figure is the founder's: never assume "
-        "or look one up.",
+        "Per segment: value = price x 12 / price_period_months x units_per_customer x (take_rate_percent + "
+        "second_line_percent)/100 (the annual revenue from one buying customer; second_line_percent is a second "
+        "revenue line from the same buyer as a share of the main bill, kept whole, no cap; price_period_months left "
+        "out is 12, a yearly price, and is flagged: send 1 for a monthly price); gross spend = customers x price x 12 "
+        "/ price_period_months x units_per_customer (before the take rate, the second line included); TAM = customers "
+        "x value; SAM = customers x serviceable_percent/100 x value; SOM = obtainable_customers (preferred) or SAM "
+        "customers x obtainable_percent/100, x value, or obtainable_units (the price's own unit, such as seats or "
+        "licences, never fractional customers) x price x 12 / price_period_months x (take_rate_percent + "
+        "second_line_percent)/100. A segment with only the customers to win leaves customers out (or gives it equal to "
+        "them): its SOM is worked, its TAM and SAM are not (flagged no_market_count), and with them the TAM and SAM "
+        "totals and the top-down comparison. Totals are sums (SOM only when every segment gives one). The path: SOM "
+        "customers / customers_today and (SOM customers - customers_today) / som_years (or som_months / 12) a year, a "
+        "straight line, no compound rate. Each top_down figure (amount x comparable_percent/100) is set beside the "
+        "bottom-up TAM or SAM as a cross-check, never a verdict. stated_tam, stated_sam and stated_som come back "
+        "consistent or a mismatch within tolerance_percent. Each sensitivity row works one field of one segment at the "
+        "founder's own values, the rest at base, with the SOM range and swing and the exact value at which SOM reaches "
+        "som_target (does_not_move first, for a field that is no factor of SOM; else met_without_it when the base SOM "
+        "already reaches it) and the total reaches the first top-down figure. A unit price prints to the cent when "
+        "exact, else with the places it needs ($0.0075). Flags name a price period left out, a segment with no market "
+        "count, double counting, a SOM given only as a share, no horizon, a SOM below the target and a target no row "
+        "reaches, never errors. Every count, price, share and figure is the founder's: never assume or look one up.",
     ),
     "instrument_compare": (
         InstrumentCompareInput,
@@ -267,7 +274,8 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "term first (note_change_of_control_multiple of the principal, or note_change_of_control_at_cap with "
         "note_months_to_exit). A sale with no such term, or with existing SAFEs or notes outstanding under B, gives "
         "B as not worked with note_refusal and its reason in words. Those terms are refused with a next round. "
-        "Every term is the founder's: never assume one.",
+        "The result opens with summary (ownership at each point and the founders' payout at each exit, copies of "
+        "the full rows). Every term is the founder's: never assume one.",
     ),
     "pool_plan": (
         PoolPlanInput,
