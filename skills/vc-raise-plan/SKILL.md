@@ -143,13 +143,14 @@ offer.
 
 5. **Read the result before answering**: `allocation` (the totals, the room and the allocation left), `funnel` (each
    stage's row, the conversion, `expected_term_sheets`, `targets_needed`, `more_targets_needed`), `timing`
-   (`runway_months`, `start_raising_by`), every code in `flags`, and `assumptions`. The report prints the cash, the
-   floor and each phase the start-raising month rests on; a line that says `not given: read as none` is a figure the
-   founder did not give, so ask for it before quoting the month. The expected term sheets are an
-   expectation from the founder's own rates, never a forecast: say so each time the figure is quoted. A refusal or a
-   tool error is the answer for those inputs: relay its reason and what to change (`stage_rate_missing`: ask for the
-   founder's rate; `commitment_kind_missing`: ask whether it is firm or soft; `no_months_to_raise_given`: ask for the
-   months to raise).
+   (`runway_months`, `start_raising_by`), every code in `flags`, and `assumptions`. The command line's report prints the
+   cash, the floor and each phase the start-raising month rests on, and a line that says `not given: read as none` is a
+   figure the founder did not give; the MCP result shows such a figure as `0`. Either way, check each phase sent against
+   the founder's words, and ask for a revenue the founder has not given before quoting the month. The expected term
+   sheets are an expectation from the founder's own rates, never a forecast: say so each time the figure is quoted. A
+   refusal or a tool error is the answer for those inputs: relay its reason and what to change (`stage_rate_missing`:
+   ask for the founder's rate; `commitment_kind_missing`: ask whether it is firm or soft; `no_months_to_raise_given`:
+   ask for the months to raise).
 6. **Plan the batches** from the tiers, the founder's batch inputs and the printed start-raising month. The window
    for first meetings opens at the start-raising month as printed (`start_raising_by`), and its weeks are numbered
    from there (month 4, week 1): no calendar date is worked out. That month is the latest start on the founder's plan,
@@ -179,7 +180,7 @@ same meaning beside each flag; the MCP result does not. None says which investor
 | Flag                           | What it means for the founder                                                                                 | What to prepare                                                                                |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `no_lead_cheque_given`         | No lead cheque was given, so the allocation left still holds the lead's part of the round.                    | Say the allocation left includes the lead's part until a lead says yes.                        |
-| `no_pro_rata_given`            | No pro rata amount was given, so none is counted: with pro rata rights, the allocation left is smaller.       | Ask whether any existing investor holds pro rata rights, and for each amount.                  |
+| `no_pro_rata_given`            | No pro rata amount was given, so none is counted: with pro rata rights, the allocation left is smaller.       | Ask for each existing investor's pro rata amount; if the founder said there is none, say so.   |
 | `soft_commitments_not_counted` | At least one commitment is soft, so it is shown on its own line and never counted against the round.          | Ask whether any soft commitment has firmed up; re-run when one does.                           |
 | `oversubscribed`               | The lead's cheque and the firm commitments alone come to more than the round.                                 | Quote the allocation left as printed; the round size is the founder's call.                    |
 | `pro_rata_exceeds_left`        | The lead's cheque and the firm commitments fit, but the pro rata is larger than the room they leave.          | Quote the room and the allocation left as printed; how much pro rata to take is the founder's. |

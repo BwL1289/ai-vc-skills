@@ -34,6 +34,6 @@ None: no `equity_raise_pipeline` call. There is no investor list of the founder'
   - `[the lead's cheque, if a lead has said yes]`
   - `[each commitment and whether you count it firm or soft]`
   - `[each existing investor's pro rata amount, or none]`
-  - the cash, the burn and the months to raise.
+  - the cash, the monthly burn and revenue, and the months to raise.
 - It gives no count of investors, no expected term sheets and no start-raising month, and closes as not investment,
   legal or tax advice.

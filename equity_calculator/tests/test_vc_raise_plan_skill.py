@@ -219,6 +219,10 @@ def test_the_steps_tier_by_the_founders_rules_and_date_the_batches_from_the_prin
     assert "When `start_raising_date_passed` holds, say the plan is already late" in steps
     assert "When `cash_never_runs_out` holds, ask the founder for a start month" in steps
     assert "nothing the founder did not give" in steps
+    # A revenue left out prints as read as none on the command line but as 0 in the MCP result, so the agent checks
+    # each phase it sent against the founder's words.
+    assert "the MCP result shows such a figure as `0`" in steps
+    assert "check each phase sent against the founder's words" in steps
 
 
 def test_the_limits_keep_the_founder_as_the_user() -> None:
