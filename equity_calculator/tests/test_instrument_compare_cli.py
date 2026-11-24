@@ -380,6 +380,13 @@ async def test_with_no_next_round_the_report_says_so_and_shows_the_note_at_matur
     assert flags["discount_unused_without_round"].endswith("it changes no figure here")
 
 
+async def test_with_a_next_round_the_report_shows_what_the_note_owes_at_each_month_named() -> None:
+    report = await run([*_COMPANY_BU, "--note-owed-month", "18"])
+
+    assert "$2,150,000.00" in _line(report, "Note owed at month 18")
+    assert "next round" in _line(report, "Mode")
+
+
 async def test_the_no_next_round_report_never_picks_an_option() -> None:
     for argv in (_COMPANY_DX, [*_TODAY[:-2], *_EXITS]):
         lines = (await run(argv)).lower().split("\nassumptions:\n")[0]
@@ -427,6 +434,7 @@ async def test_with_no_next_round_the_command_line_and_the_model_give_the_same_r
             "give one change-of-control term, --note-change-of-control-multiple or --note-change-of-control-at-cap",
         ),
         (["--note-months-to-conversion", "12"], "no_next_round_given: --note-months-to-conversion"),
+        (["--note-owed-month", "12"], "--note-owed-month gives month 12 more than once: give each month once"),
         (
             ["--note-maturity-conversion-price", "0.5"],
             "give --note-maturity-conversion-valuation or --note-maturity-conversion-price, not both",

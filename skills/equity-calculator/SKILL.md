@@ -11,20 +11,20 @@ work them out by hand, and do not round or re-derive what it returns.
 
 ## Which scenario answers which question
 
-| Question                                                                                                        | Scenario             | MCP tool                    |
-| --------------------------------------------------------------------------------------------------------------- | -------------------- | --------------------------- |
-| Is selling n% worth it for an m-times better average outcome?                                                   | `investor`           | `equity_investor`           |
-| What is the most of the company a hire is worth, and what should the offer be?                                  | `employee`           | `equity_employee`           |
-| How many pool shares does a target pool need, and what is the price per share?                                  | `pool`               | `equity_pool`               |
-| How do SAFEs and notes convert in a priced round, and what is the cap table after it?                           | `round`              | `equity_round`              |
-| What is my stake after these rounds?                                                                            | `dilution`           | `equity_dilution`           |
-| How many shares have vested at month M, and what do they cost or are they worth?                                | `vesting`            | `equity_vesting`            |
-| Who gets what when the company is sold for E?                                                                   | `waterfall`          | `equity_waterfall`          |
-| Does a deck's raise, valuation, ownership and runway add up before a VC checks it?                              | `deal_check`         | `equity_deal_check`         |
-| How long does each raise last on our plan and a downside, and which milestones does it reach?                   | `runway_plan`        | `equity_runway_plan`        |
-| Do our ARR, retention, churn, CAC payback and burn multiple match their parts before a VC checks them?          | `metrics_check`      | `equity_metrics_check`      |
-| What are our TAM, SAM and SOM bottom-up, do they match the deck, and which assumption moves them most?          | `market_sizing`      | `equity_market_sizing`      |
-| A priced round now or a convertible note now: who owns what after the next round, and who gets what at an exit? | `instrument_compare` | `equity_instrument_compare` |
+| Question                                                                                                                                                 | Scenario             | MCP tool                    |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | --------------------------- |
+| Is selling n% worth it for an m-times better average outcome?                                                                                            | `investor`           | `equity_investor`           |
+| What is the most of the company a hire is worth, and what should the offer be?                                                                           | `employee`           | `equity_employee`           |
+| How many pool shares does a target pool need, and what is the price per share?                                                                           | `pool`               | `equity_pool`               |
+| How do SAFEs and notes convert in a priced round, and what is the cap table after it?                                                                    | `round`              | `equity_round`              |
+| What is my stake after these rounds?                                                                                                                     | `dilution`           | `equity_dilution`           |
+| How many shares have vested at month M, and what do they cost or are they worth?                                                                         | `vesting`            | `equity_vesting`            |
+| Who gets what when the company is sold for E?                                                                                                            | `waterfall`          | `equity_waterfall`          |
+| Does a deck's raise, valuation, ownership and runway add up before a VC checks it?                                                                       | `deal_check`         | `equity_deal_check`         |
+| How long does each raise last on our plan and a downside, and which milestones does it reach?                                                            | `runway_plan`        | `equity_runway_plan`        |
+| Do our ARR, retention, churn, CAC payback and burn multiple match their parts before a VC checks them?                                                   | `metrics_check`      | `equity_metrics_check`      |
+| What are our TAM, SAM and SOM bottom-up, do they match the deck, and which assumption moves them most?                                                   | `market_sizing`      | `equity_market_sizing`      |
+| A priced round now or a convertible note now: who owns what after the next round (or the note at its maturity, with none), and who gets what at an exit? | `instrument_compare` | `equity_instrument_compare` |
 
 A founder's question about a whole raise goes to the review built for it, which runs these tools and explains what
 they return: a deck's ask, ownership after the round and runway to the vc-deal-math skill; how much to raise on a
@@ -245,7 +245,11 @@ page). Everything else is standard arithmetic, labelled `unverified` in the resu
   diluted shares) and discount price, beside the existing SAFEs and notes. Each exit after the next round goes
   through the waterfall on each option's classes, converted shares on their round's series terms with a preference on
   the amount converted. Ownership is shares over the total; payouts are split to the cent within each option; B - A is
-  the exact difference rounded once. The note's maturity is only compared, never modelled; no anti-dilution applies.
+  the exact difference rounded once. With a next round the note's maturity is only compared, never modelled; no
+  anti-dilution applies. With no next round, the note is worked on its own terms instead: what it owes at the months
+  named, at its maturity the repayment (and a conversion only at the founder's valuation or price), and at each sale
+  before any priced round its multiple of principal paid first or its conversion at the cap; with no such term, or
+  with existing SAFEs or notes outstanding, option B is not worked at that sale and the row says why.
 
 ## Limits
 

@@ -218,7 +218,12 @@ def test_option_a_at_a_sale_is_the_waterfall_scenario_s_split() -> None:
 
 
 def test_each_option_s_payouts_add_up_to_the_sale_to_the_cent() -> None:
-    for fields in (COMPARE_DX, _bu(**_AT_CAP)):
+    """With an existing series too, under either term: the note's claim comes before every share, the series' preference
+    before the common."""
+    series = {"shares": 1_000_000, "invested": "1000000", "preference_multiple": "1", "participation": "none"}
+    sales = {"existing_series": [series], "exit_amounts": ["1500000", "5000000", "20000000"]}
+    multiple = {"note_change_of_control_multiple": "2"}
+    for fields in (COMPARE_DX, _bu(**_AT_CAP), _bu(**_AT_CAP, **sales), _bu(**multiple, **sales)):
         for item in instrument_compare(**fields).exits_before_any_round:
             assert sum(payout.priced.rounded for payout in item.payouts) == item.exit_amount.rounded
             assert sum(_payout(item, payout.group).note.rounded for payout in item.payouts) == item.exit_amount.rounded
@@ -272,6 +277,17 @@ def test_an_uncapped_note_works_in_both_modes() -> None:
     assert "discount_unused_without_round" in without.flags
     assert all(item.note_refusal is None for item in without.exits_before_any_round)
     assert any(row.key == "note_discount_rule" for row in without.assumptions)
+
+
+def test_what_the_note_owes_at_each_month_named_shows_in_both_modes() -> None:
+    """BU at 5% simple on $2M: $2,150,000 at 18 months, with a next round or with none; never a line it was not asked
+    for."""
+    with_round = instrument_compare(**{**COMPARE_BU, "note_owed_months": [18]})
+    without = instrument_compare(**_bu(note_owed_months=[18]))
+
+    for result in (with_round, without):
+        assert [(owed.months, owed.owed.exact) for owed in result.note_owed] == [(18, 2_150_000)]
+    assert instrument_compare(**COMPARE_BU).note_owed == ()
 
 
 def test_the_flags_of_the_mode() -> None:
@@ -339,6 +355,7 @@ def test_existing_instruments_convert_in_option_a_and_hold_no_shares_under_b() -
         ({"note_maturity_conversion_price": "-1", "note_maturity_months": 24}, "greater than 0"),
         ({"note_months_to_exit": 601}, "less than or equal to 600"),
         ({"note_owed_months": [12] * 7}, "at most 6 items"),
+        ({"note_owed_months": [24, 12, 24]}, "note_owed_months gives month 24 more than once"),
         ({"note_change_of_control_at_cap": "yes"}, "valid boolean"),
     ],
 )

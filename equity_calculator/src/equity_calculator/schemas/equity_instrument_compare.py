@@ -363,6 +363,12 @@ class InstrumentCompareInput(BaseModel):
         none), an existing series or note whose terms would be assumed, an existing note it cannot move, or a round
         with no price whatever happens (a pool target or capped SAFEs taking the whole company)."""
         self._months_fit_the_mode()
+        repeated = sorted({month for month in self.note_owed_months if self.note_owed_months.count(month) > 1})
+        if repeated:
+            raise ValueError(
+                f"note_owed_months gives month {', '.join(str(month) for month in repeated)} more than once: give each "
+                "month once"
+            )
         if not self.exit_amounts:
             after = "after the next round" if self.next_rounds else "before any priced round (no next round is given)"
             raise ValueError(f"exit_amounts is empty: give at least one exit, what the company sells for {after}")

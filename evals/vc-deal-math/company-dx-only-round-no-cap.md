@@ -67,7 +67,7 @@ option to take, and computes nothing in its own text.
 
 - It asks for nothing more: the founder gave both sets of terms, the note's maturity and what happens then, its term at
   a sale, the months to show and the sale values, and said the priced terms are standard, so `{"standard": true}`
-  goes in. It assumes no cap and no next round.
+  goes in. It passes no cap and no next round, as the founder said.
 - It passes no `next_rounds` and no `note_months_to_conversion`, and it says in words that the comparison runs with no
   next round (`no_next_round_given`): the note never converts at a priced round here, so the table shows ownership
   right after today, the note at its maturity and each sale before any priced round.
