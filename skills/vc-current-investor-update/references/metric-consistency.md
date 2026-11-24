@@ -48,7 +48,8 @@ Every metric's definition, word for word the same in every update; a change says
 
 ARR, retention, churn, CAC payback and burn multiple are not checked by either update skill: each is quoted as stated
 with "not checked here: the vc-metrics-readiness skill checks it from its parts", and the answer points the founder to
-that skill. Figures no tool computes stay quoted as stated with "not checked: no tool computes this": growth rates, LTV,
-and the change in cash between the two updates. For the cash, add the bracketed ask
+that skill; so are LTV, LTV/CAC, the Rule of 40 and the magic number. Figures no tool computes stay quoted as stated
+with "not checked: no tool computes this": growth rates and the change in cash between the two updates. For the
+cash, add the bracketed ask
 `[a one-line bridge from the last update's cash to this one's: net burn plus anything else that moved cash]`, since a
 reader holding both updates can make that comparison.

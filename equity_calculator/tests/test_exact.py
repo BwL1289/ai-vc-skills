@@ -201,7 +201,8 @@ _EXAMPLES: tuple[ScenarioInput, ...] = (
         }
     ),
     # A metrics check with every part: an annual unit, the starting customers' own movements, a month with one-time
-    # and usage revenue, customers, spend and margin, burn, concentration, every stated figure and a segment band.
+    # and usage revenue, customers, spend and margin, burn, concentration, LTV on logo churn over 7/12 of a year, the
+    # Rule of 40, the magic number, every stated figure and a segment band.
     MetricsCheckInput.model_validate(
         {
             "period_months": 7,
@@ -226,6 +227,15 @@ _EXAMPLES: tuple[ScenarioInput, ...] = (
             "net_burn": "912500",
             "largest_customer_revenue": "137500",
             "period_revenue": "862500",
+            "arpa": "16250",
+            "contribution_margin_percent": "57.5",
+            "ltv_churn_basis": "logo",
+            "revenue_growth_percent": "37.5",
+            "profit_margin_percent": "-12.5",
+            "profit_margin_basis": "operating",
+            "quarter_revenue": "412500",
+            "prior_quarter_revenue": "362500",
+            "prior_quarter_sales_marketing_spend": "287500",
             "stated_arr": "1750000",
             "stated_nrr_percent": "103",
             "stated_grr_percent": "94",
@@ -234,6 +244,10 @@ _EXAMPLES: tuple[ScenarioInput, ...] = (
             "stated_cac_payback_months": "18.5",
             "stated_burn_multiple": "2.3",
             "stated_concentration_percent": "16",
+            "stated_ltv": "105000",
+            "stated_ltv_to_cac": "13",
+            "stated_rule_of_40_percent": "25",
+            "stated_magic_number": "0.7",
             "customer_segment": "mid_market",
         }
     ),

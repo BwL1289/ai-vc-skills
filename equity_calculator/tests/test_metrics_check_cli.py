@@ -1,7 +1,7 @@
 """``equity_calculator metrics_check``: the report, ``--json``, the Metrics check sheet read back, and refusals.
 
 No DB, no network: ``run`` is awaited in process. The only files written are workbooks under pytest's temporary
-directory. The worked values are Company AM and AN from ``test_metrics_check.py``.
+directory. The worked values are Company AM, AN and DL from ``test_metrics_check.py``.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from equity_calculator.schemas.equity_common import EquityQuantity
 from equity_calculator.schemas.equity_metrics_check import MetricsFlag
 from equity_calculator.workbook import FROZEN_PANE, NUMBER_FORMATS, VERDICT_FILLS, save_workbook
 from openpyxl import load_workbook
-from tests.support import METRICS_AM, METRICS_AN_DECK, metrics_check
+from tests.support import METRICS_AM, METRICS_AN_DECK, METRICS_DL, metrics_check
 
 _ARGPARSE_EXIT = 2
 _FIRST = 0
@@ -83,8 +83,54 @@ _COMPANY_AN = [
     "--stated-cac-payback-months",
     "7.2",
 ]
+_COMPANY_DL = [
+    "metrics_check",
+    "--period-months",
+    "1",
+    "--starting-recurring",
+    "200,000",
+    "--new-recurring",
+    "20000",
+    "--expansion-recurring",
+    "2000",
+    "--contraction-recurring",
+    "1000",
+    "--churned-recurring",
+    "3000",
+    "--customers-new",
+    "25",
+    "--customers-new-paid",
+    "10",
+    "--sales-marketing-spend",
+    "150000",
+    "--gross-margin-percent",
+    "80",
+    "--arpa",
+    "$2,000",
+    "--contribution-margin-percent",
+    "60%",
+    "--revenue-growth-percent",
+    "70",
+    "--profit-margin-percent=-35",
+    "--profit-margin-basis",
+    "ebitda",
+    "--quarter-revenue",
+    "600000",
+    "--prior-quarter-revenue",
+    "510000",
+    "--prior-quarter-sales-marketing-spend",
+    "450000",
+    "--stated-ltv",
+    "100,000",
+    "--stated-ltv-to-cac",
+    "10",
+    "--stated-rule-of-40-percent",
+    "35%",
+    "--stated-magic-number",
+    "0.2",
+]
 _VERDICT_COLOURS = {"consistent": "C6EFCE", "mismatch": "FFC7CE", "not_checked": "FFEB9C"}
-_MODEL_FIELD = re.compile(r"\b[a-z]+_[a-z_]+\b")
+_MODEL_FIELD = re.compile(r"\b[a-z]+_[a-z0-9_]+\b")
 
 
 async def test_the_report_shows_each_check_the_flags_and_the_verdict() -> None:
@@ -128,6 +174,26 @@ async def test_the_dollar_and_percent_spellings_read_as_the_model_fields() -> No
     printed = json.loads(await run([*_COMPANY_AM, "--json"]))
 
     assert printed == json.loads(metrics_check(**METRICS_AM).model_dump_json())
+    assert json.loads(await run([*_COMPANY_DL, "--json"])) == json.loads(metrics_check(**METRICS_DL).model_dump_json())
+
+
+async def test_the_report_names_ltvs_margin_the_rule_of_40s_and_the_magic_numbers_variant() -> None:
+    report = await run(_COMPANY_DL)
+
+    for pattern in (
+        r"LTV \(contribution margin\) +\$60,000\.00",
+        r"LTV on revenue alone +\$100,000\.00",
+        r"LTV on gross margin +\$80,000\.00",
+        r"LTV/CAC +10\.000000x",
+        r"Rule of 40 \(growth \+ EBITDA margin\) +35\.0000%",
+        r"Magic number \(on revenue\) +0\.800000x",
+        r"Magic number without the 4 +0\.200000x",
+        r"LTV: verdict +mismatch",
+        r"Rule of 40: rounds to the deck's \"35\" +yes",
+        r"stated_magic_number_not_annualised",
+    ):
+        assert re.search(pattern, report), pattern
+    assert "rule_of_40_rule = revenue growth 70% + EBITDA margin -35%" in report
 
 
 @pytest.mark.parametrize(
@@ -148,6 +214,25 @@ async def test_the_dollar_and_percent_spellings_read_as_the_model_fields() -> No
         ),
         (["--customers-start=-1"], "--customers-start: Input should be greater than or equal to 0"),
         (["--period-months", "40"], "--period-months: Input should be less than or equal to 36"),
+        (
+            ["--starting-recurring", "100", "--churned-recurring", "5", "--arpa", "10"],
+            "--arpa needs --contribution-margin-percent or --gross-margin-percent",
+        ),
+        (
+            ["--starting-recurring", "100", "--arpa", "10", "--gross-margin-percent", "50"],
+            "--arpa needs gross revenue churn above 0 in the period to work LTV (--starting-recurring above 0 and "
+            "some contraction or churn; --ltv-churn-basis picks another churn)",
+        ),
+        (["--revenue-growth-percent", "30"], "--revenue-growth-percent needs --profit-margin-percent"),
+        (
+            ["--quarter-revenue", "2", "--prior-quarter-revenue", "1"],
+            "--quarter-revenue needs --prior-quarter-sales-marketing-spend",
+        ),
+        (["--stated-magic-number", "1"], "--stated-magic-number needs --quarter-revenue and --prior-quarter-revenue"),
+        (
+            ["--stated-rule-of-40-percent", "40"],
+            "--stated-rule-of-40-percent needs --revenue-growth-percent and --profit-margin-percent to check it",
+        ),
     ],
     ids=[
         "movement-without-start",
@@ -158,6 +243,12 @@ async def test_the_dollar_and_percent_spellings_read_as_the_model_fields() -> No
         "churn-without-a-basis",
         "negative-customers",
         "period-too-long",
+        "arpa-without-a-margin",
+        "arpa-with-no-churn",
+        "growth-without-margin",
+        "quarters-without-spend",
+        "magic-number-without-quarters",
+        "rule-of-40-without-parts",
     ],
 )
 async def test_refusals_name_flags_never_model_fields(argv: list[str], message: str) -> None:
@@ -177,6 +268,8 @@ async def test_refusals_name_flags_never_model_fields(argv: list[str], message: 
         ("--recurring-unit", "weekly"),
         ("--stated-churn-basis", "revenue"),
         ("--customer-segment", "startup"),
+        ("--ltv-churn-basis", "customers"),
+        ("--profit-margin-basis", "gross"),
     ],
 )
 async def test_unreadable_arguments_exit_2(flag: str, raw: str, capsys: pytest.CaptureFixture[str]) -> None:
@@ -216,8 +309,13 @@ _UNCHECKED_MULTIPLE: dict[str, object] = {
 
 @pytest.mark.parametrize(
     ("fields", "overall"),
-    [(METRICS_AM, "mismatch"), (METRICS_AN_DECK, "mismatch"), (_UNCHECKED_MULTIPLE, "not_checked")],
-    ids=["company-am", "company-an", "multiple-left-unchecked"],
+    [
+        (METRICS_AM, "mismatch"),
+        (METRICS_AN_DECK, "mismatch"),
+        (METRICS_DL, "mismatch"),
+        (_UNCHECKED_MULTIPLE, "not_checked"),
+    ],
+    ids=["company-am", "company-an", "company-dl", "multiple-left-unchecked"],
 )
 def test_the_sheet_reads_back_with_formats_and_verdict_fills(
     tmp_path: Path, fields: dict[str, object], overall: str
@@ -289,6 +387,27 @@ _EVERY_FLAG = (
     metrics_check(period_months=1, starting_recurring="100", churned_recurring="3"),
     metrics_check(period_months=1, starting_recurring="100", month_total_revenue="110"),
     metrics_check(period_months=1, starting_recurring="100", churned_recurring="2.1", stated_churn_percent="1.7"),
+    metrics_check(**METRICS_DL),
+    metrics_check(
+        period_months=1, starting_recurring="100", churned_recurring="5", arpa="10", gross_margin_percent="50"
+    ),
+    metrics_check(
+        period_months=1,
+        revenue_growth_percent="30",
+        profit_margin_percent="10",
+        gross_margin_percent="70",
+        stated_rule_of_40_percent="100",
+    ),
+    # A 60% contribution margin above the 50% gross margin; LTV 10·(3/5)·20 = 120, on gross margin 100 (the stated).
+    metrics_check(
+        period_months=1,
+        starting_recurring="100",
+        churned_recurring="5",
+        arpa="10",
+        gross_margin_percent="50",
+        contribution_margin_percent="60",
+        stated_ltv="100",
+    ),
 )
 
 

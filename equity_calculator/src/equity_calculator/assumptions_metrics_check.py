@@ -6,18 +6,24 @@ payback targets by customer segment), David Sacks's "The Burn Multiple" (the mul
 Skok's "SaaS Metrics 2.0" (the 2%-a-month net revenue churn line). Each was read in full on 23 Nov 2026, text only
 (charts, images and embedded slides not seen). The three benchmark lines are questions, never errors, and inputs the
 founder can change. The period rule, the cohort rule, which customers net retention leaves out, the exact payback
-formula and the tolerances are marked unverified: modelling choices or arithmetic no source read fixes.
+formula and the tolerances are marked unverified: modelling choices or arithmetic no source read fixes. So are the
+parts of LTV that a16z's item 5 (paraphrased, not quoted: a month's contribution margin over the monthly churn) does not
+give, and the Rule of 40 and the magic number, for which no source was read: none is credited or quoted, and no
+benchmark is set for either, or for LTV/CAC.
 """
 
 from __future__ import annotations
 
 from decimal import Decimal
+from fractions import Fraction
 
 from equity_calculator.assumptions import UNVERIFIED
 from equity_calculator.schemas.equity_common import EquityAssumption
 from equity_calculator.schemas.equity_metrics_check import (
+    CHURN_BASIS_NAMES,
     DEFAULT_BURN_MULTIPLE_BAND,
     DEFAULT_NET_REVENUE_CHURN_BAND_PERCENT,
+    PROFIT_MARGIN_NAMES,
     MetricsCheckInput,
     payback_band,
 )
@@ -91,6 +97,16 @@ NET_REVENUE_CHURN_BAND_QUOTE = (
 )
 _BENCHMARK = "a benchmark, not a rule"
 _SEGMENT_NAMES = {"smb": "SMB", "mid_market": "mid-market", "enterprise": "enterprise"}
+_LTV_SOURCE = (
+    f"{A16Z_METRICS_SOURCE}, item 5, paraphrased (LTV on contribution margin, not on revenue or gross margin: one "
+    "month's contribution margin per customer times a lifetime of one over the monthly churn; and a "
+    "contribution-margin LTV set against CAC); the churn basis, periods longer than a month, leaving out discounting "
+    f"and taking blended CAC are ours, {UNVERIFIED}"
+)
+# No source was read for either, so no person or firm is credited: a name returns only with its source read in full.
+_UNREAD = "no source was read for it, so none is credited or quoted"
+_RULE_OF_40_SOURCE = f"{UNVERIFIED}: a common SaaS rule of thumb; {_UNREAD}"
+_MAGIC_NUMBER_SOURCE = f"{UNVERIFIED}: a common SaaS ratio; {_UNREAD}"
 
 
 def _assumption(key: str, setting: str, statement: str, source: str) -> EquityAssumption:
@@ -109,12 +125,18 @@ def _listed(names: list[str]) -> str:
 
 def _revenue_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[EquityAssumption]:
     """The period rule always; the ARR rule with any ARR; retention, cohort and churn rules when worked."""
+    apart = (
+        " The Rule of 40's growth and margin and the magic number's two quarters are the founder's own figures, "
+        "outside this period."
+        if used & {"rule_of_40", "magic_number"}
+        else ""
+    )
     rows = [
         _assumption(
             "period_rule",
             _months(inputs.period_months),
             "Every flow figure (the recurring revenue movement, customers, spend, burn and revenue) is for this one "
-            "period; retention and churn are over the period and never annualised or compounded.",
+            f"period; retention and churn are over the period and never annualised or compounded.{apart}",
             f"{UNVERIFIED} (a modelling choice)",
         )
     ]
@@ -207,7 +229,7 @@ def _efficiency_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[Eq
         setting = (
             "spend / new monthly recurring revenue (no gross margin given)"
             if margin is None
-            else f"spend / (new monthly recurring revenue × {margin}% gross margin)"
+            else f"spend / (new monthly recurring revenue × {margin:f}% gross margin)"
         )
         rows.append(
             _assumption(
@@ -238,6 +260,73 @@ def _efficiency_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[Eq
                 "largest customer's revenue / the period's revenue",
                 "Both revenues are for the same period; no benchmark is set.",
                 f"{A16Z_MORE_METRICS_SOURCE}, item 14: {_CONCENTRATION_QUOTE}",
+            )
+        )
+
+    return rows + _later_rows(inputs, used)
+
+
+def _units(inputs: MetricsCheckInput) -> str:
+    """The units of ARPA the period holds, in words: "12 months", "1 month", "1 year", "7/12 of a year"."""
+    if inputs.recurring_unit == "monthly":
+        return _months(inputs.period_months)
+    years = Fraction(inputs.period_months, 12)
+    if years.denominator == 1:
+        return "1 year" if years == 1 else f"{years.numerator} years"
+    return f"{years.numerator}/{years.denominator} of a year"
+
+
+def _later_rows(inputs: MetricsCheckInput, used: frozenset[str]) -> list[EquityAssumption]:
+    """The LTV, Rule of 40 and magic number rules, each only when worked."""
+    rows = []
+    if "ltv" in used:
+        given = inputs.contribution_margin_percent
+        margin = (
+            f"{given:f}% contribution margin" if given is not None else f"{inputs.gross_margin_percent:f}% gross margin"
+        )
+        churn = f"{CHURN_BASIS_NAMES[inputs.ltv_churn_basis]} over {_months(inputs.period_months)}"
+        rows.append(
+            _assumption(
+                "ltv_rule",
+                f"{inputs.recurring_unit} ARPA × {_units(inputs)} × {margin} / {churn}",
+                "LTV is what one account earns after margin over its expected life: the period's revenue per account, "
+                "after the margin, divided by the share lost per period, with no discounting and no growth. The "
+                "contribution margin is used when given (beyond the cost of revenue, it takes out the other costs "
+                "that grow with each account); else the gross margin, which a flag names. A churn at or below 0 is "
+                "refused, since the lifetime would have no end. LTV/CAC divides LTV by blended CAC; no benchmark is "
+                "set for it.",
+                _LTV_SOURCE,
+            )
+        )
+    if "rule_of_40" in used:
+        basis = PROFIT_MARGIN_NAMES[inputs.profit_margin_basis]
+        rows.append(
+            _assumption(
+                "rule_of_40_rule",
+                f"revenue growth {inputs.revenue_growth_percent:f}% + {basis} {inputs.profit_margin_percent:f}%",
+                "The Rule of 40 adds the founder's revenue growth percent and profit margin percent, each as given, "
+                "neither converted, annualised or worked from the other parts. The margin is the one the founder names "
+                "(EBITDA, operating, free cash flow or net). No line is set: whether the sum clears 40 is the rule's "
+                "own test, which no source read for this calculator fixes.",
+                _RULE_OF_40_SOURCE,
+            )
+        )
+    if "magic_number" in used:
+        setting = (
+            "4 × (this quarter's revenue - the prior quarter's) / the prior quarter's sales and marketing spend"
+            if inputs.magic_number_variant() == "revenue"
+            else "(ARR at this quarter's end - at the prior quarter's end) / the prior quarter's sales and marketing "
+            "spend"
+        )
+        rows.append(
+            _assumption(
+                "magic_number_rule",
+                setting,
+                "The magic number sets the new annual revenue a quarter added against the sales and marketing spend of "
+                "the quarter before it. On revenue the quarter's change is annualised by 4; on ARR the change is "
+                "already a year's, so there is no 4. The variant is the one the founder's figures give. Spend from "
+                "the same quarter and margin-adjusted variants are not worked, and no benchmark is set.",
+                _MAGIC_NUMBER_SOURCE,
             )
         )
 

@@ -186,7 +186,7 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
     ),
     "metrics_check": (
         MetricsCheckInput,
-        "Metrics check (ARR, retention, churn, CAC payback, burn multiple)",
+        "Metrics check (ARR, retention, churn, CAC payback, burn multiple, LTV, Rule of 40, magic number)",
         "A founder's traction metrics worked exactly from their parts over one period_months, and each figure the "
         "document states checked. Recurring revenue in recurring_unit (monthly or annual; k = 12 or 1, the only "
         "conversion): starting_recurring S and the period's new N, expansion E, contraction C and churned X. ARR at "
@@ -196,7 +196,14 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "never annualised; gross revenue churn (C + X)/S, net (C + X - E)/S, logo churn customers_lost / "
         "customers_start. CAC = sales_marketing_spend / customers_new (paid: / customers_new_paid); CAC payback = "
         "spend / (new monthly recurring x gross margin), and on revenue only; burn multiple = net_burn / net new "
-        "ARR (none at or below zero); concentration = largest_customer_revenue / period_revenue. Each stated_* "
+        "ARR (none at or below zero); concentration = largest_customer_revenue / period_revenue. LTV = arpa (in "
+        "recurring_unit, scaled to the period) x the contribution_margin_percent, else gross_margin_percent (flagged), "
+        "/ the period's churn on ltv_churn_basis (gross_revenue unless given; a churn at or below 0, or no margin, is "
+        "refused); LTV/CAC = LTV / blended CAC. Rule of 40 = revenue_growth_percent + profit_margin_percent, both the "
+        "founder's, added as given, with profit_margin_basis naming the margin (unlabelled is flagged). Magic number "
+        "= 4 x (quarter_revenue - prior_quarter_revenue) / prior_quarter_sales_marketing_spend, or on ARR "
+        "(quarter_ending_arr - prior_quarter_ending_arr) / that spend with no 4; magic_number_variant names which. No "
+        "benchmark for LTV/CAC, the Rule of 40 or the magic number. Each stated_* "
         "figure comes back consistent or a mismatch, or not_checked for a stated burn multiple with no multiple to "
         "work (the overall verdict is then never consistent); a stated ARR against the movement's ending ARR or the "
         "latest month's, whichever it is within the tolerance of (arr_basis names it); a churn with no basis once per "
@@ -206,7 +213,8 @@ _SCENARIOS: dict[str, tuple[type[ScenarioInput], str, str]] = {
         "months or multiple row also says whether the stated figure is the computed one rounded half away from zero to "
         "the places it is typed with, which makes it consistent even past the tolerance (send it as text, those "
         "places as the document writes them). Flags name the likely cause of a mismatch (a run-rate called ARR, new "
-        "customers in NRR, payback on revenue, new not net new ARR), a figure consistent by the tolerance alone, a "
+        "customers in NRR, payback on revenue, new not net new ARR, an LTV or LTV/CAC on revenue, a Rule of 40 on "
+        "gross margin, a magic number without its 4), a figure consistent by the tolerance alone, a "
         "movement and latest month that disagree, "
         "and three benchmark questions (payback by customer_segment, burn multiple 3x, monthly net revenue churn "
         "2%), never errors. Every part is the founder's figure: never assume one.",
@@ -330,9 +338,10 @@ _INSTRUCTIONS = (
     "equity_waterfall (who gets what of an exit), equity_deal_check (a founder's raise checked: valuation, ownership "
     "after the round, runway, the deck's own figures), equity_runway_plan (how long each raise lasts on a phased "
     "plan and a downside, which milestones it reaches, the smallest raise that gets there), equity_metrics_check "
-    "(a founder's ARR, retention, churn, CAC payback, burn multiple and concentration worked from their parts and "
-    "checked against the document's figures), equity_market_sizing (a founder's TAM, SAM and SOM built bottom-up "
-    "from their own segments, checked against the deck, set beside any top-down figure, with ranges), "
+    "(a founder's ARR, retention, churn, CAC payback, burn multiple, concentration, LTV, LTV/CAC, Rule of 40 and magic "
+    "number worked from their parts and checked against the document's figures), equity_market_sizing (a founder's "
+    "TAM, SAM and SOM built bottom-up from their own segments, checked against the deck, set beside any top-down "
+    "figure, with ranges), "
     "equity_instrument_compare (a priced round now beside a convertible note now: ownership after today and after "
     "each next round, and each exit's payouts, side by side, never a pick), equity_pool_plan (the option pool a "
     "founder's hiring plan needs to the next round beside the pool a term sheet asks for, side by side, never a "

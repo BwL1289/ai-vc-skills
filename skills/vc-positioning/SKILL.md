@@ -153,9 +153,10 @@ so the lenses do not anchor on the dimension marks; step 5 then starts at the qu
      which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
    - ARR, retention, churn, CAC payback and burn multiple are checked by the vc-metrics-readiness skill
      (`equity_metrics_check`), and a market size by the vc-market-sizing skill (`equity_market_sizing`): quote each as
-     stated, check that it has a definition and a period, and name the skill that checks it. Growth rates and LTV: no
-     tool computes them; quote them as stated with "not checked: no tool computes this". Never compute, convert or
-     round any of these (no monthly growth turned into yearly, no "1% of the market is").
+     stated, check that it has a definition and a period, and name the skill that checks it. LTV, LTV/CAC, the Rule
+     of 40 and the magic number go to the vc-metrics-readiness skill too. Growth rates: no tool computes them; quote
+     them as stated with "not checked: no tool computes this". Never compute, convert or round any of these (no
+     monthly growth turned into yearly, no "1% of the market is").
 5. **Run the adversarial review** (next section): attack, check the quotes, refute, rank.
 6. **Draft the tightened narrative** (rules below), starting from the surviving objections' rewrites.
 7. **Draft the prep script** (below), with the branch for a founder who has no existing investor.
@@ -416,7 +417,8 @@ Lead with what to fix, then the material to take into the prep session.
    label, both readings side by side), and each flag as a question a partner is likely to ask, with its meaning; a
    runway with no raise or on a SAFE or note raise, and that raise's use-of-funds lines, with `equity_runway_plan`'s
    rows, or quoted as stated beside the ask for cash and burn when they were not given; each metric or market size
-   with the skill that checks it; growth rates and LTV quoted as stated with "not checked: no tool computes this";
+   with the skill that checks it (LTV and the magic number included); growth rates quoted as stated with "not
+   checked: no tool computes this";
    and any figure that lacks a definition or a period.
 7. **Tightened narrative:** one-liner options, a 30-second version, the section order with bracketed asks.
 8. **Prep script,** filled in with the founder's material and the top survivors.
@@ -456,8 +458,9 @@ unverified; no person or post is credited for it.
 - The adversarial review predicts likely objections from the founder's text; it is not a verdict on the company, and
   a real partner may raise others.
 - No investor research: no target lists, fund look-ups, contact details or outreach. The founder names who they meet.
-- No arithmetic outside the equity calculator's tools. Growth rates and LTV are quoted, not computed; metrics and
-  market sizes are checked by the vc-metrics-readiness and vc-market-sizing skills.
+- No arithmetic outside the equity calculator's tools. Growth rates are quoted, not computed; metrics (LTV, the Rule
+  of 40 and the magic number included) and market sizes are checked by the vc-metrics-readiness and vc-market-sizing
+  skills.
 - The phrase table holds common signals from public guides, not rules; they vary by stage, sector, region and
   investor. One row ("conservative projections") has no public source read and is marked unverified.
 - It works from the founder's text and sends nothing anywhere.

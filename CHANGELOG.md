@@ -15,6 +15,14 @@ All notable changes to this repository. Dates are UTC.
   through `round`, and on their planned rounds it follows the founders through `dilution`, from their share after
   that preview when there is one. It never rules on legal validity: its flags name the questions for the company's
   lawyer. The new `vc-cap-table-check` skill (preview, four evals) runs it.
+- `metrics_check` (MCP tool `equity_metrics_check`) now works LTV on contribution margin (ARPA × the period's units ×
+  margin / the churn the founder names, the gross margin flagged when no contribution margin is given, a churn at or
+  below zero refused), LTV/CAC on blended CAC, the Rule of 40 from the founder's own growth and margin percents with
+  the margin's basis named, and the magic number on revenue (4 × the quarter's change / the prior quarter's sales and
+  marketing spend) or on ARR, and checks a deck's stated figures for each; seven new flags name an LTV on gross
+  margin, a contribution margin above the gross margin, a stated LTV on revenue alone or on gross margin, an unnamed
+  Rule of 40 margin, a stated Rule of 40 on gross margin and a stated magic number without its 4. No benchmark is set for any of them. `vc-metrics-readiness` (and the skills that
+  quoted LTV as unchecked) now send these to the tool, with a Company DL eval (unrecorded).
 - Plugin version 0.3.0, so an installed copy picks up the five new skills and the calculator's two new scenarios;
   the README, the website, the plugin and marketplace descriptions and AGENTS.md list them, and the existing skills
   hand the topics they own to them.

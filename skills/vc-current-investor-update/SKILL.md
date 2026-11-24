@@ -130,8 +130,8 @@ the draft written at step 7.
    update gave, compared as written (Runway).
 5. **Runway:** call `equity_runway_plan` (next section).
 6. **Other figures:** quote each as stated, with its line from the rules file's "Not checked here": ARR, retention,
-   churn, CAC payback and burn multiple go to the vc-metrics-readiness skill; the rest are "not checked: no tool
-   computes this".
+   churn, CAC payback and burn multiple go to the vc-metrics-readiness skill, as do LTV, LTV/CAC, the Rule of 40
+   and the magic number; the rest are "not checked: no tool computes this".
 7. **Draft or revise.** Draft mode: write the update in the shape above from the founder's material only, every gap a
    bracketed ask; the period is labelled as the founder gives it (`[year]` when no year is given). Review mode: keep the
    founder's draft and words; change only what a status, the calculator or a kept finding requires. Either way, a

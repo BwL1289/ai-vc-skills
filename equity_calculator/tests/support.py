@@ -367,6 +367,35 @@ METRICS_AN_DECK: dict[str, object] = {
     "stated_cac_payback_months": "7.2",
 }
 METRICS_AN_MODEL: dict[str, object] = {**METRICS_AN_PARTS, "stated_cac_payback_months": "9.6"}
+# Company DL, one month: $200k MRR at the start, $20k new, $2k expansion, $1k downgrades, $3k cancelled; 25 new
+# customers (10 from paid channels) for $150k of sales and marketing; 80% gross margin, 60% contribution margin, $2k
+# ARPA a month. The founder's own figures: 70% revenue growth and a -35% EBITDA margin; quarter revenue $510k then
+# $600k, with $450k of sales and marketing in the earlier quarter. Its deck says LTV $100k, LTV/CAC 10x, Rule of 40
+# 35% and a magic number of 0.2.
+METRICS_DL: dict[str, object] = {
+    "period_months": 1,
+    "starting_recurring": "200000",
+    "new_recurring": "20000",
+    "expansion_recurring": "2000",
+    "contraction_recurring": "1000",
+    "churned_recurring": "3000",
+    "customers_new": 25,
+    "customers_new_paid": 10,
+    "sales_marketing_spend": "150000",
+    "gross_margin_percent": "80",
+    "arpa": "2000",
+    "contribution_margin_percent": "60",
+    "revenue_growth_percent": "70",
+    "profit_margin_percent": "-35",
+    "profit_margin_basis": "ebitda",
+    "quarter_revenue": "600000",
+    "prior_quarter_revenue": "510000",
+    "prior_quarter_sales_marketing_spend": "450000",
+    "stated_ltv": "100000",
+    "stated_ltv_to_cac": "10",
+    "stated_rule_of_40_percent": "35",
+    "stated_magic_number": "0.2",
+}
 
 
 def metrics_check(**fields: object) -> MetricsCheckResult:

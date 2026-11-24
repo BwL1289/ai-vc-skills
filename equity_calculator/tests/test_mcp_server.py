@@ -293,8 +293,8 @@ async def test_the_metrics_tool_holds_a_figure_sent_as_text_that_is_the_computed
 
 
 async def test_the_metrics_tool_schema_says_to_send_each_rounded_figure_as_text() -> None:
-    """The six stated percent, months and multiple fields say, in the tool's own input schema, to send text with the
-    document's places (a JSON number drops or adds one); the two money fields keep the tolerance alone and say
+    """The nine stated percent, months and multiple fields say, in the tool's own input schema, to send text with the
+    document's places (a JSON number drops or adds one); the three money fields keep the tolerance alone and say
     nothing."""
     tools = {tool.name: tool for tool in await _tools(mcp_server.build_server())}
     fields = tools["equity_metrics_check"].inputSchema["$defs"]["MetricsCheckInput"]["properties"]
@@ -305,12 +305,16 @@ async def test_the_metrics_tool_schema_says_to_send_each_rounded_figure_as_text(
         "stated_cac_payback_months",
         "stated_burn_multiple",
         "stated_concentration_percent",
+        "stated_ltv_to_cac",
+        "stated_rule_of_40_percent",
+        "stated_magic_number",
     )
 
     for name in written:
         assert "Send it as text with exactly the places the document writes" in fields[name]["description"], name
     assert "description" not in fields["stated_arr"]
     assert "description" not in fields["stated_cac"]
+    assert "description" not in fields["stated_ltv"]
 
 
 async def test_the_investor_tool_answers_what_the_cli_prints_with_json() -> None:
