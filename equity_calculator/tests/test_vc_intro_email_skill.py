@@ -52,9 +52,7 @@ _DESCRIPTION_WORDS = (
 )
 # The brief's hand-offs: messaging, the update to prospective investors, and the claims the reader pass flags.
 _HANDOFFS = {
-    "vc-positioning": (
-        "Messaging (the one-liner, the story and the say-and-avoid list): the vc-positioning skill (preview)."
-    ),
+    "vc-positioning": "Messaging (the one-liner, the story and the say-and-avoid list): the vc-positioning skill.",
     "vc-prospective-investor-update": "vc-prospective-investor-update skill (preview)",
     "vc-claims-check": "the vc-claims-check skill (preview)",
 }

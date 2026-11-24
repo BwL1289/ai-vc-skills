@@ -30,12 +30,12 @@ names a firm the deck fits, gives no score, and never adds a fact about the comp
     the claims alone, the founder runs that skill on its own.
   - The ask's arithmetic in full (ownership after the round, the pool, the SAFE stack, runway): the vc-deal-math
     skill, whose steps this skill follows. One equity question with no deck: the equity-calculator skill.
-  - The market slide, built bottom-up from who buys, how many and what each pays: the vc-market-sizing skill (preview).
+  - The market slide, built bottom-up from who buys, how many and what each pays: the vc-market-sizing skill.
   - The competition slide itself, built as a map at four levels on the founder's own axes, with the substitutes story
     and the answer to "what if the big platform builds this?": the vc-competitive-landscape skill (preview).
-  - How much to raise and what it reaches: the vc-round-sizing skill (preview).
-  - Rehearsing the partner meeting once the deck is ready: the vc-partner-meeting skill (preview).
-  - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview).
+  - How much to raise and what it reaches: the vc-round-sizing skill.
+  - Rehearsing the partner meeting once the deck is ready: the vc-partner-meeting skill.
+  - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill.
   - A term sheet the founder was offered: the vc-term-sheet-review skill (preview).
 
 ## Inputs

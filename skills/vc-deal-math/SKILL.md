@@ -25,7 +25,7 @@ them. The aim is a deck whose numbers hold up, so the meeting is about the compa
   `equity_runway_plan`, as step 2 says; `deal_check` works a priced round's runway at one flat burn, a quick check,
   and on a phased plan that round's runway comes from `equity_runway_plan` too.
 - Hand off ARR, retention, churn, CAC payback and burn multiple to the vc-metrics-readiness skill (preview), a market
-  size to the vc-market-sizing skill (preview), and a term sheet to the vc-term-sheet-review skill (preview).
+  size to the vc-market-sizing skill, and a term sheet to the vc-term-sheet-review skill (preview).
 - Hand off a term sheet's pool ask, set beside the pool the founder's hiring plan needs, to the vc-option-pool-plan
   skill (preview).
 

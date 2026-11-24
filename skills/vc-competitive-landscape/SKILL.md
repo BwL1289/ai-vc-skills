@@ -29,10 +29,10 @@ founder did not give, looks nothing up, places no company on an axis, and adds n
   - The whole deck, slide by slide: the vc-deck-review skill. Its competition check reads the slide this skill drafts.
   - Each claim's evidence, a competitor fact among them, and figures that disagree across documents: the
     vc-claims-check skill (preview).
-  - Messaging (the one-liner, the story and the say-and-avoid list): the vc-positioning skill (preview).
-  - The market's size, built bottom-up: the vc-market-sizing skill (preview).
-  - The product decisions behind a difference, and what was said no to: the vc-taste-check skill (preview).
-  - Rehearsing the partner meeting, where "what if they copy you?" gets asked: the vc-partner-meeting skill (preview).
+  - Messaging (the one-liner, the story and the say-and-avoid list): the vc-positioning skill.
+  - The market's size, built bottom-up: the vc-market-sizing skill.
+  - The product decisions behind a difference, and what was said no to: the vc-taste-check skill.
+  - Rehearsing the partner meeting, where "what if they copy you?" gets asked: the vc-partner-meeting skill.
   - A pass that gave competition as its reason: the vc-pass-debrief skill (preview).
 
 ## Inputs

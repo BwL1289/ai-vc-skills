@@ -22,10 +22,10 @@ the founder's answer. The skill never says which investor to pick.
   the founder's own rates from one stage to the next, typed in or as files. Any of them may come as a file the agent
   can read in this session.
 - Hand off:
-  - How much to raise and how long it lasts on the plan: the vc-round-sizing skill (preview).
+  - How much to raise and how long it lasts on the plan: the vc-round-sizing skill.
   - The intro emails, once the batches are set: the vc-intro-email skill (preview).
   - A pass from an investor, to learn from it and answer it: the vc-pass-debrief skill (preview).
-  - The questions investors ask after a first meeting, and the data room: the vc-diligence-questions skill (preview).
+  - The questions investors ask after a first meeting, and the data room: the vc-diligence-questions skill.
   - One scenario on its own (the runway alone, a round's cap table): the equity-calculator skill.
 
 ## Inputs
@@ -165,16 +165,16 @@ offer.
    written as that lead time ("2 weeks before month 4, week 1"). An investor who does not fit in the window is listed
    as outside it; the founder decides what to do (a later batch, a wider window, more meetings a week). When
    `start_raising_date_passed` holds, say the plan is already late on the founder's own figures, place the first week
-   as this week, and offer the vc-round-sizing skill (preview) for the raise and the runway. When
+   as this week, and offer the vc-round-sizing skill for the raise and the runway. When
    `cash_never_runs_out` holds, ask the founder for a start month and label it as the founder's.
 7. **Keep the tracker**: one row per investor on the plan, with these columns and nothing the founder did not give:
    investor, tier, warm path (with its source), batch and week, intro asked, first meeting, partner meeting, term
    sheet or pass, and the next step with its hand-off (an intro email to the vc-intro-email skill (preview), a pass to
-   the vc-pass-debrief skill (preview), the questions after a first meeting to the vc-diligence-questions skill
-   (preview)). Dates and outcomes are the founder's, filled in as the founder reports them; when the counts at each
-   stage change, re-run `equity_raise_pipeline` with the new counts.
+   the vc-pass-debrief skill (preview), the questions after a first meeting to the vc-diligence-questions skill).
+   Dates and outcomes are the founder's, filled in as the founder reports them; when the counts at each stage change,
+   re-run `equity_raise_pipeline` with the new counts.
 8. **Follow-ups go to tools too**: a new commitment, a commitment that firms up, a changed rate or a new funnel count,
-   by re-running `equity_raise_pipeline`; a different round size by the vc-round-sizing skill (preview).
+   by re-running `equity_raise_pipeline`; a different round size by the vc-round-sizing skill.
 
 ## Flags
 

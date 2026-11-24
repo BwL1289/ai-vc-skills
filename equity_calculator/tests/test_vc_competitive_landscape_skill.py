@@ -56,11 +56,11 @@ _DESCRIPTION_WORDS = (
 _HANDOFFS = {
     "vc-deck-review": "The whole deck, slide by slide: the vc-deck-review skill.",
     "vc-claims-check": "the vc-claims-check skill (preview)",
-    "vc-positioning": (
-        "Messaging (the one-liner, the story and the say-and-avoid list): the vc-positioning skill (preview)."
-    ),
+    "vc-positioning": "Messaging (the one-liner, the story and the say-and-avoid list): the vc-positioning skill.",
 }
 _OTHER_HANDOFFS = ("vc-market-sizing", "vc-taste-check", "vc-partner-meeting", "vc-pass-debrief")
+# Of those, the skills still in preview; a hand-off to one says "(preview)", a hand-off to any other has no suffix.
+_IN_PREVIEW = ("vc-pass-debrief",)
 _LEVELS = ("Direct", "Indirect", "Adjacent", "Substitutes")
 _ADJACENT_KINDS = (
     "a company with the same technology aimed at another use",
@@ -161,7 +161,8 @@ def test_every_skill_it_hands_off_to_exists_and_the_brief_s_three_hand_offs_are_
         assert line in when, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
     for name in _OTHER_HANDOFFS:
-        assert f"the {name} skill (preview)" in when, name
+        suffix = " (preview)" if name in _IN_PREVIEW else "."
+        assert f"the {name} skill{suffix}" in when, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
 
 

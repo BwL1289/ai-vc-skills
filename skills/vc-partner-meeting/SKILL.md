@@ -31,9 +31,9 @@ company, its round or its investors that the founder did not give.
     vc-deal-math skill, which calls `equity_deal_check`. New money on a SAFE or note: `equity_round` (the
     equity-calculator skill); a note weighed against a priced round now: `equity_instrument_compare`. Runway with no
     raise, or on a SAFE or note raise: `equity_runway_plan`. A stake through later rounds: `equity_dilution`.
-  - Why this amount, and not more or less, and which milestone it reaches: the vc-round-sizing skill (preview).
-  - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview).
-  - Diligence after the meeting, by area, with a data-room checklist: the vc-diligence-questions skill (preview), which
+  - Why this amount, and not more or less, and which milestone it reaches: the vc-round-sizing skill.
+  - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill.
+  - Diligence after the meeting, by area, with a data-room checklist: the vc-diligence-questions skill, which
     reads this skill's question bank ([`references/question-bank.md`](references/question-bank.md)).
   - The emails that get the meeting (an intro blurb, a cold email, follow-ups): the vc-intro-email skill (preview).
   - A pass after the meeting, read and answered: the vc-pass-debrief skill (preview).
