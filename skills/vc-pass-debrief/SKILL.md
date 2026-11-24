@@ -112,7 +112,7 @@ fact, none says what the investor thinks or felt, and none adds a reason the pas
 | "Outside our thesis", "a portfolio conflict"   | As stated, a reason about the fund; the text does not show whether it is the whole reason                           |
 | "Love what you're building, but ..."           | The words after "but" are the reason; the praise is the polite opening                                              |
 | "Not a fit at this time", "we'll pass for now" | No reason given; any reading would be a guess, so give none                                                         |
-| A reason under Other, as stated                | The material did not settle the point the pass names; any reading beyond that would be a guess, so give none        |
+| A reason under Other, as stated                | At most a plain reading of the words as stated; where any reading would be a guess, give none                       |
 
 ## What to fix
 
