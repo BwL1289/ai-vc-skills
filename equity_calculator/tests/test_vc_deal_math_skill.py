@@ -292,7 +292,8 @@ def test_figures_outside_the_deal_terms_go_to_the_skills_built_for_them() -> Non
 
     assert "ARR, retention, churn, CAC payback and burn multiple to the vc-metrics-readiness skill" in limits
     assert "a market size to the vc-market-sizing skill" in limits
-    assert f'Growth rates and LTV are quoted as stated with "{_NO_TOOL}"' in limits
+    assert "LTV, LTV/CAC, the Rule of 40 and the magic number go to the vc-metrics-readiness skill as well" in limits
+    assert f'Growth rates are quoted as stated with "{_NO_TOOL}"' in limits
     assert "(a growth rate, a market size, unit economics)" not in limits
 
 

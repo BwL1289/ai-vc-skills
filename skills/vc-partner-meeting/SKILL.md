@@ -128,8 +128,9 @@ lenses" says, so the lenses do not anchor on the numbers or the bank; step 4 the
      command line's report prints. That is a change of notation, not a calculation; never round it.
    - ARR, retention, churn, CAC payback and burn multiple belong to the vc-metrics-readiness skill
      (`equity_metrics_check`), a market size to the vc-market-sizing skill (`equity_market_sizing`): here, quote them
-     as stated, check only that each has a definition and a period, and name that skill. Growth rates and LTV are
-     quoted with "not checked: no tool computes this". Never compute, convert or round one.
+     as stated, check only that each has a definition and a period, and name that skill. LTV, LTV/CAC, the Rule of
+     40 and the magic number belong to that skill too. Growth rates are quoted with "not checked: no tool computes
+     this". Never compute, convert or round one.
 4. **Run the adversarial review** (next section): attack, check quotes, refute, rank. Its kept questions are the drill.
 5. **Add the standing prep questions** (the section after it). They are asked of every founder and are not refuted.
 6. **Drill.** Live mode: put one question at a time, kept questions first, then the first five standing ones, at

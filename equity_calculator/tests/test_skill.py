@@ -23,7 +23,7 @@ _FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 _FENCE = re.compile(r"^```([a-z]*)\n(.*?)^```$", re.MULTILINE | re.DOTALL)
 # The field table's header row, however its cells are padded (a Markdown formatter may align the columns).
 _TABLE_HEAD = re.compile(r"^\|\s*Scenario\s*\|\s*Fields \(required in bold\)\s*\|$", re.MULTILINE)
-_NAME = re.compile(r'[`"]([a-z_]+)[`"]')
+_NAME = re.compile(r'[`"]([a-z][a-z0-9_]*)[`"]')
 _PROGRAM = "equity_calculator "
 _DESCRIPTION_LIMIT = 1024
 

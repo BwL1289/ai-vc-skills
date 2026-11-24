@@ -36,7 +36,7 @@ and the option-pool shuffle.
 | `waterfall`          | A company is sold. Who gets what, with preferences paid by rank and each preferred class choosing to convert or not?                                                                                |
 | `deal_check`         | A founder's raise as a VC will read it: do the valuation, percent sold, ownership after the round and runway the deck states agree with the arithmetic?                                             |
 | `runway_plan`        | How long does each raise last on a founder's phased plan and a downside, which milestones does it reach with time to raise the next round, and how much is needed to get there?                     |
-| `metrics_check`      | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback and burn multiple the deck states agree with their parts?                                       |
+| `metrics_check`      | A founder's traction metrics as a VC will recompute them: do the ARR, retention, churn, CAC payback, burn multiple, LTV, Rule of 40 and magic number the deck states agree with their parts?        |
 | `market_sizing`      | A founder's market built bottom-up: TAM, SAM and SOM from customers and price, the deck's figures checked, a top-down cross-check, and which assumption moves it most?                              |
 | `instrument_compare` | A founder choosing between a priced round now and a convertible note now: who owns what after today and after each next round, and who gets what at each exit, A beside B with B - A, never a pick? |
 
@@ -193,7 +193,13 @@ preview until it has been checked on real decks and meetings.
   multiple, its 3x line and the multiple approaching 0 as burn reaches 0; and David Skok's ["SaaS Metrics 2.0"](https://www.forentrepreneurs.com/saas-metrics-2/)
   (no date on the page) for net revenue churn above 2% a month. The three lines are benchmarks, not rules: each
   raises a question, never an error, and each is an input. The period rule, the cohort rule, leaving new customers
-  out of retention, the exact payback formula and the tolerances are unverified.
+  out of retention, the exact payback formula and the tolerances are unverified. LTV rests on the same a16z page's
+  item 5 for working it on contribution margin rather than on revenue or gross margin, paraphrased, not quoted; the
+  LTV formula itself (no discounting, the churn it divides by) is ours, unverified. The Rule of 40 (made widely known
+  by a Brad Feld post of February 2015) and the magic number (a name Scale Venture Partners credits to one of its own
+  partners, with the quarterly formula often traced to a 2008 Hummer Winblad post) are common definitions whose
+  sources were not read for this release: nothing of them is quoted, both are marked unverified, and no benchmark is
+  set for either, nor for LTV or LTV/CAC.
 - **Market size**: the market sizing quotes two Y Combinator pages word for word in its assumptions:
   ["How to Pitch Your Company"](https://www.ycombinator.com/library/4b-how-to-pitch-your-company)
   (the YC pitch guide; no date on the page; read in full on 23 November 2026), for building the market from customers
@@ -536,7 +542,22 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    zero burn, and none for a negative burn or net new ARR, is ours (unverified). On new ARR alone it is worked
    whenever a multiple is stated, to test whether the stated figure used new ARR. Concentration = the largest
    customer's revenue / the period's revenue (a16z), with no benchmark.
-5. **Checks.** Each stated figure is checked with `deal_check`'s tolerances (0.5 points for a percent, 2% of the
+5. **Lifetime value.** With a, the founder's average revenue per account (ARPA) in the recurring unit, the period's
+   units P/u (u = 1 month for a monthly unit, 12 for an annual one), m the contribution margin when given (a16z works
+   LTV on contribution margin, not on revenue or gross margin; paraphrased) and the gross margin otherwise, and c the
+   period's churn on `ltv_churn_basis` (gross revenue churn by default, or net revenue or logo churn, the founder's
+   choice): LTV = a·(P/u)·m / c, with no discounting (the formula is ours, unverified). LTV/CAC = LTV / blended CAC.
+   On revenue alone, LTV = a·(P/u) / c and its LTV/CAC are worked whenever an LTV or LTV/CAC is stated, to test
+   whether the stated figure left the margin out. ARPA with no margin is refused (LTV is never worked on revenue
+   alone), and so is a churn at or below zero: with no churn the lifetime has no end.
+6. **Growth and efficiency.** Three parts stand outside the period, each the founder's own: the revenue growth
+   percent g, the profit margin percent q and its basis (EBITDA, operating, free cash flow or net; not named, it is
+   flagged). The Rule of 40 = g + q, as given (a common SaaS rule of thumb, unverified). The magic number = 4·(Q - Q')
+   / M', with Q this quarter's revenue, Q' the prior quarter's and M' the prior quarter's sales and marketing spend;
+   given as the ending ARR of the two quarters A and A' instead, it is (A - A') / M', already a year's worth, with
+   no 4 (a common definition, unverified). Without the 4, (Q - Q') / M' is worked whenever a magic number on revenue
+   is stated. Each may fall below zero. No benchmark is set for LTV, LTV/CAC, the Rule of 40 or the magic number.
+7. **Checks.** Each stated figure is checked with `deal_check`'s tolerances (0.5 points for a percent, 2% of the
    computed value for the rest, each an input, the edge included); a mismatch whose difference shows as equal to the
    tolerance says it is just over it. A stated percent, months or multiple is also consistent, whatever the
    tolerance, when it is the computed figure rounded half away from zero to the places it is written with, since
@@ -555,11 +576,14 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    one is given. A stated burn multiple with no multiple to work (step 4) comes back
    `not_checked`, with no computed figure. The verdict: mismatch if any figure is, else not_checked if none was
    checked or one was left unchecked, else consistent.
-6. **Flags**, never errors. Beside a mismatch, the likely cause: `stated_arr_matches_run_rate`,
+8. **Flags**, never errors. Beside a mismatch, the likely cause: `stated_arr_matches_run_rate`,
    `stated_nrr_includes_new` (ending over starting recurring revenue), `stated_payback_not_margin_adjusted` and
    `stated_burn_multiple_uses_new_not_net_arr` (also beside a multiple left unchecked), each only when the stated
-   figure lands within tolerance of that other definition (the tolerance alone: the rounding rule of step 5 decides a
-   verdict, never a cause; the run-rate one also only when the latest month has one-time or usage revenue).
+   figure lands within tolerance of that other definition (the tolerance alone: the rounding rule of step 7 decides a
+   verdict, never a cause; the run-rate one also only when the latest month has one-time or usage revenue);
+   `stated_ltv_uses_revenue_not_margin` (a stated LTV or LTV/CAC within tolerance of the figure on revenue alone),
+   `stated_rule_of_40_uses_gross_margin` (within tolerance of growth + the gross margin) and
+   `stated_magic_number_not_annualised` (within tolerance of the change without the 4).
    `consistent_beyond_rounding`: a figure consistent by the tolerance alone, not the computed figure
    rounded to its places, such as a monthly churn of 1.7% against 2.1%, so a VC recomputing gets another figure. With
    or without a mismatch:
@@ -569,7 +593,8 @@ gives it; the calculator never converts a quarter to a year or compounds a rate.
    alone), `blended_cac_only` (no paid-channel count),
    `payback_not_margin_adjusted` (no gross margin), `burn_multiple_not_defined` (net new ARR at or below zero) and
    `no_net_burn` (a net burn at or below zero); each of these two says the overall verdict cannot be consistent only
-   when a multiple is stated. The benchmarks, each an input: `payback_above_band` (at or above
+   when a multiple is stated; `ltv_on_gross_margin` (no contribution margin, so LTV is on the gross margin) and
+   `rule_of_40_margin_basis_unlabelled` (the margin's basis not named). The benchmarks, each an input: `payback_above_band` (at or above
    Bessemer's target for the customer segment, under 12 months for SMB, 18 for mid-market and 24 for enterprise, or
    the founder's own band), `burn_multiple_above_band` (3x or more, Sacks) and `net_revenue_churn_above_band` (above
    2% in a one-month period, Skok; not asked over a longer period, since nothing is compounded).
@@ -582,7 +607,11 @@ everything the period had (the start, new and expansion, so ARR at the end is ne
 its total, the starting customers' contraction and churn above the start (each the period's total when its `cohort_*`
 figure is not given, so retention is never below 0), the latest month's parts without its total or above it, customers lost or
 paid-channel customers without or above their total, the largest customer without or above the period's revenue, a
-stated figure without what it needs to be checked, and a churn basis without a stated churn or its inputs.
+stated figure without what it needs to be checked, and a churn basis without a stated churn or its inputs; for the
+later metrics, ARPA without a margin or a churn above zero on its basis, a contribution margin or `ltv_churn_basis`
+without ARPA, growth without a margin or a margin without growth, a margin basis without a margin, one quarter
+without the other, the magic number's quarters as both revenue and ARR, and its quarters without the prior quarter's
+spend or that spend without them.
 
 ### Market sizing (YC's pitch guide for customers × price and the seed guide for TAM as revenue; the rest unverified)
 
@@ -864,6 +893,41 @@ ARR is 12 × $100k = $1,200,000; the $1.5M is the run-rate, with the fees in it.
 `stated_arr_matches_run_rate`, `run_rate_includes_non_recurring`, `stated_nrr_includes_new`,
 `stated_burn_multiple_uses_new_not_net_arr` and `burn_multiple_above_band` as what a VC is likely to ask about.
 
+**LTV, the Rule of 40 and the magic number (Company DL, made up).** In one month, monthly recurring revenue went from
+$200k with $20k new, $2k expansion, $1k downgrades and $3k cancelled; 25 new customers, 10 of them from paid channels,
+for $150k of sales and marketing. Gross margin is 80%, contribution margin 60%, and the average account pays $2k a
+month. The founder's own figures: revenue grew 70% over the year, the EBITDA margin is -35%, and quarterly revenue went
+from $510k to $600k on $450k of sales and marketing in the earlier quarter. The deck says LTV $100k, LTV/CAC 10x, Rule
+of 40 35% and a magic number of 0.2:
+
+```
+equity_calculator metrics_check --period-months 1 --starting-recurring 200000 --new-recurring 20000 \
+    --expansion-recurring 2000 --contraction-recurring 1000 --churned-recurring 3000 --customers-new 25 \
+    --customers-new-paid 10 --sales-marketing-spend 150000 --gross-margin-percent 80 --arpa 2000 \
+    --contribution-margin-percent 60 --revenue-growth-percent 70 --profit-margin-percent=-35 \
+    --profit-margin-basis ebitda --quarter-revenue 600000 --prior-quarter-revenue 510000 \
+    --prior-quarter-sales-marketing-spend 450000 --stated-ltv 100000 --stated-ltv-to-cac 10 \
+    --stated-rule-of-40-percent 35 --stated-magic-number 0.2
+  LTV (contribution margin)                                              $60,000.00  ARPA × the period's units × margin / gross revenue churn
+  LTV on revenue alone                                                  $100,000.00  ARPA × the period's units / gross revenue churn
+  LTV/CAC                                                                10.000000x  LTV / blended CAC
+  Rule of 40 (growth + EBITDA margin)                                      35.0000%  revenue growth + margin, as given
+  Magic number (on revenue)                                               0.800000x  4·(quarter revenue - prior quarter's) / prior quarter's spend
+  Magic number without the 4                                              0.200000x  (quarter revenue - prior quarter's) / prior quarter's spend
+  LTV: verdict                                                             mismatch  within the tolerance is consistent
+  LTV/CAC: verdict                                                       consistent  within the tolerance, or rounding to the deck's, is consistent
+  Rule of 40: verdict                                                    consistent  within the tolerance, or rounding to the deck's, is consistent
+  Magic number: verdict                                                    mismatch  within the tolerance, or rounding to the deck's, is consistent
+  Overall verdict                                                          mismatch  mismatch if any figure is (an unlabelled churn holds when any basis does); else not_checked with none checked or one left unchecked; else consistent
+```
+
+Gross revenue churn is ($1k + $3k) / $200k = 2% for the month, so LTV is $2k × 60% / 2% = $60,000; the deck's $100k is
+the same sum with no margin taken out, which `stated_ltv_uses_revenue_not_margin` names. LTV/CAC is $60,000 / $6,000 =
+10x, consistent: the deck's 10x is on margin, though its LTV is not. The Rule of 40 is 70% - 35% = 35%, consistent,
+and no line is set for it. The magic number is 4 × $90k / $450k = 0.8; the deck's 0.2 leaves out the 4 that turns the
+quarter's change into a year's, which `stated_magic_number_not_annualised` names. No benchmark is set for any of the
+four.
+
 **A market built bottom-up (Company AW, made up).** Software for vet clinics: 18,000 independent clinics at $400 a
 month, 60% of them reachable today, 900 to win and 45 customers now; and 400 multi-site groups, 15 locations each at
 $300 a location a month, 50% reachable, 10% of those to win and 2 customers now. An analyst's figure of $2.1B a
@@ -984,9 +1048,13 @@ equity_calculator metrics_check --period-months P [--recurring-unit monthly|annu
     [--cohort-churned-recurring X]] [--month-total-revenue T [--month-one-time-revenue O]
     [--month-usage-revenue U]] [--customers-start S [--customers-lost L]] [--customers-new N
     [--customers-new-paid P]] [--sales-marketing-spend M [--gross-margin-percent G]] [--net-burn B]
-    [--largest-customer-revenue L --period-revenue R] [--stated-arr A] [--stated-nrr-percent N]
+    [--largest-customer-revenue L --period-revenue R] [--arpa A [--contribution-margin-percent M]
+    [--ltv-churn-basis gross_revenue|net_revenue|logo]] [--revenue-growth-percent G --profit-margin-percent M
+    [--profit-margin-basis BASIS]] [--quarter-revenue Q --prior-quarter-revenue Q' | --quarter-ending-arr A
+    --prior-quarter-ending-arr A'] [--prior-quarter-sales-marketing-spend M] [--stated-arr A] [--stated-nrr-percent N]
     [--stated-grr-percent G] [--stated-churn-percent C [--stated-churn-basis BASIS]] [--stated-cac C]
     [--stated-cac-payback-months M] [--stated-burn-multiple X] [--stated-concentration-percent C]
+    [--stated-ltv L] [--stated-ltv-to-cac X] [--stated-rule-of-40-percent R] [--stated-magic-number X]
     [--tolerance-points P] [--tolerance-percent Q] [--customer-segment smb|mid_market|enterprise]
     [--payback-band-months B] [--burn-multiple-band X] [--net-revenue-churn-band-percent C]
 equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
@@ -1026,6 +1094,12 @@ are there, and `--stated-churn-basis` (`logo`, `gross_revenue`, `net_revenue` or
 `--stated-churn-percent -3` reads as a number, but `-3%` needs the `=` form, `--stated-churn-percent=-3%`. A stated retention or churn figure is checked over
 `--period-months` and never annualised, so give the period the document's figure covers (1 for a monthly churn, 12
 for an annual NRR) and run once per period when the document mixes them. A stated CAC is checked as blended CAC.
+`--arpa` is the average revenue per account in `--recurring-unit`, and LTV needs a margin with it
+(`--contribution-margin-percent`, else `--gross-margin-percent`) and a churn above zero on `--ltv-churn-basis`.
+`--revenue-growth-percent` and `--profit-margin-percent` are the founder's own figures for the Rule of 40, with
+`--profit-margin-basis` (`ebitda`, `operating`, `free_cash_flow`, `net` or `unlabelled`) naming the margin, and a
+negative margin also needs the `=` form (`--profit-margin-percent=-35`). The magic number takes two consecutive
+quarters' revenue, or their ending ARR, and the earlier quarter's sales and marketing spend.
 
 `market_sizing` needs at least one `--segment`, one group of buying customers with no overlap between groups. Each
 count, price and share is the founder's own figure: a price is given with the months it covers
@@ -1325,21 +1399,24 @@ The `runway_plan` scenario adds these, each only when the input uses it:
 
 The `metrics_check` scenario adds these, each only when the input uses it:
 
-| Key                      | Default                                                                                                                                                          | How to change it                              | Source                                                                                                                      |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `period_rule`            | every flow is for the one period; nothing annualised or compounded                                                                                               | `--period-months`                             | unverified (a modelling choice)                                                                                             |
-| `arr_rule`               | ARR = k × recurring revenue (the movement's); ARR from the latest month = 12 × its recurring revenue; run-rate = 12 × its whole revenue: only the figures worked | `--recurring-unit`                            | a16z ("16 More Startup Metrics", item 2)                                                                                    |
-| `retention_rule`         | GRR = (S - C - X)/S; NRR = (S + E - C - X)/S; new customers left out (primed, C' and so on, once a starting-customers figure is given)                           | fixed                                         | Bessemer for the definitions; leaving new customers out unverified                                                          |
-| `cohort_rule`            | the period's totals; with `--cohort-*` figures, which movements are the starting customers' own and which are totals                                             | the `--cohort-*` figures                      | unverified (a modelling choice)                                                                                             |
-| `churn_rule`             | logo, gross and net revenue churn over the period                                                                                                                | fixed                                         | a16z ("16 Startup Metrics", item 11; per month)                                                                             |
-| `cac_rule`               | blended = spend / new customers; paid = spend / paid-channel customers                                                                                           | fixed                                         | a16z ("16 Startup Metrics", item 8)                                                                                         |
-| `payback_rule`           | spend / (new monthly recurring revenue × gross margin)                                                                                                           | `--gross-margin-percent`                      | Bessemer (on gross margin); the formula unverified                                                                          |
-| `burn_multiple_rule`     | net burn / net new ARR; none at or below zero, a stated one not checked                                                                                          | fixed                                         | Sacks (the formula, no ratio before revenue, and approaching 0 as burn reaches 0); working none at zero or below unverified |
-| `concentration_rule`     | largest customer / the period's revenue; no benchmark                                                                                                            | fixed                                         | a16z ("16 More Startup Metrics", item 14)                                                                                   |
-| `tolerance`              | 0.5 points; 2% relative; a percent, months or multiple that is the computed figure rounded to its places also holds; one flag beside it                          | `--tolerance-points`, `--tolerance-percent`   | unverified (the rounding test is standard arithmetic)                                                                       |
-| `payback_band`           | the segment's target: 12, 18 or 24 months; with no margin, set against the revenue-only payback as a floor                                                       | `--customer-segment`, `--payback-band-months` | Bessemer (a benchmark, not a rule)                                                                                          |
-| `burn_multiple_band`     | 3x                                                                                                                                                               | `--burn-multiple-band`                        | Sacks (a benchmark, not a rule)                                                                                             |
-| `net_revenue_churn_band` | 2% a month, one-month periods only                                                                                                                               | `--net-revenue-churn-band-percent`            | Skok (a benchmark, not a rule)                                                                                              |
+| Key                      | Default                                                                                                                                                             | How to change it                                     | Source                                                                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `period_rule`            | every flow is for the one period; nothing annualised or compounded                                                                                                  | `--period-months`                                    | unverified (a modelling choice)                                                                                                      |
+| `arr_rule`               | ARR = k × recurring revenue (the movement's); ARR from the latest month = 12 × its recurring revenue; run-rate = 12 × its whole revenue: only the figures worked    | `--recurring-unit`                                   | a16z ("16 More Startup Metrics", item 2)                                                                                             |
+| `retention_rule`         | GRR = (S - C - X)/S; NRR = (S + E - C - X)/S; new customers left out (primed, C' and so on, once a starting-customers figure is given)                              | fixed                                                | Bessemer for the definitions; leaving new customers out unverified                                                                   |
+| `cohort_rule`            | the period's totals; with `--cohort-*` figures, which movements are the starting customers' own and which are totals                                                | the `--cohort-*` figures                             | unverified (a modelling choice)                                                                                                      |
+| `churn_rule`             | logo, gross and net revenue churn over the period                                                                                                                   | fixed                                                | a16z ("16 Startup Metrics", item 11; per month)                                                                                      |
+| `cac_rule`               | blended = spend / new customers; paid = spend / paid-channel customers                                                                                              | fixed                                                | a16z ("16 Startup Metrics", item 8)                                                                                                  |
+| `payback_rule`           | spend / (new monthly recurring revenue × gross margin)                                                                                                              | `--gross-margin-percent`                             | Bessemer (on gross margin); the formula unverified                                                                                   |
+| `burn_multiple_rule`     | net burn / net new ARR; none at or below zero, a stated one not checked                                                                                             | fixed                                                | Sacks (the formula, no ratio before revenue, and approaching 0 as burn reaches 0); working none at zero or below unverified          |
+| `concentration_rule`     | largest customer / the period's revenue; no benchmark                                                                                                               | fixed                                                | a16z ("16 More Startup Metrics", item 14)                                                                                            |
+| `ltv_rule`               | ARPA × the period's units × the contribution margin (else the gross margin) / the period's churn on its basis; no discounting; LTV/CAC on blended CAC; no benchmark | `--contribution-margin-percent`, `--ltv-churn-basis` | a16z ("16 Startup Metrics", item 5, paraphrased: on contribution margin); the formula, the churn basis and no discounting unverified |
+| `rule_of_40_rule`        | the founder's revenue growth + profit margin, as given, the margin's basis named; no line set                                                                       | `--profit-margin-basis`                              | unverified (a common rule of thumb; its sources not read)                                                                            |
+| `magic_number_rule`      | 4 × the quarter's revenue change / the prior quarter's sales and marketing spend; on ARR, the change with no 4; no benchmark                                        | `--quarter-ending-arr`, `--prior-quarter-ending-arr` | unverified (a common definition; its sources not read)                                                                               |
+| `tolerance`              | 0.5 points; 2% relative; a percent, months or multiple that is the computed figure rounded to its places also holds; one flag beside it                             | `--tolerance-points`, `--tolerance-percent`          | unverified (the rounding test is standard arithmetic)                                                                                |
+| `payback_band`           | the segment's target: 12, 18 or 24 months; with no margin, set against the revenue-only payback as a floor                                                          | `--customer-segment`, `--payback-band-months`        | Bessemer (a benchmark, not a rule)                                                                                                   |
+| `burn_multiple_band`     | 3x                                                                                                                                                                  | `--burn-multiple-band`                               | Sacks (a benchmark, not a rule)                                                                                                      |
+| `net_revenue_churn_band` | 2% a month, one-month periods only                                                                                                                                  | `--net-revenue-churn-band-percent`                   | Skok (a benchmark, not a rule)                                                                                                       |
 
 The `market_sizing` scenario adds these: `bottom_up_rule`, `annual_rule` and `sam_rule` always, the rest only when
 the input uses them:

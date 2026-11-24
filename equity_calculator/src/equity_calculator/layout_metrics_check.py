@@ -2,12 +2,13 @@
 
 One value column. The parts as given come first, then the ARR figures and which one a stated ARR is checked against,
 retention and churn (each labelled with its period, never annualised), CAC and payback, the burn multiple,
-concentration and the payback benchmark in force, then each stated figure checked (stated, computed, difference,
-whether the figure as typed is a rounding of the computed one, which is consistent even past the tolerance, verdict; an
-unlabelled churn once per basis; a burn multiple with no multiple to work shows "none" and not_checked), the flags in
-plain words, and the overall verdict. Values only: no line carries a live formula. When a starting-customers figure is
-given, retention and revenue churn print primed letters (C' for the starting customers' own contraction, else the
-period's total).
+concentration, LTV (labelled with its margin) and LTV/CAC, the Rule of 40 (labelled with its margin), the magic number
+(labelled with its variant) and the payback benchmark in force, then each stated figure checked (stated, computed,
+difference, whether the figure as typed is a rounding of the computed one, which is consistent even past the tolerance,
+verdict; an unlabelled churn once per basis; a burn multiple with no multiple to work shows "none" and not_checked), the
+flags in plain words, and the overall verdict. Values only: no line carries a live formula. When a starting-customers
+figure is given, retention and revenue churn print primed letters (C' for the starting customers' own contraction, else
+the period's total).
 """
 
 from __future__ import annotations
@@ -28,8 +29,8 @@ from equity_calculator.text import display
 
 _TITLE = "Metrics check"
 _HEADING = (
-    "Traction metrics worked from their parts: ARR, retention, churn, CAC payback, burn multiple, the document's "
-    "figures"
+    "Traction metrics worked from their parts: ARR, retention, churn, CAC payback, burn multiple, LTV, the Rule of 40, "
+    "the magic number, the document's figures"
 )
 _COLUMNS = ("These figures",)
 _UNIT_NAMES = {"monthly": "monthly", "annual": "annual"}
@@ -47,6 +48,10 @@ _CHECK_NAMES = {
     "cac_payback": "CAC payback",
     "burn_multiple": "Burn multiple",
     "concentration": "Customer concentration",
+    "ltv": "LTV",
+    "ltv_to_cac": "LTV/CAC",
+    "rule_of_40": "Rule of 40",
+    "magic_number": "Magic number",
 }
 _CHECK_HOW = {
     "arr": "the movement's ending ARR or the latest month's",
@@ -56,6 +61,30 @@ _CHECK_HOW = {
     "cac_payback": "spend/(new monthly recurring·margin), or on revenue with no margin",
     "burn_multiple": "net burn / net new ARR",
     "concentration": "largest customer / period revenue",
+    "ltv_to_cac": "LTV / blended CAC",
+    "rule_of_40": "revenue growth + margin, as given",
+}
+# The magic number's working, by the variant the inputs give.
+_MAGIC_HOW = {
+    "revenue": "4·(quarter revenue - prior quarter's) / prior quarter's spend",
+    "arr": "(quarter-end ARR - prior quarter's) / prior quarter's spend",
+}
+_LTV_MARGIN_NAMES = {"contribution": "contribution margin", "gross": "gross margin"}
+_CHURN_WORDS = {"gross_revenue": "gross revenue churn", "net_revenue": "net revenue churn", "logo": "logo churn"}
+# A profit margin's basis as the given line shows it.
+_BASIS_WORDS = {
+    "ebitda": "EBITDA",
+    "operating": "operating",
+    "free_cash_flow": "free cash flow",
+    "net": "net",
+    "unlabelled": "unlabelled",
+}
+_PROFIT_MARGIN_WORDS = {
+    "ebitda": "EBITDA margin",
+    "operating": "operating margin",
+    "free_cash_flow": "free cash flow margin",
+    "net": "net margin",
+    "unlabelled": "margin, basis not named",
 }
 _CHURN_HOW = {
     "logo": "customers lost / customers at the start",
@@ -139,6 +168,17 @@ def _flag_words(flag: MetricsFlag, result: MetricsCheckResult) -> str:
         "net_revenue_churn_above_band": f"Net revenue churn over {period} is above "
         f"{inputs.net_revenue_churn_band_percent:f}%; a VC is likely to ask what is driving it (a benchmark, not a "
         "rule)",
+        "ltv_on_gross_margin": "LTV is on gross margin, as no contribution margin was given; a16z works LTV on "
+        "contribution margin, which also takes out the other costs that grow with each account, so a VC may work it "
+        "lower: give the contribution margin",
+        "stated_ltv_uses_revenue_not_margin": "A stated LTV or LTV/CAC matches the figure on revenue alone, with no "
+        "margin taken out; a VC is likely to recompute it on margin",
+        "rule_of_40_margin_basis_unlabelled": "The Rule of 40's margin names no basis; a VC is likely to ask which "
+        "margin it adds (EBITDA, operating, free cash flow or net): name it beside the figure",
+        "stated_rule_of_40_uses_gross_margin": "The stated Rule of 40 matches revenue growth plus gross margin, not "
+        "plus a profit margin; a VC is likely to recompute it on profit",
+        "stated_magic_number_not_annualised": "The stated magic number matches the quarter's revenue change over the "
+        "prior quarter's spend without the 4 that annualises it; a VC is likely to recompute it with the 4",
     }
     return words[flag]
 
@@ -185,6 +225,34 @@ def _movement_lines(inputs: MetricsCheckInput) -> list[tuple[str, str, EquityQua
     ]
 
 
+def _later_given(inputs: MetricsCheckInput) -> list[tuple[str, str, EquityQuantity | str | None]]:
+    """LTV's parts, the Rule of 40's two percents and the magic number's quarters, each shown only when given."""
+    unit = _UNIT_NAMES[inputs.recurring_unit]
+    ltv = inputs.arpa is not None
+    margin = inputs.profit_margin_percent is not None
+    return [
+        ("arpa", f"Average revenue per account ({unit}, ARPA)", _maybe("money", inputs.arpa)),
+        ("contribution_margin", "Contribution margin", _maybe_percent(inputs.contribution_margin_percent)),
+        ("ltv_churn_basis", "LTV divides by", _CHURN_WORDS[inputs.ltv_churn_basis] if ltv else None),
+        ("revenue_growth", "Revenue growth", _maybe_percent(inputs.revenue_growth_percent)),
+        ("profit_margin", "Profit margin", _maybe_percent(inputs.profit_margin_percent)),
+        ("profit_margin_basis", "Profit margin basis", _BASIS_WORDS[inputs.profit_margin_basis] if margin else None),
+        ("quarter_revenue", "This quarter's revenue (Q)", _maybe("money", inputs.quarter_revenue)),
+        ("prior_quarter_revenue", "The prior quarter's revenue (Q')", _maybe("money", inputs.prior_quarter_revenue)),
+        ("quarter_ending_arr", "ARR at this quarter's end (A)", _maybe("money", inputs.quarter_ending_arr)),
+        (
+            "prior_quarter_ending_arr",
+            "ARR at the prior quarter's end (A')",
+            _maybe("money", inputs.prior_quarter_ending_arr),
+        ),
+        (
+            "prior_quarter_spend",
+            "The prior quarter's sales and marketing spend",
+            _maybe("money", inputs.prior_quarter_sales_marketing_spend),
+        ),
+    ]
+
+
 def _given_lines(result: MetricsCheckResult) -> list[Line]:
     """The parts as given and each figure the document states, then the tolerances and bands in use."""
     inputs = result.inputs
@@ -206,6 +274,7 @@ def _given_lines(result: MetricsCheckResult) -> list[Line]:
         ("net_burn", "Net burn", _maybe("money", inputs.net_burn)),
         ("largest_customer", "Largest customer's revenue", _maybe("money", inputs.largest_customer_revenue)),
         ("period_revenue", "Revenue in the period", _maybe("money", inputs.period_revenue)),
+        *_later_given(inputs),
         ("given_arr", "ARR as stated", _maybe("money", inputs.stated_arr)),
         ("given_nrr", "Net revenue retention as stated", _maybe_percent(inputs.stated_nrr_percent)),
         ("given_grr", "Gross revenue retention as stated", _maybe_percent(inputs.stated_grr_percent)),
@@ -215,6 +284,10 @@ def _given_lines(result: MetricsCheckResult) -> list[Line]:
         ("given_payback", "CAC payback as stated", _maybe("months", inputs.stated_cac_payback_months)),
         ("given_burn_multiple", "Burn multiple as stated", _maybe("multiplier", inputs.stated_burn_multiple)),
         ("given_concentration", "Concentration as stated", _maybe_percent(inputs.stated_concentration_percent)),
+        ("given_ltv", "LTV as stated", _maybe("money", inputs.stated_ltv)),
+        ("given_ltv_to_cac", "LTV/CAC as stated", _maybe("multiplier", inputs.stated_ltv_to_cac)),
+        ("given_rule_of_40", "Rule of 40 as stated", _maybe_percent(inputs.stated_rule_of_40_percent)),
+        ("given_magic_number", "Magic number as stated", _maybe("multiplier", inputs.stated_magic_number)),
         ("customer_segment", "Customer segment", inputs.customer_segment),
         ("tolerance_points", "Tolerance for a percent", given_percent(inputs.tolerance_points) if checked else None),
         (
@@ -295,6 +368,7 @@ def _metric_lines(result: MetricsCheckResult) -> list[Line]:
         ("burn_multiple", "Burn multiple", result.burn_multiple, "net burn / net new ARR"),
         ("burn_multiple_new", "Burn multiple on new ARR only", result.burn_multiple_on_new_arr, "net burn / new ARR"),
         ("concentration", "Customer concentration", result.concentration, "largest customer / period revenue"),
+        *_later_metrics(result),
         (
             "payback_band",
             "CAC payback benchmark",
@@ -315,6 +389,35 @@ def _metric_lines(result: MetricsCheckResult) -> list[Line]:
         band = given_percent(inputs.net_revenue_churn_band_percent)
         lines.append(Line("net_revenue_churn_band", "Net revenue churn benchmark (1 month)", (band,), GIVEN))
     return lines
+
+
+def _later_metrics(result: MetricsCheckResult) -> list[tuple[str, str, EquityQuantity | str | None, str]]:
+    """LTV and LTV/CAC (labelled with the margin and churn they use), the Rule of 40 (with its margin) and the magic
+    number (with its variant), and each figure on the other definition worked beside a stated one."""
+    inputs = result.inputs
+    margin = "none" if result.ltv_margin_basis is None else _LTV_MARGIN_NAMES[result.ltv_margin_basis]
+    churn = _CHURN_WORDS[inputs.ltv_churn_basis]
+    variant = result.magic_number_variant
+    on = "revenue" if variant == "revenue" else "ARR"
+    return [
+        ("ltv", f"LTV ({margin})", result.ltv, f"ARPA × the period's units × margin / {churn}"),
+        ("ltv_on_revenue", "LTV on revenue alone", result.ltv_on_revenue, f"ARPA × the period's units / {churn}"),
+        ("ltv_to_cac", "LTV/CAC", result.ltv_to_cac, "LTV / blended CAC"),
+        ("ltv_to_cac_on_revenue", "LTV/CAC on revenue alone", result.ltv_to_cac_on_revenue, "LTV on revenue / CAC"),
+        (
+            "rule_of_40",
+            f"Rule of 40 (growth + {_PROFIT_MARGIN_WORDS[inputs.profit_margin_basis]})",
+            result.rule_of_40,
+            "revenue growth + margin, as given",
+        ),
+        ("magic_number", f"Magic number (on {on})", result.magic_number, _MAGIC_HOW[variant or "revenue"]),
+        (
+            "magic_number_unannualised",
+            "Magic number without the 4",
+            result.magic_number_unannualised,
+            "(quarter revenue - prior quarter's) / prior quarter's spend",
+        ),
+    ]
 
 
 def _verdict_how(check: MetricsCheck, inputs: MetricsCheckInput) -> str:
@@ -344,6 +447,9 @@ def _typed(check: MetricsCheck, inputs: MetricsCheckInput) -> Decimal | None:
         "cac_payback": inputs.stated_cac_payback_months,
         "burn_multiple": inputs.stated_burn_multiple,
         "concentration": inputs.stated_concentration_percent,
+        "ltv_to_cac": inputs.stated_ltv_to_cac,
+        "rule_of_40": inputs.stated_rule_of_40_percent,
+        "magic_number": inputs.stated_magic_number,
     }
     return typed.get(check.key)
 
@@ -357,6 +463,10 @@ def _check_lines(check: MetricsCheck, result: MetricsCheckResult) -> list[Line]:
         name, key = _CHECK_NAMES[check.key], f"check_{check.key}"
         if check.key == "arr" and result.arr_basis is not None:
             how = _ARR_BASIS_WORDS[result.arr_basis]
+        elif check.key == "magic_number":
+            how = _MAGIC_HOW[result.magic_number_variant or "revenue"]
+        elif check.key == "ltv":
+            how = f"ARPA × the period's units × margin / {_CHURN_WORDS[inputs.ltv_churn_basis]}"
         else:
             how = _CHECK_HOW[check.key]
         if check.key in ("grr", "nrr"):

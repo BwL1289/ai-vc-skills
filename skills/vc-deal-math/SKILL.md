@@ -242,8 +242,9 @@ the three `runway_plan` flags; the runway plan's `consistent_beyond_rounding` me
   line or a table cell unless the founder's material states it or a tool returned it; quote both figures as stated
   instead ("from 2,000 to 4,500", never "more than doubled"). A figure outside the deal terms goes to the skill built
   for it: ARR, retention, churn, CAC payback and burn multiple to the vc-metrics-readiness skill
-  (`equity_metrics_check`), a market size to the vc-market-sizing skill (`equity_market_sizing`). Growth rates and LTV
-  are quoted as stated with "not checked: no tool computes this".
+  (`equity_metrics_check`), a market size to the vc-market-sizing skill (`equity_market_sizing`). LTV, LTV/CAC, the
+  Rule of 40 and the magic number go to the vc-metrics-readiness skill as well. Growth rates are quoted as stated with
+  "not checked: no tool computes this".
 - It checks the arithmetic of the figures the founder gives, pasted or in a file the agent can read in this session. It
   opens no folder of files, reads no figure off a chart or a picture, and sends nothing anywhere. A term sheet goes to
   the vc-term-sheet-review skill.

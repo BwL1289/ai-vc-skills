@@ -37,9 +37,14 @@ convertible note now.
         [--cohort-churned-recurring X]] [--month-total-revenue T [--month-one-time-revenue O]
         [--month-usage-revenue U]] [--customers-start S [--customers-lost L]] [--customers-new N
         [--customers-new-paid P]] [--sales-marketing-spend M [--gross-margin-percent G]] [--net-burn B]
-        [--largest-customer-revenue L --period-revenue R] [--stated-arr A] [--stated-nrr-percent N]
+        [--largest-customer-revenue L --period-revenue R] [--arpa A [--contribution-margin-percent M]
+        [--ltv-churn-basis BASIS]] [--revenue-growth-percent G --profit-margin-percent M
+        [--profit-margin-basis BASIS]] [(--quarter-revenue Q --prior-quarter-revenue Q' |
+        --quarter-ending-arr A --prior-quarter-ending-arr A') --prior-quarter-sales-marketing-spend S]
+        [--stated-arr A] [--stated-nrr-percent N]
         [--stated-grr-percent G] [--stated-churn-percent C [--stated-churn-basis BASIS]] [--stated-cac C]
         [--stated-cac-payback-months M] [--stated-burn-multiple X] [--stated-concentration-percent C]
+        [--stated-ltv L] [--stated-ltv-to-cac X] [--stated-rule-of-40-percent R] [--stated-magic-number M]
         [--tolerance-points P] [--tolerance-percent Q] [--customer-segment smb|mid_market|enterprise]
         [--payback-band-months B] [--burn-multiple-band X] [--net-revenue-churn-band-percent C]
     equity_calculator market_sizing --segment "TERMS"... [--top-down "TERMS"]... [--sensitivity "TERMS"]...
@@ -179,7 +184,8 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
         (
             "metrics_check",
-            "Check your traction metrics before a VC does: ARR, retention, churn, CAC payback, burn multiple",
+            "Check your traction metrics before a VC does: ARR, retention, churn, CAC payback, burn multiple, LTV, "
+            "Rule of 40, magic number",
             metrics_check_arguments,
         ),
         (

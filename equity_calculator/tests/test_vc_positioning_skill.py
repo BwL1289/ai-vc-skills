@@ -373,14 +373,14 @@ def test_every_flag_code_has_its_meaning_in_the_skill() -> None:
     assert 'with its meaning from "Calculator flags" below' in _unwrapped(_section("## Steps"))
 
 
-def test_metrics_and_market_sizes_go_to_their_skills_and_growth_and_ltv_stay_unchecked() -> None:
+def test_metrics_and_market_sizes_go_to_their_skills_and_growth_stays_unchecked() -> None:
     steps = _unwrapped(_section("## Steps"))
 
     assert "ARR, retention, churn, CAC payback and burn multiple are checked by the vc-metrics-readiness skill" in steps
     assert "a market size by the vc-market-sizing skill" in steps
+    assert "LTV, LTV/CAC, the Rule of 40 and the magic number go to the vc-metrics-readiness skill too" in steps
     assert (
-        'Growth rates and LTV: no tool computes them; quote them as stated with "not checked: no tool computes this"'
-        in steps
+        'Growth rates: no tool computes them; quote them as stated with "not checked: no tool computes this"' in steps
     )
     assert "no tool in this repository computes them" not in steps
 

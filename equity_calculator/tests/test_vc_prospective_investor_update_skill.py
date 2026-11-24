@@ -574,8 +574,8 @@ def test_the_lenses_are_the_four_and_name_no_person_or_firm() -> None:
     assert "a definition or lowlight the founder did not give is a bracketed ask (`[runway definition]`)" in steps
     assert 'a moved target is named under "Last time we said", with the old and new targets as quoted' in steps
     assert (
-        "ARR, retention, churn, CAC payback and burn multiple go to the vc-metrics-readiness skill; the rest are "
-        '"not checked: no tool computes this"'
+        "ARR, retention, churn, CAC payback and burn multiple go to the vc-metrics-readiness skill, as do LTV, "
+        'LTV/CAC, the Rule of 40 and the magic number; the rest are "not checked: no tool computes this"'
     ) in steps
 
 

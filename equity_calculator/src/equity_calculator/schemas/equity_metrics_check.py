@@ -1,15 +1,18 @@
 """Pydantic models of a founder's traction metrics checked against their parts (``equity_calculator metrics_check``).
 
 A deck, a model or an investor update states some of: ARR, net and gross revenue retention, a churn figure, CAC, CAC
-payback, a burn multiple and customer concentration. The check takes the parts those figures are made of, all for one
-period the founder names (``period_months``): the recurring revenue at the start and its movement over the period
-(new, expansion, contraction, churned), the latest month's revenue and how much of it is one-time or usage, the
-customers at the start, lost and won, the sales and marketing spend, the gross margin, the net burn, and the largest
-customer's revenue with the period's revenue. It works each metric exactly and returns each stated figure as
-``consistent``, a ``mismatch``, or ``not_checked`` (a stated burn multiple when no multiple can be worked), with
-flags that name the likely cause of a mismatch (a run-rate called ARR, new customers counted in net retention, a
-payback on revenue rather than gross margin, a burn multiple on new rather than net new ARR) and three benchmark
-questions, never errors.
+payback, a burn multiple, customer concentration, LTV, LTV/CAC, the Rule of 40 and the magic number. The check takes the
+parts those figures are made of, all for one period the founder names (``period_months``): the recurring revenue at the
+start and its movement over the period (new, expansion, contraction, churned), the latest month's revenue and how much
+of it is one-time or usage, the customers at the start, lost and won, the sales and marketing spend, the gross margin,
+the net burn, the largest customer's revenue with the period's revenue, and the average revenue per account with a
+contribution margin. Three parts stand apart from the period: the founder's revenue growth and profit margin percents
+(the Rule of 40) and two quarters' revenue or ending ARR with the earlier quarter's sales and marketing spend (the magic
+number). It works each metric exactly and returns each stated figure as ``consistent``, a ``mismatch``, or
+``not_checked`` (a stated burn multiple when no multiple can be worked), with flags that name the likely cause of a
+mismatch (a run-rate called ARR, new customers counted in net retention, a payback on revenue rather than gross margin,
+a burn multiple on new rather than net new ARR, an LTV on revenue, a Rule of 40 on gross margin, a magic number without
+its 4) and three benchmark questions, never errors.
 
 No valuation, instrument, runway or burn projection: those stay with ``deal_check``, ``round`` and ``runway_plan``.
 This module reuses ``equity_deal_check``'s verdict words and default tolerances, so no cycle.
@@ -38,18 +41,22 @@ from pydantic import BaseModel, Field, model_validator
 __all__ = [
     "DEFAULT_BURN_MULTIPLE_BAND",
     "DEFAULT_NET_REVENUE_CHURN_BAND_PERCENT",
+    "MAGIC_NUMBER_QUARTERS_PER_YEAR",
     "MAX_PERIOD_MONTHS",
     "SEGMENT_PAYBACK_MONTHS",
     "ArrBasis",
     "ChurnBasis",
     "CustomerCount",
     "CustomerSegment",
+    "LtvMarginBasis",
+    "MagicNumberVariant",
     "MetricsCheck",
     "MetricsCheckInput",
     "MetricsCheckKey",
     "MetricsCheckResult",
     "MetricsCheckScenario",
     "MetricsFlag",
+    "ProfitMarginBasis",
     "RecurringUnit",
     "StatedChurnBasis",
     "payback_band",
@@ -70,15 +77,42 @@ StatedChurnBasis = Literal["logo", "gross_revenue", "net_revenue", "unlabelled"]
 # Who the company sells to; it sets the CAC payback benchmark when no band is given.
 CustomerSegment = Literal["smb", "mid_market", "enterprise"]
 
+# Which margin LTV is worked on: the founder's contribution margin when given, else their gross margin (flagged).
+LtvMarginBasis = Literal["contribution", "gross"]
+
+# Which profit margin the founder adds to revenue growth for the Rule of 40; ``unlabelled`` when they do not say (a
+# flag asks them to name it).
+ProfitMarginBasis = Literal["ebitda", "operating", "free_cash_flow", "net", "unlabelled"]
+
+# Which magic number was worked: on two quarters' revenue (the change times 4) or on their ending ARR (no 4, since ARR
+# is already a year's).
+MagicNumberVariant = Literal["revenue", "arr"]
+
+# The revenue magic number annualises one quarter's change in revenue by this factor; the ARR variant does not.
+MAGIC_NUMBER_QUARTERS_PER_YEAR = 4
+
 # Which stated figure a check is about.
-MetricsCheckKey = Literal["arr", "nrr", "grr", "churn", "cac", "cac_payback", "burn_multiple", "concentration"]
+MetricsCheckKey = Literal[
+    "arr",
+    "nrr",
+    "grr",
+    "churn",
+    "cac",
+    "cac_payback",
+    "burn_multiple",
+    "concentration",
+    "ltv",
+    "ltv_to_cac",
+    "rule_of_40",
+    "magic_number",
+]
 
 # Which ARR a stated ARR is checked against: the movement's ending ARR or the latest month's, whichever the stated ARR
 # is within the tolerance of (the movement's when both are worked and it is within both or neither).
 ArrBasis = Literal["movement", "month"]
 
 # Facts and questions a VC is likely to raise. They never change a verdict; their plain words are in
-# ``equity_calculator.layout_metrics_check``. The four ``stated_*`` flags are set only beside a mismatch (the burn
+# ``equity_calculator.layout_metrics_check``. The seven ``stated_*`` flags are set only beside a mismatch (the burn
 # multiple's also beside a figure left unchecked), when the stated figure is within the tolerance of the named wrong
 # definition instead, so each names the likely cause.
 # ``consistent_beyond_rounding`` names a stated percent, months or multiple consistent by the tolerance alone, not as
@@ -94,6 +128,11 @@ MetricsFlag = Literal[
     "payback_not_margin_adjusted",
     "stated_payback_not_margin_adjusted",
     "stated_burn_multiple_uses_new_not_net_arr",
+    "ltv_on_gross_margin",
+    "stated_ltv_uses_revenue_not_margin",
+    "rule_of_40_margin_basis_unlabelled",
+    "stated_rule_of_40_uses_gross_margin",
+    "stated_magic_number_not_annualised",
     "consistent_beyond_rounding",
     "burn_multiple_not_defined",
     "no_net_burn",
@@ -128,6 +167,13 @@ _COHORT = (
 # The two movements that lose the starting customers' revenue, as (cohort part, total) pairs.
 _COHORT_LOSSES = _COHORT[1:]
 
+# For each LTV churn basis: its name in a refusal, and what it needs to be above 0.
+_LTV_CHURN_NEEDS: dict[ChurnBasis, tuple[str, str]] = {
+    "gross_revenue": ("gross revenue", "starting_recurring above 0 and some contraction or churn"),
+    "net_revenue": ("net revenue", "starting_recurring above 0 and contraction plus churn above expansion"),
+    "logo": ("logo", "customers_start above 0 and customers_lost above 0"),
+}
+
 # The description each stated percent, months or multiple field carries in the JSON schema (``AS_WRITTEN``).
 _PERCENT_AS_WRITTEN = "Percent points. " + AS_WRITTEN.format(examples='"2", "2.0", "0.0"')
 _MONTHS_AS_WRITTEN = AS_WRITTEN.format(examples='"12", "12.0"')
@@ -139,10 +185,13 @@ class MetricsCheckInput(BaseModel):
 
     Every flow figure is for the same ``period_months``. Recurring revenue (``starting_recurring`` and its four
     movements, the period's totals) is in ``recurring_unit``. The ``cohort_*`` fields are the same three movements for
-    the customers there at the start only; retention and revenue churn use them when given. Percent fields take
-    percent points (``95`` is 95%). The tolerances say how far a stated figure may sit from the computed one
-    (``deal_check``'s defaults); a stated percent, months or multiple that is the computed figure rounded to the places
-    it is typed with holds even past them. The three bands raise a benchmark question, never an error.
+    the customers there at the start only; retention and revenue churn use them when given. ``arpa`` is in
+    ``recurring_unit`` too, and LTV divides it by the period's churn on ``ltv_churn_basis``. Two groups stand apart
+    from the period: the Rule of 40's growth and margin percents, and the magic number's two quarters (revenue or
+    ending ARR) with the earlier quarter's spend. Percent fields take percent points (``95`` is 95%). The tolerances say
+    how far a stated figure may sit from the computed one (``deal_check``'s defaults); a stated percent, months or
+    multiple that is the computed figure rounded to the places it is typed with holds even past them. The three bands
+    raise a benchmark question, never an error.
     """
 
     model_config = MODEL_CONFIG
@@ -170,6 +219,22 @@ class MetricsCheckInput(BaseModel):
     net_burn: BoundedDecimal | None = None
     largest_customer_revenue: BoundedDecimal | None = Field(default=None, ge=0)
     period_revenue: BoundedDecimal | None = Field(default=None, gt=0)
+    # LTV: the average recurring revenue per account in ``recurring_unit`` (the tool scales it to the period), on the
+    # contribution margin when given, else the gross margin, over the period's churn on ``ltv_churn_basis``.
+    arpa: BoundedDecimal | None = Field(default=None, gt=0)
+    contribution_margin_percent: BoundedDecimal | None = Field(default=None, gt=0, le=WHOLE_PERCENT)
+    ltv_churn_basis: ChurnBasis = "gross_revenue"
+    # The Rule of 40: the founder's own revenue growth and profit margin, in percent points, added as given.
+    revenue_growth_percent: BoundedDecimal | None = Field(default=None, ge=-WHOLE_PERCENT)
+    profit_margin_percent: BoundedDecimal | None = Field(default=None, le=WHOLE_PERCENT)
+    profit_margin_basis: ProfitMarginBasis = "unlabelled"
+    # The magic number: two consecutive quarters' revenue, or their ending ARR, and the earlier quarter's sales and
+    # marketing spend. Quarters by definition, whatever ``period_months`` is.
+    quarter_revenue: BoundedDecimal | None = Field(default=None, ge=0)
+    prior_quarter_revenue: BoundedDecimal | None = Field(default=None, ge=0)
+    quarter_ending_arr: BoundedDecimal | None = Field(default=None, ge=0)
+    prior_quarter_ending_arr: BoundedDecimal | None = Field(default=None, ge=0)
+    prior_quarter_sales_marketing_spend: BoundedDecimal | None = Field(default=None, gt=0)
     stated_arr: BoundedDecimal | None = Field(default=None, gt=0)
     # The stated percent, months and multiple fields are ``WrittenDecimal``: a zero keeps the places it is written with
     # ("0.0" is one place), which the rounding test reads (a figure that is the computed one rounded to its places is
@@ -189,6 +254,12 @@ class MetricsCheckInput(BaseModel):
     stated_concentration_percent: WrittenDecimal | None = Field(
         default=None, ge=0, le=WHOLE_PERCENT, description=_PERCENT_AS_WRITTEN
     )
+    stated_ltv: BoundedDecimal | None = Field(default=None, gt=0)
+    stated_ltv_to_cac: WrittenDecimal | None = Field(default=None, gt=0, description=_MULTIPLE_AS_WRITTEN)
+    # Either sign: growth and margin may each be below zero.
+    stated_rule_of_40_percent: WrittenDecimal | None = Field(default=None, description=_PERCENT_AS_WRITTEN)
+    # Either sign: a quarter's revenue or ARR may fall.
+    stated_magic_number: WrittenDecimal | None = Field(default=None, description=_MULTIPLE_AS_WRITTEN)
     tolerance_points: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_POINTS, ge=0, lt=WHOLE_PERCENT)
     tolerance_percent: BoundedDecimal = Field(default=DEFAULT_TOLERANCE_PERCENT, ge=0, lt=WHOLE_PERCENT)
     customer_segment: CustomerSegment | None = None
@@ -204,6 +275,9 @@ class MetricsCheckInput(BaseModel):
         nothing to check it against."""
         self._movement_rules()
         self._part_rules()
+        self._ltv_rules()
+        self._rule_of_40_rules()
+        self._magic_number_rules()
         self._stated_rules()
         return self
 
@@ -218,6 +292,18 @@ class MetricsCheckInput(BaseModel):
     def has_revenue_churn(self) -> bool:
         """Whether retention and revenue churn can be worked: recurring revenue at the start above 0."""
         return self.starting_recurring is not None and self.starting_recurring > 0
+
+    def has_rule_of_40(self) -> bool:
+        """Whether the Rule of 40 can be worked: the founder's revenue growth and profit margin both given."""
+        return self.revenue_growth_percent is not None and self.profit_margin_percent is not None
+
+    def magic_number_variant(self) -> MagicNumberVariant | None:
+        """Which magic number the inputs give: on two quarters' revenue, on their ending ARR, or none."""
+        if self.quarter_revenue is not None and self.prior_quarter_revenue is not None:
+            return "revenue"
+        if self.quarter_ending_arr is not None and self.prior_quarter_ending_arr is not None:
+            return "arr"
+        return None
 
     def _movement_rules(self) -> None:
         """Refuse a movement without its start, more lost than there was, or a cohort part above its total.
@@ -300,6 +386,83 @@ class MetricsCheckInput(BaseModel):
             if self.largest_customer_revenue > self.period_revenue:
                 raise ValueError("largest_customer_revenue is above period_revenue")
 
+    def _ltv_churn(self) -> Fraction | None:
+        """The period's churn on ``ltv_churn_basis``, exactly as ``metrics_check`` works it; none when it cannot be
+        worked."""
+        if self.ltv_churn_basis == "logo":
+            if not self.has_logo_churn() or self.customers_start is None or self.customers_lost is None:
+                return None
+            return Fraction(self.customers_lost, self.customers_start)
+        if not self.has_revenue_churn() or self.starting_recurring is None:
+            return None
+        lost = self._cohort_lost()
+        if self.ltv_churn_basis == "net_revenue":
+            given = self.cohort_expansion_recurring
+            lost -= Fraction(self.expansion_recurring if given is None else given)
+        return lost / Fraction(self.starting_recurring)
+
+    def _ltv_rules(self) -> None:
+        """Refuse LTV's parts without ``arpa``, an ``arpa`` with no margin, and an LTV whose churn is not above 0."""
+        if self.arpa is None:
+            if self.contribution_margin_percent is not None:
+                raise ValueError("contribution_margin_percent needs arpa (it is used for LTV alone)")
+            if self.ltv_churn_basis != "gross_revenue":
+                raise ValueError("ltv_churn_basis needs arpa")
+            return
+
+        if self.contribution_margin_percent is None and self.gross_margin_percent is None:
+            raise ValueError(
+                "arpa needs contribution_margin_percent or gross_margin_percent: LTV is worked on a margin, never on "
+                "revenue alone"
+            )
+        churn = self._ltv_churn()
+        if churn is None or churn <= 0:
+            name, needs = _LTV_CHURN_NEEDS[self.ltv_churn_basis]
+            raise ValueError(
+                f"arpa needs {name} churn above 0 in the period to work LTV ({needs}; ltv_churn_basis picks another "
+                "churn): with no churn the lifetime has no end, so LTV does not compute"
+            )
+
+    def _rule_of_40_rules(self) -> None:
+        """Refuse half of the Rule of 40, and a margin basis with no margin."""
+        pair = (
+            ("revenue_growth_percent", "profit_margin_percent"),
+            ("profit_margin_percent", "revenue_growth_percent"),
+        )
+        for given, other in pair:
+            if getattr(self, given) is not None and getattr(self, other) is None:
+                raise ValueError(f"{given} needs {other}: the Rule of 40 adds the two")
+        if self.profit_margin_basis != "unlabelled" and self.profit_margin_percent is None:
+            raise ValueError("profit_margin_basis needs profit_margin_percent")
+
+    def _magic_number_rules(self) -> None:
+        """Refuse half of a pair of quarters, both variants at once, and quarters or spend without the other."""
+        pairs = (
+            ("quarter_revenue", "prior_quarter_revenue"),
+            ("quarter_ending_arr", "prior_quarter_ending_arr"),
+        )
+        for first, second in pairs:
+            for given, other in ((first, second), (second, first)):
+                if getattr(self, given) is not None and getattr(self, other) is None:
+                    raise ValueError(f"{given} needs {other}: the magic number compares two consecutive quarters")
+        if self.quarter_revenue is not None and self.quarter_ending_arr is not None:
+            raise ValueError(
+                "give the magic number's quarters as revenue (quarter_revenue, prior_quarter_revenue) or as ARR "
+                "(quarter_ending_arr, prior_quarter_ending_arr), not both"
+            )
+        variant = self.magic_number_variant()
+        spend = self.prior_quarter_sales_marketing_spend
+        if variant is not None and spend is None:
+            first = "quarter_revenue" if variant == "revenue" else "quarter_ending_arr"
+            raise ValueError(
+                f"{first} needs prior_quarter_sales_marketing_spend (the earlier quarter's sales and marketing spend)"
+            )
+        if variant is None and spend is not None:
+            raise ValueError(
+                "prior_quarter_sales_marketing_spend needs quarter_revenue and prior_quarter_revenue, or "
+                "quarter_ending_arr and prior_quarter_ending_arr"
+            )
+
     def _stated_rules(self) -> None:
         """Refuse a stated figure without the parts that check it, naming what it needs."""
         needs: list[tuple[str, object, bool, str]] = [
@@ -334,6 +497,26 @@ class MetricsCheckInput(BaseModel):
                 self.stated_concentration_percent,
                 self.largest_customer_revenue is not None,
                 "largest_customer_revenue and period_revenue",
+            ),
+            ("stated_ltv", self.stated_ltv, self.arpa is not None, "arpa"),
+            (
+                "stated_ltv_to_cac",
+                self.stated_ltv_to_cac,
+                self.arpa is not None and self.sales_marketing_spend is not None and bool(self.customers_new),
+                "arpa, sales_marketing_spend and customers_new above 0",
+            ),
+            (
+                "stated_rule_of_40_percent",
+                self.stated_rule_of_40_percent,
+                self.has_rule_of_40(),
+                "revenue_growth_percent and profit_margin_percent",
+            ),
+            (
+                "stated_magic_number",
+                self.stated_magic_number,
+                self.magic_number_variant() is not None,
+                "quarter_revenue and prior_quarter_revenue, or quarter_ending_arr and prior_quarter_ending_arr, with "
+                "prior_quarter_sales_marketing_spend",
             ),
         ]
         for name, stated, ready, what in needs:
@@ -400,10 +583,13 @@ class MetricsCheckResult(BaseModel):
     """The metrics worked from their parts, each stated figure's verdict, the flags and the overall verdict.
 
     Money is ARR or dollars; retention, churn and concentration are fractions over ``period_months`` (never
-    annualised); paybacks are months; multiples are ratios. A value is none when its parts were not given.
-    ``arr_basis`` says which ARR a stated ARR is checked against: of the movement's ending ARR and the latest month's,
-    the one it is within the tolerance of (the movement's when it is within both or neither, or with no stated ARR).
-    ``payback_band_months`` is the benchmark in force.
+    annualised); paybacks are months; multiples are ratios; the Rule of 40 is a fraction (0.45 for 45). A value is none
+    when its parts were not given. ``arr_basis`` says which ARR a stated ARR is checked against: of the movement's
+    ending ARR and the latest month's, the one it is within the tolerance of (the movement's when it is within both or
+    neither, or with no stated ARR). ``payback_band_months`` is the benchmark in force. ``ltv_margin_basis`` says which
+    margin LTV is on and ``magic_number_variant`` which magic number was worked. ``ltv_on_revenue``,
+    ``ltv_to_cac_on_revenue`` and ``magic_number_unannualised`` are worked only beside a stated LTV, LTV/CAC or magic
+    number, to test whether it used that other definition.
     """
 
     model_config = MODEL_CONFIG
@@ -430,6 +616,15 @@ class MetricsCheckResult(BaseModel):
     burn_multiple: EquityQuantity | None = None
     burn_multiple_on_new_arr: EquityQuantity | None = None
     concentration: EquityQuantity | None = None
+    ltv: EquityQuantity | None = None
+    ltv_margin_basis: LtvMarginBasis | None = None
+    ltv_on_revenue: EquityQuantity | None = None
+    ltv_to_cac: EquityQuantity | None = None
+    ltv_to_cac_on_revenue: EquityQuantity | None = None
+    rule_of_40: EquityQuantity | None = None
+    magic_number: EquityQuantity | None = None
+    magic_number_variant: MagicNumberVariant | None = None
+    magic_number_unannualised: EquityQuantity | None = None
     payback_band_months: EquityQuantity | None = None
     checks: tuple[MetricsCheck, ...]
     flags: tuple[MetricsFlag, ...]

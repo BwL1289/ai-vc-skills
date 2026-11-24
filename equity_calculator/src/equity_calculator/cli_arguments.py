@@ -34,7 +34,13 @@ from equity_calculator.cli_numbers import (
 )
 from equity_calculator.schemas.equity import PoolTiming, ShareRounding
 from equity_calculator.schemas.equity_instrument_compare import PoolAtExit
-from equity_calculator.schemas.equity_metrics_check import CustomerSegment, RecurringUnit, StatedChurnBasis
+from equity_calculator.schemas.equity_metrics_check import (
+    ChurnBasis,
+    CustomerSegment,
+    ProfitMarginBasis,
+    RecurringUnit,
+    StatedChurnBasis,
+)
 from equity_calculator.schemas.equity_round import NoteCompounding, StubRule
 from equity_calculator.schemas.equity_vesting import Acceleration, AccelerationBase
 
@@ -456,6 +462,50 @@ def _metrics_parts_arguments(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument("--largest-customer-revenue", type=parse_decimal, help="The largest customer's revenue.")
     parser.add_argument("--period-revenue", type=parse_decimal, help="Total revenue in the period.")
+    _metrics_later_parts_arguments(parser)
+
+
+def _metrics_later_parts_arguments(parser: argparse.ArgumentParser) -> None:
+    """LTV's parts, the Rule of 40's two percents and the magic number's two quarters."""
+    parser.add_argument(
+        "--arpa",
+        type=parse_decimal,
+        help="Average recurring revenue per account, in --recurring-unit; LTV is worked from it.",
+    )
+    parser.add_argument(
+        "--contribution-margin-percent",
+        type=parse_percent,
+        help="Contribution margin, in percent; LTV uses it over --gross-margin-percent.",
+    )
+    parser.add_argument(
+        "--ltv-churn-basis",
+        choices=get_args(ChurnBasis),
+        help="The period's churn LTV divides by (default gross_revenue).",
+    )
+    parser.add_argument(
+        "--revenue-growth-percent",
+        type=parse_percent,
+        help="Revenue growth for the Rule of 40, in percent, as you state it (below 0 as --revenue-growth-percent=-5).",
+    )
+    parser.add_argument(
+        "--profit-margin-percent",
+        type=parse_percent,
+        help="Profit margin for the Rule of 40, in percent (below 0 as --profit-margin-percent=-20).",
+    )
+    parser.add_argument(
+        "--profit-margin-basis",
+        choices=get_args(ProfitMarginBasis),
+        help="Which margin --profit-margin-percent is (default unlabelled, which is flagged).",
+    )
+    quarters = (
+        ("--quarter-revenue", "The latest quarter's revenue (Q), for the magic number."),
+        ("--prior-quarter-revenue", "The quarter before's revenue (Q')."),
+        ("--quarter-ending-arr", "ARR at the latest quarter's end (A), for the magic number on ARR."),
+        ("--prior-quarter-ending-arr", "ARR at the end of the quarter before (A')."),
+        ("--prior-quarter-sales-marketing-spend", "Sales and marketing spend in the quarter before, every cost."),
+    )
+    for flag, words in quarters:
+        parser.add_argument(flag, type=parse_decimal, help=words)
 
 
 def metrics_check_arguments(parser: argparse.ArgumentParser) -> None:
@@ -483,6 +533,10 @@ def metrics_check_arguments(parser: argparse.ArgumentParser) -> None:
         ("--stated-cac-payback-months", parse_decimal, "The CAC payback it states, in months."),
         ("--stated-burn-multiple", parse_decimal, "The burn multiple it states (2.5 for 2.5x)."),
         ("--stated-concentration-percent", parse_percent, "The largest customer's share of revenue it states."),
+        ("--stated-ltv", parse_decimal, "The LTV it states, in dollars."),
+        ("--stated-ltv-to-cac", parse_decimal, "The LTV/CAC it states (3 for 3x)."),
+        ("--stated-rule-of-40-percent", parse_percent, "The Rule of 40 it states, in percent (45 for 45%)."),
+        ("--stated-magic-number", parse_decimal, "The magic number it states (0.8 for 0.8)."),
         (
             "--tolerance-points",
             parse_percent,

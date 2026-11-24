@@ -175,8 +175,8 @@ draft written at step 8.
    not a metric status.
 6. **Runway,** only when the update shows one: call `equity_runway_plan` (next section).
 7. **Other figures:** quote each as stated, with its line from the shared rules file's "Not checked here": ARR,
-   retention, churn, CAC payback and burn multiple go to the vc-metrics-readiness skill; the rest are "not checked: no
-   tool computes this".
+   retention, churn, CAC payback and burn multiple go to the vc-metrics-readiness skill, as do LTV, LTV/CAC, the Rule
+   of 40 and the magic number; the rest are "not checked: no tool computes this".
 8. **Draft or revise.** Draft mode: write the update in the shape above from the founder's material only, every gap a
    bracketed ask. Review mode: keep the founder's draft and words; change only what a status, the calculator, a figure
    or definition that Differs from the current-investor update or a kept finding requires. With more than one ask in the

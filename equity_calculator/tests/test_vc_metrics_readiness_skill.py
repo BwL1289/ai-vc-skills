@@ -34,10 +34,10 @@ _TEXT = _SKILL.read_text(encoding="utf-8")
 _POSITIONING = (_ROOT / "skills" / "vc-positioning" / "SKILL.md").read_text(encoding="utf-8")
 _CLAIMS_CHECK = (_ROOT / "skills" / "vc-claims-check" / "SKILL.md").read_text(encoding="utf-8")
 _EVALS = sorted((_ROOT / "evals" / "vc-metrics-readiness").glob("*.md"))
-_EVAL_COUNT = 5
-# The repository gives each made-up company its own letter; this skill's evals use AM to AP and BT (sorted by file
-# name, so BT comes last).
-_EVAL_LETTERS = ("am", "an", "ao", "ap", "bt")
+_EVAL_COUNT = 6
+# The repository gives each made-up company its own letter; this skill's evals use AM to AP, BT and DL (sorted by file
+# name, so BT and DL come last).
+_EVAL_LETTERS = ("am", "an", "ao", "ap", "bt", "dl")
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_metrics_check` call."
 _CALL_EVALS = [path for path in _EVALS if _NO_CALL not in path.read_text(encoding="utf-8")]
 _NO_CALL_EVALS = [path for path in _EVALS if path not in _CALL_EVALS]
@@ -102,6 +102,10 @@ _COMPUTED_METRICS = (
     "CAC payback",
     "Burn multiple",
     "Customer concentration",
+    "LTV",
+    "LTV/CAC",
+    "Rule of 40",
+    "Magic number",
 )
 _VERDICTS = ("Contradicted", "Will be discounted", "Needs a source", "Supported")
 _REFUTE_VERDICTS = ("**Dropped, answered:**", "**Dropped, not grounded:**", "**Kept:**")
@@ -363,15 +367,19 @@ def test_the_model_converts_nothing_and_the_calculator_does_every_ratio() -> Non
         "a stated figure is never set against the benchmark by eye",
     ):
         assert rule in steps, rule
-    # Each figure goes to the tool or skill that checks it; growth rates and LTV have none.
+    # Each figure goes to the tool or skill that checks it; growth rates have none.
     for rule in (
         "go to `equity_deal_check` as the vc-deal-math skill says",
         "A runway with no raise, a runway on a SAFE or note raise and that raise's use-of-funds lines go to "
         "`equity_runway_plan`",
         "as the vc-round-sizing skill calls it; with no cash or burn given, ask for them",
         "A market size goes to `equity_market_sizing` as the vc-market-sizing skill says",
-        'Growth rates, LTV and every other metric the table marks quoted: quote as stated with "not checked: no tool '
+        'Growth rates and every other metric the table marks quoted: quote as stated with "not checked: no tool '
         'computes this"',
+        "LTV, LTV/CAC, the Rule of 40 and the magic number go to this tool from the founder's parts, never worked by "
+        "hand",
+        "Each missing part is a bracketed ask",
+        "No benchmark is set for any of the four, so none is set against a line by eye.",
         "No deal term, runway or use-of-funds line goes to this tool, `equity_metrics_check`.",
     ):
         assert rule in steps, rule

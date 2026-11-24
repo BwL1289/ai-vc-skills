@@ -587,5 +587,6 @@ def test_step_4_asks_which_way_the_fully_diluted_total_counts_safes_and_metrics_
     assert "never subtract the SAFE or note shares yourself" in steps
     assert "ARR, retention, churn, CAC payback and burn multiple are checked by the vc-metrics-readiness skill" in steps
     assert "a market size by the vc-market-sizing skill" in steps
-    assert "Growth rates and LTV: no tool computes them" in steps
+    assert "LTV, LTV/CAC, the Rule of 40 and the magic number go to the vc-metrics-readiness skill too" in steps
+    assert "Growth rates: no tool computes them" in steps
     assert "have no tool here" not in steps

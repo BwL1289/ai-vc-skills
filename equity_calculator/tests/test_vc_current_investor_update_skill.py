@@ -360,8 +360,8 @@ def test_the_draft_adds_no_year_definition_or_lowlight_the_founder_did_not_give(
     assert "never this skill's words" in steps
     # Metrics a tool checks are handed off; the rest stay unchecked.
     assert (
-        "ARR, retention, churn, CAC payback and burn multiple go to the vc-metrics-readiness skill; the rest are "
-        '"not checked: no tool computes this"'
+        "ARR, retention, churn, CAC payback and burn multiple go to the vc-metrics-readiness skill, as do LTV, "
+        'LTV/CAC, the Rule of 40 and the magic number; the rest are "not checked: no tool computes this"'
     ) in steps
 
 
@@ -456,11 +456,13 @@ def test_the_tie_out_statuses_are_the_fixed_words_and_compare_as_stated() -> Non
     assert "or Not yet due (its date has not come; it carries over)" in tie_out
     assert "The runway row's status is the calculator's verdict word" in tie_out
     assert _NOT_CHECKED in rules
-    # ARR, retention, churn, CAC payback and burn multiple have a tool now; growth rates and LTV do not.
+    # ARR, retention, churn, CAC payback, burn multiple, LTV, the Rule of 40 and the magic number have a tool now;
+    # growth rates do not.
     not_checked = _unwrapped(_section("## Not checked here", _RULES))
     assert f'"{_METRICS_HANDOFF}"' in not_checked
     assert "ARR, retention, churn, CAC payback and burn multiple" in not_checked
-    assert "growth rates, LTV" in not_checked
+    assert "so are LTV, LTV/CAC, the Rule of 40 and the magic number" in not_checked
+    assert "growth rates and the change in cash" in not_checked
     assert "the vc-metrics-readiness skill" in _unwrapped(_section("## Steps"))
     # One rule for a count given as an event against one given as a level, and no comparison across a changed
     # definition.

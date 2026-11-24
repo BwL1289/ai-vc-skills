@@ -595,13 +595,14 @@ def test_the_exit_statement_the_skill_quotes_is_the_waterfalls_own() -> None:
     assert f'`exit_is_shared_amount`: "{statement}"' in _unwrapped(_section("## The outcome case"))
 
 
-def test_metrics_and_market_sizes_go_to_their_skills_and_only_growth_and_ltv_stay_unchecked() -> None:
+def test_metrics_and_market_sizes_go_to_their_skills_and_only_growth_stays_unchecked() -> None:
     shape = _unwrapped(_section("## The memo's shape"))
     limits = _unwrapped(_section("## Limits"))
 
     assert "ARR, retention, churn, CAC payback and burn multiple are checked against their parts by the" in shape
     assert "a market size is built bottom-up by the vc-market-sizing skill" in shape
-    assert f'Growth rates and LTV are quoted as stated, with "{_NOT_CHECKED}"' in shape
+    assert "as are LTV, LTV/CAC, the Rule of 40 and the magic number" in shape
+    assert f'Growth rates are quoted as stated, with "{_NOT_CHECKED}"' in shape
     assert "Growth rates, market sizes, retention and unit economics" not in _TEXT
     assert "checked by the vc-metrics-readiness and vc-market-sizing skills" in limits
 

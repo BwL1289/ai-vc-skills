@@ -17,17 +17,26 @@ customers' own movements when given, else the totals.
 - Burn multiple: net burn / net new ARR, when both are above 0; on new ARR only, net burn / k·N, worked whenever a
   multiple is stated, to test whether the stated figure used new ARR. Customer concentration: the largest customer's
   revenue / the period's revenue.
+- LTV = a·(P/u)·m / c: a the average recurring revenue per account in the recurring unit, P/u the units in the period
+  (P months, u = 1 for a monthly unit, 12 for an annual one), m the contribution margin when given, else the gross
+  margin, c the period's churn on ``ltv_churn_basis`` (gross revenue churn unless the founder picks net revenue or logo
+  churn; the validator refuses a churn at or below 0). LTV/CAC = LTV / blended CAC. On revenue alone (no m), each is
+  worked only beside its stated figure, to test whether that figure left the margin out.
+- Rule of 40 = the founder's revenue growth percent + their profit margin percent, as given (the basis named or not).
+- Magic number, on revenue: 4·(Q - Q') / M', Q and Q' the latest and the prior quarter's revenue, M' the prior
+  quarter's sales and marketing spend; on ARR: (A - A') / M', the two quarters' ending ARR, no 4. Without the 4 it is
+  worked only beside a stated magic number on revenue, to test whether the stated figure left it out.
 
 Each stated figure becomes one check (a stated churn with no basis one per basis it can be worked on, consistent when
 any is; a churn below zero only on net revenue). A stated percent, months or multiple is consistent when it is within
 the tolerance (``tolerance_points`` points for a percent, ``tolerance_percent`` of the computed figure for the rest,
 the edge included) or when it is the computed figure rounded half away from zero to the places it is typed with
 (``12`` against 12.40, ``2`` against 2.4%; ``0.0`` is one place): people write figures rounded to the places they
-show. Money is consistent within ``tolerance_percent`` only, since a figure like $1.2M carries no places once typed as
-1200000. A stated burn multiple with no multiple to work is ``not_checked``, and the overall verdict is then
-``not_checked`` unless a figure is a mismatch, never ``consistent``. The four ``stated_*`` cause flags read a stated
-figure's agreement with the other definition by the tolerance alone. ``consistent_beyond_rounding`` names a figure that
-holds by the tolerance alone. Flags never change a verdict.
+show. Money (ARR, CAC, LTV) is consistent within ``tolerance_percent`` only, since a figure like $1.2M carries no
+places once typed as 1200000. A stated burn multiple with no multiple to work is ``not_checked``, and the overall
+verdict is then ``not_checked`` unless a figure is a mismatch, never ``consistent``. The seven ``stated_*`` cause flags
+read a stated figure's agreement with the other definition by the tolerance alone. ``consistent_beyond_rounding``
+names a figure that holds by the tolerance alone. Flags never change a verdict.
 """
 
 from __future__ import annotations
@@ -43,8 +52,10 @@ from equity_calculator.rounding import rounds_to
 from equity_calculator.schemas.equity_common import EquityQuantity, EquityUnit
 from equity_calculator.schemas.equity_deal_check import DealVerdict
 from equity_calculator.schemas.equity_metrics_check import (
+    MAGIC_NUMBER_QUARTERS_PER_YEAR,
     ArrBasis,
     ChurnBasis,
+    LtvMarginBasis,
     MetricsCheck,
     MetricsCheckInput,
     MetricsCheckKey,
@@ -57,6 +68,8 @@ __all__ = ["compute_metrics_check"]
 
 _MONTHS_PER_YEAR = 12
 _ONE_MONTH = 1
+# Which worked churn LTV divides by, for each ``ltv_churn_basis``.
+_LTV_CHURN: dict[ChurnBasis, str] = {"gross_revenue": "gross_churn", "net_revenue": "net_churn", "logo": "logo_churn"}
 
 
 @dataclass(frozen=True)
@@ -82,11 +95,23 @@ class _Worked:
     burn_multiple: Fraction | None = None
     burn_multiple_on_new: Fraction | None = None
     concentration: Fraction | None = None
+    ltv: Fraction | None = None
+    ltv_on_revenue: Fraction | None = None
+    ltv_to_cac: Fraction | None = None
+    ltv_to_cac_on_revenue: Fraction | None = None
+    rule_of_40: Fraction | None = None
+    magic_number: Fraction | None = None
+    magic_number_unannualised: Fraction | None = None
 
 
 def _annual_factor(inputs: MetricsCheckInput) -> int:
     """k: 12 for a monthly recurring unit, 1 for an annual one."""
     return _MONTHS_PER_YEAR if inputs.recurring_unit == "monthly" else 1
+
+
+def _months_per_unit(inputs: MetricsCheckInput) -> int:
+    """u: the months one recurring unit covers, 1 for monthly and 12 for annual."""
+    return 1 if inputs.recurring_unit == "monthly" else _MONTHS_PER_YEAR
 
 
 def _cohort(given: Decimal | None, total: Decimal) -> Fraction:
@@ -179,15 +204,68 @@ def _efficiency(inputs: MetricsCheckInput, net_new_arr: Fraction | None) -> dict
     return worked
 
 
+def _lifetime(
+    inputs: MetricsCheckInput, retention: dict[str, Fraction | None], blended_cac: Fraction | None
+) -> dict[str, Fraction | None]:
+    """LTV on its margin over the period's churn on ``ltv_churn_basis``, and LTV/CAC; on revenue alone beside a stated
+    figure."""
+    worked: dict[str, Fraction | None] = {}
+    margin = inputs.contribution_margin_percent
+    if margin is None:
+        margin = inputs.gross_margin_percent
+    churn = retention.get(_LTV_CHURN[inputs.ltv_churn_basis])
+    # The validator refuses an ``arpa`` with no margin or with a churn at or below 0; this only narrows the types.
+    if inputs.arpa is None or margin is None or churn is None or churn <= ZERO:
+        return worked
+
+    revenue = fraction(inputs.arpa) * Fraction(inputs.period_months, _months_per_unit(inputs)) / churn
+    ltv = revenue * from_percent(margin)
+    worked["ltv"] = ltv
+    if inputs.stated_ltv is not None:
+        worked["ltv_on_revenue"] = revenue
+    if blended_cac is not None:
+        worked["ltv_to_cac"] = ltv / blended_cac
+        if inputs.stated_ltv_to_cac is not None:
+            worked["ltv_to_cac_on_revenue"] = revenue / blended_cac
+
+    return worked
+
+
+def _growth_efficiency(inputs: MetricsCheckInput) -> dict[str, Fraction | None]:
+    """The Rule of 40 from the founder's two percents, and the magic number on revenue or on ARR."""
+    worked: dict[str, Fraction | None] = {}
+    if inputs.revenue_growth_percent is not None and inputs.profit_margin_percent is not None:
+        worked["rule_of_40"] = from_percent(inputs.revenue_growth_percent) + from_percent(inputs.profit_margin_percent)
+    spend = inputs.prior_quarter_sales_marketing_spend
+    if spend is None:
+        return worked
+
+    if inputs.quarter_revenue is not None and inputs.prior_quarter_revenue is not None:
+        change = fraction(inputs.quarter_revenue) - fraction(inputs.prior_quarter_revenue)
+        worked["magic_number"] = MAGIC_NUMBER_QUARTERS_PER_YEAR * change / fraction(spend)
+        if inputs.stated_magic_number is not None:
+            worked["magic_number_unannualised"] = change / fraction(spend)
+    elif inputs.quarter_ending_arr is not None and inputs.prior_quarter_ending_arr is not None:
+        worked["magic_number"] = (fraction(inputs.quarter_ending_arr) - fraction(inputs.prior_quarter_ending_arr)) / (
+            fraction(spend)
+        )
+
+    return worked
+
+
 def _work(inputs: MetricsCheckInput) -> _Worked:
     """Every metric the inputs give."""
     arr = _arr(inputs)
+    retention = _retention(inputs)
+    acquisition = _acquisition(inputs)
 
     return _Worked(
         **arr,
-        **_retention(inputs),
-        **_acquisition(inputs),
+        **retention,
+        **acquisition,
         **_efficiency(inputs, arr.get("net_new_arr")),
+        **_lifetime(inputs, retention, acquisition.get("blended_cac")),
+        **_growth_efficiency(inputs),
     )
 
 
@@ -295,14 +373,36 @@ def _checks(inputs: MetricsCheckInput, worked: _Worked) -> tuple[MetricsCheck, .
     )
     for key, unit, stated, computed in relatives:
         if stated is not None and computed is not None:
-            checks.append(_check(key, unit, stated, computed, relative * computed))
+            checks.append(_check(key, unit, stated, computed, relative * abs(computed)))
         elif key == "burn_multiple" and stated is not None:
             checks.append(MetricsCheck(key=key, stated=quantity(unit, fraction(stated)), verdict="not_checked"))
     if inputs.stated_concentration_percent is not None and worked.concentration is not None:
         written = inputs.stated_concentration_percent
         checks.append(_check("concentration", "fraction", written, worked.concentration, points))
+    checks += _later_checks(inputs, worked, points, relative)
 
     return tuple(checks)
+
+
+def _later_checks(
+    inputs: MetricsCheckInput, worked: _Worked, points: Fraction, relative: Fraction
+) -> list[MetricsCheck]:
+    """The stated LTV, LTV/CAC, Rule of 40 and magic number, each checked when its figure was worked, in that order;
+    a percent within ``points``, the rest within ``relative`` of the computed figure's size (a magic number may be
+    below 0)."""
+    checks: list[MetricsCheck] = []
+    later: tuple[tuple[MetricsCheckKey, EquityUnit, Decimal | None, Fraction | None], ...] = (
+        ("ltv", "money", inputs.stated_ltv, worked.ltv),
+        ("ltv_to_cac", "multiplier", inputs.stated_ltv_to_cac, worked.ltv_to_cac),
+        ("rule_of_40", "fraction", inputs.stated_rule_of_40_percent, worked.rule_of_40),
+        ("magic_number", "multiplier", inputs.stated_magic_number, worked.magic_number),
+    )
+    for key, unit, stated, computed in later:
+        if stated is not None and computed is not None:
+            tolerance = points if unit == "fraction" else relative * abs(computed)
+            checks.append(_check(key, unit, stated, computed, tolerance))
+
+    return checks
 
 
 def _mismatched(checks: tuple[MetricsCheck, ...], key: MetricsCheckKey, *, or_unchecked: bool = False) -> bool:
@@ -348,6 +448,34 @@ def _definition_flags(
     ):
         if _within(fraction(inputs.stated_burn_multiple), on_new, relative * on_new):
             flags.append("stated_burn_multiple_uses_new_not_net_arr")
+
+    return flags + _later_definition_flags(inputs, worked, checks)
+
+
+def _later_definition_flags(
+    inputs: MetricsCheckInput, worked: _Worked, checks: tuple[MetricsCheck, ...]
+) -> list[MetricsFlag]:
+    """The three later ``stated_*`` flags: an LTV or LTV/CAC on revenue alone, a Rule of 40 on gross margin and a
+    magic number without its 4, each beside a mismatch and by the tolerance alone."""
+    points = from_percent(inputs.tolerance_points)
+    relative = from_percent(inputs.tolerance_percent)
+    flags: list[MetricsFlag] = []
+    on_revenue: tuple[tuple[MetricsCheckKey, Decimal | None, Fraction | None], ...] = (
+        ("ltv", inputs.stated_ltv, worked.ltv_on_revenue),
+        ("ltv_to_cac", inputs.stated_ltv_to_cac, worked.ltv_to_cac_on_revenue),
+    )
+    for key, stated, revenue in on_revenue:
+        if stated is not None and revenue is not None and _mismatched(checks, key):
+            if _within(fraction(stated), revenue, relative * revenue):
+                flags.append("stated_ltv_uses_revenue_not_margin")
+    growth, gross, rule = inputs.revenue_growth_percent, inputs.gross_margin_percent, inputs.stated_rule_of_40_percent
+    if rule is not None and growth is not None and gross is not None and _mismatched(checks, "rule_of_40"):
+        if _within(from_percent(rule), from_percent(growth) + from_percent(gross), points):
+            flags.append("stated_rule_of_40_uses_gross_margin")
+    unannualised = worked.magic_number_unannualised
+    if inputs.stated_magic_number is not None and unannualised is not None and _mismatched(checks, "magic_number"):
+        if _within(fraction(inputs.stated_magic_number), unannualised, relative * abs(unannualised)):
+            flags.append("stated_magic_number_not_annualised")
 
     return flags
 
@@ -412,6 +540,10 @@ def _flags(inputs: MetricsCheckInput, worked: _Worked, checks: tuple[MetricsChec
             found.add("burn_multiple_not_defined")
         if inputs.net_burn <= 0:
             found.add("no_net_burn")
+    if worked.ltv is not None and inputs.contribution_margin_percent is None:
+        found.add("ltv_on_gross_margin")
+    if worked.rule_of_40 is not None and inputs.profit_margin_basis == "unlabelled":
+        found.add("rule_of_40_margin_basis_unlabelled")
 
     return tuple(flag for flag in _FLAG_ORDER if flag in found)
 
@@ -474,6 +606,15 @@ def compute_metrics_check(inputs: MetricsCheckInput) -> MetricsCheckResult:
         burn_multiple=_optional("multiplier", worked.burn_multiple),
         burn_multiple_on_new_arr=_optional("multiplier", worked.burn_multiple_on_new),
         concentration=_optional("fraction", worked.concentration),
+        ltv=_optional("money", worked.ltv),
+        ltv_margin_basis=None if worked.ltv is None else _ltv_margin_basis(inputs),
+        ltv_on_revenue=_optional("money", worked.ltv_on_revenue),
+        ltv_to_cac=_optional("multiplier", worked.ltv_to_cac),
+        ltv_to_cac_on_revenue=_optional("multiplier", worked.ltv_to_cac_on_revenue),
+        rule_of_40=_optional("fraction", worked.rule_of_40),
+        magic_number=_optional("multiplier", worked.magic_number),
+        magic_number_variant=None if worked.magic_number is None else inputs.magic_number_variant(),
+        magic_number_unannualised=_optional("multiplier", worked.magic_number_unannualised),
         payback_band_months=None
         if band is None or (worked.payback is None and worked.revenue_payback is None)
         else quantity("months", fraction(band)),
@@ -482,6 +623,11 @@ def compute_metrics_check(inputs: MetricsCheckInput) -> MetricsCheckResult:
         verdict=_verdict(checks),
         assumptions=metrics_check_assumptions(inputs, bool(checks), _used(worked)),
     )
+
+
+def _ltv_margin_basis(inputs: MetricsCheckInput) -> LtvMarginBasis:
+    """The margin LTV is worked on: the contribution margin when given, else the gross margin."""
+    return "contribution" if inputs.contribution_margin_percent is not None else "gross"
 
 
 def _used(worked: _Worked) -> frozenset[str]:

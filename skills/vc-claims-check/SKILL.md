@@ -149,8 +149,9 @@ claims list; step 7 then runs only the quote check and the refute pass.
      which is what the command line's report prints. That is a change of notation, not a calculation; never round it.
    - ARR, retention, churn, CAC payback and burn multiple are checked by the vc-metrics-readiness skill
      (`equity_metrics_check`), and a market size by the vc-market-sizing skill (`equity_market_sizing`): quote each as
-     stated and name the skill that checks it in its fix. Growth rates and LTV: no tool computes them; quote them with
-     "not checked: no tool computes this". Of all these figures, never compute, convert or round one.
+     stated and name the skill that checks it in its fix. LTV, LTV/CAC, the Rule of 40 and the magic number go to the
+     vc-metrics-readiness skill too. Growth rates: no tool computes them; quote them with "not checked: no tool
+     computes this". Of all these figures, never compute, convert or round one.
 6. **Scan for discount patterns** (the table below). For each hit, quote the line, name the pattern and its source,
    and write the fix using only the founder's facts, or a bracketed ask: `[the signed contract's start date]`.
 7. **Run the adversarial review** (next section): the skeptic, the quote check, the refute pass.
@@ -304,6 +305,7 @@ attacks) is this skill's own method.
 - It never invents, strengthens or finds evidence: no web look-ups, no market data, no checks on people or companies.
 - It never role-plays or speaks as a named investor, firm or author.
 - No arithmetic outside the equity calculator's tools. Figures are compared as stated, never converted. Metrics and
-  market sizes are checked by the vc-metrics-readiness and vc-market-sizing skills; growth rates and LTV by no tool.
+  market sizes (LTV, LTV/CAC, the Rule of 40 and the magic number among the metrics) are checked by the
+  vc-metrics-readiness and vc-market-sizing skills; growth rates by no tool.
 - The adversarial review predicts which claims a partner is likely to check first; a real partner may check others.
 - It works from the founder's text and sends nothing anywhere.
