@@ -31,8 +31,8 @@ score and no readiness percentage, and never adds a fact, a figure or a document
     data-room document and takes its pool for the calculator, but never reviews or judges its clauses.
   - Metric definitions, and whether ARR, retention, churn, CAC payback and burn multiple match their parts: the
     vc-metrics-readiness skill (preview).
-  - The sizing model behind the market size, built bottom-up: the vc-market-sizing skill (preview).
-  - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview).
+  - The sizing model behind the market size, built bottom-up: the vc-market-sizing skill.
+  - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill.
 
 ## Inputs
 

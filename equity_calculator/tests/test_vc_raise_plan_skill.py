@@ -53,12 +53,15 @@ _HANDOFF_SKILLS = (
     "vc-intro-email",
     "vc-pass-debrief",
 )
-# Preview skills are marked "(preview)" where another skill hands off to them, as the rest of the pack does.
+# Preview skills are marked "(preview)" where another skill hands off to them, as the rest of the pack does; a skill
+# out of preview carries no suffix.
 _PREVIEW_HANDOFFS = (
-    "the vc-round-sizing skill (preview)",
     "the vc-intro-email skill (preview)",
     "the vc-pass-debrief skill (preview)",
-    "the vc-diligence-questions skill (preview)",
+)
+_AVAILABLE_HANDOFFS = (
+    "the vc-round-sizing skill.",
+    "the vc-diligence-questions skill.",
 )
 _EVAL_COMPANIES = ("ra", "rb", "rc", "rd")
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_raise_pipeline` call."
@@ -179,7 +182,7 @@ def test_every_skill_it_hands_off_to_is_named_and_preview_ones_are_marked() -> N
     for name in _HANDOFF_SKILLS:
         assert name in handoffs, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
-    for handoff in _PREVIEW_HANDOFFS:
+    for handoff in _PREVIEW_HANDOFFS + _AVAILABLE_HANDOFFS:
         assert handoff in handoffs, handoff
     # The tracker's next steps hand an intro email and a pass to the skills built for them.
     steps = _unwrapped(_section("## Steps"))

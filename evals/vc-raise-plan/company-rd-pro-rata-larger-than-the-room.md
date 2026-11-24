@@ -67,7 +67,7 @@ the founder, asks for no investor list (the question is about coverage alone), a
   round, but the pro rata is larger than the room they leave. It quotes the printed figures and works out no gap of
   its own.
 - It leaves the choice to the founder: how much pro rata to take is the founder's and the existing investors' to
-  settle, with the founder's lawyer, and a larger round is a question for the vc-round-sizing skill (preview). It
+  settle, with the founder's lawyer, and a larger round is a question for the vc-round-sizing skill. It
   suggests no amount to cut and no investor to drop.
 - The funnel, as printed: on the founder's own rates today's funnel is expected to give 2.40 term sheets, an
   expectation and not a forecast, against the 2 wanted, and 0 more first-stage targets are needed; the start-raising

@@ -33,15 +33,14 @@ and never adds a figure, customer or fact the founder did not give. It takes no 
   - A slide-by-slide read of the deck this memo draws on: the vc-deck-review skill.
   - Each claim's evidence, and figures that disagree across the deck, one-pager and memo: the vc-claims-check skill.
   - Rehearsing the questions the memo leaves open, before the partner meeting: the vc-partner-meeting skill.
-  - The diligence questions and data-room checklist behind each section of the memo: the vc-diligence-questions
-    skill (preview).
+  - The diligence questions and data-room checklist behind each section of the memo: the vc-diligence-questions skill.
   - The ask's arithmetic in full (ownership after the round, the pool, the SAFE stack, runway): the vc-deal-math
     skill, whose steps this skill follows. One equity question on its own: the equity-calculator skill.
   - The one-liner, the story and the say-and-avoid list: the vc-positioning skill.
   - The traction section's ARR, retention, churn, CAC payback and burn multiple, checked against their parts: the
     vc-metrics-readiness skill (preview).
-  - The market section's size, built bottom-up from buyers and price: the vc-market-sizing skill (preview).
-  - How much to raise and what each amount reaches: the vc-round-sizing skill (preview).
+  - The market section's size, built bottom-up from buyers and price: the vc-market-sizing skill.
+  - How much to raise and what each amount reaches: the vc-round-sizing skill.
   - The term sheet, once one arrives, line by line against a standard baseline: the vc-term-sheet-review skill
     (preview).
 

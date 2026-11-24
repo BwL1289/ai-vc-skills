@@ -34,15 +34,15 @@ adds a fact about the company that the founder did not give.
     skill (preview). Point the founder to it when they give more than one document or a claim has no evidence named.
   - A slide-by-slide deck review: the vc-deck-review skill. Point the founder to it when they share a whole
     deck.
-  - Rehearsing the partner meeting: the vc-partner-meeting skill (preview).
-  - The decisions behind the product and what was said no to: the vc-taste-check skill (preview).
-  - How much to raise and what it buys: the vc-round-sizing skill (preview).
+  - Rehearsing the partner meeting: the vc-partner-meeting skill.
+  - The decisions behind the product and what was said no to: the vc-taste-check skill.
+  - How much to raise and what it buys: the vc-round-sizing skill.
   - A term sheet you were offered: the vc-term-sheet-review skill (preview).
-  - Diligence after the first meeting, with a data-room checklist: the vc-diligence-questions skill (preview).
+  - Diligence after the first meeting, with a data-room checklist: the vc-diligence-questions skill.
   - Writing the investor updates themselves: the vc-current-investor-update skill (preview).
   - Metrics and their definitions: the vc-metrics-readiness skill (preview).
-  - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview).
-  - Market size, bottom-up: the vc-market-sizing skill (preview).
+  - The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill.
+  - Market size, bottom-up: the vc-market-sizing skill.
   - Keeping prospective investors updated before the raise: the vc-prospective-investor-update skill (preview).
   - The competition map and slide: the vc-competitive-landscape skill (preview).
   - The intro emails themselves (a forwardable blurb, a cold email, follow-ups): the vc-intro-email skill (preview).

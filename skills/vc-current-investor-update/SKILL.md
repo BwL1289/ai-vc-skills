@@ -31,7 +31,7 @@ adds a figure, customer or event the founder did not give, and never leaves out 
   - A raise that closed in the period (ownership, the SAFE stack, the pool): the vc-deal-math skill, or the
     equity-calculator skill for one scenario on its own.
   - The story for the coming raise and the say-and-avoid list: the vc-positioning skill.
-  - How much to raise next and which milestone it buys: the vc-round-sizing skill (preview).
+  - How much to raise next and which milestone it buys: the vc-round-sizing skill.
   - Whether a metric's definition is the one investors expect, and ARR, retention, churn, CAC payback or burn multiple
     checked from their parts: the vc-metrics-readiness skill (preview).
   - The short update a founder sends prospective investors before a raise, cut from this one when both go out in the

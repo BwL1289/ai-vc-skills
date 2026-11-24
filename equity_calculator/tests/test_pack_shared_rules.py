@@ -85,9 +85,7 @@ _VERDICT_RULE = (
 _THEN = "graded against the pass sentence this eval had then"
 _THEN_VERDICT = re.compile(r"\*\*(Pass|Partial|Fail), against the pass sentence this eval had then[;:]")
 _TODAY = "today's sentence"
-_MEMO_HANDOFF = (
-    "The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill (preview)."
-)
+_MEMO_HANDOFF = "The memo a champion partner is likely to write for the partnership: the vc-investor-memo skill."
 # Every recorded eval with the pass sentence it had when its run was recorded: the first 12 hex digits of the SHA-256
 # of that sentence, its line breaks taken out (_pass_sentence). A recording adds its eval here. A pass sentence changed
 # after its run keeps its digest here, so the test sees the change and asks for the README's rule in that file.
@@ -570,7 +568,7 @@ def test_every_hand_off_to_the_memo_skill_says_a_champion_is_likely_to_write_it(
         line.strip()
         for path in sorted(_SKILLS.glob("*/SKILL.md"))
         for line in path.read_text(encoding="utf-8").splitlines()
-        if "the vc-investor-memo skill (preview)" in line
+        if "the vc-investor-memo skill" in line
     ]
 
     assert len(handoffs) >= 4

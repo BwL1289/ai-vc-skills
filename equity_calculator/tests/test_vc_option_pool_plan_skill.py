@@ -44,8 +44,10 @@ _TRIGGERS = (
     "the VC wants a bigger pool",
 )
 _HANDOFF_SKILLS = ("vc-term-sheet-review", "vc-round-sizing", "vc-deal-math", "equity-calculator")
-# Preview skills are marked "(preview)" where another skill hands off to them, as the rest of the pack does.
-_PREVIEW_HANDOFFS = ("the vc-term-sheet-review skill (preview)", "the vc-round-sizing skill (preview)")
+# Preview skills are marked "(preview)" where another skill hands off to them, as the rest of the pack does; a skill
+# out of preview carries no suffix.
+_PREVIEW_HANDOFFS = ("the vc-term-sheet-review skill (preview)",)
+_AVAILABLE_HANDOFFS = ("the vc-round-sizing skill.",)
 _EVAL_COMPANIES = ("cp", "cq", "cr", "cs")
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_pool_plan` call."
 _ONE_CALL = "## Expected tool call\n\n`equity_pool_plan`, once:"
@@ -157,7 +159,7 @@ def test_every_skill_it_hands_off_to_exists_and_preview_ones_are_marked() -> Non
     for name in _HANDOFF_SKILLS:
         assert name in handoffs, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
-    for handoff in _PREVIEW_HANDOFFS:
+    for handoff in _PREVIEW_HANDOFFS + _AVAILABLE_HANDOFFS:
         assert handoff in handoffs, handoff
 
 

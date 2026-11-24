@@ -29,7 +29,7 @@ looks up a market figure, and never adds a count, price, share, adoption rate or
     equity-calculator skill.
   - Traction metrics beside the market (ARR, retention, churn, CAC payback, burn multiple): the vc-metrics-readiness
     skill (preview).
-  - How much to raise and what each amount reaches: the vc-round-sizing skill (preview).
+  - How much to raise and what each amount reaches: the vc-round-sizing skill.
 
 ## Inputs
 

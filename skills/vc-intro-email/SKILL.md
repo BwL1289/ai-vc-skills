@@ -24,7 +24,7 @@ contact details, and never adds a figure, customer, credential or fact the found
   emails to this investor, and what the founder knows of the investor and the connector. Any of these may come as a
   file the agent can read in this session.
 - Hand off:
-  - Messaging (the one-liner, the story and the say-and-avoid list): the vc-positioning skill (preview). Point the
+  - Messaging (the one-liner, the story and the say-and-avoid list): the vc-positioning skill. Point the
     founder to it when the one-liner is not clear; an email cannot fix an unclear story.
   - Each claim's evidence, and figures that disagree across the documents: the vc-claims-check skill (preview). The
     reader pass hands it every such flag.

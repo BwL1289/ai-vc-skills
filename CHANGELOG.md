@@ -6,6 +6,9 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- `vc-deal-math`, `vc-round-sizing`, `vc-market-sizing`, `vc-positioning`, `vc-investor-memo`, `vc-taste-check`,
+  `vc-diligence-questions` and `vc-partner-meeting` are out of preview: each was run on a real deck, and the deck's
+  founder agreed with its output; plugin version 0.3.4.
 - Live runs of five of the six skills added on 2026-11-24 (Claude Code 2.1.331), one eval each, each recorded in its
   eval with a trimmed excerpt and a verdict under the README's rule: `vc-competitive-landscape` (Company CM),
   `vc-option-pool-plan` (Company CP), `vc-pass-debrief` (Company CQ) and `vc-intro-email` (Company CU) passed, each

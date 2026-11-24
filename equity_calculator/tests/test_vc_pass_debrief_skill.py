@@ -91,8 +91,17 @@ _DIGITS = re.compile(r"\d+")
 _EVAL_TITLE = re.compile(r"\A# Eval (\d+): ")
 # Names the skill must never take a voice from: it writes in the founder's voice only.
 _PEOPLE_AND_FIRMS = ("sequoia", "a16z", "andreessen", "y combinator", "graham", "stebbings", "20vc")
-# The pack's hand-offs to these two carry no suffix, in every skill; every other hand-off here says "(preview)".
-_NO_SUFFIX = ("vc-deck-review", "vc-deal-math")
+# The skills out of preview: the pack's hand-offs to them carry no suffix, in every skill; every other hand-off here
+# says "(preview)".
+_NO_SUFFIX = (
+    "vc-deck-review",
+    "vc-deal-math",
+    "vc-market-sizing",
+    "vc-positioning",
+    "vc-round-sizing",
+    "vc-partner-meeting",
+    "vc-taste-check",
+)
 # A made-up fund, product or company label, or a brand-like fund name: an answer may name only those its prompt names.
 _LABELLED = re.compile(
     r"\b[A-Z][a-z]+ (?:Seed|Capital|Ventures|Partners|Fund)\b" r"|\b(?:Fund|Product|Suite|Company) [A-Z]{1,2}\b"
@@ -167,6 +176,8 @@ def test_every_skill_it_hands_off_to_exists() -> None:
     for name in _HANDOFF_SKILLS:
         suffix = "" if name in _NO_SUFFIX else " (preview)"
         assert f"the {name} skill{suffix}" in when, name
+        if name in _NO_SUFFIX:
+            assert f"the {name} skill (preview)" not in when, name
         assert (_ROOT / "skills" / name / "SKILL.md").is_file(), name
     # The raise plan keeps the investor list and the tracker; no reason group maps to it, so it sits outside the list
     # whose skills are each named again in "What to fix".

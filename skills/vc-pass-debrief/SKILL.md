@@ -26,15 +26,15 @@ reason, figure or event the founder did not give.
   can read in this session.
 - Hand off, each named again in "What to fix":
   - Traction and the definitions of the metrics shown: the vc-metrics-readiness skill (preview).
-  - The market's size, built bottom-up: the vc-market-sizing skill (preview).
-  - The team's story, the one-liner and what to say: the vc-positioning skill (preview).
+  - The market's size, built bottom-up: the vc-market-sizing skill.
+  - The team's story, the one-liner and what to say: the vc-positioning skill.
   - The deck as a whole: the vc-deck-review skill.
   - Competition and "what if they build it": the vc-competitive-landscape skill (preview).
   - A claim the investor did not believe: the vc-claims-check skill (preview).
-  - The round's size and what it reaches: the vc-round-sizing skill (preview). The ask's arithmetic: the vc-deal-math
+  - The round's size and what it reaches: the vc-round-sizing skill. The ask's arithmetic: the vc-deal-math
     skill.
-  - Questions the founder could not answer in the meeting: the vc-partner-meeting skill (preview).
-  - Product decisions that read as generic: the vc-taste-check skill (preview).
+  - Questions the founder could not answer in the meeting: the vc-partner-meeting skill.
+  - Product decisions that read as generic: the vc-taste-check skill.
   - Keeping a fund that said "come back later" up to date: the vc-prospective-investor-update skill (preview).
 - Back to the raise, a hand-off with no group of its own: the investor list and the tracker (who to write to next, who
   passed and why, what is left of the round): the vc-raise-plan skill (preview).

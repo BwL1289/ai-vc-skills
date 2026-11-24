@@ -23,7 +23,7 @@ the founder's answer. The skill never says which pool to accept.
 - Hand off:
   - The whole term sheet (every term against a standard one, an exit waterfall, questions for the lawyer): the
     vc-term-sheet-review skill (preview).
-  - How much to raise and how long it lasts on the plan: the vc-round-sizing skill (preview).
+  - How much to raise and how long it lasts on the plan: the vc-round-sizing skill.
   - A deck's ask checked before a VC reads it (valuation labels, the SAFE stack, percent sold, runway): the
     vc-deal-math skill.
   - One scenario on its own (a pool with the pool in the post-money, SAFEs and notes converting in the round, what one

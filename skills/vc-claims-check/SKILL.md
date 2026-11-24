@@ -24,7 +24,7 @@ looks anything up, and never adds evidence, figures or facts the founder did not
 - Hand off:
   - ARR, retention, churn, CAC payback and burn multiple, with their definitions: the vc-metrics-readiness skill
     (preview).
-  - A market size built bottom-up: the vc-market-sizing skill (preview).
+  - A market size built bottom-up: the vc-market-sizing skill.
   - The ask's arithmetic in full (ownership after the round, the pool, runway): the vc-deal-math skill, whose steps
     this skill follows for deal terms.
   - A raise on a SAFE or note: `equity_round`, as vc-deal-math step 2 says (the equity-calculator skill), and its

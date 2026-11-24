@@ -25,7 +25,7 @@ rules on whether a share, a grant or a transfer is legally valid.
 - Hand off how big the option pool should be, and what a top-up costs the founders, to the vc-option-pool-plan skill
   (preview), which sizes it from the founder's own hiring plan (`equity_pool_plan`).
 - Hand off a term sheet to the vc-term-sheet-review skill (preview), and the diligence questions an investor is likely
-  to ask about the company to the vc-diligence-questions skill (preview).
+  to ask about the company to the vc-diligence-questions skill.
 
 ## Steps
 
