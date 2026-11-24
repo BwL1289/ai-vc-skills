@@ -1,11 +1,14 @@
 # Eval 6: Company DL, an LTV on revenue alone and a magic number without its 4
 
 A test prompt for the `vc-metrics-readiness` skill. The company is made up. The tool call and the excerpt are from a
-real `equity_calculator metrics_check` run with these inputs. The answer states the expected behaviour; it is not a
-recorded run, and this eval has not been run in a live session. A run passes when it makes the one one-month call
-below with the founder's ARPA, contribution margin, churn basis, growth, margin and basis and the two quarters, works
-none of the four figures by hand, leads with the LTV and magic number mismatches and the flag that explains each, and
-sets no line against the Rule of 40, LTV/CAC or the magic number.
+real `equity_calculator metrics_check` run with these inputs. "Expected answer" states the expected behaviour, and
+"Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.331 on 2026-11-24). A run passes when it makes the
+one one-month call below with the founder's ARPA, contribution margin, churn basis, growth, margin and basis and the two
+quarters, works none of the four figures by hand, leads with the LTV and magic number mismatches and the flag that
+explains each, and sets no line against the Rule of 40, LTV/CAC or the magic number. The verdict is Pass when every
+clause of that sentence is met, Partial when exactly one clause is missed or met only in part, and Fail when two or more
+are missed; a shortfall against the other points of the expected answer is noted but does not change the verdict. The
+recorded run is a Pass with shortfalls. The skill was changed after that run (see "Recorded answer").
 
 ## Prompt
 
@@ -119,3 +122,83 @@ the slide's places.
 lost]`, `[net burn last month]`, `[the largest customer's revenue last month]`).
 - No score, no "ready" or "not ready", no firm named as a fit or a voice; nothing is computed, converted or rounded
   in the answer's own text.
+
+## Recorded answer
+
+Recorded with Claude Code 2.1.331 on 2026-11-24, with plugin 0.3.5 loaded from this repository and no user settings. An
+earlier run of this eval that day, on plugin 0.3.2, is not recorded. The answer is shown whole.
+
+**Pass, with shortfalls against the expected answer.** It met every clause of the pass sentence above. It made the one
+one-month `equity_metrics_check` call, its input the same as the expected call, and no other; every figure in the answer
+is one the tool printed ($60,000.00, $100,000.00, $80,000.00, 10.000000x, 16.666667x, 35.0000%, 0.800000, 0.200000),
+none worked by hand; it led with the LTV and magic number mismatches, each with the flag that explains it in plain words
+(the LTV worked on revenue, not margin; the magic number missing the four that annualises it); and it set no line
+against the Rule of 40, LTV/CAC or the magic number, saying the calculator sets none. Its lenses ran together in one
+subagent and its refute pass in another, which the answer said is less independent. Short of the expected answer: it
+gave the magic number mismatch a tier ("Minor (understates)"), where the expected answer has both mismatches with no
+tier; there is no metrics table with a verdict per metric, so Contradicted and Supported never appear, and LTV/CAC and
+the Rule of 40 are ranked as weakening the slide instead of Supported; neither flag code
+(`stated_ltv_uses_revenue_not_margin`, `stated_magic_number_not_annualised`), none of the assumption rows (`ltv_rule`,
+`rule_of_40_rule`, `magic_number_rule`) and not a16z's item 5 behind the LTV is named; and blended CAC, paid CAC and
+gross margin are not listed as missing stage expectations. The skill's rule that an understated figure goes in the minor
+tier at most named ARR, retention, churn, CAC, payback, burn multiple and concentration, not the magic number, and the
+run read the slide's 0.2 below the tool's 0.8 as an understatement. Since this run the skill says that a mismatch a flag
+explains as another definition, a magic number without its 4 among them, is no understatement, whichever way it errs,
+and keeps no tier. The eval has not been run again.
+
+> **Slide 9 has two figures that do not hold up as written: the LTV and the magic number.** The other two lines check out against your own parts. I can't give a readiness verdict, but these are the fixes, in order.
+>
+> ## The biggest fixes
+>
+> 1. **"LTV $100k." is worked on revenue, not margin.** On your 60% contribution margin and monthly gross revenue churn, the calculator gives $60,000.00, a difference of -$40,000.00. Your $100k matches its revenue-only figure, $100,000.00 (on gross margin it is $80,000.00).
+> 2. **"LTV/CAC 10x." only works with the $60,000 LTV.** The calculator gives 10.000000x on the contribution-margin LTV over a blended CAC of $6,000.00. With the slide's own $100k it gives 16.666667x, so the two lines on the slide use two different LTVs.
+> 3. **"Magic number 0.2." is missing the four that annualises it.** From Q2 and Q3 revenue and Q2 spend, the calculator gives 0.800000; 0.200000 is the unannualised quarterly figure. Here the slide understates you.
+>
+> ## Ranked fix list
+>
+> | #   | Tier                                          | Line                                                         | Why a partner reads it that way                                                                                         | Fix                                                                                                           |
+> | --- | --------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+> | 1   | None, you weigh the gap (calculator mismatch) | "LTV $100k."                                                 | LTV on revenue sets too high a ceiling on acquisition spend, and the slide names no margin or churn basis.              | "LTV $60k (60% contribution margin, monthly gross revenue churn)".                                            |
+> | 2   | Minor (understates)                           | "Magic number 0.2."                                          | A quarterly change set against a ratio usually read annualised looks low.                                               | "Magic number 0.8 (Q3 vs Q2 revenue, Q2 S&M spend)", or label 0.2 as quarterly.                               |
+> | 3   | Weakens                                       | "LTV/CAC 10x."                                               | It is blended only. Paid CAC is $15,000.00 against blended $6,000.00, and a partner will ask whether paid growth works. | Show both CACs and say what the $150,000 includes. `[is $150,000 all sales and marketing cost, or ads only?]` |
+> | 4   | Weakens                                       | "Rule of 40: 35% (70% revenue growth, -35% EBITDA margin)."  | The sum is right (35.0000%) and the margin is named, but neither figure has a period.                                   | Add the period. `[period for the 70% growth and the -35% EBITDA margin]`                                      |
+> | 5   | Weakens                                       | Slide 9 as a whole                                           | For a Series A with recurring revenue, a fund usually expects more than these four ratios (see below).                  | Add the missing metrics from the calculator's values.                                                         |
+> | 6   | Minor                                         | "Revenue was $510,000 in Q2 and $600,000 in Q3" (your notes) | The magic number rests on it, and it does not say recurring or total.                                                   | `[are the Q2 and Q3 figures recurring or total revenue?]`                                                     |
+>
+> One objection was dropped: that the LTV's churn has no parts. Your notes answer it ("downgrades $1,000 and cancellations $3,000"), but put the basis beside the figure on the slide.
+>
+> ## What the calculator gives from your parts
+>
+> These cover last month only and are not annualised.
+>
+> | Metric                      | Calculator value                   | On the slide?                                                         |
+> | --------------------------- | ---------------------------------- | --------------------------------------------------------------------- |
+> | Ending ARR                  | $2,616,000.00 (from $2,400,000.00) | Missing                                                               |
+> | Net new ARR                 | $216,000.00 (new ARR $240,000.00)  | Missing                                                               |
+> | Gross revenue retention     | 98.0000%                           | Missing                                                               |
+> | Net revenue retention       | 99.0000%                           | Missing                                                               |
+> | Gross revenue churn         | 2.0000%                            | Missing                                                               |
+> | Net revenue churn           | 1.0000%                            | Missing                                                               |
+> | CAC payback on gross margin | 9.38 months (7.50 on revenue only) | Missing                                                               |
+> | Logo churn                  | Not computed                       | Missing `[customers at start of month, customers lost]`               |
+> | Burn multiple               | Not computed                       | Missing `[net burn for the month]`                                    |
+> | Concentration               | Not computed                       | Missing `[largest customer's revenue and total revenue, same period]` |
+>
+> Retention uses the month's totals, which is exact only if no customer won during the month also moved. The calculator sets no benchmark for LTV/CAC, the Rule of 40 or the magic number, so I have not rated any of them. Its Rule of 40 and magic number definitions are common ones with no source read behind them.
+>
+> ## Open asks
+>
+> - `[which month "last month" is]`
+> - `[is $150,000 all sales and marketing cost, or ads only?]`
+> - `[period for the 70% growth and the -35% EBITDA margin]`
+> - `[are the Q2 and Q3 figures recurring or total revenue?]`
+> - `[customers at start of month, customers lost]`
+> - `[net burn for the month]`
+> - `[largest customer's revenue and total revenue, same period]`
+> - `[customer segment: small business, mid-market or enterprise]`, which sets the payback benchmark question
+>
+> ## How this was run
+>
+> The attack lenses ran in one subagent and the refute pass in another, to keep cost down. That is less independent than one subagent per lens and per objection; say so if you want the full pass. I saw no billing or ledger data, and a partner will ask for it.
+>
+> This is not investment, legal, tax or accounting advice. The figures should match your books before the deck goes out.

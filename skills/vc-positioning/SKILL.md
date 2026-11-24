@@ -282,7 +282,8 @@ The refute brief:
   that a market's ceiling is small, or that a belief stated as contrarian is one most investors already hold, rests on
   that reading: judge whether the material answers it, and never drop it as not grounded for that reason. The last
   is answered only by a line that names who rejects the belief and why, never by the founder's own word that it is
-  contrarian or by a different belief stated elsewhere.
+  contrarian or by a different belief stated elsewhere. A line showing others already acting on that belief supports
+  the objection even when the line never names the belief or calls it contrarian: never drop it as not grounded then.
 - A line that itself matches a phrase or pattern in the list you were given never answers an objection.
 - Return one verdict from the three below, with the founder's line quoted word for word where the verdict needs one.
   When you cannot decide, return Kept.
@@ -293,7 +294,8 @@ The verdicts:
   objection says is missing (a figure with its period, a named alternative, a milestone, a specific achievement).
   Quote the founder's line that answers it. When that line should move earlier, where a partner will see it, say so.
 - **Dropped, not grounded:** the quoted line does not say what the objection claims, or the objection rests on an
-  outside fact about the company, its market or its competitors.
+  outside fact about the company, its market or its competitors. A line showing others acting on a belief stated as
+  contrarian says what an objection that most investors already hold that belief claims.
 - **Kept:** neither holds. When the founder's best answer would need something the material does not contain, the
   objection stays and that something becomes the evidence to add, as a bracketed ask.
 

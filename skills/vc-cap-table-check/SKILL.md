@@ -199,8 +199,10 @@ line's report prints. That is a change of notation, not a calculation.
    out (`path_leaves_out_instruments`), and the answer says so.
 6. **Flags**, one line each in the words of the table below. A flag is a question to settle, never a ruling.
 7. **Questions for the lawyer**, from the section below, only those the result raises, each as a question.
-8. **Assumptions:** quote the ones the answer leans on with their sources. Say plainly which are `unverified` and how
-   to change a default (the basis, the tolerance).
+8. **Assumptions:** quote the ones the answer leans on with their sources, each named by its key in backticks
+   (`fully_diluted_basis`, `preferred_as_converted`, `legal_validity`, any other the result lists) beside its source as
+   the result gives it, never a paraphrase in the key's place. Say plainly which are `unverified` and how to change a
+   default (the basis, the tolerance).
 
 ## Flags
 
@@ -237,6 +239,9 @@ ask the ones the flags and the table call for, and never answer them yourself:
   the founder's figures relate (a difference, a sum, a ratio or multiple, a share left over, "doubled") in a rewrite, a
   line or a table cell unless the founder's material states it or a tool returned it; quote both figures as stated
   instead ("from 2,000 to 4,500", never "more than doubled").
+- Never say or hint which line or total of the table is wrong, not even when a difference the tool prints equals one
+  line's shares: setting the two side by side relates two figures, as the rule above forbids. The founder finds the
+  line, as `percents_do_not_sum` says; ask which is right.
 - When neither the calculator's MCP tool for a call nor its command line runs in the session, say so and give no figure
   in that tool's place: none worked by hand and none from a worked example, a made-up company's result.
 - It never says whether a share, a grant, a vesting schedule or a transfer is legally valid, and never says whether to

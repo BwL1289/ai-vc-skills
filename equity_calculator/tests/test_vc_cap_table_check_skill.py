@@ -35,6 +35,9 @@ _PROGRAM = "equity_calculator "
 _DESCRIPTION_LIMIT = 1024
 _LINE_LIMIT = 500
 _EVAL_COUNT = 4
+_RECORDED = "## Recorded answer"
+# A recorded run's verdict line, in the shape the repository's recorded evals use.
+_VERDICT_LINE = re.compile(r"\*\*(?:Pass|Partial|Fail)\b[^*]*\*\*")
 _TRIGGERS = (
     "check my cap table",
     "does our cap table add up",
@@ -245,3 +248,47 @@ def test_it_reads_a_file_and_never_works_out_a_relation_of_its_own() -> None:
     assert _NO_COMPARISON in text
     when = _unwrapped(_section("## When to use it"))
     assert "Any of these may come as a file the agent can read in this session." in when
+
+
+def test_it_never_guesses_which_line_is_wrong_and_names_each_assumption_by_its_key() -> None:
+    """A live run matched the tool's 100,000-share gap to the warrants line and paraphrased the assumptions."""
+    limits = _unwrapped(_section("## Limits"))
+    answering = _unwrapped(_section("## Answering"))
+
+    assert (
+        "Never say or hint which line or total of the table is wrong, not even when a difference the tool prints equals"
+        " one line's shares: setting the two side by side relates two figures, as the rule above forbids."
+    ) in limits
+    assert "The founder finds the line, as `percents_do_not_sum` says; ask which is right." in limits
+    assert (
+        "each named by its key in backticks (`fully_diluted_basis`, `preferred_as_converted`, `legal_validity`, any"
+        " other the result lists) beside its source as the result gives it, never a paraphrase in the key's place"
+    ) in answering
+
+
+@pytest.mark.parametrize("path", _EVALS, ids=[path.stem for path in _EVALS])
+def test_each_eval_says_whether_it_holds_a_recorded_run(path: Path) -> None:
+    """An eval with no recorded run says so; one with a recorded run says so in its intro and holds the run's excerpt
+    after the expected answer, opening with its verdict and what changed since, with no call or excerpt of its own."""
+    text = path.read_text(encoding="utf-8")
+    intro = _unwrapped(text.split("\n## ", 1)[0])
+
+    assert "made up" in intro
+    if f"\n{_RECORDED}\n" not in text:
+        assert "not a recorded run" in intro and "has not been run in a live session" in intro
+        return
+    assert '"Recorded answer" is an excerpt of a recorded run' in intro and "not a recorded run" not in intro
+    assert text.index(f"\n{_RECORDED}\n") > text.index("\n## Expected answer\n")
+    recorded = _section(_RECORDED, text)
+    assert _VERDICT_LINE.match(recorded.strip("\n").split("\n\n")[1])
+    assert "Since this run" in _unwrapped(recorded)
+    assert _fences("json", recorded) == [] and _fences("text", recorded) == []
+
+
+def test_the_recorded_run_passed_and_its_line_guess_led_to_a_fix() -> None:
+    (path,) = (path for path in _EVALS if path.name.startswith("company-cq-"))
+    recorded = _unwrapped(_section(_RECORDED, path.read_text(encoding="utf-8")))
+
+    assert "**Pass, with shortfalls against the expected answer.** It met every clause of the pass sentence" in recorded
+    assert '"The gap is 100,000 shares, and your warrants line is 100,000."' in recorded
+    assert "Since this run the skill's limits say never to say or hint which line is wrong" in recorded

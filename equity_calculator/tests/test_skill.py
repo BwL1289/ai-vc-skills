@@ -99,6 +99,33 @@ def test_it_hands_a_founders_review_to_the_skill_built_for_it_and_asks_for_the_t
     assert "never as an assumed figure" in text and "State any value you had to assume" not in text
 
 
+def test_a_priced_round_against_a_note_goes_to_the_deal_math_skill_and_its_answer_follows_step_7() -> None:
+    """A live run of a priced round against a note loaded this skill, never vc-deal-math, and so missed step 7: the mode
+    in words, the summary first, B - A for ownership, the flag codes, and no figure of its own. This skill now routes
+    the comparison there and, if it answers here, says the same."""
+    text = " ".join(line.strip() for line in _TEXT.splitlines())
+
+    assert (
+        "a priced round now weighed against a convertible note now, with a next round or none (`instrument_compare`),"
+        " to the vc-deal-math skill's step 7"
+    ) in text
+    assert "For such a question, load that skill and answer from it, not from this one." in text
+    assert (
+        "Lead with the result's `summary`, say in words which mode ran (with no next round, that the note never"
+        " converts at a priced round here), show A, B and B - A as the tool gives them for every row that has them,"
+        " ownership included, and never say which option to take."
+    ) in text
+    assert (
+        "add, subtract or divide none of them in your own text: a figure the result does not print (what is left of a"
+        " sale, where two exits cross) is not given"
+    ) in text
+    assert (
+        "Name each flag by its code with its meaning from the table of the skill built on that tool, loading that skill"
+        " to read it"
+    ) in text
+    assert "vc-deal-math's step 7 for `instrument_compare`" in text
+
+
 def test_the_field_table_names_every_input_field_and_nothing_else() -> None:
     rows = _table_rows()
 

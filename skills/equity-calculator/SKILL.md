@@ -30,12 +30,14 @@ work them out by hand, and do not round or re-derive what it returns.
 | Does our cap table add up: totals, each holder's percent, authorised shares, SAFEs outstanding, departed holders?                                        | `cap_table_check`    | `equity_cap_table_check`    |
 
 A founder's question about a whole raise goes to the review built for it, which runs these tools and explains what
-they return: a deck's ask, ownership after the round and runway to the vc-deal-math skill; how much to raise on a
-phased plan to the vc-round-sizing skill; traction metrics to the vc-metrics-readiness skill; a market slide to the
-vc-market-sizing skill; a term sheet to the vc-term-sheet-review skill; an update to current investors to the
-vc-current-investor-update skill; a hiring plan against a term sheet's pool ask to the vc-option-pool-plan skill; whom
-to pitch, in what order, and whether the pipeline fills the round to the vc-raise-plan skill; a cap table to tie out to
-the vc-cap-table-check skill (preview). This skill answers one scenario on its own.
+they return: a deck's ask, ownership after the round and runway to the vc-deal-math skill; a priced round now weighed
+against a convertible note now, with a next round or none (`instrument_compare`), to the vc-deal-math skill's step 7;
+how much to raise on a phased plan to the vc-round-sizing skill; traction metrics to the vc-metrics-readiness skill; a
+market slide to the vc-market-sizing skill; a term sheet to the vc-term-sheet-review skill; an update to current
+investors to the vc-current-investor-update skill; a hiring plan against a term sheet's pool ask to the
+vc-option-pool-plan skill; whom to pitch, in what order, and whether the pipeline fills the round to the vc-raise-plan
+skill; a cap table to tie out to the vc-cap-table-check skill (preview). For such a question, load that skill and answer
+from it, not from this one. This skill answers one scenario on its own.
 
 ## Running it
 
@@ -140,8 +142,10 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
    founder says the terms are standard. With no next round (the founder hopes this raise is the only one) the tool runs
    its no-next-round mode (flag `no_next_round_given`, with `note_months_to_conversion` left out): ownership today, the
    note at its maturity and each exit as a sale before any priced round, on the note's own maturity and
-   change-of-control terms, which are asked for, never assumed (vc-deal-math's step 7). Show A, B and B - A as the tool
-   gives them and never say which option to take. For `pool_plan`, never assume one: the share counts, the round, the
+   change-of-control terms, which are asked for, never assumed (vc-deal-math's step 7). Lead with the result's
+   `summary`, say in words which mode ran (with no next round, that the note never converts at a priced round here),
+   show A, B and B - A as the tool gives them for every row that has them, ownership included, and never say which
+   option to take. For `pool_plan`, never assume one: the share counts, the round, the
    requested pool, the next round's month and every hire's start month and grant are the founder's own figures, so ask
    for them; with no hire the tool refuses (`no_hiring_plan_given`). Show the plan, the requested pool and requested -
    plan as the tool gives them and never say which pool to accept. For `raise_pipeline`, never assume one: the round,
@@ -157,20 +161,22 @@ equity_calculator vesting --grant-shares 48000 --month 30 --strike-price 0.50 --
    founders' path takes the rounds the founder plans: with a preview it starts after it, so pass only the rounds after
    the preview. Never say whether a share was validly issued: the tool flags the questions for the company's lawyer.
 2. Give the headline numbers as the tool prints them (the `rounded` value with its unit, or the exact fraction when
-   precision matters). Do not round them again or recompute them. A value whose unit is `fraction` is a share of the
-   whole: show it as a percent by moving the decimal point of its `rounded` value two places to the right, keeping
-   every digit (0.166667 is 16.6667%), as the command line's report does; that is notation, not a calculation.
+   precision matters). Do not round them again or recompute them, and add, subtract or divide none of them in your own
+   text: a figure the result does not print (what is left of a sale, where two exits cross) is not given. A value
+   whose unit is `fraction` is a share of the whole: show it as a percent by moving the decimal point of its `rounded`
+   value two places to the right, keeping every digit (0.166667 is 16.6667%), as the command line's report does; that
+   is notation, not a calculation.
 3. Quote the assumptions the result lists. Each has a source; say plainly when it is `unverified` (standard
    arithmetic no cited source fixes, such as every option-pool, note and waterfall convention), and say how to change
    a default when the user's terms differ.
 4. A refusal or a tool error is the answer for those inputs: relay the reason and what to change. Never guess a
    number the calculator refused to give.
 5. A result's `flags` are codes. The command line's report prints each one's meaning beside it; the MCP result does
-   not. Relay a flag with its meaning from the table of the skill built on that tool: vc-deal-math for `deal_check`,
-   vc-round-sizing for `runway_plan`, vc-metrics-readiness for `metrics_check`, vc-market-sizing for
-   `market_sizing`, vc-deal-math's step 7 for `instrument_compare`, vc-option-pool-plan for `pool_plan`, vc-raise-plan
-   for `raise_pipeline`, and vc-cap-table-check for `cap_table_check`. A flag is a question to be ready for, never an
-   error.
+   not. Name each flag by its code with its meaning from the table of the skill built on that tool, loading that skill
+   to read it: vc-deal-math for `deal_check`, vc-round-sizing for `runway_plan`, vc-metrics-readiness for
+   `metrics_check`, vc-market-sizing for `market_sizing`, vc-deal-math's step 7 for `instrument_compare`,
+   vc-option-pool-plan for `pool_plan`, vc-raise-plan for `raise_pipeline`, and vc-cap-table-check for
+   `cap_table_check`. A flag is a question to be ready for, never an error.
 6. The calculator works the arithmetic of the terms given. It does not read a term sheet or a cap table file, and it
    is not legal, tax or investment advice: say so when the question needs either.
 

@@ -485,6 +485,17 @@ def test_calculator_mismatches_lead_the_list_and_there_is_no_score() -> None:
     ) in attack
     assert "an ARR or CAC mismatch that no flag explains may still be the founder's rounding" in attack
     assert "A mismatch is never the tool's figure rounded" not in attack
+    # A live run tiered a magic number without its 4 as an understatement: a mismatch a flag explains as another
+    # definition keeps no tier, whichever way it errs, in Stage A and in the ranked list.
+    assert (
+        "A mismatch a flag explains as another definition (a magic number without its 4, say) is no understatement,"
+        " whichever way it errs, and keeps no tier."
+    ) in attack
+    assert "minor at most (Stage A), never one a flag explains as another definition." in ranked
+    (dl,) = (path for path in _EVALS if path.name.startswith("company-dl-"))
+    recorded = _unwrapped(_section(_RECORDED, dl.read_text(encoding="utf-8")))
+    assert "**Pass, with shortfalls against the expected answer.** It met every clause of the pass sentence" in recorded
+    assert 'it gave the magic number mismatch a tier ("Minor (understates)")' in recorded
     assert "merges into that mismatch's entry and keeps the lens name" in _unwrapped(_section("### Check the quotes"))
     assert "no percentages and no score" in ranked
     assert "An unlabelled churn with one consistent basis row is not a mismatch" in _unwrapped(

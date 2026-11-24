@@ -43,6 +43,9 @@ def _headings(path: Path) -> set[str]:
 
 
 _EVAL_COUNT = 8
+_RECORDED = "## Recorded answer"
+# A recorded run's verdict line, in the shape the repository's recorded evals use.
+_VERDICT_LINE = re.compile(r"\*\*(?:Pass|Partial|Fail)\b[^*]*\*\*")
 _NO_CALL = "## Expected tool call\n\nNone: no `equity_deal_check` call."
 # A SAFE raise's runway held for the month its planned spend starts, or for that spend once the month is given: no call
 # yet, and the runway line says why. "the month the" keeps the first opening from matching the second's "monthly".
@@ -160,6 +163,25 @@ async def test_the_command_and_the_json_example_are_the_same_check() -> None:
 
 def test_there_is_one_eval_per_worked_company() -> None:
     assert len(_EVALS) == _EVAL_COUNT
+
+
+@pytest.mark.parametrize("path", _EVALS, ids=[path.stem for path in _EVALS])
+def test_each_eval_says_whether_it_holds_a_recorded_run(path: Path) -> None:
+    """An eval with no recorded run says so; one with a recorded run says so in its intro and holds the run's excerpt
+    after the expected answer, opening with its verdict and what changed since, with no call or excerpt of its own."""
+    text = path.read_text(encoding="utf-8")
+    intro = _unwrapped(text.split("\n## ", 1)[0])
+
+    assert "made up" in intro
+    if f"\n{_RECORDED}\n" not in text:
+        assert "not a recorded run" in intro and "has not been run in a live session" in intro
+        return
+    assert '"Recorded answer" is an excerpt of a recorded run' in intro and "not a recorded run" not in intro
+    assert text.index(f"\n{_RECORDED}\n") > text.index("\n## Expected answer\n")
+    recorded = _section(_RECORDED, text)
+    assert _VERDICT_LINE.match(recorded.strip("\n").split("\n\n")[1])
+    assert "Since this run" in _unwrapped(recorded)
+    assert _fences("json", recorded) == [] and _fences("text", recorded) == []
 
 
 def test_one_eval_expects_no_deal_check_call() -> None:
@@ -390,6 +412,11 @@ def test_a_founder_who_expects_no_next_round_is_asked_for_the_note_s_own_maturit
     assert compute(_INPUT_MODELS["instrument_compare"].model_validate(inputs)).mode == "no_next_round"
     assert "it says in words that the comparison runs with no next round (`no_next_round_given`)" in answer
     assert "It never picks an option or calls one better" in answer
+    # The live run is recorded as a Fail: its session loaded the equity-calculator skill, so step 7 never reached it.
+    recorded = _unwrapped(_section(_RECORDED, text))
+    assert "**Fail: three of the five clauses met only in part.**" in recorded
+    assert "The session loaded the equity-calculator skill, never this one" in recorded
+    assert "This skill's own text is unchanged." in recorded
 
 
 def test_the_comparison_step_carries_every_flag_s_meaning() -> None:

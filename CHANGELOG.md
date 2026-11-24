@@ -6,6 +6,14 @@ All notable changes to this repository. Dates are UTC.
 
 ### Added
 
+- Live runs of four more evals on plugin 0.3.5 (Claude Code 2.1.331), each recorded in its eval with an excerpt and a
+  verdict under the README's rule: `vc-positioning` (Company BK), `vc-metrics-readiness` (Company DL) and
+  `vc-cap-table-check` (Company CQ) passed, each with shortfalls against its expected answer noted, and `vc-deal-math`
+  (Company DX) failed, with three clauses met only in part: its session loaded the `equity-calculator` skill, never
+  `vc-deal-math`, so step 7's rules never reached it. These are the first recorded live runs of `vc-cap-table-check`
+  and `vc-deal-math`. Earlier runs of the same four evals that day, on plugin 0.3.2, are not recorded.
+- Plugin version 0.3.6 (the plugin's, the marketplace's and the `equity_calculator` package's), so an installed copy
+  picks up the skill fixes from those runs, listed under Changed.
 - Plugin version 0.3.5, and the `equity_calculator` package now carries the plugin's version (it had stayed at 0.1.0):
   the plugin starts the calculator's server with `uvx` from the package's folder, and uv kept serving its cached build
   of that folder until the package's `pyproject.toml` changed, so live runs, which loaded the plugin from one clone
@@ -287,6 +295,21 @@ All notable changes to this repository. Dates are UTC.
 
 ### Changed
 
+- Skill fixes from the four live runs on plugin 0.3.5, each pinned by a test:
+  - `equity-calculator` sends a priced round weighed against a convertible note (`instrument_compare`) to
+    `vc-deal-math`'s step 7, and says to load the review skill a question belongs to and answer from it. When it answers
+    a comparison itself, it leads with the result's `summary`, says in words which mode ran, shows A, B and B - A for
+    every row that has them, ownership included, names each flag by its code with its meaning from the review skill's
+    table, and adds, subtracts or divides none of the tool's figures in its own text (the run stayed in this skill,
+    left out the mode and the ownership B - A, named no flag and worked out a remainder and a crossover of its own).
+  - `vc-positioning`'s refute pass keeps an objection that a belief stated as contrarian is one most investors already
+    hold when its quoted line shows others acting on the belief without naming it (a run's judge dropped the one
+    quoting the competition slide as not grounded).
+  - `vc-cap-table-check` never says or hints which line or total is wrong, even when a difference the tool prints
+    equals one line's shares (a run matched the 100,000-share gap to the warrants line), and names each assumption it
+    leans on by its key, with its source (a run paraphrased them).
+  - `vc-metrics-readiness` keeps no tier on a mismatch a flag explains as another definition, whichever way it errs (a
+    run tiered a magic number without its 4 as an understatement, which the eval's expected answer does not).
 - Every calculator-backed skill puts the MCP tool first. Each command line a skill prints follows the MCP call it
   repeats and is labelled "Only when the tool is not in the session (search for it by name first), the same call from
   the command line" (the `equity-calculator` skill, which prints several, labels them in its own words); a command named

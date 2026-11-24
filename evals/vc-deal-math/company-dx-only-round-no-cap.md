@@ -1,11 +1,15 @@
 # Eval 8: Company DX, "we hope this is our only round, and we'd rather not offer a cap"
 
-A test prompt for the `vc-deal-math` skill. The company is made up. The answer states the expected behaviour; it is not
-a recorded run, and this eval has not been run in a live session. Every figure under "Expected answer" is pasted from
-what `equity_calculator instrument_compare` printed for these inputs; none is typed by hand. A run passes when it makes
-the one tool call below with no next round (field order free, money and percents as strings), says in words that the
-comparison runs with no next round, shows these figures side by side as option A, option B and B - A, never says which
-option to take, and computes nothing in its own text.
+A test prompt for the `vc-deal-math` skill. The company is made up. "Expected answer" states the expected behaviour,
+and "Recorded answer" is an excerpt of a recorded run (Claude Code 2.1.331 on 2026-11-24). Every figure under
+"Expected answer" is pasted from what `equity_calculator instrument_compare` printed for these inputs; none is typed
+by hand. A run passes when it makes the one tool call below with no next round (field order free, money and percents
+as strings), says in words that the comparison runs with no next round, shows these figures side by side as option A,
+option B and B - A, never says which option to take, and computes nothing in its own text. The verdict is Pass when
+every clause of that sentence is met, Partial when exactly one clause is missed or met only in part, and Fail when two
+or more are missed; a shortfall against the other points of the expected answer is noted but does not change the
+verdict. The recorded run is a Fail: its session loaded the equity-calculator skill, never this one. The
+equity-calculator skill was changed after that run (see "Recorded answer").
 
 ## Prompt
 
@@ -100,3 +104,95 @@ option to take, and computes nothing in its own text.
 - It never picks an option or calls one better for the founders, and it hands the note's maturity and what happens at
   it, its change-of-control wording and the conversion mechanics to their lawyer.
 - It does not call `equity_deal_check`, and it adds, subtracts or divides none of the tool's figures in its own text.
+
+## Recorded answer
+
+Recorded with Claude Code 2.1.331 on 2026-11-24, with plugin 0.3.5 loaded from this repository and no user settings. An
+earlier run of this eval that day, on plugin 0.3.2, is not recorded. The answer is shown whole.
+
+**Fail: three of the five clauses met only in part.** The session loaded the equity-calculator skill, never this one, so
+this skill's step 7 never reached the run; the earlier run on plugin 0.3.2 did the same. It made the one
+`equity_instrument_compare` call, its input the same as the expected call, with no next round, and the tool ran its
+no-next-round mode; and it never said which option to take. In part only: it never said in words that the comparison
+runs with no next round, the nearest being its heading "Sale before any other raise" and its line that the discount
+"only applies at a priced round, so if you never raise again it changes no figure"; its sale table sets the priced seed,
+the note and the note minus the priced seed side by side, but its ownership table has no B - A column, so today's
+18.0000% and -20.0000% are missing and the maturity's 4.6347 and 5.1497 points appear only in a sentence; and while its
+tables hold the tool's figures, its own text says the common "shares the other $1.5M" at the $3M sale, a figure the tool
+prints nowhere, and that "The crossover lies somewhere between $10M and $40M". Partial allows exactly one clause short,
+so three short is a Fail. Short of the expected answer too: it does not lead with the result's summary; it names no flag
+code and none of the assumptions `maturity_rule`, `exit_before_any_round` and `note_discount_rule`, listing assumptions
+of its own instead; it asks for more, though the founder gave every term; it hands nothing to a lawyer by name; its sale
+table drops the cents; and some of its wording ("the note costs you more", "only favours founders") comes close to
+calling one option better. It did say the $5M is taken over today's 10,000,000 fully diluted shares and that the note's
+own wording decides what happens at maturity and at a sale. The session's first line listed the calculator's server as
+still starting, with none of its tools; the run found the tool by searching for it by name and called it once. Since
+this run the equity-calculator skill sends a priced round weighed against a note to this skill, loaded and followed from
+its step 7, and when it answers such a comparison itself it says which mode ran, leads with the summary, shows B - A for
+every row the tool gives it, names each flag by its code with its meaning, and adds, subtracts or divides none of the
+tool's figures. This skill's own text is unchanged. The eval has not been run again.
+
+> All figures below come from the equity calculator, with the priced seed taken as 1x non-participating preferred (your "standard terms") and no pool top-up.
+>
+> ## What the note owes
+>
+> | Month         | Interest    | Owed          |
+> | ------------- | ----------- | ------------- |
+> | 12            | $90,000.00  | $1,590,000.00 |
+> | 24 (maturity) | $180,000.00 | $1,680,000.00 |
+>
+> At month 24 the note is either repaid in cash ($1,680,000.00) or converts. Converting at a $5M valuation over today's 10,000,000 fully diluted shares gives a price of $0.50 and 3,360,000 new shares.
+>
+> ## Ownership
+>
+> |                        | Priced seed | Note, today           | Note, converted at maturity |
+> | ---------------------- | ----------- | --------------------- | --------------------------- |
+> | Founders               | 72.0000%    | 90.0000%              | 67.3653%                    |
+> | Team (granted options) | 4.0000%     | 5.0000%               | 3.7425%                     |
+> | Unissued pool          | 4.0000%     | 5.0000%               | 3.7425%                     |
+> | Investors              | 20.0000%    | 0% (debt outstanding) | 25.1497%                    |
+>
+> The priced seed is 2,500,000 shares at $0.60. If the note converts at maturity, founders end 4.6347 points below the priced seed, and investors hold 5.1497 points more.
+>
+> ## Sale before any other raise
+>
+> Under the note, holders are paid 2x principal ($3,000,000) first, and the shares split the rest.
+>
+> | Sale     | Group         | Priced seed | Note        | Note minus priced |
+> | -------- | ------------- | ----------- | ----------- | ----------------- |
+> | **$3M**  | Founders      | $1,350,000  | $0          | −$1,350,000       |
+> |          | Team          | $75,000     | $0          | −$75,000          |
+> |          | Unissued pool | $75,000     | $0          | −$75,000          |
+> |          | Investors     | $1,500,000  | $3,000,000  | +$1,500,000       |
+> | **$10M** | Founders      | $7,200,000  | $6,300,000  | −$900,000         |
+> |          | Team          | $400,000    | $350,000    | −$50,000          |
+> |          | Unissued pool | $400,000    | $350,000    | −$50,000          |
+> |          | Investors     | $2,000,000  | $3,000,000  | +$1,000,000       |
+> | **$40M** | Founders      | $28,800,000 | $33,300,000 | +$4,500,000       |
+> |          | Team          | $1,600,000  | $1,850,000  | +$250,000         |
+> |          | Unissued pool | $1,600,000  | $1,850,000  | +$250,000         |
+> |          | Investors     | $8,000,000  | $3,000,000  | −$5,000,000       |
+>
+> - **$3M sale:** the 2x takes the entire price under the note, so founders and team get nothing. Under the priced seed, investors take their 1x preference and common shares the other $1.5M.
+> - **$10M sale:** priced investors convert and take 20%; the note's fixed $3M is more than that, so founders get $900,000 less with the note.
+> - **$40M sale:** the note's payout is still $3M while priced investors take 20% ($8M), so founders get $4.5M more with the note.
+>
+> ## What this means for an only round
+>
+> - **The 20% discount does nothing here.** It only applies at a priced round, so if you never raise again it changes no figure.
+> - **Without a sale, the note costs you more than the priced seed.** At month 24 you either find $1.68M in cash or convert at a price below the seed's ($0.50 against $0.60), with interest converting too.
+> - **The note only favours founders in a large sale inside 24 months.** The crossover lies somewhere between $10M and $40M; below it the 2x costs you more than 20% of the company would.
+>
+> ## Assumptions to check
+>
+> - **Unissued pool at a sale:** the calculator pays the 500,000 unissued pool shares as if granted and exercised. If ungranted options would get nothing, that money goes to the other holders and the founder figures rise under both options.
+> - **2x on principal only:** no interest is added on a sale. If the note says 2x principal plus accrued interest, or the greater of 2x and conversion, these figures do not apply.
+> - **Nothing else comes off the sale price:** no fees, escrow, other debt or option exercise cash.
+>
+> ## Needs from the founder
+>
+> - [Who chooses between repayment and conversion at maturity: you or the note holders]
+> - [Whether the 2x is on principal only, and whether holders can convert instead on a sale]
+> - [Whether the unissued pool would be granted before a sale]
+>
+> This is arithmetic on the terms you gave, not legal, tax or investment advice; the note's actual wording decides the maturity and sale outcomes.
