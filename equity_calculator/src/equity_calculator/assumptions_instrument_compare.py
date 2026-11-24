@@ -139,7 +139,7 @@ def _sale_setting(inputs: InstrumentCompareInput) -> str:
     return "no change-of-control term given"
 
 
-def _discount_rows(inputs: InstrumentCompareInput) -> list[EquityAssumption]:
+def _cap_and_discount_rows(inputs: InstrumentCompareInput) -> list[EquityAssumption]:
     """With no next round, a note's discount has no price to come off, and its cap sets a price only at a sale on the
     converts-at-its-cap term: one row each for a discount and a cap given."""
     rows = []
@@ -148,9 +148,9 @@ def _discount_rows(inputs: InstrumentCompareInput) -> list[EquityAssumption]:
             _assumption(
                 "note_cap_rule",
                 "applies only where the note converts at it",
-                "A note's cap price (cap / FD) sets the price it converts at only at a priced round (where it is "
-                "below the discount price) or at a sale on a converts-at-its-cap term; with no next round it changes "
-                "a figure here only at a sale worked on that term.",
+                "A note's cap price (cap / FD) sets the price it converts at only at a priced round (where it is the "
+                "lower price) or at a sale on a converts-at-its-cap term; with no next round it changes a figure here "
+                "only at a sale worked on that term.",
                 f"{UNVERIFIED} (notes have no standard form; terms vary)",
             )
         )
@@ -218,7 +218,7 @@ def _no_round_rows(inputs: InstrumentCompareInput) -> list[EquityAssumption]:
             "modelled.",
             f"{UNVERIFIED} (the note's own terms decide)",
         ),
-        *_discount_rows(inputs),
+        *_cap_and_discount_rows(inputs),
         _assumption(
             "existing_instruments_rule",
             "convert in option A's round today; outstanding under option B",
