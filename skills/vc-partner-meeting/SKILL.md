@@ -161,7 +161,7 @@ lenses" says, so the lenses do not anchor on the numbers or the bank; step 4 the
    answer is debriefed too, leading with its answering line. A pasted answer that matches none is debriefed under the
    founder's own question, quoted, labelled "your question" in place of a lens. A kept question with no pasted answer is
    marked "not rehearsed". The founder can stop at any point; debrief what was answered.
-7. **Debrief** (the section below): each answer, a stronger one, and what a yes would need.
+7. **Debrief** (the section below): each answer, a stronger one (none for "Draft taken"), and what a yes would need.
 8. **Check before answering.** Every question and every weak-answer note quotes a line that is in the founder's material
    word for word, or, for a mismatch or a flag, the tool's row; every stronger answer uses only facts from the material
    or a tool result, and marks each gap as a bracketed ask; every figure is quoted as stated or comes from a tool,

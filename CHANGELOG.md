@@ -316,8 +316,8 @@ All notable changes to this repository. Dates are UTC.
   taken: rehearse it in your own words before the meeting.", in place of what was weak or "held up". The draft is
   quoted as the skill's text with no answer label and gets no weak notes and no stronger answer; an answer the founder
   also gave in their own words is debriefed as usual. `references/debrief.md` defines it beside "held up",
-  `references/drill.md` names it after its rule on taken drafts, and the skill's debrief summary and its hardest three
-  carry it, with SKILL.md still at 349 lines; a new test pins all four.
+  `references/drill.md` names it after its rule on taken drafts, and the skill's step 7, its debrief summary and its
+  hardest three carry it, with SKILL.md still at 349 lines; a new test pins all five.
 - `vc-partner-meeting` takes five rules from its first live drill, each pinned in its test. The first three
   questions, and every one in the ends-the-meeting tier, are answered in the founder's own words before any draft is
   shown, even when the founder asks for a draft on every question (with a one-click draft on every question, a founder

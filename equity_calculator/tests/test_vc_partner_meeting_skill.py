@@ -687,6 +687,7 @@ def test_a_draft_the_founder_takes_is_labelled_draft_taken_never_held_up() -> No
     assert (
         "whether the founder's answer held up, or \"Draft taken\" where the founder took the skill's draft" in answering
     )
+    assert 'a stronger one (none for "Draft taken")' in _unwrapped(_section("## Steps"))
 
 
 def test_a_follow_up_is_in_the_founders_everyday_words_never_the_skills_or_investors_terms() -> None:

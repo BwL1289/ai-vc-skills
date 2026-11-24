@@ -130,7 +130,7 @@ only applies at a priced round, so it changes nothing here") and says principal 
 raise. It names none of the assumptions `maturity_rule`, `exit_before_any_round` and `note_discount_rule` and marks none
 `unverified`, listing its own instead, which match the tool's rules (the 2x on the principal alone, paid before any
 share; the discount only at a priced round). The team's and the pool's percents sit in a sentence with no B - A; its
-tables drop the cents; and its second sentence ("it costs you more than the seed in a $3M or $10M sale and at maturity,
+tables drop the cents; and its third sentence ("it costs you more than the seed in a $3M or $10M sale and at maturity,
 and less only in the $40M sale") compares the options without choosing one, close to the line. Its lawyer section hands
 over who chooses at maturity and a sale after maturity, but the 2x change-of-control wording sits under its assumptions
 and the conversion mechanics are not handed over by name. It asks the founder for nothing more, does not call
